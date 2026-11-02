@@ -1,7 +1,8 @@
 # Lean0
 
 Lean0 is an experimental tool for verifying Lean 4 proofs against an explicit 
-axiomatic presentation of Lean's type theory (about 400 lines), using [Metamath 
+axiomatic presentation of Lean's type theory (about 900 lines, half of it the 
+schema for inductive types), using [Metamath 
 Zero](https://github.com/digama0/mm0) as a minimal logical framework. It uses a 
 modified [nanoda](https://github.com/ammkrn/nanoda_lib) to record the steps 
 involved in checking types and definitional equality, and then translates these 
@@ -18,11 +19,12 @@ was [described by Chris Bailey in
 2020](https://leanprover-community.github.io/archive/stream/236449-Program-verification/topic/Projects.html).
 
 Lean0 implements this idea for Lean 4, with axioms based on 
-[Lean4Lean](https://github.com/digama0/lean4lean)'s `IsDefEq` judgment. We 
-hope to eventually extend this further with a general scheme for inductive 
-types similar to the one already developed by Carneiro for Lean 3.
+[Lean4Lean](https://github.com/digama0/lean4lean)'s `IsDefEq` judgment, and a 
+schema for inductive types (positivity, universes, the elimination level, the 
+recursor's type and rules, projections and structure eta) transcribed from the 
+kernel, since Lean4Lean leaves inductive declarations unspecified.
 
-Inductive types and quotients are not certified yet: their rules are 
+Nested inductive types and quotients are not certified yet: their rules are 
 represented as axioms instantiated from the export. Some other axioms support 
 accelerated `Nat` operations (for example, assuming that `Nat.add` on numerals 
 correctly implements addition), though the arithmetic itself is proved.
@@ -38,23 +40,24 @@ trust:
   bounds-checked;
 - `spec/lean.mm0`, a transcription of Lean4Lean's typing judgment with a few 
   pragmatic extensions (binary Nat literals, two admissible rules, 
-  side-relation shortcuts);
-- axioms generated per declaration for inductive types (recursor rules, 
-  projections and eta) and quotients, and one per accelerated `Nat` operation 
-  (`Nat.add` on numerals is addition, and so on). Currently nothing
-  trusted checks that an inductive declaration is legal (positivity, universes, 
-  elimination level) or that its recursor is otherwise formulated correctly. So 
-  a certificate is conditional on the export's inductive declarations being 
-  legal. This has historically been a source of soundness bugs
-  (nested inductives: [#14576](https://github.com/leanprover/lean4/issues/14576),
+  side-relation shortcuts), and the schema for inductive types: a declaration 
+  is a term of the spec, the certificate proves it legal (positivity, 
+  universes, elimination level), and the recursor's type and rules, 
+  projections and eta are derived from it. Its soundness argument is 
+  `notes/audit-lean-mm0.md` §4; the kernel's recursors are compared with the 
+  derived ones on every block. This is where the kernel's soundness bugs have 
+  been (nested inductives: [#14576](https://github.com/leanprover/lean4/issues/14576),
   [#14616](https://github.com/leanprover/lean4/pull/14616); the `Prop` test
   guarding elimination and projection:
   [#14613](https://github.com/leanprover/lean4/pull/14613),
   [#14807](https://github.com/leanprover/lean4/pull/14807),
-  [#14843](https://github.com/leanprover/lean4/pull/14843)). We plan to 
-  develop a generic and correct schema for inductive types. Until then, the 
-  assumptions necessary for inductive types are at least inspectable in the 
-  generated `.mm0` file;
+  [#14843](https://github.com/leanprover/lean4/pull/14843));
+- axioms generated per declaration for nested inductive types (which the 
+  schema does not cover yet: recursor rules, projections and eta, with the 
+  declaration's legality unchecked) and quotients, and one per accelerated 
+  `Nat` operation (`Nat.add` on numerals is addition, and so on). `lean0 gen` 
+  reports how many blocks the schema left to these axioms, and the assumptions 
+  are inspectable in the generated `.mm0` file;
 - that the `.mm0` file the verifier reads is in fact the spec followed by the 
   certificate's statements (the verification targets). `lean0 joined` generates 
   this file, and its output can be checked by inspection.
@@ -65,9 +68,10 @@ names, with the statement Lean gives it, you need to trust:
 - `lean4export`;
 - `nanoda`'s export parser;
 - either `lean0`'s translation of declarations into MM0 statements, or `lean0 
-  check` (the `lean0-check` crate, about 600 lines, independent of the 
-  generator), which reads `.mm0` statements back into Lean expressions and 
-  compares them with the export (it does not check the generated axioms above).
+  check` (the `lean0-check` crate, about 900 lines, independent of the 
+  generator), which reads `.mm0` statements and each inductive block's 
+  declaration back into Lean expressions and compares them with the export (it 
+  does not check the generated axioms above).
 
 ## Prior Art
 
@@ -115,9 +119,9 @@ to check proof steps in a totally generic way.
 
 ## Status
 
-With the trust list above, and in particular given the generated axioms for 
-inductive types, quotients and literal operations, conversion and typing have 
-been certified for all of Lean's `Init` and all of `Std`:
+With the trust list above, conversion and typing have been certified for all 
+of Lean's `Init` and all of `Std`, with the inductive types as generated axioms 
+(the runs below predate the schema; they are being redone):
 
 - `Init` (59,423 declarations): 32 certificates, 103.6 GB, generated in 45 
   minutes on 8 cores;

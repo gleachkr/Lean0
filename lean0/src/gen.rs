@@ -41,6 +41,14 @@ pub enum ConstKind {
     Opaque,
     /// An MM0 `def`: typed by its `c_ty` theorem.
     Def,
+    /// Type `i` of an inductive block whose data definition is the `term` (stage B): the
+    /// constant is `ind_ty (X_D us) i`, typed by its `c_df` theorem.
+    Ind { i: usize },
+    /// Constructor `c` of type `i` of a block: `ind_ctor (X_D us) i c`.
+    Ctor { i: usize, c: usize },
+    /// The recursor of type `i` of a block: `ind_rec (X_D us) i v`, where `v` is its first
+    /// level if `large` (the motive's), else `lz`.
+    Rec { i: usize, large: bool },
 }
 
 #[derive(Debug, Clone)]
@@ -67,8 +75,8 @@ pub struct Gen {
     pub lean: Lean,
     pub lv: Levels,
     pub consts: HashMap<String, ConstInfo>,
-    terms: Names,
-    pub(super) thms: Names,
+    pub(crate) terms: Names,
+    pub(crate) thms: Names,
     /// Names that variables may use and constants may not.
     var_names: Names,
     spec_len: usize,
@@ -81,6 +89,17 @@ pub struct Gen {
     pub quot_red: HashMap<String, ThId>,
     /// Structures, by inductive type name.
     pub structs: HashMap<String, StructInfo>,
+    /// Block atoms (`term X_blk: blk;`), by inductive type name.
+    pub blks: HashMap<String, TId>,
+    /// Stage-B blocks, by the name of each of their types.
+    pub blocks: HashMap<String, std::rc::Rc<crate::induct::Block>>,
+    /// Counts for the run's report: blocks certified by the schema, and blocks left in stage A
+    /// with the reason.
+    pub stage_b: usize,
+    pub stage_a: Vec<(String, String)>,
+    /// The Horn prover's index of the spec's clauses (made once; the blocks' theorems are
+    /// added per declaration).
+    pub horn_index: mm0kit::horn::Index,
     /// Binary numerals and the arithmetic relations' prover.
     pub bins: Bins,
     /// The literal axioms, once `Nat.zero` and `Nat.succ` are declared.
@@ -95,7 +114,7 @@ pub struct Gen {
     /// before are replayed: their statements are made without their proofs.
     pub shard: Option<(usize, usize)>,
     /// The current declaration is replayed (see `shard`).
-    replay: bool,
+    pub(crate) replay: bool,
     /// Sharded generation into separate certificates (parts): a replayed theorem's proof term
     /// becomes an opaque term, since the earlier part's statements are restated as axioms.
     pub parts: bool,
@@ -108,7 +127,8 @@ pub struct Gen {
 
 #[derive(Debug, Clone)]
 pub struct StructInfo {
-    pub proj: TId,
+    /// The block atom (`term X_blk: blk;`).
+    pub blk: TId,
     pub np: usize,
     pub nf: usize,
     /// Typing axiom of each field, and whether it takes the sort premise.
@@ -145,6 +165,7 @@ impl Gen {
         terms.reserve("G");
         let spec_len = env.order.len();
         let spec_thms = env.thms.len();
+        let horn_index = mm0kit::horn::Index::new(&env);
         let costs = crate::costs::Costs::from_env();
         if costs.is_some() {
             env.rule_counts = Some(Vec::new());
@@ -164,6 +185,11 @@ impl Gen {
             iota: HashMap::default(),
             quot_red: HashMap::default(),
             structs: HashMap::default(),
+            blks: HashMap::default(),
+            blocks: HashMap::default(),
+            stage_b: 0,
+            stage_a: Vec::new(),
+            horn_index,
             bins,
             nat: None,
             nat_ops: HashMap::default(),
@@ -178,6 +204,55 @@ impl Gen {
     }
 
     pub fn show(&self, e: E) -> String { self.env.show(e, &[]) }
+
+    /// The MM0 term of the Lean constant `name` at the levels `ls`.
+    pub fn const_term(&mut self, name: &str, ls: &[E]) -> Option<E> {
+        let ci = self.consts.get(name)?.clone();
+        if ci.nlevels != ls.len() {
+            return None
+        }
+        Some(match ci.kind {
+            ConstKind::Opaque | ConstKind::Def => self.env.app(ci.term, ls),
+            ConstKind::Ind { i } => {
+                let d = self.env.app(ci.term, ls);
+                let i = self.lean.nat(&mut self.env, i);
+                self.env.app_n("ind_ty", &[d, i])
+            }
+            ConstKind::Ctor { i, c } => {
+                let d = self.env.app(ci.term, ls);
+                let (i, c) = (self.lean.nat(&mut self.env, i), self.lean.nat(&mut self.env, c));
+                self.env.app_n("ind_ctor", &[d, i, c])
+            }
+            ConstKind::Rec { i, large } => {
+                let (v, bl) = if large { (ls[0], &ls[1..]) } else { (self.env.app_n("lz", &[]), ls) };
+                let d = self.env.app(ci.term, bl);
+                let i = self.lean.nat(&mut self.env, i);
+                self.env.app_n("ind_rec", &[d, i, v])
+            }
+        })
+    }
+
+    /// The atom of the block of the inductive type `ind` (`term X_blk: blk;`), declared on
+    /// first use.
+    pub fn blk_id(&mut self, ind: &str) -> R<TId> {
+        let t = match self.blks.get(ind) {
+            Some(&t) => t,
+            None => {
+                let name = self.terms.fresh(&format!("{}_blk", mangle(ind)));
+                let blk_s = self.env.sort_names["blk"];
+                let t = add_term(&mut self.env, &name, vec![], blk_s, TermKind::Term, &format!("The inductive block of `{ind}`."))?;
+                self.blks.insert(ind.to_string(), t);
+                t
+            }
+        };
+        Ok(t)
+    }
+
+    /// The block atom of `ind` as a term.
+    pub fn blk_term(&mut self, ind: &str) -> R<E> {
+        let t = self.blk_id(ind)?;
+        Ok(self.env.app(t, &[]))
+    }
 
     pub fn lean_name<'t>(&self, tc: &TypeChecker<'_, 't, '_>, n: NamePtr<'t>) -> String {
         match tc.ctx.read_name(n) {
@@ -330,7 +405,28 @@ impl Gen {
                 }
             }
         }
+        if self.stage_b + self.stage_a.len() > 0 {
+            eprintln!("lean0: {} inductive blocks certified by the schema, {} left to stage A", self.stage_b, self.stage_a.len());
+            for (n, why) in self.stage_a.iter().take(20) {
+                eprintln!("  stage A: {n}: {why}");
+            }
+        }
         Ok(())
+    }
+
+    /// Take back the statements and proofs a block's stage-B attempt made (none written yet),
+    /// and what it registered under the block's type names.
+    pub fn rollback(&mut self, order0: usize, pfs0: usize, names: &[String]) {
+        self.env.rollback(order0);
+        self.env.truncate_pfs(pfs0);
+        self.bins.forget_pfs(pfs0);
+        self.lean.reset();
+        self.lv.reset();
+        for n in names {
+            self.consts.remove(n);
+            self.blocks.remove(n);
+            self.blks.remove(n);
+        }
     }
 
     /// Free what the declaration that started at proof node `pfs0`, expression node `exprs0` and
@@ -415,10 +511,32 @@ impl Gen {
             Declar::Axiom { .. } => {
                 opaque(&mut el, &sig, info.ty, "axiom")?;
             }
-            Declar::Inductive(..) => {
+            Declar::Inductive(id) => {
+                if id.all_ind_names.first() == Some(&id.info.name) {
+                    let (order0, pfs0) = (el.g.env.order.len(), el.g.env.num_pfs());
+                    match crate::induct::block_head(&mut el, &sig, id, all) {
+                        Ok(true) => return Ok(el.type_mismatches),
+                        Ok(false) => {}
+                        Err(e) => {
+                            let names: Vec<String> = id.all_ind_names.iter().map(|&n| el.g.lean_name(el.tc, n)).collect();
+                            el.g.rollback(order0, pfs0, &names);
+                            el.forget_proofs();
+                            el.g.stage_a.push((sig.lean_name.clone(), e));
+                        }
+                    }
+                } else if el.g.blocks.contains_key(&sig.lean_name) {
+                    // a later type of a stage-B block: its lemmas were made with the block
+                    return Ok(el.type_mismatches)
+                }
                 opaque(&mut el, &sig, info.ty, "inductive type")?;
             }
             Declar::Constructor(cd) => {
+                if crate::induct::constructor(&mut el, &sig, cd, all)? {
+                    if sig.lean_name == "Nat.zero" || sig.lean_name == "Nat.succ" {
+                        natlit::lit_axioms(&mut el, &sig.lean_name, info.ty)?;
+                    }
+                    return Ok(el.type_mismatches)
+                }
                 // translate everything first: a failure must not leave statements behind
                 let fields = if el.tc.env.get_structure(&cd.inductive_name, true).is_some() {
                     Some(structure_fields(&mut el, cd.inductive_name, info.ty)?)
@@ -434,6 +552,9 @@ impl Gen {
                 }
             }
             Declar::Recursor(rd) => {
+                if crate::induct::recursor(&mut el, &sig, rd, all)? {
+                    return Ok(el.type_mismatches)
+                }
                 // The rules mention the recursor itself, and for a mutual or nested inductive
                 // its sibling recursors, so they are translated after those are declared.
                 // Check first that everything else they mention is known; undeclared siblings
@@ -565,13 +686,13 @@ impl Gen {
         Ok(el.type_mismatches)
     }
 
-    fn lvl_args(&self, lvl_names: &[String]) -> Vec<(String, u8)> {
+    pub(crate) fn lvl_args(&self, lvl_names: &[String]) -> Vec<(String, u8)> {
         let lvl_s = self.env.sort_names["lvl"];
         lvl_names.iter().map(|s| (s.clone(), lvl_s)).collect()
     }
 
     /// `(G: ctx)` followed by the level arguments.
-    fn g_args(&self, lvl_names: &[String]) -> Vec<(String, u8)> {
+    pub(crate) fn g_args(&self, lvl_names: &[String]) -> Vec<(String, u8)> {
         let mut v = vec![("G".to_string(), self.env.sort_names["ctx"])];
         v.extend(self.lvl_args(lvl_names));
         v
@@ -585,7 +706,7 @@ impl Gen {
     }
 
     /// A name for the primed copy of level variable `s`.
-    fn var_names_fresh2(&mut self, s: &str, taken: &[String]) -> String {
+    pub(crate) fn var_names_fresh2(&mut self, s: &str, taken: &[String]) -> String {
         let mut c = format!("{s}2");
         let mut i = 3;
         while taken.contains(&c) || self.env.has_term(&c) {
@@ -629,10 +750,10 @@ pub fn memory_mb(field: &str) -> Option<u64> {
 }
 
 /// The names of the declaration being generated.
-struct Sig {
-    lean_name: String,
-    cname: String,
-    lvl_names: Vec<String>,
+pub(crate) struct Sig {
+    pub lean_name: String,
+    pub cname: String,
+    pub lvl_names: Vec<String>,
 }
 
 /// Variables of a generated statement: names that are not term names, and their indices.
@@ -641,7 +762,7 @@ pub(super) struct Vars {
 }
 
 impl Vars {
-    pub(super) fn new() -> Self { Vars { args: Vec::new() } }
+    pub(crate) fn new() -> Self { Vars { args: Vec::new() } }
 
     pub(super) fn add(&mut self, env: &mut Env, base: &str, sort: &str) -> E {
         let mut name = base.to_string();
@@ -653,16 +774,16 @@ impl Vars {
         env.var(u16::try_from(self.args.len() - 1).unwrap())
     }
 
-    fn many(&mut self, env: &mut Env, base: &str, sort: &str, n: usize) -> Vec<E> {
+    pub(crate) fn many(&mut self, env: &mut Env, base: &str, sort: &str, n: usize) -> Vec<E> {
         (0..n).map(|i| self.add(env, &format!("{base}{}", i + 1), sort)).collect()
     }
 
-    fn lvls(&mut self, env: &mut Env, names: &[String], suffix: &str) -> Vec<E> {
+    pub(crate) fn lvls(&mut self, env: &mut Env, names: &[String], suffix: &str) -> Vec<E> {
         names.iter().map(|n| self.add(env, &format!("{n}{suffix}"), "lvl")).collect()
     }
 }
 
-fn apps(g: &mut Gen, f: E, args: &[E]) -> E {
+pub(crate) fn apps(g: &mut Gen, f: E, args: &[E]) -> E {
     args.iter().fold(f, |f, &a| g.lean.app(&mut g.env, f, a))
 }
 
@@ -720,7 +841,6 @@ fn opaque<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::Ex
 /// The constructor's parameters, levels and the indices are separate variables, as in nanoda,
 /// which does not compare them with the recursor's; the typing premise forces them to agree.
 fn recursor_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &nanoda_lib::env::RecursorData<'t>, rhss: &[E]) -> R<()> {
-    let rec_term = el.g.consts[&sig.lean_name].term;
     for (rule, &rhs) in rd.rec_rules.iter().zip(rhss) {
         let ctor_lean = el.g.lean_name(el.tc, rule.ctor_name);
         let Some(cd) = el.tc.env.get_constructor(&rule.ctor_name).cloned() else { return Err(format!("unknown constructor {ctor_lean}")) };
@@ -728,7 +848,6 @@ fn recursor_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &nanoda_lib
         let ncp = cd.num_params as usize;
         let ncl = el.tc.ctx.read_levels(cd.info.uparams).len();
         let g = &mut *el.g;
-        let ctor_term = g.consts[&ctor_lean].term;
         let short = ctor_lean.rsplit('.').next().unwrap_or(&ctor_lean);
         // def R_c (us: lvl): expr = $ rhs $;   (shift levels down, as for definitions)
         let n = sig.lvl_names.len();
@@ -752,9 +871,9 @@ fn recursor_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &nanoda_lib
         let cps = v.many(&mut g.env, "q", "expr", ncp);
         let fs = v.many(&mut g.env, "f", "expr", nf);
         let tv = v.add(&mut g.env, "T", "expr");
-        let c = g.env.app(ctor_term, &cls);
+        let c = g.const_term(&ctor_lean, &cls).ok_or("constructor term")?;
         let major = apps(g, c, &[cps.clone(), fs.clone()].concat());
-        let r = g.env.app(rec_term, &us);
+        let r = g.const_term(&sig.lean_name, &us).ok_or("recursor term")?;
         let lhs = apps(g, r, &[ps.clone(), ms.clone(), mins.clone(), is, vec![major]].concat());
         let d = g.env.app(def, &us);
         let rhs = apps(g, d, &[ps, ms, mins, fs].concat());
@@ -772,7 +891,6 @@ fn recursor_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &nanoda_lib
 fn quot_axiom<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig) -> R<()> {
     let g = &mut *el.g;
     let Some(mk) = g.consts.get("Quot.mk").cloned() else { return Err("Quot.mk must precede Quot.lift and Quot.ind".into()) };
-    let head = g.consts[&sig.lean_name].term;
     let nargs = if sig.lean_name == "Quot.lift" { 5 } else { 4 };
     let mut v = Vars::new();
     let gv = v.add(&mut g.env, "G", "ctx");
@@ -782,9 +900,9 @@ fn quot_axiom<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig) -> R<()> {
     let ys = v.many(&mut g.env, "y", "expr", 2);
     let a = v.add(&mut g.env, "a", "expr");
     let tv = v.add(&mut g.env, "T", "expr");
-    let m = g.env.app(mk.term, &mls);
+    let m = g.const_term("Quot.mk", &mls).ok_or("Quot.mk term")?;
     let q = apps(g, m, &[ys[0], ys[1], a]);
-    let h = g.env.app(head, &us);
+    let h = g.const_term(&sig.lean_name, &us).ok_or("quotient term")?;
     let lhs = apps(g, h, &[xs.clone(), vec![q]].concat());
     let rhs = g.lean.app(&mut g.env, xs[3], a);
     let hyp = g.env.app_n("ty", &[gv, lhs, tv]);
@@ -800,7 +918,8 @@ fn quot_axiom<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig) -> R<()> {
 /// reduction axiom; plus structure eta when `S` is not recursive.
 ///
 /// The typing axiom substitutes the parameters and the earlier projections into the field
-/// type through `inst` premises, outermost variable first. When `S` may live in `Prop`, a
+/// type through `inst` premises, outermost first (the spec's `pinst` and `qinst`). When `S`
+/// may live in `Prop`, a
 /// field that is not a proposition (or follows one that is not) may only be projected from
 /// a structure whose sort is at least 1, so its axiom takes the premise
 /// `leqv (lmax (ls lz) L) L` (as nanoda's `infer_proj` checks). If the fields up to it are
@@ -808,14 +927,14 @@ fn quot_axiom<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig) -> R<()> {
 /// What `structure_axioms` needs from the constructor's type: each field's type (a de Bruijn
 /// term under the parameters and earlier fields), whether it is a proposition, the level of
 /// its sort, and the structure's sort level.
-struct Fields {
-    tys: Vec<E>,
-    is_prop: Vec<bool>,
-    levels: Vec<E>,
-    sort: E,
+pub(crate) struct Fields {
+    pub tys: Vec<E>,
+    pub is_prop: Vec<bool>,
+    pub levels: Vec<E>,
+    pub sort: E,
 }
 
-fn structure_fields<'t>(el: &mut Elab<'_, '_, 't, '_>, ind: NamePtr<'t>, ctor_ty: nanoda_lib::util::ExprPtr<'t>) -> R<Fields> {
+pub(crate) fn structure_fields<'t>(el: &mut Elab<'_, '_, 't, '_>, ind: NamePtr<'t>, ctor_ty: nanoda_lib::util::ExprPtr<'t>) -> R<Fields> {
     let ind_data = el.tc.env.get_structure(&ind, true).cloned().unwrap();
     let np = ind_data.num_params as usize;
     // field types (as de Bruijn terms under the parameters and earlier fields), and which are props
@@ -868,64 +987,20 @@ fn structure_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ind: NamePtr<'
     let Fields { tys: field_tys, is_prop, levels: field_lvls, sort: lsort } = fields;
     let nf = field_tys.len();
     let g = &mut *el.g;
-    let sort_ok = {
-        let z = g.env.app_n("lz", &[]);
-        let one = g.env.app_n("ls", &[z]);
-        let m = g.env.app_n("lmax", &[one, lsort]);
-        let g2 = &mut *g;
-        g2.lv.equiv(&g2.lean, &mut g2.env, m, lsort).is_ok()
-    };
-    let s_term = g.consts[&ind_lean].term;
-    let mk_term = g.consts[&sig.lean_name].term;
-    let ind_cname = g.env.terms[s_term.0 as usize].name.clone();
-    let (nat_s, expr_s) = (g.env.sort_names["nat"], g.env.sort_names["expr"]);
-    // term S_proj (i: nat) (e: expr): expr;
-    let proj_name = g.terms.fresh(&format!("{ind_cname}_proj"));
-    let proj = add_term(&mut g.env, &proj_name, vec![("i".into(), nat_s), ("e".into(), expr_s)], expr_s, TermKind::Term,
-        &format!("Projections of the structure `{ind_lean}`."))?;
-    // structural rules
-    let rules = {
-        let mut v = Vars::new();
-        let (k, i, e) = (v.add(&mut g.env, "k", "nat"), v.add(&mut g.env, "i", "nat"), v.add(&mut g.env, "e", "expr"));
-        let pe = g.env.app(proj, &[i, e]);
-        let h = g.env.app_n("closed", &[k, e]);
-        let c = g.env.app_n("closed", &[k, pe]);
-        let name = g.thms.fresh(&format!("{proj_name}_closed"));
-        let closed = add_thm(&mut g.env, &name, v.args, vec![h], c, true, false, None, "Projections are structural for `closed`.")?;
-        let mut v = Vars::new();
-        let (n, k, i) = (v.add(&mut g.env, "n", "nat"), v.add(&mut g.env, "k", "nat"), v.add(&mut g.env, "i", "nat"));
-        let (e, e2) = (v.add(&mut g.env, "e", "expr"), v.add(&mut g.env, "e2", "expr"));
-        let (pe, pe2) = (g.env.app(proj, &[i, e]), g.env.app(proj, &[i, e2]));
-        let h = g.env.app_n("lift", &[n, k, e, e2]);
-        let c = g.env.app_n("lift", &[n, k, pe, pe2]);
-        let name = g.thms.fresh(&format!("{proj_name}_lift"));
-        let lift = add_thm(&mut g.env, &name, v.args, vec![h], c, true, false, None, "Projections are structural for `lift`.")?;
-        let mut v = Vars::new();
-        let (k, i) = (v.add(&mut g.env, "k", "nat"), v.add(&mut g.env, "i", "nat"));
-        let (e, a, e2) = (v.add(&mut g.env, "e", "expr"), v.add(&mut g.env, "a", "expr"), v.add(&mut g.env, "e2", "expr"));
-        let (pe, pe2) = (g.env.app(proj, &[i, e]), g.env.app(proj, &[i, e2]));
-        let h = g.env.app_n("inst", &[k, e, a, e2]);
-        let c = g.env.app_n("inst", &[k, pe, a, pe2]);
-        let name = g.thms.fresh(&format!("{proj_name}_inst"));
-        let inst = add_thm(&mut g.env, &name, v.args, vec![h], c, true, false, None, "Projections are structural for `inst`.")?;
-        mm0kit::lean::ProjRules { closed, lift, inst }
-    };
-    g.lean.proj_rules.insert(proj, rules);
+    let sort_ok = !level_may_be_zero(g, lsort);
+    let ind_cname = mangle(&ind_lean);
+    let proj_name = format!("{ind_cname}_proj");
+    // projections are the spec's `proj b i e`, `b` the block's atom
+    let blk = g.blk_id(&ind_lean)?;
+    let proj = g.env.app(blk, &[]);
     // typing axioms
     let mut df = Vec::new();
     let mut df_prop = Vec::new();
-    // a field level that may be zero (not provably at least 1)
-    let may_be_zero = |g: &mut Gen, l: E| {
-        let z = g.env.app_n("lz", &[]);
-        let one = g.env.app_n("ls", &[z]);
-        let m = g.env.app_n("lmax", &[one, l]);
-        g.lv.equiv(&g.lean, &mut g.env, m, l).is_err()
-    };
     for i in 0..nf {
         let needs_sort = !sort_ok && !is_prop[..=i].iter().all(|&b| b);
         // fields up to `i` that are propositions only at some levels (`Exists.{0}`'s witness)
         let lvl_js: Vec<usize> = (0..=i).filter(|&j| !is_prop[j]).collect();
-        let prop_ok = needs_sort && lvl_js.iter().all(|&j| may_be_zero(g, field_lvls[j]));
+        let prop_ok = needs_sort && lvl_js.iter().all(|&j| level_may_be_zero(g, field_lvls[j]));
         let mut variants = vec![needs_sort];
         if prop_ok {
             variants.push(false);
@@ -937,8 +1012,6 @@ fn structure_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ind: NamePtr<'
             let us = v.lvls(&mut g.env, &sig.lvl_names, "");
             let ps = v.many(&mut g.env, "p", "expr", np);
             let (e, e2) = (v.add(&mut g.env, "e", "expr"), v.add(&mut g.env, "e2", "expr"));
-            let n = np + i;
-            let rs = v.many(&mut g.env, "R", "expr", n);
             let mut hyps = Vec::new();
             // the levels of `S` are the constructor's (same names, same order)
             let lsort_here = g.env.subst(lsort, &std::iter::once(gv).chain(us.iter().copied()).collect::<Vec<_>>());
@@ -955,19 +1028,14 @@ fn structure_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ind: NamePtr<'
                     hyps.push(g.env.app_n("leqv", &[l, z]));
                 }
             }
-            let st = g.env.app(s_term, &us);
+            let st = g.const_term(&ind_lean, &us).ok_or("structure term")?;
             let st = apps(g, st, &ps);
             hyps.push(g.lean.deq(&mut g.env, gv, e, e2, st));
-            let fty = g.env.subst(field_tys[i], &std::iter::once(gv).chain(us.iter().copied()).collect::<Vec<_>>());
-            let mut cur = fty;
-            for j in 0..n {
-                let a = if j < np { ps[j] } else { g.lean.proj(&mut g.env, proj, j - np, e) };
-                let kk = g.lean.nat(&mut g.env, n - 1 - j);
-                hyps.push(g.env.app_n("inst", &[kk, cur, a, rs[j]]));
-                cur = rs[j];
-            }
+            let subst: Vec<E> = std::iter::once(gv).chain(us.iter().copied()).collect();
+            let (ihyps, r) = field_inst_hyps(g, &mut v, field_tys[i], &subst, &ps, i, proj, e);
+            hyps.extend(ihyps);
             let (pe, pe2) = (g.lean.proj(&mut g.env, proj, i, e), g.lean.proj(&mut g.env, proj, i, e2));
-            let concl = g.lean.deq(&mut g.env, gv, pe, pe2, cur);
+            let concl = g.lean.deq(&mut g.env, gv, pe, pe2, r);
             let name = g.thms.fresh(&format!("{proj_name}_{i}_df{}", if from_prop { "p" } else { "" }));
             let what = if from_prop {
                 " (from a proposition, when the fields up to it are propositions)"
@@ -996,7 +1064,7 @@ fn structure_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ind: NamePtr<'
         let ps = v.many(&mut g.env, "p", "expr", np);
         let fs = v.many(&mut g.env, "f", "expr", nf);
         let tv = v.add(&mut g.env, "T", "expr");
-        let m = g.env.app(mk_term, &cls);
+        let m = g.const_term(&sig.lean_name, &cls).ok_or("constructor term")?;
         let m = apps(g, m, &[ps, fs.clone()].concat());
         let lhs = g.lean.proj(&mut g.env, proj, i, m);
         let hyp = g.env.app_n("ty", &[gv, lhs, tv]);
@@ -1011,11 +1079,11 @@ fn structure_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ind: NamePtr<'
         let us = v.lvls(&mut g.env, &sig.lvl_names, "");
         let ps = v.many(&mut g.env, "p", "expr", np);
         let e = v.add(&mut g.env, "e", "expr");
-        let st = g.env.app(s_term, &us);
+        let st = g.const_term(&ind_lean, &us).ok_or("structure term")?;
         let st = apps(g, st, &ps);
         let hyp = g.env.app_n("ty", &[gv, e, st]);
         let projs: Vec<E> = (0..nf).map(|i| g.lean.proj(&mut g.env, proj, i, e)).collect();
-        let m = g.env.app(mk_term, &us);
+        let m = g.const_term(&sig.lean_name, &us).ok_or("constructor term")?;
         let m = apps(g, m, &[ps, projs].concat());
         let concl = g.lean.deq(&mut g.env, gv, e, m, st);
         let name = g.thms.fresh(&format!("{ind_cname}_eta"));
@@ -1023,15 +1091,44 @@ fn structure_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ind: NamePtr<'
     } else {
         None
     };
-    g.structs.insert(ind_lean, StructInfo { proj, np, nf, df, df_prop, red, eta, sort: lsort, field_tys });
+    g.structs.insert(ind_lean, StructInfo { blk, np, nf, df, df_prop, red, eta, sort: lsort, field_tys });
     Ok(())
 }
 
-fn add_term(env: &mut Env, name: &str, args: Vec<(String, u8)>, ret: u8, kind: TermKind, doc: &str) -> R<TId> {
+/// The level `l` may be zero: it is not provably at least 1 (`lmax 1 l ≈ l` fails).
+pub(crate) fn level_may_be_zero(g: &mut Gen, l: E) -> bool {
+    let z = g.env.app_n("lz", &[]);
+    let one = g.env.app_n("ls", &[z]);
+    let m = g.env.app_n("lmax", &[one, l]);
+    g.lv.equiv(&g.lean, &mut g.env, m, l).is_err()
+}
+
+/// The `inst` hypotheses that give the type of the projection `proj b i e` of `e : S ps`:
+/// the field's type `fty` (under the parameters and the `i` earlier fields, over the level
+/// variables `1..`, instantiated by `subst`) with the parameters and then the earlier
+/// projections of `e` put in, outermost first (the spec's `pinst`/`qinst`: a simultaneous
+/// substitution), each result a fresh variable `R`. Returns the hypotheses and the last
+/// result.
+pub(crate) fn field_inst_hyps(g: &mut Gen, v: &mut Vars, fty: E, subst: &[E], ps: &[E], i: usize, blk: E, e: E) -> (Vec<E>, E) {
+    let np = ps.len();
+    let n = np + i;
+    let mut cur = g.env.subst(fty, subst);
+    let mut hyps = Vec::new();
+    for j in 0..n {
+        let a = if j < np { ps[j] } else { g.lean.proj(&mut g.env, blk, j - np, e) };
+        let k = g.lean.nat(&mut g.env, n - 1 - j);
+        let r = v.add(&mut g.env, "R", "expr");
+        hyps.push(g.env.app_n("inst", &[k, cur, a, r]));
+        cur = r;
+    }
+    (hyps, cur)
+}
+
+pub(crate) fn add_term(env: &mut Env, name: &str, args: Vec<(String, u8)>, ret: u8, kind: TermKind, doc: &str) -> R<TId> {
     env.add_term(TermDecl { name: name.into(), args, ret, kind, local: false, doc: Some(doc.into()) }).map_err(|e| e.0)
 }
 
-pub(super) fn add_thm(
+pub(crate) fn add_thm(
     env: &mut Env, name: &str, args: Vec<(String, u8)>, hyps: Vec<E>, concl: E, axiom: bool, local: bool,
     proof: Option<mm0kit::env::P>, doc: &str,
 ) -> R<ThId> {

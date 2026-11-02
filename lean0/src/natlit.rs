@@ -260,8 +260,7 @@ pub struct NatLits {
 
 /// The translation of a constant without levels.
 fn konst(el: &mut Elab<'_, '_, '_, '_>, lean: &str) -> Option<E> {
-    let t = el.g.consts.get(lean)?.term;
-    (el.g.consts[lean].nlevels == 0).then(|| el.g.env.app(t, &[]))
+    el.g.const_term(lean, &[])
 }
 
 /// Once `Nat`, `Nat.zero` and `Nat.succ` are declared with the expected types

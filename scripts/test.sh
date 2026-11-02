@@ -158,12 +158,15 @@ tamper induct rejected --tamper-theorem two_add_two_ty
 tamper induct rejected --tamper-theorem quot_ex_ty
 # Rules the proofs depend on: a false premise makes every use fail ...
 for ax in beta eta proofIrrel sortDF lmax_comm Pt_df; do tamper core rejected --tamper-axiom "$ax"; done
-for ax in Eq_rec_refl_iota MyNat_rec_succ_iota MyList_rec_cons_iota Prod_eta PUnit_eta Sigma_eta \
-          Prod_proj_0_mk And_proj_1_df Prod_proj_inst Quot_lift_mk; do
-  tamper induct rejected --tamper-axiom "$ax"
+# (the inductive rules are theorems now, derived from the schema: a tampered statement with
+# the original proof is rejected like any other)
+for th in Eq_rec_refl_iota MyNat_rec_succ_iota MyList_rec_cons_iota Prod_eta PUnit_eta Sigma_eta \
+          Prod_proj_0_mk And_proj_1_df; do
+  tamper induct rejected --tamper-theorem "$th"
 done
+for ax in inst_proj ind_iota proj_ty Quot_lift_mk; do tamper induct rejected --tamper-axiom "$ax"; done
 # ... and rules they do not use are harmless, which shows the test can tell the difference.
-tamper induct accepted --tamper-axiom And_eta
+tamper induct accepted --tamper-axiom Quot_ind_mk
 tamper induct accepted --tamper-axiom eta
 # Literals: the generated literal axioms and the binary-arithmetic relations.
 tamper lit rejected --tamper-theorem lit_mul_big_ty

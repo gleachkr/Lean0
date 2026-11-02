@@ -2,6 +2,7 @@
 
 pub mod bin;
 pub mod env;
+pub mod horn;
 pub mod lean;
 pub mod level;
 pub mod mmb;

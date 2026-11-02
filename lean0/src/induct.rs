@@ -1,0 +1,840 @@
+//! Stage B: inductive blocks certified by the spec's schema (audit §4).
+//!
+//! A block that is not nested becomes a data term `def X_D (us): ind = ind_mk X_blk P T`,
+//! and its types, constructors and recursors are the spec's `ind_ty (X_D us) i`,
+//! `ind_ctor (X_D us) i c` and `ind_rec (X_D us) i v`. Their typing lemmas (`X_df`), the
+//! iota rules (`X_rec_c_iota`), projection typing and reduction and structure eta keep the
+//! statements of stage A but are theorems, proved from the schema's axioms by the Horn
+//! prover over the spec: `tys_ok` (the parameters and the types' types are types),
+//! `ind_wf` (the constructors are legal), `rec_ty`, `rec_rhs`, and so on. The typing facts
+//! these need (each parameter, each type's type, each field's type is a type) come from the
+//! elaborator, keyed by context and term for the prover's hook.
+//!
+//! The block's data is emitted at its first type's declaration, together with `tys_ok` and
+//! the types' `_df` lemmas (whose typing needs only the earlier environment);
+//! `ind_wf` is emitted at the first constructor or recursor, when the sibling types are in
+//! nanoda's scope. The recursor's derived type and each rule's derived right-hand side are
+//! compared with the export's, so the schema is checked against the kernel on every block.
+//! A block the schema cannot handle (nested; a type or constructor whose shape needs `whnf`)
+//! is left to stage A, and counted.
+use crate::elab::{Elab, R};
+use crate::gen::{add_term, add_thm, apps, ConstInfo, ConstKind, Gen, Sig, StructInfo, Vars};
+use crate::names::mangle;
+use mm0kit::env::{Env, TermKind, ThId, TId, E, P};
+use mm0kit::horn::{Hooks, Horn};
+use mm0kit::lean::Lean;
+use mm0kit::level::Levels;
+use nanoda_lib::env::{Declar, DeclarMap, InductiveData, RecursorData};
+use nanoda_lib::expr::Expr;
+use nanoda_lib::level::Level;
+use nanoda_lib::util::{ExprPtr, NamePtr};
+use rustc_hash::FxHashMap as HashMap;
+use std::cell::Cell;
+use std::rc::Rc;
+
+fn mm<A>(r: mm0kit::env::Result<A>) -> R<A> { r.map_err(|e| e.0) }
+
+/// A stage-B block.
+pub struct Block {
+    /// The data definition `X_D (us): ind`.
+    pub data: TId,
+    /// The atom `X_blk`.
+    pub blk: TId,
+    /// The Lean names of the types, in order, and of each type's constructors.
+    pub names: Vec<String>,
+    pub ctors: Vec<Vec<String>>,
+    pub nlevels: usize,
+    pub lvl_names: Vec<String>,
+    pub np: usize,
+    pub nidx: Vec<usize>,
+    /// `theorem X_D_tys: tys_ok G (X_D us)`.
+    pub tys_ok: ThId,
+    /// `theorem X_D_wf: ind_wf G (X_D us)`, once emitted.
+    pub wf: Cell<Option<ThId>>,
+}
+
+impl Block {
+    fn data_term(&self, g: &mut Gen, us: &[E]) -> E { g.env.app(self.data, us) }
+}
+
+/// Typing facts for the prover: `(context, term) → (level, proof of ty context term (srt level))`.
+#[derive(Default)]
+struct Facts {
+    tys: HashMap<(E, E), (E, P)>,
+}
+
+impl Hooks for Facts {
+    fn prove(&mut self, h: &mut Horn, env: &mut Env, lean: &mut Lean, lv: &mut Levels, goal: E) -> Option<mm0kit::env::Result<P>> {
+        let (t, args) = env.head(goal)?;
+        if t != lean.ids.ty {
+            return None
+        }
+        let args = args.to_vec();
+        let (ctx, e) = (h.zonk(env, args[0]), h.zonk(env, args[1]));
+        if !h.is_ground(env, ctx) || !h.is_ground(env, e) {
+            return None
+        }
+        let &(l, p) = self.tys.get(&(ctx, e))?;
+        let want = h.zonk(env, args[2]);
+        let sl = lean.srt(env, l);
+        if h.unify(env, want, sl) {
+            return Some(Ok(p))
+        }
+        // `ty ctx e (srt l2)` with `l ≈ l2`: cast
+        let Some((ts, [l2])) = env.head(want) else { return Some(Err(mm0kit::env::Mm0Error("typing fact: not a sort".into()))) };
+        if ts != lean.ids.srt {
+            return Some(Err(mm0kit::env::Mm0Error("typing fact: not a sort".into())));
+        }
+        let l2 = *l2;
+        Some((|| {
+            let q = h.leqv(env, lean, lv, l, l2)?;
+            let ps = lean.sort_df(env, ctx, l, l2, q)?;
+            lean.defeq_df(env, ps, p)
+        })())
+    }
+}
+
+/// The prover and its hooks for one declaration.
+struct Prover {
+    horn: Horn,
+    facts: Facts,
+}
+
+impl Prover {
+    fn new(g: &Gen) -> Self {
+        let mut horn = Horn::with_index(g.horn_index.clone());
+        let mut seen = std::collections::HashSet::new();
+        for b in g.blocks.values() {
+            if !seen.insert(b.data) {
+                continue
+            }
+            horn.add_clause(&g.env, b.tys_ok);
+            if let Some(wf) = b.wf.get() {
+                horn.add_clause(&g.env, wf);
+            }
+        }
+        Prover { horn, facts: Facts::default() }
+    }
+
+    fn prove(&mut self, g: &mut Gen, goal: E) -> R<P> {
+        mm(self.horn.prove(&mut g.env, &mut g.lean, &mut g.lv, &mut self.facts, goal))
+    }
+
+    fn apply(&mut self, g: &mut Gen, th: &str, goal: E) -> R<P> {
+        let th = g.env.thm_id(th);
+        mm(self.horn.apply(&mut g.env, &mut g.lean, &mut g.lv, &mut self.facts, th, goal))
+    }
+}
+
+// ------------------------------------------------------------------ the declaration as data
+
+/// The translation of a constructor or type's type body under the parameters, with the
+/// block's types as variables.
+struct DataTr<'t> {
+    types: Vec<NamePtr<'t>>,
+    uparams: Vec<NamePtr<'t>>,
+}
+
+impl<'t> DataTr<'t> {
+    fn self_index(&self, el: &Elab<'_, '_, 't, '_>, e: ExprPtr<'t>) -> Option<usize> {
+        let Expr::Const { name, levels, .. } = el.tc.ctx.read_expr(e) else { return None };
+        let j = self.types.iter().position(|&t| t == name)?;
+        let ls = el.tc.ctx.read_levels(levels);
+        if ls.len() != self.uparams.len() {
+            return None
+        }
+        for (&l, &u) in ls.iter().zip(&self.uparams) {
+            match el.tc.ctx.read_level(l) {
+                Level::Param(n, _) if n == u => {}
+                _ => return None,
+            }
+        }
+        Some(j)
+    }
+
+    fn has_self(&self, el: &Elab<'_, '_, 't, '_>, e: ExprPtr<'t>) -> bool {
+        let mut names = Vec::new();
+        el.const_names(e, &mut names);
+        names.iter().any(|n| self.types.contains(n))
+    }
+
+    /// Translate `e` at depth `d` (the parameters plus the binders of `e` above it), mapping
+    /// the block's types to `# (d + j)`: outside the parameters.
+    fn tr(&self, el: &mut Elab<'_, '_, 't, '_>, e: ExprPtr<'t>, d: usize) -> R<E> {
+        if !self.has_self(el, e) {
+            return el.tr_at(e, d)
+        }
+        if let Some(j) = self.self_index(el, e) {
+            return Ok(el.g.lean.bvar(&mut el.g.env, d + j))
+        }
+        match el.tc.ctx.read_expr(e) {
+            Expr::App { fun, arg, .. } => {
+                let (f, a) = (self.tr(el, fun, d)?, self.tr(el, arg, d)?);
+                Ok(el.g.lean.app(&mut el.g.env, f, a))
+            }
+            Expr::Lambda { binder_type, body, .. } => {
+                let (a, b) = (self.tr(el, binder_type, d)?, self.tr(el, body, d + 1)?);
+                Ok(el.g.lean.lam(&mut el.g.env, a, b))
+            }
+            Expr::Pi { binder_type, body, .. } => {
+                let (a, b) = (self.tr(el, binder_type, d)?, self.tr(el, body, d + 1)?);
+                Ok(el.g.lean.pi(&mut el.g.env, a, b))
+            }
+            Expr::Proj { ty_name, idx, structure, .. } => {
+                let s = el.g.lean_name(el.tc, ty_name);
+                let Some(si) = el.g.structs.get(&s) else { return Err(format!("projection of unknown structure {s}")) };
+                let b = el.g.env.app(si.blk, &[]);
+                let x = self.tr(el, structure, d)?;
+                Ok(el.g.lean.proj(&mut el.g.env, b, idx, x))
+            }
+            Expr::Const { name, .. } => Err(format!("the block's type {} occurs at other levels", el.g.lean_name(el.tc, name))),
+            _ => Err("the block's types occur under a let".into()),
+        }
+    }
+}
+
+/// The kernel's `consumeTypeAnnotations`: strip `outParam`, `semiOutParam`, `optParam` and
+/// `autoParam` from the head of `e`.
+pub(crate) fn consume_annots<'t>(el: &mut Elab<'_, '_, 't, '_>, mut e: ExprPtr<'t>) -> ExprPtr<'t> {
+    loop {
+        let (f, args) = el.tc.ctx.unfold_apps(e);
+        let Expr::Const { name, .. } = el.tc.ctx.read_expr(f) else { return e };
+        let n = el.g.lean_name(el.tc, name);
+        let strip = matches!((n.as_str(), args.len()), ("outParam" | "semiOutParam", 1) | ("optParam" | "autoParam", 2));
+        if !strip {
+            return e
+        }
+        e = args[0];
+    }
+}
+
+/// The `Π` telescope of `ty` with each binder type's annotations consumed: the binders as
+/// the kernel declares them when it builds recursors (`withLocalDecl ...
+/// dom.consumeTypeAnnotations`). The block's data is stated this way, so that the derived
+/// recursor types and rules are the kernel's; the types' and constructors' typing lemmas
+/// state the exported (annotated) types through a definitional cast.
+fn strip_pis<'t>(el: &mut Elab<'_, '_, 't, '_>, ty: ExprPtr<'t>) -> ExprPtr<'t> {
+    match el.tc.ctx.read_expr(ty) {
+        Expr::Pi { binder_name, binder_style, binder_type, body, .. } => {
+            let bt = consume_annots(el, binder_type);
+            let b = strip_pis(el, body);
+            el.tc.ctx.mk_pi(binder_name, binder_style, bt, b)
+        }
+        _ => ty,
+    }
+}
+
+/// Peel `np` parameter binders off `ty`, checking their types against `params` (translated
+/// at their depth), and return the body.
+fn peel_params<'t>(el: &mut Elab<'_, '_, 't, '_>, ty: ExprPtr<'t>, params: &[E]) -> R<ExprPtr<'t>> {
+    let mut ty = ty;
+    for (q, &p) in params.iter().enumerate() {
+        let Expr::Pi { binder_type, body, .. } = el.tc.ctx.read_expr(ty) else { return Err("fewer binders than parameters".into()) };
+        if el.tr_at(binder_type, q)? != p {
+            return Err(format!("parameter {} differs between the block's types", q + 1))
+        }
+        ty = body;
+    }
+    Ok(ty)
+}
+
+/// The parameters of the block, from the first type's type: their translations at their
+/// depths, and the context term (innermost first).
+fn params<'t>(el: &mut Elab<'_, '_, 't, '_>, ty: ExprPtr<'t>, np: usize) -> R<(Vec<E>, E)> {
+    let mut ps = Vec::new();
+    let mut ty = ty;
+    for q in 0..np {
+        let Expr::Pi { binder_type, body, .. } = el.tc.ctx.read_expr(ty) else { return Err("fewer binders than parameters".into()) };
+        ps.push(el.tr_at(binder_type, q)?);
+        ty = body;
+    }
+    let mut ctx = el.g.env.app_n("nil", &[]);
+    for &p in &ps {
+        ctx = el.g.lean.cons(&mut el.g.env, p, ctx);
+    }
+    Ok((ps, ctx))
+}
+
+/// `e` is `Π ... . Sort _` with `k` binders.
+fn is_sorted<'t>(el: &Elab<'_, '_, 't, '_>, mut e: ExprPtr<'t>) -> Option<usize> {
+    let mut k = 0;
+    loop {
+        match el.tc.ctx.read_expr(e) {
+            Expr::Pi { body, .. } => {
+                k += 1;
+                e = body
+            }
+            Expr::Sort { .. } => return Some(k),
+            _ => return None,
+        }
+    }
+}
+
+// ------------------------------------------------------------------ typing facts
+
+/// Open the binders of `ty` (at most `upto` of them) with the elaborator, recording for each
+/// binder from `from` on the fact that its type is a type (in the context of the earlier
+/// binders); then run `f` with them open. The binders are closed again afterwards.
+fn with_binders<'t, A>(
+    el: &mut Elab<'_, '_, 't, '_>, ty: ExprPtr<'t>, from: usize, upto: Option<usize>, facts: &mut Facts,
+    f: impl FnOnce(&mut Elab<'_, '_, 't, '_>, ExprPtr<'t>, &mut Facts) -> R<A>,
+) -> R<A> {
+    let mut ty = ty;
+    let mut opened = 0;
+    let r = (|| {
+        while let Expr::Pi { binder_name, binder_style, binder_type, body, .. } = el.tc.ctx.read_expr(ty) {
+            if upto.is_some_and(|u| opened >= u) {
+                break
+            }
+            let bt = el.inst_locals(binder_type);
+            if opened >= from {
+                record_type(el, bt, facts)?;
+            }
+            el.open_pub(binder_name, binder_style, bt)?;
+            opened += 1;
+            ty = body;
+        }
+        let body = el.inst_locals(ty);
+        f(el, body, facts)
+    })();
+    for _ in 0..opened {
+        el.close_pub();
+    }
+    r
+}
+
+/// Record that `t` (with the open locals) is a type.
+fn record_type<'t>(el: &mut Elab<'_, '_, 't, '_>, t: ExprPtr<'t>, facts: &mut Facts) -> R<()> {
+    let (st, p) = el.infer(t)?;
+    let (level, p) = el.as_sort(p, st)?;
+    let key = (el.ctx_pub(), el.tr(t)?);
+    let l = el.trl(level)?;
+    facts.tys.insert(key, (l, p));
+    Ok(())
+}
+
+// ------------------------------------------------------------------ emission
+
+/// The level arguments of a lemma about the block: `G` then the block's levels (var `1..`).
+fn block_levels(g: &mut Gen, b: &Block) -> Vec<E> { (0..b.nlevels).map(|i| g.env.var(1 + i as u16)).collect() }
+
+/// `theorem NAME (G) (us): concl`, proved (or stated, when replaying).
+fn emit_thm(g: &mut Gen, name: &str, lvl_names: &[String], concl: E, proof: Option<P>, doc: &str) -> R<ThId> {
+    let args = g.g_args(lvl_names);
+    add_thm(&mut g.env, name, args, vec![], concl, false, false, proof, doc)
+}
+
+/// `X_df (G) (us) (us2): leqv us us2 > deq G (c us) (c us2) T`, the typing lemma of a block
+/// constant, proved by `eeqv_df` from the schema's typing axiom and `eeqv`. `None` when
+/// replaying. If `eeqv` cannot be proved (an opaque constant in the data without an `eeqv`
+/// clause), the lemma is stated as an axiom and the block counted.
+fn emit_df<'t>(el: &mut Elab<'_, '_, 't, '_>, pv: &mut Prover, sig: &Sig, lean_name: &str, c: E, c2: E, ty_s: ExprPtr<'t>, ty_e: ExprPtr<'t>) -> R<ThId> {
+    let t = el.tr(ty_e)?;
+    let ts = el.tr(ty_s)?;
+    let g = &mut *el.g;
+    let n = sig.lvl_names.len();
+    let mut df_args = g.g_args(&sig.lvl_names);
+    let lvl_s = g.env.sort_names["lvl"];
+    for s in &sig.lvl_names {
+        let s2 = g.var_names_fresh2(s, &sig.lvl_names);
+        df_args.push((s2, lvl_s));
+    }
+    let gv = g.env.var(0);
+    let us: Vec<E> = (0..n).map(|i| g.env.var(1 + i as u16)).collect();
+    let us2: Vec<E> = (0..n).map(|i| g.env.var(1 + (n + i) as u16)).collect();
+    let hyps: Vec<E> = us.iter().zip(&us2).map(|(&a, &b)| g.env.app_n("leqv", &[a, b])).collect();
+    let concl = g.lean.deq(&mut g.env, gv, c, c2, t);
+    let df_name = g.thms.fresh(&format!("{}_df", sig.cname));
+    let doc = format!("`{lean_name}` has its type, at any equivalent levels (`constDF`).");
+    if g.replay {
+        return add_thm(&mut g.env, &df_name, df_args, hyps, concl, false, false, None, &doc)
+    }
+    pv.horn.facts.clear();
+    for (i, &h) in hyps.iter().enumerate() {
+        let p = g.env.hyp(i as u16, h);
+        pv.horn.facts.insert(h, p);
+    }
+    let ty_goal = g.env.app_n("ty", &[gv, c, ts]);
+    let p_ty = pv.prove(g, ty_goal).map_err(|e| format!("typing `{lean_name}` by the schema: {e}"))?;
+    // the schema types the constant at the stripped type; cast to the exported one
+    let p_ty = el.cast(p_ty, ty_s, ty_e)?;
+    let g = &mut *el.g;
+    let eq_goal = g.env.app_n("eeqv", &[c, c2]);
+    match pv.prove(g, eq_goal) {
+        Ok(p_eq) => {
+            let th = g.env.thm_id("eeqv_df");
+            let p = mm(g.env.thm(th, &[gv, c, c2, t], &[p_ty, p_eq]))?;
+            add_thm(&mut g.env, &df_name, df_args, hyps, concl, false, false, Some(p), &doc)
+        }
+        Err(e) => {
+            g.stage_a.push((lean_name.to_string(), format!("level invariance not derived (`{}_df` is an axiom): {e}", sig.cname)));
+            add_thm(&mut g.env, &df_name, df_args, hyps, concl, true, false, None, &doc)
+        }
+    }
+}
+
+/// The first type of a block: emit the block's data and the types' typing lemmas, if the
+/// schema handles the block. `Ok(false)`: not handled (stage A), with the reason recorded.
+pub(crate) fn block_head<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, id: &InductiveData<'t>, all: &DeclarMap<'t>) -> R<bool> {
+    let lean_name = sig.lean_name.clone();
+    let reason = |el: &mut Elab<'_, '_, 't, '_>, why: String| -> R<bool> {
+        el.g.stage_a.push((lean_name.clone(), why));
+        Ok(false)
+    };
+    if id.is_nested {
+        return reason(el, "nested".into())
+    }
+    let uparams: Vec<NamePtr<'t>> = el.tc.ctx.read_levels(id.info.uparams).iter().map(|&l| match el.tc.ctx.read_level(l) {
+        Level::Param(n, _) => n,
+        _ => unreachable!(),
+    }).collect();
+    let np = id.num_params as usize;
+    // the types of the block, from the export (the later ones are not in nanoda's scope yet)
+    let mut types: Vec<InductiveData<'t>> = Vec::new();
+    for &n in id.all_ind_names.iter() {
+        match all.get(&n) {
+            Some(Declar::Inductive(d)) if d.info.uparams == id.info.uparams && d.num_params == id.num_params && !d.is_nested => types.push(d.clone()),
+            Some(Declar::Inductive(_)) => return reason(el, "the block's types differ in parameters".into()),
+            _ => return reason(el, "a type of the block is missing from the export".into()),
+        }
+    }
+    let names: Vec<String> = types.iter().map(|d| el.g.lean_name(el.tc, d.info.name)).collect();
+    let dt = DataTr { types: id.all_ind_names.to_vec(), uparams };
+    // the data: parameters, each type's type and its constructors' types, with the binders'
+    // annotations consumed
+    let head_ty = strip_pis(el, id.info.ty);
+    let (ps, pctx) = match params(el, head_ty, np) {
+        Ok(x) => x,
+        Err(e) => return reason(el, e),
+    };
+    let mut fs = Vec::new();
+    let mut nidx = Vec::new();
+    let mut ctor_names = Vec::new();
+    let mut ks: Vec<Vec<E>> = Vec::new();
+    let mut tys_s = Vec::new();
+    for d in &types {
+        let dty = strip_pis(el, d.info.ty);
+        tys_s.push(dty);
+        let body = match peel_params(el, dty, &ps) {
+            Ok(b) => b,
+            Err(e) => return reason(el, e),
+        };
+        let Some(k) = is_sorted(el, body) else { return reason(el, "a type's type is not `Π indices. Sort`".into()) };
+        if k != d.num_indices as usize {
+            return reason(el, "index count".into())
+        }
+        nidx.push(k);
+        fs.push(el.tr_at(body, np)?);
+        let mut cs = Vec::new();
+        let mut cns = Vec::new();
+        for &c in d.all_ctor_names.iter() {
+            let Some(Declar::Constructor(cd)) = all.get(&c) else { return reason(el, "a constructor is missing from the export".into()) };
+            if cd.info.uparams != id.info.uparams {
+                return reason(el, "a constructor's levels differ".into())
+            }
+            let cty = strip_pis(el, cd.info.ty);
+            let body = match peel_params(el, cty, &ps) {
+                Ok(b) => b,
+                Err(e) => return reason(el, e),
+            };
+            match dt.tr(el, body, np) {
+                Ok(k) => cs.push(k),
+                Err(e) => return reason(el, e),
+            }
+            cns.push(el.g.lean_name(el.tc, c));
+        }
+        ks.push(cs);
+        ctor_names.push(cns);
+    }
+    // from here on statements are emitted; a failure is rolled back by the caller
+    let g = &mut *el.g;
+    let blk = g.blk_id(&lean_name)?;
+    let n = sig.lvl_names.len();
+    let mut t = g.env.app_n("tnil", &[]);
+    for i in (0..types.len()).rev() {
+        let mut c = g.env.app_n("cnil", &[]);
+        for &k in ks[i].iter().rev() {
+            c = g.env.app_n("ccons", &[k, c]);
+        }
+        t = g.env.app_n("tcons", &[fs[i], c, t]);
+    }
+    let atom = g.env.app(blk, &[]);
+    let body = g.env.app_n("ind_mk", &[atom, pctx, t]);
+    // the def takes the levels as its only arguments: shift Var(i+1) to Var(i)
+    let mut shift = vec![g.env.var(0)];
+    shift.extend((0..n).map(|i| g.env.var(i as u16)));
+    let body0 = g.env.subst(body, &shift);
+    let data_name = g.terms.fresh(&format!("{}_D", mangle(&lean_name)));
+    let ind_s = g.env.sort_names["ind"];
+    let lvl_args = g.lvl_args(&sig.lvl_names);
+    let data = add_term(&mut g.env, &data_name, lvl_args, ind_s, TermKind::Def { body: body0, public_body: true },
+        &format!("The inductive block of `{lean_name}`: its parameters, types and constructors."))?;
+    // theorem X_D_tys (G) (us): tys_ok G (X_D us)
+    let mut pv = Prover::new(g);
+    let us: Vec<E> = (0..n).map(|i| g.env.var(1 + i as u16)).collect();
+    let d = g.env.app(data, &us);
+    let gv = g.env.var(0);
+    let goal = g.env.app_n("tys_ok", &[gv, d]);
+    let proof = if g.replay {
+        None
+    } else {
+        // the facts: each parameter type and each type's type is a type
+        let mut facts = std::mem::take(&mut pv.facts);
+        with_binders(el, head_ty, 0, Some(np), &mut facts, |el, _, facts| {
+            for &dty in &tys_s {
+                let body = peel_params(el, dty, &ps)?;
+                let body = el.inst_locals(body);
+                record_type(el, body, facts)?;
+            }
+            Ok(())
+        })?;
+        pv.facts = facts;
+        Some(pv.prove(el.g, goal).map_err(|e| format!("the types of `{lean_name}` by the schema: {e}"))?)
+    };
+    let g = &mut *el.g;
+    let name = g.thms.fresh(&format!("{data_name}_tys"));
+    let tys_ok = emit_thm(g, &name, &sig.lvl_names, goal, proof, &format!("The parameters and types of the block of `{lean_name}` are types."))?;
+    let block = Rc::new(Block {
+        data,
+        blk,
+        names: names.clone(),
+        ctors: ctor_names,
+        nlevels: n,
+        lvl_names: sig.lvl_names.clone(),
+        np,
+        nidx,
+        tys_ok,
+        wf: Cell::new(None),
+    });
+    pv.horn.add_clause(&g.env, tys_ok);
+    for n in &names {
+        g.blocks.insert(n.clone(), block.clone());
+    }
+    // each type's typing lemma
+    for (i, d) in types.iter().enumerate() {
+        let tname = names[i].clone();
+        let cname = if i == 0 { sig.cname.clone() } else { el.g.terms.fresh(&mangle(&tname)) };
+        let tsig = Sig { lean_name: tname.clone(), cname, lvl_names: sig.lvl_names.clone() };
+        el.g.consts.insert(tname.clone(), ConstInfo { term: data, kind: ConstKind::Ind { i }, nlevels: n, ty_thm: ThId(0) });
+        let g = &mut *el.g;
+        let us2: Vec<E> = (0..n).map(|i| g.env.var(1 + (n + i) as u16)).collect();
+        let c = g.const_term(&tname, &us).unwrap();
+        let c2 = g.const_term(&tname, &us2).unwrap();
+        let df = emit_df(el, &mut pv, &tsig, &tname, c, c2, tys_s[i], d.info.ty)?;
+        el.g.consts.get_mut(&tname).unwrap().ty_thm = df;
+    }
+    el.g.stage_b += 1;
+    Ok(true)
+}
+
+/// Emit `theorem X_D_wf: ind_wf G (X_D us)` if it is not yet (the sibling types must be in
+/// nanoda's scope: at a constructor or recursor).
+fn ensure_wf<'t>(el: &mut Elab<'_, '_, 't, '_>, pv: &mut Prover, block: &Rc<Block>, ind: NamePtr<'t>, all: &DeclarMap<'t>) -> R<ThId> {
+    if let Some(wf) = block.wf.get() {
+        return Ok(wf)
+    }
+    let g = &mut *el.g;
+    let us = block_levels(g, block);
+    let d = block.data_term(g, &us);
+    let gv = g.env.var(0);
+    let goal = g.env.app_n("ind_wf", &[gv, d]);
+    let proof = if g.replay {
+        None
+    } else {
+        let mut facts = std::mem::take(&mut pv.facts);
+        ctor_facts(el, ind, block.np, all, &mut facts)?;
+        pv.facts = facts;
+        Some(pv.prove(el.g, goal).map_err(|e| format!("the constructors of `{}` by the schema: {e}", block.names[0]))?)
+    };
+    let g = &mut *el.g;
+    let data_name = g.env.terms[block.data.0 as usize].name.clone();
+    let name = g.thms.fresh(&format!("{data_name}_wf"));
+    let wf = emit_thm(g, &name, &block.lvl_names, goal, proof, &format!("The block of `{}` is a legal inductive declaration.", block.names[0]))?;
+    block.wf.set(Some(wf));
+    pv.horn.add_clause(&g.env, wf);
+    Ok(wf)
+}
+
+/// The facts for every field of every constructor of the block (`ind_wf`, `elim_ok`,
+/// `proj_ok`); `ind` is any type of the block, which must be in nanoda's scope.
+fn ctor_facts<'t>(el: &mut Elab<'_, '_, 't, '_>, ind: NamePtr<'t>, np: usize, all: &DeclarMap<'t>, facts: &mut Facts) -> R<()> {
+    let Some(Declar::Inductive(id)) = all.get(&ind) else { return Err("the block's types are not in the export".into()) };
+    for &t in id.all_ind_names.iter() {
+        let Some(Declar::Inductive(d)) = all.get(&t) else { return Err("a type of the block is not in the export".into()) };
+        for &c in d.all_ctor_names.iter() {
+            let Some(Declar::Constructor(cd)) = all.get(&c) else { return Err("a constructor of the block is not in the export".into()) };
+            let ty = strip_pis(el, cd.info.ty);
+            with_binders(el, ty, np, None, facts, |_, _, _| Ok(()))?;
+        }
+    }
+    Ok(())
+}
+
+/// A constructor of a stage-B block: its typing lemma, and for a structure the projection
+/// and eta lemmas. `Ok(false)`: not a stage-B block.
+pub(crate) fn constructor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, cd: &nanoda_lib::env::ConstructorData<'t>, all: &DeclarMap<'t>) -> R<bool> {
+    let ind = el.g.lean_name(el.tc, cd.inductive_name);
+    let Some(block) = el.g.blocks.get(&ind).cloned() else { return Ok(false) };
+    let i = block.names.iter().position(|n| *n == ind).unwrap();
+    let c = cd.ctor_idx as usize;
+    let mut pv = Prover::new(el.g);
+    ensure_wf(el, &mut pv, &block, cd.inductive_name, all)?;
+    let n = block.nlevels;
+    el.g.consts.insert(sig.lean_name.clone(), ConstInfo { term: block.data, kind: ConstKind::Ctor { i, c }, nlevels: n, ty_thm: ThId(0) });
+    let ty_s = strip_pis(el, cd.info.ty);
+    let g = &mut *el.g;
+    let us = block_levels(g, &block);
+    let us2: Vec<E> = (0..n).map(|i| g.env.var(1 + (n + i) as u16)).collect();
+    let ct = g.const_term(&sig.lean_name, &us).unwrap();
+    let ct2 = g.const_term(&sig.lean_name, &us2).unwrap();
+    let df = emit_df(el, &mut pv, sig, &sig.lean_name, ct, ct2, ty_s, cd.info.ty)?;
+    el.g.consts.get_mut(&sig.lean_name).unwrap().ty_thm = df;
+    if el.tc.env.get_structure(&cd.inductive_name, true).is_some() {
+        // the field types as the schema has them (annotations consumed); a projection's use
+        // casts to nanoda's type (`Elab::proj_cast`)
+        let fields = crate::gen::structure_fields(el, cd.inductive_name, ty_s)?;
+        structure(el, &mut pv, sig, &block, i, cd, fields)?;
+    }
+    Ok(true)
+}
+
+/// Projection typing and reduction and structure eta for a stage-B structure, with the
+/// statements of stage A (`gen::structure_axioms`) proved from `proj_ty`, `proj_mk` and
+/// `ind_eta`.
+fn structure<'t>(el: &mut Elab<'_, '_, 't, '_>, pv: &mut Prover, sig: &Sig, block: &Rc<Block>, j: usize, cd: &nanoda_lib::env::ConstructorData<'t>, fields: crate::gen::Fields) -> R<()> {
+    let ind_lean = block.names[j].clone();
+    let eta_ok = el.tc.env.can_be_struct(&cd.inductive_name);
+    let np = block.np;
+    let crate::gen::Fields { tys: field_tys, is_prop, levels: field_lvls, sort: lsort } = fields;
+    let nf = field_tys.len();
+    // the facts: the fields' types (`proj_ok_prop`)
+    if !el.g.replay {
+        let mut facts = std::mem::take(&mut pv.facts);
+        let ty_s = strip_pis(el, cd.info.ty);
+        with_binders(el, ty_s, np, None, &mut facts, |_, _, _| Ok(()))?;
+        pv.facts = facts;
+    }
+    let g = &mut *el.g;
+    let sort_ok = !crate::gen::level_may_be_zero(g, lsort);
+    let blk = block.blk;
+    let proj = g.env.app(blk, &[]);
+    let proj_name = format!("{}_proj", mangle(&ind_lean));
+    let mut df = Vec::new();
+    let mut df_prop = Vec::new();
+    for i in 0..nf {
+        let needs_sort = !sort_ok && !is_prop[..=i].iter().all(|&b| b);
+        let lvl_js: Vec<usize> = (0..=i).filter(|&j| !is_prop[j]).collect();
+        let prop_ok = needs_sort && lvl_js.iter().all(|&j| crate::gen::level_may_be_zero(g, field_lvls[j]));
+        let mut variants = vec![needs_sort];
+        if prop_ok {
+            variants.push(false);
+        }
+        for (vi, &sort_premise) in variants.iter().enumerate() {
+            let from_prop = vi == 1;
+            let mut v = Vars::new();
+            let gv = v.add(&mut g.env, "G", "ctx");
+            let us = v.lvls(&mut g.env, &sig.lvl_names, "");
+            let ps = v.many(&mut g.env, "p", "expr", np);
+            let (e, e2) = (v.add(&mut g.env, "e", "expr"), v.add(&mut g.env, "e2", "expr"));
+            let mut hyps = Vec::new();
+            let subst: Vec<E> = std::iter::once(gv).chain(us.iter().copied()).collect();
+            let lsort_here = g.env.subst(lsort, &subst);
+            if sort_premise {
+                let z = g.env.app_n("lz", &[]);
+                let one = g.env.app_n("ls", &[z]);
+                let m = g.env.app_n("lmax", &[one, lsort_here]);
+                hyps.push(g.env.app_n("leqv", &[m, lsort_here]));
+            }
+            if from_prop {
+                let z = g.env.app_n("lz", &[]);
+                for &j in &lvl_js {
+                    let l = g.env.subst(field_lvls[j], &subst);
+                    hyps.push(g.env.app_n("leqv", &[l, z]));
+                }
+            }
+            let st = g.const_term(&ind_lean, &us).unwrap();
+            let st = apps(g, st, &ps);
+            hyps.push(g.lean.deq(&mut g.env, gv, e, e2, st));
+            let (ihyps, r) = crate::gen::field_inst_hyps(g, &mut v, field_tys[i], &subst, &ps, i, proj, e);
+            hyps.extend(ihyps);
+            let (pe, pe2) = (g.lean.proj(&mut g.env, proj, i, e), g.lean.proj(&mut g.env, proj, i, e2));
+            let concl = g.lean.deq(&mut g.env, gv, pe, pe2, r);
+            let name = g.thms.fresh(&format!("{proj_name}_{i}_df{}", if from_prop { "p" } else { "" }));
+            let what = if from_prop {
+                " (from a proposition, when the fields up to it are propositions)"
+            } else if sort_premise {
+                " (not from a proposition)"
+            } else {
+                ""
+            };
+            let proof = prove_lemma(g, pv, "proj_ty", &hyps, concl)?;
+            let th = add_thm(&mut g.env, &name, v.args, hyps, concl, false, false, proof, &format!("Typing of field {i} of `{ind_lean}`{what}."))?;
+            if from_prop {
+                df_prop.push(Some((th, lvl_js.iter().map(|&j| field_lvls[j]).collect())));
+            } else {
+                df.push((th, needs_sort));
+            }
+        }
+        if !prop_ok {
+            df_prop.push(None);
+        }
+    }
+    let mut red = Vec::new();
+    for i in 0..nf {
+        let mut v = Vars::new();
+        let gv = v.add(&mut g.env, "G", "ctx");
+        let cls = v.lvls(&mut g.env, &sig.lvl_names, "");
+        let ps = v.many(&mut g.env, "p", "expr", np);
+        let fs = v.many(&mut g.env, "f", "expr", nf);
+        let tv = v.add(&mut g.env, "T", "expr");
+        let m = g.const_term(&sig.lean_name, &cls).unwrap();
+        let m = apps(g, m, &[ps, fs.clone()].concat());
+        let lhs = g.lean.proj(&mut g.env, proj, i, m);
+        let hyp = g.env.app_n("ty", &[gv, lhs, tv]);
+        let concl = g.lean.deq(&mut g.env, gv, lhs, fs[i], tv);
+        let name = g.thms.fresh(&format!("{proj_name}_{i}_mk"));
+        let proof = prove_lemma(g, pv, "proj_mk", &[hyp], concl)?;
+        red.push(add_thm(&mut g.env, &name, v.args, vec![hyp], concl, false, false, proof, &format!("Field {i} of a `{}` application.", sig.lean_name))?);
+    }
+    let eta = if eta_ok {
+        let mut v = Vars::new();
+        let gv = v.add(&mut g.env, "G", "ctx");
+        let us = v.lvls(&mut g.env, &sig.lvl_names, "");
+        let ps = v.many(&mut g.env, "p", "expr", np);
+        let e = v.add(&mut g.env, "e", "expr");
+        let st = g.const_term(&ind_lean, &us).unwrap();
+        let st = apps(g, st, &ps);
+        let hyp = g.env.app_n("ty", &[gv, e, st]);
+        let projs: Vec<E> = (0..nf).map(|i| g.lean.proj(&mut g.env, proj, i, e)).collect();
+        let m = g.const_term(&sig.lean_name, &us).unwrap();
+        let m = apps(g, m, &[ps, projs].concat());
+        let concl = g.lean.deq(&mut g.env, gv, e, m, st);
+        let name = g.thms.fresh(&format!("{}_eta", mangle(&ind_lean)));
+        let proof = prove_lemma(g, pv, "ind_eta", &[hyp], concl)?;
+        Some(add_thm(&mut g.env, &name, v.args, vec![hyp], concl, false, false, proof, &format!("Structure eta for `{ind_lean}`."))?)
+    } else {
+        None
+    };
+    g.structs.insert(ind_lean, StructInfo { blk, np, nf, df, df_prop, red, eta, sort: lsort, field_tys });
+    Ok(())
+}
+
+/// Prove `concl` from `hyps` by the schema axiom `rule` (`None` when replaying).
+fn prove_lemma(g: &mut Gen, pv: &mut Prover, rule: &str, hyps: &[E], concl: E) -> R<Option<P>> {
+    if g.replay {
+        return Ok(None)
+    }
+    pv.horn.facts.clear();
+    for (i, &h) in hyps.iter().enumerate() {
+        let p = g.env.hyp(i as u16, h);
+        pv.horn.facts.insert(h, p);
+    }
+    Ok(Some(pv.apply(g, rule, concl)?))
+}
+
+/// A recursor of a stage-B block: its typing lemma and its rules' definitions and iota
+/// lemmas. `Ok(false)`: not a stage-B block.
+pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &RecursorData<'t>, all: &DeclarMap<'t>) -> R<bool> {
+    let Some(ind_name) = el.tc.ctx.get_major_induct(rd) else { return Ok(false) };
+    let ind = el.g.lean_name(el.tc, ind_name);
+    let Some(block) = el.g.blocks.get(&ind).cloned() else { return Ok(false) };
+    // the recursor of a nested block's auxiliary type has a stage-B type as its major's
+    // (`Lean.Syntax.rec_1` on `Array Syntax`): not the block's recursor
+    let rec_all: Vec<String> = rd.all_inductives.iter().map(|&n| el.g.lean_name(el.tc, n)).collect();
+    if rec_all != block.names || sig.lean_name != format!("{ind}.rec") {
+        return Ok(false)
+    }
+    let i = block.names.iter().position(|n| *n == ind).unwrap();
+    let nl = el.tc.ctx.read_levels(rd.info.uparams).len();
+    let large = nl == block.nlevels + 1;
+    if !large && nl != block.nlevels {
+        return Err("recursor levels".into())
+    }
+    let mut pv = Prover::new(el.g);
+    ensure_wf(el, &mut pv, &block, ind_name, all)?;
+    if !el.g.replay {
+        // `elim_ok` may need the fields' types (one constructor whose fields are propositions)
+        let mut facts = std::mem::take(&mut pv.facts);
+        ctor_facts(el, ind_name, block.np, all, &mut facts)?;
+        pv.facts = facts;
+    }
+    el.g.consts.insert(sig.lean_name.clone(), ConstInfo { term: block.data, kind: ConstKind::Rec { i, large }, nlevels: nl, ty_thm: ThId(0) });
+    let g = &mut *el.g;
+    let us: Vec<E> = (0..nl).map(|i| g.env.var(1 + i as u16)).collect();
+    let us2: Vec<E> = (0..nl).map(|i| g.env.var(1 + (nl + i) as u16)).collect();
+    let rt = g.const_term(&sig.lean_name, &us).unwrap();
+    let rt2 = g.const_term(&sig.lean_name, &us2).unwrap();
+    let df = emit_df(el, &mut pv, sig, &sig.lean_name, rt, rt2, rd.info.ty, rd.info.ty)?;
+    el.g.consts.get_mut(&sig.lean_name).unwrap().ty_thm = df;
+    // the rules mention the sibling recursors of a mutual block, declared later: register
+    // them now (their own declaration sets their typing lemma)
+    for r in rd.rec_rules.iter() {
+        let mut names = Vec::new();
+        el.const_names(r.val, &mut names);
+        for n in names {
+            let c = el.g.lean_name(el.tc, n);
+            if el.g.consts.contains_key(&c) {
+                continue
+            }
+            match all.get(&n) {
+                Some(Declar::Recursor(sr)) if sr.all_inductives == rd.all_inductives && sr.info.uparams == rd.info.uparams => {
+                    let Some(sind) = el.tc.ctx.get_major_induct(sr) else { return Err(format!("the inductive of {c}")) };
+                    let sind = el.g.lean_name(el.tc, sind);
+                    let Some(si) = block.names.iter().position(|x| *x == sind) else { return Err(format!("{c} is not a recursor of the block")) };
+                    el.g.consts.insert(c, ConstInfo { term: block.data, kind: ConstKind::Rec { i: si, large }, nlevels: nl, ty_thm: ThId(0) });
+                }
+                _ => return Err(format!("unknown constant {c}")),
+            }
+        }
+    }
+    let rhss: Vec<E> = rd.rec_rules.iter().map(|r| el.tr(r.val)).collect::<R<_>>()?;
+    for (rule, &rhs) in rd.rec_rules.iter().zip(&rhss) {
+        let ctor_lean = el.g.lean_name(el.tc, rule.ctor_name);
+        let Some(cd) = el.tc.env.get_constructor(&rule.ctor_name).cloned() else { return Err(format!("unknown constructor {ctor_lean}")) };
+        let nf = rule.ctor_telescope_size_wo_params as usize;
+        let c = cd.ctor_idx as usize;
+        let g = &mut *el.g;
+        let short = ctor_lean.rsplit('.').next().unwrap_or(&ctor_lean);
+        let mut shift = vec![g.env.var(0)];
+        shift.extend((0..nl).map(|i| g.env.var(i as u16)));
+        let rhs0 = g.env.subst(rhs, &shift);
+        let def_name = g.terms.fresh(&format!("{}_{}", sig.cname, mangle(short)));
+        let expr_s = g.env.sort_names["expr"];
+        let lvl_args = g.lvl_args(&sig.lvl_names);
+        // the schema's right-hand side must be the export's
+        if !g.replay {
+            let (v, bl) = if large { (us[0], &us[1..]) } else { (g.env.app_n("lz", &[]), &us[..]) };
+            let d = block.data_term(g, bl);
+            let (ie, ce) = (g.lean.nat(&mut g.env, i), g.lean.nat(&mut g.env, c));
+            let goal = g.env.app_n("rec_rhs", &[d, v, ie, ce, rhs]);
+            pv.prove(g, goal).map_err(|e| format!("the rule of `{}` for `{ctor_lean}` is not the schema's: {e}", sig.lean_name))?;
+        }
+        let def = add_term(&mut g.env, &def_name, lvl_args, expr_s, TermKind::Def { body: rhs0, public_body: true },
+            &format!("The right-hand side of the iota rule of `{}` for `{ctor_lean}`.", sig.lean_name))?;
+        let mut v = Vars::new();
+        let gv = v.add(&mut g.env, "G", "ctx");
+        let us = v.lvls(&mut g.env, &sig.lvl_names, "");
+        let ps = v.many(&mut g.env, "p", "expr", rd.num_params as usize);
+        let ms = v.many(&mut g.env, "m", "expr", rd.num_motives as usize);
+        let mins = v.many(&mut g.env, "n", "expr", rd.num_minors as usize);
+        let is = v.many(&mut g.env, "i", "expr", rd.num_indices as usize);
+        let cls: Vec<E> = (0..block.nlevels).map(|i| v.add(&mut g.env, &format!("v{}", i + 1), "lvl")).collect();
+        let cps = v.many(&mut g.env, "q", "expr", block.np);
+        let fs = v.many(&mut g.env, "f", "expr", nf);
+        let tv = v.add(&mut g.env, "T", "expr");
+        let ct = g.const_term(&ctor_lean, &cls).unwrap();
+        let major = apps(g, ct, &[cps.clone(), fs.clone()].concat());
+        let r = g.const_term(&sig.lean_name, &us).unwrap();
+        let lhs = apps(g, r, &[ps.clone(), ms.clone(), mins.clone(), is, vec![major]].concat());
+        let dv = g.env.app(def, &us);
+        let rhs = apps(g, dv, &[ps, ms, mins, fs].concat());
+        let hyp = g.env.app_n("ty", &[gv, lhs, tv]);
+        let concl = g.lean.deq(&mut g.env, gv, lhs, rhs, tv);
+        let name = g.thms.fresh(&format!("{def_name}_iota"));
+        let proof = prove_lemma(g, &mut pv, "ind_iota", &[hyp], concl).map_err(|e| format!("iota of `{}` on `{ctor_lean}`: {e}", sig.lean_name))?;
+        let th = add_thm(&mut g.env, &name, v.args, vec![hyp], concl, false, false, proof,
+            &format!("Iota reduction of `{}` on `{ctor_lean}`.", sig.lean_name))?;
+        g.iota.insert((sig.lean_name.clone(), ctor_lean), th);
+    }
+    Ok(true)
+}

@@ -112,6 +112,7 @@ impl Unify<'_> {
     fn expr(&mut self, e: E) {
         match self.env.node(e) {
             Node::Var(i) => push_cmd(&mut self.out, cmd::UREF, i as u32),
+            Node::Meta(_) => panic!("a metavariable in a statement"),
             Node::App(t, args) => {
                 if let Some(&h) = self.heap.get(&e) {
                     push_cmd(&mut self.out, cmd::UREF, h);
@@ -348,6 +349,7 @@ impl<'a> Proof<'a> {
         let env = self.env;
         match env.node(e) {
             Node::Var(i) => push_cmd(&mut self.out, cmd::REF, i as u32),
+            Node::Meta(_) => panic!("a metavariable in a proof"),
             Node::App(t, args) => {
                 if let Some(&h) = self.eheap.get(&e) {
                     push_cmd(&mut self.out, cmd::REF, h);

@@ -21,6 +21,8 @@ pub struct P(pub u32);
 pub enum Node<'a> {
     Var(u16),
     App(TId, &'a [E]),
+    /// A prover's metavariable (`horn`): never in a statement or a written proof.
+    Meta(u32),
 }
 
 /// A stored expression node: `head` is a term id, or `VAR | i` for the variable `i`; the
@@ -34,6 +36,7 @@ struct NodeRec {
 }
 
 const VAR: u32 = 1 << 31;
+const META: u32 = 1 << 30;
 
 /// SipHash: FxHash collides on similar names (`x_l94`), which would rename them.
 fn name_hash(name: &str) -> u64 {
@@ -215,6 +218,12 @@ impl Env {
 
     pub fn var(&mut self, i: u16) -> E { self.mk(VAR | i as u32, &[]) }
 
+    /// The metavariable `i` (see `horn`).
+    pub fn meta(&mut self, i: u32) -> E {
+        assert!(i < META, "too many metavariables");
+        self.mk(META | i, &[])
+    }
+
     pub fn app(&mut self, t: TId, args: &[E]) -> E {
         debug_assert_eq!(self.terms[t.0 as usize].args.len(), args.len(), "arity of {}", self.terms[t.0 as usize].name);
         self.mk(t.0, args)
@@ -238,6 +247,8 @@ impl Env {
         let r = self.nodes[e.0 as usize];
         if r.head & VAR != 0 {
             Node::Var((r.head & !VAR) as u16)
+        } else if r.head & META != 0 {
+            Node::Meta(r.head & !META)
         } else {
             Node::App(TId(r.head), self.rec_args(r))
         }
@@ -246,7 +257,7 @@ impl Env {
     pub fn head(&self, e: E) -> Option<(TId, &[E])> {
         match self.node(e) {
             Node::App(t, args) => Some((t, args)),
-            Node::Var(_) => None,
+            Node::Var(_) | Node::Meta(_) => None,
         }
     }
 
@@ -267,6 +278,7 @@ impl Env {
         }
         let r = match self.node(e) {
             Node::Var(i) => args[i as usize],
+            Node::Meta(_) => e,
             Node::App(t, xs) => {
                 let xs = xs.to_vec();
                 let ys: Vec<E> = xs.iter().map(|&x| self.subst_aux(x, args, memo)).collect();
@@ -645,6 +657,36 @@ impl Env {
     pub fn has_term(&self, name: &str) -> bool { self.term_names.contains_key(name) }
     pub fn has_thm(&self, name: &str) -> bool { self.thm_names.contains_key(name) || self.local_names.contains(&name_hash(name)) }
 
+    /// Take back the statements `order[from..]` (none of them written yet) and their names.
+    /// Proof nodes are not freed here (`forget_proofs`).
+    pub fn rollback(&mut self, from: usize) {
+        let mut nterms = self.terms.len();
+        let mut nthms = self.thms.len();
+        for &st in &self.order[from..] {
+            match st {
+                Stmt::Sort(_) => panic!("rollback over a sort"),
+                Stmt::Term(t) => nterms = nterms.min(t.0 as usize),
+                Stmt::Thm(t) => nthms = nthms.min(t.0 as usize),
+            }
+        }
+        for d in &self.terms[nterms..] {
+            self.term_names.remove(&d.name);
+        }
+        for d in &self.thms[nthms..] {
+            if d.local {
+                self.local_names.remove(&name_hash(&d.name));
+            } else {
+                self.thm_names.remove(&*d.name);
+            }
+        }
+        self.terms.truncate(nterms);
+        self.thms.truncate(nthms);
+        self.order.truncate(from);
+        self.split_lemmas.retain(|_, id| (id.0 as usize) < nthms);
+        let keep = self.split_lemmas.clone();
+        self.recent_lemmas.retain(|k| keep.contains_key(k));
+    }
+
     /// Free the names of the local theorems among `order[from..]`, which must have been
     /// written (`mmb::Writer::flush` streams the names into the index).
     pub fn forget_local_names(&mut self, from: usize) {
@@ -677,6 +719,7 @@ impl Env {
 
     fn show_aux(&self, e: E, vars: &[&str], paren: bool, out: &mut String) {
         match self.node(e) {
+            Node::Meta(i) => out.push_str(&format!("?m{i}")),
             Node::Var(i) => match vars.get(i as usize) {
                 Some(n) => out.push_str(n),
                 None => write!(out, "?v{i}").unwrap(),

@@ -188,6 +188,17 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
 
     fn ctx(&self) -> E { self.ctxs[self.d()] }
 
+    /// The MM0 context of the open binders, over `G`.
+    pub fn ctx_pub(&self) -> E { self.ctx() }
+
+    /// Forget every memoized proof (after the generator rolled proofs back).
+    pub fn forget_proofs(&mut self) {
+        self.infer_memo.clear();
+        self.defeq_memo.clear();
+        self.closed_lemmas.clear();
+        self.handles.clear();
+    }
+
     fn read(&self, e: ExprPtr<'t>) -> Expr<'t> { self.tc.ctx.read_expr(e) }
 
     pub fn show(&mut self, e: ExprPtr<'t>) -> String {
@@ -256,13 +267,12 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
             Expr::Const { name, levels, .. } => {
                 let s = self.g.lean_name(self.tc, name);
                 let Some(ci) = self.g.consts.get(&s) else { return Err(format!("unknown constant {s}")) };
-                let term = ci.term;
                 if ci.nlevels != self.tc.ctx.read_levels(levels).len() {
                     return Err(format!("wrong number of universe levels for {s}"))
                 }
                 let ls: Vec<LevelPtr<'t>> = self.tc.ctx.read_levels(levels).to_vec();
                 let ls: Vec<E> = ls.into_iter().map(|l| self.trl(l)).collect::<R<_>>()?;
-                self.g.env.app(term, &ls)
+                self.g.const_term(&s, &ls).ok_or_else(|| format!("no term for {s}"))?
             }
             Expr::App { fun, arg, .. } => {
                 let (f, a) = (self.tr_at(fun, d)?, self.tr_at(arg, d)?);
@@ -284,9 +294,9 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
             Expr::Proj { ty_name, idx, structure, .. } => {
                 let s = self.g.lean_name(self.tc, ty_name);
                 let Some(si) = self.g.structs.get(&s) else { return Err(format!("projection of unknown structure {s}")) };
-                let t = si.proj;
+                let b = self.g.env.app(si.blk, &[]);
                 let x = self.tr_at(structure, d)?;
-                self.g.lean.proj(&mut self.g.env, t, idx, x)
+                self.g.lean.proj(&mut self.g.env, b, idx, x)
             }
             Expr::NatLit { ptr, .. } => {
                 let n = self.tc.ctx.read_bignum(ptr).unwrap().clone();
@@ -736,7 +746,7 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
             args.push(self.trl(l)?);
         }
         let p = match ci.kind {
-            ConstKind::Opaque => {
+            ConstKind::Opaque | ConstKind::Ind { .. } | ConstKind::Ctor { .. } | ConstKind::Rec { .. } => {
                 let mut hyps = Vec::new();
                 for (&l, &l2) in a.iter().zip(&b) {
                     args.push(self.trl(l2)?);
@@ -906,10 +916,14 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         }
         hyps.push(pe);
         // the field type, with parameters and earlier projections substituted outermost first
+        // (the lemma's `inst` premises, as the spec's `pinst`/`qinst`)
         let n = si.np + idx;
         let mut cur = self.g.env.subst(si.field_tys[idx], &lvls);
         for j in 0..n {
-            let a = if j < si.np { pts[j] } else { self.g.lean.proj(&mut self.g.env, si.proj, j - si.np, e) };
+            let a = if j < si.np { pts[j] } else {
+                let b = self.g.env.app(si.blk, &[]);
+                self.g.lean.proj(&mut self.g.env, b, j - si.np, e)
+            };
             let (r, pr) = mm(self.g.lean.inst(&mut self.g.env, n - 1 - j, cur, a))?;
             args.push(r);
             hyps.push(pr);
@@ -934,6 +948,12 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         let t1 = self.proj_field_type(idx, structure)?;
         if t == self.tr(t1)? {
             return self.cast(p, t1, to)
+        }
+        // a stage-B lemma states the field type with its annotations consumed (`optParam`,
+        // `autoParam`, ...), as the block's data has it
+        let t2 = crate::induct::consume_annots(self, t1);
+        if t == self.tr(t2)? {
+            return self.cast(p, t2, to)
         }
         Err(format!("internal: projection typed at an unexpected type: {}", self.g.show(t)))
     }

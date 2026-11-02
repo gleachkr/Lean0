@@ -51,7 +51,7 @@ pub enum View {
     /// literal `lit n`.
     Const(TId),
     /// A projection `S_proj i e` of a structure `S` (a generated term).
-    Proj(TId, usize, E),
+    Proj(E, usize, E),
     /// Anything else (a variable of sort `expr`, which generated proofs never contain).
     Other,
 }
@@ -65,11 +65,13 @@ pub struct ProjRules {
 
 pub struct Lean {
     pub ids: Ids,
+    /// The spec's `proj` term (`proj b i e`), if the spec has it.
+    pub proj_id: Option<TId>,
     nats: Vec<E>,
     /// `closed k (c us)` lemma for each constant (by its head term), taking `k` then the levels.
     pub const_closed: HashMap<TId, ThId>,
-    /// The structural `closed`, `lift` and `inst` axioms of each projection term.
-    pub proj_rules: HashMap<TId, ProjRules>,
+    /// The structural `closed`, `lift` and `inst` axioms of `proj`.
+    pub proj_rules: Option<ProjRules>,
     fvb_memo: HashMap<E, usize>,
     memo_closed: HashMap<(usize, E), P>,
     memo_lift: HashMap<(usize, usize, E), (E, P)>,
@@ -104,15 +106,24 @@ impl Lean {
             closed: t("closed"),
         };
         let mut const_closed = HashMap::default();
-        // a Nat literal `lit n` is closed like a constant
-        if env.has_term("lit") && env.has_thm("closed_lit") {
-            const_closed.insert(t("lit"), env.thm_id("closed_lit"));
+        // a Nat literal `lit n` is closed like a constant, and so are the inductive constants
+        for (term, ax) in [("lit", "closed_lit"), ("ind_ty", "closed_ind_ty"), ("ind_ctor", "closed_ind_ctor"), ("ind_rec", "closed_ind_rec")] {
+            if env.has_term(term) && env.has_thm(ax) {
+                const_closed.insert(t(term), env.thm_id(ax));
+            }
         }
+        let proj_id = env.has_term("proj").then(|| t("proj"));
+        let proj_rules = proj_id.filter(|_| env.has_thm("closed_proj")).map(|_| ProjRules {
+            closed: env.thm_id("closed_proj"),
+            lift: env.thm_id("lift_proj"),
+            inst: env.thm_id("inst_proj"),
+        });
         Lean {
             ids,
+            proj_id,
             nats: Vec::new(),
             const_closed,
-            proj_rules: HashMap::default(),
+            proj_rules,
             fvb_memo: HashMap::default(),
             memo_closed: HashMap::default(),
             memo_lift: HashMap::default(),
@@ -185,7 +196,7 @@ impl Lean {
             [f, a] if t == i.app => View::App(*f, *a),
             [a, b] if t == i.lam => View::Lam(*a, *b),
             [a, b] if t == i.pi => View::Pi(*a, *b),
-            [n, e] if self.proj_rules.contains_key(&t) => View::Proj(t, self.nat_val(env, *n).expect("projection index"), *e),
+            [b, n, e] if Some(t) == self.proj_id => View::Proj(*b, self.nat_val(env, *n).expect("projection index"), *e),
             _ if env.terms[t.0 as usize].ret == env.terms[i.bvar.0 as usize].ret => View::Const(t),
             _ => View::Other,
         }
@@ -199,9 +210,11 @@ impl Lean {
     pub fn app(&self, env: &mut Env, f: E, a: E) -> E { env.app(self.ids.app, &[f, a]) }
     pub fn lam(&self, env: &mut Env, a: E, b: E) -> E { env.app(self.ids.lam, &[a, b]) }
     pub fn pi(&self, env: &mut Env, a: E, b: E) -> E { env.app(self.ids.pi, &[a, b]) }
-    pub fn proj(&mut self, env: &mut Env, t: TId, i: usize, e: E) -> E {
+    /// `proj b i e`, for the block atom `b`.
+    pub fn proj(&mut self, env: &mut Env, b: E, i: usize, e: E) -> E {
         let ie = self.nat(env, i);
-        env.app(t, &[ie, e])
+        let t = self.proj_id.expect("the spec has no proj term");
+        env.app(t, &[b, ie, e])
     }
     pub fn cons(&self, env: &mut Env, a: E, g: E) -> E { env.app(self.ids.cons, &[a, g]) }
     pub fn deq(&self, env: &mut Env, g: E, a: E, b: E, t: E) -> E { env.app(self.ids.deq, &[g, a, b, t]) }
@@ -255,9 +268,9 @@ impl Lean {
                 let (a, b) = (self.lift_pure(env, n, k, a), self.lift_pure(env, n, k + 1, b));
                 self.pi(env, a, b)
             }
-            View::Proj(t, i, x) => {
+            View::Proj(b, i, x) => {
                 let x = self.lift_pure(env, n, k, x);
-                self.proj(env, t, i, x)
+                self.proj(env, b, i, x)
             }
             _ => e,
         };
@@ -289,9 +302,9 @@ impl Lean {
                 let (t, b) = (self.inst_pure(env, k, t, a), self.inst_pure(env, k + 1, b, a));
                 self.pi(env, t, b)
             }
-            View::Proj(t, i, x) => {
+            View::Proj(b, i, x) => {
                 let x = self.inst_pure(env, k, x, a);
-                self.proj(env, t, i, x)
+                self.proj(env, b, i, x)
             }
             _ => e,
         };
@@ -395,10 +408,10 @@ impl Lean {
                 let r = if matches!(self.view(env, e), View::Lam(..)) { "closed_lam" } else { "closed_pi" };
                 env.thm_n(r, &[k, a, b], &[pa, pb])?
             }
-            View::Proj(t, i, x) => {
+            View::Proj(b, i, x) => {
                 let px = self.closed(env, k, x)?;
-                let (th, ie) = (self.proj_rules[&t].closed, self.nat(env, i));
-                env.thm(th, &[k, ie, x], &[px])?
+                let (th, ie) = (self.proj_rules.as_ref().unwrap().closed, self.nat(env, i));
+                env.thm(th, &[k, b, ie, x], &[px])?
             }
             View::Const(t) => {
                 let Some(&th) = self.const_closed.get(&t) else { bail!("no closedness lemma for {}", env.terms[t.0 as usize].name) };
@@ -452,10 +465,10 @@ impl Lean {
                     };
                     (e2, env.thm_n(r, &[ne, ke, a, b, a2, b2], &[pa, pb])?)
                 }
-                View::Proj(t, i, x) => {
+                View::Proj(b, i, x) => {
                     let (x2, px) = self.lift(env, n, k, x)?;
-                    let (th, ie) = (self.proj_rules[&t].lift, self.nat(env, i));
-                    (self.proj(env, t, i, x2), env.thm(th, &[ne, ke, ie, x, x2], &[px])?)
+                    let (th, ie) = (self.proj_rules.as_ref().unwrap().lift, self.nat(env, i));
+                    (self.proj(env, b, i, x2), env.thm(th, &[ne, ke, b, ie, x, x2], &[px])?)
                 }
                 _ => bail!("lift: unexpected expression {}", env.show(e, &[])),
             }
@@ -507,10 +520,10 @@ impl Lean {
                     };
                     (e2, env.thm_n(r, &[ke, ty, b, a, t2, b2], &[pt, pb])?)
                 }
-                View::Proj(t, i, x) => {
+                View::Proj(b, i, x) => {
                     let (x2, px) = self.inst(env, k, x, a)?;
-                    let (th, ie) = (self.proj_rules[&t].inst, self.nat(env, i));
-                    (self.proj(env, t, i, x2), env.thm(th, &[ke, ie, x, a, x2], &[px])?)
+                    let (th, ie) = (self.proj_rules.as_ref().unwrap().inst, self.nat(env, i));
+                    (self.proj(env, b, i, x2), env.thm(th, &[ke, b, ie, x, a, x2], &[px])?)
                 }
                 _ => bail!("inst: unexpected expression {}", env.show(e, &[])),
             }
