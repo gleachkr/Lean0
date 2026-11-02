@@ -1,0 +1,605 @@
+Lean0's changes to nanoda_lib (https://github.com/ammkrn/nanoda_lib) at commit
+d0a02cc5defadd683f62f9d078f41688314fa31f (v0.4.30),
+applied by scripts/nanoda.sh (into build/nanoda) and by flake.nix. There are two kinds:
+the tracing hook (src/trace.rs, the recording calls in src/tc.rs and three cache fields in
+src/util.rs), and making public the items the lean0 crates use. After editing build/nanoda,
+regenerate this file with `scripts/nanoda.sh diff`.
+
+diff -ruN a/src/env.rs b/src/env.rs
+--- a/src/env.rs
++++ b/src/env.rs
+@@ -66,7 +66,7 @@
+ /// information to begin the process of checking an inductive declaration.
+ #[derive(Debug, Clone, PartialEq, Eq)]
+ pub struct InductiveData<'a> {
+-    pub(crate) info: DeclarInfo<'a>,
++    pub info: DeclarInfo<'a>,
+     /// `true` when recursive (that is, the inductive type appears as an argument in a constructor).
+     pub(crate) is_recursive: bool,
+     /// `true` when this typs is a nested inductive
+@@ -74,7 +74,7 @@
+     pub(crate) is_nested: bool,
+     /// All inductive types in a mutual block must have the same parameters, though this
+     /// does not exactly hold for nested inductives.
+-    pub(crate) num_params: u16,
++    pub num_params: u16,
+     pub(crate) num_indices: u16,
+     /// The names of this type, and any other inductive types in a `mutual..end`
+     /// block. No nested inductive info is conveyed here.
+@@ -82,7 +82,7 @@
+     /// The constructor names for THIS type only. No constructors
+     /// from other elements in a mutual block, nothing from any nested
+     /// construction.
+-    pub(crate) all_ctor_names: Arc<[NamePtr<'a>]>,
++    pub all_ctor_names: Arc<[NamePtr<'a>]>,
+ }
+ 
+ impl<'a> InductiveData<'a> {
+@@ -227,7 +227,7 @@
+     cutoff: usize,
+ }
+ 
+-pub(crate) type DeclarMap<'a> = FxIndexMap<NamePtr<'a>, Declar<'a>>;
++pub type DeclarMap<'a> = FxIndexMap<NamePtr<'a>, Declar<'a>>;
+ pub(crate) type NotationMap<'a> = FxHashMap<NamePtr<'a>, Notation<'a>>;
+ 
+ impl<'x, 'a: 'x> Env<'x, 'a> {
+@@ -300,7 +300,7 @@
+     /// characteristics required of a structure. The requirements to be a structure are
+     /// (1) the inductive declaration is not recursive, (2) the declaration has only one
+     /// constructor, and (3) the type is declared with no indices.
+-    pub(crate) fn can_be_struct(&self, n: &NamePtr<'a>) -> bool {
++    pub fn can_be_struct(&self, n: &NamePtr<'a>) -> bool {
+         match self.get_inductive(n) {
+             Some(InductiveData { is_recursive, num_indices, all_ctor_names, .. }) =>
+                 (!is_recursive) && (all_ctor_names.len() == 1) && (*num_indices == 0),
+diff -ruN a/src/expr.rs b/src/expr.rs
+--- a/src/expr.rs
++++ b/src/expr.rs
+@@ -458,7 +458,7 @@
+         out
+     }
+ 
+-    pub(crate) fn subst_declar_info_levels(
++    pub fn subst_declar_info_levels(
+         &mut self,
+         info: crate::env::DeclarInfo<'t>,
+         in_vals: LevelsPtr<'t>,
+@@ -577,7 +577,7 @@
+     /// Used in iota reduction (`reduce_rec`) to turn a bignum
+     /// either `Nat.zero`, or `App (Nat.succ) (bignum - 1)`; in order to do iota reduction,
+     /// we need to know what constructor the major premise comes from.
+-    pub(crate) fn nat_lit_to_constructor(&mut self, n: BigUintPtr<'t>) -> Option<ExprPtr<'t>> {
++    pub fn nat_lit_to_constructor(&mut self, n: BigUintPtr<'t>) -> Option<ExprPtr<'t>> {
+         assert!(self.export_file.config.nat_extension);
+         let n = self.read_bignum(n).unwrap();
+         if n.is_zero() {
+@@ -603,7 +603,7 @@
+     }
+ 
+     /// Convert a string literal to `String.ofList <| List.cons (Char.ofNat _) .. List.nil`
+-    pub(crate) fn str_lit_to_constructor(&mut self, s: StringPtr<'t>) -> Option<ExprPtr<'t>> {
++    pub fn str_lit_to_constructor(&mut self, s: StringPtr<'t>) -> Option<ExprPtr<'t>> {
+         if (!self.export_file.config.string_extension) || (!self.export_file.config.nat_extension) {
+             return None
+         }
+@@ -640,7 +640,7 @@
+     }
+ 
+     /// If `e` is a NatLit, or `Const Nat.zero []`, return the appropriate Bignum.
+-    pub(crate) fn get_bignum_from_expr(&mut self, e: ExprPtr<'t>) -> Option<BigUint> {
++    pub fn get_bignum_from_expr(&mut self, e: ExprPtr<'t>) -> Option<BigUint> {
+         if let NatLit { ptr, .. } = self.read_expr(e) {
+             self.read_bignum(ptr).cloned()
+         } else if Some(e) == self.c_nat_zero() {
+@@ -687,14 +687,14 @@
+         Some(self.mk_const(n, levels))
+     }
+ 
+-    pub(crate) fn c_nat_succ(&mut self) -> Option<ExprPtr<'t>> {
++    pub fn c_nat_succ(&mut self) -> Option<ExprPtr<'t>> {
+         let n = self.export_file.name_cache.nat_succ?;
+         let levels = self.alloc_levels_slice(&[]);
+         Some(self.mk_const(n, levels))
+     }
+ 
+     /// Make `Const("Nat", [])`
+-    pub(crate) fn nat_type(&mut self) -> Option<ExprPtr<'t>> {
++    pub fn nat_type(&mut self) -> Option<ExprPtr<'t>> {
+         let n = self.export_file.name_cache.nat?;
+         let levels = self.alloc_levels_slice(&[]);
+         Some(self.mk_const(n, levels))
+@@ -853,7 +853,7 @@
+     /// in an expression which are boudn by something above it.
+     pub(crate) fn num_loose_bvars(&self, e: ExprPtr<'t>) -> u16 { self.read_expr(e).num_loose_bvars() }
+ 
+-    pub(crate) fn has_fvars(&self, e: ExprPtr<'t>) -> bool { self.read_expr(e).has_fvars() }
++    pub fn has_fvars(&self, e: ExprPtr<'t>) -> bool { self.read_expr(e).has_fvars() }
+ }
+ 
+ impl<'t> Expr<'t> {
+diff -ruN a/src/lib.rs b/src/lib.rs
+--- a/src/lib.rs
++++ b/src/lib.rs
+@@ -15,6 +15,7 @@
+ pub mod pretty_printer;
+ pub mod quot;
+ pub mod tc;
++pub mod trace;
+ #[cfg(test)]
+ mod tests;
+ pub mod unique_hasher;
+diff -ruN a/src/tc.rs b/src/tc.rs
+--- a/src/tc.rs
++++ b/src/tc.rs
+@@ -1,5 +1,6 @@
+ use crate::env::ReducibilityHint;
+ use crate::env::{ConstructorData, Declar, DeclarInfo, Env, InductiveData, RecRule, RecursorData};
++use crate::trace::DefEqWhy;
+ use crate::expr::Expr;
+ use crate::util::{
+     nat_div, nat_mod, nat_sub, nat_gcd, nat_land, nat_lor, 
+@@ -50,13 +51,13 @@
+ /// expressions we know to be well-typed, so we can pass the flag `InferOnly` to omit
+ /// these checks when they are not needed.
+ #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+-pub(crate) enum InferFlag {
++pub enum InferFlag {
+     InferOnly,
+     Check,
+ }
+ 
+ pub struct TypeChecker<'x, 't, 'p> {
+-    pub(crate) ctx: &'x mut TcCtx<'t, 'p>,
++    pub ctx: &'x mut TcCtx<'t, 'p>,
+     /// An immutable reference to an environment, which contains declarations and notation.
+     /// To accommodate the temporary declarations created while checking nested inductives,
+     /// the environment may have a temporary extension which also holds declarations, and
+@@ -67,7 +68,7 @@
+     /// outstanding references to environment declarations. Rust can tell that borrows
+     /// of different struct fields are exclusive, but it can't analyze what fields of a given
+     /// field's type are being exclusively borrowed.
+-    pub(crate) env: &'x Env<'x, 't>,
++    pub env: &'x Env<'x, 't>,
+     /// The caches for things like inference, reduction, and equality checking.
+     pub(crate) tc_cache: TcCache<'t>,
+     /// If this type checker is being used to check a simple declaration, this field will
+@@ -251,7 +252,7 @@
+     }
+ 
+     /// Expand `(x : Prod A B)` into `Prod.mk (Prod.fst x) (Prod.snd x)`
+-    fn expand_eta_struct_aux(&mut self, e_type: ExprPtr<'t>, e: ExprPtr<'t>) -> Option<ExprPtr<'t>> {
++    pub fn expand_eta_struct_aux(&mut self, e_type: ExprPtr<'t>, e: ExprPtr<'t>) -> Option<ExprPtr<'t>> {
+         // `c_name = Point`
+         let (_f, c_name, c_levels, args) = self.ctx.unfold_const_apps(e_type)?;
+         // `Point` declaration
+@@ -329,13 +330,14 @@
+                         return None
+                     }
+                 }
++                self.record_why(x, y, DefEqWhy::EtaStruct);
+                 return Some(true)
+             }
+         }
+         None
+     }
+ 
+-    fn str_lit_to_ctor_reducing(&mut self, x: StringPtr<'t>) -> Option<ExprPtr<'t>> {
++    pub fn str_lit_to_ctor_reducing(&mut self, x: StringPtr<'t>) -> Option<ExprPtr<'t>> {
+         self.ctx.str_lit_to_constructor(x).map(|x| self.whnf(x))
+     }
+ 
+@@ -401,7 +403,7 @@
+     /// Try to reduce an expression `e` which is an application of `Nat.succ`,
+     /// or an application of a supported binary operation. `e` must have no free
+     /// variables.
+-    pub(crate) fn try_reduce_nat(&mut self, e: ExprPtr<'t>) -> Option<ExprPtr<'t>> {
++    pub fn try_reduce_nat(&mut self, e: ExprPtr<'t>) -> Option<ExprPtr<'t>> {
+         if !self.ctx.export_file.config.nat_extension {
+             return None
+         }
+@@ -455,7 +457,7 @@
+         self.reduce_proj_core(idx, structure)
+     }
+ 
+-    fn reduce_proj_core(&mut self, idx: usize, mut structure: ExprPtr<'t>) -> Option<ExprPtr<'t>> {
++    pub fn reduce_proj_core(&mut self, idx: usize, mut structure: ExprPtr<'t>) -> Option<ExprPtr<'t>> {
+         if let StringLit { ptr, .. } = self.ctx.read_expr(structure) {
+             if let Some(s) = self.str_lit_to_ctor_reducing(ptr) {
+                 structure = s;
+@@ -539,7 +541,7 @@
+         }
+     }
+ 
+-    pub(crate) fn infer(&mut self, e: ExprPtr<'t>, flag: InferFlag) -> ExprPtr<'t> {
++    pub fn infer(&mut self, e: ExprPtr<'t>, flag: InferFlag) -> ExprPtr<'t> {
+         if let Some(cached) = self.tc_cache.infer_cache_check.get(&e).copied() {
+             return cached
+         }
+@@ -877,6 +879,7 @@
+ 
+     fn def_eq_nat(&mut self, x: ExprPtr<'t>, y: ExprPtr<'t>) -> Option<bool> {
+         if self.ctx.is_nat_zero(x) && self.ctx.is_nat_zero(y) {
++            self.record_why(x, y, DefEqWhy::NatZero);
+             return Some(true)
+         }
+         if let (NatLit { .. }, NatLit { .. }) = (self.ctx.read_expr(x), self.ctx.read_expr(y)) {
+@@ -884,7 +887,11 @@
+             return Some(x == y)
+         }
+         if let (Some(x_pred), Some(y_pred)) = (self.ctx.pred_of_nat_succ(x), self.ctx.pred_of_nat_succ(y)) {
+-            Some(self.def_eq(x_pred, y_pred))
++            let r = self.def_eq(x_pred, y_pred);
++            if r {
++                self.record_why(x, y, DefEqWhy::NatSucc(x_pred, y_pred));
++            }
++            Some(r)
+         } else {
+             None
+         }
+@@ -997,33 +1004,66 @@
+         if ((!self.ctx.has_fvars(x_n)) || self.ctx.eager_mode) && Some(y_n) == self.ctx.c_bool_true() {
+             let x_nn = self.whnf(x_n);
+             if Some(x_nn) == self.ctx.c_bool_true() {
++                // both sides reduce to `Bool.true`
++                self.record_why(x, y, DefEqWhy::Reduce(x_nn, y_n));
+                 return true
+             }
+         }
+ 
+         if let Some(easy) = self.def_eq_quick_check(x_n, y_n) {
++            if easy {
++                self.record_reduce(x, y, x_n, y_n);
++            }
+             return easy
+         }
+ 
++        // Lean0 tracer: `fin` is the pair at which the successful rule applied.
++        let mut fin = (x_n, y_n);
+         let result = if let Some(short) = self.proof_irrel_eq(x_n, y_n) {
++            if short {
++                self.record_why(x_n, y_n, DefEqWhy::ProofIrrel);
++            }
+             short
+         } else {
+             match self.lazy_delta_step(x_n, y_n) {
+-                FoundEqResult(short) => short,
++                FoundEqResult(short) => {
++                    if short {
++                        fin = self.tc_cache.delta_final.take().unwrap_or(fin);
++                    }
++                    short
++                }
+                 Exhausted(x_n, y_n) => {
+-                    if self.def_eq_const(x_n, y_n) || self.def_eq_local(x_n, y_n) || self.def_eq_proj(x_n, y_n) {
++                    fin = (x_n, y_n);
++                    if self.def_eq_const(x_n, y_n) {
++                        self.record_why(x_n, y_n, DefEqWhy::Const);
++                        true
++                    } else if self.def_eq_local(x_n, y_n) {
++                        self.record_why(x_n, y_n, DefEqWhy::Local);
++                        true
++                    } else if self.def_eq_proj(x_n, y_n) {
++                        self.record_why(x_n, y_n, DefEqWhy::Proj);
+                         true
+                     } else {
+                         let (xn0, yn0) = (x_n, y_n);
+                         let (x_n, y_n) = (self.whnf_no_unfolding(xn0), self.whnf_no_unfolding(yn0));
+                         if x_n != xn0 || y_n != yn0 {
++                            fin = (x_n, y_n);
+                             self.def_eq(x_n, y_n)
++                        } else if self.def_eq_app(x_n, y_n) {
++                            self.record_why(x_n, y_n, DefEqWhy::App);
++                            true
++                        } else if self.try_eta_expansion(x_n, y_n) {
++                            true
++                        } else if self.try_eta_struct(x_n, y_n) {
++                            true
++                        } else if self.try_string_lit_expansion(x_n, y_n) {
++                            self.record_why(x_n, y_n, DefEqWhy::StrLit);
++                            true
++                        } else if matches!(self.def_eq_unit(x_n, y_n), Some(true)) {
++                            self.record_why(x_n, y_n, DefEqWhy::Unit);
++                            true
+                         } else {
+-                            self.def_eq_app(x_n, y_n)
+-                                || self.try_eta_expansion(x_n, y_n)
+-                                || self.try_eta_struct(x_n, y_n)
+-                                || self.try_string_lit_expansion(x_n, y_n)
+-                                || matches!(self.def_eq_unit(x_n, y_n), Some(true))
++                            false
+                         }
+                     }
+                 }
+@@ -1031,6 +1071,7 @@
+         };
+         if result {
+             self.tc_cache.eq_cache.insert(SortedPair::new(x, y));
++            self.record_reduce(x, y, fin.0, fin.1);
+         } else {
+             self.tc_cache.defeq_fail_cache.insert(defeq_fail_cache_key);        
+         }
+@@ -1046,7 +1087,7 @@
+         Some(self.ctx.foldl_apps(new_const, args))
+     }
+ 
+-    fn to_ctor_when_k(
++    pub fn to_ctor_when_k(
+         &mut self,
+         major: ExprPtr<'t>,
+         rec: &RecursorData<'t>,
+@@ -1080,7 +1121,7 @@
+         None
+     }
+ 
+-    fn iota_try_eta_struct(&mut self, ind_name: NamePtr<'t>, e: ExprPtr<'t>) -> ExprPtr<'t> {
++    pub fn iota_try_eta_struct(&mut self, ind_name: NamePtr<'t>, e: ExprPtr<'t>) -> ExprPtr<'t> {
+         if (!self.env.can_be_struct(&ind_name)) || self.is_ctor_app(e).is_some() {
+             e
+         } else {
+@@ -1101,7 +1142,7 @@
+         }
+     }
+     
+-    fn reduce_rec(
++    pub fn reduce_rec(
+         &mut self,
+         const_name: NamePtr<'t>,
+         const_levels: LevelsPtr<'t>,
+@@ -1184,7 +1225,7 @@
+ 
+     /// Try to unfold the base `Const` and re-fold applications, but don't
+     /// do any further reduction.
+-    fn unfold_def(&mut self, e: ExprPtr<'t>) -> Option<ExprPtr<'t>> {
++    pub fn unfold_def(&mut self, e: ExprPtr<'t>) -> Option<ExprPtr<'t>> {
+         let (fun, args) = self.ctx.unfold_apps(e);
+         let (name, levels) = self.ctx.try_const_info(fun)?;
+         let (def_uparams, def_value) = self.env.get_declar_val(&name)?;
+@@ -1212,12 +1253,19 @@
+         }
+         if self.ctx.alpha_eq(x, y) {
+             self.tc_cache.eq_cache.insert(SortedPair::new(x, y));
++            self.record_why(x, y, DefEqWhy::Alpha);
+             return Some(true)
+         }
+         if let Some(r) = self.def_eq_sort(x, y) {
++            if r {
++                self.record_why(x, y, DefEqWhy::Sort);
++            }
+             return Some(r)
+         }
+         if let Some(r) = self.def_eq_binder_multi(x, y) {
++            if r {
++                self.record_why(x, y, DefEqWhy::Binder);
++            }
+             return Some(r)
+         }
+         None
+@@ -1291,9 +1339,17 @@
+         }
+         if (!self.ctx.has_fvars(x) && !self.ctx.has_fvars(y)) || self.ctx.eager_mode {
+             if let Some(xprime) = self.try_reduce_nat(x) {
+-                return Some(DeltaResult::FoundEqResult(self.def_eq(xprime, y)))
++                let r = self.def_eq(xprime, y);
++                if r {
++                    self.record_why(x, y, DefEqWhy::Reduce(xprime, y));
++                }
++                return Some(DeltaResult::FoundEqResult(r))
+             } else if let Some(yprime) = self.try_reduce_nat(y) {
+-                return Some(DeltaResult::FoundEqResult(self.def_eq(x, yprime)))
++                let r = self.def_eq(x, yprime);
++                if r {
++                    self.record_why(x, y, DefEqWhy::Reduce(x, yprime));
++                }
++                return Some(DeltaResult::FoundEqResult(r))
+             }
+         }
+         None
+@@ -1308,6 +1364,10 @@
+     fn lazy_delta_step(&mut self, mut x: ExprPtr<'t>, mut y: ExprPtr<'t>) -> DeltaResult<'t> {
+         loop {
+             if let Some(r) = self.delta_try_nat(x, y) {
++                if r == FoundEqResult(true) {
++                    // `delta_try_nat` recorded the rule for `(x, y)`
++                    self.tc_cache.delta_final = Some((x, y));
++                }
+                 return r
+             }
+             let (r1, r2) = (self.get_applied_def(x), self.get_applied_def(y));
+@@ -1333,6 +1393,10 @@
+                 }
+                 (Some((x_name, l_hint)), Some((y_name, r_hint))) => {
+                     if let Some(r) = self.try_eq_const_app(x, x_name, l_hint, y, y_name, r_hint) {
++                        if r == FoundEqResult(true) {
++                            self.record_why(x, y, DefEqWhy::ConstApp);
++                            self.tc_cache.delta_final = Some((x, y));
++                        }
+                         return r
+                     } else {
+                         x = self.delta(x);
+@@ -1341,6 +1405,9 @@
+                 }
+             }
+             if let Some(quick_result) = self.def_eq_quick_check(x, y) {
++                if quick_result {
++                    self.tc_cache.delta_final = Some((x, y));
++                }
+                 return FoundEqResult(quick_result)
+             }
+         }
+@@ -1388,7 +1455,11 @@
+                 let v0 = self.ctx.mk_var(0);
+                 let new_body = self.ctx.mk_app(y, v0);
+                 let new_lambda = self.ctx.mk_lambda(binder_name, binder_style, binder_type, new_body);
+-                return self.def_eq(x, new_lambda)
++                let r = self.def_eq(x, new_lambda);
++                if r {
++                    self.record_why(x, y, DefEqWhy::Eta(new_lambda));
++                }
++                return r
+             }
+         }
+         false
+diff -ruN a/src/trace.rs b/src/trace.rs
+--- a/src/trace.rs
++++ b/src/trace.rs
+@@ -0,0 +1,86 @@
++//! The Lean0 tracer: why did a `def_eq` call succeed?
++//!
++//! Only the top rule is recorded for each successful pair. The premises of a rule are
++//! themselves `def_eq` questions (on subterms, reducts, or inferred types), and the
++//! elaborator asks them again; they are answered from the caches.
++
++use crate::tc::TypeChecker;
++use crate::util::ExprPtr;
++
++#[derive(Debug, Clone, Copy, PartialEq, Eq)]
++pub enum DefEqWhy<'t> {
++    /// The two terms are alpha-equivalent (equal up to binder names and binder info).
++    Alpha,
++    /// Both are sorts, with equivalent levels.
++    Sort,
++    /// Both are `Pi` (or both `Lambda`) telescopes, with defeq domains and bodies.
++    Binder,
++    /// `x` head-reduces to `x'` and `y` to `y'` (beta, zeta, delta, ...), and `x' ≡ y'`.
++    Reduce(ExprPtr<'t>, ExprPtr<'t>),
++    /// Both are proofs of propositions with defeq types.
++    ProofIrrel,
++    /// Same head definition (lazy delta congruence): defeq arguments, equivalent levels.
++    ConstApp,
++    /// The same constant, with equivalent levels.
++    Const,
++    /// The same free variable.
++    Local,
++    /// Applications with the same number of arguments: defeq heads and arguments.
++    App,
++    /// `x` is a lambda and `x ≡ λ(_: A). y #0` (the given term), where `y : Π A, B`.
++    Eta(ExprPtr<'t>),
++    /// Projections with the same index of defeq structures (or of structures that reduce to
++    /// constructor applications with defeq fields at that index).
++    Proj,
++    /// `y` is a full constructor application `S.mk ps fs` of a structure, `x : S ps'`, and
++    /// `fs[i] ≡ x.i` for each field (structure eta).
++    EtaStruct,
++    /// Both have the same type, a structure with no fields.
++    Unit,
++    /// Both are `0`: the literal `0` or `Nat.zero`.
++    NatZero,
++    /// `x ≡ Nat.succ x'` and `y ≡ Nat.succ y'` (each a literal `n+1` or a `Nat.succ`
++    /// application), and `x' ≡ y'`.
++    NatSucc(ExprPtr<'t>, ExprPtr<'t>),
++    /// One side is a string literal and the other `String.ofList l`: the literal's expansion,
++    /// in weak head normal form, is defeq to the other side.
++    StrLit,
++    /// A rule outside the supported fragment.
++    Unsupported(&'static str),
++}
++
++impl<'x, 't: 'x, 'p: 't> TypeChecker<'x, 't, 'p> {
++    pub(crate) fn record_why(&mut self, x: ExprPtr<'t>, y: ExprPtr<'t>, why: DefEqWhy<'t>) {
++        if self.tc_cache.trace {
++            self.tc_cache.eq_why.entry((x, y)).or_insert(why);
++        }
++    }
++
++    pub(crate) fn record_reduce(&mut self, x: ExprPtr<'t>, y: ExprPtr<'t>, x2: ExprPtr<'t>, y2: ExprPtr<'t>) {
++        if (x, y) != (x2, y2) {
++            self.record_why(x, y, DefEqWhy::Reduce(x2, y2));
++        }
++    }
++
++    /// Decide `x ≡ y` and say why. `None` if they are not defeq, otherwise the rule and
++    /// whether it was recorded for `(y, x)` instead (so it has to be read with sides swapped).
++    /// Pointer-equal terms need no rule and are reported as `Alpha`.
++    pub fn def_eq_why(&mut self, x: ExprPtr<'t>, y: ExprPtr<'t>) -> Option<(bool, DefEqWhy<'t>)> {
++        assert!(self.tc_cache.trace, "def_eq_why needs tracing enabled");
++        if x == y {
++            return Some((false, DefEqWhy::Alpha))
++        }
++        if !self.def_eq(x, y) {
++            return None
++        }
++        if let Some(w) = self.tc_cache.eq_why.get(&(x, y)) {
++            return Some((false, *w))
++        }
++        if let Some(w) = self.tc_cache.eq_why.get(&(y, x)) {
++            return Some((true, *w))
++        }
++        panic!("def_eq succeeded without a recorded reason")
++    }
++
++    pub fn enable_trace(&mut self) { self.tc_cache.trace = true; }
++}
+diff -ruN a/src/util.rs b/src/util.rs
+--- a/src/util.rs
++++ b/src/util.rs
+@@ -270,7 +270,7 @@
+     //anchor: PhantomData<&'t AnchorZst>,
+     /// Each type checker's context shares an immutable reference to the structured contents of
+     /// the export file, and some additional information taken from the export file.
+-    pub(crate) export_file: &'t ExportFile<'p>,
++    pub export_file: &'t ExportFile<'p>,
+     /// The underlying storage for temporary `Name`, `Level`, and `Expr`` items created while
+     /// type checking a declaration. These are dropped once the declaration is verified, since
+     /// they are no longer needed.
+@@ -278,7 +278,7 @@
+     /// Non-monotonic counter showing the current deBruijn level (which is also the number
+     /// of binders that are open above us). When a binder is opened and traversed under, this
+     /// counter is incremented. When the binder is closed again, this counter is decremented.
+-    pub(crate) dbj_level_counter: u16,
++    pub dbj_level_counter: u16,
+     /// Monotonically increasing counter for unique free variables. Any two free variables created
+     /// with the `mk_unique` constructor are unique within their `(ExportFile, TcCtx)` pair.
+     pub(crate) unique_counter: u32,
+@@ -660,7 +660,7 @@
+ 
+     /// "replace" a free variable when closing a binder, decrementing the deBruijn level
+     /// counter, so that level can be reused as appropriate.
+-    pub(crate) fn replace_dbj_level(&mut self, e: ExprPtr<'t>) {
++    pub fn replace_dbj_level(&mut self, e: ExprPtr<'t>) {
+         match self.read_expr(e) {
+             Expr::Local { id: FVarId::DbjLevel(level), .. } => {
+                 debug_assert_eq!(level + 1, self.dbj_level_counter);
+@@ -799,8 +799,8 @@
+     pub(crate) quot_lift: Option<NamePtr<'p>>,
+     pub(crate) quot_ind: Option<NamePtr<'p>>,
+     pub(crate) nat: Option<NamePtr<'p>>,
+-    pub(crate) nat_zero: Option<NamePtr<'p>>,
+-    pub(crate) nat_succ: Option<NamePtr<'p>>,
++    pub nat_zero: Option<NamePtr<'p>>,
++    pub nat_succ: Option<NamePtr<'p>>,
+     pub(crate) nat_add: Option<NamePtr<'p>>,
+     pub(crate) nat_sub: Option<NamePtr<'p>>,
+     pub(crate) nat_mul: Option<NamePtr<'p>>,
+@@ -852,6 +852,12 @@
+     pub(crate) defeq_fail_cache: FxHashSet<(ExprPtr<'t>, ExprPtr<'t>, bool)>,
+     /// Strong reduction is not used during type-checking, this is more of a library/inspection feature.
+     pub(crate) strong_cache: UniqueHashMap<(ExprPtr<'t>, bool, bool), ExprPtr<'t>>,
++    /// Lean0 tracer: when set, every successful `def_eq` records why it succeeded in `eq_why`.
++    pub(crate) trace: bool,
++    /// Lean0 tracer: the rule that justified `def_eq(x, y)`, keyed by the ordered pair.
++    pub(crate) eq_why: FxHashMap<(ExprPtr<'t>, ExprPtr<'t>), crate::trace::DefEqWhy<'t>>,
++    /// Lean0 tracer: the pair at which the last successful `lazy_delta_step` concluded.
++    pub(crate) delta_final: Option<(ExprPtr<'t>, ExprPtr<'t>)>,
+ }
+ 
+ impl<'t> TcCache<'t> {
+@@ -865,6 +871,9 @@
+             congr_fail_cache: new_fx_hash_set(),
+             defeq_fail_cache: new_fx_hash_set(),
+             strong_cache: new_unique_hash_map(),
++            trace: false,
++            eq_why: new_fx_hash_map(),
++            delta_final: None,
+         }
+     }
+ 
+@@ -877,6 +886,8 @@
+         self.congr_fail_cache.clear();
+         self.defeq_fail_cache.clear();
+         self.strong_cache.clear();
++        self.eq_why.clear();
++        self.delta_final = None;
+     }
+ }
+ 

@@ -1,0 +1,19 @@
+import "../lean.mm0";
+
+-- The shape of a constant without a body (axiom, opaque, inductive type,
+-- constructor, recursor). The generator will emit these per constant.
+--
+--   `PUnit.{u} : Sort u`
+
+term PUnit (u: lvl): expr;
+--| `constDF` for `PUnit`: `Γ ⊢ PUnit.{u} ≡ PUnit.{u2} : Sort u` when `u ≈ u2`.
+axiom PUnit_df (G: ctx) (u u2: lvl): $ leqv u u2 $ > $ deq G (PUnit u) (PUnit u2) (srt u) $;
+--| Constants are closed terms.
+axiom PUnit_closed (u: lvl): $ closed z (PUnit u) $;
+
+--| `PUnit.{max u v} ≡ PUnit.{max v u}`
+theorem PUnit_comm (G: ctx) (u v: lvl):
+  $ deq G (PUnit (lmax u v)) (PUnit (lmax v u)) (srt (lmax u v)) $;
+--| Using a constant under a binder: `fun (x : PUnit.{u}) => x : PUnit.{u} → PUnit.{u}`.
+theorem PUnit_id (G: ctx) (u: lvl):
+  $ ty G (lam (PUnit u) (bvar z)) (pi (PUnit u) (PUnit u)) $;

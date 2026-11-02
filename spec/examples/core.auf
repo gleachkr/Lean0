@@ -1,0 +1,125 @@
+include "../lib.auf";
+
+id_ty
+-----
+l1: $ ty G (srt u) (srt (ls u)) $ by ty_srt []
+l2: $ ty (cons (srt u) G) (bvar z) (srt u) $ by bvar [lookup_srt0 []]
+l3: $ ty (cons (bvar z) (cons (srt u) G)) (bvar z) (bvar (s z)) $ by bvar [lookup_z [lift1_z []]]
+l4: $ ty (cons (srt u) G) (lam (bvar z) (bvar z)) (pi (bvar z) (bvar (s z))) $ by lamDF [l2, l3]
+l5: $ ty G (id u) (pi (srt u) (pi (bvar z) (bvar (s z)))) $ by lamDF [l1, l4]
+
+-- Contexts under the binders of `comp`: α, β, δ, f : β → δ, g : α → β, x : α.
+def c1 (G: ctx) (u: lvl): ctx = $ cons (srt u) G $
+def c2 (G: ctx) (u v: lvl): ctx = $ cons (srt v) (c1 G u) $
+def c3 (G: ctx) (u v w: lvl): ctx = $ cons (srt w) (c2 G u v) $
+def c4 (G: ctx) (u v w: lvl): ctx = $ cons (pi (bvar (s z)) (bvar (s z))) (c3 G u v w) $
+def c5 (G: ctx) (u v w: lvl): ctx =
+  $ cons (pi (bvar (s (s (s z)))) (bvar (s (s (s z))))) (c4 G u v w) $
+def c6 (G: ctx) (u v w: lvl): ctx = $ cons (bvar (s (s (s (s z))))) (c5 G u v w) $
+
+comp_ty
+-------
+-- binder types
+a1: $ ty G (srt u) (srt (ls u)) $ by ty_srt []
+a2: $ ty (c1 G u) (srt v) (srt (ls v)) $ by ty_srt []
+a3: $ ty (c2 G u v) (srt w) (srt (ls w)) $ by ty_srt []
+-- f's type β → δ in c3
+b1: $ lookup (c3 G u v w) (s z) (srt v) $ by lookup_srt_s [lookup_srt0 []]
+b2: $ lookup (cons (bvar (s z)) (c3 G u v w)) (s z) (srt w) $ by lookup_srt_s [lookup_srt0 []]
+b3: $ ty (c3 G u v w) (pi (bvar (s z)) (bvar (s z))) (srt (limax v w)) $
+  by forallEDF [bvar [b1], bvar [b2]]
+-- g's type α → β in c4
+d1: $ lookup (c4 G u v w) (s (s (s z))) (srt u) $
+  by lookup_srt_s [lookup_srt_s [lookup_srt_s [lookup_srt0 []]]]
+d2: $ lookup (cons (bvar (s (s (s z)))) (c4 G u v w)) (s (s (s z))) (srt v) $
+  by lookup_srt_s [lookup_srt_s [lookup_srt_s [lookup_srt0 []]]]
+d3: $ ty (c4 G u v w) (pi (bvar (s (s (s z)))) (bvar (s (s (s z))))) (srt (limax u v)) $
+  by forallEDF [bvar [d1], bvar [d2]]
+-- x's type α in c5
+e1: $ ty (c5 G u v w) (bvar (s (s (s (s z))))) (srt u) $
+  by bvar [lookup_srt_s [lookup_srt_s [lookup_srt_s [lookup_srt_s [lookup_srt0 []]]]]]
+-- variable typings in c6
+x1: $ ty (c6 G u v w) (bvar z) (bvar (s (s (s (s (s z)))))) $ by bvar [lookup_z [lift1_z []]]
+g1: $ lift (s z) z (pi (bvar (s (s (s z)))) (bvar (s (s (s z)))))
+                   (pi (bvar (s (s (s (s z))))) (bvar (s (s (s (s z)))))) $
+  by lift_pi [lift1_z [], lift1_ge [le_s [le_z []]]]
+g2: $ lift (s z) z (pi (bvar (s (s (s (s z))))) (bvar (s (s (s (s z))))))
+                   (pi (bvar (s (s (s (s (s z)))))) (bvar (s (s (s (s (s z))))))) $
+  by lift_pi [lift1_z [], lift1_ge [le_s [le_z []]]]
+g3: $ ty (c6 G u v w) (bvar (s z))
+        (pi (bvar (s (s (s (s (s z)))))) (bvar (s (s (s (s (s z))))))) $
+  by bvar [lookup_s [lookup_z [g1], g2]]
+f1: $ lift (s z) z (pi (bvar (s z)) (bvar (s z))) (pi (bvar (s (s z))) (bvar (s (s z)))) $
+  by lift_pi [lift1_z [], lift1_ge [le_s [le_z []]]]
+f2: $ lift (s z) z (pi (bvar (s (s z))) (bvar (s (s z))))
+                   (pi (bvar (s (s (s z)))) (bvar (s (s (s z))))) $
+  by lift_pi [lift1_z [], lift1_ge [le_s [le_z []]]]
+f3: $ lift (s z) z (pi (bvar (s (s (s z)))) (bvar (s (s (s z)))))
+                   (pi (bvar (s (s (s (s z))))) (bvar (s (s (s (s z)))))) $
+  by lift_pi [lift1_z [], lift1_ge [le_s [le_z []]]]
+f4: $ ty (c6 G u v w) (bvar (s (s z)))
+        (pi (bvar (s (s (s (s z))))) (bvar (s (s (s (s z)))))) $
+  by bvar [lookup_s [lookup_s [lookup_z [f1], f2], f3]]
+-- the body f (g x) : δ
+h1: $ ty (c6 G u v w) (app (bvar (s z)) (bvar z)) (bvar (s (s (s (s z))))) $
+  by appDF [g3, x1, inst_bvar_gt [le_z []]]
+h2: $ ty (c6 G u v w) (app (bvar (s (s z))) (app (bvar (s z)) (bvar z))) (bvar (s (s (s z)))) $
+  by appDF [f4, h1, inst_bvar_gt [le_z []]]
+-- the six lambdas
+k6: $ ty (c5 G u v w) (lam (bvar (s (s (s (s z)))))
+        (app (bvar (s (s z))) (app (bvar (s z)) (bvar z))))
+      (pi (bvar (s (s (s (s z))))) (bvar (s (s (s z))))) $ by lamDF [e1, h2]
+k5: $ ty (c4 G u v w) (lam (pi (bvar (s (s (s z)))) (bvar (s (s (s z)))))
+        (lam (bvar (s (s (s (s z))))) (app (bvar (s (s z))) (app (bvar (s z)) (bvar z)))))
+      (pi (pi (bvar (s (s (s z)))) (bvar (s (s (s z)))))
+        (pi (bvar (s (s (s (s z))))) (bvar (s (s (s z)))))) $ by lamDF [d3, k6]
+k4: $ ty (c3 G u v w) (lam (pi (bvar (s z)) (bvar (s z)))
+        (lam (pi (bvar (s (s (s z)))) (bvar (s (s (s z)))))
+        (lam (bvar (s (s (s (s z))))) (app (bvar (s (s z))) (app (bvar (s z)) (bvar z))))))
+      (pi (pi (bvar (s z)) (bvar (s z)))
+        (pi (pi (bvar (s (s (s z)))) (bvar (s (s (s z)))))
+        (pi (bvar (s (s (s (s z))))) (bvar (s (s (s z))))))) $ by lamDF [b3, k5]
+k3: $ ty (c2 G u v) (lam (srt w) (lam (pi (bvar (s z)) (bvar (s z)))
+        (lam (pi (bvar (s (s (s z)))) (bvar (s (s (s z)))))
+        (lam (bvar (s (s (s (s z))))) (app (bvar (s (s z))) (app (bvar (s z)) (bvar z)))))))
+      (pi (srt w) (pi (pi (bvar (s z)) (bvar (s z)))
+        (pi (pi (bvar (s (s (s z)))) (bvar (s (s (s z)))))
+        (pi (bvar (s (s (s (s z))))) (bvar (s (s (s z)))))))) $ by lamDF [a3, k4]
+k2: $ ty (c1 G u) (lam (srt v) (lam (srt w) (lam (pi (bvar (s z)) (bvar (s z)))
+        (lam (pi (bvar (s (s (s z)))) (bvar (s (s (s z)))))
+        (lam (bvar (s (s (s (s z))))) (app (bvar (s (s z))) (app (bvar (s z)) (bvar z))))))))
+      (pi (srt v) (pi (srt w) (pi (pi (bvar (s z)) (bvar (s z)))
+        (pi (pi (bvar (s (s (s z)))) (bvar (s (s (s z)))))
+        (pi (bvar (s (s (s (s z))))) (bvar (s (s (s z))))))))) $ by lamDF [a2, k3]
+k1: $ ty G (comp u v w)
+  (pi (srt u) (pi (srt v) (pi (srt w)
+  (pi (pi (bvar (s z)) (bvar (s z)))
+  (pi (pi (bvar (s (s (s z)))) (bvar (s (s (s z)))))
+  (pi (bvar (s (s (s (s z))))) (bvar (s (s (s z)))))))))) $ by lamDF [a1, k2]
+
+eta_ex
+------
+l1: $ ty (cons (pi (srt l) (srt l)) G) (bvar z) (pi (srt l) (srt l)) $
+  by bvar [lookup_z [lift_pi [lift_srt [], lift_srt []]]]
+l2: $ deq (cons (pi (srt l) (srt l)) G)
+      (lam (srt l) (app (bvar (s z)) (bvar z))) (bvar z) (pi (srt l) (srt l)) $
+  by eta [l1, lift1_z []]
+
+pirr_ex
+-------
+-- p = #2, h₁ = #1, h₂ = #0, all of type p (which is #2 after two lifts)
+l1: $ lookup (cons (bvar (s z)) (cons (bvar z) (cons (srt lz) G))) (s (s z)) (srt lz) $
+  by lookup_srt_s [lookup_srt_s [lookup_srt0 []]]
+l2: $ ty (cons (bvar (s z)) (cons (bvar z) (cons (srt lz) G))) (bvar (s (s z))) (srt lz) $
+  by bvar [l1]
+l3: $ ty (cons (bvar (s z)) (cons (bvar z) (cons (srt lz) G))) (bvar (s z)) (bvar (s (s z))) $
+  by bvar [lookup_s [lookup_z [lift1_z []], lift1_z []]]
+l4: $ ty (cons (bvar (s z)) (cons (bvar z) (cons (srt lz) G))) (bvar z) (bvar (s (s z))) $
+  by bvar [lookup_z [lift1_z []]]
+l5: $ deq (cons (bvar (s z)) (cons (bvar z) (cons (srt lz) G)))
+      (bvar (s z)) (bvar z) (bvar (s (s z))) $ by proofIrrel [l2, l3, l4]
+
+id_inh
+------
+l1: $ ty nil (id u) (pi (srt u) (pi (bvar z) (bvar (s z)))) $ by id_ty []
+l2: $ inh nil (pi (srt u) (pi (bvar z) (bvar (s z)))) $ by inh_i [l1]

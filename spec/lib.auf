@@ -1,0 +1,71 @@
+-- Derived rules for lean.mm0. Proof-local: nothing here is trusted.
+
+-- Arithmetic on unary naturals
+
+lemma add_one (i: nat): $ add i (s z) (s i) $
+----
+l1: $ add i (s z) (s i) $ by add_s [add_z []]
+
+lemma lt_z (n: nat): $ lt z (s n) $
+----
+l1: $ le (s z) (s n) $ by le_s [le_z []]
+
+lemma le_refl1 : $ le (s z) (s z) $
+----
+l1: $ le (s z) (s z) $ by le_s [le_z []]
+
+-- Lifting by one
+
+lemma lift1_ge (k i: nat): $ le k i $ > $ lift (s z) k (bvar i) (bvar (s i)) $
+----
+l1: $ lift (s z) k (bvar i) (bvar (s i)) $ by lift_bvar_ge [#1, add_one []]
+
+lemma lift1_z (i: nat): $ lift (s z) z (bvar i) (bvar (s i)) $
+----
+l1: $ lift (s z) z (bvar i) (bvar (s i)) $ by lift1_ge [le_z []]
+
+lemma lift_closed0 (n k: nat) (e: expr): $ closed z e $ > $ lift n k e e $
+----
+l1: $ lift n k e e $ by lift_closed [#1, le_z []]
+
+lemma inst_closed0 (k: nat) (e a: expr): $ closed z e $ > $ inst k e a e $
+----
+l1: $ inst k e a e $ by inst_closed [#1, le_z []]
+
+-- Context lookup
+
+lemma lookup_srt0 (G: ctx) (l: lvl): $ lookup (cons (srt l) G) z (srt l) $
+----
+l1: $ lookup (cons (srt l) G) z (srt l) $ by lookup_z [lift_srt []]
+
+lemma lookup_srt_s (G: ctx) (A: expr) (n: nat) (l: lvl):
+  $ lookup G n (srt l) $ > $ lookup (cons A G) (s n) (srt l) $
+----
+l1: $ lookup (cons A G) (s n) (srt l) $ by lookup_s [#1, lift_srt []]
+
+-- Judgment
+
+lemma refl_l (G: ctx) (e e2 A: expr): $ deq G e e2 A $ > $ ty G e A $
+----
+l1: $ deq G e e A $ by trans [#1, symm [#1]]
+
+lemma refl_r (G: ctx) (e e2 A: expr): $ deq G e e2 A $ > $ ty G e2 A $
+----
+l1: $ deq G e2 e2 A $ by trans [symm [#1], #1]
+
+lemma ty_srt (G: ctx) (l: lvl): $ ty G (srt l) (srt (ls l)) $
+----
+l1: $ ty G (srt l) (srt (ls l)) $ by sortDF [leqv_refl []]
+
+lemma lookup_closed0 (G: ctx) (A: expr): $ closed z A $ > $ lookup (cons A G) z A $
+----
+l1: $ lookup (cons A G) z A $ by lookup_z [lift_closed0 [#1]]
+
+lemma lookup_closed_s (G: ctx) (A B: expr) (n: nat):
+  $ lookup G n B $ > $ closed z B $ > $ lookup (cons A G) (s n) B $
+----
+l1: $ lookup (cons A G) (s n) B $ by lookup_s [#1, lift_closed0 [#2]]
+
+lemma lift0 (i: nat): $ lift z z (bvar i) (bvar i) $
+----
+l1: $ lift z z (bvar i) (bvar i) $ by lift_bvar_ge [le_z [], add_z []]

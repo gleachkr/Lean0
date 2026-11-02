@@ -1,0 +1,29 @@
+import "../lean.mm0";
+
+--| `@[reducible] def id.{u} {α : Sort u} (a : α) : α := a`
+def id (u: lvl): expr = $ lam (srt u) (lam (bvar z) (bvar z)) $;
+theorem id_ty (G: ctx) (u: lvl): $ ty G (id u) (pi (srt u) (pi (bvar z) (bvar (s z)))) $;
+
+--| `def Function.comp.{u,v,w} {α : Sort u} {β : Sort v} {δ : Sort w}
+--|    (f : β → δ) (g : α → β) : α → δ := fun x => f (g x)`
+def comp (u v w: lvl): expr = $ lam (srt u) (lam (srt v) (lam (srt w)
+  (lam (pi (bvar (s z)) (bvar (s z)))
+  (lam (pi (bvar (s (s (s z)))) (bvar (s (s (s z)))))
+  (lam (bvar (s (s (s (s z)))))
+    (app (bvar (s (s z))) (app (bvar (s z)) (bvar z)))))))) $;
+theorem comp_ty (G: ctx) (u v w: lvl): $ ty G (comp u v w)
+  (pi (srt u) (pi (srt v) (pi (srt w)
+  (pi (pi (bvar (s z)) (bvar (s z)))
+  (pi (pi (bvar (s (s (s z)))) (bvar (s (s (s z)))))
+  (pi (bvar (s (s (s (s z))))) (bvar (s (s (s z)))))))))) $;
+
+--| η: in context `f : Sort l → Sort l`, `fun x => f x ≡ f`.
+theorem eta_ex (G: ctx) (l: lvl): $ deq (cons (pi (srt l) (srt l)) G)
+  (lam (srt l) (app (bvar (s z)) (bvar z))) (bvar z) (pi (srt l) (srt l)) $;
+
+--| Proof irrelevance: in context `p : Prop, h₁ : p, h₂ : p`, `h₁ ≡ h₂ : p`.
+theorem pirr_ex (G: ctx): $ deq (cons (bvar (s z)) (cons (bvar z) (cons (srt lz) G)))
+  (bvar (s z)) (bvar z) (bvar (s (s z))) $;
+
+--| A theorem stated without its proof term: `∀ α : Sort u, α → α` is inhabited.
+theorem id_inh (u: lvl): $ inh nil (pi (srt u) (pi (bvar z) (bvar (s z)))) $;

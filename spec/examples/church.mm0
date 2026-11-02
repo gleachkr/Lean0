@@ -1,0 +1,32 @@
+import "../lean.mm0";
+
+-- Abbreviations for small de Bruijn indices.
+def n1: nat = $ s z $;
+def n2: nat = $ s n1 $;
+def n3: nat = $ s n2 $;
+def n4: nat = $ s n3 $;
+def v0: expr = $ bvar z $;
+def v1: expr = $ bvar n1 $;
+def v2: expr = $ bvar n2 $;
+def v3: expr = $ bvar n3 $;
+def v4: expr = $ bvar n4 $;
+
+--| `def CNat.{u} := (α : Sort u) → (α → α) → α → α`
+def cnat (u: lvl): expr = $ pi (srt u) (pi (pi v0 v1) (pi v1 v2)) $;
+--| `def CNat.zero.{u} : CNat.{u} := fun α s z => z`
+def czero (u: lvl): expr = $ lam (srt u) (lam (pi v0 v1) (lam v1 v0)) $;
+--| `def CNat.one.{u} : CNat.{u} := fun α s z => s z`
+def cone (u: lvl): expr = $ lam (srt u) (lam (pi v0 v1) (lam v1 (app v1 v0))) $;
+--| `def CNat.succ.{u} (n : CNat.{u}) : CNat.{u} := fun α s z => s (n α s z)`
+def csucc (u: lvl): expr =
+  $ lam (cnat u) (lam (srt u) (lam (pi v0 v1) (lam v1 (app v1 (app (app (app v3 v2) v1) v0))))) $;
+
+theorem cnat_ty (G: ctx) (u: lvl):
+  $ ty G (cnat u) (srt (limax (ls u) (limax (limax u u) (limax u u)))) $;
+--| The same, at the simpler universe `imax (u+1) u` (exercises `defeqDF`).
+theorem cnat_ty2 (G: ctx) (u: lvl): $ ty G (cnat u) (srt (limax (ls u) u)) $;
+theorem czero_ty (G: ctx) (u: lvl): $ ty G (czero u) (cnat u) $;
+theorem cone_ty (G: ctx) (u: lvl): $ ty G (cone u) (cnat u) $;
+theorem csucc_ty (G: ctx) (u: lvl): $ ty G (csucc u) (pi (cnat u) (cnat u)) $;
+--| `CNat.succ CNat.zero ≡ CNat.one` (four β-steps under binders).
+theorem csucc_zero (G: ctx) (u: lvl): $ deq G (app (csucc u) (czero u)) (cone u) (cnat u) $;

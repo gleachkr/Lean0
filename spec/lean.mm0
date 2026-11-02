@@ -1,0 +1,418 @@
+delimiter $ ( ) , . $;
+
+--| LeanTT core, transcribed from Lean4Lean (digama0/lean4lean @ 67f63b0):
+--|   Theory/VLevel.lean, Theory/VExpr.lean, Theory/Typing/Basic.lean.
+--|
+--| Deviations from the verbatim presentation (see notes/audit-lean-mm0.md §10):
+--| * There is no environment term and no `const` constructor. A Lean
+--|   definition is an MM0 `def` returning `expr` whose arguments are its
+--|   universe parameters (so δ is MM0 unfolding and `instL` is MM0
+--|   substitution). Axioms, inductives, constructors and recursors are MM0
+--|   `term`s, each with two generated axioms: its `constDF` instance and
+--|   `closed k (c us)` for every `k`. (The `closed` axiom is valid only for
+--|   constants without `expr` arguments; a future `proj` needs recursive rules.)
+--| * Universe parameters are MM0 variables of sort `lvl`, so the `l.WF U`
+--|   side conditions are vacuous and are dropped.
+--| * Meta-level operations (liftN, inst, Lookup) are syntax-directed
+--|   relations, proved node by node.
+--| * Nat literals are a primitive `lit` over binary numerals (an extension;
+--|   Lean4Lean unfolds literals to `Nat.succ`/`Nat.zero`).  The axioms tying
+--|   `lit` to `Nat` are generated per environment.
+--| * Two admissible rules are axioms: `instDF` (substitution, Lean4Lean's
+--|   theorem `IsDefEq.instN`), so that a substituted term's typing need not
+--|   be derived again, and `weakDF` (weakening, `IsDefEq.weakN`), so that a
+--|   derivation made in a shorter context can be used in a longer one.
+--|
+--| Everything here is closed first-order syntax: no sort admits bound
+--| variables.
+--|
+--| Notations: `⊢ Γ, e ≡ e2 : A` for the judgment and `⊩ Γ, e : A` for typing,
+--| `λ A. e`, `Π A. B`, `f @ a`, `# i` for a bound variable, `A :: Γ` and `[]`
+--| for contexts, `a ⊔ b` for `max`, and `≤`, `<` and `≈` (level equivalence).
+--| Each has an ASCII form too (`|- G, e == e2 : A`, `||- G, e : A`, `\ A. e`,
+--| `\Pi A. B`, `\/`, `<=`, `~=`), declared first; the Unicode one is declared
+--| last, the form Aufbau prints. A term with a notation can still be written as
+--| an application (`deq G e e2 A`), as the generated statements are.
+
+--| @hole _wff
+strict provable sort wff;
+
+---------------------------------------------------------------------------
+-- Unary naturals (de Bruijn indices)
+---------------------------------------------------------------------------
+
+--| @hole _n
+strict free sort nat;
+term z: nat;
+term s: nat > nat;
+
+--| `le i n`: i ≤ n.
+term le: nat > nat > wff;
+infixl le: $<=$ prec 50;
+infixl le: $≤$ prec 50;
+axiom le_z (n: nat): $ z ≤ n $;
+axiom le_s (i n: nat): $ i ≤ n $ > $ s i ≤ s n $;
+
+--| `lt i n`: i < n.
+def lt (i n: nat): wff = $ s i ≤ n $;
+infixl lt: $<$ prec 50;
+
+--| `add i n j`: i + n = j.
+term add: nat > nat > nat > wff;
+axiom add_z (i: nat): $ add i z i $;
+axiom add_s (i n j: nat): $ add i n j $ > $ add i (s n) (s j) $;
+
+---------------------------------------------------------------------------
+-- Universe levels (VLevel.lean:8-13)
+---------------------------------------------------------------------------
+
+--| @hole _l
+strict free sort lvl;
+term lz: lvl;
+term ls: lvl > lvl;
+term lmax: lvl > lvl > lvl;
+infixl lmax: $\/$ prec 65;
+infixl lmax: $⊔$ prec 65;
+term limax: lvl > lvl > lvl;
+
+--| `leqv l l2`: a sound approximation of semantic equivalence `l ≈ l2`
+--| (VLevel.lean:58, equal evaluation under every assignment of the level
+--| variables). Each axiom below is valid under `VLevel.eval`, where
+--| `imax a b = if b = 0 then 0 else max a b`. These axioms alone are
+--| incomplete (notes/audit-lean-mm0.md); `leqv_cases` below completes them.
+term leqv: lvl > lvl > wff;
+infixl leqv: $~=$ prec 50;
+infixl leqv: $≈$ prec 50;
+axiom leqv_refl (a: lvl): $ a ≈ a $;
+axiom leqv_symm (a b: lvl): $ a ≈ b $ > $ b ≈ a $;
+axiom leqv_trans (a b c: lvl): $ a ≈ b $ > $ b ≈ c $ > $ a ≈ c $;
+axiom leqv_succ (a b: lvl): $ a ≈ b $ > $ ls a ≈ ls b $;
+axiom leqv_max (a b c d: lvl):
+  $ a ≈ b $ > $ c ≈ d $ > $ a ⊔ c ≈ b ⊔ d $;
+axiom leqv_imax (a b c d: lvl):
+  $ a ≈ b $ > $ c ≈ d $ > $ limax a c ≈ limax b d $;
+axiom lmax_comm (a b: lvl): $ a ⊔ b ≈ b ⊔ a $;
+axiom lmax_assoc (a b c: lvl): $ a ⊔ b ⊔ c ≈ a ⊔ (b ⊔ c) $;
+axiom lmax_idem (a: lvl): $ a ⊔ a ≈ a $;
+axiom lmax_zero (a: lvl): $ lz ⊔ a ≈ a $;
+axiom lmax_succ (a b: lvl): $ ls a ⊔ ls b ≈ ls (a ⊔ b) $;
+axiom lmax_succ_self (a: lvl): $ a ⊔ ls a ≈ ls a $;
+axiom limax_zero (a: lvl): $ limax a lz ≈ lz $;
+axiom limax_zero_l (a: lvl): $ limax lz a ≈ a $;
+--| `imax 1 a = a`: if `a = 0` both are 0, otherwise `max 1 a = a`. nanoda's level `simplify`
+--| applies it (and `limax_zero_l`) whenever it puts a `Sort` in weak head normal form.
+axiom limax_one (a: lvl): $ limax (ls lz) a ≈ a $;
+axiom limax_succ (a b: lvl): $ limax a (ls b) ≈ a ⊔ ls b $;
+axiom limax_self (a: lvl): $ limax a a ≈ a $;
+axiom limax_max (a b c: lvl):
+  $ limax a (b ⊔ c) ≈ limax a b ⊔ limax a c $;
+axiom limax_imax (a b c: lvl):
+  $ limax a (limax b c) ≈ limax a c ⊔ limax b c $;
+
+--| Proof by cases on a universe parameter. A case split must substitute the
+--| parameter inside an arbitrary level, which cannot be stated over MM0
+--| variables. So a goal's variables are first abstracted to object-level
+--| parameters `lparam i` (`leqv_inst` puts the original levels back), and
+--| `leqv_cases` splits on one of those. The semantics of `leqv` (equal value
+--| under every assignment) covers `lparam`s like any other level variable. With
+--| the axioms above for the `imax`-free cases, this decides `leqv` completely
+--| (notes/audit-lean-mm0.md §4). `lparam` only ever occurs inside `leqv` proofs.
+term lparam: nat > lvl;
+
+--| Lists of levels.
+--| @hole _ls
+strict free sort lvls;
+term lnil: lvls;
+term lcons: lvl > lvls > lvls;
+
+--| `lnth S n a`: the `n`th element of `S` is `a`.
+term lnth: lvls > nat > lvl > wff;
+axiom lnth_z (a: lvl) (S: lvls): $ lnth (lcons a S) z a $;
+axiom lnth_s (a b: lvl) (S: lvls) (n: nat): $ lnth S n b $ > $ lnth (lcons a S) (s n) b $;
+
+--| `linst S l l2`: `l2` is `l` with each `lparam i` replaced by the `i`th
+--| element of `S`.
+term linst: lvls > lvl > lvl > wff;
+axiom linst_z (S: lvls): $ linst S lz lz $;
+axiom linst_s (S: lvls) (a a2: lvl): $ linst S a a2 $ > $ linst S (ls a) (ls a2) $;
+axiom linst_max (S: lvls) (a b a2 b2: lvl):
+  $ linst S a a2 $ > $ linst S b b2 $ > $ linst S (a ⊔ b) (a2 ⊔ b2) $;
+axiom linst_imax (S: lvls) (a b a2 b2: lvl):
+  $ linst S a a2 $ > $ linst S b b2 $ > $ linst S (limax a b) (limax a2 b2) $;
+axiom linst_param (S: lvls) (n: nat) (a: lvl): $ lnth S n a $ > $ linst S (lparam n) a $;
+
+--| `lsubst n l a l2`: `l2` is `l` with `lparam n` replaced by `a`.
+term lsubst: nat > lvl > lvl > lvl > wff;
+axiom lsubst_z (n: nat) (a: lvl): $ lsubst n lz a lz $;
+axiom lsubst_s (n: nat) (b a b2: lvl): $ lsubst n b a b2 $ > $ lsubst n (ls b) a (ls b2) $;
+axiom lsubst_max (n: nat) (b c a b2 c2: lvl):
+  $ lsubst n b a b2 $ > $ lsubst n c a c2 $ > $ lsubst n (b ⊔ c) a (b2 ⊔ c2) $;
+axiom lsubst_imax (n: nat) (b c a b2 c2: lvl):
+  $ lsubst n b a b2 $ > $ lsubst n c a c2 $ > $ lsubst n (limax b c) a (limax b2 c2) $;
+axiom lsubst_eq (n: nat) (a: lvl): $ lsubst n (lparam n) a a $;
+axiom lsubst_lt (n m: nat) (a: lvl): $ m < n $ > $ lsubst n (lparam m) a (lparam m) $;
+axiom lsubst_gt (n m: nat) (a: lvl): $ n < m $ > $ lsubst n (lparam m) a (lparam m) $;
+
+--| Case split on `lparam n`: zero, or the successor of some level (which is
+--| again called `lparam n`).
+axiom leqv_cases (n: nat) (l r l0 r0 l1 r1: lvl):
+  $ lsubst n l lz l0 $ > $ lsubst n r lz r0 $ > $ l0 ≈ r0 $ >
+  $ lsubst n l (ls (lparam n)) l1 $ > $ lsubst n r (ls (lparam n)) r1 $ > $ l1 ≈ r1 $ >
+  $ l ≈ r $;
+--| Instantiating the parameters of an equivalence.
+axiom leqv_inst (S: lvls) (l r l2 r2: lvl):
+  $ l ≈ r $ > $ linst S l l2 $ > $ linst S r r2 $ > $ l2 ≈ r2 $;
+
+---------------------------------------------------------------------------
+-- Expressions (VExpr.lean:7-13), without `const`
+---------------------------------------------------------------------------
+
+--| @hole _e
+strict free sort expr;
+term bvar: nat > expr;
+prefix bvar: $#$ prec max;
+term srt: lvl > expr;
+term app: expr > expr > expr;
+infixl app: $@$ prec 1000;
+term lam: expr > expr > expr;
+notation lam (A e: expr): expr = ($\$:20) A ($.$:0) e;
+notation lam (A e: expr): expr = ($λ$:20) A ($.$:0) e;
+--| `forallE` in Lean4Lean.
+term pi: expr > expr > expr;
+notation pi (A B: expr): expr = ($\Pi$:20) A ($.$:0) B;
+notation pi (A B: expr): expr = ($Π$:20) A ($.$:0) B;
+
+--| `closed k e`: every loose bound variable of `e` is below `k`
+--| (`ClosedN e k`, VExpr.lean:99-104).
+term closed: nat > expr > wff;
+axiom closed_bvar (i k: nat): $ i < k $ > $ closed k # i $;
+axiom closed_srt (k: nat) (l: lvl): $ closed k (srt l) $;
+axiom closed_app (k: nat) (f a: expr):
+  $ closed k f $ > $ closed k a $ > $ closed k (f @ a) $;
+axiom closed_lam (k: nat) (A b: expr):
+  $ closed k A $ > $ closed (s k) b $ > $ closed k (λ A. b) $;
+axiom closed_pi (k: nat) (A b: expr):
+  $ closed k A $ > $ closed (s k) b $ > $ closed k (Π A. b) $;
+
+--| `lift n k e e2`: `e2 = liftN n e k` (VExpr.lean:17, 38-44).
+term lift: nat > nat > expr > expr > wff;
+axiom lift_bvar_lt (n k i: nat): $ i < k $ > $ lift n k # i # i $;
+axiom lift_bvar_ge (n k i j: nat):
+  $ k ≤ i $ > $ add i n j $ > $ lift n k # i # j $;
+axiom lift_srt (n k: nat) (l: lvl): $ lift n k (srt l) (srt l) $;
+axiom lift_app (n k: nat) (f a f2 a2: expr):
+  $ lift n k f f2 $ > $ lift n k a a2 $ > $ lift n k (f @ a) (f2 @ a2) $;
+axiom lift_lam (n k: nat) (A b A2 b2: expr):
+  $ lift n k A A2 $ > $ lift n (s k) b b2 $ > $ lift n k (λ A. b) (λ A2. b2) $;
+axiom lift_pi (n k: nat) (A b A2 b2: expr):
+  $ lift n k A A2 $ > $ lift n (s k) b b2 $ > $ lift n k (Π A. b) (Π A2. b2) $;
+--| Admissible (by induction on `e`): `ClosedN.liftN_eq`, VExpr.lean:117.
+axiom lift_closed (n j k: nat) (e: expr):
+  $ closed j e $ > $ j ≤ k $ > $ lift n k e e $;
+
+--| `inst k e a e2`: `e2 = inst e a k` (VExpr.lean:187-188, 240-246).
+term inst: nat > expr > expr > expr > wff;
+axiom inst_bvar_lt (k i: nat) (a: expr): $ i < k $ > $ inst k # i a # i $;
+axiom inst_bvar_eq (k: nat) (a a2: expr): $ lift k z a a2 $ > $ inst k # k a a2 $;
+axiom inst_bvar_gt (k i: nat) (a: expr):
+  $ k ≤ i $ > $ inst k # (s i) a # i $;
+axiom inst_srt (k: nat) (l: lvl) (a: expr): $ inst k (srt l) a (srt l) $;
+axiom inst_app (k: nat) (f x a f2 x2: expr):
+  $ inst k f a f2 $ > $ inst k x a x2 $ > $ inst k (f @ x) a (f2 @ x2) $;
+axiom inst_lam (k: nat) (A b a A2 b2: expr):
+  $ inst k A a A2 $ > $ inst (s k) b a b2 $ > $ inst k (λ A. b) a (λ A2. b2) $;
+axiom inst_pi (k: nat) (A b a A2 b2: expr):
+  $ inst k A a A2 $ > $ inst (s k) b a b2 $ > $ inst k (Π A. b) a (Π A2. b2) $;
+--| Admissible (by induction on `e`): `ClosedN.instN_eq`, VExpr.lean:482.
+axiom inst_closed (j k: nat) (e a: expr):
+  $ closed j e $ > $ j ≤ k $ > $ inst k e a e $;
+
+---------------------------------------------------------------------------
+-- Contexts (Typing/Basic.lean:6-8)
+---------------------------------------------------------------------------
+
+--| Innermost binder first; each entry is a type relative to the tail.
+--| @hole _G
+strict free sort ctx;
+term nil: ctx;
+prefix nil: $[]$ prec max;
+term cons: expr > ctx > ctx;
+infixr cons: $::$ prec 60;
+
+term lookup: ctx > nat > expr > wff;
+axiom lookup_z (A A2: expr) (G: ctx):
+  $ lift (s z) z A A2 $ > $ lookup (A :: G) z A2 $;
+axiom lookup_s (A B B2: expr) (G: ctx) (n: nat):
+  $ lookup G n B $ > $ lift (s z) z B B2 $ > $ lookup (A :: G) (s n) B2 $;
+
+--| `cinst k G0 A0 a G1 G`: `G1` is `G0` extended by `A0` and then `k` more
+--| entries, and `G` is `G1` without `A0`, with `a` substituted for it in the
+--| `k` entries above it (`Ctx.InstN`, Typing/Lemmas.lean:86).
+term cinst: nat > ctx > expr > expr > ctx > ctx > wff;
+axiom cinst_z (G0: ctx) (A0 a: expr): $ cinst z G0 A0 a (A0 :: G0) G0 $;
+axiom cinst_s (k: nat) (G0 G1 G: ctx) (A0 a A A2: expr):
+  $ cinst k G0 A0 a G1 G $ > $ inst k A a A2 $ >
+  $ cinst (s k) G0 A0 a (A :: G1) (A2 :: G) $;
+
+--| `cext n G G2`: `G2` is `G` extended by `n` more entries
+--| (`Ctx.LiftN n 0 G G2`, the `zero` case, Typing/Lemmas.lean:9).
+term cext: nat > ctx > ctx > wff;
+axiom cext_z (G: ctx): $ cext z G G $;
+axiom cext_s (n: nat) (G G2: ctx) (A: expr):
+  $ cext n G G2 $ > $ cext (s n) G (A :: G2) $;
+
+---------------------------------------------------------------------------
+-- The judgment `Γ ⊢ e ≡ e2 : A` (IsDefEq, Typing/Basic.lean:18-56)
+---------------------------------------------------------------------------
+
+term deq: ctx > expr > expr > expr > wff;
+notation deq (G: ctx) (e e2 A: expr): wff = ($|-$:0) G ($,$:0) e ($==$:0) e2 ($:$:0) A;
+notation deq (G: ctx) (e e2 A: expr): wff = ($⊢$:0) G ($,$:0) e ($≡$:0) e2 ($:$:0) A;
+
+--| `Γ ⊢ e : A` is the diagonal of the judgment.
+def ty (G: ctx) (e A: expr): wff = $ ⊢ G, e ≡ e : A $;
+notation ty (G: ctx) (e A: expr): wff = ($||-$:0) G ($,$:0) e ($:$:0) A;
+notation ty (G: ctx) (e A: expr): wff = ($⊩$:0) G ($,$:0) e ($:$:0) A;
+
+axiom bvar (G: ctx) (i: nat) (A: expr):
+  $ lookup G i A $ > $ ⊢ G, # i ≡ # i : A $;
+axiom symm (G: ctx) (e e2 A: expr):
+  $ ⊢ G, e ≡ e2 : A $ > $ ⊢ G, e2 ≡ e : A $;
+axiom trans (G: ctx) (e1 e2 e3 A: expr):
+  $ ⊢ G, e1 ≡ e2 : A $ > $ ⊢ G, e2 ≡ e3 : A $ > $ ⊢ G, e1 ≡ e3 : A $;
+axiom sortDF (G: ctx) (l l2: lvl):
+  $ l ≈ l2 $ > $ ⊢ G, srt l ≡ srt l2 : srt (ls l) $;
+axiom appDF (G: ctx) (f f2 A B a a2 R: expr):
+  $ ⊢ G, f ≡ f2 : Π A. B $ > $ ⊢ G, a ≡ a2 : A $ > $ inst z B a R $ >
+  $ ⊢ G, f @ a ≡ f2 @ a2 : R $;
+axiom lamDF (G: ctx) (u: lvl) (A A2 b b2 B: expr):
+  $ ⊢ G, A ≡ A2 : srt u $ > $ ⊢ A :: G, b ≡ b2 : B $ >
+  $ ⊢ G, λ A. b ≡ λ A2. b2 : Π A. B $;
+axiom forallEDF (G: ctx) (u v: lvl) (A A2 B B2: expr):
+  $ ⊢ G, A ≡ A2 : srt u $ > $ ⊢ A :: G, B ≡ B2 : srt v $ >
+  $ ⊢ G, Π A. B ≡ Π A2. B2 : srt (limax u v) $;
+axiom defeqDF (G: ctx) (u: lvl) (A B e e2: expr):
+  $ ⊢ G, A ≡ B : srt u $ > $ ⊢ G, e ≡ e2 : A $ > $ ⊢ G, e ≡ e2 : B $;
+axiom beta (G: ctx) (A e B a r R: expr):
+  $ ⊢ A :: G, e ≡ e : B $ > $ ⊢ G, a ≡ a : A $ > $ inst z e a r $ > $ inst z B a R $ >
+  $ ⊢ G, (λ A. e) @ a ≡ r : R $;
+axiom eta (G: ctx) (A B e e1: expr):
+  $ ⊢ G, e ≡ e : Π A. B $ > $ lift (s z) z e e1 $ >
+  $ ⊢ G, λ A. e1 @ # z ≡ e : Π A. B $;
+axiom proofIrrel (G: ctx) (p h h2: expr):
+  $ ⊢ G, p ≡ p : srt lz $ > $ ⊢ G, h ≡ h : p $ > $ ⊢ G, h2 ≡ h2 : p $ >
+  $ ⊢ G, h ≡ h2 : p $;
+
+---------------------------------------------------------------------------
+-- Admissible rules (theorems of Lean4Lean, here axioms)
+---------------------------------------------------------------------------
+
+--| Substitution: `IsDefEq.instN`, Typing/Lemmas.lean:634 (see
+--| notes/audit-lean-mm0.md §6).
+axiom instDF (k: nat) (G0 G1 G: ctx) (A0 a e e2 A r r2 R: expr):
+  $ ⊢ G0, a ≡ a : A0 $ > $ cinst k G0 A0 a G1 G $ > $ ⊢ G1, e ≡ e2 : A $ >
+  $ inst k e a r $ > $ inst k e2 a r2 $ > $ inst k A a R $ >
+  $ ⊢ G, r ≡ r2 : R $;
+
+--| Weakening: `IsDefEq.weakN`, Typing/Lemmas.lean:501, for `Ctx.LiftN n 0`
+--| (see notes/audit-lean-mm0.md §6).
+axiom weakDF (n: nat) (G G2: ctx) (e e2 A r r2 R: expr):
+  $ ⊢ G, e ≡ e2 : A $ > $ cext n G G2 $ >
+  $ lift n z e r $ > $ lift n z e2 r2 $ > $ lift n z A R $ >
+  $ ⊢ G2, r ≡ r2 : R $;
+
+---------------------------------------------------------------------------
+-- Nat literals (notes/audit-lean-mm0.md §5; an extension of Lean4Lean's theory)
+---------------------------------------------------------------------------
+
+--| Binary numerals: `b0` is 0, `bd0 n` is 2n and `bd1 n` is 2n+1. Each
+--| relation below is syntax-directed, and each axiom is true when every
+--| numeral is read as its value (so a non-canonical numeral such as
+--| `bd0 b0` is harmless; generated proofs only use canonical ones).
+--| @hole _b
+strict free sort bin;
+term b0: bin;
+term bd0: bin > bin;
+term bd1: bin > bin;
+
+--| `bsucc a b`: a + 1 = b.
+term bsucc: bin > bin > wff;
+axiom bsucc_0: $ bsucc b0 (bd1 b0) $;
+axiom bsucc_d0 (a: bin): $ bsucc (bd0 a) (bd1 a) $;
+axiom bsucc_d1 (a b: bin): $ bsucc a b $ > $ bsucc (bd1 a) (bd0 b) $;
+
+--| `bdbl a b`: 2a = b (`bd0`, except that 2·0 is `b0`).
+term bdbl: bin > bin > wff;
+axiom bdbl_0: $ bdbl b0 b0 $;
+axiom bdbl_d0 (a: bin): $ bdbl (bd0 a) (bd0 (bd0 a)) $;
+axiom bdbl_d1 (a: bin): $ bdbl (bd1 a) (bd0 (bd1 a)) $;
+
+--| `badd a b c`: a + b = c. `baddc a b c`: a + b + 1 = c (with carry).
+term badd: bin > bin > bin > wff;
+term baddc: bin > bin > bin > wff;
+axiom badd_0l (b: bin): $ badd b0 b b $;
+axiom badd_0r (a: bin): $ badd a b0 a $;
+axiom badd_00 (a b c: bin): $ badd a b c $ > $ badd (bd0 a) (bd0 b) (bd0 c) $;
+axiom badd_01 (a b c: bin): $ badd a b c $ > $ badd (bd0 a) (bd1 b) (bd1 c) $;
+axiom badd_10 (a b c: bin): $ badd a b c $ > $ badd (bd1 a) (bd0 b) (bd1 c) $;
+axiom badd_11 (a b c: bin): $ baddc a b c $ > $ badd (bd1 a) (bd1 b) (bd0 c) $;
+axiom baddc_0l (b c: bin): $ bsucc b c $ > $ baddc b0 b c $;
+axiom baddc_0r (a c: bin): $ bsucc a c $ > $ baddc a b0 c $;
+axiom baddc_00 (a b c: bin): $ badd a b c $ > $ baddc (bd0 a) (bd0 b) (bd1 c) $;
+axiom baddc_01 (a b c: bin): $ baddc a b c $ > $ baddc (bd0 a) (bd1 b) (bd0 c) $;
+axiom baddc_10 (a b c: bin): $ baddc a b c $ > $ baddc (bd1 a) (bd0 b) (bd0 c) $;
+axiom baddc_11 (a b c: bin): $ baddc a b c $ > $ baddc (bd1 a) (bd1 b) (bd1 c) $;
+
+--| `bmul a b c`: a · b = c (by the bits of `b`).
+term bmul: bin > bin > bin > wff;
+axiom bmul_0 (a: bin): $ bmul a b0 b0 $;
+axiom bmul_d0 (a b c d: bin): $ bmul a b c $ > $ bdbl c d $ > $ bmul a (bd0 b) d $;
+axiom bmul_d1 (a b c d e: bin):
+  $ bmul a b c $ > $ bdbl c d $ > $ badd d a e $ > $ bmul a (bd1 b) e $;
+
+--| `bpow a b c`: a ^ b = c (by the bits of `b`; 0 ^ 0 = 1).
+term bpow: bin > bin > bin > wff;
+axiom bpow_0 (a: bin): $ bpow a b0 (bd1 b0) $;
+axiom bpow_d0 (a b c d: bin): $ bpow a b c $ > $ bmul c c d $ > $ bpow a (bd0 b) d $;
+axiom bpow_d1 (a b c d e: bin):
+  $ bpow a b c $ > $ bmul c c d $ > $ bmul d a e $ > $ bpow a (bd1 b) e $;
+
+--| `band a b c`, `bor a b c`, `bxor a b c`: bitwise and, or and exclusive or.
+term band: bin > bin > bin > wff;
+axiom band_0l (b: bin): $ band b0 b b0 $;
+axiom band_0r (a: bin): $ band a b0 b0 $;
+axiom band_00 (a b c d: bin): $ band a b c $ > $ bdbl c d $ > $ band (bd0 a) (bd0 b) d $;
+axiom band_01 (a b c d: bin): $ band a b c $ > $ bdbl c d $ > $ band (bd0 a) (bd1 b) d $;
+axiom band_10 (a b c d: bin): $ band a b c $ > $ bdbl c d $ > $ band (bd1 a) (bd0 b) d $;
+axiom band_11 (a b c: bin): $ band a b c $ > $ band (bd1 a) (bd1 b) (bd1 c) $;
+term bor: bin > bin > bin > wff;
+axiom bor_0l (b: bin): $ bor b0 b b $;
+axiom bor_0r (a: bin): $ bor a b0 a $;
+axiom bor_00 (a b c: bin): $ bor a b c $ > $ bor (bd0 a) (bd0 b) (bd0 c) $;
+axiom bor_01 (a b c: bin): $ bor a b c $ > $ bor (bd0 a) (bd1 b) (bd1 c) $;
+axiom bor_10 (a b c: bin): $ bor a b c $ > $ bor (bd1 a) (bd0 b) (bd1 c) $;
+axiom bor_11 (a b c: bin): $ bor a b c $ > $ bor (bd1 a) (bd1 b) (bd1 c) $;
+term bxor: bin > bin > bin > wff;
+axiom bxor_0l (b: bin): $ bxor b0 b b $;
+axiom bxor_0r (a: bin): $ bxor a b0 a $;
+axiom bxor_00 (a b c d: bin): $ bxor a b c $ > $ bdbl c d $ > $ bxor (bd0 a) (bd0 b) d $;
+axiom bxor_01 (a b c: bin): $ bxor a b c $ > $ bxor (bd0 a) (bd1 b) (bd1 c) $;
+axiom bxor_10 (a b c: bin): $ bxor a b c $ > $ bxor (bd1 a) (bd0 b) (bd1 c) $;
+axiom bxor_11 (a b c d: bin): $ bxor a b c $ > $ bdbl c d $ > $ bxor (bd1 a) (bd1 b) d $;
+
+--| `lit n`: the Nat literal with value `n`, read as `Nat.succ^n Nat.zero`
+--| (Lean4Lean's translation of literals). The axioms that relate it to the
+--| environment's `Nat` are generated with `Nat.succ` (`Nat_lit_zero`,
+--| `Nat_lit_succ`), and those for the accelerated operations with each
+--| operation (`Nat_add_lit`, ...); see notes/audit-lean-mm0.md.
+term lit: bin > expr;
+axiom closed_lit (k: nat) (n: bin): $ closed k (lit n) $;
+
+---------------------------------------------------------------------------
+-- Statements
+---------------------------------------------------------------------------
+
+--| `inh G A`: `A` is inhabited in `Γ`. Theorems are stated this way so that
+--| their proof terms stay inside the proof file.
+term inh: ctx > expr > wff;
+axiom inh_i (G: ctx) (e A: expr): $ ⊢ G, e ≡ e : A $ > $ inh G A $;
