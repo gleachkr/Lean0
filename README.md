@@ -26,10 +26,13 @@ kernel, since Lean4Lean leaves inductive declarations unspecified.
 
 Nested inductive types are certified as the kernel does them: as the mutual 
 block with auxiliary types that the kernel checks in their place, with the 
-nested occurrences restored in what is stated. Some axioms support accelerated 
-`Nat` operations (for example, assuming that `Nat.add` on numerals correctly 
-implements addition), though the arithmetic itself is proved. Quotients and 
-the tie between literals and `Nat` are part of the spec.
+nested occurrences restored in what is stated. The accelerated `Nat` 
+operations are rules of the spec over the defining equations Lean4Lean checks 
+(a certificate derives `Nat.add x 0 ≡ x` and `Nat.add x (y+1) ≡ (Nat.add x y)+1` 
+once, and the arithmetic itself is proved bit by bit), except division, modulus, 
+gcd and the bitwise operations, which still have axioms assuming that the 
+definition computes the operation. Quotients and the tie between literals and 
+`Nat` are part of the spec.
 
 ## Trusted Base
 

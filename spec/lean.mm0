@@ -21,7 +21,10 @@ delimiter $ ( ) , . $;
 --|   relations, proved node by node.
 --| * Nat literals are a primitive `lit` over binary numerals (an extension;
 --|   Lean4Lean unfolds literals to `Nat.succ`/`Nat.zero`), tied to Lean's
---|   `Nat` by `lit_zero`/`lit_succ`.
+--|   `Nat` by `lit_zero`/`lit_succ`. The accelerated operations are rules
+--|   over the defining equations Lean4Lean checks (`add_eqs`, `nat_add_lit`,
+--|   ...), except the division-like ones, whose axioms a certificate
+--|   generates.
 --| * Lean's `Nat` and `Eq` are the blocks `nat_D` and `eq_D` (data the
 --|   checker compares with the export), and the quotient primitives are
 --|   constants with the kernel's types and reduction rules.
@@ -411,9 +414,10 @@ axiom bxor_11 (a b c d: bin): $ bxor a b c $ > $ bdbl c d $ > $ bxor (bd1 a) (bd
 
 --| `lit n`: the Nat literal with value `n`, read as `Nat.succ^n Nat.zero`
 --| (Lean4Lean's translation of literals). `lit_zero` and `lit_succ` (below,
---| after the inductive schema) relate it to Lean's `Nat`; the axioms for the
---| accelerated operations are generated with each operation (`Nat_add_lit`,
---| ...); see notes/audit-lean-mm0.md.
+--| after the inductive schema) relate it to Lean's `Nat`, and the rules for
+--| the accelerated operations follow them (`nat_add_lit`, ...; those of
+--| `Nat.div`, `Nat.mod`, `Nat.gcd` and the bitwise operations are generated
+--| with each operation); see notes/audit-lean-mm0.md.
 term lit: bin > expr;
 axiom closed_lit (k: nat) (n: bin): $ closed k (lit n) $;
 
@@ -1137,6 +1141,150 @@ axiom quot_ind_mk (G: ctx) (u: lvl) (x1 x2 x3 x4: expr) (v1: lvl) (y1 y2 a T: ex
 axiom lit_zero (G: ctx): $ deq G (lit b0) (ind_ctor nat_D z z) (ind_ty nat_D z) $;
 axiom lit_succ (G: ctx) (a b: bin):
   $ bsucc a b $ > $ deq G (lit b) (app (ind_ctor nat_D z (s z)) (lit a)) (ind_ty nat_D z) $;
+
+---------------------------------------------------------------------------
+-- The literal operations (notes/audit-lean-mm0.md §5). The kernel computes
+-- `Nat.add` and the other accelerated operations on literals with GMP. Each
+-- `*_eqs` relation states, of a closed function of the right type, the
+-- defining equations Lean4Lean checks of the environment's function
+-- (`Primitive.lean`), over fresh variables (`# z` and `# (s z)` of type
+-- `nat_ty`), and `nat_*_lit` then gives the operation's value on literals,
+-- with the value forced by a binary-arithmetic premise. A certificate proves
+-- the equations of the environment's `Nat.add` (and so on) once, when it is
+-- declared. `Nat.pred`, `Nat.add` and `Nat.mul` enter the equations of
+-- `Nat.sub`, `Nat.mul`, `Nat.pow` and `Nat.shiftLeft` with their own, and
+-- `Nat.shiftRight` is computed a shift at a time from the divisions by 2.
+-- `Nat.div`, `Nat.mod`, `Nat.gcd` and the bitwise operations have no rules
+-- here: a certificate generates their axioms (audit §5).
+---------------------------------------------------------------------------
+
+--| Lean's `Nat`, `Nat.zero` and `Nat.succ`.
+def nat_ty: expr = $ ind_ty nat_D z $;
+def nat_zero: expr = $ ind_ctor nat_D z z $;
+def nat_succ: expr = $ ind_ctor nat_D z (s z) $;
+
+--| `add_eqs G f`: `f` is closed, `f : Nat → Nat → Nat`, `f x 0 ≡ x` and
+--| `f x (succ y) ≡ succ (f x y)`: Lean's `Nat.add`.
+term add_eqs: ctx > expr > wff;
+axiom add_eqs_i (G: ctx) (f: expr):
+  $ closed z f $ > $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
+  $ ⊢ nat_ty :: G, f @ # z @ nat_zero ≡ # z : nat_ty $ >
+  $ ⊢ nat_ty :: nat_ty :: G, f @ # (s z) @ (nat_succ @ # z) ≡ nat_succ @ (f @ # (s z) @ # z) : nat_ty $ >
+  $ add_eqs G f $;
+--| `f a b ≡ a + b` on literals.
+axiom nat_add_lit (G: ctx) (f: expr) (a b c: bin):
+  $ add_eqs G f $ > $ badd a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+
+--| `pred_eqs G p`: `p 0 ≡ 0` and `p (succ x) ≡ x`: Lean's `Nat.pred`.
+term pred_eqs: ctx > expr > wff;
+axiom pred_eqs_i (G: ctx) (p: expr):
+  $ closed z p $ > $ ⊩ G, p : Π nat_ty. nat_ty $ >
+  $ ⊢ G, p @ nat_zero ≡ nat_zero : nat_ty $ >
+  $ ⊢ nat_ty :: G, p @ (nat_succ @ # z) ≡ # z : nat_ty $ >
+  $ pred_eqs G p $;
+--| `sub_eqs G f p`: with `pred_eqs G p`, `f x 0 ≡ x` and `f x (succ y) ≡ p (f x y)`:
+--| Lean's `Nat.sub`.
+term sub_eqs: ctx > expr > expr > wff;
+axiom sub_eqs_i (G: ctx) (f p: expr):
+  $ pred_eqs G p $ > $ closed z f $ > $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
+  $ ⊢ nat_ty :: G, f @ # z @ nat_zero ≡ # z : nat_ty $ >
+  $ ⊢ nat_ty :: nat_ty :: G, f @ # (s z) @ (nat_succ @ # z) ≡ p @ (f @ # (s z) @ # z) : nat_ty $ >
+  $ sub_eqs G f p $;
+--| `f a b ≡ a - b` on literals: `c + b = a`, or `a + c = b` and the difference is 0.
+axiom nat_sub_lit (G: ctx) (f p: expr) (a b c: bin):
+  $ sub_eqs G f p $ > $ badd c b a $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+axiom nat_sub_lit0 (G: ctx) (f p: expr) (a b c: bin):
+  $ sub_eqs G f p $ > $ badd a c b $ > $ ⊢ G, f @ lit a @ lit b ≡ lit b0 : nat_ty $;
+
+--| `mul_eqs G f fa`: with `add_eqs G fa`, `f x 0 ≡ 0` and `f x (succ y) ≡ fa (f x y) x`:
+--| Lean's `Nat.mul`.
+term mul_eqs: ctx > expr > expr > wff;
+axiom mul_eqs_i (G: ctx) (f fa: expr):
+  $ add_eqs G fa $ > $ closed z f $ > $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
+  $ ⊢ nat_ty :: G, f @ # z @ nat_zero ≡ nat_zero : nat_ty $ >
+  $ ⊢ nat_ty :: nat_ty :: G, f @ # (s z) @ (nat_succ @ # z) ≡ fa @ (f @ # (s z) @ # z) @ # (s z) : nat_ty $ >
+  $ mul_eqs G f fa $;
+--| `f a b ≡ a · b` on literals.
+axiom nat_mul_lit (G: ctx) (f fa: expr) (a b c: bin):
+  $ mul_eqs G f fa $ > $ bmul a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+
+--| `pow_eqs G f fm fa`: with `mul_eqs G fm fa`, `f x 0 ≡ succ 0` and
+--| `f x (succ y) ≡ fm (f x y) x`: Lean's `Nat.pow`.
+term pow_eqs: ctx > expr > expr > expr > wff;
+axiom pow_eqs_i (G: ctx) (f fm fa: expr):
+  $ mul_eqs G fm fa $ > $ closed z f $ > $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
+  $ ⊢ nat_ty :: G, f @ # z @ nat_zero ≡ nat_succ @ nat_zero : nat_ty $ >
+  $ ⊢ nat_ty :: nat_ty :: G, f @ # (s z) @ (nat_succ @ # z) ≡ fm @ (f @ # (s z) @ # z) @ # (s z) : nat_ty $ >
+  $ pow_eqs G f fm fa $;
+--| `f a b ≡ a ^ b` on literals.
+axiom nat_pow_lit (G: ctx) (f fm fa: expr) (a b c: bin):
+  $ pow_eqs G f fm fa $ > $ bpow a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+
+--| `beq_eqs G f B t u`: `f : Nat → Nat → B` with `f 0 0 ≡ t`, `f 0 (succ y) ≡ u`,
+--| `f (succ x) 0 ≡ u` and `f (succ x) (succ y) ≡ f x y`, where `B`, `t` and `u` are
+--| closed: Lean's `Nat.beq`, with `Bool`, `true` and `false`.
+term beq_eqs: ctx > expr > expr > expr > expr > wff;
+axiom beq_eqs_i (G: ctx) (f B t u: expr):
+  $ closed z f $ > $ closed z B $ > $ closed z t $ > $ closed z u $ >
+  $ ⊩ G, f : Π nat_ty. Π nat_ty. B $ >
+  $ ⊢ G, f @ nat_zero @ nat_zero ≡ t : B $ >
+  $ ⊢ nat_ty :: G, f @ nat_zero @ (nat_succ @ # z) ≡ u : B $ >
+  $ ⊢ nat_ty :: G, f @ (nat_succ @ # z) @ nat_zero ≡ u : B $ >
+  $ ⊢ nat_ty :: nat_ty :: G, f @ (nat_succ @ # (s z)) @ (nat_succ @ # z) ≡ f @ # (s z) @ # z : B $ >
+  $ beq_eqs G f B t u $;
+--| `f a a ≡ t`, and `f a b ≡ u` when `a + c + 1 = b` or `b + c + 1 = a`.
+axiom nat_beq_lit (G: ctx) (f B t u: expr) (a: bin):
+  $ beq_eqs G f B t u $ > $ ⊢ G, f @ lit a @ lit a ≡ t : B $;
+axiom nat_beq_lit_lt (G: ctx) (f B t u: expr) (a b c: bin):
+  $ beq_eqs G f B t u $ > $ baddc a c b $ > $ ⊢ G, f @ lit a @ lit b ≡ u : B $;
+axiom nat_beq_lit_gt (G: ctx) (f B t u: expr) (a b c: bin):
+  $ beq_eqs G f B t u $ > $ baddc b c a $ > $ ⊢ G, f @ lit a @ lit b ≡ u : B $;
+
+--| `ble_eqs G f B t u`: `f 0 y ≡ t`, `f (succ x) 0 ≡ u` and `f (succ x) (succ y) ≡ f x y`:
+--| Lean's `Nat.ble`.
+term ble_eqs: ctx > expr > expr > expr > expr > wff;
+axiom ble_eqs_i (G: ctx) (f B t u: expr):
+  $ closed z f $ > $ closed z B $ > $ closed z t $ > $ closed z u $ >
+  $ ⊩ G, f : Π nat_ty. Π nat_ty. B $ >
+  $ ⊢ nat_ty :: G, f @ nat_zero @ # z ≡ t : B $ >
+  $ ⊢ nat_ty :: G, f @ (nat_succ @ # z) @ nat_zero ≡ u : B $ >
+  $ ⊢ nat_ty :: nat_ty :: G, f @ (nat_succ @ # (s z)) @ (nat_succ @ # z) ≡ f @ # (s z) @ # z : B $ >
+  $ ble_eqs G f B t u $;
+--| `f a b ≡ t` when `a + c = b`, and `≡ u` when `b + c + 1 = a`.
+axiom nat_ble_lit (G: ctx) (f B t u: expr) (a b c: bin):
+  $ ble_eqs G f B t u $ > $ badd a c b $ > $ ⊢ G, f @ lit a @ lit b ≡ t : B $;
+axiom nat_ble_lit_gt (G: ctx) (f B t u: expr) (a b c: bin):
+  $ ble_eqs G f B t u $ > $ baddc b c a $ > $ ⊢ G, f @ lit a @ lit b ≡ u : B $;
+
+--| `shl_eqs G f fm fa`: with `mul_eqs G fm fa`, `f x 0 ≡ x` and
+--| `f x (succ y) ≡ f (fm 2 x) y`: Lean's `Nat.shiftLeft`.
+term shl_eqs: ctx > expr > expr > expr > wff;
+axiom shl_eqs_i (G: ctx) (f fm fa: expr):
+  $ mul_eqs G fm fa $ > $ closed z f $ > $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
+  $ ⊢ nat_ty :: G, f @ # z @ nat_zero ≡ # z : nat_ty $ >
+  $ ⊢ nat_ty :: nat_ty :: G, f @ # (s z) @ (nat_succ @ # z) ≡ f @ (fm @ lit (bd0 (bd1 b0)) @ # (s z)) @ # z : nat_ty $ >
+  $ shl_eqs G f fm fa $;
+--| `f a b ≡ a · 2^b` on literals.
+axiom nat_shl_lit (G: ctx) (f fm fa: expr) (a b p c: bin):
+  $ shl_eqs G f fm fa $ > $ bpow (bd0 (bd1 b0)) b p $ > $ bmul a p c $ >
+  $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+
+--| `shr_eqs G f fd`: `f x 0 ≡ x` and `f x (succ y) ≡ fd (f x y) 2`, with `fd` closed:
+--| Lean's `Nat.shiftRight`, with `Nat.div`.
+term shr_eqs: ctx > expr > expr > wff;
+axiom shr_eqs_i (G: ctx) (f fd: expr):
+  $ closed z f $ > $ closed z fd $ > $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
+  $ ⊢ nat_ty :: G, f @ # z @ nat_zero ≡ # z : nat_ty $ >
+  $ ⊢ nat_ty :: nat_ty :: G, f @ # (s z) @ (nat_succ @ # z) ≡ fd @ (f @ # (s z) @ # z) @ lit (bd0 (bd1 b0)) : nat_ty $ >
+  $ shr_eqs G f fd $;
+--| `f a b` on literals, a shift at a time: `f a 0 ≡ a`, and `f a (b+1) ≡ c2` from
+--| `f a b ≡ c` and `fd c 2 ≡ c2` (the division by 2, as the certificate derives it).
+axiom nat_shr_lit_z (G: ctx) (f fd: expr) (a: bin):
+  $ shr_eqs G f fd $ > $ ⊢ G, f @ lit a @ lit b0 ≡ lit a : nat_ty $;
+axiom nat_shr_lit_s (G: ctx) (f fd: expr) (a b b2 c c2: bin):
+  $ shr_eqs G f fd $ > $ bsucc b b2 $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $ >
+  $ ⊢ G, fd @ lit c @ lit (bd0 (bd1 b0)) ≡ lit c2 : nat_ty $ >
+  $ ⊢ G, f @ lit a @ lit b2 ≡ lit c2 : nat_ty $;
 
 ---------------------------------------------------------------------------
 -- Statements

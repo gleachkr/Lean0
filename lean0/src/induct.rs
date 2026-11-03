@@ -20,7 +20,7 @@
 //! are compared with the export's, so the schema is checked against the kernel on every
 //! block. A block the schema cannot handle (a type or constructor whose shape needs `whnf`)
 //! is left to stage A, and counted.
-use crate::elab::{Elab, R};
+use crate::elab::{mm, Elab, R};
 use crate::gen::{add_term, add_thm, apps, ConstInfo, ConstKind, Gen, Nested, Sig, StructInfo, Vars};
 use crate::names::mangle;
 use mm0kit::env::{Env, TermKind, ThId, TId, E, P};
@@ -35,7 +35,6 @@ use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
 use std::cell::Cell;
 use std::rc::Rc;
 
-fn mm<A>(r: mm0kit::env::Result<A>) -> R<A> { r.map_err(|e| e.0) }
 
 /// A stage-B block.
 pub struct Block {

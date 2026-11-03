@@ -33,7 +33,8 @@ use rustc_hash::FxHashMap as HashMap;
 
 pub type R<A> = Result<A, String>;
 
-fn mm<A>(r: mm0kit::env::Result<A>) -> R<A> { r.map_err(|e| e.0) }
+/// An `mm0kit` result as an elaborator result.
+pub(crate) fn mm<A>(r: mm0kit::env::Result<A>) -> R<A> { r.map_err(|e| e.0) }
 
 const MAX_REDUCE_STEPS: usize = 100_000;
 
@@ -185,6 +186,9 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
     pub fn open_pub(&mut self, name: NamePtr<'t>, style: nanoda_lib::expr::BinderStyle, ty: ExprPtr<'t>) -> R<ExprPtr<'t>> { self.open(name, style, ty) }
 
     pub fn close_pub(&mut self) { self.close() }
+
+    /// The `i`th open fvar (from the outermost).
+    pub fn local(&self, i: usize) -> Option<ExprPtr<'t>> { self.locals.get(i).copied() }
 
     fn ctx(&self) -> E { self.ctxs[self.d()] }
 
@@ -1341,8 +1345,13 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         self.cast(p, ft, tcur)
     }
 
-    /// `Γ ⊢ op (lit a) (lit b) ≡ r : T` by the first of the operation's axioms that applies.
+    /// `Γ ⊢ op (lit a) (lit b) ≡ r : T` by the first of the operation's theorems that applies.
     fn nat_op(&mut self, op: &str, a: &BigUint, b: &BigUint) -> R<P> {
+        if op == "Nat.shiftRight" {
+            if let Some(&eqs) = self.g.nat_eqs.get(op) {
+                return self.nat_shr(eqs, a, b)
+            }
+        }
         let (Some(o), Some(ths)) = (natlit::op(op), self.g.nat_ops.get(op).cloned()) else {
             return Err(format!("no literal axioms for {op}"))
         };
@@ -1369,6 +1378,41 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
             return mm(self.g.env.thm(th, &targs, &hyps))
         }
         Err(format!("internal: no literal axiom of {op} applies"))
+    }
+
+    /// `Γ ⊢ Nat.shiftRight (lit a) (lit b) ≡ lit (a >> b) : Nat`, a shift at a time from the
+    /// equations `eqs` (`shr_eqs G Nat.shiftRight Nat.div`: the spec's `nat_shr_lit_z` and
+    /// `nat_shr_lit_s`) and the divisions by 2.
+    fn nat_shr(&mut self, eqs: ThId, a: &BigUint, b: &BigUint) -> R<P> {
+        let k = natlit::small(b)?;
+        let gc = self.ctx();
+        let (Some(f), Some(fd), Some(nat)) = (self.g.const_term("Nat.shiftRight", &[]), self.g.const_term("Nat.div", &[]), self.g.const_term("Nat", &[])) else {
+            return Err("internal: `Nat.shiftRight` without `Nat.div`".into())
+        };
+        let g = &mut *self.g;
+        let num = |g: &mut Gen, n: &BigUint| g.bins.num(&mut g.env, n);
+        let peqs = mm(g.env.thm(eqs, &[gc], &[]))?;
+        let na = num(g, a);
+        let mut p = mm(g.env.thm_n("nat_shr_lit_z", &[gc, f, fd, na], &[peqs]))?;
+        let two = BigUint::from(2u32);
+        let mut c = a.clone();
+        for i in 0..k {
+            let bi = BigUint::from(i);
+            let (bi1, ps) = mm(self.g.bins.rel(&mut self.g.env, Rel::Succ, &[bi.clone()]))?;
+            let c2 = &c / &two;
+            let pd = self.nat_op("Nat.div", &c, &two)?;
+            let g = &mut *self.g;
+            let args = [gc, f, fd, na, num(g, &bi), num(g, &bi1), num(g, &c), num(g, &c2)];
+            p = mm(g.env.thm_n("nat_shr_lit_s", &args, &[peqs, ps, p, pd]))?;
+            c = c2;
+        }
+        let g = &mut *self.g;
+        let (la, lb, lc) = (g.env.app(g.bins.lit, &[na]), num(g, b), num(g, &c));
+        let (lb, lc) = (g.env.app(g.bins.lit, &[lb]), g.env.app(g.bins.lit, &[lc]));
+        let fa = g.lean.app(&mut g.env, f, la);
+        let lhs = g.lean.app(&mut g.env, fa, lb);
+        let want = g.lean.deq(&mut g.env, gc, lhs, lc, nat);
+        mm(g.env.convert(p, want))
     }
 
     // ------------------------------------------------------------------ reduction

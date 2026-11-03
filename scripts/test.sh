@@ -176,14 +176,22 @@ tamper induct accepted --tamper-axiom eta
 tamper nested rejected --tamper-theorem tree_size_ex_ty
 for ax in ind_iota_nst rst_ty nst_hit_z aux_data_i spz_hit ndecl_cons; do tamper nested rejected --tamper-axiom "$ax"; done
 tamper nested accepted --tamper-axiom spz_proj
-# Literals: the generated literal axioms and the binary-arithmetic relations.
+# Literals: the ties, the operations' rules over their defining equations (the derived
+# `_eqs` and `_lit` theorems), the generated axioms of the division-like operations, and the
+# binary-arithmetic relations.
 tamper lit rejected --tamper-theorem lit_mul_big_ty
 tamper lit rejected --tamper-theorem dbl_ex_ty
-for ax in lit_zero lit_succ Nat_add_lit Nat_mul_lit Nat_sub_lit0 Nat_beq_lit_gt Nat_ble_lit_gt Nat_pow_lit \
-          Nat_shiftLeft_lit closed_lit bsucc_d1 badd_11 baddc_11 bmul_d1 bpow_d1 bdbl_d1; do
+for th in Nat_add_eqs Nat_pred_eqs Nat_beq_eqs Nat_shiftRight_eqs Nat_add_lit Nat_sub_lit0 Nat_ble_lit_gt Nat_shiftLeft_lit; do
+  tamper lit rejected --tamper-theorem "$th"
+done
+for ax in lit_zero lit_succ nat_add_lit add_eqs_i pred_eqs_i sub_eqs_i nat_mul_lit nat_pow_lit nat_beq_lit_gt \
+          nat_ble_lit nat_shl_lit nat_shr_lit_z nat_shr_lit_s Nat_div_lit Nat_mod_lit Nat_gcd_lit2 Nat_land_lit \
+          closed_lit bsucc_d1 badd_11 baddc_11 bmul_d1 bpow_d1 bdbl_d1; do
   tamper lit rejected --tamper-axiom "$ax"
 done
 tamper lit accepted --tamper-axiom bxor_11
+tamper lit accepted --tamper-axiom Nat_div_lit0
+tamper lit accepted --tamper-axiom Nat_gcd_lit
 # Substitution (typing handles).
 for ax in instDF cinst_z cinst_s; do tamper lit rejected --tamper-axiom "$ax"; done
 

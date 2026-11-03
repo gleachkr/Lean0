@@ -110,8 +110,14 @@ pub struct Gen {
     pub bins: Bins,
     /// The literal axioms, once `Nat.zero` and `Nat.succ` are declared.
     pub nat: Option<NatLits>,
-    /// The literal axioms of each accelerated operation, in the order of `natlit::OPS`.
+    /// The literal theorems of each accelerated operation, in the order of `natlit::OPS`.
     pub nat_ops: HashMap<String, Vec<ThId>>,
+    /// The derived defining equations of the operations (`natlit::EQS`): `Nat_add_eqs`, ...
+    pub nat_eqs: HashMap<String, ThId>,
+    /// Counts for the run's report: operations whose literal theorems follow from their
+    /// equations, and operations left with generated axioms, with the reason.
+    pub lit_stage_b: usize,
+    pub lit_stage_a: Vec<(String, String)>,
     /// Recursors declared early, with a sibling whose rules mention them: their MM0 names.
     predeclared: HashMap<String, String>,
     /// `LEAN0_COSTS`: proof nodes by elaborator rule.
@@ -202,6 +208,9 @@ impl Gen {
             bins,
             nat: None,
             nat_ops: HashMap::default(),
+            nat_eqs: HashMap::default(),
+            lit_stage_b: 0,
+            lit_stage_a: Vec::new(),
             costs,
             shard: None,
             replay: false,
@@ -321,6 +330,9 @@ impl Gen {
     /// and unused expressions are then freed.
     pub fn run(&mut self, export: &ExportFile<'_>, keep_going: bool, out: &mut mm0kit::mmb::Writer) -> R<()> {
         self.reserve_level_names(export);
+        // the operations with defining equations in the spec (`natlit::EQS`): each is
+        // declared in a type checker extended by itself, so that its equations can be derived
+        let eq_names: Vec<NamePtr<'_>> = natlit::EQS.iter().filter_map(|e| export.find_name(e.lean)).collect();
         let progress = std::env::var_os("LEAN0_PROGRESS").is_some();
         // with progress lines, also report a declaration still running after each minute
         let current: std::sync::Arc<std::sync::Mutex<Option<(String, Instant)>>> = Default::default();
@@ -365,6 +377,12 @@ impl Gen {
                     let (name, nst) = ctx.with_tc(EnvLimit::ByName(info.name), |tc| (self.lean_name(tc, info.name), build_nested(tc, &id, all, at_head)));
                     let r = nst.and_then(|nst| ctx.with_tc_and_declar_ext(info, &nst.ext, |tc| self.declar(tc, d, all, Some(&nst))));
                     (name, r)
+                }),
+                None if matches!(d, Declar::Definition { .. }) && eq_names.contains(&d.info().name) => export.with_ctx(|ctx| {
+                    let info = *d.info();
+                    let mut ext = DeclarMap::default();
+                    ext.insert(info.name, d.clone());
+                    ctx.with_tc_and_declar_ext(info, &ext, |tc| (self.lean_name(tc, info.name), self.declar(tc, d, all, None)))
                 }),
                 None => export.with_tc_and_declar(*d.info(), |tc| (self.lean_name(tc, d.info().name), self.declar(tc, d, all, None))),
             };
@@ -433,6 +451,12 @@ impl Gen {
                 eprintln!("  stage A: {n}: {why}");
             }
         }
+        if self.lit_stage_b + self.lit_stage_a.len() > 0 {
+            eprintln!("lean0: {} literal operations certified by their defining equations, {} with generated axioms", self.lit_stage_b, self.lit_stage_a.len());
+            for (n, why) in &self.lit_stage_a {
+                eprintln!("  stage A: {n}: {why}");
+            }
+        }
         Ok(())
     }
 
@@ -443,6 +467,7 @@ impl Gen {
         self.env.truncate_pfs(pfs0);
         let nthms = self.env.thms.len();
         self.eeqv_axioms.retain(|_, th| (th.0 as usize) < nthms);
+        self.nat_eqs.retain(|_, th| (th.0 as usize) < nthms);
         self.bins.forget_pfs(pfs0);
         self.lean.reset();
         self.lv.reset();

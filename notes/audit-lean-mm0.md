@@ -404,16 +404,61 @@ and `lit` is inert.
 |---|---|
 | `lit_zero`: `deq G (lit b0) (ind_ctor nat_D z z) (ind_ty nat_D z)` | in the model, `Nat.zero ≡ Nat.zero : Nat` (`constDF`); `nat_D` is Lean's `Nat`, with `Nat.zero : Nat` by its data |
 | `lit_succ`: `bsucc a b > deq G (lit b) (app (ind_ctor nat_D z (s z)) (lit a)) (ind_ty nat_D z)` | both sides denote the same term `succ^(a+1) zero`, which has type `Nat` because `Nat.succ : Nat → Nat` by the data |
-| `Nat_add_lit`, `Nat_sub_lit`/`_lit0`, `Nat_mul_lit`, `Nat_div_lit`/`_lit0`, `Nat_mod_lit`/`_lit0`, `Nat_gcd_lit`/`_lit2`, `Nat_beq_lit`/`_lit_lt`/`_lit_gt`, `Nat_ble_lit`/`_lit_gt`, `Nat_land_lit`, `Nat_lor_lit`, `Nat_xor_lit`, `Nat_pow_lit`, `Nat_shiftLeft_lit`, `Nat_shiftRight_lit` | `op (succ^a zero) (succ^b zero) ≡ succ^(f a b) zero : Nat` (or `≡ Bool.true/false : Bool`), where the premises force the value: `sub` from `c+b = a` or `a+c = b`; `div`/`mod` from `q·b = m`, `m+r = a`, `r+x+1 = b` (so `r < b`, Euclidean division, and `b = 0` has its own axiom: `a/0 = 0`, `a%0 = a`); `gcd` from `g·p = a`, `g·q = b` (`g` divides both) and `x·a = y·b + g` or `y·b = x·a + g` (every common divisor divides `g`, so `g = gcd a b`; `a = b = 0` forces `g = 0`); `beq` false from `a+c+1 = b` or `b+c+1 = a`; `ble` from `a+c = b` / `b+c+1 = a`; shifts via `2^b`. |
+| generated (stage A): `Nat_div_lit`/`_lit0`, `Nat_mod_lit`/`_lit0`, `Nat_gcd_lit`/`_lit2`, `Nat_land_lit`, `Nat_lor_lit`, `Nat_xor_lit`; and `Nat_add_lit`, `Nat_sub_lit`/`_lit0`, `Nat_mul_lit`, `Nat_beq_lit`/`_lit_lt`/`_lit_gt`, `Nat_ble_lit`/`_lit_gt`, `Nat_pow_lit`, `Nat_shiftLeft_lit`, `Nat_shiftRight_lit` only when the operation's equations below could not be derived (the run reports it) | `op (succ^a zero) (succ^b zero) ≡ succ^(f a b) zero : Nat` (or `≡ Bool.true/false : Bool`), where the premises force the value: `sub` from `c+b = a` or `a+c = b`; `div`/`mod` from `q·b = m`, `m+r = a`, `r+x+1 = b` (so `r < b`, Euclidean division, and `b = 0` has its own axiom: `a/0 = 0`, `a%0 = a`); `gcd` from `g·p = a`, `g·q = b` (`g` divides both) and `x·a = y·b + g` or `y·b = x·a + g` (every common divisor divides `g`, so `g = gcd a b`; `a = b = 0` forces `g = 0`); `beq` false from `a+c+1 = b` or `b+c+1 = a`; `ble` from `a+c = b` / `b+c+1 = a`; shifts via `2^b`. |
 
-**Trust gap (stage A).** The operation axioms are valid only if the environment's definition
-of each operation computes it on numerals, which is Lean4Lean's `HasPrimitives` invariant.
-Lean4Lean establishes it by checking defining equations when the definition is added
-(`Primitive.lean`: e.g. `Nat.add x 0 ≡ x` and `Nat.add x (succ y) ≡ succ (Nat.add x y)` for
-fresh `x y`; well-founded unfolding for `gcd`, `div`, `mod` and the bitwise operations). Lean0,
-like nanoda and the C++ kernel, only checks the name and the type (`Nat → Nat → Nat`, or
-`→ Bool` for `beq`/`ble`). Planned stage B: prove Lean4Lean's equations as theorems in the
-certificate, and state each axiom with them as premises.
+**Trust gap of the generated operation axioms (stage A).** They are valid only if the
+environment's definition of the operation computes it on numerals, which is Lean4Lean's
+`HasPrimitives` invariant. Lean4Lean establishes it by checking defining equations when the
+definition is added (`Primitive.lean`: e.g. `Nat.add x 0 ≡ x` and
+`Nat.add x (succ y) ≡ succ (Nat.add x y)` for fresh `x y`; well-founded unfolding through
+`WellFounded.Nat.fix`, `dite` and `Decidable` reflection for `gcd`, `div`, `mod` and the
+bitwise operations). Lean0, like nanoda and the C++ kernel, only checks the name and the type
+(`Nat → Nat → Nat`, or `→ Bool` for `beq`/`ble`) for the six operations that keep generated
+axioms. The others are stage B, below.
+
+### The literal operations as rules over defining equations (`spec/lean.mm0`, "The literal operations"; stage B)
+
+The spec states, per operation, a relation `*_eqs G f ...` that holds exactly when its
+single rule `*_eqs_i` applies: `f` is closed, `f` has the operation's type, and the defining
+equations Lean4Lean checks of the environment's definition (`Primitive.lean`, `checkNatAdd`
+and so on) hold as `deq` judgments over fresh variables (`# z`, `# (s z)` of type
+`nat_ty = ind_ty nat_D z`, in contexts `nat_ty :: G` and `nat_ty :: nat_ty :: G`). The
+rules `nat_*_lit` then give the operation's value on literals. A certificate derives the
+equations of the environment's `Nat.add` (etc.) when it is declared, as ordinary derivations
+(delta, iota, beta), and states `Nat_add_eqs: add_eqs G Nat_add`; its `Nat_add_lit` (the same
+statement as the stage-A axiom) is then a theorem, from `nat_add_lit`. So the kernel's claim
+"`Nat.add` computes addition on numerals" is reduced to the rule's soundness, argued here:
+Lean4Lean's `HasPrimitives` argument, done once in the model rather than trusted per
+environment. `Nat.div`, `Nat.mod`, `Nat.gcd`, `Nat.land`, `Nat.lor` and `Nat.xor` have no
+rules yet (their equations go through well-founded or fuel recursion, `dite` and `Decidable`
+reflection, which the spec would have to characterize; Lean4Lean's `checkNatFuelRec`,
+`checkNatGcd`, `checkNatBitwise`): they keep the generated axioms above.
+
+Conventions of the arguments: `n̄` is `lit n`, `N`, `Z` and `S` are `nat_ty`, `nat_zero` and
+`nat_succ`; `Γ ⊢ n̄ : N` for every `n` by `lit_zero`/`lit_succ` (the typing of a `deq`); an
+equation over fresh variables is instantiated at literals by substitution (`IsDefEq.instN`,
+the spec's `instDF`; the equations are stated in extended contexts, so `f` must be closed
+for the premises' `f` to be the lifting of the conclusion's `f`, which is why every
+function the equations mention is required closed, directly or by its own relation);
+`f ā ≡ f ā : Π N. N` from the typing premise and `ā : N`, so the congruence `appDF` turns
+`b̄ ≡ e` into `f ā b̄ ≡ f ā e`. The `*_eqs_i` rules are definitional (a relation introduced
+by its only rule) and need no argument; the `_i` premises' order is also the generator's.
+
+| rule | argument |
+|---|---|
+| `nat_add_lit`: `add_eqs G f > badd a b c > ⊢ G, f ā b̄ ≡ c̄ : N` | by induction on `b`, `f ā b̄ ≡ (a+b)‾`: `f ā 0̄ ≡ f ā Z ≡ ā` (`lit_zero`, congruence, the first equation at `x := ā`); `f ā (b+1)‾ ≡ f ā (S b̄) ≡ S (f ā b̄) ≡ S (a+b)‾ ≡ (a+b+1)‾` (`lit_succ`, the second equation at `x := ā, y := b̄`, the hypothesis with congruence, `lit_succ` backwards). `badd` gives `c = a+b` (above). |
+| `nat_sub_lit`, `nat_sub_lit0`: `sub_eqs G f p > badd c b a > f ā b̄ ≡ c̄`; `> badd a c b > f ā b̄ ≡ 0̄` | by induction on `b`, `f ā b̄ ≡ (a ∸ b)‾` (truncated subtraction): the step is `f ā (S b̄) ≡ p (f ā b̄) ≡ p (a∸b)‾`, and `pred_eqs G p` gives `p Z ≡ Z` and `p (S n̄) ≡ n̄`, so `p (a∸b)‾ ≡ (a∸b∸1)‾` in both cases. `c + b = a` makes `a ∸ b = c`, and `a + c = b` makes `a ∸ b = 0`. |
+| `nat_mul_lit`: `mul_eqs G f fa > bmul a b c > f ā b̄ ≡ c̄` | by induction on `b`, `f ā b̄ ≡ (a·b)‾`: `f ā (S b̄) ≡ fa (f ā b̄) ā ≡ fa (a·b)‾ ā ≡ (a·b + a)‾`, the last by `nat_add_lit`'s argument for `fa` (its premise `add_eqs G fa`). |
+| `nat_pow_lit`: `pow_eqs G f fm fa > bpow a b c > f ā b̄ ≡ c̄` | by induction on `b`, `f ā b̄ ≡ (a^b)‾`: `f ā 0̄ ≡ S Z ≡ 1̄` (`a^0 = 1`, as `bpow`); `f ā (S b̄) ≡ fm (f ā b̄) ā ≡ fm (a^b)‾ ā ≡ (a^b · a)‾` by `nat_mul_lit`'s argument for `fm`. |
+| `nat_beq_lit`: `beq_eqs G f B t u > f ā ā ≡ t : B`; `nat_beq_lit_lt`: `> baddc a c b > f ā b̄ ≡ u`; `nat_beq_lit_gt`: `> baddc b c a > f ā b̄ ≡ u` | the fourth equation, `f (S x) (S y) ≡ f x y`, at literals (`lit_succ` on both arguments) gives `f (n+1)‾ (m+1)‾ ≡ f n̄ m̄`, so by induction on `a`: `f ā ā ≡ f 0̄ 0̄ ≡ f Z Z ≡ t`; for `b = a+c+1 > a`, `f ā b̄ ≡ f 0̄ (c+1)‾ ≡ f Z (S c̄) ≡ u` (the second equation at `x := c̄`); for `a = b+c+1 > b` symmetrically with the third. `B`, `t` and `u` are required closed because `u` occurs in equations stated under a binder (and `B` as their type); `t` is only used in `G`, so its closedness is a harmless extra premise. |
+| `nat_ble_lit`: `ble_eqs G f B t u > badd a c b > f ā b̄ ≡ t`; `nat_ble_lit_gt`: `> baddc b c a > f ā b̄ ≡ u` | as for `beq` with the third equation: for `b = a+c`, `f ā b̄ ≡ f 0̄ c̄ ≡ f Z c̄ ≡ t` (the first equation at `x := c̄`); for `a = b+c+1`, `f ā b̄ ≡ f (c+1)‾ 0̄ ≡ f (S c̄) Z ≡ u` (the second). |
+| `nat_shl_lit`: `shl_eqs G f fm fa > bpow 2 b p > bmul a p c > f ā b̄ ≡ c̄` | by induction on `b` for all `a`, `f ā b̄ ≡ (a·2^b)‾`: `f ā 0̄ ≡ ā`; `f ā (S b̄) ≡ f (fm 2̄ ā) b̄ ≡ f (2a)‾ b̄ ≡ (2a·2^b)‾` (the second equation, `nat_mul_lit`'s argument for `fm` with congruence, the hypothesis at `2a`). |
+| `nat_shr_lit_z`: `shr_eqs G f fd > f ā 0̄ ≡ ā`; `nat_shr_lit_s`: `> bsucc b b2 > f ā b̄ ≡ c̄ > fd c̄ 2̄ ≡ c2‾ > f ā b2‾ ≡ c2‾` | one shift at a time, with the division by 2 a premise (the certificate derives it from `Nat.div`'s rule or axiom): `f ā 0̄ ≡ f ā Z ≡ ā`; `f ā b2‾ ≡ f ā (S b̄) ≡ fd (f ā b̄) 2̄ ≡ fd c̄ 2̄ ≡ c2‾` (`lit_succ`, the second equation at `x := ā, y := b̄`, congruence with the third premise, which needs `fd` closed and typed, both from the premises, then the fourth). Nothing else is assumed of `fd`. |
+
+The equations are derived with the kernel's computation on literals switched off in nanoda
+(`nat_ops_off`), since `Nat.beq 0 0 ≡ true` would otherwise be a computation about the very
+rule being established; the derivation then unfolds the definition (which is what the
+equations are about).
 
 String literals have no axioms: a string literal is translated as its expansion
 `String.ofList [Char.ofNat n, …]` (Lean4Lean's translation; nanoda expands it in `def_eq`), so
@@ -565,9 +610,9 @@ itself, accepting only the forms lean0 writes. For every declaration of the expo
   `closed k (c us)` over `(k: nat)` and the levels, or `leqv u u2 > ... > eeqv (c us) (c us2)`
   over the levels and their primed copies, with no other hypotheses.
 
-Not checked by it: the other generated axioms, of stage-A blocks and literal operations (§4
-and §5) and the `_df` typing axioms of opaque constants, which are argued and generated, not
-compared with anything in the export; and whether a
+Not checked by it: the other generated axioms, of stage-A blocks and the division-like
+literal operations (§4 and §5) and the `_df` typing axioms of opaque constants, which are
+argued and generated, not compared with anything in the export; and whether a
 theorem's proof term (an abstract def) is the export's (it is never stated, so it cannot
 matter). The comparison reads both sides structurally, so a translation bug, a doc comment
 naming the wrong constant, or a statement edited by hand is reported, with the first place
@@ -640,9 +685,11 @@ departures from the verbatim presentation:
   hold schematically (§2). With the case-split rules of §4 (`lparam`, `leqv_cases`,
   `leqv_inst`) the axioms decide `leqv` completely: `imax`-free levels are compared by normal
   form, and a parameter under `imax` is split on until none is left.
-* **Nat literals** (§5): `lit : bin > expr` over binary numerals, with generated axioms tying
-  `lit` to `Nat.zero` and `Nat.succ` and to each accelerated operation. A **string literal** is
-  translated as its `String.ofList` expansion and needs no axiom.
+* **Nat literals** (§5): `lit : bin > expr` over binary numerals, tied to `Nat.zero` and
+  `Nat.succ` by the spec (`lit_zero`, `lit_succ`), with the accelerated operations as rules
+  over their defining equations (`add_eqs`/`nat_add_lit`, ...; the division-like ones as
+  generated axioms). A **string literal** is translated as its `String.ofList` expansion and
+  needs no axiom.
 * **Inductives** (§4, stage B): a block is a data term, `def X_D (us): ind = ind_mk X_blk P T`,
   and its types, constructors and recursors are the spec's `ind_ty (X_D us) i`,
   `ind_ctor (X_D us) i c` and `ind_rec (X_D us) i v` (no term per constant; `v` the motive's
