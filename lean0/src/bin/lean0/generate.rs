@@ -48,7 +48,7 @@ struct Spec {
 }
 
 pub fn run(args: &[String]) -> Result<(), String> {
-    let usage = "usage: lean0 gen EXPORT.ndjson OUT_DIR NAME [--keep-going] [--stats-only | --statements-only] [--jobs N [--parts P [--max-pending M]] [--balance STATS]] [--spec SPEC.mm0] [--tamper-axiom A | --tamper-theorem T]...";
+    let usage = "usage: lean0 gen EXPORT.ndjson OUT_DIR NAME [--keep-going] [--stats-only | --statements-only] [--jobs N [--parts P [--max-pending M]] [--balance STATS]] [--spec SPEC.mm0] [--tamper-axiom A | --tamper-theorem T]... [--unchecked]";
     let [export, out, name, opts @ ..] = args else { return Err(usage.into()) };
     let mut spec = Spec { text: lean0_check::SPEC.to_string(), file: "lean.mm0".into(), path: None };
     let mut tamper_axioms = Vec::new();
@@ -56,6 +56,7 @@ pub fn run(args: &[String]) -> Result<(), String> {
     let mut keep_going = false;
     let mut stats_only = false;
     let mut statements_only = false;
+    let mut unchecked = false;
     let (mut jobs, mut balance, mut shard, mut parts, mut part, mut max_pending) = (None, None, None, None, None, None);
     let mut it = opts.iter();
     while let Some(o) = it.next() {
@@ -69,6 +70,10 @@ pub fn run(args: &[String]) -> Result<(), String> {
         }
         if o == "--statements-only" {
             statements_only = true;
+            continue
+        }
+        if o == "--unchecked" {
+            unchecked = true;
             continue
         }
         match (o.as_str(), it.next()) {
@@ -104,8 +109,8 @@ pub fn run(args: &[String]) -> Result<(), String> {
         if statements_only {
             return Err("--statements-only is for one part (--shard LO HI --part K)".into())
         }
-        if !tamper_axioms.is_empty() || !tamper_thms.is_empty() {
-            return Err("--jobs and --parts cannot be combined with tampering".into())
+        if !tamper_axioms.is_empty() || !tamper_thms.is_empty() || unchecked {
+            return Err("--jobs and --parts cannot be combined with tampering or --unchecked".into())
         }
         let jobs = jobs.unwrap_or_else(|| std::thread::available_parallelism().map_or(1, |n| n.get()));
         return parallel([export, out, name], &spec, jobs, parts, max_pending, balance.as_deref(), keep_going, stats_only)
@@ -127,10 +132,16 @@ pub fn run(args: &[String]) -> Result<(), String> {
     let cfg: Config = serde_json::from_value(cfg).map_err(|e| e.to_string())?;
     let (export_file, _) = cfg.to_export_file().map_err(|e| e.to_string())?;
     // The kernel decides; certificate generation only replays what it accepts. nanoda reports
-    // a type error by panicking.
-    std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| export_file.check_all_declars()))
-        .map_err(|_| "nanoda rejected the export (see the panic message above)".to_string())?;
-    eprintln!("nanoda: checked {} declarations{}", export_file.declars.len(), peak());
+    // a type error by panicking. `--unchecked` skips this, for the negative tests of the
+    // inductive schema (declarations the kernel would reject, which the schema must reject
+    // too): nanoda is not trusted, so a certificate made this way is as good as any other.
+    if unchecked {
+        eprintln!("lean0: --unchecked: the export is not checked by nanoda");
+    } else {
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| export_file.check_all_declars()))
+            .map_err(|_| "nanoda rejected the export (see the panic message above)".to_string())?;
+        eprintln!("nanoda: checked {} declarations{}", export_file.declars.len(), peak());
+    }
 
     let mut gen = Gen::new(&spec.text)?;
     let out = Path::new(out);

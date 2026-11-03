@@ -338,6 +338,21 @@ are in scope at each point.
 `whnf` (`isRecArg`, `checkPositivity`, the parameter match) make a block fall back to stage
 A, counted and reported by `lean0 gen`.
 
+**Negative tests.** The relations that compute a term (`rec_ty`, `rec_rhs`, the projections'
+types) are checked against the kernel on every block, as said above, but the relations that
+check a block (`ipos`, `ulevel`, `tys_wf`, `elim_ok`, ...) can only be too permissive, which
+no legal export shows. Lean's kernel elaborates no illegal block, so `scripts/illegal-export.py`
+makes one by one change to the export of `tests/lean/Illegal.lean` (legal blocks of the same
+shapes, all certified by the schema), and `scripts/test.sh` runs `lean0 gen --unchecked` on it,
+which skips nanoda's check so that the schema alone judges the block; the run must fail at the
+block, naming the schema. The cases, and the relation that rejects each: a non-positive
+occurrence `(NP → NP) → NP` (`ipos`: the domain is neither free of the block nor a valid
+occurrence); a field `Type` of a type in `Type` (`ulevel`); a recursor of a proposition with two
+constructors into `Sort u` (`elim_ok`); a mutual block with one type in `Type` and one in
+`Type 1` (`tys_wf`); a constructor whose result is `W (W α)` (`cwf_res`, through `iargs`); a
+field `V (V α)` (`ipos`, through `indapp` and `iargs`). nanoda rejects all six as well (two by
+not terminating, `historical/upstream-issues.md`).
+
 ### Generated per-declaration axioms (stage A, `lean0/src/gen.rs`)
 
 These live in the generated `.mm0`, not in `lean.mm0`, and must be read against the Lean

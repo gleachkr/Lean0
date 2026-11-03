@@ -177,21 +177,26 @@ tamper nested rejected --tamper-theorem tree_size_ex_ty
 for ax in ind_iota_nst rst_ty nst_hit_z aux_data_i spz_hit ndecl_cons; do tamper nested rejected --tamper-axiom "$ax"; done
 tamper nested accepted --tamper-axiom spz_proj
 # Literals: the ties, the operations' rules over their defining equations (the derived
-# `_eqs` and `_lit` theorems), the generated axioms of the division-like operations, and the
+# `_eqs` and `_lit` theorems, including the division-like operations' relations over the
+# decision reflection, the fuel recursions and the well-founded fixpoint), and the
 # binary-arithmetic relations.
 tamper lit rejected --tamper-theorem lit_mul_big_ty
 tamper lit rejected --tamper-theorem dbl_ex_ty
-for th in Nat_add_eqs Nat_pred_eqs Nat_beq_eqs Nat_shiftRight_eqs Nat_add_lit Nat_sub_lit0 Nat_ble_lit_gt Nat_shiftLeft_lit; do
+for th in Nat_add_eqs Nat_pred_eqs Nat_beq_eqs Nat_shiftRight_eqs Nat_div_eqs Nat_mod_eqs Nat_gcd_eqs \
+          Nat_bitwise_eqs Nat_xor_eqs Nat_add_lit Nat_sub_lit0 Nat_ble_lit_gt Nat_shiftLeft_lit Nat_div_lit \
+          Nat_mod_lit Nat_gcd_lit Nat_gcd_lit2 Nat_land_lit Nat_lor_lit; do
   tamper lit rejected --tamper-theorem "$th"
 done
 for ax in lit_zero lit_succ nat_add_lit add_eqs_i pred_eqs_i sub_eqs_i nat_mul_lit nat_pow_lit nat_beq_lit_gt \
-          nat_ble_lit nat_shl_lit nat_shr_lit_z nat_shr_lit_s Nat_div_lit Nat_mod_lit Nat_gcd_lit2 Nat_land_lit \
-          closed_lit bsucc_d1 badd_11 baddc_11 bmul_d1 bpow_d1 bdbl_d1; do
+          nat_ble_lit nat_shl_lit nat_shr_lit_z nat_shr_lit_s dec_eqs_i ite_eqs_i natle_dec_i nateq_dec_i \
+          bool_dec_i div_eqs_i mod_eqs_i fix_eqs_i gcd_eqs_i bitwise_eqs_i bitop_eqs_i nat_div_lit nat_mod_lit \
+          nat_gcd_lit nat_gcd_lit2 nat_land_lit nat_lor_lit nat_xor_lit \
+          closed_lit bsucc_d1 badd_11 baddc_11 bmul_d1 bpow_d1 bdbl_d1 bxor_11; do
   tamper lit rejected --tamper-axiom "$ax"
 done
-tamper lit accepted --tamper-axiom bxor_11
-tamper lit accepted --tamper-axiom Nat_div_lit0
-tamper lit accepted --tamper-axiom Nat_gcd_lit
+# every rule is used by its `_lit` theorem's proof; what the module has no use for
+tamper lit accepted --tamper-axiom quot_lift_mk
+tamper lit accepted --tamper-axiom ind_iota_nst
 # Substitution (typing handles).
 for ax in instDF cinst_z cinst_s; do tamper lit rejected --tamper-axiom "$ax"; done
 
@@ -205,5 +210,23 @@ if target/release/lean0 gen "$bad/bad.ndjson" "$bad" bad > /dev/null 2>&1 || [ -
 else
   echo "rejected as expected: corrupted export"
 fi
+
+echo "== negative tests: illegal inductive blocks (the schema must reject them)"
+# Lean's kernel elaborates no illegal block, so each is made by one change to the export of
+# tests/lean/Illegal.lean (whose blocks the schema certifies, the control), and `--unchecked`
+# skips nanoda's check so that the schema alone judges it: `lean0 gen` must fail at the block,
+# naming the schema. nanoda rejects every one of them too (two by not terminating).
+for case in nonpositive universe elim mutual result occurrence; do
+  d="build/gen/illegal-$case"
+  rm -rf "$d"; mkdir -p "$d"
+  python3 scripts/illegal-export.py build/lean/illegal.ndjson "$d/x.ndjson" "$case"
+  if target/release/lean0 gen "$d/x.ndjson" "$d" x --unchecked > "$d/log" 2>&1 || [ -e "$d/x.mmb" ]; then
+    echo "FAIL: an illegal inductive block was certified: $case"; fail=1
+  elif ! grep -q 'by the schema' "$d/log"; then
+    echo "FAIL: not rejected by the schema: $case"; fail=1
+  else
+    echo "rejected as expected: $(grep -m1 'by the schema' "$d/log" | sed 's/^lean0: //; s/: horn:.*//') ($case)"
+  fi
+done
 
 [ "$fail" = 0 ] && echo "all tests passed" || { echo "SOME TESTS FAILED"; exit 1; }

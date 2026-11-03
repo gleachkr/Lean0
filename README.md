@@ -175,7 +175,9 @@ To use lean0, you need:
 
 **For development**, `nix develop` has Rust, elan, perf and the pinned verifiers (mm0-c,
 mm0-zig, and Aufbau's `abc` for the hand proofs). Then `scripts/test.sh` runs everything, with
-both verifiers and the negative tests, and prints "all tests passed". It builds lean4export
+both verifiers and the negative tests (tampered certificates, a corrupted export, and
+hand-made illegal inductive declarations, which the schema must reject), and prints "all
+tests passed". It builds lean4export
 in `tests/lake`, as a Lake dependency at the pinned revision.
 
 ## Use
