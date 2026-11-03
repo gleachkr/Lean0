@@ -7,9 +7,10 @@
 //! the defining equations Lean4Lean checks of the definition are derived over fresh
 //! variables when it is declared (`eqs_theorem`: the theorem `Nat_add_eqs: add_eqs G Nat_add`),
 //! and the operation's theorems on literals (`Nat_add_lit`, ...) follow from the spec's
-//! rules. The other operations' theorems (`OPS` without a schema: `Nat.div`, `Nat.mod`,
-//! `Nat.gcd` and the bitwise operations), and those of an operation whose equations cannot
-//! be derived, are generated axioms (stage A, counted in the run's report).
+//! rules. `natrec` does the same for the division-like operations (`Nat.div`, `Nat.mod`,
+//! `Nat.gcd`, `Nat.bitwise` and the bitwise operations), whose relations are larger. The
+//! theorems of an operation whose equations cannot be derived are generated axioms (stage A,
+//! counted in the run's report).
 //!
 //! One table (`OPS`) gives each operation's theorems. `op_axioms` states them, and the
 //! elaborator instantiates them with `witness`.
@@ -102,16 +103,16 @@ pub const OPS: &[Op] = &[
         to_bool: false,
         axs: &[
             // q b = m, m + r = a, r < b
-            OpAx { suffix: "lit", vars: DIVMOD, hyps: DIVMOD_HYPS, lhs: [V(0), V(1)], rhs: Rhs::Lit(V(2)), schema: None },
-            OpAx { suffix: "lit0", vars: &["a"], hyps: &[], lhs: [V(0), N(0)], rhs: Rhs::Lit(N(0)), schema: None },
+            OpAx { suffix: "lit", vars: DIVMOD, hyps: DIVMOD_HYPS, lhs: [V(0), V(1)], rhs: Rhs::Lit(V(2)), schema: Some("nat_div_lit") },
+            OpAx { suffix: "lit0", vars: &["a"], hyps: &[], lhs: [V(0), N(0)], rhs: Rhs::Lit(N(0)), schema: Some("nat_div_lit0") },
         ],
     },
     Op {
         lean: "Nat.mod",
         to_bool: false,
         axs: &[
-            OpAx { suffix: "lit", vars: DIVMOD, hyps: DIVMOD_HYPS, lhs: [V(0), V(1)], rhs: Rhs::Lit(V(4)), schema: None },
-            OpAx { suffix: "lit0", vars: &["a"], hyps: &[], lhs: [V(0), N(0)], rhs: Rhs::Lit(V(0)), schema: None },
+            OpAx { suffix: "lit", vars: DIVMOD, hyps: DIVMOD_HYPS, lhs: [V(0), V(1)], rhs: Rhs::Lit(V(4)), schema: Some("nat_mod_lit") },
+            OpAx { suffix: "lit0", vars: &["a"], hyps: &[], lhs: [V(0), N(0)], rhs: Rhs::Lit(V(0)), schema: Some("nat_mod_lit0") },
         ],
     },
     Op {
@@ -125,7 +126,7 @@ pub const OPS: &[Op] = &[
                 hyps: &[GCD_DIV[0], GCD_DIV[1], GCD_DIV[2], GCD_DIV[3], (Rel::Add, &[V(8), V(2), V(7)])],
                 lhs: [V(0), V(1)],
                 rhs: Rhs::Lit(V(2)),
-                schema: None,
+                schema: Some("nat_gcd_lit"),
             },
             OpAx {
                 suffix: "lit2",
@@ -133,7 +134,7 @@ pub const OPS: &[Op] = &[
                 hyps: &[GCD_DIV[0], GCD_DIV[1], GCD_DIV[2], GCD_DIV[3], (Rel::Add, &[V(7), V(2), V(8)])],
                 lhs: [V(0), V(1)],
                 rhs: Rhs::Lit(V(2)),
-                schema: None,
+                schema: Some("nat_gcd_lit2"),
             },
         ],
     },
@@ -155,9 +156,9 @@ pub const OPS: &[Op] = &[
             OpAx { suffix: "lit_gt", vars: ABC, hyps: &[(Rel::AddC, &[V(1), V(2), V(0)])], lhs: [V(0), V(1)], rhs: Rhs::False, schema: Some("nat_ble_lit_gt") },
         ],
     },
-    Op { lean: "Nat.land", to_bool: false, axs: &[bin_op("lit", Rel::And, None)] },
-    Op { lean: "Nat.lor", to_bool: false, axs: &[bin_op("lit", Rel::Or, None)] },
-    Op { lean: "Nat.xor", to_bool: false, axs: &[bin_op("lit", Rel::Xor, None)] },
+    Op { lean: "Nat.land", to_bool: false, axs: &[bin_op("lit", Rel::And, Some("nat_land_lit"))] },
+    Op { lean: "Nat.lor", to_bool: false, axs: &[bin_op("lit", Rel::Or, Some("nat_lor_lit"))] },
+    Op { lean: "Nat.xor", to_bool: false, axs: &[bin_op("lit", Rel::Xor, Some("nat_xor_lit"))] },
     Op { lean: "Nat.pow", to_bool: false, axs: &[bin_op("lit", Rel::Pow, Some("nat_pow_lit"))] },
     Op {
         lean: "Nat.shiftLeft",
@@ -324,6 +325,9 @@ pub const EQS: &[Eqs] = &[
 
 pub fn eqs(lean: &str) -> Option<&'static Eqs> { EQS.iter().find(|e| e.lean == lean) }
 
+/// Every operation with defining equations in the spec, here or in `natrec`.
+pub fn eq_ops() -> impl Iterator<Item = &'static str> { EQS.iter().map(|e| e.lean).chain(crate::natrec::OPS.iter().map(|o| o.lean)) }
+
 /// Exponents (of `Nat.pow`, and shift distances) beyond this are refused: the certificate
 /// would be far too large anyway.
 const MAX_EXPONENT: u64 = 1 << 20;
@@ -475,7 +479,7 @@ fn spec_rules(el: &mut Elab<'_, '_, '_, '_>) -> bool {
 /// The arguments after `G` of `e.rel` (and of the rules over it): the definition, then for
 /// a `Bool` result `Bool`, `true` and `false`, then the arguments of each dependency's
 /// relation, then the other functions.
-fn rel_args(el: &mut Elab<'_, '_, '_, '_>, e: &Eqs) -> Option<Vec<E>> {
+pub(crate) fn rel_args(el: &mut Elab<'_, '_, '_, '_>, e: &Eqs) -> Option<Vec<E>> {
     let mut v = vec![konst(el, e.lean)?];
     if e.bool_result {
         v.extend([konst(el, "Bool")?, konst(el, "Bool.true")?, konst(el, "Bool.false")?]);
@@ -614,10 +618,16 @@ pub fn op_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, lean: &str, cname: &str, ty:
     if el.g.nat.is_none() {
         return Ok(())
     }
-    if let Some(e) = eqs(lean) {
+    let rec_op = crate::natrec::op(lean);
+    if eqs(lean).is_some() || rec_op.is_some() {
         if spec_rules(el) {
             let (order0, pfs0) = (el.g.env.order.len(), el.g.env.num_pfs());
-            match eqs_theorem(el, e, cname) {
+            let r = match (eqs(lean), rec_op) {
+                (Some(e), _) => eqs_theorem(el, e, cname),
+                (None, Some(o)) => crate::natrec::eqs_theorem(el, o, cname),
+                _ => unreachable!(),
+            };
+            match r {
                 Ok(th) => {
                     el.g.nat_eqs.insert(lean.to_string(), th);
                     el.g.lit_stage_b += 1;
@@ -643,7 +653,11 @@ pub fn op_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, lean: &str, cname: &str, ty:
     let Some(f) = konst(el, lean) else { return Ok(()) };
     let t = el.tr(ty)?;
     let eqs_th = el.g.nat_eqs.get(lean).copied();
-    let rel_args = eqs(lean).and_then(|e| rel_args(el, e)).unwrap_or_default();
+    let rel_args = match (eqs(lean), rec_op) {
+        (Some(e), _) => rel_args(el, e).unwrap_or_default(),
+        (None, Some(o)) => crate::natrec::lit_rule_args(el, o).unwrap_or_default(),
+        _ => Vec::new(),
+    };
     let g = &mut *el.g;
     let r1 = g.lean.pi(&mut g.env, nat, res);
     let want = g.lean.pi(&mut g.env, nat, r1);
@@ -708,7 +722,7 @@ pub fn op_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, lean: &str, cname: &str, ty:
         };
         ths.push(th);
     }
-    if eqs_th.is_none() && eqs(lean).is_none() {
+    if eqs_th.is_none() && eqs(lean).is_none() && rec_op.is_none() {
         g.lit_stage_a.push((lean.to_string(), "no rules in the spec".into()));
     }
     g.nat_ops.insert(lean.to_string(), ths);

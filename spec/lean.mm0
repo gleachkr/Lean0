@@ -23,8 +23,8 @@ delimiter $ ( ) , . $;
 --|   Lean4Lean unfolds literals to `Nat.succ`/`Nat.zero`), tied to Lean's
 --|   `Nat` by `lit_zero`/`lit_succ`. The accelerated operations are rules
 --|   over the defining equations Lean4Lean checks (`add_eqs`, `nat_add_lit`,
---|   ...), except the division-like ones, whose axioms a certificate
---|   generates.
+--|   ...; `div_eqs`, `gcd_eqs`, `bitwise_eqs`, ... for the operations defined
+--|   by fuel and well-founded recursion).
 --| * Lean's `Nat` and `Eq` are the blocks `nat_D` and `eq_D` (data the
 --|   checker compares with the export), and the quotient primitives are
 --|   constants with the kernel's types and reduction rules.
@@ -415,9 +415,8 @@ axiom bxor_11 (a b c d: bin): $ bxor a b c $ > $ bdbl c d $ > $ bxor (bd1 a) (bd
 --| `lit n`: the Nat literal with value `n`, read as `Nat.succ^n Nat.zero`
 --| (Lean4Lean's translation of literals). `lit_zero` and `lit_succ` (below,
 --| after the inductive schema) relate it to Lean's `Nat`, and the rules for
---| the accelerated operations follow them (`nat_add_lit`, ...; those of
---| `Nat.div`, `Nat.mod`, `Nat.gcd` and the bitwise operations are generated
---| with each operation); see notes/audit-lean-mm0.md.
+--| the accelerated operations follow them (`nat_add_lit`, ...); see
+--| notes/audit-lean-mm0.md.
 term lit: bin > expr;
 axiom closed_lit (k: nat) (n: bin): $ closed k (lit n) $;
 
@@ -1154,8 +1153,8 @@ axiom lit_succ (G: ctx) (a b: bin):
 -- declared. `Nat.pred`, `Nat.add` and `Nat.mul` enter the equations of
 -- `Nat.sub`, `Nat.mul`, `Nat.pow` and `Nat.shiftLeft` with their own, and
 -- `Nat.shiftRight` is computed a shift at a time from the divisions by 2.
--- `Nat.div`, `Nat.mod`, `Nat.gcd` and the bitwise operations have no rules
--- here: a certificate generates their axioms (audit §5).
+-- `Nat.div`, `Nat.mod`, `Nat.gcd` and the bitwise operations follow, under
+-- "The division-like operations".
 ---------------------------------------------------------------------------
 
 --| Lean's `Nat`, `Nat.zero` and `Nat.succ`.
@@ -1285,6 +1284,278 @@ axiom nat_shr_lit_s (G: ctx) (f fd: expr) (a b b2 c c2: bin):
   $ shr_eqs G f fd $ > $ bsucc b b2 $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $ >
   $ ⊢ G, fd @ lit c @ lit (bd0 (bd1 b0)) ≡ lit c2 : nat_ty $ >
   $ ⊢ G, f @ lit a @ lit b2 ≡ lit c2 : nat_ty $;
+
+-- The division-like operations (audit §5). Lean4Lean's checks of `Nat.div`,
+-- `Nat.mod`, `Nat.gcd` and `Nat.bitwise` (`Condition.check`, `checkNatDITE`,
+-- `checkITE`, `checkNatFuelRec`, `unfoldNatWellFounded` and its probes) go
+-- through conditionals on decided propositions, fuel recursion and the
+-- well-founded fixpoint `WellFounded.Nat.fix`. The relations below state
+-- those checks over variables standing for Lean's `@dite Nat`, `@ite Nat`,
+-- `Decidable.intro`, `Nat.decLe`, the proof terms, and so on: nothing is
+-- assumed of them beyond the equations.
+
+--| The literals `0`, `1` and `2`.
+def lit0: expr = $ lit b0 $;
+def lit1: expr = $ lit (bd1 b0) $;
+def lit2: expr = $ lit (bd0 (bd1 b0)) $;
+
+--| `dec_eqs G B t u Not Dec dite T R ofT ofF`: a reflection of decisions
+--| (Lean4Lean's `Reflection`): `R p b H : Dec p` decides the proposition `p`
+--| by the Bool `b`, given `H : T p b`, and the dependent conditional at
+--| `nat_ty` reduces on it: `dite p (R p t H) a b ≡ a (ofT p H)` and
+--| `dite p (R p u H) a b ≡ b (ofF p H)` (`checkNatDITE`), for fresh
+--| `p : Prop`, `H`, `a` and `b`. In Lean, `Decidable.intro`, `Bool.Reflects`
+--| and `@dite Nat`.
+term dec_eqs: ctx > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > wff;
+axiom dec_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF: expr):
+  $ closed z B $ > $ closed z t $ > $ closed z u $ > $ closed z Not $ > $ closed z Dec $ >
+  $ closed z dite $ > $ closed z T $ > $ closed z R $ > $ closed z ofT $ > $ closed z ofF $ >
+  $ ⊢ (Π (Not @ # (s (s z))). nat_ty) :: (Π # (s z). nat_ty) :: (T @ # z @ t) :: srt lz :: G,
+      dite @ # (s (s (s z))) @ (R @ # (s (s (s z))) @ t @ # (s (s z))) @ # (s z) @ # z ≡ # (s z) @ (ofT @ # (s (s (s z))) @ # (s (s z))) : nat_ty $ >
+  $ ⊢ (Π (Not @ # (s (s z))). nat_ty) :: (Π # (s z). nat_ty) :: (T @ # z @ u) :: srt lz :: G,
+      dite @ # (s (s (s z))) @ (R @ # (s (s (s z))) @ u @ # (s (s z))) @ # (s z) @ # z ≡ # z @ (ofF @ # (s (s (s z))) @ # (s (s z))) : nat_ty $ >
+  $ dec_eqs G B t u Not Dec dite T R ofT ofF $;
+--| `ite_eqs G B t u T R ite`: the conditional at `nat_ty` reduces on the
+--| reflection: `ite p (R p t H) a b ≡ a` and `ite p (R p u H) a b ≡ b`
+--| (`checkITE`). In Lean, `@ite Nat`.
+term ite_eqs: ctx > expr > expr > expr > expr > expr > expr > wff;
+axiom ite_eqs_i (G: ctx) (B t u T R ite: expr):
+  $ closed z B $ > $ closed z t $ > $ closed z u $ > $ closed z T $ > $ closed z R $ > $ closed z ite $ >
+  $ ⊢ nat_ty :: nat_ty :: (T @ # z @ t) :: srt lz :: G,
+      ite @ # (s (s (s z))) @ (R @ # (s (s (s z))) @ t @ # (s (s z))) @ # (s z) @ # z ≡ # (s z) : nat_ty $ >
+  $ ⊢ nat_ty :: nat_ty :: (T @ # z @ u) :: srt lz :: G,
+      ite @ # (s (s (s z))) @ (R @ # (s (s (s z))) @ u @ # (s (s z))) @ # (s z) @ # z ≡ # z : nat_ty $ >
+  $ ite_eqs G B t u T R ite $;
+
+--| `natle_dec G B t u Not Dec dite T R ofT ofF leN dleN ble pf`: with the
+--| reflection, `dleN x y ≡ R (leN x y) (ble x y) (pf x y)` for fresh `x y`,
+--| where `ble` has `Nat.ble`'s equations (`Condition.natLE`): Lean's
+--| `Nat.decLe` decides `≤` by `Nat.ble`.
+term natle_dec: ctx > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > wff;
+axiom natle_dec_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf: expr):
+  $ dec_eqs G B t u Not Dec dite T R ofT ofF $ > $ ble_eqs G ble B t u $ >
+  $ closed z leN $ > $ closed z dleN $ > $ closed z pf $ >
+  $ ⊢ nat_ty :: nat_ty :: G,
+      dleN @ # (s z) @ # z ≡ R @ (leN @ # (s z) @ # z) @ (ble @ # (s z) @ # z) @ (pf @ # (s z) @ # z) : Dec @ (leN @ # (s z) @ # z) $ >
+  $ natle_dec G B t u Not Dec dite T R ofT ofF leN dleN ble pf $;
+
+--| `nateq_dec G ... eqN deqN beq pq`: likewise `deqN x y ≡ R (eqN x y) (beq x y) (pq x y)`
+--| with `Nat.beq`'s equations (`Condition.natEq`): Lean's `Nat.decEq`.
+term nateq_dec: ctx > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > wff;
+axiom nateq_dec_i (G: ctx) (B t u Not Dec dite T R ofT ofF eqN deqN beq pq: expr):
+  $ dec_eqs G B t u Not Dec dite T R ofT ofF $ > $ beq_eqs G beq B t u $ >
+  $ closed z eqN $ > $ closed z deqN $ > $ closed z pq $ >
+  $ ⊢ nat_ty :: nat_ty :: G,
+      deqN @ # (s z) @ # z ≡ R @ (eqN @ # (s z) @ # z) @ (beq @ # (s z) @ # z) @ (pq @ # (s z) @ # z) : Dec @ (eqN @ # (s z) @ # z) $ >
+  $ nateq_dec G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $;
+
+--| `bool_dec G B t u Not dite ite bp bd`: a condition on a Bool
+--| (`Condition.bool`: `bp b` is `b = true`, decided by `bd b`): the
+--| conditionals at `nat_ty` reduce on `bp t` and `bp u`, for fresh `a b`:
+--| `dite (bp t) (bd t) (λ _. a) (λ _. b) ≡ a`, `ite (bp t) (bd t) a b ≡ a`,
+--| and the `u` cases to `b`.
+term bool_dec: ctx > expr > expr > expr > expr > expr > expr > expr > expr > wff;
+axiom bool_dec_i (G: ctx) (B t u Not dite ite bp bd: expr):
+  $ closed z B $ > $ closed z t $ > $ closed z u $ > $ closed z Not $ >
+  $ closed z dite $ > $ closed z ite $ > $ closed z bp $ > $ closed z bd $ >
+  $ ⊢ nat_ty :: nat_ty :: G,
+      dite @ (bp @ t) @ (bd @ t) @ (λ (bp @ t). # (s (s z))) @ (λ (Not @ (bp @ t)). # (s z)) ≡ # (s z) : nat_ty $ >
+  $ ⊢ nat_ty :: nat_ty :: G,
+      dite @ (bp @ u) @ (bd @ u) @ (λ (bp @ u). # (s (s z))) @ (λ (Not @ (bp @ u)). # (s z)) ≡ # z : nat_ty $ >
+  $ ⊢ nat_ty :: nat_ty :: G, ite @ (bp @ t) @ (bd @ t) @ # (s z) @ # z ≡ # (s z) : nat_ty $ >
+  $ ⊢ nat_ty :: nat_ty :: G, ite @ (bp @ u) @ (bd @ u) @ # (s z) @ # z ≡ # z : nat_ty $ >
+  $ bool_dec G B t u Not dite ite bp bd $;
+
+--| `div_eqs G ... leN dleN ble pf sub p f go pfs lem`: Lean4Lean's
+--| `checkNatDiv`: with `Nat.decLe`'s reflection and `Nat.sub`'s equations,
+--| `f x y ≡ dite (leN 1 y) (dleN 1 y) (λ hy. go y hy (succ x) x (pfs x)) (λ _. 0)`
+--| and, for `hy : leN 1 y` and `h : leN (succ x) (succ fuel)`,
+--| `go y hy (succ fuel) x h ≡ dite (leN y x) (dleN y x)
+--|   (λ h2. succ (go y hy fuel (sub x y) (lem x y fuel hy h2 h))) (λ _. 0)`:
+--| Lean's `Nat.div` and `Nat.div.go` (fuel recursion, the proofs
+--| `Nat.lt_succ_self` and `Nat.div_rec_fuel_lemma`).
+term div_eqs: ctx > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > wff;
+axiom div_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr):
+  $ natle_dec G B t u Not Dec dite T R ofT ofF leN dleN ble pf $ > $ sub_eqs G sub p $ >
+  $ closed z f $ > $ closed z go $ > $ closed z pfs $ > $ closed z lem $ >
+  $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
+  $ ⊢ nat_ty :: nat_ty :: G,
+      f @ # (s z) @ # z ≡ dite @ (leN @ lit1 @ # z) @ (dleN @ lit1 @ # z)
+        @ (λ (leN @ lit1 @ # z). go @ # (s z) @ # z @ (nat_succ @ # (s (s z))) @ # (s (s z)) @ (pfs @ # (s (s z))))
+        @ (λ (Not @ (leN @ lit1 @ # z)). lit0) : nat_ty $ >
+  $ ⊢ (leN @ (nat_succ @ # (s (s (s z)))) @ (nat_succ @ # z)) :: nat_ty :: (leN @ lit1 @ # z) :: nat_ty :: nat_ty :: G,
+      go @ # (s (s (s z))) @ # (s (s z)) @ (nat_succ @ # (s z)) @ # (s (s (s (s z)))) @ # z ≡ dite @ (leN @ # (s (s (s z))) @ # (s (s (s (s z))))) @ (dleN @ # (s (s (s z))) @ # (s (s (s (s z)))))
+        @ (λ (leN @ # (s (s (s z))) @ # (s (s (s (s z))))). nat_succ @ (go @ # (s (s (s (s z)))) @ # (s (s (s z))) @ # (s (s z)) @ (sub @ # (s (s (s (s (s z))))) @ # (s (s (s (s z))))) @ (lem @ # (s (s (s (s (s z))))) @ # (s (s (s (s z)))) @ # (s (s z)) @ # (s (s (s z))) @ # z @ # (s z))))
+        @ (λ (Not @ (leN @ # (s (s (s z))) @ # (s (s (s (s z)))))). lit0) : nat_ty $ >
+  $ div_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $;
+--| `f a b ≡ q` on literals when `q·b + r = a` and `r < b`, and `f a 0 ≡ 0`.
+axiom nat_div_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr) (a b q m r x: bin):
+  $ div_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ >
+  $ bmul q b m $ > $ badd m r a $ > $ baddc r x b $ > $ ⊢ G, f @ lit a @ lit b ≡ lit q : nat_ty $;
+axiom nat_div_lit0 (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr) (a: bin):
+  $ div_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ >
+  $ ⊢ G, f @ lit a @ lit0 ≡ lit0 : nat_ty $;
+
+--| `mod_eqs G ... sub p ite f go pfs lem`: Lean4Lean's `checkNatMod`: `f 0 x ≡ 0`,
+--| `f (succ x) y ≡ ite (leN y (succ x)) (dleN y (succ x))
+--|   (dite (leN 1 y) (dleN 1 y) (λ hy. go y hy (succ (succ x)) (succ x) (pfs (succ x))) (λ _. succ x))
+--|   (succ x)`,
+--| and `go y hy (succ fuel) x h ≡ dite (leN y x) (dleN y x)
+--|   (λ h2. go y hy fuel (sub x y) (lem x y fuel hy h2 h)) (λ _. x)`:
+--| Lean's `Nat.mod`, `Nat.modCore` and `Nat.modCore.go`.
+term mod_eqs: ctx > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > wff;
+axiom mod_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr):
+  $ natle_dec G B t u Not Dec dite T R ofT ofF leN dleN ble pf $ > $ sub_eqs G sub p $ >
+  $ ite_eqs G B t u T R ite $ >
+  $ closed z f $ > $ closed z go $ > $ closed z pfs $ > $ closed z lem $ >
+  $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
+  $ ⊢ nat_ty :: G, f @ lit0 @ # z ≡ lit0 : nat_ty $ >
+  $ ⊢ nat_ty :: nat_ty :: G,
+      f @ (nat_succ @ # (s z)) @ # z ≡ ite @ (leN @ # z @ (nat_succ @ # (s z))) @ (dleN @ # z @ (nat_succ @ # (s z)))
+        @ (dite @ (leN @ lit1 @ # z) @ (dleN @ lit1 @ # z)
+          @ (λ (leN @ lit1 @ # z). go @ # (s z) @ # z @ (nat_succ @ (nat_succ @ # (s (s z)))) @ (nat_succ @ # (s (s z))) @ (pfs @ (nat_succ @ # (s (s z)))))
+          @ (λ (Not @ (leN @ lit1 @ # z)). nat_succ @ # (s (s z))))
+        @ (nat_succ @ # (s z)) : nat_ty $ >
+  $ ⊢ (leN @ (nat_succ @ # (s (s (s z)))) @ (nat_succ @ # z)) :: nat_ty :: (leN @ lit1 @ # z) :: nat_ty :: nat_ty :: G,
+      go @ # (s (s (s z))) @ # (s (s z)) @ (nat_succ @ # (s z)) @ # (s (s (s (s z)))) @ # z ≡ dite @ (leN @ # (s (s (s z))) @ # (s (s (s (s z))))) @ (dleN @ # (s (s (s z))) @ # (s (s (s (s z)))))
+        @ (λ (leN @ # (s (s (s z))) @ # (s (s (s (s z))))). go @ # (s (s (s (s z)))) @ # (s (s (s z))) @ # (s (s z)) @ (sub @ # (s (s (s (s (s z))))) @ # (s (s (s (s z))))) @ (lem @ # (s (s (s (s (s z))))) @ # (s (s (s (s z)))) @ # (s (s z)) @ # (s (s (s z))) @ # z @ # (s z)))
+        @ (λ (Not @ (leN @ # (s (s (s z))) @ # (s (s (s (s z)))))). # (s (s (s (s (s z)))))) : nat_ty $ >
+  $ mod_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $;
+--| `f a b ≡ r` on literals when `q·b + r = a` and `r < b`, and `f a 0 ≡ a`.
+axiom nat_mod_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr) (a b q m r x: bin):
+  $ mod_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ >
+  $ bmul q b m $ > $ badd m r a $ > $ baddc r x b $ > $ ⊢ G, f @ lit a @ lit b ≡ lit r : nat_ty $;
+axiom nat_mod_lit0 (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr) (a: bin):
+  $ mod_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ >
+  $ ⊢ G, f @ lit a @ lit0 ≡ lit a : nat_ty $;
+
+--| The type of the functional of a well-founded fixpoint over the measure
+--| `hm : al → nat`: `Π x : al. (Π y : al. ltN (hm y) (hm x) → motive y) → motive x`.
+def fix_fty (al motive hm ltN: expr): expr =
+  $ Π al. Π (Π al. Π (ltN @ (hm @ # z) @ (hm @ # (s z))). motive @ # (s z)). motive @ # (s z) $;
+
+--| `fix_eqs G ite bp bd beq fix go eager al motive hm ltN pfx pfgo`: Lean's
+--| `WellFounded.Nat.fix` at the type `al` with the measure `hm`
+--| (`unfoldNatWellFounded`): for every functional `F` and `x : al`,
+--| `fix al motive hm F x ≡ go al motive hm F (eager (succ (hm x))) x (pfx x)`;
+--| `eager x ≡ ite (bp (beq x x)) (bd (beq x x)) x x` (`WellFounded.Nat.eager`,
+--| which keeps the fuel from reducing until it is a numeral); and the fuel
+--| recursion `go al motive hm F (succ t) x h ≡ F x (λ y hy. go al motive hm F t y (pfgo t x h y hy))`.
+term fix_eqs: ctx > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > wff;
+axiom fix_eqs_i (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr):
+  $ closed z ite $ > $ closed z bp $ > $ closed z bd $ > $ closed z beq $ >
+  $ closed z fix $ > $ closed z go $ > $ closed z eager $ > $ closed z al $ > $ closed z motive $ >
+  $ closed z hm $ > $ closed z ltN $ > $ closed z pfx $ > $ closed z pfgo $ >
+  $ ⊢ al :: fix_fty al motive hm ltN :: G,
+      fix @ al @ motive @ hm @ # (s z) @ # z ≡ go @ al @ motive @ hm @ # (s z) @ (eager @ (nat_succ @ (hm @ # z))) @ # z @ (pfx @ # z) : motive @ # z $ >
+  $ ⊢ nat_ty :: G, eager @ # z ≡ ite @ (bp @ (beq @ # z @ # z)) @ (bd @ (beq @ # z @ # z)) @ # z @ # z : nat_ty $ >
+  $ ⊢ (ltN @ (hm @ # z) @ (nat_succ @ # (s z))) :: al :: nat_ty :: fix_fty al motive hm ltN :: G,
+      go @ al @ motive @ hm @ # (s (s (s z))) @ (nat_succ @ # (s (s z))) @ # (s z) @ # z
+        ≡ # (s (s (s z))) @ # (s z) @ (λ al. λ (ltN @ (hm @ # z) @ (hm @ # (s (s z)))). go @ al @ motive @ hm @ # (s (s (s (s (s z))))) @ # (s (s (s (s z)))) @ # (s z) @ (pfgo @ # (s (s (s (s z)))) @ # (s (s (s z))) @ # (s (s z)) @ # (s z) @ # z)) : motive @ # (s z) $ >
+  $ fix_eqs G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $;
+
+--| `gcd_eqs G ... f pack F pfF`: Lean4Lean's `checkNatGcd`: with `Nat.mod`'s
+--| equations, `Nat.decEq`'s reflection, the Bool condition and the fixpoint,
+--| `f m n ≡ fix al motive hm F (pack m n)`, `hm (pack m n) ≡ m` (the measure
+--| is the first argument), and the probes of the functional:
+--| `F (pack 0 n) ih ≡ n` and, given `H : Not (eqN (succ m) 0)`,
+--| `F (pack (succ m) n) ih ≡ ih (pack (fm n (succ m)) (succ m)) (pfF (succ m) n H)`.
+term gcd_eqs: ctx > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > wff;
+axiom gcd_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr):
+  $ mod_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem $ >
+  $ nateq_dec G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $ >
+  $ bool_dec G B t u Not dite ite bp bd $ >
+  $ fix_eqs G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ >
+  $ closed z f $ > $ closed z pack $ > $ closed z F $ > $ closed z pfF $ >
+  $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
+  $ ⊢ nat_ty :: nat_ty :: G, f @ # (s z) @ # z ≡ fix @ al @ motive @ hm @ F @ (pack @ # (s z) @ # z) : nat_ty $ >
+  $ ⊢ nat_ty :: nat_ty :: G, hm @ (pack @ # (s z) @ # z) ≡ # (s z) : nat_ty $ >
+  $ ⊢ (Π al. Π (ltN @ (hm @ # z) @ (hm @ (pack @ lit0 @ # (s z)))). motive @ # (s z)) :: nat_ty :: G,
+      F @ (pack @ lit0 @ # (s z)) @ # z ≡ # (s z) : motive @ (pack @ lit0 @ # (s z)) $ >
+  $ ⊢ (Π al. Π (ltN @ (hm @ # z) @ (hm @ (pack @ (nat_succ @ # (s (s (s z)))) @ # (s (s z))))). motive @ # (s z))
+        :: (Not @ (eqN @ (nat_succ @ # (s z)) @ lit0)) :: nat_ty :: nat_ty :: G,
+      F @ (pack @ (nat_succ @ # (s (s (s z)))) @ # (s (s z))) @ # z
+        ≡ # z @ (pack @ (fm @ # (s (s z)) @ (nat_succ @ # (s (s (s z))))) @ (nat_succ @ # (s (s (s z))))) @ (pfF @ (nat_succ @ # (s (s (s z)))) @ # (s (s z)) @ # (s z))
+        : motive @ (pack @ (nat_succ @ # (s (s (s z)))) @ # (s (s z))) $ >
+  $ gcd_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $;
+--| `f a b ≡ g` on literals when `g` divides `a` and `b` and `x·a = y·b + g`
+--| (or `y·b = x·a + g`).
+axiom nat_gcd_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr) (a b g p2 q x y m n: bin):
+  $ gcd_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ >
+  $ bmul g p2 a $ > $ bmul g q b $ > $ bmul x a m $ > $ bmul y b n $ > $ badd n g m $ >
+  $ ⊢ G, f @ lit a @ lit b ≡ lit g : nat_ty $;
+axiom nat_gcd_lit2 (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr) (a b g p2 q x y m n: bin):
+  $ gcd_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ >
+  $ bmul g p2 a $ > $ bmul g q b $ > $ bmul x a m $ > $ bmul y b n $ > $ badd m g n $ >
+  $ ⊢ G, f @ lit a @ lit b ≡ lit g : nat_ty $;
+
+--| `bitwise_eqs G ... fb pack Fb pfB dec`: Lean4Lean's `checkNatBitwise`:
+--| with the equations of `Nat.div`, `Nat.mod` and `Nat.add`, `Nat.decEq`'s
+--| reflection, the Bool condition and the fixpoint, for a fresh
+--| `bf : B → B → B`: `fb bf n m ≡ fix al motive hm (Fb bf) (pack n m)`,
+--| `hm (pack n m) ≡ n`, `dec p (R p b H) ≡ b` (`Decidable.decide` of a
+--| reflected decision is its Bool), and the probe of the functional at
+--| `pack n m`: `Fb bf (pack n m) ih ≡`
+--|   `dite (eqN n 0) (deqN n 0) (λ _. dite (bp (bf u t)) (bd (bf u t)) (λ _. m) (λ _. 0))`
+--|   `(λ h. dite (eqN m 0) (deqN m 0) (λ _. dite (bp (bf t u)) (bd (bf t u)) (λ _. n) (λ _. 0))`
+--|   `(λ _. dite (bp (bf b1 b2)) (bd (bf b1 b2)) (λ _. fa (fa r r) 1) (λ _. fa r r)))`
+--| where `bi = dec (eqN (fm x 2) 1) (deqN (fm x 2) 1)` is the low bit of `x` and
+--| `r = ih (pack (fd n 2) (fd m 2)) (pfB n m h)` the recursive call.
+term bitwise_eqs: ctx > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > wff;
+axiom bitwise_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr):
+  $ div_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god pfs lem $ >
+  $ mod_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem $ >
+  $ nateq_dec G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $ >
+  $ bool_dec G B t u Not dite ite bp bd $ >
+  $ add_eqs G fa $ >
+  $ fix_eqs G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ >
+  $ closed z fb $ > $ closed z pack $ > $ closed z Fb $ > $ closed z pfB $ > $ closed z dec $ >
+  $ ⊩ G, fb : Π (Π B. Π B. B). Π nat_ty. Π nat_ty. nat_ty $ >
+  $ ⊢ nat_ty :: nat_ty :: (Π B. Π B. B) :: G,
+      fb @ # (s (s z)) @ # (s z) @ # z ≡ fix @ al @ motive @ hm @ (Fb @ # (s (s z))) @ (pack @ # (s z) @ # z) : nat_ty $ >
+  $ ⊢ nat_ty :: nat_ty :: G, hm @ (pack @ # (s z) @ # z) ≡ # (s z) : nat_ty $ >
+  $ ⊢ (T @ # (s z) @ # z) :: B :: srt lz :: G, dec @ # (s (s z)) @ (R @ # (s (s z)) @ # (s z) @ # z) ≡ # (s z) : B $ >
+  $ ⊢ (Π al. Π (ltN @ (hm @ # z) @ (hm @ (pack @ # (s (s z)) @ # (s z)))). motive @ # (s z)) :: nat_ty :: nat_ty :: (Π B. Π B. B) :: G,
+      Fb @ # (s (s (s z))) @ (pack @ # (s (s z)) @ # (s z)) @ # z
+        ≡ dite @ (eqN @ # (s (s z)) @ lit0) @ (deqN @ # (s (s z)) @ lit0)
+          @ (λ (eqN @ # (s (s z)) @ lit0). dite @ (bp @ (# (s (s (s (s z)))) @ u @ t)) @ (bd @ (# (s (s (s (s z)))) @ u @ t))
+              @ (λ (bp @ (# (s (s (s (s z)))) @ u @ t)). # (s (s (s z)))) @ (λ (Not @ (bp @ (# (s (s (s (s z)))) @ u @ t))). lit0))
+          @ (λ (Not @ (eqN @ # (s (s z)) @ lit0)). dite @ (eqN @ # (s (s z)) @ lit0) @ (deqN @ # (s (s z)) @ lit0)
+              @ (λ (eqN @ # (s (s z)) @ lit0). dite @ (bp @ (# (s (s (s (s (s z))))) @ t @ u)) @ (bd @ (# (s (s (s (s (s z))))) @ t @ u))
+                  @ (λ (bp @ (# (s (s (s (s (s z))))) @ t @ u)). # (s (s (s (s (s z)))))) @ (λ (Not @ (bp @ (# (s (s (s (s (s z))))) @ t @ u))). lit0))
+              @ (λ (Not @ (eqN @ # (s (s z)) @ lit0)).
+                  dite @ (bp @ (# (s (s (s (s (s z))))) @ (dec @ (eqN @ (fm @ # (s (s (s (s z)))) @ lit2) @ lit1) @ (deqN @ (fm @ # (s (s (s (s z)))) @ lit2) @ lit1)) @ (dec @ (eqN @ (fm @ # (s (s (s z))) @ lit2) @ lit1) @ (deqN @ (fm @ # (s (s (s z))) @ lit2) @ lit1))))
+                    @ (bd @ (# (s (s (s (s (s z))))) @ (dec @ (eqN @ (fm @ # (s (s (s (s z)))) @ lit2) @ lit1) @ (deqN @ (fm @ # (s (s (s (s z)))) @ lit2) @ lit1)) @ (dec @ (eqN @ (fm @ # (s (s (s z))) @ lit2) @ lit1) @ (deqN @ (fm @ # (s (s (s z))) @ lit2) @ lit1))))
+                    @ (λ (bp @ (# (s (s (s (s (s z))))) @ (dec @ (eqN @ (fm @ # (s (s (s (s z)))) @ lit2) @ lit1) @ (deqN @ (fm @ # (s (s (s (s z)))) @ lit2) @ lit1)) @ (dec @ (eqN @ (fm @ # (s (s (s z))) @ lit2) @ lit1) @ (deqN @ (fm @ # (s (s (s z))) @ lit2) @ lit1)))).
+                        fa @ (fa @ (# (s (s (s z))) @ (pack @ (fd @ # (s (s (s (s (s z))))) @ lit2) @ (fd @ # (s (s (s (s z)))) @ lit2)) @ (pfB @ # (s (s (s (s (s z))))) @ # (s (s (s (s z)))) @ # (s (s z)))) @ (# (s (s (s z))) @ (pack @ (fd @ # (s (s (s (s (s z))))) @ lit2) @ (fd @ # (s (s (s (s z)))) @ lit2)) @ (pfB @ # (s (s (s (s (s z))))) @ # (s (s (s (s z)))) @ # (s (s z))))) @ lit1)
+                    @ (λ (Not @ (bp @ (# (s (s (s (s (s z))))) @ (dec @ (eqN @ (fm @ # (s (s (s (s z)))) @ lit2) @ lit1) @ (deqN @ (fm @ # (s (s (s (s z)))) @ lit2) @ lit1)) @ (dec @ (eqN @ (fm @ # (s (s (s z))) @ lit2) @ lit1) @ (deqN @ (fm @ # (s (s (s z))) @ lit2) @ lit1))))).
+                        fa @ (# (s (s (s z))) @ (pack @ (fd @ # (s (s (s (s (s z))))) @ lit2) @ (fd @ # (s (s (s (s z)))) @ lit2)) @ (pfB @ # (s (s (s (s (s z))))) @ # (s (s (s (s z)))) @ # (s (s z)))) @ (# (s (s (s z))) @ (pack @ (fd @ # (s (s (s (s (s z))))) @ lit2) @ (fd @ # (s (s (s (s z)))) @ lit2)) @ (pfB @ # (s (s (s (s (s z))))) @ # (s (s (s (s z)))) @ # (s (s z)))))))
+        : motive @ (pack @ # (s (s z)) @ # (s z)) $ >
+  $ bitwise_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $;
+
+--| `bitop_eqs G ... f bf r1 r2 r3 r4`: `f ≡ fb bf` for a Bool function `bf`
+--| with the truth table `bf t t ≡ r1`, `bf t u ≡ r2`, `bf u t ≡ r3`,
+--| `bf u u ≡ r4` (`checkNatLAnd`, `checkNatLOr`, `checkNatXor`): Lean's
+--| `Nat.land`, `Nat.lor` and `Nat.xor` are `Nat.bitwise and`, `Nat.bitwise or`
+--| and `Nat.bitwise bne`.
+term bitop_eqs: ctx > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > wff;
+axiom bitop_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4: expr):
+  $ bitwise_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ >
+  $ closed z f $ > $ closed z bf $ > $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
+  $ ⊢ G, f ≡ fb @ bf : Π nat_ty. Π nat_ty. nat_ty $ >
+  $ ⊢ G, bf @ t @ t ≡ r1 : B $ > $ ⊢ G, bf @ t @ u ≡ r2 : B $ >
+  $ ⊢ G, bf @ u @ t ≡ r3 : B $ > $ ⊢ G, bf @ u @ u ≡ r4 : B $ >
+  $ bitop_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4 $;
+--| `f a b` on literals for the truth tables of and, or and xor.
+axiom nat_land_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf: expr) (a b c: bin):
+  $ bitop_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf t u u u $ >
+  $ band a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+axiom nat_lor_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf: expr) (a b c: bin):
+  $ bitop_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf t t t u $ >
+  $ bor a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+axiom nat_xor_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf: expr) (a b c: bin):
+  $ bitop_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf u t t u $ >
+  $ bxor a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
 
 ---------------------------------------------------------------------------
 -- Statements

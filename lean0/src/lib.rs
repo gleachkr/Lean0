@@ -7,3 +7,4 @@ pub mod gen;
 pub mod induct;
 pub mod names;
 pub mod natlit;
+pub mod natrec;

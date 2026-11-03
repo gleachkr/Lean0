@@ -112,7 +112,7 @@ pub struct Gen {
     pub nat: Option<NatLits>,
     /// The literal theorems of each accelerated operation, in the order of `natlit::OPS`.
     pub nat_ops: HashMap<String, Vec<ThId>>,
-    /// The derived defining equations of the operations (`natlit::EQS`): `Nat_add_eqs`, ...
+    /// The derived defining equations of the operations (`natlit::eq_ops`): `Nat_add_eqs`, ...
     pub nat_eqs: HashMap<String, ThId>,
     /// Counts for the run's report: operations whose literal theorems follow from their
     /// equations, and operations left with generated axioms, with the reason.
@@ -330,9 +330,9 @@ impl Gen {
     /// and unused expressions are then freed.
     pub fn run(&mut self, export: &ExportFile<'_>, keep_going: bool, out: &mut mm0kit::mmb::Writer) -> R<()> {
         self.reserve_level_names(export);
-        // the operations with defining equations in the spec (`natlit::EQS`): each is
+        // the operations with defining equations in the spec (`natlit::eq_ops`): each is
         // declared in a type checker extended by itself, so that its equations can be derived
-        let eq_names: Vec<NamePtr<'_>> = natlit::EQS.iter().filter_map(|e| export.find_name(e.lean)).collect();
+        let eq_names: Vec<NamePtr<'_>> = natlit::eq_ops().filter_map(|n| export.find_name(n)).collect();
         let progress = std::env::var_os("LEAN0_PROGRESS").is_some();
         // with progress lines, also report a declaration still running after each minute
         let current: std::sync::Arc<std::sync::Mutex<Option<(String, Instant)>>> = Default::default();

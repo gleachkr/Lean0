@@ -29,9 +29,10 @@ block with auxiliary types that the kernel checks in their place, with the
 nested occurrences restored in what is stated. The accelerated `Nat` 
 operations are rules of the spec over the defining equations Lean4Lean checks 
 (a certificate derives `Nat.add x 0 ≡ x` and `Nat.add x (y+1) ≡ (Nat.add x y)+1` 
-once, and the arithmetic itself is proved bit by bit), except division, modulus, 
-gcd and the bitwise operations, which still have axioms assuming that the 
-definition computes the operation. Quotients and the tie between literals and 
+once, and the arithmetic itself is proved bit by bit; for division, modulus, 
+gcd and the bitwise operations the equations are those of the fuel and 
+well-founded recursions Lean defines them by, with the conditionals and 
+decision procedures as variables). Quotients and the tie between literals and 
 `Nat` are part of the spec.
 
 ## Trusted Base
@@ -62,8 +63,9 @@ trust:
 - axioms generated per declaration for the few inductive types the schema 
   leaves out (those whose shape the kernel reads through `whnf`: recursor 
   rules, projections and eta, with the declaration's legality unchecked), one 
-  per accelerated `Nat` operation (`Nat.add` on numerals is addition, and so 
-  on), and one per 
+  per accelerated `Nat` operation whose defining equations could not be 
+  derived (`Nat.add` on numerals is addition, and so on; none in Init), and 
+  one per 
   opaque constant that an inductive declaration mentions at its universe 
   levels (the constant at equivalent levels is the same expression). `lean0 
   gen` reports how many blocks the schema left to these axioms, and the 
