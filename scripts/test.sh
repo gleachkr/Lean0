@@ -41,6 +41,15 @@ echo "== mm0kit self-test"
 cargo run -q --release -p mm0kit --example selftest -- spec/lean.mm0 build/out/selftest.mm0 build/out/selftest.mmb > /dev/null
 [ "$(accepted_by build/out/selftest.mmb build/out/selftest.mm0)" = 2 ] && echo "selftest: ok" || { echo "FAIL: selftest"; fail=1; }
 
+# The spec's relations are the functions and predicates they are read as (mm0kit/src/modes.rs):
+# well-moded, and the clauses of each function pairwise exclusive. A spec with an extra clause
+# for `lift` must be rejected.
+echo "== lean0 modes (the spec's relations as functions)"
+cargo build -q --release --bin lean0
+target/release/lean0 modes > build/out/modes.txt && echo "modes: $(tail -1 build/out/modes.txt)" || { echo "FAIL: lean0 modes"; fail=1; }
+{ cat spec/lean.mm0; echo 'axiom lift_dup (n k: nat) (e: expr): $ lift n k e e $;'; } > build/out/modes-bad.mm0
+if target/release/lean0 modes build/out/modes-bad.mm0 > build/out/modes-bad.txt; then echo "FAIL: lean0 modes accepted an overlapping clause"; fail=1; else echo "modes: an overlapping clause is rejected"; fi
+
 for lean in tests/lean/*.lean; do
   echo "== ${lean#tests/lean/}"
   scripts/certify.sh "$lean" > /dev/null || { echo "FAIL: $lean"; fail=1; }

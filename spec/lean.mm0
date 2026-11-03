@@ -1,7 +1,26 @@
 delimiter $ ( ) , . $;
 
---| LeanTT core, transcribed from Lean4Lean (digama0/lean4lean @ 67f63b0):
---|   Theory/VLevel.lean, Theory/VExpr.lean, Theory/Typing/Basic.lean.
+--| LeanTT: Lean 4's kernel as an MM0 theory, transcribed from Lean4Lean
+--| (digama0/lean4lean @ 67f63b0: Theory/VLevel.lean, Theory/VExpr.lean,
+--| Theory/Typing/Basic.lean), with the kernel's inductive types, quotients and
+--| literals (notes/audit-lean-mm0.md §4 and §5).
+--|
+--| The file is in three parts. Part I, Syntax, declares the sorts (naturals,
+--| levels, expressions, contexts, binary numerals, inductive blocks as data: all
+--| closed first-order syntax, no sort admits bound variables) and relations on
+--| them that are the graphs of functions, or predicates, on syntax, defined by
+--| clauses that recurse on their inputs: lifting and substitution, the reading
+--| of an inductive block, the recursor's type and rules, and so on. Nothing in
+--| Part I mentions level equivalence or the judgment. Part II declares those
+--| two relations, `≈` and `⊢`, and the relations defined over them in the same
+--| way (the well-formedness of an inductive block, its elimination level, the
+--| defining equations of the literal operations). Part III states the rules:
+--| the axioms concluding `≈` and `⊢`, which are the theory, each argued in the
+--| audit. `lean0 modes` checks mechanically that every relation of Parts I and
+--| II is well-moded and that the clauses of each function are pairwise
+--| exclusive (`mm0kit/src/modes.rs`), so that the two parts read as the
+--| definition of the kernel's meta-operations and Part III as the rules over
+--| them.
 --|
 --| Deviations from the verbatim presentation (see notes/audit-lean-mm0.md §10):
 --| * There is no environment term and no `const` constructor. A Lean
@@ -10,7 +29,7 @@ delimiter $ ( ) , . $;
 --|   substitution). An inductive block is a data term `ind_mk b P T` (a
 --|   generated `def X_D (us): ind`), and its types, constructors and recursors
 --|   are `ind_ty D i`, `ind_ctor D i c` and `ind_rec D i v`, typed by the
---|   schema below once the certificate proves the block legal (`ind_wf`).
+--|   schema once the certificate proves the block legal (`ind_wf`).
 --|   A nested block is the mutual block the kernel checks in its place,
 --|   with the nested occurrences restored in what it states (`ind_mkn`).
 --|   Axioms and opaques are MM0 `term`s, each with two generated axioms:
@@ -35,9 +54,6 @@ delimiter $ ( ) , . $;
 --| * `eeqv_df`: expressions of the same shape at equivalent levels are
 --|   definitionally equal (generalizing `sortDF` and `constDF`).
 --|
---| Everything here is closed first-order syntax: no sort admits bound
---| variables.
---|
 --| Notations: `⊢ Γ, e ≡ e2 : A` for the judgment and `⊩ Γ, e : A` for typing,
 --| `λ A. e`, `Π A. B`, `f @ a`, `# i` for a bound variable, `A :: Γ` and `[]`
 --| for contexts, `a ⊔ b` for `max`, and `≤`, `<` and `≈` (level equivalence).
@@ -45,13 +61,18 @@ delimiter $ ( ) , . $;
 --| `\Pi A. B`, `\/`, `<=`, `~=`), declared first; the Unicode one is declared
 --| last, the form Aufbau prints. A term with a notation can still be written as
 --| an application (`deq G e e2 A`), as the generated statements are.
-
+--|
 --| @hole _wff
 strict provable sort wff;
 
 ---------------------------------------------------------------------------
--- Unary naturals (de Bruijn indices)
+-- PART I: SYNTAX
+-- Every relation here is the graph of a function (its mode, which arguments are
+-- inputs, is in `mm0kit/src/modes.rs`) or a predicate on syntax, defined by
+-- clauses that recurse on their inputs; nothing mentions `≈` or `⊢`.
 ---------------------------------------------------------------------------
+
+-- Unary naturals (de Bruijn indices) ---------------------------------------
 
 --| @hole _n
 strict free sort nat;
@@ -74,9 +95,7 @@ term add: nat > nat > nat > wff;
 axiom add_z (i: nat): $ add i z i $;
 axiom add_s (i n j: nat): $ add i n j $ > $ add i (s n) (s j) $;
 
----------------------------------------------------------------------------
--- Universe levels (VLevel.lean:8-13)
----------------------------------------------------------------------------
+-- Universe levels (VLevel.lean:8-13) ---------------------------------------
 
 --| @hole _l
 strict free sort lvl;
@@ -87,48 +106,8 @@ infixl lmax: $\/$ prec 65;
 infixl lmax: $⊔$ prec 65;
 term limax: lvl > lvl > lvl;
 
---| `leqv l l2`: a sound approximation of semantic equivalence `l ≈ l2`
---| (VLevel.lean:58, equal evaluation under every assignment of the level
---| variables). Each axiom below is valid under `VLevel.eval`, where
---| `imax a b = if b = 0 then 0 else max a b`. These axioms alone are
---| incomplete (notes/audit-lean-mm0.md); `leqv_cases` below completes them.
-term leqv: lvl > lvl > wff;
-infixl leqv: $~=$ prec 50;
-infixl leqv: $≈$ prec 50;
-axiom leqv_refl (a: lvl): $ a ≈ a $;
-axiom leqv_symm (a b: lvl): $ a ≈ b $ > $ b ≈ a $;
-axiom leqv_trans (a b c: lvl): $ a ≈ b $ > $ b ≈ c $ > $ a ≈ c $;
-axiom leqv_succ (a b: lvl): $ a ≈ b $ > $ ls a ≈ ls b $;
-axiom leqv_max (a b c d: lvl):
-  $ a ≈ b $ > $ c ≈ d $ > $ a ⊔ c ≈ b ⊔ d $;
-axiom leqv_imax (a b c d: lvl):
-  $ a ≈ b $ > $ c ≈ d $ > $ limax a c ≈ limax b d $;
-axiom lmax_comm (a b: lvl): $ a ⊔ b ≈ b ⊔ a $;
-axiom lmax_assoc (a b c: lvl): $ a ⊔ b ⊔ c ≈ a ⊔ (b ⊔ c) $;
-axiom lmax_idem (a: lvl): $ a ⊔ a ≈ a $;
-axiom lmax_zero (a: lvl): $ lz ⊔ a ≈ a $;
-axiom lmax_succ (a b: lvl): $ ls a ⊔ ls b ≈ ls (a ⊔ b) $;
-axiom lmax_succ_self (a: lvl): $ a ⊔ ls a ≈ ls a $;
-axiom limax_zero (a: lvl): $ limax a lz ≈ lz $;
-axiom limax_zero_l (a: lvl): $ limax lz a ≈ a $;
---| `imax 1 a = a`: if `a = 0` both are 0, otherwise `max 1 a = a`. nanoda's level `simplify`
---| applies it (and `limax_zero_l`) whenever it puts a `Sort` in weak head normal form.
-axiom limax_one (a: lvl): $ limax (ls lz) a ≈ a $;
-axiom limax_succ (a b: lvl): $ limax a (ls b) ≈ a ⊔ ls b $;
-axiom limax_self (a: lvl): $ limax a a ≈ a $;
-axiom limax_max (a b c: lvl):
-  $ limax a (b ⊔ c) ≈ limax a b ⊔ limax a c $;
-axiom limax_imax (a b c: lvl):
-  $ limax a (limax b c) ≈ limax a c ⊔ limax b c $;
-
---| Proof by cases on a universe parameter. A case split must substitute the
---| parameter inside an arbitrary level, which cannot be stated over MM0
---| variables. So a goal's variables are first abstracted to object-level
---| parameters `lparam i` (`leqv_inst` puts the original levels back), and
---| `leqv_cases` splits on one of those. The semantics of `leqv` (equal value
---| under every assignment) covers `lparam`s like any other level variable. With
---| the axioms above for the `imax`-free cases, this decides `leqv` completely
---| (notes/audit-lean-mm0.md §4). `lparam` only ever occurs inside `leqv` proofs.
+--| `lparam i`: an object-level level parameter, for the case split
+--| `leqv_cases` (Part III); it only ever occurs inside `leqv` proofs.
 term lparam: nat > lvl;
 
 --| Lists of levels.
@@ -165,19 +144,7 @@ axiom lsubst_eq (n: nat) (a: lvl): $ lsubst n (lparam n) a a $;
 axiom lsubst_lt (n m: nat) (a: lvl): $ m < n $ > $ lsubst n (lparam m) a (lparam m) $;
 axiom lsubst_gt (n m: nat) (a: lvl): $ n < m $ > $ lsubst n (lparam m) a (lparam m) $;
 
---| Case split on `lparam n`: zero, or the successor of some level (which is
---| again called `lparam n`).
-axiom leqv_cases (n: nat) (l r l0 r0 l1 r1: lvl):
-  $ lsubst n l lz l0 $ > $ lsubst n r lz r0 $ > $ l0 ≈ r0 $ >
-  $ lsubst n l (ls (lparam n)) l1 $ > $ lsubst n r (ls (lparam n)) r1 $ > $ l1 ≈ r1 $ >
-  $ l ≈ r $;
---| Instantiating the parameters of an equivalence.
-axiom leqv_inst (S: lvls) (l r l2 r2: lvl):
-  $ l ≈ r $ > $ linst S l l2 $ > $ linst S r r2 $ > $ l2 ≈ r2 $;
-
----------------------------------------------------------------------------
--- Expressions (VExpr.lean:7-13), without `const`
----------------------------------------------------------------------------
+-- Expressions (VExpr.lean:7-13), without `const` ---------------------------
 
 --| @hole _e
 strict free sort expr;
@@ -239,9 +206,7 @@ axiom inst_pi (k: nat) (A b a A2 b2: expr):
 axiom inst_closed (j k: nat) (e a: expr):
   $ closed j e $ > $ j ≤ k $ > $ inst k e a e $;
 
----------------------------------------------------------------------------
--- Contexts (Typing/Basic.lean:6-8)
----------------------------------------------------------------------------
+-- Contexts (Typing/Basic.lean:6-8) -----------------------------------------
 
 --| Innermost binder first; each entry is a type relative to the tail.
 --| @hole _G
@@ -273,69 +238,21 @@ axiom cext_z (G: ctx): $ cext z G G $;
 axiom cext_s (n: nat) (G G2: ctx) (A: expr):
   $ cext n G G2 $ > $ cext (s n) G (A :: G2) $;
 
----------------------------------------------------------------------------
--- The judgment `Γ ⊢ e ≡ e2 : A` (IsDefEq, Typing/Basic.lean:18-56)
----------------------------------------------------------------------------
+--| Contexts as lists: `clen G n` is the length, `cnth G n A` entry `n` as
+--| written (`lookup` lifts it), `capp P G G2` the concatenation `P ++ G`.
+--| Lengths and entries: of a context, of a constructor list, and `ntys T n m`
+--| for `n` types with `m` constructors in all.
+term clen: ctx > nat > wff;
+axiom clen_nil: $ clen [] z $;
+axiom clen_cons (A: expr) (G: ctx) (n: nat): $ clen G n $ > $ clen (A :: G) (s n) $;
+term cnth: ctx > nat > expr > wff;
+axiom cnth_z (A: expr) (G: ctx): $ cnth (A :: G) z A $;
+axiom cnth_s (A B: expr) (G: ctx) (n: nat): $ cnth G n B $ > $ cnth (A :: G) (s n) B $;
+term capp: ctx > ctx > ctx > wff;
+axiom capp_nil (G: ctx): $ capp [] G G $;
+axiom capp_cons (A: expr) (P G G2: ctx): $ capp P G G2 $ > $ capp (A :: P) G (A :: G2) $;
 
-term deq: ctx > expr > expr > expr > wff;
-notation deq (G: ctx) (e e2 A: expr): wff = ($|-$:0) G ($,$:0) e ($==$:0) e2 ($:$:0) A;
-notation deq (G: ctx) (e e2 A: expr): wff = ($⊢$:0) G ($,$:0) e ($≡$:0) e2 ($:$:0) A;
-
---| `Γ ⊢ e : A` is the diagonal of the judgment.
-def ty (G: ctx) (e A: expr): wff = $ ⊢ G, e ≡ e : A $;
-notation ty (G: ctx) (e A: expr): wff = ($||-$:0) G ($,$:0) e ($:$:0) A;
-notation ty (G: ctx) (e A: expr): wff = ($⊩$:0) G ($,$:0) e ($:$:0) A;
-
-axiom bvar (G: ctx) (i: nat) (A: expr):
-  $ lookup G i A $ > $ ⊢ G, # i ≡ # i : A $;
-axiom symm (G: ctx) (e e2 A: expr):
-  $ ⊢ G, e ≡ e2 : A $ > $ ⊢ G, e2 ≡ e : A $;
-axiom trans (G: ctx) (e1 e2 e3 A: expr):
-  $ ⊢ G, e1 ≡ e2 : A $ > $ ⊢ G, e2 ≡ e3 : A $ > $ ⊢ G, e1 ≡ e3 : A $;
-axiom sortDF (G: ctx) (l l2: lvl):
-  $ l ≈ l2 $ > $ ⊢ G, srt l ≡ srt l2 : srt (ls l) $;
-axiom appDF (G: ctx) (f f2 A B a a2 R: expr):
-  $ ⊢ G, f ≡ f2 : Π A. B $ > $ ⊢ G, a ≡ a2 : A $ > $ inst z B a R $ >
-  $ ⊢ G, f @ a ≡ f2 @ a2 : R $;
-axiom lamDF (G: ctx) (u: lvl) (A A2 b b2 B: expr):
-  $ ⊢ G, A ≡ A2 : srt u $ > $ ⊢ A :: G, b ≡ b2 : B $ >
-  $ ⊢ G, λ A. b ≡ λ A2. b2 : Π A. B $;
-axiom forallEDF (G: ctx) (u v: lvl) (A A2 B B2: expr):
-  $ ⊢ G, A ≡ A2 : srt u $ > $ ⊢ A :: G, B ≡ B2 : srt v $ >
-  $ ⊢ G, Π A. B ≡ Π A2. B2 : srt (limax u v) $;
-axiom defeqDF (G: ctx) (u: lvl) (A B e e2: expr):
-  $ ⊢ G, A ≡ B : srt u $ > $ ⊢ G, e ≡ e2 : A $ > $ ⊢ G, e ≡ e2 : B $;
-axiom beta (G: ctx) (A e B a r R: expr):
-  $ ⊢ A :: G, e ≡ e : B $ > $ ⊢ G, a ≡ a : A $ > $ inst z e a r $ > $ inst z B a R $ >
-  $ ⊢ G, (λ A. e) @ a ≡ r : R $;
-axiom eta (G: ctx) (A B e e1: expr):
-  $ ⊢ G, e ≡ e : Π A. B $ > $ lift (s z) z e e1 $ >
-  $ ⊢ G, λ A. e1 @ # z ≡ e : Π A. B $;
-axiom proofIrrel (G: ctx) (p h h2: expr):
-  $ ⊢ G, p ≡ p : srt lz $ > $ ⊢ G, h ≡ h : p $ > $ ⊢ G, h2 ≡ h2 : p $ >
-  $ ⊢ G, h ≡ h2 : p $;
-
----------------------------------------------------------------------------
--- Admissible rules (theorems of Lean4Lean, here axioms)
----------------------------------------------------------------------------
-
---| Substitution: `IsDefEq.instN`, Typing/Lemmas.lean:634 (see
---| notes/audit-lean-mm0.md §6).
-axiom instDF (k: nat) (G0 G1 G: ctx) (A0 a e e2 A r r2 R: expr):
-  $ ⊢ G0, a ≡ a : A0 $ > $ cinst k G0 A0 a G1 G $ > $ ⊢ G1, e ≡ e2 : A $ >
-  $ inst k e a r $ > $ inst k e2 a r2 $ > $ inst k A a R $ >
-  $ ⊢ G, r ≡ r2 : R $;
-
---| Weakening: `IsDefEq.weakN`, Typing/Lemmas.lean:501, for `Ctx.LiftN n 0`
---| (see notes/audit-lean-mm0.md §6).
-axiom weakDF (n: nat) (G G2: ctx) (e e2 A r r2 R: expr):
-  $ ⊢ G, e ≡ e2 : A $ > $ cext n G G2 $ >
-  $ lift n z e r $ > $ lift n z e2 r2 $ > $ lift n z A R $ >
-  $ ⊢ G2, r ≡ r2 : R $;
-
----------------------------------------------------------------------------
--- Nat literals (notes/audit-lean-mm0.md §5; an extension of Lean4Lean's theory)
----------------------------------------------------------------------------
+-- Nat literals: binary numerals (notes/audit-lean-mm0.md §5) ---------------
 
 --| Binary numerals: `b0` is 0, `bd0 n` is 2n and `bd1 n` is 2n+1. Each
 --| relation below is syntax-directed, and each axiom is true when every
@@ -413,21 +330,24 @@ axiom bxor_10 (a b c: bin): $ bxor a b c $ > $ bxor (bd1 a) (bd0 b) (bd1 c) $;
 axiom bxor_11 (a b c d: bin): $ bxor a b c $ > $ bdbl c d $ > $ bxor (bd1 a) (bd1 b) d $;
 
 --| `lit n`: the Nat literal with value `n`, read as `Nat.succ^n Nat.zero`
---| (Lean4Lean's translation of literals). `lit_zero` and `lit_succ` (below,
---| after the inductive schema) relate it to Lean's `Nat`, and the rules for
---| the accelerated operations follow them (`nat_add_lit`, ...); see
---| notes/audit-lean-mm0.md.
+--| (Lean4Lean's translation of literals). `lit_zero` and `lit_succ` (Part III)
+--| relate it to Lean's `Nat`, and the rules for the accelerated operations
+--| follow them (`nat_add_lit`, ...; notes/audit-lean-mm0.md §5).
 term lit: bin > expr;
 axiom closed_lit (k: nat) (n: bin): $ closed k (lit n) $;
+--| The literals `0`, `1` and `2`.
+def lit0: expr = $ lit b0 $;
+def lit1: expr = $ lit (bd1 b0) $;
+def lit2: expr = $ lit (bd0 (bd1 b0)) $;
 
----------------------------------------------------------------------------
--- Inductive types (notes/audit-lean-mm0.md §4; not in Lean4Lean, whose
--- `VInductDecl.WF` is left as `sorry`). A schema: an inductive block is a
--- term of sort `ind`, the certificate proves it well formed (`ind_wf`), and
--- the types, constructors and recursors, their iota rules, projections and
--- structure eta follow from the axioms below. The rules transcribe Lean's
--- kernel (`inductive.cpp`; Lean4Lean's `Inductive/Add.lean` is the port read
--- for this): every relation below is syntax-directed over the declaration.
+-- Inductive blocks as data (notes/audit-lean-mm0.md §4) --------------------
+-- Not in Lean4Lean, whose `VInductDecl.WF` is left as `sorry`. A schema: an
+-- inductive block is a term of sort `ind`, the certificate proves it well
+-- formed (`ind_wf`, Part II), and the types, constructors and recursors, their
+-- iota rules, projections and structure eta follow from the rules of Part III.
+-- The relations transcribe Lean's kernel (`inductive.cpp`; Lean4Lean's
+-- `Inductive/Add.lean` is the port read for this): every one is
+-- syntax-directed over the declaration.
 --
 -- A block `ind_mk b P T` has an atom `b` (a `term` of sort `blk` per block,
 -- so that structurally equal declarations stay distinct), the parameters as
@@ -443,7 +363,6 @@ axiom closed_lit (k: nat) (n: bin): $ closed k (lit n) $;
 -- Counting conventions: `np` parameters, `n` types, `m` constructors in all,
 -- `nf` fields of a constructor, `nidx` indices of a type; motive `j` is the
 -- `j`th binder after the parameters and minor `k` the `k`th after the motives.
----------------------------------------------------------------------------
 
 --| @hole _blk
 strict free sort blk;
@@ -459,6 +378,23 @@ term tnil: tys;
 term tcons: expr > ctors > tys > tys;
 term cnil: ctors;
 term ccons: expr > ctors > ctors;
+
+--| A nested block `ind_mkn b P T N` is the mutual block the kernel checks in
+--| its place: `T` lists the declared types and then one auxiliary type per
+--| nested occurrence `I Ds` of an earlier block `I` in the constructors (in
+--| the kernel's order), and `N` lists the occurrences, each `ind_ty I i @ Ds`
+--| written like a constructor type at depth 0 (a `ctx` used as a list; `Ds`
+--| mention the block's types). An auxiliary type must have `I`'s type and
+--| constructors at `Ds` with the occurrences replaced by the auxiliary types
+--| (`spz`), and the kernel adds auxiliary types for all of `I`'s block at
+--| once (`nst_ok`). So an auxiliary type denotes the occurrence itself, and
+--| the block's constructors, recursors and rules are stated with the
+--| occurrences restored (`rst`, the kernel's `restoreNested`): the auxiliary
+--| type `ind_ty D j ps is` is read as `I Ds[ps] is` and its constructor
+--| `ind_ctor D j c ps fs` as `ind_ctor I i c Ds[ps] fs`. Its recursor is the
+--| block's (`X.rec_k` for the `k`th auxiliary type) and reduces on `I`'s
+--| constructors (`ind_iota_nst`).
+term ind_mkn: blk > ctx > tys > ctx > ind;
 
 --| Type `i`, constructor `c` of type `i`, and the recursor of type `i` with
 --| motives in `srt v`, of a block.
@@ -478,12 +414,17 @@ axiom lift_proj (n k: nat) (b: blk) (i: nat) (e e2: expr):
 axiom inst_proj (k: nat) (b: blk) (i: nat) (e a e2: expr):
   $ inst k e a e2 $ > $ inst k (proj b i e) a (proj b i e2) $;
 
--- Reading the declaration ---------------------------------------------------
+-- Reading the declaration --------------------------------------------------
 
 --| The parts of a block. (Clauses take a variable `D` and read it through
 --| `ind_data`, so that a block named by a definition stays folded.)
 term ind_data: ind > blk > ctx > tys > wff;
 axiom ind_data_i (b: blk) (P: ctx) (T: tys): $ ind_data (ind_mk b P T) b P T $;
+axiom ind_data_n (b: blk) (P: ctx) (T: tys) (N: ctx): $ ind_data (ind_mkn b P T N) b P T $;
+--| `ind_nested D N`: the occurrences of `D` (none for `ind_mk`).
+term ind_nested: ind > ctx > wff;
+axiom ind_nested_mk (b: blk) (P: ctx) (T: tys): $ ind_nested (ind_mk b P T) [] $;
+axiom ind_nested_mkn (b: blk) (P: ctx) (T: tys) (N: ctx): $ ind_nested (ind_mkn b P T N) N $;
 
 --| `nth_ty T i F C`: type `i` of `T` has type `F` and constructors `C`.
 term nth_ty: tys > nat > expr > ctors > wff;
@@ -495,11 +436,8 @@ axiom nth_ctor_z (K: expr) (C: ctors): $ nth_ctor (ccons K C) z K $;
 axiom nth_ctor_s (K K2: expr) (C: ctors) (c: nat):
   $ nth_ctor C c K $ > $ nth_ctor (ccons K2 C) (s c) K $;
 
---| Lengths: of a context, of a constructor list, and `ntys T n m` for `n`
---| types with `m` constructors in all.
-term clen: ctx > nat > wff;
-axiom clen_nil: $ clen [] z $;
-axiom clen_cons (A: expr) (G: ctx) (n: nat): $ clen G n $ > $ clen (A :: G) (s n) $;
+--| Lengths: of a constructor list, and `ntys T n m` for `n` types with `m`
+--| constructors in all.
 term clen_c: ctors > nat > wff;
 axiom clen_c_nil: $ clen_c cnil z $;
 axiom clen_c_cons (K: expr) (C: ctors) (n: nat): $ clen_c C n $ > $ clen_c (ccons K C) (s n) $;
@@ -536,44 +474,48 @@ axiom nidx_i (D: ind) (b: blk) (P: ctx) (T: tys) (i k: nat) (F: expr) (C: ctors)
 term nfields: ind > nat > nat > nat > wff;
 axiom nfields_i (D: ind) (b: blk) (P: ctx) (T: tys) (i c nf: nat) (F K: expr) (C: ctors):
   $ ind_data D b P T $ > $ nth_ty T i F C $ > $ nth_ctor C c K $ > $ npis K nf $ > $ nfields D i c nf $;
+--| `ndecl N n n0`: `n0` declared types among `n`; `aux_of D N j X`: the
+--| occurrence of auxiliary type `j` (entry `j - n0` of `N`).
+term ndecl: ctx > nat > nat > wff;
+axiom ndecl_nil (n: nat): $ ndecl [] n n $;
+axiom ndecl_cons (X: expr) (N: ctx) (n n0: nat): $ ndecl N n n0 $ > $ ndecl (X :: N) (s n) n0 $;
+term aux_of: ind > ctx > nat > expr > wff;
+axiom aux_of_i (D: ind) (N: ctx) (j np n m n0 k: nat) (X: expr):
+  $ ind_arity D np n m $ > $ ndecl N n n0 $ > $ add n0 k j $ > $ cnth N k X $ > $ aux_of D N j X $;
 
--- Telescopes and applications ------------------------------------------------
+-- Telescopes and applications ----------------------------------------------
 
---| `pis P b T`: `T = Π P. b`; `lams P b T`: `T = λ P. b`; `capp P G G2`:
---| `G2 = P ++ G`.
+--| `pis P b T`: `T = Π P. b`; `lams P b T`: `T = λ P. b`.
 term pis: ctx > expr > expr > wff;
 axiom pis_nil (b: expr): $ pis [] b b $;
 axiom pis_cons (A b T: expr) (P: ctx): $ pis P (Π A. b) T $ > $ pis (A :: P) b T $;
 term lams: ctx > expr > expr > wff;
 axiom lams_nil (b: expr): $ lams [] b b $;
 axiom lams_cons (A b T: expr) (P: ctx): $ lams P (λ A. b) T $ > $ lams (A :: P) b T $;
-term capp: ctx > ctx > ctx > wff;
-axiom capp_nil (G: ctx): $ capp [] G G $;
-axiom capp_cons (A: expr) (P G G2: ctx): $ capp P G G2 $ > $ capp (A :: P) G (A :: G2) $;
 
 --| `pargs X d n e`: `e = X @ # (d+n-1) @ ... @ # d` (the `n` variables above
---| depth `d`). `napp f n e`: `e` is `f` applied to `n` arguments. `rehead Y X
---| k e e2`: `e = Y @ a1 .. ak` and `e2 = X @ a1 .. ak`. `drop k e e2`: `e` is
---| `e2` applied to `k` arguments. `argat k e a`: `a` is the `k`th argument of
---| `e` from the outside. `has_arg e a`: `a` is an argument of `e`.
+--| depth `d`). `spine h e k`: `e` is `h` applied to `k` arguments; read with
+--| `k` given it takes `k` arguments off `e`, and with `h` given by its head (a
+--| constant or a variable, not an application) it counts the arguments down to
+--| that head. `rehead Y X k e e2`: `e = Y @ a1 .. ak` and `e2 = X @ a1 .. ak`.
+--| `has_arg e a`: `a` is an argument of `e`.
 term pargs: expr > nat > nat > expr > wff;
 axiom pargs_z (X: expr) (d: nat): $ pargs X d z X $;
 axiom pargs_s (X e: expr) (d n: nat): $ pargs X (s d) n e $ > $ pargs X d (s n) (e @ # d) $;
-term napp: expr > nat > expr > wff;
-axiom napp_z (f: expr): $ napp f z f $;
-axiom napp_s (f e a: expr) (n: nat): $ napp f n e $ > $ napp f (s n) (e @ a) $;
+term spine: expr > expr > nat > wff;
+axiom spine_z (h: expr): $ spine h h z $;
+axiom spine_s (h e a: expr) (k: nat): $ spine h e k $ > $ spine h (e @ a) (s k) $;
 term rehead: expr > expr > nat > expr > expr > wff;
 axiom rehead_z (Y X: expr): $ rehead Y X z Y X $;
 axiom rehead_s (Y X e e2 a: expr) (k: nat): $ rehead Y X k e e2 $ > $ rehead Y X (s k) (e @ a) (e2 @ a) $;
-term drop: nat > expr > expr > wff;
-axiom drop_z (e: expr): $ drop z e e $;
-axiom drop_s (e e2 a: expr) (k: nat): $ drop k e e2 $ > $ drop (s k) (e @ a) e2 $;
-term argat: nat > expr > expr > wff;
-axiom argat_z (e a: expr): $ argat z (e @ a) a $;
-axiom argat_s (e a b: expr) (k: nat): $ argat k e a $ > $ argat (s k) (e @ b) a $;
+--| `has_arg e a`: `a` is an argument of `e`. `leaf_has j e`: `# j` (at the
+--| binder's depth) is an argument of the result under the remaining binders.
 term has_arg: expr > expr > wff;
 axiom has_arg_z (e a: expr): $ has_arg (e @ a) a $;
 axiom has_arg_s (e a b: expr): $ has_arg e a $ > $ has_arg (e @ b) a $;
+term leaf_has: nat > expr > wff;
+axiom leaf_has_pi (j: nat) (A B: expr): $ leaf_has (s j) B $ > $ leaf_has j (Π A. B) $;
+axiom leaf_has_app (j: nat) (e: expr): $ has_arg e # j $ > $ leaf_has j e $;
 --| `pinst i S A R`: `S` is a block's type or constructor applied to `p0 ..
 --| p(np-1)`; `R` is `A` (under `i` binders over the block's parameters) with
 --| the parameters put in, outermost first (`p0` at `# (i + np - 1)`, then
@@ -583,19 +525,45 @@ term pinst: nat > expr > expr > expr > wff;
 axiom pinst_head (i: nat) (D: ind) (j: nat) (A: expr): $ pinst i (ind_ty D j) A A $;
 axiom pinst_head_c (i: nat) (D: ind) (j c: nat) (A: expr): $ pinst i (ind_ctor D j c) A A $;
 axiom pinst_app (i: nat) (S a A A1 R: expr): $ pinst (s i) S A A1 $ > $ inst i A1 a R $ > $ pinst i (S @ a) A R $;
---| `spine_ty e D j k`: `e` is `ind_ty D j` applied to `k` arguments; `spine_ctor`
---| and `spine_rec` likewise for a constructor and a recursor.
-term spine_ty: expr > ind > nat > nat > wff;
-axiom spine_ty_z (D: ind) (j: nat): $ spine_ty (ind_ty D j) D j z $;
-axiom spine_ty_s (e a: expr) (D: ind) (j k: nat): $ spine_ty e D j k $ > $ spine_ty (e @ a) D j (s k) $;
-term spine_ctor: expr > ind > nat > nat > nat > wff;
-axiom spine_ctor_z (D: ind) (i c: nat): $ spine_ctor (ind_ctor D i c) D i c z $;
-axiom spine_ctor_s (e a: expr) (D: ind) (i c k: nat): $ spine_ctor e D i c k $ > $ spine_ctor (e @ a) D i c (s k) $;
-term spine_rec: expr > ind > nat > lvl > nat > wff;
-axiom spine_rec_z (D: ind) (i: nat) (v: lvl): $ spine_rec (ind_rec D i v) D i v z $;
-axiom spine_rec_s (e a: expr) (D: ind) (i: nat) (v: lvl) (k: nat): $ spine_rec e D i v k $ > $ spine_rec (e @ a) D i v (s k) $;
 
--- Well-formedness ---------------------------------------------------------------
+-- Lean's `Nat` and `Eq`, and the quotient primitives -----------------------
+-- (notes/audit-lean-mm0.md §4 and §5.) `nat_D` and `eq_D` are the data of the
+-- blocks `Nat` and `Eq` as Lean's prelude declares them; `lean0 check` reads
+-- the statements between the `lean0-check` marks (written in prefix form for
+-- that) and compares the export's `Nat`, `Eq` and quotient declarations with
+-- them. A certificate proves `tys_ok` and `ind_wf` for the two blocks like any
+-- other. The quotient primitives' types and reduction rules are in Part III.
+
+-- lean0-check: begin
+--| The inductive block of `Nat`.
+term nat_blk: blk;
+--| The inductive block of `Nat`: its parameters, types and constructors.
+def nat_D: ind = $ ind_mk nat_blk nil (tcons (srt (ls lz)) (ccons (bvar z) (ccons (pi (bvar z) (bvar (s z))) cnil)) tnil) $;
+--| The inductive block of `Eq`.
+term eq_blk: blk;
+--| The inductive block of `Eq`: its parameters, types and constructors.
+def eq_D (u: lvl): ind = $ ind_mk eq_blk (cons (bvar z) (cons (srt u) nil)) (tcons (pi (bvar (s z)) (srt lz)) (ccons (app (app (app (bvar (s (s z))) (bvar (s z))) (bvar z)) (bvar z)) cnil) tnil) $;
+--| Lean quotient primitive `Quot`.
+term quot (u: lvl): expr;
+--| Lean quotient primitive `Quot.mk`.
+term quot_mk (u: lvl): expr;
+--| Lean quotient primitive `Quot.lift`.
+term quot_lift (u v: lvl): expr;
+--| Lean quotient primitive `Quot.ind`.
+term quot_ind (u: lvl): expr;
+-- lean0-check: end
+
+axiom closed_quot (k: nat) (u: lvl): $ closed k (quot u) $;
+axiom closed_quot_mk (k: nat) (u: lvl): $ closed k (quot_mk u) $;
+axiom closed_quot_lift (k: nat) (u v: lvl): $ closed k (quot_lift u v) $;
+axiom closed_quot_ind (k: nat) (u: lvl): $ closed k (quot_ind u) $;
+
+--| Lean's `Nat`, `Nat.zero` and `Nat.succ`.
+def nat_ty: expr = $ ind_ty nat_D z $;
+def nat_zero: expr = $ ind_ctor nat_D z z $;
+def nat_succ: expr = $ ind_ctor nat_D z (s z) $;
+
+-- Occurrences of the block (`isValidIndApp`, `checkPositivity`, `isRecArg`) ---
 
 --| `sinst D j n k e e2`: `e2` is `e` with the variables `# k .. # (k+n-j-1)`
 --| replaced by `ind_ty D j .. ind_ty D (n-1)` (the block's types, which are
@@ -608,16 +576,12 @@ axiom sinst_step (D: ind) (j n k: nat) (e e1 e2: expr):
 term iargs: nat > nat > expr > expr > wff;
 axiom iargs_z (k: nat) (X: expr): $ iargs k z X X $;
 axiom iargs_s (k m: nat) (X A a: expr): $ iargs k m X A $ > $ closed k a $ > $ iargs k (s m) X (A @ a) $;
---| `bvar_head e t`: the head of the application `e` is `# t`.
-term bvar_head: expr > nat > wff;
-axiom bvar_head_z (t: nat): $ bvar_head # t t $;
-axiom bvar_head_s (e a: expr) (t: nat): $ bvar_head e t $ > $ bvar_head (e @ a) t $;
 --| `indapp D n np d A j`: at depth `d`, `A` is type `j` of the block applied
 --| to the parameters and to its indices, which do not mention the block
 --| (`isValidIndApp`).
 term indapp: ind > nat > nat > nat > expr > nat > wff;
-axiom indapp_i (D: ind) (n np d j k t m: nat) (X A: expr):
-  $ bvar_head A t $ > $ add d np k $ > $ add k j t $ > $ j < n $ > $ pargs # t d np X $ > $ nidx D j m $ >
+axiom indapp_i (D: ind) (n np d j k t m na: nat) (X A: expr):
+  $ spine # t A na $ > $ add d np k $ > $ add k j t $ > $ j < n $ > $ pargs # t d np X $ > $ nidx D j m $ >
   $ iargs k m X A $ > $ indapp D n np d A j $;
 --| `ipos D n np d A`: `A` is a positive field type at depth `d`: no occurrence
 --| of the block, or `Π` over a domain without one, or a valid occurrence
@@ -632,11 +596,293 @@ term recfield: ind > nat > nat > nat > expr > nat > wff;
 axiom recfield_pi (D: ind) (n np d j: nat) (A B: expr):
   $ recfield D n np (s d) B j $ > $ recfield D n np d (Π A. B) j $;
 axiom recfield_app (D: ind) (n np d j: nat) (A: expr): $ indapp D n np d A j $ > $ recfield D n np d A j $;
+
+-- Nested occurrences (`ElimNestedInductive`): restoring and specializing ---
+
+--| `rst D N e e2`: `e2` is `e` with the auxiliary types and constructors
+--| restored: nothing when there are no occurrences (`rst_nil`), else from
+--| the outside in, `rst_refl` for the subterms left as they are (the clauses
+--| are tried in this order, so that an unknown `e2` is computed).
+term rst: ind > ctx > expr > expr > wff;
+axiom rst_nil (D: ind) (e: expr): $ rst D [] e e $;
+axiom rst_ty (D: ind) (N: ctx) (j np n m na k: nat) (e S X X1 X2 e2: expr):
+  $ spine (ind_ty D j) e na $ > $ aux_of D N j X $ > $ ind_arity D np n m $ > $ sinst D z n np X X1 $ >
+  $ add np k na $ > $ spine S e k $ > $ pinst z S X1 X2 $ > $ rehead S X2 k e e2 $ > $ rst D N e e2 $;
+axiom rst_ctor (D I: ind) (N: ctx) (j c i np n m na k npi: nat) (e S X X1 X2 Y e2: expr):
+  $ spine (ind_ctor D j c) e na $ > $ aux_of D N j X $ > $ ind_arity D np n m $ > $ sinst D z n np X X1 $ >
+  $ add np k na $ > $ spine S e k $ > $ pinst z S X1 X2 $ > $ spine (ind_ty I i) X2 npi $ >
+  $ rehead (ind_ty I i) (ind_ctor I i c) npi X2 Y $ > $ rehead S Y k e e2 $ > $ rst D N e e2 $;
+axiom rst_app (D: ind) (N: ctx) (f a f2 a2: expr): $ rst D N f f2 $ > $ rst D N a a2 $ > $ rst D N (f @ a) (f2 @ a2) $;
+axiom rst_lam (D: ind) (N: ctx) (A b A2 b2: expr): $ rst D N A A2 $ > $ rst D N b b2 $ > $ rst D N (λ A. b) (λ A2. b2) $;
+axiom rst_pi (D: ind) (N: ctx) (A b A2 b2: expr): $ rst D N A A2 $ > $ rst D N b b2 $ > $ rst D N (Π A. b) (Π A2. b2) $;
+axiom rst_proj (D: ind) (N: ctx) (b: blk) (i: nat) (e e2: expr): $ rst D N e e2 $ > $ rst D N (proj b i e) (proj b i e2) $;
+axiom rst_refl (D: ind) (N: ctx) (e: expr): $ rst D N e e $;
+term nst_hit: ctx > nat > nat > nat > expr > expr > wff;
+--| `nst_hit N j d np e e2`: `e` is an occurrence of `N` (the first entry being
+--| auxiliary type `j`) lifted to depth `d` and applied to more arguments,
+--| and `e2` its replacement. The entries are tried in order: the first
+--| clause fails as a whole when the entry is not `e`'s.
+axiom nst_hit_z (X S Y e e2: expr) (N: ctx) (I: ind) (i j d np na npi r a t: nat):
+  $ spine (ind_ty I i) X npi $ > $ spine (ind_ty I i) e na $ > $ add npi r na $ > $ lift d z X S $ > $ spine S e r $ >
+  $ add np j a $ > $ add d a t $ > $ pargs # t d np Y $ > $ rehead S Y r e e2 $ > $ nst_hit (X :: N) j d np e e2 $;
+axiom nst_hit_s (X e e2: expr) (N: ctx) (j d np: nat): $ nst_hit N (s j) d np e e2 $ > $ nst_hit (X :: N) j d np e e2 $;
+--| `spz D N d e e2`: `e2` is `e` (at depth `d` in a constructor type) with
+--| each occurrence `I Ds is` of `N` replaced by its auxiliary type
+--| `# (d + np + j)` applied to the block's parameters and to `is`
+--| (`replaceAllNested`: from the outside in, so `is` stay as they are).
+term spz: ind > ctx > nat > expr > expr > wff;
+axiom spz_refl (D: ind) (N: ctx) (d: nat) (e: expr): $ spz D N d e e $;
+axiom spz_hit (D: ind) (N: ctx) (d np n m n0: nat) (e e2: expr):
+  $ ind_arity D np n m $ > $ ndecl N n n0 $ > $ nst_hit N n0 d np e e2 $ > $ spz D N d e e2 $;
+axiom spz_app (D: ind) (N: ctx) (d: nat) (f a f2 a2: expr): $ spz D N d f f2 $ > $ spz D N d a a2 $ > $ spz D N d (f @ a) (f2 @ a2) $;
+axiom spz_lam (D: ind) (N: ctx) (d: nat) (A b A2 b2: expr): $ spz D N d A A2 $ > $ spz D N (s d) b b2 $ > $ spz D N d (λ A. b) (λ A2. b2) $;
+axiom spz_pi (D: ind) (N: ctx) (d: nat) (A b A2 b2: expr): $ spz D N d A A2 $ > $ spz D N (s d) b b2 $ > $ spz D N d (Π A. b) (Π A2. b2) $;
+axiom spz_proj (D: ind) (N: ctx) (d: nat) (b: blk) (i: nat) (e e2: expr): $ spz D N d e e2 $ > $ spz D N d (proj b i e) (proj b i e2) $;
+--| `spz_ctors D N I X ni npi C C2`: `C2` is the constructors `C` of a type of
+--| `I` at the occurrence `X`, specialized: `I`'s types put in, `I`'s own
+--| occurrences restored (it may be nested itself), the parameters replaced
+--| by `Ds` (`pinst`), then `spz`.
+term spz_ctors: ind > ctx > ind > expr > nat > nat > ctors > ctors > wff;
+axiom spz_ctors_nil (D: ind) (N: ctx) (I: ind) (X: expr) (ni npi: nat): $ spz_ctors D N I X ni npi cnil cnil $;
+axiom spz_ctors_cons (D I: ind) (N NI: ctx) (X K K1 K2 K3 K4: expr) (ni npi: nat) (C C2: ctors):
+  $ sinst I z ni npi K K1 $ > $ ind_nested I NI $ > $ rst I NI K1 K2 $ > $ pinst z X K2 K3 $ > $ spz D N z K3 K4 $ >
+  $ spz_ctors D N I X ni npi C C2 $ > $ spz_ctors D N I X ni npi (ccons K C) (ccons K4 C2) $;
+--| `aux_data D I X j i`: type `j` of `D` has the type of `I`'s type `i` at
+--| `X`'s arguments and its constructors specialized.
+term aux_data: ind > ind > expr > nat > nat > wff;
+axiom aux_data_i (D I: ind) (b bi: blk) (P Pi N: ctx) (T Ti: tys) (j i npi ni mi: nat) (X F Fi: expr) (C Ci: ctors):
+  $ ind_data D b P T $ > $ ind_nested D N $ > $ ind_data I bi Pi Ti $ > $ nth_ty T j F C $ > $ nth_ty Ti i Fi Ci $ >
+  $ pinst z X Fi F $ > $ ind_arity I npi ni mi $ > $ spz_ctors D N I X ni npi Ci C $ > $ aux_data D I X j i $;
+
+-- The recursor's type (`mkRecInfos`) ---------------------------------------
+
+--| `mty D np j d v F M`: `M` is the type of motive `j`, read off `F` (the
+--| type's type lifted over the `j` earlier motives) at depth `d`:
+--| `Π indices. Π (ind_ty D j params indices). srt v`.
+term mty: ind > nat > nat > nat > lvl > expr > expr > wff;
+axiom mty_pi (D: ind) (np j d: nat) (v: lvl) (A B M: expr):
+  $ mty D np j (s d) v B M $ > $ mty D np j d v (Π A. B) (Π A. M) $;
+axiom mty_srt (D: ind) (np j d k: nat) (v l: lvl) (X I: expr):
+  $ add d j k $ > $ pargs (ind_ty D j) k np X $ > $ pargs X z d I $ > $ mty D np j d v (srt l) (Π I. srt v) $;
+--| `motives D np v j T M`: the motives of the types `j`.. of `T`, as a context
+--| (innermost first; motive `j` outermost).
+term motives: ind > nat > lvl > nat > tys > ctx > wff;
+axiom motives_nil (D: ind) (np j: nat) (v: lvl): $ motives D np v j tnil [] $;
+axiom motives_cons (D: ind) (np j: nat) (v: lvl) (F F2 Mj: expr) (C: ctors) (T: tys) (Mr M: ctx):
+  $ lift j z F F2 $ > $ mty D np j z v F2 Mj $ > $ motives D np v (s j) T Mr $ > $ capp Mr (Mj :: []) M $ >
+  $ motives D np v j (tcons F C T) M $;
+--| `ihty D np n mo fld y A IH`: the type of the inductive hypothesis for a
+--| recursive field of type `A = Π ys. ind_ty D j params indices` (`A` already
+--| over the fields and the minors before it): `Π ys. motive_j indices (field
+--| ys)`, with the motives `mo` binders above depth 0 and the field at `# fld`.
+term ihty: ind > nat > nat > nat > nat > nat > expr > expr > wff;
+axiom ihty_pi (D: ind) (np n mo fld y: nat) (A B IH: expr):
+  $ ihty D np n mo fld (s y) B IH $ > $ ihty D np n mo fld y (Π A. B) (Π A. IH) $;
+axiom ihty_app (D: ind) (np n mo fld y j ni k a b mj f: nat) (Y X U A: expr):
+  $ spine (ind_ty D j) A k $ > $ nidx D j ni $ > $ add np ni k $ > $ rehead Y # mj ni A X $ > $ spine (ind_ty D j) Y np $ >
+  $ add y mo a $ > $ add a n b $ > $ add mj (s j) b $ > $ add y fld f $ > $ pargs # f z y U $ >
+  $ ihty D np n mo fld y A (X @ U) $;
+--| `mwalk D np n k i c nf d r Ihs K Min`: `Min` is the rest of the type of
+--| minor `k` (for constructor `c` of type `i`, with `nf` fields), read off
+--| the constructor type `K` at depth `d`, after `r` recursive fields whose
+--| inductive hypotheses are `Ihs` (innermost first): `Π fields. Π Ihs. motive_i indices
+--| (ind_ctor D i c params fields)`. Field types are put over the minors and
+--| motives (`lift`, with the block's types put in).
+term mwalk: ind > nat > nat > nat > nat > nat > nat > nat > nat > ctx > expr > expr > wff;
+axiom mwalk_pi_nr (D: ind) (np n k i c nf d r dp kn: nat) (Ihs: ctx) (A A3 B Min: expr):
+  $ add d np dp $ > $ closed dp A $ > $ add k n kn $ > $ lift kn d A A3 $ >
+  $ mwalk D np n k i c nf (s d) r Ihs B Min $ > $ mwalk D np n k i c nf d r Ihs (Π A. B) (Π A3. Min) $;
+axiom mwalk_pi_rec (D: ind) (np n k i c nf d r dp kn j a sh fld mo: nat) (Ihs: ctx) (A A2 A3 A4 B IH Min: expr):
+  $ add d np dp $ > $ recfield D n np d A j $ > $ sinst D z n dp A A2 $ > $ add k n kn $ > $ lift kn d A2 A3 $ >
+  $ add r nf a $ > $ add sh d a $ > $ add fld (s z) sh $ > $ add a k mo $ > $ lift sh z A3 A4 $ >
+  $ ihty D np n mo fld z A4 IH $ >
+  $ mwalk D np n k i c nf (s d) (s r) (IH :: Ihs) B Min $ > $ mwalk D np n k i c nf d r Ihs (Π A. B) (Π A3. Min) $;
+axiom mwalk_res (D: ind) (np n k i c d r dp kn h0 h1 h ni mi a b: nat) (Ihs: ctx) (K K2 K3 Y X Y1 Y2 Min: expr):
+  $ add d np dp $ > $ add k n kn $ > $ add dp i h0 $ > $ add h0 kn h1 $ > $ add h1 r h $ >
+  $ lift kn d K K2 $ > $ lift r z K2 K3 $ > $ nidx D i ni $ > $ rehead Y # mi ni K3 X $ > $ spine # h Y np $ >
+  $ add r d a $ > $ add a kn b $ > $ add mi (s i) b $ > $ pargs (ind_ctor D i c) b np Y1 $ > $ pargs Y1 r d Y2 $ >
+  $ pis Ihs (X @ Y2) Min $ > $ mwalk D np n k i c d d r Ihs K Min $;
+--| `cminors D np n k i c C M`: the minors of constructors `c`.. (`C`) of type
+--| `i`, from minor `k`; `minors D np n k i T M`: of types `i`.. (`T`). Both
+--| as contexts, innermost first.
+term cminors: ind > nat > nat > nat > nat > nat > ctors > ctx > wff;
+axiom cminors_nil (D: ind) (np n k i c: nat): $ cminors D np n k i c cnil [] $;
+axiom cminors_cons (D: ind) (np n k i c nf: nat) (K Min: expr) (C: ctors) (M1 M: ctx):
+  $ npis K nf $ > $ mwalk D np n k i c nf z z [] K Min $ > $ cminors D np n (s k) i (s c) C M1 $ >
+  $ capp M1 (Min :: []) M $ > $ cminors D np n k i c (ccons K C) M $;
+term minors: ind > nat > nat > nat > nat > tys > ctx > wff;
+axiom minors_nil (D: ind) (np n k i: nat): $ minors D np n k i tnil [] $;
+axiom minors_cons (D: ind) (np n k i nc k2: nat) (F: expr) (C: ctors) (T: tys) (M1 M2 M: ctx):
+  $ cminors D np n k i z C M1 $ > $ clen_c C nc $ > $ add k nc k2 $ > $ minors D np n k2 (s i) T M2 $ >
+  $ capp M2 M1 M $ > $ minors D np n k i (tcons F C T) M $;
+--| `rtail D np n m i d F B`: `B = Π indices. Π (ind_ty D i params indices).
+--| motive_i indices major`, read off `F` (lifted over the motives and
+--| minors) at depth `d`.
+term rtail: ind > nat > nat > nat > nat > nat > expr > expr > wff;
+axiom rtail_pi (D: ind) (np n m i d: nat) (A B B2: expr):
+  $ rtail D np n m i (s d) B B2 $ > $ rtail D np n m i d (Π A. B) (Π A. B2) $;
+axiom rtail_srt (D: ind) (np n m i d mn dmn mi: nat) (l: lvl) (X I X2: expr):
+  $ add m n mn $ > $ add d mn dmn $ > $ pargs (ind_ty D i) dmn np X $ > $ pargs X z d I $ >
+  $ add mi i dmn $ > $ pargs # mi (s z) d X2 $ > $ rtail D np n m i d (srt l) (Π I. X2 @ # z) $;
+--| `rec_ty D v i R`: the type of the recursor of type `i` with motives in
+--| `srt v`: `Π params. Π motives. Π minors. Π indices. Π major. motive_i
+--| indices major`.
+term rec_ty: ind > lvl > nat > expr > wff;
+axiom rec_ty_i (D: ind) (b: blk) (P: ctx) (T: tys) (v: lvl) (i np n m mn: nat) (M N: ctx) (F F2 B R1 R2 R: expr) (C: ctors):
+  $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ motives D np v z T M $ > $ minors D np n z z T N $ >
+  $ nth_ty T i F C $ > $ add m n mn $ > $ lift mn z F F2 $ > $ rtail D np n m i z F2 B $ >
+  $ pis N B R1 $ > $ pis M R1 R2 $ > $ pis P R2 R $ > $ rec_ty D v i R $;
+
+-- The recursor's rules (`mkRecRules`) --------------------------------------
+
+--| `ihval D np n m v nf fld y A IH`: the inductive hypothesis of a recursive
+--| field: `λ ys. ind_rec D j v params motives minors indices (field ys)`, read
+--| off the field's type `A` (over all `nf` fields, the field at `# fld`).
+term ihval: ind > nat > nat > nat > lvl > nat > nat > nat > expr > expr > wff;
+axiom ihval_lam (D: ind) (np n m: nat) (v: lvl) (nf fld y: nat) (A B IH: expr):
+  $ ihval D np n m v nf fld (s y) B IH $ > $ ihval D np n m v nf fld y (Π A. B) (λ A. IH) $;
+axiom ihval_app (D: ind) (np n m: nat) (v: lvl) (nf fld y j ni k a mn b f: nat) (Y X1 X2 X3 U A: expr):
+  $ spine (ind_ty D j) A k $ > $ nidx D j ni $ > $ add np ni k $ > $ rehead Y X2 ni A X3 $ > $ spine (ind_ty D j) Y np $ >
+  $ add y nf a $ > $ add m n mn $ > $ add a mn b $ > $ pargs (ind_rec D j v) b np X1 $ > $ pargs X1 a mn X2 $ >
+  $ add y fld f $ > $ pargs # f z y U $ > $ ihval D np n m v nf fld y A (X3 @ U) $;
+--| `rwalk D np n m v nf d Acc K Val`: `Val = λ fields. Acc ihs`, read off the
+--| constructor type `K` at depth `d`, where `Acc` is the minor applied to
+--| the fields and `ihs` the inductive hypotheses of the recursive fields.
+term rwalk: ind > nat > nat > nat > lvl > nat > nat > expr > expr > expr > wff;
+axiom rwalk_pi_nr (D: ind) (np n m: nat) (v: lvl) (nf d dp mn: nat) (Acc A A3 B Val: expr):
+  $ add d np dp $ > $ closed dp A $ > $ add m n mn $ > $ lift mn d A A3 $ >
+  $ rwalk D np n m v nf (s d) Acc B Val $ > $ rwalk D np n m v nf d Acc (Π A. B) (λ A3. Val) $;
+axiom rwalk_pi_rec (D: ind) (np n m: nat) (v: lvl) (nf d dp mn j sh fld: nat) (Acc A A2 A3 A4 B IH Val: expr):
+  $ add d np dp $ > $ recfield D n np d A j $ > $ sinst D z n dp A A2 $ > $ add m n mn $ > $ lift mn d A2 A3 $ >
+  $ add sh d nf $ > $ add fld (s z) sh $ > $ lift sh z A3 A4 $ > $ ihval D np n m v nf fld z A4 IH $ >
+  $ rwalk D np n m v nf (s d) (Acc @ IH) B Val $ > $ rwalk D np n m v nf d Acc (Π A. B) (λ A3. Val) $;
+axiom rwalk_res (D: ind) (np n m: nat) (v: lvl) (d: nat) (Acc K: expr):
+  $ npis K z $ > $ rwalk D np n m v d d Acc K Acc $;
+--| `rec_rhs D v i c R`: the right-hand side of the recursor's rule for
+--| constructor `c` of type `i`: `λ params. λ motives. λ minors. λ fields.
+--| minor_k fields ihs`.
+term rec_rhs: ind > lvl > nat > nat > expr > wff;
+axiom rec_rhs_i (D: ind) (b: blk) (P: ctx) (T: tys) (v: lvl) (i c np n m k nf a mk: nat) (M N: ctx) (F K Acc Val R1 R2 R: expr) (C: ctors):
+  $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ motives D np v z T M $ > $ minors D np n z z T N $ >
+  $ nth_ty T i F C $ > $ nth_ctor C c K $ > $ minor_idx T i c k $ > $ npis K nf $ >
+  $ add nf m a $ > $ add mk (s k) a $ > $ pargs # mk z nf Acc $ > $ rwalk D np n m v nf z Acc K Val $ >
+  $ lams N Val R1 $ > $ lams M R1 R2 $ > $ lams P R2 R $ > $ rec_rhs D v i c R $;
+--| `rec_rule D v i c R`: the rule's right-hand side, restored.
+term rec_rule: ind > lvl > nat > nat > expr > wff;
+axiom rec_rule_i (D: ind) (N: ctx) (v: lvl) (i c: nat) (R0 R: expr):
+  $ rec_rhs D v i c R0 $ > $ ind_nested D N $ > $ rst D N R0 R $ > $ rec_rule D v i c R $;
+
+-- Structures: fields, projections and eta ----------------------------------
+
+--| `struct_like D j`: type `j` has one constructor and no indices (the kernel's
+--| `is_structure_like`; a type of a mutual block may qualify).
+term struct_like: ind > nat > wff;
+axiom struct_like_i (D: ind) (b: blk) (P: ctx) (T: tys) (j: nat) (F K: expr) (l: lvl):
+  $ ind_data D b P T $ > $ nth_ty T j F (ccons K cnil) $ > $ isort F z l $ > $ struct_like D j $;
+--| `field_ty D j i A`: the type of field `i` of the constructor of type `j`,
+--| under the parameters and the earlier fields, with the block's types put in.
+term field_ty: ind > nat > nat > expr > wff;
+axiom field_ty_i (D: ind) (b: blk) (P: ctx) (T: tys) (j i np n m: nat) (F K K2 A: expr) (C: ctors):
+  $ ind_data D b P T $ > $ nth_ty T j F C $ > $ nth_ctor C z K $ > $ clen P np $ > $ ntys T n m $ >
+  $ sinst D z n np K K2 $ > $ nth_pi K2 i A $ > $ field_ty D j i A $;
+--| `qinst b e k j A R`: `R` is `A` with the `k` remaining fields `j`,
+--| `j+1`, ... (field `j` at `# (k-1)`) replaced by the projections of `e`.
+term qinst: blk > expr > nat > nat > expr > expr > wff;
+axiom qinst_z (b: blk) (e A: expr) (j: nat): $ qinst b e z j A A $;
+axiom qinst_s (b: blk) (e A A1 R: expr) (k j: nat):
+  $ inst k A (proj b j e) A1 $ > $ qinst b e k (s j) A1 R $ > $ qinst b e (s k) j A R $;
+--| Structure eta is for a structure whose fields do not mention the block
+--| (`nonrec`, `eta_ok`); `projs b e k Y M`: `M = Y @ proj b 0 e @ .. @ proj b (k-1) e`.
+term nonrec: nat > nat > expr > wff;
+axiom nonrec_pi (np d k: nat) (A B: expr): $ add d np k $ > $ closed k A $ > $ nonrec np (s d) B $ > $ nonrec np d (Π A. B) $;
+axiom nonrec_res (np d: nat) (K: expr): $ npis K z $ > $ nonrec np d K $;
+term eta_ok: ind > nat > wff;
+axiom eta_ok_i (D: ind) (b: blk) (P: ctx) (T: tys) (j np: nat) (F K: expr):
+  $ struct_like D j $ > $ ind_data D b P T $ > $ nth_ty T j F (ccons K cnil) $ > $ clen P np $ > $ nonrec np z K $ >
+  $ eta_ok D j $;
+term projs: blk > expr > nat > expr > expr > wff;
+axiom projs_z (b: blk) (e Y: expr): $ projs b e z Y Y $;
+axiom projs_s (b: blk) (e Y M: expr) (k: nat): $ projs b e k Y M $ > $ projs b e (s k) Y (M @ proj b k e) $;
+
+---------------------------------------------------------------------------
+-- PART II: DEFINITIONS OVER LEVEL EQUIVALENCE AND THE JUDGMENT
+-- The relations `≈` and `⊢` (their axioms are Part III), and the predicates
+-- defined over them by clauses as in Part I: a typing or equivalence premise
+-- is a side condition of the clause.
+---------------------------------------------------------------------------
+
+-- Level equivalence (VLevel.lean:58) ---------------------------------------
+
+--| `leqv l l2`: `l ≈ l2`, semantic equivalence of levels (VLevel.lean:58:
+--| equal evaluation under every assignment of the level variables, including
+--| the `lparam`s). Its axioms are in Part III.
+term leqv: lvl > lvl > wff;
+infixl leqv: $~=$ prec 50;
+infixl leqv: $≈$ prec 50;
+
 --| `ulevel l s`: a field in `srt s` may belong to a type in `srt l`: the type
 --| is a proposition, or `s ≤ l`.
 term ulevel: lvl > lvl > wff;
 axiom ulevel_prop (l u: lvl): $ l ≈ lz $ > $ ulevel l u $;
 axiom ulevel_le (l u: lvl): $ l ⊔ u ≈ l $ > $ ulevel l u $;
+
+-- The judgment `Γ ⊢ e ≡ e2 : A` (IsDefEq, Typing/Basic.lean:18-56) ---------
+
+--| The judgment `Γ ⊢ e ≡ e2 : A` (IsDefEq, Typing/Basic.lean:18-56). Its
+--| rules are in Part III.
+term deq: ctx > expr > expr > expr > wff;
+notation deq (G: ctx) (e e2 A: expr): wff = ($|-$:0) G ($,$:0) e ($==$:0) e2 ($:$:0) A;
+notation deq (G: ctx) (e e2 A: expr): wff = ($⊢$:0) G ($,$:0) e ($≡$:0) e2 ($:$:0) A;
+
+--| `Γ ⊢ e : A` is the diagonal of the judgment.
+def ty (G: ctx) (e A: expr): wff = $ ⊢ G, e ≡ e : A $;
+notation ty (G: ctx) (e A: expr): wff = ($||-$:0) G ($,$:0) e ($:$:0) A;
+notation ty (G: ctx) (e A: expr): wff = ($⊩$:0) G ($,$:0) e ($:$:0) A;
+
+-- Level equivalence of expressions -----------------------------------------
+
+--| `eeqv e e2`: `e` and `e2` agree except at levels, which are equivalent.
+--| Two such expressions denote the same thing, so `e ≡ e2` (`eeqv_df`, Part
+--| III). `eeqv_refl` covers every identical subterm (an opaque constant at the
+--| same levels among them).
+term eeqv: expr > expr > wff;
+axiom eeqv_refl (e: expr): $ eeqv e e $;
+term ind_eqv: ind > ind > wff;
+term ceqv: ctx > ctx > wff;
+term teqv: tys > tys > wff;
+term cseqv: ctors > ctors > wff;
+axiom eeqv_bvar (i: nat): $ eeqv # i # i $;
+axiom eeqv_srt (l l2: lvl): $ l ≈ l2 $ > $ eeqv (srt l) (srt l2) $;
+axiom eeqv_app (f a f2 a2: expr): $ eeqv f f2 $ > $ eeqv a a2 $ > $ eeqv (f @ a) (f2 @ a2) $;
+axiom eeqv_lam (A b A2 b2: expr): $ eeqv A A2 $ > $ eeqv b b2 $ > $ eeqv (λ A. b) (λ A2. b2) $;
+axiom eeqv_pi (A b A2 b2: expr): $ eeqv A A2 $ > $ eeqv b b2 $ > $ eeqv (Π A. b) (Π A2. b2) $;
+axiom eeqv_lit (n: bin): $ eeqv (lit n) (lit n) $;
+axiom eeqv_ind_ty (D D2: ind) (i: nat): $ ind_eqv D D2 $ > $ eeqv (ind_ty D i) (ind_ty D2 i) $;
+axiom eeqv_ind_ctor (D D2: ind) (i c: nat): $ ind_eqv D D2 $ > $ eeqv (ind_ctor D i c) (ind_ctor D2 i c) $;
+axiom eeqv_ind_rec (D D2: ind) (i: nat) (v v2: lvl):
+  $ ind_eqv D D2 $ > $ v ≈ v2 $ > $ eeqv (ind_rec D i v) (ind_rec D2 i v2) $;
+axiom eeqv_proj (b: blk) (i: nat) (e e2: expr): $ eeqv e e2 $ > $ eeqv (proj b i e) (proj b i e2) $;
+axiom eeqv_quot (u u2: lvl): $ leqv u u2 $ > $ eeqv (quot u) (quot u2) $;
+axiom eeqv_quot_mk (u u2: lvl): $ leqv u u2 $ > $ eeqv (quot_mk u) (quot_mk u2) $;
+axiom eeqv_quot_lift (u v u2 v2: lvl):
+  $ leqv u u2 $ > $ leqv v v2 $ > $ eeqv (quot_lift u v) (quot_lift u2 v2) $;
+axiom eeqv_quot_ind (u u2: lvl): $ leqv u u2 $ > $ eeqv (quot_ind u) (quot_ind u2) $;
+axiom ind_eqv_i (D D2: ind) (b: blk) (P P2 N N2: ctx) (T T2: tys):
+  $ ind_data D b P T $ > $ ind_data D2 b P2 T2 $ > $ ceqv P P2 $ > $ teqv T T2 $ >
+  $ ind_nested D N $ > $ ind_nested D2 N2 $ > $ ceqv N N2 $ > $ ind_eqv D D2 $;
+axiom ceqv_nil: $ ceqv [] [] $;
+axiom ceqv_cons (A A2: expr) (G G2: ctx): $ eeqv A A2 $ > $ ceqv G G2 $ > $ ceqv (A :: G) (A2 :: G2) $;
+axiom teqv_nil: $ teqv tnil tnil $;
+axiom teqv_cons (F F2: expr) (C C2: ctors) (T T2: tys):
+  $ eeqv F F2 $ > $ cseqv C C2 $ > $ teqv T T2 $ > $ teqv (tcons F C T) (tcons F2 C2 T2) $;
+axiom cseqv_nil: $ cseqv cnil cnil $;
+axiom cseqv_cons (K K2: expr) (C C2: ctors): $ eeqv K K2 $ > $ cseqv C C2 $ > $ cseqv (ccons K C) (ccons K2 C2) $;
+
+-- Well-formedness of an inductive block ------------------------------------
+-- `checkInductiveTypes` and `checkConstructors`; for a nested block, `nst_ok`:
+-- the occurrences come in groups, one per declared type of a well-formed block
+-- `I`, each auxiliary type with `I`'s data specialized.
+
 --| `cwf D n np l i Ctx d K`: `K`, the rest of a constructor type of type `i`
 --| at depth `d`, is well formed in `Ctx` (the fields so far, with the block's
 --| types put in, over the parameters and `G`): each field type is a type of
@@ -677,112 +923,22 @@ axiom tys_ty_cons (Ctx: ctx) (F: expr) (C: ctors) (T: tys) (u: lvl):
 term tys_ok: ctx > ind > wff;
 axiom tys_ok_i (G G2: ctx) (D: ind) (b: blk) (P: ctx) (T: tys):
   $ ind_data D b P T $ > $ ctx_wf G P $ > $ capp P G G2 $ > $ tys_ty G2 T $ > $ tys_ok G D $;
---| A well-formed block, in context `G`.
+--| A well-formed block, in context `G` (`ind_wf_i`, after `nst_ok` below).
 term ind_wf: ctx > ind > wff;
-
--- Nested inductive types (`ElimNestedInductive`) ------------------------------------
-
---| A nested block `ind_mkn b P T N` is the mutual block the kernel checks in
---| its place: `T` lists the declared types and then one auxiliary type per
---| nested occurrence `I Ds` of an earlier block `I` in the constructors (in
---| the kernel's order), and `N` lists the occurrences, each `ind_ty I i @ Ds`
---| written like a constructor type at depth 0 (a `ctx` used as a list; `Ds`
---| mention the block's types). An auxiliary type must have `I`'s type and
---| constructors at `Ds` with the occurrences replaced by the auxiliary types
---| (`spz`), and the kernel adds auxiliary types for all of `I`'s block at
---| once (`nst_ok`). So an auxiliary type denotes the occurrence itself, and
---| the block's constructors, recursors and rules are stated with the
---| occurrences restored (`rst`, the kernel's `restoreNested`): the auxiliary
---| type `ind_ty D j ps is` is read as `I Ds[ps] is` and its constructor
---| `ind_ctor D j c ps fs` as `ind_ctor I i c Ds[ps] fs`. Its recursor is the
---| block's (`X.rec_k` for the `k`th auxiliary type) and reduces on `I`'s
---| constructors (`ind_iota_nst`).
-term ind_mkn: blk > ctx > tys > ctx > ind;
-axiom ind_data_n (b: blk) (P: ctx) (T: tys) (N: ctx): $ ind_data (ind_mkn b P T N) b P T $;
---| `ind_nested D N`: the occurrences of `D` (none for `ind_mk`).
-term ind_nested: ind > ctx > wff;
-axiom ind_nested_mk (b: blk) (P: ctx) (T: tys): $ ind_nested (ind_mk b P T) [] $;
-axiom ind_nested_mkn (b: blk) (P: ctx) (T: tys) (N: ctx): $ ind_nested (ind_mkn b P T N) N $;
---| `ndecl N n n0`: `n0` declared types among `n`; `nst_at N n0 j X`: the
---| occurrence of auxiliary type `j`, when the first auxiliary type is `n0`.
-term ndecl: ctx > nat > nat > wff;
-axiom ndecl_nil (n: nat): $ ndecl [] n n $;
-axiom ndecl_cons (X: expr) (N: ctx) (n n0: nat): $ ndecl N n n0 $ > $ ndecl (X :: N) (s n) n0 $;
-term nst_at: ctx > nat > nat > expr > wff;
-axiom nst_at_z (X: expr) (N: ctx) (j: nat): $ nst_at (X :: N) j j X $;
-axiom nst_at_s (X X2: expr) (N: ctx) (n0 j: nat): $ nst_at N (s n0) j X $ > $ nst_at (X2 :: N) n0 j X $;
-term aux_of: ind > ctx > nat > expr > wff;
-axiom aux_of_i (D: ind) (N: ctx) (j np n m n0: nat) (X: expr):
-  $ ind_arity D np n m $ > $ ndecl N n n0 $ > $ nst_at N n0 j X $ > $ aux_of D N j X $;
---| `rst D N e e2`: `e2` is `e` with the auxiliary types and constructors
---| restored: nothing when there are no occurrences (`rst_nil`), else from
---| the outside in, `rst_refl` for the subterms left as they are (the clauses
---| are tried in this order, so that an unknown `e2` is computed).
-term rst: ind > ctx > expr > expr > wff;
-axiom rst_nil (D: ind) (e: expr): $ rst D [] e e $;
-axiom rst_ty (D: ind) (N: ctx) (j np n m na k: nat) (e S X X1 X2 e2: expr):
-  $ spine_ty e D j na $ > $ aux_of D N j X $ > $ ind_arity D np n m $ > $ sinst D z n np X X1 $ >
-  $ add np k na $ > $ drop k e S $ > $ pinst z S X1 X2 $ > $ rehead S X2 k e e2 $ > $ rst D N e e2 $;
-axiom rst_ctor (D I: ind) (N: ctx) (j c i np n m na k npi: nat) (e S X X1 X2 Y e2: expr):
-  $ spine_ctor e D j c na $ > $ aux_of D N j X $ > $ ind_arity D np n m $ > $ sinst D z n np X X1 $ >
-  $ add np k na $ > $ drop k e S $ > $ pinst z S X1 X2 $ > $ spine_ty X2 I i npi $ >
-  $ rehead (ind_ty I i) (ind_ctor I i c) npi X2 Y $ > $ rehead S Y k e e2 $ > $ rst D N e e2 $;
-axiom rst_app (D: ind) (N: ctx) (f a f2 a2: expr): $ rst D N f f2 $ > $ rst D N a a2 $ > $ rst D N (f @ a) (f2 @ a2) $;
-axiom rst_lam (D: ind) (N: ctx) (A b A2 b2: expr): $ rst D N A A2 $ > $ rst D N b b2 $ > $ rst D N (λ A. b) (λ A2. b2) $;
-axiom rst_pi (D: ind) (N: ctx) (A b A2 b2: expr): $ rst D N A A2 $ > $ rst D N b b2 $ > $ rst D N (Π A. b) (Π A2. b2) $;
-axiom rst_proj (D: ind) (N: ctx) (b: blk) (i: nat) (e e2: expr): $ rst D N e e2 $ > $ rst D N (proj b i e) (proj b i e2) $;
-axiom rst_refl (D: ind) (N: ctx) (e: expr): $ rst D N e e $;
-term nst_hit: ctx > nat > nat > nat > expr > expr > wff;
---| `nst_hit N j d np e e2`: `e` is an occurrence of `N` (the first entry being
---| auxiliary type `j`) lifted to depth `d` and applied to more arguments,
---| and `e2` its replacement. The entries are tried in order: the first
---| clause fails as a whole when the entry is not `e`'s.
-axiom nst_hit_z (X S Y e e2: expr) (N: ctx) (I: ind) (i j d np na npi r a t: nat):
-  $ spine_ty X I i npi $ > $ spine_ty e I i na $ > $ add npi r na $ > $ lift d z X S $ > $ drop r e S $ >
-  $ add np j a $ > $ add d a t $ > $ pargs # t d np Y $ > $ rehead S Y r e e2 $ > $ nst_hit (X :: N) j d np e e2 $;
-axiom nst_hit_s (X e e2: expr) (N: ctx) (j d np: nat): $ nst_hit N (s j) d np e e2 $ > $ nst_hit (X :: N) j d np e e2 $;
---| `spz D N d e e2`: `e2` is `e` (at depth `d` in a constructor type) with
---| each occurrence `I Ds is` of `N` replaced by its auxiliary type
---| `# (d + np + j)` applied to the block's parameters and to `is`
---| (`replaceAllNested`: from the outside in, so `is` stay as they are).
-term spz: ind > ctx > nat > expr > expr > wff;
-axiom spz_refl (D: ind) (N: ctx) (d: nat) (e: expr): $ spz D N d e e $;
-axiom spz_hit (D: ind) (N: ctx) (d np n m n0: nat) (e e2: expr):
-  $ ind_arity D np n m $ > $ ndecl N n n0 $ > $ nst_hit N n0 d np e e2 $ > $ spz D N d e e2 $;
-axiom spz_app (D: ind) (N: ctx) (d: nat) (f a f2 a2: expr): $ spz D N d f f2 $ > $ spz D N d a a2 $ > $ spz D N d (f @ a) (f2 @ a2) $;
-axiom spz_lam (D: ind) (N: ctx) (d: nat) (A b A2 b2: expr): $ spz D N d A A2 $ > $ spz D N (s d) b b2 $ > $ spz D N d (λ A. b) (λ A2. b2) $;
-axiom spz_pi (D: ind) (N: ctx) (d: nat) (A b A2 b2: expr): $ spz D N d A A2 $ > $ spz D N (s d) b b2 $ > $ spz D N d (Π A. b) (Π A2. b2) $;
-axiom spz_proj (D: ind) (N: ctx) (d: nat) (b: blk) (i: nat) (e e2: expr): $ spz D N d e e2 $ > $ spz D N d (proj b i e) (proj b i e2) $;
---| `spz_ctors D N I X ni npi C C2`: `C2` is the constructors `C` of a type of
---| `I` at the occurrence `X`, specialized: `I`'s types put in, `I`'s own
---| occurrences restored (it may be nested itself), the parameters replaced
---| by `Ds` (`pinst`), then `spz`.
-term spz_ctors: ind > ctx > ind > expr > nat > nat > ctors > ctors > wff;
-axiom spz_ctors_nil (D: ind) (N: ctx) (I: ind) (X: expr) (ni npi: nat): $ spz_ctors D N I X ni npi cnil cnil $;
-axiom spz_ctors_cons (D I: ind) (N NI: ctx) (X K K1 K2 K3 K4: expr) (ni npi: nat) (C C2: ctors):
-  $ sinst I z ni npi K K1 $ > $ ind_nested I NI $ > $ rst I NI K1 K2 $ > $ pinst z X K2 K3 $ > $ spz D N z K3 K4 $ >
-  $ spz_ctors D N I X ni npi C C2 $ > $ spz_ctors D N I X ni npi (ccons K C) (ccons K4 C2) $;
---| `aux_data D I X j i`: type `j` of `D` has the type of `I`'s type `i` at
---| `X`'s arguments and its constructors specialized.
-term aux_data: ind > ind > expr > nat > nat > wff;
-axiom aux_data_i (D I: ind) (b bi: blk) (P Pi N: ctx) (T Ti: tys) (j i npi ni mi: nat) (X F Fi: expr) (C Ci: ctors):
-  $ ind_data D b P T $ > $ ind_nested D N $ > $ ind_data I bi Pi Ti $ > $ nth_ty T j F C $ > $ nth_ty Ti i Fi Ci $ >
-  $ pinst z X Fi F $ > $ ind_arity I npi ni mi $ > $ spz_ctors D N I X ni npi Ci C $ > $ aux_data D I X j i $;
 --| `nst_ok G D j N2`: the occurrences `N2` (from auxiliary type `j` on) come
 --| in groups, one per declared type of a well-formed block `I` in order with
 --| the same arguments (`nst_group`, types `i` to `ni0`; `I.all` excludes
---| `I`'s own auxiliary types), each with the data above.
+--| `I`'s own auxiliary types), each with the data of `aux_data` (Part I).
 term nst_ok: ctx > ind > nat > ctx > wff;
 term nst_group: ctx > ind > ind > expr > nat > nat > nat > ctx > ctx > wff;
 axiom nst_ok_nil (G: ctx) (D: ind) (j: nat): $ nst_ok G D j [] $;
 axiom nst_ok_cons (G: ctx) (D I: ind) (j j2 npi ni mi ni0: nat) (X: expr) (N2 N3 NI: ctx):
-  $ spine_ty X I z npi $ > $ ind_wf G I $ > $ ind_arity I npi ni mi $ > $ ind_nested I NI $ > $ ndecl NI ni ni0 $ >
+  $ spine (ind_ty I z) X npi $ > $ ind_wf G I $ > $ ind_arity I npi ni mi $ > $ ind_nested I NI $ > $ ndecl NI ni ni0 $ >
   $ nst_group G D I X j z ni0 (X :: N2) N3 $ > $ add j ni0 j2 $ > $ nst_ok G D j2 N3 $ > $ nst_ok G D j (X :: N2) $;
 axiom nst_group_done (G: ctx) (D I: ind) (X0: expr) (j ni: nat) (N: ctx): $ nst_group G D I X0 j ni ni N N $;
 axiom nst_group_cons (G: ctx) (D I: ind) (X0 X: expr) (j i ni npi: nat) (N N2: ctx):
-  $ i < ni $ > $ spine_ty X0 I z npi $ > $ rehead (ind_ty I z) (ind_ty I i) npi X0 X $ > $ aux_data D I X j i $ >
+  $ i < ni $ > $ spine (ind_ty I z) X0 npi $ > $ rehead (ind_ty I z) (ind_ty I i) npi X0 X $ > $ aux_data D I X j i $ >
   $ nst_group G D I X0 (s j) (s i) ni N N2 $ > $ nst_group G D I X0 j i ni (X :: N) N2 $;
-
 --| A well-formed block, in context `G` (`l`, the block's universe, is the first
 --| type's).
 axiom ind_wf_i (G G2: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (np n m k n0: nat) (l: lvl) (F: expr) (C: ctors):
@@ -790,15 +946,16 @@ axiom ind_wf_i (G G2: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (np n m k n0: n
   $ nth_ty T z F C $ > $ isort F k l $ > $ tys_wf D n np l z G2 T $ >
   $ ind_nested D N $ > $ ndecl N n n0 $ > $ nst_ok G D n0 N $ > $ ind_wf G D $;
 
--- The elimination level (`isLargeEliminator`) --------------------------------------
+-- The elimination level (`isLargeEliminator`) ------------------------------
 
 --| `elim_ok G D v`: the recursor may have motives in `srt v`: always for
 --| `v ≈ 0`; for every `v` when the types are never propositions, or the block
 --| is one type with no constructors, or one type with one constructor whose
 --| fields that are not propositions all appear as arguments of its result.
 term large: ctx > ind > wff;
+--| `fir D np Ctx d K`: each remaining field is a proposition or an argument
+--| of the result.
 term fir: ind > nat > ctx > nat > expr > wff;
-term leaf_has: nat > expr > wff;
 term elim_ok: ctx > ind > lvl > wff;
 axiom elim_prop (G: ctx) (D: ind) (v: lvl): $ v ≈ lz $ > $ elim_ok G D v $;
 axiom elim_large (G: ctx) (D: ind) (v: lvl): $ large G D $ > $ elim_ok G D v $;
@@ -820,173 +977,9 @@ axiom fir_arg (D: ind) (np: nat) (Ctx: ctx) (d k: nat) (A A2 B: expr):
 axiom fir_prop (D: ind) (np: nat) (Ctx: ctx) (d k: nat) (A A2 B: expr):
   $ add d np k $ > $ sinst D z (s z) k A A2 $ > $ ⊩ Ctx, A2 : srt lz $ > $ fir D np (A2 :: Ctx) (s d) B $ >
   $ fir D np Ctx d (Π A. B) $;
-axiom leaf_has_pi (j: nat) (A B: expr): $ leaf_has (s j) B $ > $ leaf_has j (Π A. B) $;
-axiom leaf_has_app (j: nat) (e: expr): $ has_arg e # j $ > $ leaf_has j e $;
 
--- The recursor's type (`mkRecInfos`) ---------------------------------------------
+-- Projections from a structure that may be a proposition (`infer_proj`) ----
 
---| `mty D np j d v F M`: `M` is the type of motive `j`, read off `F` (the
---| type's type lifted over the `j` earlier motives) at depth `d`:
---| `Π indices. Π (ind_ty D j params indices). srt v`.
-term mty: ind > nat > nat > nat > lvl > expr > expr > wff;
-axiom mty_pi (D: ind) (np j d: nat) (v: lvl) (A B M: expr):
-  $ mty D np j (s d) v B M $ > $ mty D np j d v (Π A. B) (Π A. M) $;
-axiom mty_srt (D: ind) (np j d k: nat) (v l: lvl) (X I: expr):
-  $ add d j k $ > $ pargs (ind_ty D j) k np X $ > $ pargs X z d I $ > $ mty D np j d v (srt l) (Π I. srt v) $;
---| `motives D np v j T M`: the motives of the types `j`.. of `T`, as a context
---| (innermost first; motive `j` outermost).
-term motives: ind > nat > lvl > nat > tys > ctx > wff;
-axiom motives_nil (D: ind) (np j: nat) (v: lvl): $ motives D np v j tnil [] $;
-axiom motives_cons (D: ind) (np j: nat) (v: lvl) (F F2 Mj: expr) (C: ctors) (T: tys) (Mr M: ctx):
-  $ lift j z F F2 $ > $ mty D np j z v F2 Mj $ > $ motives D np v (s j) T Mr $ > $ capp Mr (Mj :: []) M $ >
-  $ motives D np v j (tcons F C T) M $;
---| `ihty D np n mo fld y A IH`: the type of the inductive hypothesis for a
---| recursive field of type `A = Π ys. ind_ty D j params indices` (`A` already
---| over the fields and the minors before it): `Π ys. motive_j indices (field
---| ys)`, with the motives `mo` binders above depth 0 and the field at `# fld`.
-term ihty: ind > nat > nat > nat > nat > nat > expr > expr > wff;
-axiom ihty_pi (D: ind) (np n mo fld y: nat) (A B IH: expr):
-  $ ihty D np n mo fld (s y) B IH $ > $ ihty D np n mo fld y (Π A. B) (Π A. IH) $;
-axiom ihty_app (D: ind) (np n mo fld y j ni k a b mj f: nat) (Y X U A: expr):
-  $ spine_ty A D j k $ > $ nidx D j ni $ > $ add np ni k $ > $ rehead Y # mj ni A X $ > $ napp (ind_ty D j) np Y $ >
-  $ add y mo a $ > $ add a n b $ > $ add mj (s j) b $ > $ add y fld f $ > $ pargs # f z y U $ >
-  $ ihty D np n mo fld y A (X @ U) $;
---| `mwalk D np n k i c nf d r Ihs K Min`: `Min` is the rest of the type of
---| minor `k` (for constructor `c` of type `i`, with `nf` fields), read off
---| the constructor type `K` at depth `d`, after `r` recursive fields whose
---| inductive hypotheses are `Ihs` (innermost first): `Π fields. Π Ihs. motive_i indices
---| (ind_ctor D i c params fields)`. Field types are put over the minors and
---| motives (`lift`, with the block's types put in).
-term mwalk: ind > nat > nat > nat > nat > nat > nat > nat > nat > ctx > expr > expr > wff;
-axiom mwalk_pi_nr (D: ind) (np n k i c nf d r dp kn: nat) (Ihs: ctx) (A A3 B Min: expr):
-  $ add d np dp $ > $ closed dp A $ > $ add k n kn $ > $ lift kn d A A3 $ >
-  $ mwalk D np n k i c nf (s d) r Ihs B Min $ > $ mwalk D np n k i c nf d r Ihs (Π A. B) (Π A3. Min) $;
-axiom mwalk_pi_rec (D: ind) (np n k i c nf d r dp kn j a sh fld mo: nat) (Ihs: ctx) (A A2 A3 A4 B IH Min: expr):
-  $ add d np dp $ > $ recfield D n np d A j $ > $ sinst D z n dp A A2 $ > $ add k n kn $ > $ lift kn d A2 A3 $ >
-  $ add r nf a $ > $ add sh d a $ > $ add fld (s z) sh $ > $ add a k mo $ > $ lift sh z A3 A4 $ >
-  $ ihty D np n mo fld z A4 IH $ >
-  $ mwalk D np n k i c nf (s d) (s r) (IH :: Ihs) B Min $ > $ mwalk D np n k i c nf d r Ihs (Π A. B) (Π A3. Min) $;
-axiom mwalk_res (D: ind) (np n k i c d r dp kn h0 h1 h ni mi a b: nat) (Ihs: ctx) (K K2 K3 Y X Y1 Y2 Min: expr):
-  $ add d np dp $ > $ add k n kn $ > $ add dp i h0 $ > $ add h0 kn h1 $ > $ add h1 r h $ >
-  $ lift kn d K K2 $ > $ lift r z K2 K3 $ > $ nidx D i ni $ > $ rehead Y # mi ni K3 X $ > $ napp # h np Y $ >
-  $ add r d a $ > $ add a kn b $ > $ add mi (s i) b $ > $ pargs (ind_ctor D i c) b np Y1 $ > $ pargs Y1 r d Y2 $ >
-  $ pis Ihs (X @ Y2) Min $ > $ mwalk D np n k i c d d r Ihs K Min $;
---| `cminors D np n k i c C M`: the minors of constructors `c`.. (`C`) of type
---| `i`, from minor `k`; `minors D np n k i T M`: of types `i`.. (`T`). Both
---| as contexts, innermost first.
-term cminors: ind > nat > nat > nat > nat > nat > ctors > ctx > wff;
-axiom cminors_nil (D: ind) (np n k i c: nat): $ cminors D np n k i c cnil [] $;
-axiom cminors_cons (D: ind) (np n k i c nf: nat) (K Min: expr) (C: ctors) (M1 M: ctx):
-  $ npis K nf $ > $ mwalk D np n k i c nf z z [] K Min $ > $ cminors D np n (s k) i (s c) C M1 $ >
-  $ capp M1 (Min :: []) M $ > $ cminors D np n k i c (ccons K C) M $;
-term minors: ind > nat > nat > nat > nat > tys > ctx > wff;
-axiom minors_nil (D: ind) (np n k i: nat): $ minors D np n k i tnil [] $;
-axiom minors_cons (D: ind) (np n k i nc k2: nat) (F: expr) (C: ctors) (T: tys) (M1 M2 M: ctx):
-  $ cminors D np n k i z C M1 $ > $ clen_c C nc $ > $ add k nc k2 $ > $ minors D np n k2 (s i) T M2 $ >
-  $ capp M2 M1 M $ > $ minors D np n k i (tcons F C T) M $;
---| `rtail D np n m i d F B`: `B = Π indices. Π (ind_ty D i params indices).
---| motive_i indices major`, read off `F` (lifted over the motives and
---| minors) at depth `d`.
-term rtail: ind > nat > nat > nat > nat > nat > expr > expr > wff;
-axiom rtail_pi (D: ind) (np n m i d: nat) (A B B2: expr):
-  $ rtail D np n m i (s d) B B2 $ > $ rtail D np n m i d (Π A. B) (Π A. B2) $;
-axiom rtail_srt (D: ind) (np n m i d mn dmn mi: nat) (l: lvl) (X I X2: expr):
-  $ add m n mn $ > $ add d mn dmn $ > $ pargs (ind_ty D i) dmn np X $ > $ pargs X z d I $ >
-  $ add mi i dmn $ > $ pargs # mi (s z) d X2 $ > $ rtail D np n m i d (srt l) (Π I. X2 @ # z) $;
---| `rec_ty D v i R`: the type of the recursor of type `i` with motives in
---| `srt v`: `Π params. Π motives. Π minors. Π indices. Π major. motive_i
---| indices major`.
-term rec_ty: ind > lvl > nat > expr > wff;
-axiom rec_ty_i (D: ind) (b: blk) (P: ctx) (T: tys) (v: lvl) (i np n m mn: nat) (M N: ctx) (F F2 B R1 R2 R: expr) (C: ctors):
-  $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ motives D np v z T M $ > $ minors D np n z z T N $ >
-  $ nth_ty T i F C $ > $ add m n mn $ > $ lift mn z F F2 $ > $ rtail D np n m i z F2 B $ >
-  $ pis N B R1 $ > $ pis M R1 R2 $ > $ pis P R2 R $ > $ rec_ty D v i R $;
-
--- The recursor's rules (`mkRecRules`) ----------------------------------------------
-
---| `ihval D np n m v nf fld y A IH`: the inductive hypothesis of a recursive
---| field: `λ ys. ind_rec D j v params motives minors indices (field ys)`, read
---| off the field's type `A` (over all `nf` fields, the field at `# fld`).
-term ihval: ind > nat > nat > nat > lvl > nat > nat > nat > expr > expr > wff;
-axiom ihval_lam (D: ind) (np n m: nat) (v: lvl) (nf fld y: nat) (A B IH: expr):
-  $ ihval D np n m v nf fld (s y) B IH $ > $ ihval D np n m v nf fld y (Π A. B) (λ A. IH) $;
-axiom ihval_app (D: ind) (np n m: nat) (v: lvl) (nf fld y j ni k a mn b f: nat) (Y X1 X2 X3 U A: expr):
-  $ spine_ty A D j k $ > $ nidx D j ni $ > $ add np ni k $ > $ rehead Y X2 ni A X3 $ > $ napp (ind_ty D j) np Y $ >
-  $ add y nf a $ > $ add m n mn $ > $ add a mn b $ > $ pargs (ind_rec D j v) b np X1 $ > $ pargs X1 a mn X2 $ >
-  $ add y fld f $ > $ pargs # f z y U $ > $ ihval D np n m v nf fld y A (X3 @ U) $;
---| `rwalk D np n m v nf d Acc K Val`: `Val = λ fields. Acc ihs`, read off the
---| constructor type `K` at depth `d`, where `Acc` is the minor applied to
---| the fields and `ihs` the inductive hypotheses of the recursive fields.
-term rwalk: ind > nat > nat > nat > lvl > nat > nat > expr > expr > expr > wff;
-axiom rwalk_pi_nr (D: ind) (np n m: nat) (v: lvl) (nf d dp mn: nat) (Acc A A3 B Val: expr):
-  $ add d np dp $ > $ closed dp A $ > $ add m n mn $ > $ lift mn d A A3 $ >
-  $ rwalk D np n m v nf (s d) Acc B Val $ > $ rwalk D np n m v nf d Acc (Π A. B) (λ A3. Val) $;
-axiom rwalk_pi_rec (D: ind) (np n m: nat) (v: lvl) (nf d dp mn j sh fld: nat) (Acc A A2 A3 A4 B IH Val: expr):
-  $ add d np dp $ > $ recfield D n np d A j $ > $ sinst D z n dp A A2 $ > $ add m n mn $ > $ lift mn d A2 A3 $ >
-  $ add sh d nf $ > $ add fld (s z) sh $ > $ lift sh z A3 A4 $ > $ ihval D np n m v nf fld z A4 IH $ >
-  $ rwalk D np n m v nf (s d) (Acc @ IH) B Val $ > $ rwalk D np n m v nf d Acc (Π A. B) (λ A3. Val) $;
-axiom rwalk_bvar (D: ind) (np n m: nat) (v: lvl) (d h: nat) (Acc: expr):
-  $ rwalk D np n m v d d Acc # h Acc $;
-axiom rwalk_app (D: ind) (np n m: nat) (v: lvl) (d: nat) (Acc f a: expr):
-  $ rwalk D np n m v d d Acc (f @ a) Acc $;
---| `rec_rhs D v i c R`: the right-hand side of the recursor's rule for
---| constructor `c` of type `i`: `λ params. λ motives. λ minors. λ fields.
---| minor_k fields ihs`.
-term rec_rhs: ind > lvl > nat > nat > expr > wff;
-axiom rec_rhs_i (D: ind) (b: blk) (P: ctx) (T: tys) (v: lvl) (i c np n m k nf a mk: nat) (M N: ctx) (F K Acc Val R1 R2 R: expr) (C: ctors):
-  $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ motives D np v z T M $ > $ minors D np n z z T N $ >
-  $ nth_ty T i F C $ > $ nth_ctor C c K $ > $ minor_idx T i c k $ > $ npis K nf $ >
-  $ add nf m a $ > $ add mk (s k) a $ > $ pargs # mk z nf Acc $ > $ rwalk D np n m v nf z Acc K Val $ >
-  $ lams N Val R1 $ > $ lams M R1 R2 $ > $ lams P R2 R $ > $ rec_rhs D v i c R $;
-
--- Typing and reduction --------------------------------------------------------------
-
-axiom ind_ty_ty (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (i: nat) (F R: expr) (C: ctors):
-  $ tys_ok G D $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ pis P F R $ > $ ⊩ G, ind_ty D i : R $;
-axiom ind_ctor_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (i c np n m: nat) (F K K2 K3 R: expr) (C: ctors):
-  $ ind_wf G D $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ nth_ctor C c K $ > $ clen P np $ > $ ntys T n m $ >
-  $ sinst D z n np K K2 $ > $ ind_nested D N $ > $ rst D N K2 K3 $ > $ pis P K3 R $ > $ ⊩ G, ind_ctor D i c : R $;
-axiom ind_rec_ty (G: ctx) (D: ind) (N: ctx) (i: nat) (v: lvl) (R0 R: expr):
-  $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_ty D v i R0 $ > $ ind_nested D N $ > $ rst D N R0 R $ > $ ⊩ G, ind_rec D i v : R $;
---| `rec_rule D v i c R`: the rule's right-hand side, restored.
-term rec_rule: ind > lvl > nat > nat > expr > wff;
-axiom rec_rule_i (D: ind) (N: ctx) (v: lvl) (i c: nat) (R0 R: expr):
-  $ rec_rhs D v i c R0 $ > $ ind_nested D N $ > $ rst D N R0 R $ > $ rec_rule D v i c R $;
---| Iota: `ind_rec D i v ps ms ns is (ind_ctor D2 i c qs fs) ≡ R ps ms ns fs`
---| whenever the left side is well typed (which makes `D2` an instance of `D`
---| at equivalent levels and `qs`, `is` agree with the recursor's, as in
---| nanoda's `reduce_rec`).
-axiom ind_iota (G: ctx) (D D2: ind) (i c: nat) (v: lvl) (np n m a0 a ni k nf nq: nat) (R e3 e4 Y maj rhs0 rhs T: expr):
-  $ spine_rec e4 D i v k $ > $ spine_ctor maj D2 i c nq $ > $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_rule D v i c R $ >
-  $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m a $ > $ nidx D i ni $ > $ add a ni k $ > $ nfields D i c nf $ >
-  $ add np nf nq $ > $ rehead (ind_rec D i v) R a e3 rhs0 $ > $ drop ni e4 e3 $ > $ drop nf maj Y $ >
-  $ rehead Y rhs0 nf maj rhs $ > $ ⊩ G, e4 @ maj : T $ > $ ⊢ G, e4 @ maj ≡ rhs : T $;
---| Iota of the recursor of an auxiliary type `i` (the occurrence `I Ds`) on
---| `I`'s constructor `c`: `ind_rec D i v ps ms ns is (ind_ctor I2 ii c qs fs)
---| ≡ R ps ms ns fs` when well typed (which makes `I2` an instance of `I` and
---| `qs` the occurrence's arguments at `ps`); the fields are the last `nf`
---| arguments of the major premise, as in `inductive_reduce_rec`.
-axiom ind_iota_nst (G: ctx) (D I I2: ind) (N: ctx) (i ii c: nat) (v: lvl) (np n m a0 a ni k nf nq npi: nat)
-    (R e3 e4 X Y maj rhs0 rhs T: expr):
-  $ spine_rec e4 D i v k $ > $ spine_ctor maj I2 ii c nq $ > $ ind_wf G D $ > $ elim_ok G D v $ >
-  $ ind_nested D N $ > $ aux_of D N i X $ > $ spine_ty X I ii npi $ > $ rec_rule D v i c R $ >
-  $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m a $ > $ nidx D i ni $ > $ add a ni k $ > $ nfields D i c nf $ >
-  $ add npi nf nq $ > $ rehead (ind_rec D i v) R a e3 rhs0 $ > $ drop ni e4 e3 $ > $ drop nf maj Y $ >
-  $ rehead Y rhs0 nf maj rhs $ > $ ⊩ G, e4 @ maj : T $ > $ ⊢ G, e4 @ maj ≡ rhs : T $;
-
--- Structures: projections and eta ------------------------------------------------------
-
---| `struct_like D j`: type `j` has one constructor and no indices (the kernel's
---| `is_structure_like`; a type of a mutual block may qualify).
-term struct_like: ind > nat > wff;
-axiom struct_like_i (D: ind) (b: blk) (P: ctx) (T: tys) (j: nat) (F K: expr) (l: lvl):
-  $ ind_data D b P T $ > $ nth_ty T j F (ccons K cnil) $ > $ isort F z l $ > $ struct_like D j $;
---| `field_ty D j i A`: the type of field `i` of the constructor of type `j`,
---| under the parameters and the earlier fields, with the block's types put in.
-term field_ty: ind > nat > nat > expr > wff;
-axiom field_ty_i (D: ind) (b: blk) (P: ctx) (T: tys) (j i np n m: nat) (F K K2 A: expr) (C: ctors):
-  $ ind_data D b P T $ > $ nth_ty T j F C $ > $ nth_ctor C z K $ > $ clen P np $ > $ ntys T n m $ >
-  $ sinst D z n np K K2 $ > $ nth_pi K2 i A $ > $ field_ty D j i A $;
 --| `proj_ok G D j i`: field `i` of type `j` may be projected: the type's sort
 --| is at least 1, or the fields up to `i` are all propositions (nanoda's
 --| `infer_proj`, which requires only the projected and the dependent ones).
@@ -1002,165 +995,18 @@ axiom fprops_z (D: ind) (n np: nat) (Ctx: ctx) (d: nat) (K: expr): $ fprops D n 
 axiom fprops_s (D: ind) (n np: nat) (Ctx: ctx) (d cnt k: nat) (A A2 B: expr):
   $ add d np k $ > $ sinst D z n k A A2 $ > $ ⊩ Ctx, A2 : srt lz $ > $ fprops D n np (A2 :: Ctx) (s d) cnt B $ >
   $ fprops D n np Ctx d (s cnt) (Π A. B) $;
---| `qinst b e k j A R`: `R` is `A` with the `k` remaining fields `j`,
---| `j+1`, ... (field `j` at `# (k-1)`) replaced by the projections of `e`.
-term qinst: blk > expr > nat > nat > expr > expr > wff;
-axiom qinst_z (b: blk) (e A: expr) (j: nat): $ qinst b e z j A A $;
-axiom qinst_s (b: blk) (e A A1 R: expr) (k j: nat):
-  $ inst k A (proj b j e) A1 $ > $ qinst b e k (s j) A1 R $ > $ qinst b e (s k) j A R $;
-axiom proj_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (j i np: nat) (e e2 S A A1 A2 R: expr):
-  $ ⊢ G, e ≡ e2 : S $ > $ spine_ty S D j np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ struct_like D j $ >
-  $ proj_ok G D j i $ > $ clen P np $ > $ field_ty D j i A $ > $ ind_nested D N $ > $ rst D N A A2 $ > $ pinst i S A2 A1 $ >
-  $ qinst b e i z A1 R $ >
-  $ ⊢ G, proj b i e ≡ proj b i e2 : R $;
---| `proj b i (ind_ctor D2 j z qs fs) ≡ fs[i]` when well typed.
-axiom proj_mk (G: ctx) (D2: ind) (b: blk) (j i np n m nf nq ii: nat) (M f T: expr):
-  $ spine_ctor M D2 j z nq $ > $ ind_arity D2 np n m $ > $ nfields D2 j z nf $ > $ add np nf nq $ >
-  $ add ii (s i) nf $ > $ argat ii M f $ > $ ⊩ G, proj b i M : T $ > $ ⊢ G, proj b i M ≡ f : T $;
---| Structure eta, for a structure whose fields do not mention the block.
-term nonrec: nat > nat > expr > wff;
-axiom nonrec_pi (np d k: nat) (A B: expr): $ add d np k $ > $ closed k A $ > $ nonrec np (s d) B $ > $ nonrec np d (Π A. B) $;
-axiom nonrec_bvar (np d i: nat): $ nonrec np d # i $;
-axiom nonrec_app (np d: nat) (f a: expr): $ nonrec np d (f @ a) $;
-term eta_ok: ind > nat > wff;
-axiom eta_ok_i (D: ind) (b: blk) (P: ctx) (T: tys) (j np: nat) (F K: expr):
-  $ struct_like D j $ > $ ind_data D b P T $ > $ nth_ty T j F (ccons K cnil) $ > $ clen P np $ > $ nonrec np z K $ >
-  $ eta_ok D j $;
---| `projs b e k Y M`: `M = Y @ proj b 0 e @ .. @ proj b (k-1) e`.
-term projs: blk > expr > nat > expr > expr > wff;
-axiom projs_z (b: blk) (e Y: expr): $ projs b e z Y Y $;
-axiom projs_s (b: blk) (e Y M: expr) (k: nat): $ projs b e k Y M $ > $ projs b e (s k) Y (M @ proj b k e) $;
-axiom ind_eta (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (j np nf: nat) (e S Y M: expr):
-  $ ⊩ G, e : S $ > $ spine_ty S D j np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ eta_ok D j $ > $ clen P np $ >
-  $ rehead (ind_ty D j) (ind_ctor D j z) np S Y $ > $ nfields D j z nf $ > $ projs b e nf Y M $ > $ ⊢ G, e ≡ M : S $;
 
--- Level equivalence of expressions --------------------------------------------------
-
---| `eeqv e e2`: `e` and `e2` agree except at levels, which are equivalent.
---| Two such expressions denote the same thing, so `e ≡ e2` (`eeqv_df`; this
---| generalizes `sortDF` and `constDF`). `eeqv_refl` covers every identical
---| subterm (an opaque constant at the same levels among them).
-term eeqv: expr > expr > wff;
-axiom eeqv_refl (e: expr): $ eeqv e e $;
-term ind_eqv: ind > ind > wff;
-term ceqv: ctx > ctx > wff;
-term teqv: tys > tys > wff;
-term cseqv: ctors > ctors > wff;
-axiom eeqv_bvar (i: nat): $ eeqv # i # i $;
-axiom eeqv_srt (l l2: lvl): $ l ≈ l2 $ > $ eeqv (srt l) (srt l2) $;
-axiom eeqv_app (f a f2 a2: expr): $ eeqv f f2 $ > $ eeqv a a2 $ > $ eeqv (f @ a) (f2 @ a2) $;
-axiom eeqv_lam (A b A2 b2: expr): $ eeqv A A2 $ > $ eeqv b b2 $ > $ eeqv (λ A. b) (λ A2. b2) $;
-axiom eeqv_pi (A b A2 b2: expr): $ eeqv A A2 $ > $ eeqv b b2 $ > $ eeqv (Π A. b) (Π A2. b2) $;
-axiom eeqv_lit (n: bin): $ eeqv (lit n) (lit n) $;
-axiom eeqv_ind_ty (D D2: ind) (i: nat): $ ind_eqv D D2 $ > $ eeqv (ind_ty D i) (ind_ty D2 i) $;
-axiom eeqv_ind_ctor (D D2: ind) (i c: nat): $ ind_eqv D D2 $ > $ eeqv (ind_ctor D i c) (ind_ctor D2 i c) $;
-axiom eeqv_ind_rec (D D2: ind) (i: nat) (v v2: lvl):
-  $ ind_eqv D D2 $ > $ v ≈ v2 $ > $ eeqv (ind_rec D i v) (ind_rec D2 i v2) $;
-axiom eeqv_proj (b: blk) (i: nat) (e e2: expr): $ eeqv e e2 $ > $ eeqv (proj b i e) (proj b i e2) $;
-axiom ind_eqv_i (D D2: ind) (b: blk) (P P2 N N2: ctx) (T T2: tys):
-  $ ind_data D b P T $ > $ ind_data D2 b P2 T2 $ > $ ceqv P P2 $ > $ teqv T T2 $ >
-  $ ind_nested D N $ > $ ind_nested D2 N2 $ > $ ceqv N N2 $ > $ ind_eqv D D2 $;
-axiom ceqv_nil: $ ceqv [] [] $;
-axiom ceqv_cons (A A2: expr) (G G2: ctx): $ eeqv A A2 $ > $ ceqv G G2 $ > $ ceqv (A :: G) (A2 :: G2) $;
-axiom teqv_nil: $ teqv tnil tnil $;
-axiom teqv_cons (F F2: expr) (C C2: ctors) (T T2: tys):
-  $ eeqv F F2 $ > $ cseqv C C2 $ > $ teqv T T2 $ > $ teqv (tcons F C T) (tcons F2 C2 T2) $;
-axiom cseqv_nil: $ cseqv cnil cnil $;
-axiom cseqv_cons (K K2: expr) (C C2: ctors): $ eeqv K K2 $ > $ cseqv C C2 $ > $ cseqv (ccons K C) (ccons K2 C2) $;
-axiom eeqv_df (G: ctx) (e e2 A: expr): $ ⊩ G, e : A $ > $ eeqv e e2 $ > $ ⊢ G, e ≡ e2 : A $;
-
----------------------------------------------------------------------------
--- Lean's `Nat` and `Eq`, the quotient primitives, and the literal ties
--- (notes/audit-lean-mm0.md §4 and §5). `nat_D` and `eq_D` are the data of
--- the blocks `Nat` and `Eq` as Lean's prelude declares them; `lean0 check`
--- reads the statements between the `lean0-check` marks (written in prefix
--- form for that) and compares the export's `Nat`, `Eq` and quotient
--- declarations with them. A certificate proves `tys_ok` and `ind_wf` for
--- the two blocks like any other. The quotient primitives have the types
--- the kernel gives them (`Quot.lift`'s mentions `Eq`), and `Quot.lift` and
--- `Quot.ind` reduce on `Quot.mk`; `lit n` is `Nat.succ^n Nat.zero`.
----------------------------------------------------------------------------
-
--- lean0-check: begin
---| The inductive block of `Nat`.
-term nat_blk: blk;
---| The inductive block of `Nat`: its parameters, types and constructors.
-def nat_D: ind = $ ind_mk nat_blk nil (tcons (srt (ls lz)) (ccons (bvar z) (ccons (pi (bvar z) (bvar (s z))) cnil)) tnil) $;
---| The inductive block of `Eq`.
-term eq_blk: blk;
---| The inductive block of `Eq`: its parameters, types and constructors.
-def eq_D (u: lvl): ind = $ ind_mk eq_blk (cons (bvar z) (cons (srt u) nil)) (tcons (pi (bvar (s z)) (srt lz)) (ccons (app (app (app (bvar (s (s z))) (bvar (s z))) (bvar z)) (bvar z)) cnil) tnil) $;
---| Lean quotient primitive `Quot`.
-term quot (u: lvl): expr;
---| Lean quotient primitive `Quot.mk`.
-term quot_mk (u: lvl): expr;
---| Lean quotient primitive `Quot.lift`.
-term quot_lift (u v: lvl): expr;
---| Lean quotient primitive `Quot.ind`.
-term quot_ind (u: lvl): expr;
--- lean0-check: end
-
-axiom closed_quot (k: nat) (u: lvl): $ closed k (quot u) $;
-axiom closed_quot_mk (k: nat) (u: lvl): $ closed k (quot_mk u) $;
-axiom closed_quot_lift (k: nat) (u v: lvl): $ closed k (quot_lift u v) $;
-axiom closed_quot_ind (k: nat) (u: lvl): $ closed k (quot_ind u) $;
-axiom eeqv_quot (u u2: lvl): $ leqv u u2 $ > $ eeqv (quot u) (quot u2) $;
-axiom eeqv_quot_mk (u u2: lvl): $ leqv u u2 $ > $ eeqv (quot_mk u) (quot_mk u2) $;
-axiom eeqv_quot_lift (u v u2 v2: lvl):
-  $ leqv u u2 $ > $ leqv v v2 $ > $ eeqv (quot_lift u v) (quot_lift u2 v2) $;
-axiom eeqv_quot_ind (u u2: lvl): $ leqv u u2 $ > $ eeqv (quot_ind u) (quot_ind u2) $;
-
---| `Quot : Π (α : Sort u). (α → α → Prop) → Sort u`
-axiom quot_ty (G: ctx) (u: lvl):
-  $ ty G (quot u) (pi (srt u) (pi (pi (bvar z) (pi (bvar (s z)) (srt lz))) (srt u))) $;
---| `Quot.mk : Π (α : Sort u) (r : α → α → Prop). α → Quot r`
-axiom quot_mk_ty (G: ctx) (u: lvl):
-  $ ty G (quot_mk u) (pi (srt u) (pi (pi (bvar z) (pi (bvar (s z)) (srt lz))) (pi (bvar (s z)) (app (app (quot u) (bvar (s (s z)))) (bvar (s z)))))) $;
---| `Quot.lift : Π (α : Sort u) (r : α → α → Prop) (β : Sort v) (f : α → β).
---|   (Π a b. r a b → Eq (f a) (f b)) → Quot r → β`
-axiom quot_lift_ty (G: ctx) (u v: lvl):
-  $ ty G (quot_lift u v) (pi (srt u) (pi (pi (bvar z) (pi (bvar (s z)) (srt lz))) (pi (srt v) (pi (pi (bvar (s (s z))) (bvar (s z))) (pi (pi (bvar (s (s (s z)))) (pi (bvar (s (s (s (s z))))) (pi (app (app (bvar (s (s (s (s z))))) (bvar (s z))) (bvar z)) (app (app (app (ind_ty (eq_D v) z) (bvar (s (s (s (s z)))))) (app (bvar (s (s (s z)))) (bvar (s (s z))))) (app (bvar (s (s (s z)))) (bvar (s z))))))) (pi (app (app (quot u) (bvar (s (s (s (s z)))))) (bvar (s (s (s z))))) (bvar (s (s (s z)))))))))) $;
---| `Quot.ind : Π (α : Sort u) (r : α → α → Prop) (β : Quot r → Prop).
---|   (Π a. β (Quot.mk r a)) → Π q. β q`
-axiom quot_ind_ty (G: ctx) (u: lvl):
-  $ ty G (quot_ind u) (pi (srt u) (pi (pi (bvar z) (pi (bvar (s z)) (srt lz))) (pi (pi (app (app (quot u) (bvar (s z))) (bvar z)) (srt lz)) (pi (pi (bvar (s (s z))) (app (bvar (s z)) (app (app (app (quot_mk u) (bvar (s (s (s z))))) (bvar (s (s z)))) (bvar z)))) (pi (app (app (quot u) (bvar (s (s (s z))))) (bvar (s (s z)))) (app (bvar (s (s z))) (bvar z))))))) $;
-
---| Reduction of `Quot.lift f h (Quot.mk r a)` to `f a` and of
---| `Quot.ind h (Quot.mk r a)` to `h a`, when the left side is well typed (as
---| nanoda's `reduce_quot`, which checks only the spine: typing makes the
---| constructor's `α` and `r` the primitive's).
-axiom quot_lift_mk (G: ctx) (u v: lvl) (x1 x2 x3 x4 x5: expr) (v1: lvl) (y1 y2 a T: expr):
-  $ ty G (app (app (app (app (app (app (quot_lift u v) x1) x2) x3) x4) x5) (app (app (app (quot_mk v1) y1) y2) a)) T $ >
-  $ deq G (app (app (app (app (app (app (quot_lift u v) x1) x2) x3) x4) x5) (app (app (app (quot_mk v1) y1) y2) a)) (app x4 a) T $;
-axiom quot_ind_mk (G: ctx) (u: lvl) (x1 x2 x3 x4: expr) (v1: lvl) (y1 y2 a T: expr):
-  $ ty G (app (app (app (app (app (quot_ind u) x1) x2) x3) x4) (app (app (app (quot_mk v1) y1) y2) a)) T $ >
-  $ deq G (app (app (app (app (app (quot_ind u) x1) x2) x3) x4) (app (app (app (quot_mk v1) y1) y2) a)) (app x4 a) T $;
-
---| The literal `0` is `Nat.zero`, and `n+1` is `Nat.succ n`.
-axiom lit_zero (G: ctx): $ deq G (lit b0) (ind_ctor nat_D z z) (ind_ty nat_D z) $;
-axiom lit_succ (G: ctx) (a b: bin):
-  $ bsucc a b $ > $ deq G (lit b) (app (ind_ctor nat_D z (s z)) (lit a)) (ind_ty nat_D z) $;
-
----------------------------------------------------------------------------
--- The literal operations (notes/audit-lean-mm0.md §5). The kernel computes
--- `Nat.add` and the other accelerated operations on literals with GMP. Each
--- `*_eqs` relation states, of a closed function of the right type, the
--- defining equations Lean4Lean checks of the environment's function
--- (`Primitive.lean`), over fresh variables (`# z` and `# (s z)` of type
--- `nat_ty`), and `nat_*_lit` then gives the operation's value on literals,
--- with the value forced by a binary-arithmetic premise. A certificate proves
--- the equations of the environment's `Nat.add` (and so on) once, when it is
--- declared. `Nat.pred`, `Nat.add` and `Nat.mul` enter the equations of
--- `Nat.sub`, `Nat.mul`, `Nat.pow` and `Nat.shiftLeft` with their own, and
--- `Nat.shiftRight` is computed a shift at a time from the divisions by 2.
--- `Nat.div`, `Nat.mod`, `Nat.gcd` and the bitwise operations follow, under
--- "The division-like operations".
----------------------------------------------------------------------------
-
---| Lean's `Nat`, `Nat.zero` and `Nat.succ`.
-def nat_ty: expr = $ ind_ty nat_D z $;
-def nat_zero: expr = $ ind_ctor nat_D z z $;
-def nat_succ: expr = $ ind_ctor nat_D z (s z) $;
+-- The defining equations of the literal operations (audit §5) --------------
+-- The kernel computes `Nat.add` and the other accelerated operations on
+-- literals with GMP. Each `*_eqs` relation states, of a closed function of the
+-- right type, the defining equations Lean4Lean checks of the environment's
+-- function (`Primitive.lean`), over fresh variables (`# z` and `# (s z)` of
+-- type `nat_ty`); the rules `nat_*_lit` (Part III) then give the operation's
+-- value on literals. A certificate proves the equations of the environment's
+-- `Nat.add` (and so on) once, when it is declared. `Nat.pred`, `Nat.add` and
+-- `Nat.mul` enter the equations of `Nat.sub`, `Nat.mul`, `Nat.pow` and
+-- `Nat.shiftLeft` with their own, and `Nat.shiftRight` is computed a shift at
+-- a time from the divisions by 2.
 
 --| `add_eqs G f`: `f` is closed, `f : Nat → Nat → Nat`, `f x 0 ≡ x` and
 --| `f x (succ y) ≡ succ (f x y)`: Lean's `Nat.add`.
@@ -1170,10 +1016,6 @@ axiom add_eqs_i (G: ctx) (f: expr):
   $ ⊢ nat_ty :: G, f @ # z @ nat_zero ≡ # z : nat_ty $ >
   $ ⊢ nat_ty :: nat_ty :: G, f @ # (s z) @ (nat_succ @ # z) ≡ nat_succ @ (f @ # (s z) @ # z) : nat_ty $ >
   $ add_eqs G f $;
---| `f a b ≡ a + b` on literals.
-axiom nat_add_lit (G: ctx) (f: expr) (a b c: bin):
-  $ add_eqs G f $ > $ badd a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
-
 --| `pred_eqs G p`: `p 0 ≡ 0` and `p (succ x) ≡ x`: Lean's `Nat.pred`.
 term pred_eqs: ctx > expr > wff;
 axiom pred_eqs_i (G: ctx) (p: expr):
@@ -1189,12 +1031,6 @@ axiom sub_eqs_i (G: ctx) (f p: expr):
   $ ⊢ nat_ty :: G, f @ # z @ nat_zero ≡ # z : nat_ty $ >
   $ ⊢ nat_ty :: nat_ty :: G, f @ # (s z) @ (nat_succ @ # z) ≡ p @ (f @ # (s z) @ # z) : nat_ty $ >
   $ sub_eqs G f p $;
---| `f a b ≡ a - b` on literals: `c + b = a`, or `a + c = b` and the difference is 0.
-axiom nat_sub_lit (G: ctx) (f p: expr) (a b c: bin):
-  $ sub_eqs G f p $ > $ badd c b a $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
-axiom nat_sub_lit0 (G: ctx) (f p: expr) (a b c: bin):
-  $ sub_eqs G f p $ > $ badd a c b $ > $ ⊢ G, f @ lit a @ lit b ≡ lit b0 : nat_ty $;
-
 --| `mul_eqs G f fa`: with `add_eqs G fa`, `f x 0 ≡ 0` and `f x (succ y) ≡ fa (f x y) x`:
 --| Lean's `Nat.mul`.
 term mul_eqs: ctx > expr > expr > wff;
@@ -1203,10 +1039,6 @@ axiom mul_eqs_i (G: ctx) (f fa: expr):
   $ ⊢ nat_ty :: G, f @ # z @ nat_zero ≡ nat_zero : nat_ty $ >
   $ ⊢ nat_ty :: nat_ty :: G, f @ # (s z) @ (nat_succ @ # z) ≡ fa @ (f @ # (s z) @ # z) @ # (s z) : nat_ty $ >
   $ mul_eqs G f fa $;
---| `f a b ≡ a · b` on literals.
-axiom nat_mul_lit (G: ctx) (f fa: expr) (a b c: bin):
-  $ mul_eqs G f fa $ > $ bmul a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
-
 --| `pow_eqs G f fm fa`: with `mul_eqs G fm fa`, `f x 0 ≡ succ 0` and
 --| `f x (succ y) ≡ fm (f x y) x`: Lean's `Nat.pow`.
 term pow_eqs: ctx > expr > expr > expr > wff;
@@ -1215,10 +1047,6 @@ axiom pow_eqs_i (G: ctx) (f fm fa: expr):
   $ ⊢ nat_ty :: G, f @ # z @ nat_zero ≡ nat_succ @ nat_zero : nat_ty $ >
   $ ⊢ nat_ty :: nat_ty :: G, f @ # (s z) @ (nat_succ @ # z) ≡ fm @ (f @ # (s z) @ # z) @ # (s z) : nat_ty $ >
   $ pow_eqs G f fm fa $;
---| `f a b ≡ a ^ b` on literals.
-axiom nat_pow_lit (G: ctx) (f fm fa: expr) (a b c: bin):
-  $ pow_eqs G f fm fa $ > $ bpow a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
-
 --| `beq_eqs G f B t u`: `f : Nat → Nat → B` with `f 0 0 ≡ t`, `f 0 (succ y) ≡ u`,
 --| `f (succ x) 0 ≡ u` and `f (succ x) (succ y) ≡ f x y`, where `B`, `t` and `u` are
 --| closed: Lean's `Nat.beq`, with `Bool`, `true` and `false`.
@@ -1231,14 +1059,6 @@ axiom beq_eqs_i (G: ctx) (f B t u: expr):
   $ ⊢ nat_ty :: G, f @ (nat_succ @ # z) @ nat_zero ≡ u : B $ >
   $ ⊢ nat_ty :: nat_ty :: G, f @ (nat_succ @ # (s z)) @ (nat_succ @ # z) ≡ f @ # (s z) @ # z : B $ >
   $ beq_eqs G f B t u $;
---| `f a a ≡ t`, and `f a b ≡ u` when `a + c + 1 = b` or `b + c + 1 = a`.
-axiom nat_beq_lit (G: ctx) (f B t u: expr) (a: bin):
-  $ beq_eqs G f B t u $ > $ ⊢ G, f @ lit a @ lit a ≡ t : B $;
-axiom nat_beq_lit_lt (G: ctx) (f B t u: expr) (a b c: bin):
-  $ beq_eqs G f B t u $ > $ baddc a c b $ > $ ⊢ G, f @ lit a @ lit b ≡ u : B $;
-axiom nat_beq_lit_gt (G: ctx) (f B t u: expr) (a b c: bin):
-  $ beq_eqs G f B t u $ > $ baddc b c a $ > $ ⊢ G, f @ lit a @ lit b ≡ u : B $;
-
 --| `ble_eqs G f B t u`: `f 0 y ≡ t`, `f (succ x) 0 ≡ u` and `f (succ x) (succ y) ≡ f x y`:
 --| Lean's `Nat.ble`.
 term ble_eqs: ctx > expr > expr > expr > expr > wff;
@@ -1249,12 +1069,6 @@ axiom ble_eqs_i (G: ctx) (f B t u: expr):
   $ ⊢ nat_ty :: G, f @ (nat_succ @ # z) @ nat_zero ≡ u : B $ >
   $ ⊢ nat_ty :: nat_ty :: G, f @ (nat_succ @ # (s z)) @ (nat_succ @ # z) ≡ f @ # (s z) @ # z : B $ >
   $ ble_eqs G f B t u $;
---| `f a b ≡ t` when `a + c = b`, and `≡ u` when `b + c + 1 = a`.
-axiom nat_ble_lit (G: ctx) (f B t u: expr) (a b c: bin):
-  $ ble_eqs G f B t u $ > $ badd a c b $ > $ ⊢ G, f @ lit a @ lit b ≡ t : B $;
-axiom nat_ble_lit_gt (G: ctx) (f B t u: expr) (a b c: bin):
-  $ ble_eqs G f B t u $ > $ baddc b c a $ > $ ⊢ G, f @ lit a @ lit b ≡ u : B $;
-
 --| `shl_eqs G f fm fa`: with `mul_eqs G fm fa`, `f x 0 ≡ x` and
 --| `f x (succ y) ≡ f (fm 2 x) y`: Lean's `Nat.shiftLeft`.
 term shl_eqs: ctx > expr > expr > expr > wff;
@@ -1263,11 +1077,6 @@ axiom shl_eqs_i (G: ctx) (f fm fa: expr):
   $ ⊢ nat_ty :: G, f @ # z @ nat_zero ≡ # z : nat_ty $ >
   $ ⊢ nat_ty :: nat_ty :: G, f @ # (s z) @ (nat_succ @ # z) ≡ f @ (fm @ lit (bd0 (bd1 b0)) @ # (s z)) @ # z : nat_ty $ >
   $ shl_eqs G f fm fa $;
---| `f a b ≡ a · 2^b` on literals.
-axiom nat_shl_lit (G: ctx) (f fm fa: expr) (a b p c: bin):
-  $ shl_eqs G f fm fa $ > $ bpow (bd0 (bd1 b0)) b p $ > $ bmul a p c $ >
-  $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
-
 --| `shr_eqs G f fd`: `f x 0 ≡ x` and `f x (succ y) ≡ fd (f x y) 2`, with `fd` closed:
 --| Lean's `Nat.shiftRight`, with `Nat.div`.
 term shr_eqs: ctx > expr > expr > wff;
@@ -1276,28 +1085,16 @@ axiom shr_eqs_i (G: ctx) (f fd: expr):
   $ ⊢ nat_ty :: G, f @ # z @ nat_zero ≡ # z : nat_ty $ >
   $ ⊢ nat_ty :: nat_ty :: G, f @ # (s z) @ (nat_succ @ # z) ≡ fd @ (f @ # (s z) @ # z) @ lit (bd0 (bd1 b0)) : nat_ty $ >
   $ shr_eqs G f fd $;
---| `f a b` on literals, a shift at a time: `f a 0 ≡ a`, and `f a (b+1) ≡ c2` from
---| `f a b ≡ c` and `fd c 2 ≡ c2` (the division by 2, as the certificate derives it).
-axiom nat_shr_lit_z (G: ctx) (f fd: expr) (a: bin):
-  $ shr_eqs G f fd $ > $ ⊢ G, f @ lit a @ lit b0 ≡ lit a : nat_ty $;
-axiom nat_shr_lit_s (G: ctx) (f fd: expr) (a b b2 c c2: bin):
-  $ shr_eqs G f fd $ > $ bsucc b b2 $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $ >
-  $ ⊢ G, fd @ lit c @ lit (bd0 (bd1 b0)) ≡ lit c2 : nat_ty $ >
-  $ ⊢ G, f @ lit a @ lit b2 ≡ lit c2 : nat_ty $;
 
--- The division-like operations (audit §5). Lean4Lean's checks of `Nat.div`,
--- `Nat.mod`, `Nat.gcd` and `Nat.bitwise` (`Condition.check`, `checkNatDITE`,
--- `checkITE`, `checkNatFuelRec`, `unfoldNatWellFounded` and its probes) go
--- through conditionals on decided propositions, fuel recursion and the
--- well-founded fixpoint `WellFounded.Nat.fix`. The relations below state
--- those checks over variables standing for Lean's `@dite Nat`, `@ite Nat`,
--- `Decidable.intro`, `Nat.decLe`, the proof terms, and so on: nothing is
--- assumed of them beyond the equations.
-
---| The literals `0`, `1` and `2`.
-def lit0: expr = $ lit b0 $;
-def lit1: expr = $ lit (bd1 b0) $;
-def lit2: expr = $ lit (bd0 (bd1 b0)) $;
+-- The division-like operations (audit §5) ----------------------------------
+-- Lean4Lean's checks of `Nat.div`, `Nat.mod`, `Nat.gcd` and `Nat.bitwise`
+-- (`Condition.check`, `checkNatDITE`, `checkITE`, `checkNatFuelRec`,
+-- `unfoldNatWellFounded` and its probes) go through conditionals on decided
+-- propositions, fuel recursion and the well-founded fixpoint
+-- `WellFounded.Nat.fix`. The relations below state those checks over
+-- variables standing for Lean's `@dite Nat`, `@ite Nat`, `Decidable.intro`,
+-- `Nat.decLe`, the proof terms, and so on: nothing is assumed of them beyond
+-- the equations.
 
 --| `dec_eqs G B t u Not Dec dite T R ofT ofF`: a reflection of decisions
 --| (Lean4Lean's `Reflection`): `R p b H : Dec p` decides the proposition `p`
@@ -1326,7 +1123,6 @@ axiom ite_eqs_i (G: ctx) (B t u T R ite: expr):
   $ ⊢ nat_ty :: nat_ty :: (T @ # z @ u) :: srt lz :: G,
       ite @ # (s (s (s z))) @ (R @ # (s (s (s z))) @ u @ # (s (s z))) @ # (s z) @ # z ≡ # z : nat_ty $ >
   $ ite_eqs G B t u T R ite $;
-
 --| `natle_dec G B t u Not Dec dite T R ofT ofF leN dleN ble pf`: with the
 --| reflection, `dleN x y ≡ R (leN x y) (ble x y) (pf x y)` for fresh `x y`,
 --| where `ble` has `Nat.ble`'s equations (`Condition.natLE`): Lean's
@@ -1338,7 +1134,6 @@ axiom natle_dec_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf: expr
   $ ⊢ nat_ty :: nat_ty :: G,
       dleN @ # (s z) @ # z ≡ R @ (leN @ # (s z) @ # z) @ (ble @ # (s z) @ # z) @ (pf @ # (s z) @ # z) : Dec @ (leN @ # (s z) @ # z) $ >
   $ natle_dec G B t u Not Dec dite T R ofT ofF leN dleN ble pf $;
-
 --| `nateq_dec G ... eqN deqN beq pq`: likewise `deqN x y ≡ R (eqN x y) (beq x y) (pq x y)`
 --| with `Nat.beq`'s equations (`Condition.natEq`): Lean's `Nat.decEq`.
 term nateq_dec: ctx > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > wff;
@@ -1348,7 +1143,6 @@ axiom nateq_dec_i (G: ctx) (B t u Not Dec dite T R ofT ofF eqN deqN beq pq: expr
   $ ⊢ nat_ty :: nat_ty :: G,
       deqN @ # (s z) @ # z ≡ R @ (eqN @ # (s z) @ # z) @ (beq @ # (s z) @ # z) @ (pq @ # (s z) @ # z) : Dec @ (eqN @ # (s z) @ # z) $ >
   $ nateq_dec G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $;
-
 --| `bool_dec G B t u Not dite ite bp bd`: a condition on a Bool
 --| (`Condition.bool`: `bp b` is `b = true`, decided by `bd b`): the
 --| conditionals at `nat_ty` reduce on `bp t` and `bp u`, for fresh `a b`:
@@ -1365,7 +1159,6 @@ axiom bool_dec_i (G: ctx) (B t u Not dite ite bp bd: expr):
   $ ⊢ nat_ty :: nat_ty :: G, ite @ (bp @ t) @ (bd @ t) @ # (s z) @ # z ≡ # (s z) : nat_ty $ >
   $ ⊢ nat_ty :: nat_ty :: G, ite @ (bp @ u) @ (bd @ u) @ # (s z) @ # z ≡ # z : nat_ty $ >
   $ bool_dec G B t u Not dite ite bp bd $;
-
 --| `div_eqs G ... leN dleN ble pf sub p f go pfs lem`: Lean4Lean's
 --| `checkNatDiv`: with `Nat.decLe`'s reflection and `Nat.sub`'s equations,
 --| `f x y ≡ dite (leN 1 y) (dleN 1 y) (λ hy. go y hy (succ x) x (pfs x)) (λ _. 0)`
@@ -1388,14 +1181,6 @@ axiom div_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f
         @ (λ (leN @ # (s (s (s z))) @ # (s (s (s (s z))))). nat_succ @ (go @ # (s (s (s (s z)))) @ # (s (s (s z))) @ # (s (s z)) @ (sub @ # (s (s (s (s (s z))))) @ # (s (s (s (s z))))) @ (lem @ # (s (s (s (s (s z))))) @ # (s (s (s (s z)))) @ # (s (s z)) @ # (s (s (s z))) @ # z @ # (s z))))
         @ (λ (Not @ (leN @ # (s (s (s z))) @ # (s (s (s (s z)))))). lit0) : nat_ty $ >
   $ div_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $;
---| `f a b ≡ q` on literals when `q·b + r = a` and `r < b`, and `f a 0 ≡ 0`.
-axiom nat_div_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr) (a b q m r x: bin):
-  $ div_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ >
-  $ bmul q b m $ > $ badd m r a $ > $ baddc r x b $ > $ ⊢ G, f @ lit a @ lit b ≡ lit q : nat_ty $;
-axiom nat_div_lit0 (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr) (a: bin):
-  $ div_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ >
-  $ ⊢ G, f @ lit a @ lit0 ≡ lit0 : nat_ty $;
-
 --| `mod_eqs G ... sub p ite f go pfs lem`: Lean4Lean's `checkNatMod`: `f 0 x ≡ 0`,
 --| `f (succ x) y ≡ ite (leN y (succ x)) (dleN y (succ x))
 --|   (dite (leN 1 y) (dleN 1 y) (λ hy. go y hy (succ (succ x)) (succ x) (pfs (succ x))) (λ _. succ x))
@@ -1421,19 +1206,10 @@ axiom mod_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p i
         @ (λ (leN @ # (s (s (s z))) @ # (s (s (s (s z))))). go @ # (s (s (s (s z)))) @ # (s (s (s z))) @ # (s (s z)) @ (sub @ # (s (s (s (s (s z))))) @ # (s (s (s (s z))))) @ (lem @ # (s (s (s (s (s z))))) @ # (s (s (s (s z)))) @ # (s (s z)) @ # (s (s (s z))) @ # z @ # (s z)))
         @ (λ (Not @ (leN @ # (s (s (s z))) @ # (s (s (s (s z)))))). # (s (s (s (s (s z)))))) : nat_ty $ >
   $ mod_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $;
---| `f a b ≡ r` on literals when `q·b + r = a` and `r < b`, and `f a 0 ≡ a`.
-axiom nat_mod_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr) (a b q m r x: bin):
-  $ mod_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ >
-  $ bmul q b m $ > $ badd m r a $ > $ baddc r x b $ > $ ⊢ G, f @ lit a @ lit b ≡ lit r : nat_ty $;
-axiom nat_mod_lit0 (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr) (a: bin):
-  $ mod_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ >
-  $ ⊢ G, f @ lit a @ lit0 ≡ lit a : nat_ty $;
-
 --| The type of the functional of a well-founded fixpoint over the measure
 --| `hm : al → nat`: `Π x : al. (Π y : al. ltN (hm y) (hm x) → motive y) → motive x`.
 def fix_fty (al motive hm ltN: expr): expr =
   $ Π al. Π (Π al. Π (ltN @ (hm @ # z) @ (hm @ # (s z))). motive @ # (s z)). motive @ # (s z) $;
-
 --| `fix_eqs G ite bp bd beq fix go eager al motive hm ltN pfx pfgo`: Lean's
 --| `WellFounded.Nat.fix` at the type `al` with the measure `hm`
 --| (`unfoldNatWellFounded`): for every functional `F` and `x : al`,
@@ -1453,7 +1229,6 @@ axiom fix_eqs_i (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: 
       go @ al @ motive @ hm @ # (s (s (s z))) @ (nat_succ @ # (s (s z))) @ # (s z) @ # z
         ≡ # (s (s (s z))) @ # (s z) @ (λ al. λ (ltN @ (hm @ # z) @ (hm @ # (s (s z)))). go @ al @ motive @ hm @ # (s (s (s (s (s z))))) @ # (s (s (s (s z)))) @ # (s z) @ (pfgo @ # (s (s (s (s z)))) @ # (s (s (s z))) @ # (s (s z)) @ # (s z) @ # z)) : motive @ # (s z) $ >
   $ fix_eqs G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $;
-
 --| `gcd_eqs G ... f pack F pfF`: Lean4Lean's `checkNatGcd`: with `Nat.mod`'s
 --| equations, `Nat.decEq`'s reflection, the Bool condition and the fixpoint,
 --| `f m n ≡ fix al motive hm F (pack m n)`, `hm (pack m n) ≡ m` (the measure
@@ -1478,17 +1253,6 @@ axiom gcd_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p i
         ≡ # z @ (pack @ (fm @ # (s (s z)) @ (nat_succ @ # (s (s (s z))))) @ (nat_succ @ # (s (s (s z))))) @ (pfF @ (nat_succ @ # (s (s (s z)))) @ # (s (s z)) @ # (s z))
         : motive @ (pack @ (nat_succ @ # (s (s (s z)))) @ # (s (s z))) $ >
   $ gcd_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $;
---| `f a b ≡ g` on literals when `g` divides `a` and `b` and `x·a = y·b + g`
---| (or `y·b = x·a + g`).
-axiom nat_gcd_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr) (a b g p2 q x y m n: bin):
-  $ gcd_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ >
-  $ bmul g p2 a $ > $ bmul g q b $ > $ bmul x a m $ > $ bmul y b n $ > $ badd n g m $ >
-  $ ⊢ G, f @ lit a @ lit b ≡ lit g : nat_ty $;
-axiom nat_gcd_lit2 (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr) (a b g p2 q x y m n: bin):
-  $ gcd_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ >
-  $ bmul g p2 a $ > $ bmul g q b $ > $ bmul x a m $ > $ bmul y b n $ > $ badd m g n $ >
-  $ ⊢ G, f @ lit a @ lit b ≡ lit g : nat_ty $;
-
 --| `bitwise_eqs G ... fb pack Fb pfB dec`: Lean4Lean's `checkNatBitwise`:
 --| with the equations of `Nat.div`, `Nat.mod` and `Nat.add`, `Nat.decEq`'s
 --| reflection, the Bool condition and the fixpoint, for a fresh
@@ -1532,7 +1296,6 @@ axiom bitwise_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub
                         fa @ (# (s (s (s z))) @ (pack @ (fd @ # (s (s (s (s (s z))))) @ lit2) @ (fd @ # (s (s (s (s z)))) @ lit2)) @ (pfB @ # (s (s (s (s (s z))))) @ # (s (s (s (s z)))) @ # (s (s z)))) @ (# (s (s (s z))) @ (pack @ (fd @ # (s (s (s (s (s z))))) @ lit2) @ (fd @ # (s (s (s (s z)))) @ lit2)) @ (pfB @ # (s (s (s (s (s z))))) @ # (s (s (s (s z)))) @ # (s (s z)))))))
         : motive @ (pack @ # (s (s z)) @ # (s z)) $ >
   $ bitwise_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $;
-
 --| `bitop_eqs G ... f bf r1 r2 r3 r4`: `f ≡ fb bf` for a Bool function `bf`
 --| with the truth table `bf t t ≡ r1`, `bf t u ≡ r2`, `bf u t ≡ r3`,
 --| `bf u u ≡ r4` (`checkNatLAnd`, `checkNatLOr`, `checkNatXor`): Lean's
@@ -1546,6 +1309,260 @@ axiom bitop_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p
   $ ⊢ G, bf @ t @ t ≡ r1 : B $ > $ ⊢ G, bf @ t @ u ≡ r2 : B $ >
   $ ⊢ G, bf @ u @ t ≡ r3 : B $ > $ ⊢ G, bf @ u @ u ≡ r4 : B $ >
   $ bitop_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4 $;
+
+---------------------------------------------------------------------------
+-- PART III: THE RULES
+-- The axioms concluding `≈` and `⊢`: the theory. Each is argued in
+-- notes/audit-lean-mm0.md (§2 for the core, §4 for inductive types and
+-- quotients, §5 for literals, §6 for the admissible rules).
+---------------------------------------------------------------------------
+
+-- Level equivalence (VLevel.lean:58) ---------------------------------------
+-- Each axiom is valid under `VLevel.eval`, where `imax a b = if b = 0 then 0
+-- else max a b`. These axioms alone are incomplete (notes/audit-lean-mm0.md
+-- §3); `leqv_cases` completes them. A case split must substitute the
+-- parameter inside an arbitrary level, which cannot be stated over MM0
+-- variables, so a goal's variables are first abstracted to object-level
+-- parameters `lparam i` (`leqv_inst` puts the original levels back), and
+-- `leqv_cases` splits on one of those. The semantics of `leqv` (equal value
+-- under every assignment) covers `lparam`s like any other level variable, and
+-- with the axioms for the `imax`-free cases this decides `leqv` completely
+-- (notes/audit-lean-mm0.md §4).
+
+axiom leqv_refl (a: lvl): $ a ≈ a $;
+axiom leqv_symm (a b: lvl): $ a ≈ b $ > $ b ≈ a $;
+axiom leqv_trans (a b c: lvl): $ a ≈ b $ > $ b ≈ c $ > $ a ≈ c $;
+axiom leqv_succ (a b: lvl): $ a ≈ b $ > $ ls a ≈ ls b $;
+axiom leqv_max (a b c d: lvl):
+  $ a ≈ b $ > $ c ≈ d $ > $ a ⊔ c ≈ b ⊔ d $;
+axiom leqv_imax (a b c d: lvl):
+  $ a ≈ b $ > $ c ≈ d $ > $ limax a c ≈ limax b d $;
+axiom lmax_comm (a b: lvl): $ a ⊔ b ≈ b ⊔ a $;
+axiom lmax_assoc (a b c: lvl): $ a ⊔ b ⊔ c ≈ a ⊔ (b ⊔ c) $;
+axiom lmax_idem (a: lvl): $ a ⊔ a ≈ a $;
+axiom lmax_zero (a: lvl): $ lz ⊔ a ≈ a $;
+axiom lmax_succ (a b: lvl): $ ls a ⊔ ls b ≈ ls (a ⊔ b) $;
+axiom lmax_succ_self (a: lvl): $ a ⊔ ls a ≈ ls a $;
+axiom limax_zero (a: lvl): $ limax a lz ≈ lz $;
+axiom limax_zero_l (a: lvl): $ limax lz a ≈ a $;
+--| `imax 1 a = a`: if `a = 0` both are 0, otherwise `max 1 a = a`. nanoda's level `simplify`
+--| applies it (and `limax_zero_l`) whenever it puts a `Sort` in weak head normal form.
+axiom limax_one (a: lvl): $ limax (ls lz) a ≈ a $;
+axiom limax_succ (a b: lvl): $ limax a (ls b) ≈ a ⊔ ls b $;
+axiom limax_self (a: lvl): $ limax a a ≈ a $;
+axiom limax_max (a b c: lvl):
+  $ limax a (b ⊔ c) ≈ limax a b ⊔ limax a c $;
+axiom limax_imax (a b c: lvl):
+  $ limax a (limax b c) ≈ limax a c ⊔ limax b c $;
+
+--| Case split on `lparam n`: zero, or the successor of some level (which is
+--| again called `lparam n`).
+axiom leqv_cases (n: nat) (l r l0 r0 l1 r1: lvl):
+  $ lsubst n l lz l0 $ > $ lsubst n r lz r0 $ > $ l0 ≈ r0 $ >
+  $ lsubst n l (ls (lparam n)) l1 $ > $ lsubst n r (ls (lparam n)) r1 $ > $ l1 ≈ r1 $ >
+  $ l ≈ r $;
+--| Instantiating the parameters of an equivalence.
+axiom leqv_inst (S: lvls) (l r l2 r2: lvl):
+  $ l ≈ r $ > $ linst S l l2 $ > $ linst S r r2 $ > $ l2 ≈ r2 $;
+
+-- The judgment (IsDefEq, Typing/Basic.lean:18-56) --------------------------
+
+axiom bvar (G: ctx) (i: nat) (A: expr):
+  $ lookup G i A $ > $ ⊢ G, # i ≡ # i : A $;
+axiom symm (G: ctx) (e e2 A: expr):
+  $ ⊢ G, e ≡ e2 : A $ > $ ⊢ G, e2 ≡ e : A $;
+axiom trans (G: ctx) (e1 e2 e3 A: expr):
+  $ ⊢ G, e1 ≡ e2 : A $ > $ ⊢ G, e2 ≡ e3 : A $ > $ ⊢ G, e1 ≡ e3 : A $;
+axiom sortDF (G: ctx) (l l2: lvl):
+  $ l ≈ l2 $ > $ ⊢ G, srt l ≡ srt l2 : srt (ls l) $;
+axiom appDF (G: ctx) (f f2 A B a a2 R: expr):
+  $ ⊢ G, f ≡ f2 : Π A. B $ > $ ⊢ G, a ≡ a2 : A $ > $ inst z B a R $ >
+  $ ⊢ G, f @ a ≡ f2 @ a2 : R $;
+axiom lamDF (G: ctx) (u: lvl) (A A2 b b2 B: expr):
+  $ ⊢ G, A ≡ A2 : srt u $ > $ ⊢ A :: G, b ≡ b2 : B $ >
+  $ ⊢ G, λ A. b ≡ λ A2. b2 : Π A. B $;
+axiom forallEDF (G: ctx) (u v: lvl) (A A2 B B2: expr):
+  $ ⊢ G, A ≡ A2 : srt u $ > $ ⊢ A :: G, B ≡ B2 : srt v $ >
+  $ ⊢ G, Π A. B ≡ Π A2. B2 : srt (limax u v) $;
+axiom defeqDF (G: ctx) (u: lvl) (A B e e2: expr):
+  $ ⊢ G, A ≡ B : srt u $ > $ ⊢ G, e ≡ e2 : A $ > $ ⊢ G, e ≡ e2 : B $;
+axiom beta (G: ctx) (A e B a r R: expr):
+  $ ⊢ A :: G, e ≡ e : B $ > $ ⊢ G, a ≡ a : A $ > $ inst z e a r $ > $ inst z B a R $ >
+  $ ⊢ G, (λ A. e) @ a ≡ r : R $;
+axiom eta (G: ctx) (A B e e1: expr):
+  $ ⊢ G, e ≡ e : Π A. B $ > $ lift (s z) z e e1 $ >
+  $ ⊢ G, λ A. e1 @ # z ≡ e : Π A. B $;
+axiom proofIrrel (G: ctx) (p h h2: expr):
+  $ ⊢ G, p ≡ p : srt lz $ > $ ⊢ G, h ≡ h : p $ > $ ⊢ G, h2 ≡ h2 : p $ >
+  $ ⊢ G, h ≡ h2 : p $;
+
+-- Admissible rules (theorems of Lean4Lean, here axioms) --------------------
+
+--| Substitution: `IsDefEq.instN`, Typing/Lemmas.lean:634 (see
+--| notes/audit-lean-mm0.md §6).
+axiom instDF (k: nat) (G0 G1 G: ctx) (A0 a e e2 A r r2 R: expr):
+  $ ⊢ G0, a ≡ a : A0 $ > $ cinst k G0 A0 a G1 G $ > $ ⊢ G1, e ≡ e2 : A $ >
+  $ inst k e a r $ > $ inst k e2 a r2 $ > $ inst k A a R $ >
+  $ ⊢ G, r ≡ r2 : R $;
+
+--| Weakening: `IsDefEq.weakN`, Typing/Lemmas.lean:501, for `Ctx.LiftN n 0`
+--| (see notes/audit-lean-mm0.md §6).
+axiom weakDF (n: nat) (G G2: ctx) (e e2 A r r2 R: expr):
+  $ ⊢ G, e ≡ e2 : A $ > $ cext n G G2 $ >
+  $ lift n z e r $ > $ lift n z e2 r2 $ > $ lift n z A R $ >
+  $ ⊢ G2, r ≡ r2 : R $;
+
+-- Level equivalence of expressions -----------------------------------------
+
+--| Expressions of the same shape at equivalent levels denote the same value,
+--| so they are definitionally equal (this generalizes `sortDF` and `constDF`).
+axiom eeqv_df (G: ctx) (e e2 A: expr): $ ⊩ G, e : A $ > $ eeqv e e2 $ > $ ⊢ G, e ≡ e2 : A $;
+
+-- Inductive types: typing, iota, projections and eta (audit §4) ------------
+
+axiom ind_ty_ty (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (i: nat) (F R: expr) (C: ctors):
+  $ tys_ok G D $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ pis P F R $ > $ ⊩ G, ind_ty D i : R $;
+axiom ind_ctor_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (i c np n m: nat) (F K K2 K3 R: expr) (C: ctors):
+  $ ind_wf G D $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ nth_ctor C c K $ > $ clen P np $ > $ ntys T n m $ >
+  $ sinst D z n np K K2 $ > $ ind_nested D N $ > $ rst D N K2 K3 $ > $ pis P K3 R $ > $ ⊩ G, ind_ctor D i c : R $;
+axiom ind_rec_ty (G: ctx) (D: ind) (N: ctx) (i: nat) (v: lvl) (R0 R: expr):
+  $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_ty D v i R0 $ > $ ind_nested D N $ > $ rst D N R0 R $ > $ ⊩ G, ind_rec D i v : R $;
+--| Iota: `ind_rec D i v ps ms ns is (ind_ctor D2 i c qs fs) ≡ R ps ms ns fs`
+--| whenever the left side is well typed (which makes `D2` an instance of `D`
+--| at equivalent levels and `qs`, `is` agree with the recursor's, as in
+--| nanoda's `reduce_rec`).
+axiom ind_iota (G: ctx) (D D2: ind) (i c: nat) (v: lvl) (np n m a0 a ni k nf nq: nat) (R e3 e4 Y maj rhs0 rhs T: expr):
+  $ spine (ind_rec D i v) e4 k $ > $ spine (ind_ctor D2 i c) maj nq $ > $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_rule D v i c R $ >
+  $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m a $ > $ nidx D i ni $ > $ add a ni k $ > $ nfields D i c nf $ >
+  $ add np nf nq $ > $ rehead (ind_rec D i v) R a e3 rhs0 $ > $ spine e3 e4 ni $ > $ spine Y maj nf $ >
+  $ rehead Y rhs0 nf maj rhs $ > $ ⊩ G, e4 @ maj : T $ > $ ⊢ G, e4 @ maj ≡ rhs : T $;
+--| Iota of the recursor of an auxiliary type `i` (the occurrence `I Ds`) on
+--| `I`'s constructor `c`: `ind_rec D i v ps ms ns is (ind_ctor I2 ii c qs fs)
+--| ≡ R ps ms ns fs` when well typed (which makes `I2` an instance of `I` and
+--| `qs` the occurrence's arguments at `ps`); the fields are the last `nf`
+--| arguments of the major premise, as in `inductive_reduce_rec`.
+axiom ind_iota_nst (G: ctx) (D I I2: ind) (N: ctx) (i ii c: nat) (v: lvl) (np n m a0 a ni k nf nq npi: nat)
+    (R e3 e4 X Y maj rhs0 rhs T: expr):
+  $ spine (ind_rec D i v) e4 k $ > $ spine (ind_ctor I2 ii c) maj nq $ > $ ind_wf G D $ > $ elim_ok G D v $ >
+  $ ind_nested D N $ > $ aux_of D N i X $ > $ spine (ind_ty I ii) X npi $ > $ rec_rule D v i c R $ >
+  $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m a $ > $ nidx D i ni $ > $ add a ni k $ > $ nfields D i c nf $ >
+  $ add npi nf nq $ > $ rehead (ind_rec D i v) R a e3 rhs0 $ > $ spine e3 e4 ni $ > $ spine Y maj nf $ >
+  $ rehead Y rhs0 nf maj rhs $ > $ ⊩ G, e4 @ maj : T $ > $ ⊢ G, e4 @ maj ≡ rhs : T $;
+axiom proj_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (j i np: nat) (e e2 S A A1 A2 R: expr):
+  $ ⊢ G, e ≡ e2 : S $ > $ spine (ind_ty D j) S np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ struct_like D j $ >
+  $ proj_ok G D j i $ > $ clen P np $ > $ field_ty D j i A $ > $ ind_nested D N $ > $ rst D N A A2 $ > $ pinst i S A2 A1 $ >
+  $ qinst b e i z A1 R $ >
+  $ ⊢ G, proj b i e ≡ proj b i e2 : R $;
+--| `proj b i (ind_ctor D2 j z qs fs) ≡ fs[i]` when well typed.
+axiom proj_mk (G: ctx) (D2: ind) (b: blk) (j i np n m nf nq ii: nat) (M Y f T: expr):
+  $ spine (ind_ctor D2 j z) M nq $ > $ ind_arity D2 np n m $ > $ nfields D2 j z nf $ > $ add np nf nq $ >
+  $ add ii (s i) nf $ > $ spine (Y @ f) M ii $ > $ ⊩ G, proj b i M : T $ > $ ⊢ G, proj b i M ≡ f : T $;
+axiom ind_eta (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (j np nf: nat) (e S Y M: expr):
+  $ ⊩ G, e : S $ > $ spine (ind_ty D j) S np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ eta_ok D j $ > $ clen P np $ >
+  $ rehead (ind_ty D j) (ind_ctor D j z) np S Y $ > $ nfields D j z nf $ > $ projs b e nf Y M $ > $ ⊢ G, e ≡ M : S $;
+
+-- Quotients (audit §4) -----------------------------------------------------
+-- The kernel's types of the primitives (`Quot.lift`'s mentions `Eq`), and
+-- `Quot.lift` and `Quot.ind` reduce on `Quot.mk`.
+
+--| `Quot : Π (α : Sort u). (α → α → Prop) → Sort u`
+axiom quot_ty (G: ctx) (u: lvl):
+  $ ty G (quot u) (pi (srt u) (pi (pi (bvar z) (pi (bvar (s z)) (srt lz))) (srt u))) $;
+--| `Quot.mk : Π (α : Sort u) (r : α → α → Prop). α → Quot r`
+axiom quot_mk_ty (G: ctx) (u: lvl):
+  $ ty G (quot_mk u) (pi (srt u) (pi (pi (bvar z) (pi (bvar (s z)) (srt lz))) (pi (bvar (s z)) (app (app (quot u) (bvar (s (s z)))) (bvar (s z)))))) $;
+--| `Quot.lift : Π (α : Sort u) (r : α → α → Prop) (β : Sort v) (f : α → β).
+--|   (Π a b. r a b → Eq (f a) (f b)) → Quot r → β`
+axiom quot_lift_ty (G: ctx) (u v: lvl):
+  $ ty G (quot_lift u v) (pi (srt u) (pi (pi (bvar z) (pi (bvar (s z)) (srt lz))) (pi (srt v) (pi (pi (bvar (s (s z))) (bvar (s z))) (pi (pi (bvar (s (s (s z)))) (pi (bvar (s (s (s (s z))))) (pi (app (app (bvar (s (s (s (s z))))) (bvar (s z))) (bvar z)) (app (app (app (ind_ty (eq_D v) z) (bvar (s (s (s (s z)))))) (app (bvar (s (s (s z)))) (bvar (s (s z))))) (app (bvar (s (s (s z)))) (bvar (s z))))))) (pi (app (app (quot u) (bvar (s (s (s (s z)))))) (bvar (s (s (s z))))) (bvar (s (s (s z)))))))))) $;
+--| `Quot.ind : Π (α : Sort u) (r : α → α → Prop) (β : Quot r → Prop).
+--|   (Π a. β (Quot.mk r a)) → Π q. β q`
+axiom quot_ind_ty (G: ctx) (u: lvl):
+  $ ty G (quot_ind u) (pi (srt u) (pi (pi (bvar z) (pi (bvar (s z)) (srt lz))) (pi (pi (app (app (quot u) (bvar (s z))) (bvar z)) (srt lz)) (pi (pi (bvar (s (s z))) (app (bvar (s z)) (app (app (app (quot_mk u) (bvar (s (s (s z))))) (bvar (s (s z)))) (bvar z)))) (pi (app (app (quot u) (bvar (s (s (s z))))) (bvar (s (s z)))) (app (bvar (s (s z))) (bvar z))))))) $;
+
+--| Reduction of `Quot.lift f h (Quot.mk r a)` to `f a` and of
+--| `Quot.ind h (Quot.mk r a)` to `h a`, when the left side is well typed (as
+--| nanoda's `reduce_quot`, which checks only the spine: typing makes the
+--| constructor's `α` and `r` the primitive's).
+axiom quot_lift_mk (G: ctx) (u v: lvl) (x1 x2 x3 x4 x5: expr) (v1: lvl) (y1 y2 a T: expr):
+  $ ty G (app (app (app (app (app (app (quot_lift u v) x1) x2) x3) x4) x5) (app (app (app (quot_mk v1) y1) y2) a)) T $ >
+  $ deq G (app (app (app (app (app (app (quot_lift u v) x1) x2) x3) x4) x5) (app (app (app (quot_mk v1) y1) y2) a)) (app x4 a) T $;
+axiom quot_ind_mk (G: ctx) (u: lvl) (x1 x2 x3 x4: expr) (v1: lvl) (y1 y2 a T: expr):
+  $ ty G (app (app (app (app (app (quot_ind u) x1) x2) x3) x4) (app (app (app (quot_mk v1) y1) y2) a)) T $ >
+  $ deq G (app (app (app (app (app (quot_ind u) x1) x2) x3) x4) (app (app (app (quot_mk v1) y1) y2) a)) (app x4 a) T $;
+
+-- Literals (audit §5) ------------------------------------------------------
+-- The ties to Lean's `Nat`, and the value of each accelerated operation on
+-- literals, given its defining equations (Part II), with the value forced by
+-- a binary-arithmetic premise.
+
+--| The literal `0` is `Nat.zero`, and `n+1` is `Nat.succ n`.
+axiom lit_zero (G: ctx): $ deq G (lit b0) (ind_ctor nat_D z z) (ind_ty nat_D z) $;
+axiom lit_succ (G: ctx) (a b: bin):
+  $ bsucc a b $ > $ deq G (lit b) (app (ind_ctor nat_D z (s z)) (lit a)) (ind_ty nat_D z) $;
+
+--| `f a b ≡ a + b` on literals, with `f` Lean's `Nat.add` (`add_eqs`, Part II).
+axiom nat_add_lit (G: ctx) (f: expr) (a b c: bin):
+  $ add_eqs G f $ > $ badd a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+--| `f a b ≡ a - b` on literals: `c + b = a`, or `a + c = b` and the difference is 0.
+axiom nat_sub_lit (G: ctx) (f p: expr) (a b c: bin):
+  $ sub_eqs G f p $ > $ badd c b a $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+axiom nat_sub_lit0 (G: ctx) (f p: expr) (a b c: bin):
+  $ sub_eqs G f p $ > $ badd a c b $ > $ ⊢ G, f @ lit a @ lit b ≡ lit b0 : nat_ty $;
+--| `f a b ≡ a · b` on literals.
+axiom nat_mul_lit (G: ctx) (f fa: expr) (a b c: bin):
+  $ mul_eqs G f fa $ > $ bmul a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+--| `f a b ≡ a ^ b` on literals.
+axiom nat_pow_lit (G: ctx) (f fm fa: expr) (a b c: bin):
+  $ pow_eqs G f fm fa $ > $ bpow a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+--| `f a a ≡ t`, and `f a b ≡ u` when `a + c + 1 = b` or `b + c + 1 = a`.
+axiom nat_beq_lit (G: ctx) (f B t u: expr) (a: bin):
+  $ beq_eqs G f B t u $ > $ ⊢ G, f @ lit a @ lit a ≡ t : B $;
+axiom nat_beq_lit_lt (G: ctx) (f B t u: expr) (a b c: bin):
+  $ beq_eqs G f B t u $ > $ baddc a c b $ > $ ⊢ G, f @ lit a @ lit b ≡ u : B $;
+axiom nat_beq_lit_gt (G: ctx) (f B t u: expr) (a b c: bin):
+  $ beq_eqs G f B t u $ > $ baddc b c a $ > $ ⊢ G, f @ lit a @ lit b ≡ u : B $;
+--| `f a b ≡ t` when `a + c = b`, and `≡ u` when `b + c + 1 = a`.
+axiom nat_ble_lit (G: ctx) (f B t u: expr) (a b c: bin):
+  $ ble_eqs G f B t u $ > $ badd a c b $ > $ ⊢ G, f @ lit a @ lit b ≡ t : B $;
+axiom nat_ble_lit_gt (G: ctx) (f B t u: expr) (a b c: bin):
+  $ ble_eqs G f B t u $ > $ baddc b c a $ > $ ⊢ G, f @ lit a @ lit b ≡ u : B $;
+--| `f a b ≡ a · 2^b` on literals.
+axiom nat_shl_lit (G: ctx) (f fm fa: expr) (a b p c: bin):
+  $ shl_eqs G f fm fa $ > $ bpow (bd0 (bd1 b0)) b p $ > $ bmul a p c $ >
+  $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+--| `f a b` on literals, a shift at a time: `f a 0 ≡ a`, and `f a (b+1) ≡ c2` from
+--| `f a b ≡ c` and `fd c 2 ≡ c2` (the division by 2, as the certificate derives it).
+axiom nat_shr_lit_z (G: ctx) (f fd: expr) (a: bin):
+  $ shr_eqs G f fd $ > $ ⊢ G, f @ lit a @ lit b0 ≡ lit a : nat_ty $;
+axiom nat_shr_lit_s (G: ctx) (f fd: expr) (a b b2 c c2: bin):
+  $ shr_eqs G f fd $ > $ bsucc b b2 $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $ >
+  $ ⊢ G, fd @ lit c @ lit (bd0 (bd1 b0)) ≡ lit c2 : nat_ty $ >
+  $ ⊢ G, f @ lit a @ lit b2 ≡ lit c2 : nat_ty $;
+--| `f a b ≡ q` on literals when `q·b + r = a` and `r < b`, and `f a 0 ≡ 0`.
+axiom nat_div_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr) (a b q m r x: bin):
+  $ div_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ >
+  $ bmul q b m $ > $ badd m r a $ > $ baddc r x b $ > $ ⊢ G, f @ lit a @ lit b ≡ lit q : nat_ty $;
+axiom nat_div_lit0 (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr) (a: bin):
+  $ div_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ >
+  $ ⊢ G, f @ lit a @ lit0 ≡ lit0 : nat_ty $;
+--| `f a b ≡ r` on literals when `q·b + r = a` and `r < b`, and `f a 0 ≡ a`.
+axiom nat_mod_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr) (a b q m r x: bin):
+  $ mod_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ >
+  $ bmul q b m $ > $ badd m r a $ > $ baddc r x b $ > $ ⊢ G, f @ lit a @ lit b ≡ lit r : nat_ty $;
+axiom nat_mod_lit0 (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr) (a: bin):
+  $ mod_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ >
+  $ ⊢ G, f @ lit a @ lit0 ≡ lit a : nat_ty $;
+--| `f a b ≡ g` on literals when `g` divides `a` and `b` and `x·a = y·b + g`
+--| (or `y·b = x·a + g`).
+axiom nat_gcd_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr) (a b g p2 q x y m n: bin):
+  $ gcd_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ >
+  $ bmul g p2 a $ > $ bmul g q b $ > $ bmul x a m $ > $ bmul y b n $ > $ badd n g m $ >
+  $ ⊢ G, f @ lit a @ lit b ≡ lit g : nat_ty $;
+axiom nat_gcd_lit2 (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr) (a b g p2 q x y m n: bin):
+  $ gcd_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ >
+  $ bmul g p2 a $ > $ bmul g q b $ > $ bmul x a m $ > $ bmul y b n $ > $ badd m g n $ >
+  $ ⊢ G, f @ lit a @ lit b ≡ lit g : nat_ty $;
 --| `f a b` on literals for the truth tables of and, or and xor.
 axiom nat_land_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf: expr) (a b c: bin):
   $ bitop_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf t u u u $ >
@@ -1557,9 +1574,7 @@ axiom nat_xor_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p
   $ bitop_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf u t t u $ >
   $ bxor a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
 
----------------------------------------------------------------------------
--- Statements
----------------------------------------------------------------------------
+-- Statements ---------------------------------------------------------------
 
 --| `inh G A`: `A` is inhabited in `Γ`. Theorems are stated this way so that
 --| their proof terms stay inside the proof file.

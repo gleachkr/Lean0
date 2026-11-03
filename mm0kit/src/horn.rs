@@ -99,6 +99,9 @@ pub struct Horn {
     /// The deepest failure of the current goal, for the error message.
     fail: Option<(usize, String)>,
     trace: bool,
+    /// Refuse a cyclic binding (the mode checker unifies arbitrary clause heads; the
+    /// prover's goals and patterns never need it).
+    pub occurs_check: bool,
 }
 
 /// A solved goal whose proof is built once the search is over (`Horn::finish`).
@@ -127,6 +130,7 @@ impl Horn {
             depth: 0,
             fail: None,
             trace: std::env::var_os("LEAN0_HORN").is_some(),
+            occurs_check: false,
         }
     }
 
@@ -172,6 +176,15 @@ impl Horn {
         }
     }
 
+    /// The bindings' state, for [`Horn::restore`] (the mode checker's own search).
+    pub fn save(&self) -> (usize, usize) { (self.trail.len(), self.binds.len()) }
+
+    /// Undo the bindings and forget the metavariables made since `save`.
+    pub fn restore(&mut self, (mark, nmeta): (usize, usize)) {
+        self.undo(mark);
+        self.binds.truncate(nmeta);
+    }
+
     /// `e` with its bound metavariables replaced (unbound ones stay).
     pub fn zonk(&mut self, env: &mut Env, e: E) -> E {
         let mut memo = HashMap::default();
@@ -213,10 +226,16 @@ impl Horn {
             return true
         }
         if let Some(i) = Self::meta_index(env, a) {
+            if self.occurs_check && self.occurs(env, i, b) {
+                return false
+            }
             self.bind(i, b);
             return true
         }
         if let Some(i) = Self::meta_index(env, b) {
+            if self.occurs_check && self.occurs(env, i, a) {
+                return false
+            }
             self.bind(i, a);
             return true
         }
@@ -237,6 +256,15 @@ impl Horn {
                 false
             }
             _ => false,
+        }
+    }
+
+    fn occurs(&self, env: &Env, i: usize, e: E) -> bool {
+        let e = self.deref(env, e);
+        match env.node(e) {
+            Node::Meta(j) => j as usize == i,
+            Node::Var(_) => false,
+            Node::App(_, xs) => xs.to_vec().iter().any(|&x| self.occurs(env, i, x)),
         }
     }
 

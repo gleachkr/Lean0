@@ -53,7 +53,11 @@ trust:
   projections and eta are derived from it. Its soundness argument is 
   `notes/audit-lean-mm0.md` §4; the kernel's recursors are compared with the 
   derived ones on every block, and Lean's `Nat` and `Eq` are stated in the 
-  spec and compared with the export's. This is where the kernel's soundness bugs have 
+  spec and compared with the export's. The spec is in three parts: syntax 
+  (relations that are functions or predicates on syntax), definitions over 
+  the judgment, and the 74 rules that are its semantic content; `lean0 modes` 
+  checks mechanically that the relations of the first two parts are the 
+  functions they are read as. This is where the kernel's soundness bugs have 
   been (nested inductives: [#14576](https://github.com/leanprover/lean4/issues/14576),
   [#14616](https://github.com/leanprover/lean4/pull/14616); the `Prop` test
   guarding elimination and projection:
@@ -175,9 +179,10 @@ To use lean0, you need:
 
 **For development**, `nix develop` has Rust, elan, perf and the pinned verifiers (mm0-c,
 mm0-zig, and Aufbau's `abc` for the hand proofs). Then `scripts/test.sh` runs everything, with
-both verifiers and the negative tests (tampered certificates, a corrupted export, and
-hand-made illegal inductive declarations, which the schema must reject), and prints "all
-tests passed". It builds lean4export
+both verifiers, the mode check of the spec's relations (`lean0 modes`) and the negative
+tests (tampered certificates, a corrupted export, hand-made illegal inductive declarations,
+which the schema must reject, and a spec with an overlapping clause), and prints "all tests
+passed". It builds lean4export
 in `tests/lake`, as a Lake dependency at the pinned revision.
 
 ## Use

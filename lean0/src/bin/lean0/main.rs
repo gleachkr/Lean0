@@ -8,6 +8,8 @@
 //! - `lean0 check EXPORT.ndjson STATEMENTS.mm0...`: check that the statements (of all parts, in
 //!   order) say what the export's declarations say.
 //! - `lean0 spec`: print the embedded spec.
+//! - `lean0 modes [SPEC.mm0]`: check that the spec's relations are the functions and
+//!   predicates they are read as (`mm0kit::modes`), and print the table.
 //!
 //! `joined`, `check` and `spec` are the trusted side, from the `lean0-check` crate, which does
 //! not depend on the generator.
@@ -17,7 +19,8 @@ mod generate;
 const USAGE: &str = "usage: lean0 gen EXPORT.ndjson OUT_DIR NAME [OPTIONS]
        lean0 joined [--spec SPEC.mm0] STATEMENTS.mm0...
        lean0 check EXPORT.ndjson STATEMENTS.mm0...
-       lean0 spec";
+       lean0 spec
+       lean0 modes [SPEC.mm0]";
 
 /// The command's result: `Ok(false)` for a check that found problems (exit code 1), `Err` for
 /// an error (exit code 1, or 2 for `check`).
@@ -54,6 +57,18 @@ fn run(args: &[String]) -> Result<bool, String> {
         [cmd] if cmd == "spec" => {
             print!("{}", lean0_check::SPEC);
             Ok(true)
+        }
+        [cmd, rest @ ..] if cmd == "modes" && rest.len() <= 1 => {
+            let spec = match rest {
+                [f] => std::fs::read_to_string(f).map_err(|e| format!("{f}: {e}"))?,
+                _ => lean0_check::SPEC.to_string(),
+            };
+            let r = mm0kit::modes::check(&spec).map_err(|e| e.0)?;
+            print!("{}", r.text);
+            for e in &r.errors {
+                println!("error: {e}");
+            }
+            Ok(r.errors.is_empty())
         }
         _ => Err(USAGE.into()),
     }
