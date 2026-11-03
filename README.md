@@ -24,10 +24,11 @@ schema for inductive types (positivity, universes, the elimination level, the
 recursor's type and rules, projections and structure eta) transcribed from the 
 kernel, since Lean4Lean leaves inductive declarations unspecified.
 
-Nested inductive types and quotients are not certified yet: their rules are 
-represented as axioms instantiated from the export. Some other axioms support 
-accelerated `Nat` operations (for example, assuming that `Nat.add` on numerals 
-correctly implements addition), though the arithmetic itself is proved.
+Nested inductive types are not certified yet: their rules are represented as 
+axioms instantiated from the export. Some other axioms support accelerated 
+`Nat` operations (for example, assuming that `Nat.add` on numerals correctly 
+implements addition), though the arithmetic itself is proved. Quotients and 
+the tie between literals and `Nat` are part of the spec.
 
 ## Trusted Base
 
@@ -40,12 +41,14 @@ trust:
   bounds-checked;
 - `spec/lean.mm0`, a transcription of Lean4Lean's typing judgment with a few 
   pragmatic extensions (binary Nat literals, two admissible rules, 
-  side-relation shortcuts), and the schema for inductive types: a declaration 
+  side-relation shortcuts, the quotient primitives with their types and 
+  reduction rules), and the schema for inductive types: a declaration 
   is a term of the spec, the certificate proves it legal (positivity, 
   universes, elimination level), and the recursor's type and rules, 
   projections and eta are derived from it. Its soundness argument is 
   `notes/audit-lean-mm0.md` §4; the kernel's recursors are compared with the 
-  derived ones on every block. This is where the kernel's soundness bugs have 
+  derived ones on every block, and Lean's `Nat` and `Eq` are stated in the 
+  spec and compared with the export's. This is where the kernel's soundness bugs have 
   been (nested inductives: [#14576](https://github.com/leanprover/lean4/issues/14576),
   [#14616](https://github.com/leanprover/lean4/pull/14616); the `Prop` test
   guarding elimination and projection:
@@ -54,10 +57,12 @@ trust:
   [#14843](https://github.com/leanprover/lean4/pull/14843));
 - axioms generated per declaration for nested inductive types (which the 
   schema does not cover yet: recursor rules, projections and eta, with the 
-  declaration's legality unchecked) and quotients, and one per accelerated 
-  `Nat` operation (`Nat.add` on numerals is addition, and so on). `lean0 gen` 
-  reports how many blocks the schema left to these axioms, and the assumptions 
-  are inspectable in the generated `.mm0` file;
+  declaration's legality unchecked), one per accelerated 
+  `Nat` operation (`Nat.add` on numerals is addition, and so on), and one per 
+  opaque constant that an inductive declaration mentions at its universe 
+  levels (the constant at equivalent levels is the same expression). `lean0 
+  gen` reports how many blocks the schema left to these axioms, and the 
+  assumptions are inspectable in the generated `.mm0` file;
 - that the `.mm0` file the verifier reads is in fact the spec followed by the 
   certificate's statements (the verification targets). `lean0 joined` generates 
   this file, and its output can be checked by inspection.
@@ -70,8 +75,9 @@ names, with the statement Lean gives it, you need to trust:
 - either `lean0`'s translation of declarations into MM0 statements, or `lean0 
   check` (the `lean0-check` crate, about 900 lines, independent of the 
   generator), which reads `.mm0` statements and each inductive block's 
-  declaration back into Lean expressions and compares them with the export (it 
-  does not check the generated axioms above).
+  declaration back into Lean expressions and compares them with the export (of 
+  the generated axioms above it checks only the shape of the syntactic ones, 
+  `closed` and `eeqv`).
 
 ## Prior Art
 
@@ -120,13 +126,18 @@ to check proof steps in a totally generic way.
 ## Status
 
 With the trust list above, conversion and typing have been certified for all 
-of Lean's `Init` and all of `Std`, with the inductive types as generated axioms 
-(the runs below predate the schema; they are being redone):
+of Lean's `Init` and all of `Std`:
 
-- `Init` (59,423 declarations): 32 certificates, 103.6 GB, generated in 45 
-  minutes on 8 cores;
+- `Init` (59,423 declarations): 32 certificates, 107.1 GB, generated in 69 
+  minutes on 8 cores, each verified and deleted as it was made. 605 of its 607 
+  inductive types are certified by the schema (the other two are nested); 577 
+  generated axioms remain, 521 of them the typing and closedness of 261 opaque 
+  constants and Lean axioms (`IO` and `Float` primitives, mostly), the rest 
+  the literal operations, the two nested types and level congruence for 24 
+  opaque constants in inductive declarations;
 - `Std` (103,256 declarations with `Init`): 195 certificates, 335.7 GB, 
-  generated in 3 hours on 8 cores. One declaration
+  generated in 3 hours on 8 cores. This run predates the schema (it has the 
+  inductive types as generated axioms) and is not redone yet. One declaration
   (`goCache_Inv_of_Inv._mutual`, in `Std`'s bit-blaster) has its statements but 
   no proof: its proof alone is past the MMB format's 4 GiB of table data.
 

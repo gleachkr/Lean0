@@ -1,6 +1,6 @@
 /-! Milestone 4 test module: inductive types, structures, projections and quotients.
 Only the names on the `lean0-export` line (and what they depend on) are exported. -/
--- lean0-export: two_add_two len_ex proj_red prod_eta and_swap eq_symm k_ex unit_eta sigma_ex quot_ex ev_rec_ex
+-- lean0-export: two_add_two len_ex proj_red prod_eta and_swap eq_symm k_ex unit_eta sigma_ex quot_ex ev_rec_ex opq_ex
 universe u v
 
 noncomputable section
@@ -39,3 +39,10 @@ inductive Od : Type
 end
 theorem ev_rec_ex : Ev.rec (motive_1 := fun _ => Nat) (motive_2 := fun _ => Nat) 0 (fun _ ih => ih + 1)
     (fun _ ih => ih + 1) (Ev.succ (Od.succ Ev.zero)) = 2 := rfl
+
+-- An opaque constant at the block's level in a structure's field: the structure's lemmas need
+-- the constant's level congruence (`Opq_eeqv`).
+axiom Opq : Type u
+structure OpqS where
+  x : Opq.{u}
+theorem opq_ex (s : OpqS.{u}) : s = OpqS.mk s.x := rfl

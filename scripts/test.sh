@@ -164,14 +164,14 @@ for th in Eq_rec_refl_iota MyNat_rec_succ_iota MyList_rec_cons_iota Prod_eta PUn
           Prod_proj_0_mk And_proj_1_df; do
   tamper induct rejected --tamper-theorem "$th"
 done
-for ax in inst_proj ind_iota proj_ty Quot_lift_mk; do tamper induct rejected --tamper-axiom "$ax"; done
+for ax in inst_proj ind_iota proj_ty quot_lift_mk lit_succ Opq_eeqv; do tamper induct rejected --tamper-axiom "$ax"; done
 # ... and rules they do not use are harmless, which shows the test can tell the difference.
-tamper induct accepted --tamper-axiom Quot_ind_mk
+tamper induct accepted --tamper-axiom quot_ind_mk
 tamper induct accepted --tamper-axiom eta
 # Literals: the generated literal axioms and the binary-arithmetic relations.
 tamper lit rejected --tamper-theorem lit_mul_big_ty
 tamper lit rejected --tamper-theorem dbl_ex_ty
-for ax in Nat_lit_zero Nat_lit_succ Nat_add_lit Nat_mul_lit Nat_sub_lit0 Nat_beq_lit_gt Nat_ble_lit_gt Nat_pow_lit \
+for ax in lit_zero lit_succ Nat_add_lit Nat_mul_lit Nat_sub_lit0 Nat_beq_lit_gt Nat_ble_lit_gt Nat_pow_lit \
           Nat_shiftLeft_lit closed_lit bsucc_d1 badd_11 baddc_11 bmul_d1 bpow_d1 bdbl_d1; do
   tamper lit rejected --tamper-axiom "$ax"
 done

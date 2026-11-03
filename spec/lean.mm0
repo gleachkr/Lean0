@@ -19,8 +19,11 @@ delimiter $ ( ) , . $;
 --| * Meta-level operations (liftN, inst, Lookup) are syntax-directed
 --|   relations, proved node by node.
 --| * Nat literals are a primitive `lit` over binary numerals (an extension;
---|   Lean4Lean unfolds literals to `Nat.succ`/`Nat.zero`).  The axioms tying
---|   `lit` to `Nat` are generated per environment.
+--|   Lean4Lean unfolds literals to `Nat.succ`/`Nat.zero`), tied to Lean's
+--|   `Nat` by `lit_zero`/`lit_succ`.
+--| * Lean's `Nat` and `Eq` are the blocks `nat_D` and `eq_D` (data the
+--|   checker compares with the export), and the quotient primitives are
+--|   constants with the kernel's types and reduction rules.
 --| * Two admissible rules are axioms: `instDF` (substitution, Lean4Lean's
 --|   theorem `IsDefEq.instN`), so that a substituted term's typing need not
 --|   be derived again, and `weakDF` (weakening, `IsDefEq.weakN`), so that a
@@ -406,10 +409,10 @@ axiom bxor_10 (a b c: bin): $ bxor a b c $ > $ bxor (bd1 a) (bd0 b) (bd1 c) $;
 axiom bxor_11 (a b c d: bin): $ bxor a b c $ > $ bdbl c d $ > $ bxor (bd1 a) (bd1 b) d $;
 
 --| `lit n`: the Nat literal with value `n`, read as `Nat.succ^n Nat.zero`
---| (Lean4Lean's translation of literals). The axioms that relate it to the
---| environment's `Nat` are generated with `Nat.succ` (`Nat_lit_zero`,
---| `Nat_lit_succ`), and those for the accelerated operations with each
---| operation (`Nat_add_lit`, ...); see notes/audit-lean-mm0.md.
+--| (Lean4Lean's translation of literals). `lit_zero` and `lit_succ` (below,
+--| after the inductive schema) relate it to Lean's `Nat`; the axioms for the
+--| accelerated operations are generated with each operation (`Nat_add_lit`,
+--| ...); see notes/audit-lean-mm0.md.
 term lit: bin > expr;
 axiom closed_lit (k: nat) (n: bin): $ closed k (lit n) $;
 
@@ -935,6 +938,78 @@ axiom teqv_cons (F F2: expr) (C C2: ctors) (T T2: tys):
 axiom cseqv_nil: $ cseqv cnil cnil $;
 axiom cseqv_cons (K K2: expr) (C C2: ctors): $ eeqv K K2 $ > $ cseqv C C2 $ > $ cseqv (ccons K C) (ccons K2 C2) $;
 axiom eeqv_df (G: ctx) (e e2 A: expr): $ ⊩ G, e : A $ > $ eeqv e e2 $ > $ ⊢ G, e ≡ e2 : A $;
+
+---------------------------------------------------------------------------
+-- Lean's `Nat` and `Eq`, the quotient primitives, and the literal ties
+-- (notes/audit-lean-mm0.md §4 and §5). `nat_D` and `eq_D` are the data of
+-- the blocks `Nat` and `Eq` as Lean's prelude declares them; `lean0 check`
+-- reads the statements between the `lean0-check` marks (written in prefix
+-- form for that) and compares the export's `Nat`, `Eq` and quotient
+-- declarations with them. A certificate proves `tys_ok` and `ind_wf` for
+-- the two blocks like any other. The quotient primitives have the types
+-- the kernel gives them (`Quot.lift`'s mentions `Eq`), and `Quot.lift` and
+-- `Quot.ind` reduce on `Quot.mk`; `lit n` is `Nat.succ^n Nat.zero`.
+---------------------------------------------------------------------------
+
+-- lean0-check: begin
+--| The inductive block of `Nat`.
+term nat_blk: blk;
+--| The inductive block of `Nat`: its parameters, types and constructors.
+def nat_D: ind = $ ind_mk nat_blk nil (tcons (srt (ls lz)) (ccons (bvar z) (ccons (pi (bvar z) (bvar (s z))) cnil)) tnil) $;
+--| The inductive block of `Eq`.
+term eq_blk: blk;
+--| The inductive block of `Eq`: its parameters, types and constructors.
+def eq_D (u: lvl): ind = $ ind_mk eq_blk (cons (bvar z) (cons (srt u) nil)) (tcons (pi (bvar (s z)) (srt lz)) (ccons (app (app (app (bvar (s (s z))) (bvar (s z))) (bvar z)) (bvar z)) cnil) tnil) $;
+--| Lean quotient primitive `Quot`.
+term quot (u: lvl): expr;
+--| Lean quotient primitive `Quot.mk`.
+term quot_mk (u: lvl): expr;
+--| Lean quotient primitive `Quot.lift`.
+term quot_lift (u v: lvl): expr;
+--| Lean quotient primitive `Quot.ind`.
+term quot_ind (u: lvl): expr;
+-- lean0-check: end
+
+axiom closed_quot (k: nat) (u: lvl): $ closed k (quot u) $;
+axiom closed_quot_mk (k: nat) (u: lvl): $ closed k (quot_mk u) $;
+axiom closed_quot_lift (k: nat) (u v: lvl): $ closed k (quot_lift u v) $;
+axiom closed_quot_ind (k: nat) (u: lvl): $ closed k (quot_ind u) $;
+axiom eeqv_quot (u u2: lvl): $ leqv u u2 $ > $ eeqv (quot u) (quot u2) $;
+axiom eeqv_quot_mk (u u2: lvl): $ leqv u u2 $ > $ eeqv (quot_mk u) (quot_mk u2) $;
+axiom eeqv_quot_lift (u v u2 v2: lvl):
+  $ leqv u u2 $ > $ leqv v v2 $ > $ eeqv (quot_lift u v) (quot_lift u2 v2) $;
+axiom eeqv_quot_ind (u u2: lvl): $ leqv u u2 $ > $ eeqv (quot_ind u) (quot_ind u2) $;
+
+--| `Quot : Π (α : Sort u). (α → α → Prop) → Sort u`
+axiom quot_ty (G: ctx) (u: lvl):
+  $ ty G (quot u) (pi (srt u) (pi (pi (bvar z) (pi (bvar (s z)) (srt lz))) (srt u))) $;
+--| `Quot.mk : Π (α : Sort u) (r : α → α → Prop). α → Quot r`
+axiom quot_mk_ty (G: ctx) (u: lvl):
+  $ ty G (quot_mk u) (pi (srt u) (pi (pi (bvar z) (pi (bvar (s z)) (srt lz))) (pi (bvar (s z)) (app (app (quot u) (bvar (s (s z)))) (bvar (s z)))))) $;
+--| `Quot.lift : Π (α : Sort u) (r : α → α → Prop) (β : Sort v) (f : α → β).
+--|   (Π a b. r a b → Eq (f a) (f b)) → Quot r → β`
+axiom quot_lift_ty (G: ctx) (u v: lvl):
+  $ ty G (quot_lift u v) (pi (srt u) (pi (pi (bvar z) (pi (bvar (s z)) (srt lz))) (pi (srt v) (pi (pi (bvar (s (s z))) (bvar (s z))) (pi (pi (bvar (s (s (s z)))) (pi (bvar (s (s (s (s z))))) (pi (app (app (bvar (s (s (s (s z))))) (bvar (s z))) (bvar z)) (app (app (app (ind_ty (eq_D v) z) (bvar (s (s (s (s z)))))) (app (bvar (s (s (s z)))) (bvar (s (s z))))) (app (bvar (s (s (s z)))) (bvar (s z))))))) (pi (app (app (quot u) (bvar (s (s (s (s z)))))) (bvar (s (s (s z))))) (bvar (s (s (s z)))))))))) $;
+--| `Quot.ind : Π (α : Sort u) (r : α → α → Prop) (β : Quot r → Prop).
+--|   (Π a. β (Quot.mk r a)) → Π q. β q`
+axiom quot_ind_ty (G: ctx) (u: lvl):
+  $ ty G (quot_ind u) (pi (srt u) (pi (pi (bvar z) (pi (bvar (s z)) (srt lz))) (pi (pi (app (app (quot u) (bvar (s z))) (bvar z)) (srt lz)) (pi (pi (bvar (s (s z))) (app (bvar (s z)) (app (app (app (quot_mk u) (bvar (s (s (s z))))) (bvar (s (s z)))) (bvar z)))) (pi (app (app (quot u) (bvar (s (s (s z))))) (bvar (s (s z)))) (app (bvar (s (s z))) (bvar z))))))) $;
+
+--| Reduction of `Quot.lift f h (Quot.mk r a)` to `f a` and of
+--| `Quot.ind h (Quot.mk r a)` to `h a`, when the left side is well typed (as
+--| nanoda's `reduce_quot`, which checks only the spine: typing makes the
+--| constructor's `α` and `r` the primitive's).
+axiom quot_lift_mk (G: ctx) (u v: lvl) (x1 x2 x3 x4 x5: expr) (v1: lvl) (y1 y2 a T: expr):
+  $ ty G (app (app (app (app (app (app (quot_lift u v) x1) x2) x3) x4) x5) (app (app (app (quot_mk v1) y1) y2) a)) T $ >
+  $ deq G (app (app (app (app (app (app (quot_lift u v) x1) x2) x3) x4) x5) (app (app (app (quot_mk v1) y1) y2) a)) (app x4 a) T $;
+axiom quot_ind_mk (G: ctx) (u: lvl) (x1 x2 x3 x4: expr) (v1: lvl) (y1 y2 a T: expr):
+  $ ty G (app (app (app (app (app (quot_ind u) x1) x2) x3) x4) (app (app (app (quot_mk v1) y1) y2) a)) T $ >
+  $ deq G (app (app (app (app (app (quot_ind u) x1) x2) x3) x4) (app (app (app (quot_mk v1) y1) y2) a)) (app x4 a) T $;
+
+--| The literal `0` is `Nat.zero`, and `n+1` is `Nat.succ n`.
+axiom lit_zero (G: ctx): $ deq G (lit b0) (ind_ctor nat_D z z) (ind_ty nat_D z) $;
+axiom lit_succ (G: ctx) (a b: bin):
+  $ bsucc a b $ > $ deq G (lit b) (app (ind_ctor nat_D z (s z)) (lit a)) (ind_ty nat_D z) $;
 
 ---------------------------------------------------------------------------
 -- Statements

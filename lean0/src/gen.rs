@@ -100,6 +100,11 @@ pub struct Gen {
     /// The Horn prover's index of the spec's clauses (made once; the blocks' theorems are
     /// added per declaration).
     pub horn_index: mm0kit::horn::Index,
+    /// The number of the spec's terms: a term from there on is generated.
+    pub spec_terms: usize,
+    /// Level-congruence axioms `c_eeqv` of the opaque constants that occur in a block's data
+    /// (`induct::eeqv_axioms`), by the constant's term.
+    pub eeqv_axioms: HashMap<TId, ThId>,
     /// Binary numerals and the arithmetic relations' prover.
     pub bins: Bins,
     /// The literal axioms, once `Nat.zero` and `Nat.succ` are declared.
@@ -165,6 +170,7 @@ impl Gen {
         terms.reserve("G");
         let spec_len = env.order.len();
         let spec_thms = env.thms.len();
+        let spec_terms = env.terms.len();
         let horn_index = mm0kit::horn::Index::new(&env);
         let costs = crate::costs::Costs::from_env();
         if costs.is_some() {
@@ -190,6 +196,8 @@ impl Gen {
             stage_b: 0,
             stage_a: Vec::new(),
             horn_index,
+            spec_terms,
+            eeqv_axioms: HashMap::default(),
             bins,
             nat: None,
             nat_ops: HashMap::default(),
@@ -406,7 +414,8 @@ impl Gen {
             }
         }
         if self.stage_b + self.stage_a.len() > 0 {
-            eprintln!("lean0: {} inductive blocks certified by the schema, {} left to stage A", self.stage_b, self.stage_a.len());
+            eprintln!("lean0: {} inductive blocks certified by the schema, {} left to stage A, {} level-congruence axioms for opaque constants in block data",
+                self.stage_b, self.stage_a.len(), self.eeqv_axioms.len());
             for (n, why) in self.stage_a.iter().take(20) {
                 eprintln!("  stage A: {n}: {why}");
             }
@@ -419,6 +428,8 @@ impl Gen {
     pub fn rollback(&mut self, order0: usize, pfs0: usize, names: &[String]) {
         self.env.rollback(order0);
         self.env.truncate_pfs(pfs0);
+        let nthms = self.env.thms.len();
+        self.eeqv_axioms.retain(|_, th| (th.0 as usize) < nthms);
         self.bins.forget_pfs(pfs0);
         self.lean.reset();
         self.lv.reset();
@@ -600,9 +611,11 @@ impl Gen {
                 recursor_axioms(&mut el, &sig, rd, &rhss)?;
             }
             Declar::Quot { .. } => {
-                opaque(&mut el, &sig, info.ty, "quotient primitive")?;
-                if sig.lean_name == "Quot.lift" || sig.lean_name == "Quot.ind" {
-                    quot_axiom(&mut el, &sig)?;
+                if !quot_spec(&mut el, &sig, info.ty)? {
+                    opaque(&mut el, &sig, info.ty, "quotient primitive")?;
+                    if sig.lean_name == "Quot.lift" || sig.lean_name == "Quot.ind" {
+                        quot_axiom(&mut el, &sig)?;
+                    }
                 }
             }
             Declar::Opaque { val, .. } => {
@@ -911,6 +924,74 @@ fn quot_axiom<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig) -> R<()> {
     let th = add_thm(&mut g.env, &name, v.args, vec![hyp], concl, true, false, None, &format!("Reduction of `{}` on `Quot.mk`.", sig.lean_name))?;
     g.quot_red.insert(sig.lean_name.clone(), th);
     Ok(())
+}
+
+/// A quotient primitive as the spec's constant (`quot`, `quot_mk`, `quot_lift`, `quot_ind`,
+/// typed by `quot_ty` and so on, reducing by `quot_lift_mk`/`quot_ind_mk`; audit §4), when
+/// the export's type is the spec's: `theorem Quot_df` (`constDF`, from `eeqv_df`), no
+/// generated axiom. `Ok(false)` when the spec has no such constant or the type differs (then
+/// the stage-A generated axioms, `opaque` and `quot_axiom`).
+fn quot_spec<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::ExprPtr<'t>) -> R<bool> {
+    let (term, ty_ax, eqv_ax, red) = match sig.lean_name.as_str() {
+        "Quot" => ("quot", "quot_ty", "eeqv_quot", None),
+        "Quot.mk" => ("quot_mk", "quot_mk_ty", "eeqv_quot_mk", None),
+        "Quot.lift" => ("quot_lift", "quot_lift_ty", "eeqv_quot_lift", Some("quot_lift_mk")),
+        "Quot.ind" => ("quot_ind", "quot_ind_ty", "eeqv_quot_ind", Some("quot_ind_mk")),
+        _ => return Ok(false),
+    };
+    if !el.g.env.has_term(term) || !el.g.env.has_thm(ty_ax) {
+        return Ok(false)
+    }
+    let t = el.tr(ty)?;
+    let g = &mut *el.g;
+    let term = g.env.term_id(term);
+    let n = g.env.terms[term.0 as usize].args.len();
+    if n != sig.lvl_names.len() {
+        g.stage_a.push((sig.lean_name.clone(), "the quotient primitive's universe parameters are not the spec's".into()));
+        return Ok(false)
+    }
+    let gv = g.env.var(0);
+    let us: Vec<E> = (0..n).map(|i| g.env.var(1 + i as u16)).collect();
+    let us2: Vec<E> = (0..n).map(|i| g.env.var(1 + (n + i) as u16)).collect();
+    // the spec's typing axiom at `G, us`: `ty G (c us) T`
+    let ty_th = g.env.thm_id(ty_ax);
+    let concl = g.env.thms[ty_th.0 as usize].concl;
+    let args: Vec<E> = std::iter::once(gv).chain(us.iter().copied()).collect();
+    let stmt = g.env.subst(concl, &args);
+    let Some((_, [_, c1, spec_t])) = g.env.head(stmt) else { return Err(format!("{ty_ax}: not a typing")) };
+    let (c1, spec_t) = (*c1, *spec_t);
+    if spec_t != t {
+        g.stage_a.push((sig.lean_name.clone(), "the quotient primitive's type is not the spec's".into()));
+        return Ok(false)
+    }
+    let c2 = g.env.app(term, &us2);
+    let hyps: Vec<E> = us.iter().zip(&us2).map(|(&a, &b)| g.env.app_n("leqv", &[a, b])).collect();
+    let concl = g.lean.deq(&mut g.env, gv, c1, c2, t);
+    let mut df_args = g.g_args(&sig.lvl_names);
+    let lvl_s = g.env.sort_names["lvl"];
+    for s in &sig.lvl_names {
+        let s2 = g.var_names_fresh2(s, &sig.lvl_names);
+        df_args.push((s2, lvl_s));
+    }
+    let proof = if g.replay {
+        None
+    } else {
+        let p_ty = g.env.thm(ty_th, &args, &[]).map_err(|e| e.0)?;
+        let hs: Vec<mm0kit::env::P> = hyps.iter().enumerate().map(|(i, &h)| g.env.hyp(i as u16, h)).collect();
+        let eqv_args: Vec<E> = us.iter().chain(&us2).copied().collect();
+        let p_eq = g.env.thm_n(eqv_ax, &eqv_args, &hs).map_err(|e| e.0)?;
+        Some(g.env.thm_n("eeqv_df", &[gv, c1, c2, t], &[p_ty, p_eq]).map_err(|e| e.0)?)
+    };
+    let spec_name = g.env.terms[term.0 as usize].name.clone();
+    let df_name = g.thms.fresh(&format!("{}_df", sig.cname));
+    let df = add_thm(&mut g.env, &df_name, df_args, hyps, concl, false, false, proof,
+        &format!("`{}` (the spec's `{spec_name}`) has its type, at any equivalent levels (`constDF`).", sig.lean_name))?;
+    g.consts.insert(sig.lean_name.clone(), ConstInfo { term, kind: ConstKind::Opaque, nlevels: n, ty_thm: df });
+    if let Some(r) = red {
+        let th = g.env.thm_id(r);
+        g.quot_red.insert(sig.lean_name.clone(), th);
+    }
+    Ok(true)
 }
 
 /// Projections of a structure `S` (one constructor, no indices): a term `S_proj i e`, its

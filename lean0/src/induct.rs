@@ -28,7 +28,7 @@ use nanoda_lib::env::{Declar, DeclarMap, InductiveData, RecursorData};
 use nanoda_lib::expr::Expr;
 use nanoda_lib::level::Level;
 use nanoda_lib::util::{ExprPtr, NamePtr};
-use rustc_hash::FxHashMap as HashMap;
+use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -112,6 +112,9 @@ impl Prover {
             if let Some(wf) = b.wf.get() {
                 horn.add_clause(&g.env, wf);
             }
+        }
+        for &th in g.eeqv_axioms.values() {
+            horn.add_clause(&g.env, th);
         }
         Prover { horn, facts: Facts::default() }
     }
@@ -448,27 +451,58 @@ pub(crate) fn block_head<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, id: &Indu
     }
     // from here on statements are emitted; a failure is rolled back by the caller
     let g = &mut *el.g;
-    let blk = g.blk_id(&lean_name)?;
     let n = sig.lvl_names.len();
-    let mut t = g.env.app_n("tnil", &[]);
-    for i in (0..types.len()).rev() {
-        let mut c = g.env.app_n("cnil", &[]);
-        for &k in ks[i].iter().rev() {
-            c = g.env.app_n("ccons", &[k, c]);
+    // the data body `ind_mk atom P T` as the definition's body (the levels are its only
+    // arguments: Var(i+1) shifted to Var(i))
+    let mk_body = |g: &mut Gen, atom: E| -> E {
+        let mut t = g.env.app_n("tnil", &[]);
+        for i in (0..types.len()).rev() {
+            let mut c = g.env.app_n("cnil", &[]);
+            for &k in ks[i].iter().rev() {
+                c = g.env.app_n("ccons", &[k, c]);
+            }
+            t = g.env.app_n("tcons", &[fs[i], c, t]);
         }
-        t = g.env.app_n("tcons", &[fs[i], c, t]);
-    }
-    let atom = g.env.app(blk, &[]);
-    let body = g.env.app_n("ind_mk", &[atom, pctx, t]);
-    // the def takes the levels as its only arguments: shift Var(i+1) to Var(i)
-    let mut shift = vec![g.env.var(0)];
-    shift.extend((0..n).map(|i| g.env.var(i as u16)));
-    let body0 = g.env.subst(body, &shift);
-    let data_name = g.terms.fresh(&format!("{}_D", mangle(&lean_name)));
-    let ind_s = g.env.sort_names["ind"];
-    let lvl_args = g.lvl_args(&sig.lvl_names);
-    let data = add_term(&mut g.env, &data_name, lvl_args, ind_s, TermKind::Def { body: body0, public_body: true },
-        &format!("The inductive block of `{lean_name}`: its parameters, types and constructors."))?;
+        let body = g.env.app_n("ind_mk", &[atom, pctx, t]);
+        let mut shift = vec![g.env.var(0)];
+        shift.extend((0..n).map(|i| g.env.var(i as u16)));
+        g.env.subst(body, &shift)
+    };
+    // Lean's `Nat` and `Eq` are the spec's blocks `nat_D` and `eq_D` (audit §4) when the
+    // export declares them as the spec has them
+    let spec = match lean_name.as_str() {
+        "Nat" => Some(("nat_D", "nat_blk")),
+        "Eq" => Some(("eq_D", "eq_blk")),
+        _ => None,
+    };
+    let spec = spec.filter(|(d, b)| g.env.has_term(d) && g.env.has_term(b)).and_then(|(d, b)| {
+        let (dt, bt) = (g.env.term_id(d), g.env.term_id(b));
+        let atom = g.env.app(bt, &[]);
+        let body0 = mk_body(g, atom);
+        match g.env.terms[dt.0 as usize].kind {
+            TermKind::Def { body, .. } if body == body0 && g.env.terms[dt.0 as usize].args.len() == n => Some((dt, bt, body0)),
+            _ => None,
+        }
+    });
+    let (data, blk, body0) = match spec {
+        Some((dt, bt, body0)) => {
+            g.blks.insert(lean_name.clone(), bt);
+            (dt, bt, body0)
+        }
+        None => {
+            let blk = g.blk_id(&lean_name)?;
+            let atom = g.env.app(blk, &[]);
+            let body0 = mk_body(g, atom);
+            let data_name = g.terms.fresh(&format!("{}_D", mangle(&lean_name)));
+            let ind_s = g.env.sort_names["ind"];
+            let lvl_args = g.lvl_args(&sig.lvl_names);
+            let data = add_term(&mut g.env, &data_name, lvl_args, ind_s, TermKind::Def { body: body0, public_body: true },
+                &format!("The inductive block of `{lean_name}`: its parameters, types and constructors."))?;
+            (data, blk, body0)
+        }
+    };
+    eeqv_axioms(g, body0)?;
+    let data_name = g.env.terms[data.0 as usize].name.clone();
     // theorem X_D_tys (G) (us): tys_ok G (X_D us)
     let mut pv = Prover::new(g);
     let us: Vec<E> = (0..n).map(|i| g.env.var(1 + i as u16)).collect();
@@ -525,6 +559,78 @@ pub(crate) fn block_head<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, id: &Indu
     }
     el.g.stage_b += 1;
     Ok(true)
+}
+
+/// Level congruence of the opaque constants in the block's data. `eeqv (c us) (c us2)` has
+/// no clause when `c` is a generated term that is not a public definition (an opaque, an
+/// axiom, a theorem, a stage-A constant), so a block whose data mentions one at its levels
+/// gets `axiom c_eeqv (us us2): leqv u u2 > ... > eeqv (c us) (c us2)`, once per constant
+/// (audit §4; `lean0 check` checks the shape). The scan mirrors the prover: a subterm
+/// without level variables is `eeqv_refl`, a public definition is unfolded.
+fn eeqv_axioms(g: &mut Gen, data: E) -> R<()> {
+    let mut marked = Vec::new();
+    scan_eeqv(g, data, &mut HashSet::default(), &mut HashMap::default(), &mut marked);
+    for t in marked {
+        if g.eeqv_axioms.contains_key(&t) {
+            continue
+        }
+        let d = g.env.terms[t.0 as usize].clone();
+        let lean = g.consts.iter().find(|(_, ci)| ci.term == t).map(|(n, _)| n.clone()).unwrap_or_else(|| d.name.clone());
+        let n = d.args.len();
+        let lvl_names: Vec<String> = d.args.iter().map(|a| a.0.clone()).collect();
+        let mut args = g.lvl_args(&lvl_names);
+        let lvl_s = g.env.sort_names["lvl"];
+        for s in &lvl_names {
+            let s2 = g.var_names_fresh2(s, &lvl_names);
+            args.push((s2, lvl_s));
+        }
+        let us: Vec<E> = (0..n).map(|i| g.env.var(i as u16)).collect();
+        let us2: Vec<E> = (0..n).map(|i| g.env.var((n + i) as u16)).collect();
+        let hyps: Vec<E> = us.iter().zip(&us2).map(|(&a, &b)| g.env.app_n("leqv", &[a, b])).collect();
+        let (c1, c2) = (g.env.app(t, &us), g.env.app(t, &us2));
+        let concl = g.env.app_n("eeqv", &[c1, c2]);
+        let name = g.thms.fresh(&format!("{}_eeqv", d.name));
+        let th = add_thm(&mut g.env, &name, args, hyps, concl, true, false, None,
+            &format!("`{lean}` at equivalent levels is the same expression up to levels (an opaque constant in an inductive declaration)."))?;
+        g.eeqv_axioms.insert(t, th);
+    }
+    Ok(())
+}
+
+/// The generated terms of `e` whose level congruence the prover needs (`eeqv_axioms`).
+fn scan_eeqv(g: &mut Gen, e: E, seen: &mut HashSet<E>, lvars: &mut HashMap<E, bool>, marked: &mut Vec<TId>) {
+    if !seen.insert(e) || !has_var(&g.env, e, lvars) {
+        return
+    }
+    let Some((t, args)) = g.env.head(e) else { return };
+    let args = args.to_vec();
+    if (t.0 as usize) < g.spec_terms {
+        for a in args {
+            scan_eeqv(g, a, seen, lvars, marked);
+        }
+    } else if matches!(g.env.terms[t.0 as usize].kind, TermKind::Def { public_body: true, .. }) {
+        let e2 = g.env.unfold(e).unwrap();
+        scan_eeqv(g, e2, seen, lvars, marked);
+    } else if !marked.contains(&t) {
+        marked.push(t);
+    }
+}
+
+/// `e` mentions a statement variable (a level, in a block's data).
+fn has_var(env: &Env, e: E, memo: &mut HashMap<E, bool>) -> bool {
+    if let Some(&b) = memo.get(&e) {
+        return b
+    }
+    let b = match env.node(e) {
+        mm0kit::env::Node::Var(_) => true,
+        mm0kit::env::Node::Meta(_) => false,
+        mm0kit::env::Node::App(_, xs) => {
+            let xs = xs.to_vec();
+            xs.iter().any(|&x| has_var(env, x, memo))
+        }
+    };
+    memo.insert(e, b);
+    b
 }
 
 /// Emit `theorem X_D_wf: ind_wf G (X_D us)` if it is not yet (the sibling types must be in

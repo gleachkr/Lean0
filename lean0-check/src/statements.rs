@@ -87,6 +87,24 @@ pub struct Stmt {
     hyps: Vec<M>,
     concl: Option<M>,
     doc: String,
+    /// From the spec (`spec_statements`), not a certificate: it stands for a Lean declaration
+    /// only when the export has it.
+    spec: bool,
+}
+
+/// The spec's statements between its `-- lean0-check: begin` and `-- lean0-check: end` lines
+/// (written in prefix form for this): the data of Lean's `Nat` and `Eq` (`nat_D`, `eq_D`) and
+/// the quotient primitives, which the export's declarations are compared with (audit §4).
+pub fn spec_statements(spec: &str) -> Result<Vec<Stmt>, String> {
+    let (b, e) = ("-- lean0-check: begin", "-- lean0-check: end");
+    let Some(i) = spec.find(b) else { return Ok(Vec::new()) };
+    let r = &spec[i + b.len()..];
+    let Some(j) = r.find(e) else { return Err("spec: `lean0-check: begin` without `end`".into()) };
+    let mut out = parse_mm0(&r[..j]).map_err(|e| format!("spec: {e}"))?;
+    for s in &mut out {
+        s.spec = true;
+    }
+    Ok(out)
 }
 
 /// Parse the statements of a generated `.mm0` file (its `import` line is skipped).
@@ -161,7 +179,7 @@ fn parse_stmt(st: &str, doc: String) -> Result<Stmt, String> {
             (ms, Some(c))
         }
     };
-    Ok(Stmt { kind: kind.to_string(), name, binders, hyps, concl, doc })
+    Ok(Stmt { kind: kind.to_string(), name, binders, hyps, concl, doc, spec: false })
 }
 
 /// The Lean name in a doc comment "... `NAME` ..." after `prefix`.
@@ -296,7 +314,9 @@ pub fn check(export: &ExportFile<'_>, stmts: &[Stmt]) -> Report {
                 continue
             }
             let (Some(body), Some(tn)) = (&s.concl, ind_types.get(n)) else {
-                problems.push(format!("`{}`: not a block the export declares", s.name));
+                if !s.spec {
+                    problems.push(format!("`{}`: not a block the export declares", s.name));
+                }
                 continue
             };
             let Some(bd) = block_data(s, body, n, tn, &ind_ctors) else {
@@ -319,6 +339,9 @@ pub fn check(export: &ExportFile<'_>, stmts: &[Stmt]) -> Report {
         }
         let Some(rest) = s.doc.strip_prefix("Lean ") else { continue };
         let Some(n) = rest.find('`').and_then(|i| doc_name(&rest[i..], "")) else { continue };
+        if s.spec && !by_name.contains_key(n) {
+            continue
+        }
         if by_lean.insert(n.to_string(), Standing::Term(s)).is_some() {
             problems.push(format!("{n}: two MM0 terms claim it"));
         }
@@ -353,6 +376,36 @@ pub fn check(export: &ExportFile<'_>, stmts: &[Stmt]) -> Report {
         }
         let proved = s.kind == "theorem" && c.head == "ty" && s.hyps.is_empty();
         claims.entry(lean).or_default().push(TypeClaim { stmt: &s.name, levels: lvls[..n].to_vec(), ty, proved });
+    }
+    // the syntactic axioms about a constant `c` (an opaque, an axiom, a stage-A constant):
+    // `axiom c_closed (k: nat) (us): closed k (c us)` and the level congruence
+    // `axiom c_eeqv (us us2): leqv u u2 > ... > eeqv (c us) (c us2)`
+    for s in stmts {
+        if s.kind != "axiom" {
+            continue
+        }
+        let Some(c) = &s.concl else { continue };
+        let var = |m: &M, i: usize| m.args.is_empty() && s.binders.get(i).is_some_and(|b| b.0 == m.head);
+        let lvls_from = |k: usize| s.binders[k..].iter().all(|b| b.1 == "lvl");
+        let ok = match (c.head.as_str(), c.args.as_slice()) {
+            ("closed", [k, ce]) if names.lean.contains_key(&ce.head) => {
+                let n = ce.args.len();
+                s.hyps.is_empty() && s.binders.len() == 1 + n && s.binders[0].1 == "nat" && var(k, 0) && lvls_from(1)
+                    && ce.args.iter().enumerate().all(|(i, m)| var(m, 1 + i))
+            }
+            ("eeqv", [a, b]) if names.lean.contains_key(&a.head) => {
+                let n = a.args.len();
+                a.head == b.head && b.args.len() == n && s.binders.len() == 2 * n && lvls_from(0)
+                    && a.args.iter().enumerate().all(|(i, m)| var(m, i))
+                    && b.args.iter().enumerate().all(|(i, m)| var(m, n + i))
+                    && s.hyps.len() == n
+                    && s.hyps.iter().enumerate().all(|(i, h)| h.head == "leqv" && h.args.len() == 2 && var(&h.args[0], i) && var(&h.args[1], n + i))
+            }
+            _ => continue,
+        };
+        if !ok {
+            problems.push(format!("`{}`: not of the form `{} ...` for a constant", s.name, c.head));
+        }
     }
     // the blocks' data against the export's declarations
     for bd in &names.blocks {

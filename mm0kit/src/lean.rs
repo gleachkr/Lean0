@@ -107,7 +107,8 @@ impl Lean {
         };
         let mut const_closed = HashMap::default();
         // a Nat literal `lit n` is closed like a constant, and so are the inductive constants
-        for (term, ax) in [("lit", "closed_lit"), ("ind_ty", "closed_ind_ty"), ("ind_ctor", "closed_ind_ctor"), ("ind_rec", "closed_ind_rec")] {
+        for (term, ax) in [("lit", "closed_lit"), ("ind_ty", "closed_ind_ty"), ("ind_ctor", "closed_ind_ctor"), ("ind_rec", "closed_ind_rec"),
+            ("quot", "closed_quot"), ("quot_mk", "closed_quot_mk"), ("quot_lift", "closed_quot_lift"), ("quot_ind", "closed_quot_ind")] {
             if env.has_term(term) && env.has_thm(ax) {
                 const_closed.insert(t(term), env.thm_id(ax));
             }

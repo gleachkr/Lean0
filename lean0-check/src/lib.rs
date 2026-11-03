@@ -31,7 +31,8 @@ pub struct Checked {
 /// Check that the statement files (all parts of a certificate, in order) say what the export's
 /// declarations say.
 pub fn check(export: &str, files: &[String]) -> Result<Checked, String> {
-    let mut stmts = Vec::new();
+    let mut stmts = statements::spec_statements(SPEC)?;
+    let nspec = stmts.len();
     for f in files {
         let text = std::fs::read_to_string(f).map_err(|e| format!("{f}: {e}"))?;
         stmts.extend(statements::parse_mm0(&text).map_err(|e| format!("{f}: {e}"))?);
@@ -40,5 +41,5 @@ pub fn check(export: &str, files: &[String]) -> Result<Checked, String> {
     let cfg: nanoda_lib::util::Config = serde_json::from_value(cfg).map_err(|e| e.to_string())?;
     let (export_file, _) = cfg.to_export_file().map_err(|e| e.to_string())?;
     let report = statements::check(&export_file, &stmts);
-    Ok(Checked { report, statements: stmts.len(), top_level: summary::top_level(&export_file) })
+    Ok(Checked { report, statements: stmts.len() - nspec, top_level: summary::top_level(&export_file) })
 }

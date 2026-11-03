@@ -329,7 +329,8 @@ are in scope at each point.
 | `struct_like`, `field_ty`, `proj_ok`, `fprops`, `pinst`, `qinst`, `proj_ty` | Typing of `proj b i e` for `e : ind_ty D j ps`, type `j` structure-like (one constructor, no indices; the kernel's `is_structure_like`, which a type of a mutual block may satisfy): the field's type with the parameters and then the earlier projections put in, outermost first (`pinst` recurses to the innermost argument of `S` and substitutes on the way out; `qinst` fields `0 ..` at `# (k-1) ..`), a simultaneous substitution since each term substituted is lifted over the binders below it. `proj_ok`: the type's sort is at least 1, or the fields up to `i` are propositions (`fprops`: each `⊩ Ctx, A2 : srt lz`) — the argument of stage A's `_dfp`: such projections are definable by elimination into `Prop`, and nanoda requires less (only the dependent fields), so this is no more permissive. |
 | `proj_mk` | `proj b i (ind_ctor D2 j z qs fs) ≡ fs[i]` when well typed (`argat` counts from the outside: `nf - 1 - i`); the constructor's block is free as in `ind_iota`. |
 | `nonrec`, `eta_ok`, `projs`, `ind_eta` | Eta for a structure-like type none of whose fields mentions the block (`closed (d + np)` for each domain): `e ≡ ind_ctor D j z ps (proj b 0 e) ... (proj b (nf-1) e)` at `e`'s type, since such a type is a product in the model. (The kernel requires the block not to be recursive at all; this accepts a non-recursive type of a recursive mutual block too, which is still a product.) |
-| `eeqv_*`, `ind_eqv`, `ceqv`, `teqv`, `cseqv`, `eeqv_df` | `eeqv` is the structural congruence with `leqv` at sorts and recursor levels and `ind_eqv` (same atom, componentwise `eeqv`) at the block constants. `eeqv_df`: expressions of the same shape at equivalent levels denote the same value, so they are defeq at any type of one of them (this generalizes `sortDF` and `constDF`; opaque constants will get generated `eeqv` clauses, until then a block constant's `_df` lemma that needs one is stated as an axiom and counted). |
+| `eeqv_*`, `ind_eqv`, `ceqv`, `teqv`, `cseqv`, `eeqv_df` | `eeqv` is the structural congruence with `leqv` at sorts and recursor levels and `ind_eqv` (same atom, componentwise `eeqv`) at the block constants. `eeqv_df`: expressions of the same shape at equivalent levels denote the same value, so they are defeq at any type of one of them (this generalizes `sortDF` and `constDF`). A generated term that is not a public definition (an opaque, an axiom, a theorem, a stage-A constant) has no `eeqv` clause, so a block whose data mentions one at its levels gets `axiom c_eeqv (us us2): leqv u u2 > ... > eeqv (c us) (c us2)`, once per constant (`induct::eeqv_axioms`; the generator's report counts them): the same constant at equivalent levels, which is what `eeqv` means. `lean0 check` checks its shape (§8). A `_df` lemma whose `eeqv` still fails is stated as an axiom and counted. |
+| `nat_D`, `eq_D`; `closed_quot*`, `eeqv_quot*`, `quot_ty`, `quot_mk_ty`, `quot_lift_ty`, `quot_ind_ty`, `quot_lift_mk`, `quot_ind_mk` | Lean's prelude blocks `Nat` and `Eq` are stated as spec data (between the spec's `lean0-check` marks, in prefix form), so that the quotient primitives' types (which mention `Eq`) and the literal ties (§5) can be spec axioms. The generator uses them only when the export's block is exactly this data (else the block is generated as usual, and the quotient primitives fall back to the stage-A axioms); `lean0 check` compares the export's `Nat` and `Eq` with them like any block (§8). The quotient primitives are constants with the types the kernel requires when it adds them (`quot.cpp`, `check_quot_decls`: `Quot`, `Quot.mk`, `Quot.lift`, `Quot.ind` have exactly these types, with `Eq` checked to be the expected inductive), level invariance and closedness as for any constant, and the reduction rules `Quot.lift f h (Quot.mk r a) ≡ f a` and `Quot.ind h (Quot.mk r a) ≡ h a` when the left side is well typed (Lean4Lean's quotient `extra` rules; nanoda's `reduce_quot` checks only the spine, and typing makes the constructor's `α` and `r` the primitive's, `Quot` being injective as a type former in the model). Sound in the model: the quotient of a type by a relation, with `Quot.lift` well defined by its hypothesis and `Quot.ind` by induction on representatives. |
 
 **What `ind_wf` does not say.** Duplicate constructor names, `checkNoMVarNoFVar`, the
 `_nested` prefix: naming matters, not typing. Nested blocks (`numNested > 0`: the kernel
@@ -342,7 +343,8 @@ counted and reported by `lean0 gen`.
 
 These live in the generated `.mm0`, not in `lean.mm0`, and must be read against the Lean
 declaration. They remain for the blocks the schema does not cover (nested inductives, and
-blocks that need `whnf` as above), and for quotients. They are trusted in the same sense that
+blocks that need `whnf` as above), and for a quotient primitive whose type is not the spec's
+(above). They are trusted in the same sense that
 nanoda trusts the export's recursors (which it re-derives and compares): nothing trusted
 checks that such a declaration is legal or that its recursor is the one the declaration
 determines, so the arguments below hold per kind of axiom, *assuming* the declaration is
@@ -350,14 +352,15 @@ legal and the export's recursor is the right one.
 
 | axiom class | Lean4Lean counterpart / argument |
 |---|---|
-| `c_df` (axioms, stage-A inductive types, constructors, recursors, quotient primitives, opaques) | `constDF` for a constant whose type is the given `T` (`T` is checked well-typed by the public theorem `c_wf`) |
+| `c_df` (axioms, stage-A inductive types, constructors, recursors, opaques) | `constDF` for a constant whose type is the given `T` (`T` is checked well-typed by the public theorem `c_wf`) |
 | `c_closed`: `closed k (c us)` for every `k` | constants have no loose bound variables (`ClosedN` of `.const`) |
+| `c_eeqv`: `leqv u u2 > ... > eeqv (c us) (c us2)` (only for a constant an inductive declaration mentions at its levels; above) | the same constant at equivalent levels has the same shape (`eeqv` is defined that way) |
 | `R_c` (def) + `R_c_iota`: `ty G LHS T > deq G LHS (R_c ps ms mins fs) T` | The iota rule of the exported recursor rule: `rec ps ms mins is (c cps fs) ≡ val ps ms mins fs` whenever the left side is well-typed. The constructor's parameters, levels and the indices are separate variables, as in nanoda's `reduce_rec`. They are forced to agree with the recursor's by the typing premise (typing makes the major's type defeq to `I ps is`, and inductive type formers are injective in the model). |
 | `S_proj_i_df` | Typing of `proj b i e` (the spec's `proj`, with the block's atom `b`) for `e : S us ps`: the field type with parameters and earlier projections substituted (the `inst` premises do this outermost-first, which is simultaneous substitution). The premise `leqv (lmax (ls lz) L) L` (sort at least 1) is present unless every field up to `i` is a proposition, matching nanoda's `infer_proj` restriction for structures that may be propositions. |
 | `S_proj_i_dfp` | The same typing, for projecting from a structure that is a proposition: premises `leqv L_j lz` for every field `j ≤ i` that is not a proposition at all levels (`L_j` the level of field `j`'s sort). Generated only when each such `L_j` can be zero. Sound: with every field up to `i` a proposition, `e.0, …, e.i` are definable by eliminating `e` into `Prop`, which is allowed for every inductive proposition, and the field types agree by proof irrelevance. nanoda's `infer_proj` (like Lean's kernel) requires only the fields that the projected one depends on to be propositions; requiring all of them up to `i` is stronger, so this is no more permissive. |
 | `S_proj_i_mk` | `(S.mk ps fs).i ≡ fs[i]` when well-typed (nanoda's `reduce_proj`). |
 | `S_eta` | Structure eta for non-recursive structures (one constructor, no indices): `e ≡ S.mk ps (e.0) … (e.n)` at `S us ps`. Unit eta and nanoda's iota-on-structure expansion are derived from it. |
-| `Quot_lift_mk`, `Quot_ind_mk` | `Quot.lift f h (Quot.mk r a) ≡ f a` and `Quot.ind f (Quot.mk r a) ≡ f a` when well-typed (Lean4Lean's quotient `extra` rules). |
+| `Quot_lift_mk`, `Quot_ind_mk` (only for a quotient primitive whose type is not the spec's) | `Quot.lift f h (Quot.mk r a) ≡ f a` and `Quot.ind f (Quot.mk r a) ≡ f a` when well-typed (Lean4Lean's quotient `extra` rules; the spec's `quot_lift_mk`/`quot_ind_mk` above). |
 
 K-like reduction (`Eq.rec` on a non-constructor) has no axiom: the major premise is replaced by
 the constructor using `proofIrrel`.
@@ -392,15 +395,17 @@ The relations are functional in the model, so overlapping clauses (e.g. `badd_0l
 
 `lit n` denotes `Nat.succ^n Nat.zero` (as `VExpr` constants of the environment), which is how
 Lean4Lean translates a Nat literal (`Literal.toConstructor`, unfolded). `closed_lit` holds
-because constants have no loose bound variables. In an environment without `Nat.zero` and
-`Nat.succ` no literal axioms are generated, and `lit` is inert.
+because constants have no loose bound variables. The ties to `Nat` are the spec axioms
+`lit_zero` and `lit_succ` over the spec's block `nat_D` (§4); in an environment whose `Nat` is
+not that block (the generator then declares the block itself) no literal can be certified,
+and `lit` is inert.
 
-### Generated literal axioms (`lean0/src/natlit.rs`)
+### Literal axioms: the ties (`spec/lean.mm0`) and the generated operations (`lean0/src/natlit.rs`)
 
 | axiom | argument |
 |---|---|
-| `Nat_lit_zero`: `deq G (lit b0) Nat.zero Nat` | in the model, `Nat.zero ≡ Nat.zero : Nat` (`constDF`). Generated only when `Nat.zero : Nat` |
-| `Nat_lit_succ`: `bsucc a b > deq G (lit b) (Nat.succ (lit a)) Nat` | both sides denote the same term `succ^(a+1) zero`, which has type `Nat` because `Nat.succ : Nat → Nat` (checked by the generator) |
+| `lit_zero`: `deq G (lit b0) (ind_ctor nat_D z z) (ind_ty nat_D z)` | in the model, `Nat.zero ≡ Nat.zero : Nat` (`constDF`); `nat_D` is Lean's `Nat`, with `Nat.zero : Nat` by its data |
+| `lit_succ`: `bsucc a b > deq G (lit b) (app (ind_ctor nat_D z (s z)) (lit a)) (ind_ty nat_D z)` | both sides denote the same term `succ^(a+1) zero`, which has type `Nat` because `Nat.succ : Nat → Nat` by the data |
 | `Nat_add_lit`, `Nat_sub_lit`/`_lit0`, `Nat_mul_lit`, `Nat_div_lit`/`_lit0`, `Nat_mod_lit`/`_lit0`, `Nat_gcd_lit`/`_lit2`, `Nat_beq_lit`/`_lit_lt`/`_lit_gt`, `Nat_ble_lit`/`_lit_gt`, `Nat_land_lit`, `Nat_lor_lit`, `Nat_xor_lit`, `Nat_pow_lit`, `Nat_shiftLeft_lit`, `Nat_shiftRight_lit` | `op (succ^a zero) (succ^b zero) ≡ succ^(f a b) zero : Nat` (or `≡ Bool.true/false : Bool`), where the premises force the value: `sub` from `c+b = a` or `a+c = b`; `div`/`mod` from `q·b = m`, `m+r = a`, `r+x+1 = b` (so `r < b`, Euclidean division, and `b = 0` has its own axiom: `a/0 = 0`, `a%0 = a`); `gcd` from `g·p = a`, `g·q = b` (`g` divides both) and `x·a = y·b + g` or `y·b = x·a + g` (every common divisor divides `g`, so `g = gcd a b`; `a = b = 0` forces `g = 0`); `beq` false from `a+c+1 = b` or `b+c+1 = a`; `ble` from `a+c = b` / `b+c+1 = a`; shifts via `2^b`. |
 
 **Trust gap (stage A).** The operation axioms are valid only if the environment's definition
@@ -542,15 +547,25 @@ itself, accepting only the forms lean0 writes. For every declaration of the expo
   index, Nat literals; binder names and styles are not compared; a `let` is inlined and a
   string literal expanded, as the translation does);
 * a theorem's and a definition's type is stated by a proved theorem, not an axiom;
-* a definition's body is its value.
+* a definition's body is its value;
+* the spec's own declarations of Lean constants (the statements between the spec's
+  `lean0-check` marks: the blocks `nat_D` and `eq_D` and the quotient primitives `quot`,
+  `quot_mk`, `quot_lift`, `quot_ind`) stand for `Nat`, `Eq`, `Quot`, `Quot.mk`, `Quot.lift`
+  and `Quot.ind` when the export declares them, and are compared the same way (a spec
+  declaration the export lacks is ignored);
+* an axiom concluding `closed` or `eeqv` about a constant has the syntactic shape of §4:
+  `closed k (c us)` over `(k: nat)` and the levels, or `leqv u u2 > ... > eeqv (c us) (c us2)`
+  over the levels and their primed copies, with no other hypotheses.
 
-Not checked by it: the generated axioms of stage-A blocks, quotients and literals (§4 and
-§5), which are argued and generated, not compared with anything in the export; and whether a
+Not checked by it: the other generated axioms, of stage-A blocks and literal operations (§4
+and §5) and the `_df` typing axioms of opaque constants, which are argued and generated, not
+compared with anything in the export; and whether a
 theorem's proof term (an abstract def) is the export's (it is never stated, so it cannot
 matter). The comparison reads both sides structurally, so a translation bug, a doc comment
 naming the wrong constant, or a statement edited by hand is reported, with the first place
-the two differ. All of Init (59,423 declarations, 186,932 statements, the 32 parts' own
-`.mm0` files) passes in 13 s; `scripts/test.sh` checks that edited statements are rejected.
+the two differ. All of Init (59,423 declarations, 181,310 statements with the schema, the 32
+parts' own `.mm0` files) passes in 16 s; `scripts/test.sh` checks that edited statements are
+rejected.
 
 After the check, `lean0 check` lists the export's top-level declarations (theorems,
 definitions, opaques and axioms that no declaration of the export mentions; for a slice
@@ -639,6 +654,6 @@ departures from the verbatim presentation:
 
 The generated `.mm0` therefore contains, per declaration, its `def` or `term` (or, for a
 stage-B block, its atom and data definition), its typing statement, and for opaque constants
-the two generated axioms, plus the per-structure and per-recursor lemmas or axioms above;
+the two generated axioms (and `c_eeqv` when a block's data mentions it), plus the per-structure and per-recursor lemmas or axioms above;
 lemmas made while proving are local to the MMB. §8 says how those statements are tied back
 to the export.

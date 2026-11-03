@@ -275,6 +275,13 @@ pub fn lit_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, cur: &str, cur_ty: ExprPtr<
         return Ok(())
     }
     let (Some(nat), Some(zero), Some(succ)) = (konst(el, "Nat"), konst(el, "Nat.zero"), konst(el, "Nat.succ")) else { return Ok(()) };
+    // `Nat` is the spec's block `nat_D`: the spec's `lit_zero` and `lit_succ` tie the literals
+    if el.g.env.has_term("nat_D") && el.g.env.has_thm("lit_zero") && el.g.env.has_thm("lit_succ")
+        && el.g.consts["Nat"].term == el.g.env.term_id("nat_D") {
+        let (zero, succ) = (el.g.env.thm_id("lit_zero"), el.g.env.thm_id("lit_succ"));
+        el.g.nat = Some(NatLits { zero, succ });
+        return Ok(())
+    }
     let nc = el.tc.ctx.export_file.name_cache;
     let ty_of = |lean: &str, n: Option<nanoda_lib::util::NamePtr<'t>>| -> Option<ExprPtr<'t>> {
         if lean == cur { Some(cur_ty) } else { el.tc.env.get_declar(&n?).map(|d| d.info().ty) }
