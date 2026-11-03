@@ -66,10 +66,11 @@ rm -rf "$lk"
 # a theorem (stated as an axiom) or a doc comment's Lean name must each be caught.
 echo "== negative tests: statements that do not say what the export says"
 stmt_neg() {
-  local edit="$1" f=build/gen/initsample/initsample.mm0
-  sed -e "$edit" "$f" > build/gen/initsample/neg.mm0
-  if cmp -s "$f" build/gen/initsample/neg.mm0; then echo "FAIL (edit did nothing): $edit"; fail=1; return 0; fi
-  if target/release/lean0 check build/lean/initsample.ndjson build/gen/initsample/neg.mm0 > /dev/null; then
+  local edit="$1" mod="${2:-initsample}" f
+  f=build/gen/$mod/$mod.mm0
+  sed -e "$edit" "$f" > "build/gen/$mod/neg.mm0"
+  if cmp -s "$f" "build/gen/$mod/neg.mm0"; then echo "FAIL (edit did nothing): $edit"; fail=1; return 0; fi
+  if target/release/lean0 check "build/lean/$mod.ndjson" "build/gen/$mod/neg.mm0" > /dev/null; then
     echo "FAIL (accepted): $edit"; fail=1
   else echo "rejected as expected: $edit"; fi
 }
@@ -77,7 +78,10 @@ stmt_neg '0,/^theorem rfl_ty/s/(srt u) (pi (bvar z)/(srt u) (pi (bvar (s z))/'
 stmt_neg 's/^def rfl (u: lvl): expr = \$ lam (srt u) (lam (bvar z)/def rfl (u: lvl): expr = $ lam (srt u) (lam (bvar (s z))/'
 stmt_neg '/^theorem Eq_symm_ty/s/^theorem/axiom/'
 stmt_neg 's/Lean definition `rfl`/Lean definition `rfl2`/'
-rm -f build/gen/initsample/neg.mm0
+# A nested block's occurrences restore its constructors' types: `S.node : Array S → S`
+# stated with the occurrence `List S` is caught.
+stmt_neg '/^def S_D/s/(cons (app (ind_ty (Array_D lz) z) (bvar z))/(cons (app (ind_ty (List_D lz) z) (bvar z))/' nested
+rm -f build/gen/initsample/neg.mm0 build/gen/nested/neg.mm0
 
 # Sharded generation (`--jobs`) must give the same statements, and a certificate both accept.
 echo "== sharded generation"
@@ -168,6 +172,10 @@ for ax in inst_proj ind_iota proj_ty quot_lift_mk lit_succ Opq_eeqv; do tamper i
 # ... and rules they do not use are harmless, which shows the test can tell the difference.
 tamper induct accepted --tamper-axiom quot_ind_mk
 tamper induct accepted --tamper-axiom eta
+# Nested blocks: the restore, the occurrence lookup, the auxiliary types' data and their iota.
+tamper nested rejected --tamper-theorem tree_size_ex_ty
+for ax in ind_iota_nst rst_ty nst_hit_z aux_data_i spz_hit ndecl_cons; do tamper nested rejected --tamper-axiom "$ax"; done
+tamper nested accepted --tamper-axiom spz_proj
 # Literals: the generated literal axioms and the binary-arithmetic relations.
 tamper lit rejected --tamper-theorem lit_mul_big_ty
 tamper lit rejected --tamper-theorem dbl_ex_ty

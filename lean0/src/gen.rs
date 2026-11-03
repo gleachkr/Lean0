@@ -13,7 +13,8 @@
 use crate::elab::{Elab, R};
 use crate::names::{mangle, Names};
 use crate::natlit::{self, NatLits};
-use nanoda_lib::env::Declar;
+use nanoda_lib::env::{Declar, DeclarInfo, DeclarMap, EnvLimit, InductiveData};
+use nanoda_lib::inductive::{CtorHeader, IndTyHeader, InductiveCheckState};
 use nanoda_lib::expr::Expr;
 use nanoda_lib::level::Level;
 use nanoda_lib::name::Name;
@@ -354,7 +355,19 @@ impl Gen {
                 *current.lock().unwrap() = Some((name, start));
             }
             self.cost_enter("gen.declar");
-            let (name, r) = export.with_tc_and_declar(*d.info(), |tc| (self.lean_name(tc, d.info().name), self.declar(tc, d, &export.declars)));
+            let all = &export.declars;
+            let (name, r) = match nested_block(d, all) {
+                // a declaration of a nested block: its type checker sees the kernel's auxiliary
+                // types (and, at the block's head, the block's own types)
+                Some(id) => export.with_ctx(|ctx| {
+                    let info = *d.info();
+                    let at_head = matches!(d, Declar::Inductive(_));
+                    let (name, nst) = ctx.with_tc(EnvLimit::ByName(info.name), |tc| (self.lean_name(tc, info.name), build_nested(tc, &id, all, at_head)));
+                    let r = nst.and_then(|nst| ctx.with_tc_and_declar_ext(info, &nst.ext, |tc| self.declar(tc, d, all, Some(&nst))));
+                    (name, r)
+                }),
+                None => export.with_tc_and_declar(*d.info(), |tc| (self.lean_name(tc, d.info().name), self.declar(tc, d, all, None))),
+            };
             self.cost_exit();
             if progress {
                 *current.lock().unwrap() = None;
@@ -496,7 +509,7 @@ impl Gen {
             .collect()
     }
 
-    fn declar<'t>(&mut self, tc: &mut TypeChecker<'_, 't, '_>, d: &Declar<'t>, all: &nanoda_lib::env::DeclarMap<'t>) -> R<usize> {
+    fn declar<'t>(&mut self, tc: &mut TypeChecker<'_, 't, '_>, d: &Declar<'t>, all: &DeclarMap<'t>, nested: Option<&Nested<'t>>) -> R<usize> {
         let info = *d.info();
         let uparams: Vec<NamePtr<'t>> = tc
             .ctx
@@ -525,7 +538,7 @@ impl Gen {
             Declar::Inductive(id) => {
                 if id.all_ind_names.first() == Some(&id.info.name) {
                     let (order0, pfs0) = (el.g.env.order.len(), el.g.env.num_pfs());
-                    match crate::induct::block_head(&mut el, &sig, id, all) {
+                    match crate::induct::block_head(&mut el, &sig, id, all, nested) {
                         Ok(true) => return Ok(el.type_mismatches),
                         Ok(false) => {}
                         Err(e) => {
@@ -542,7 +555,7 @@ impl Gen {
                 opaque(&mut el, &sig, info.ty, "inductive type")?;
             }
             Declar::Constructor(cd) => {
-                if crate::induct::constructor(&mut el, &sig, cd, all)? {
+                if crate::induct::constructor(&mut el, &sig, cd, all, nested)? {
                     if sig.lean_name == "Nat.zero" || sig.lean_name == "Nat.succ" {
                         natlit::lit_axioms(&mut el, &sig.lean_name, info.ty)?;
                     }
@@ -563,7 +576,7 @@ impl Gen {
                 }
             }
             Declar::Recursor(rd) => {
-                if crate::induct::recursor(&mut el, &sig, rd, all)? {
+                if crate::induct::recursor(&mut el, &sig, rd, all, nested)? {
                     return Ok(el.type_mismatches)
                 }
                 // The rules mention the recursor itself, and for a mutual or nested inductive
@@ -1215,4 +1228,68 @@ pub(crate) fn add_thm(
 ) -> R<ThId> {
     let doc = if doc.is_empty() { None } else { Some(doc.into()) };
     env.add_thm_split(ThmDecl { name: name.into(), args: args.into(), hyps: hyps.into(), concl, axiom, local, proof, doc }, split_budget()).map_err(|e| e.0)
+}
+
+/// A nested block as the kernel checks it (`ElimNestedInductive`; audit §4): the declared
+/// types with the nested occurrences in their constructors replaced by auxiliary types, then
+/// the auxiliary types (`InductiveCheckState`), and the auxiliary types as temporary
+/// declarations for the type checker of each of the block's declarations.
+pub struct Nested<'t> {
+    pub st: InductiveCheckState<'t>,
+    pub ext: DeclarMap<'t>,
+}
+
+/// The first type of the nested block `d` belongs to (a type, constructor or recursor of one).
+fn nested_block<'t>(d: &Declar<'t>, all: &DeclarMap<'t>) -> Option<InductiveData<'t>> {
+    let first = match d {
+        Declar::Inductive(id) => *id.all_ind_names.first()?,
+        Declar::Constructor(cd) => match all.get(&cd.inductive_name)? {
+            Declar::Inductive(id) => *id.all_ind_names.first()?,
+            _ => return None,
+        },
+        Declar::Recursor(rd) => *rd.all_inductives.first()?,
+        _ => return None,
+    };
+    match all.get(&first)? {
+        Declar::Inductive(id) if id.is_nested => Some(id.clone()),
+        _ => None,
+    }
+}
+
+/// The kernel's specialization of the nested block `id` (nanoda's `specialize_nested`, the
+/// export's own declarations as its input) and the temporary declarations: the auxiliary
+/// types, and at the block's head the declared types too (so that the constructors' fields
+/// can be typed there).
+fn build_nested<'t>(tc: &mut TypeChecker<'_, 't, '_>, id: &InductiveData<'t>, all: &DeclarMap<'t>, at_head: bool) -> R<Nested<'t>> {
+    let mut headers = Vec::new();
+    let mut ext = DeclarMap::default();
+    for &n in id.all_ind_names.iter() {
+        let Some(Declar::Inductive(d)) = all.get(&n) else { return Err("a type of the block is missing from the export".into()) };
+        let mut ctors = Vec::new();
+        for &c in d.all_ctor_names.iter() {
+            let Some(Declar::Constructor(cd)) = all.get(&c) else { return Err("a constructor of the block is missing from the export".into()) };
+            ctors.push(CtorHeader { name: c, ty: cd.info.ty });
+        }
+        headers.push(IndTyHeader { name: n, ty: d.info.ty, ctors });
+        if at_head {
+            ext.insert(n, Declar::Inductive(d.clone()));
+        }
+    }
+    let st = tc.specialize_nested(id, headers);
+    let all_names: std::sync::Arc<[NamePtr<'t>]> = st.all_inductives_incl_specialized.iter().map(|h| h.name).collect();
+    for h in st.all_inductives_incl_specialized.iter().skip(id.all_ind_names.len()) {
+        let binders = tc.ctx.pi_telescope_size(h.ty);
+        // only `info` is read for them (inferring the type of the constant)
+        let d = InductiveData {
+            info: DeclarInfo { name: h.name, ty: h.ty, uparams: st.uparams },
+            is_recursive: true,
+            is_nested: true,
+            num_params: id.num_params,
+            num_indices: binders.saturating_sub(id.num_params),
+            all_ind_names: all_names.clone(),
+            all_ctor_names: h.ctors.iter().map(|c| c.name).collect(),
+        };
+        ext.insert(h.name, Declar::Inductive(d));
+    }
+    Ok(Nested { st, ext })
 }

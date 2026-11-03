@@ -24,8 +24,9 @@ schema for inductive types (positivity, universes, the elimination level, the
 recursor's type and rules, projections and structure eta) transcribed from the 
 kernel, since Lean4Lean leaves inductive declarations unspecified.
 
-Nested inductive types are not certified yet: their rules are represented as 
-axioms instantiated from the export. Some other axioms support accelerated 
+Nested inductive types are certified as the kernel does them: as the mutual 
+block with auxiliary types that the kernel checks in their place, with the 
+nested occurrences restored in what is stated. Some axioms support accelerated 
 `Nat` operations (for example, assuming that `Nat.add` on numerals correctly 
 implements addition), though the arithmetic itself is proved. Quotients and 
 the tie between literals and `Nat` are part of the spec.
@@ -55,10 +56,11 @@ trust:
   [#14613](https://github.com/leanprover/lean4/pull/14613),
   [#14807](https://github.com/leanprover/lean4/pull/14807),
   [#14843](https://github.com/leanprover/lean4/pull/14843));
-- axioms generated per declaration for nested inductive types (which the 
-  schema does not cover yet: recursor rules, projections and eta, with the 
-  declaration's legality unchecked), one per accelerated 
-  `Nat` operation (`Nat.add` on numerals is addition, and so on), and one per 
+- axioms generated per declaration for the few inductive types the schema 
+  leaves out (those whose shape the kernel reads through `whnf`: recursor 
+  rules, projections and eta, with the declaration's legality unchecked), one 
+  per accelerated `Nat` operation (`Nat.add` on numerals is addition, and so 
+  on), and one per 
   opaque constant that an inductive declaration mentions at its universe 
   levels (the constant at equivalent levels is the same expression). `lean0 
   gen` reports how many blocks the schema left to these axioms, and the 
@@ -75,9 +77,10 @@ names, with the statement Lean gives it, you need to trust:
 - either `lean0`'s translation of declarations into MM0 statements, or `lean0 
   check` (the `lean0-check` crate, about 900 lines, independent of the 
   generator), which reads `.mm0` statements and each inductive block's 
-  declaration back into Lean expressions and compares them with the export (of 
-  the generated axioms above it checks only the shape of the syntactic ones, 
-  `closed` and `eeqv`).
+  declaration back into Lean expressions (a nested block's with its 
+  occurrences restored) and compares them with the export (of the generated 
+  axioms above it checks only the shape of the syntactic ones, `closed` and 
+  `eeqv`).
 
 ## Prior Art
 

@@ -32,7 +32,7 @@ use num_bigint::BigUint;
 use std::collections::HashMap;
 
 /// An MM0 expression as written: a head and its arguments (a bare identifier has none).
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct M {
     head: String,
     args: Vec<M>,
@@ -197,9 +197,13 @@ struct BlockData<'s> {
     atom: String,
     /// The parameters, outermost first.
     params: Vec<&'s M>,
-    /// Each type's type and its constructors' types.
+    /// Each type's type and its constructors' types: the declared types, then the auxiliary
+    /// types of a nested block (`ind_mkn`; audit §4).
     types: Vec<(&'s M, Vec<&'s M>)>,
-    /// The Lean names of its types and of each type's constructors (from the export).
+    /// The nested occurrences, one per auxiliary type, written like a constructor type at
+    /// depth 0 (`ind_mkn`'s last argument).
+    nested: Vec<&'s M>,
+    /// The Lean names of its declared types and of each one's constructors (from the export).
     type_names: Vec<String>,
     ctor_names: Vec<Vec<String>>,
 }
@@ -235,7 +239,14 @@ impl Names<'_> {
             }
             ("ind_rec", [d, i, v]) => {
                 let (b, mut ls) = block(d)?;
-                let n = format!("{}.rec", b.type_names.get(unary(i)?)?);
+                // the recursor of a declared type, or `X.rec_k` of the `k`th auxiliary type
+                let i = unary(i)?;
+                let n0 = b.type_names.len();
+                let n = match b.type_names.get(i) {
+                    Some(t) => format!("{t}.rec"),
+                    None if i < n0 + b.nested.len() => format!("{}.rec_{}", b.type_names[0], i - n0 + 1),
+                    None => return None,
+                };
                 match self.rec_large.get(&n)? {
                     true => ls.insert(0, v),
                     false if v.head == "lz" && v.args.is_empty() => {}
@@ -292,8 +303,10 @@ pub fn check(export: &ExportFile<'_>, stmts: &[Stmt]) -> Report {
                 }
                 Declar::Recursor(rd) => {
                     let n = lean_name(ctx, rd.info.name);
-                    let Some(ind) = ctx.get_major_induct(rd) else { continue };
-                    let Some(Declar::Inductive(id)) = export.declars.get(&ind) else { continue };
+                    // its block's first type (the major premise's type is another block's for
+                    // the recursor of a nested block's auxiliary type)
+                    let Some(ind) = rd.all_inductives.first() else { continue };
+                    let Some(Declar::Inductive(id)) = export.declars.get(ind) else { continue };
                     let nl = ctx.read_levels(rd.info.uparams).len();
                     let bl = ctx.read_levels(id.info.uparams).len();
                     large.insert(n, nl == bl + 1);
@@ -320,7 +333,7 @@ pub fn check(export: &ExportFile<'_>, stmts: &[Stmt]) -> Report {
                 continue
             };
             let Some(bd) = block_data(s, body, n, tn, &ind_ctors) else {
-                problems.push(format!("`{}`: not of the form `ind_mk X_blk P T`", s.name));
+                problems.push(format!("`{}`: not of the form `ind_mk X_blk P T` or `ind_mkn X_blk P T N`", s.name));
                 continue
             };
             let b = names.blocks.len();
@@ -329,6 +342,7 @@ pub fn check(export: &ExportFile<'_>, stmts: &[Stmt]) -> Report {
             let mut members: Vec<String> = bd.type_names.clone();
             members.extend(bd.ctor_names.iter().flatten().cloned());
             members.extend(bd.type_names.iter().map(|t| format!("{t}.rec")));
+            members.extend((1..=bd.nested.len()).map(|k| format!("{}.rec_{k}", bd.type_names[0])));
             for m in members {
                 if by_lean.insert(m.clone(), Standing::Block(b)).is_some() {
                     problems.push(format!("{m}: two MM0 terms claim it"));
@@ -456,7 +470,12 @@ pub fn check(export: &ExportFile<'_>, stmts: &[Stmt]) -> Report {
                     }
                     let want = strip_pis(ctx, cd.info.ty);
                     let mut cmp = Cmp { ctx, names: &names, lv: &lv, selfs: Some((&selfs, &uparams)), why: None };
-                    let m = pis(&bd.params, ks[c]);
+                    let np = bd.params.len();
+                    let Some(k) = restore(ks[c], 0, np, bd.type_names.len(), &bd.nested) else {
+                        problems.push(format!("{cn}: `{}` applies an auxiliary type to other arguments than the parameters", bd.stmt.name));
+                        continue
+                    };
+                    let m = pis(&bd.params, &k);
                     if !cmp.expr(&m, want) {
                         problems.push(format!("{cn}: `{}` states another type ({})", bd.stmt.name, cmp.why.unwrap_or_default()));
                     }
@@ -549,24 +568,22 @@ pub fn check(export: &ExportFile<'_>, stmts: &[Stmt]) -> Report {
 
 /// Read a block's data definition `ind_mk X_blk P T`.
 fn block_data<'s>(stmt: &'s Stmt, body: &'s M, lean: &str, type_names: &[String], ctors: &HashMap<String, Vec<String>>) -> Option<BlockData<'s>> {
-    let ("ind_mk", [atom, p, t]) = (body.head.as_str(), body.args.as_slice()) else { return None };
+    let (atom, p, t, n) = match (body.head.as_str(), body.args.as_slice()) {
+        ("ind_mk", [atom, p, t]) => (atom, p, t, None),
+        ("ind_mkn", [atom, p, t, n]) => (atom, p, t, Some(n)),
+        _ => return None,
+    };
     if !atom.args.is_empty() {
         return None
     }
     // the context lists the innermost parameter first
-    let mut params = Vec::new();
-    let mut c = p;
-    loop {
-        match (c.head.as_str(), c.args.as_slice()) {
-            ("nil", []) => break,
-            ("cons", [a, rest]) => {
-                params.push(a);
-                c = rest;
-            }
-            _ => return None,
-        }
-    }
+    let mut params = ctx_list(p)?;
     params.reverse();
+    // the occurrences: the first entry is the first auxiliary type
+    let nested = match n {
+        Some(n) => ctx_list(n)?,
+        None => Vec::new(),
+    };
     let mut types = Vec::new();
     let mut t = t;
     loop {
@@ -591,14 +608,89 @@ fn block_data<'s>(stmt: &'s Stmt, body: &'s M, lean: &str, type_names: &[String]
             _ => return None,
         }
     }
-    if types.len() != type_names.len() {
+    if types.len() != type_names.len() + nested.len() {
         return None
     }
     let ctor_names: Vec<Vec<String>> = type_names.iter().map(|n| ctors.get(n).cloned().unwrap_or_default()).collect();
     if ctor_names.iter().zip(&types).any(|(ns, (_, ks))| ns.len() != ks.len()) {
         return None
     }
-    Some(BlockData { stmt, lean: lean.to_string(), atom: atom.head.clone(), params, types, type_names: type_names.to_vec(), ctor_names })
+    Some(BlockData { stmt, lean: lean.to_string(), atom: atom.head.clone(), params, types, nested, type_names: type_names.to_vec(), ctor_names })
+}
+
+/// The entries of a context term `a1 :: a2 :: ... :: []`, in order.
+fn ctx_list(m: &M) -> Option<Vec<&M>> {
+    let mut out = Vec::new();
+    let mut c = m;
+    loop {
+        match (c.head.as_str(), c.args.as_slice()) {
+            ("nil", []) => return Some(out),
+            ("cons", [a, rest]) => {
+                out.push(a);
+                c = rest;
+            }
+            _ => return None,
+        }
+    }
+}
+
+/// A numeral.
+fn nat_m(n: usize) -> M {
+    let mut m = M { head: "z".into(), args: vec![] };
+    for _ in 0..n {
+        m = M { head: "s".into(), args: vec![m] };
+    }
+    m
+}
+
+/// `m` with its free variables (index at least `depth`) raised by `n`.
+fn lift_m(m: &M, n: usize, depth: usize) -> M {
+    match (m.head.as_str(), m.args.as_slice()) {
+        ("bvar", [k]) => match unary(k) {
+            Some(i) if i >= depth => M { head: "bvar".into(), args: vec![nat_m(i + n)] },
+            _ => m.clone(),
+        },
+        ("lam" | "pi", [a, b]) => M { head: m.head.clone(), args: vec![lift_m(a, n, depth), lift_m(b, n, depth + 1)] },
+        _ => M { head: m.head.clone(), args: m.args.iter().map(|a| lift_m(a, n, depth)).collect() },
+    }
+}
+
+/// A nested block's constructor type (at depth `d` under the parameters, `n0` declared types)
+/// with its auxiliary types restored: `# (d + np + n0 + k)` applied to the parameters and to
+/// `is` becomes the `k`th occurrence lifted to depth `d`, applied to `is` (the kernel's
+/// `restoreNested`; audit §4). `None` when an auxiliary type is applied to other arguments
+/// than the parameters (then the block is not well formed and the certificate is rejected;
+/// the comparison here reports it).
+fn restore(m: &M, d: usize, np: usize, n0: usize, nested: &[&M]) -> Option<M> {
+    // the spine
+    let mut args = Vec::new();
+    let mut head = m;
+    while let ("app", [f, a]) = (head.head.as_str(), head.args.as_slice()) {
+        args.push(a);
+        head = f;
+    }
+    args.reverse();
+    let aux = match (head.head.as_str(), head.args.as_slice()) {
+        ("bvar", [k]) => unary(k).and_then(|t| t.checked_sub(d + np + n0)),
+        _ => None,
+    };
+    if let Some(k) = aux {
+        let x = nested.get(k)?;
+        if args.len() < np || (0..np).any(|q| *args[q] != M { head: "bvar".into(), args: vec![nat_m(d + np - 1 - q)] }) {
+            return None
+        }
+        let mut r = lift_m(x, d, 0);
+        for a in &args[np..] {
+            r = M { head: "app".into(), args: vec![r, restore(a, d, np, n0, nested)?] };
+        }
+        return Some(r)
+    }
+    match (m.head.as_str(), m.args.as_slice()) {
+        ("app", [f, a]) => Some(M { head: "app".into(), args: vec![restore(f, d, np, n0, nested)?, restore(a, d, np, n0, nested)?] }),
+        ("lam" | "pi", [a, b]) => Some(M { head: m.head.clone(), args: vec![restore(a, d, np, n0, nested)?, restore(b, d + 1, np, n0, nested)?] }),
+        ("proj", [b, i, x]) => Some(M { head: "proj".into(), args: vec![b.clone(), i.clone(), restore(x, d, np, n0, nested)?] }),
+        _ => Some(m.clone()),
+    }
 }
 
 /// `Π params. body`.

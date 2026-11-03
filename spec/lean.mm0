@@ -11,9 +11,10 @@ delimiter $ ( ) , . $;
 --|   generated `def X_D (us): ind`), and its types, constructors and recursors
 --|   are `ind_ty D i`, `ind_ctor D i c` and `ind_rec D i v`, typed by the
 --|   schema below once the certificate proves the block legal (`ind_wf`).
---|   Axioms, opaques, quotient primitives and nested inductive blocks (not
---|   covered by the schema yet) are MM0 `term`s, each with two generated
---|   axioms: its `constDF` instance and `closed k (c us)` for every `k`.
+--|   A nested block is the mutual block the kernel checks in its place,
+--|   with the nested occurrences restored in what it states (`ind_mkn`).
+--|   Axioms and opaques are MM0 `term`s, each with two generated axioms:
+--|   its `constDF` instance and `closed k (c us)` for every `k`.
 --| * Universe parameters are MM0 variables of sort `lvl`, so the `l.WF U`
 --|   side conditions are vacuous and are dropped.
 --| * Meta-level operations (liftN, inst, Lookup) are syntax-directed
@@ -570,6 +571,15 @@ axiom argat_s (e a b: expr) (k: nat): $ argat k e a $ > $ argat (s k) (e @ b) a 
 term has_arg: expr > expr > wff;
 axiom has_arg_z (e a: expr): $ has_arg (e @ a) a $;
 axiom has_arg_s (e a b: expr): $ has_arg e a $ > $ has_arg (e @ b) a $;
+--| `pinst i S A R`: `S` is a block's type or constructor applied to `p0 ..
+--| p(np-1)`; `R` is `A` (under `i` binders over the block's parameters) with
+--| the parameters put in, outermost first (`p0` at `# (i + np - 1)`, then
+--| `p1` at `# (i + np - 2)`, ...: each substituted term is lifted over the
+--| binders below it).
+term pinst: nat > expr > expr > expr > wff;
+axiom pinst_head (i: nat) (D: ind) (j: nat) (A: expr): $ pinst i (ind_ty D j) A A $;
+axiom pinst_head_c (i: nat) (D: ind) (j c: nat) (A: expr): $ pinst i (ind_ctor D j c) A A $;
+axiom pinst_app (i: nat) (S a A A1 R: expr): $ pinst (s i) S A A1 $ > $ inst i A1 a R $ > $ pinst i (S @ a) A R $;
 --| `spine_ty e D j k`: `e` is `ind_ty D j` applied to `k` arguments; `spine_ctor`
 --| and `spine_rec` likewise for a constructor and a recursor.
 term spine_ty: expr > ind > nat > nat > wff;
@@ -664,12 +674,118 @@ axiom tys_ty_cons (Ctx: ctx) (F: expr) (C: ctors) (T: tys) (u: lvl):
 term tys_ok: ctx > ind > wff;
 axiom tys_ok_i (G G2: ctx) (D: ind) (b: blk) (P: ctx) (T: tys):
   $ ind_data D b P T $ > $ ctx_wf G P $ > $ capp P G G2 $ > $ tys_ty G2 T $ > $ tys_ok G D $;
+--| A well-formed block, in context `G`.
+term ind_wf: ctx > ind > wff;
+
+-- Nested inductive types (`ElimNestedInductive`) ------------------------------------
+
+--| A nested block `ind_mkn b P T N` is the mutual block the kernel checks in
+--| its place: `T` lists the declared types and then one auxiliary type per
+--| nested occurrence `I Ds` of an earlier block `I` in the constructors (in
+--| the kernel's order), and `N` lists the occurrences, each `ind_ty I i @ Ds`
+--| written like a constructor type at depth 0 (a `ctx` used as a list; `Ds`
+--| mention the block's types). An auxiliary type must have `I`'s type and
+--| constructors at `Ds` with the occurrences replaced by the auxiliary types
+--| (`spz`), and the kernel adds auxiliary types for all of `I`'s block at
+--| once (`nst_ok`). So an auxiliary type denotes the occurrence itself, and
+--| the block's constructors, recursors and rules are stated with the
+--| occurrences restored (`rst`, the kernel's `restoreNested`): the auxiliary
+--| type `ind_ty D j ps is` is read as `I Ds[ps] is` and its constructor
+--| `ind_ctor D j c ps fs` as `ind_ctor I i c Ds[ps] fs`. Its recursor is the
+--| block's (`X.rec_k` for the `k`th auxiliary type) and reduces on `I`'s
+--| constructors (`ind_iota_nst`).
+term ind_mkn: blk > ctx > tys > ctx > ind;
+axiom ind_data_n (b: blk) (P: ctx) (T: tys) (N: ctx): $ ind_data (ind_mkn b P T N) b P T $;
+--| `ind_nested D N`: the occurrences of `D` (none for `ind_mk`).
+term ind_nested: ind > ctx > wff;
+axiom ind_nested_mk (b: blk) (P: ctx) (T: tys): $ ind_nested (ind_mk b P T) [] $;
+axiom ind_nested_mkn (b: blk) (P: ctx) (T: tys) (N: ctx): $ ind_nested (ind_mkn b P T N) N $;
+--| `ndecl N n n0`: `n0` declared types among `n`; `nst_at N n0 j X`: the
+--| occurrence of auxiliary type `j`, when the first auxiliary type is `n0`.
+term ndecl: ctx > nat > nat > wff;
+axiom ndecl_nil (n: nat): $ ndecl [] n n $;
+axiom ndecl_cons (X: expr) (N: ctx) (n n0: nat): $ ndecl N n n0 $ > $ ndecl (X :: N) (s n) n0 $;
+term nst_at: ctx > nat > nat > expr > wff;
+axiom nst_at_z (X: expr) (N: ctx) (j: nat): $ nst_at (X :: N) j j X $;
+axiom nst_at_s (X X2: expr) (N: ctx) (n0 j: nat): $ nst_at N (s n0) j X $ > $ nst_at (X2 :: N) n0 j X $;
+term aux_of: ind > ctx > nat > expr > wff;
+axiom aux_of_i (D: ind) (N: ctx) (j np n m n0: nat) (X: expr):
+  $ ind_arity D np n m $ > $ ndecl N n n0 $ > $ nst_at N n0 j X $ > $ aux_of D N j X $;
+--| `rst D N e e2`: `e2` is `e` with the auxiliary types and constructors
+--| restored: nothing when there are no occurrences (`rst_nil`), else from
+--| the outside in, `rst_refl` for the subterms left as they are (the clauses
+--| are tried in this order, so that an unknown `e2` is computed).
+term rst: ind > ctx > expr > expr > wff;
+axiom rst_nil (D: ind) (e: expr): $ rst D [] e e $;
+axiom rst_ty (D: ind) (N: ctx) (j np n m na k: nat) (e S X X1 X2 e2: expr):
+  $ spine_ty e D j na $ > $ aux_of D N j X $ > $ ind_arity D np n m $ > $ sinst D z n np X X1 $ >
+  $ add np k na $ > $ drop k e S $ > $ pinst z S X1 X2 $ > $ rehead S X2 k e e2 $ > $ rst D N e e2 $;
+axiom rst_ctor (D I: ind) (N: ctx) (j c i np n m na k npi: nat) (e S X X1 X2 Y e2: expr):
+  $ spine_ctor e D j c na $ > $ aux_of D N j X $ > $ ind_arity D np n m $ > $ sinst D z n np X X1 $ >
+  $ add np k na $ > $ drop k e S $ > $ pinst z S X1 X2 $ > $ spine_ty X2 I i npi $ >
+  $ rehead (ind_ty I i) (ind_ctor I i c) npi X2 Y $ > $ rehead S Y k e e2 $ > $ rst D N e e2 $;
+axiom rst_app (D: ind) (N: ctx) (f a f2 a2: expr): $ rst D N f f2 $ > $ rst D N a a2 $ > $ rst D N (f @ a) (f2 @ a2) $;
+axiom rst_lam (D: ind) (N: ctx) (A b A2 b2: expr): $ rst D N A A2 $ > $ rst D N b b2 $ > $ rst D N (λ A. b) (λ A2. b2) $;
+axiom rst_pi (D: ind) (N: ctx) (A b A2 b2: expr): $ rst D N A A2 $ > $ rst D N b b2 $ > $ rst D N (Π A. b) (Π A2. b2) $;
+axiom rst_proj (D: ind) (N: ctx) (b: blk) (i: nat) (e e2: expr): $ rst D N e e2 $ > $ rst D N (proj b i e) (proj b i e2) $;
+axiom rst_refl (D: ind) (N: ctx) (e: expr): $ rst D N e e $;
+term nst_hit: ctx > nat > nat > nat > expr > expr > wff;
+--| `nst_hit N j d np e e2`: `e` is an occurrence of `N` (the first entry being
+--| auxiliary type `j`) lifted to depth `d` and applied to more arguments,
+--| and `e2` its replacement. The entries are tried in order: the first
+--| clause fails as a whole when the entry is not `e`'s.
+axiom nst_hit_z (X S Y e e2: expr) (N: ctx) (I: ind) (i j d np na npi r a t: nat):
+  $ spine_ty X I i npi $ > $ spine_ty e I i na $ > $ add npi r na $ > $ lift d z X S $ > $ drop r e S $ >
+  $ add np j a $ > $ add d a t $ > $ pargs # t d np Y $ > $ rehead S Y r e e2 $ > $ nst_hit (X :: N) j d np e e2 $;
+axiom nst_hit_s (X e e2: expr) (N: ctx) (j d np: nat): $ nst_hit N (s j) d np e e2 $ > $ nst_hit (X :: N) j d np e e2 $;
+--| `spz D N d e e2`: `e2` is `e` (at depth `d` in a constructor type) with
+--| each occurrence `I Ds is` of `N` replaced by its auxiliary type
+--| `# (d + np + j)` applied to the block's parameters and to `is`
+--| (`replaceAllNested`: from the outside in, so `is` stay as they are).
+term spz: ind > ctx > nat > expr > expr > wff;
+axiom spz_refl (D: ind) (N: ctx) (d: nat) (e: expr): $ spz D N d e e $;
+axiom spz_hit (D: ind) (N: ctx) (d np n m n0: nat) (e e2: expr):
+  $ ind_arity D np n m $ > $ ndecl N n n0 $ > $ nst_hit N n0 d np e e2 $ > $ spz D N d e e2 $;
+axiom spz_app (D: ind) (N: ctx) (d: nat) (f a f2 a2: expr): $ spz D N d f f2 $ > $ spz D N d a a2 $ > $ spz D N d (f @ a) (f2 @ a2) $;
+axiom spz_lam (D: ind) (N: ctx) (d: nat) (A b A2 b2: expr): $ spz D N d A A2 $ > $ spz D N (s d) b b2 $ > $ spz D N d (λ A. b) (λ A2. b2) $;
+axiom spz_pi (D: ind) (N: ctx) (d: nat) (A b A2 b2: expr): $ spz D N d A A2 $ > $ spz D N (s d) b b2 $ > $ spz D N d (Π A. b) (Π A2. b2) $;
+axiom spz_proj (D: ind) (N: ctx) (d: nat) (b: blk) (i: nat) (e e2: expr): $ spz D N d e e2 $ > $ spz D N d (proj b i e) (proj b i e2) $;
+--| `spz_ctors D N I X ni npi C C2`: `C2` is the constructors `C` of a type of
+--| `I` at the occurrence `X`, specialized: `I`'s types put in, `I`'s own
+--| occurrences restored (it may be nested itself), the parameters replaced
+--| by `Ds` (`pinst`), then `spz`.
+term spz_ctors: ind > ctx > ind > expr > nat > nat > ctors > ctors > wff;
+axiom spz_ctors_nil (D: ind) (N: ctx) (I: ind) (X: expr) (ni npi: nat): $ spz_ctors D N I X ni npi cnil cnil $;
+axiom spz_ctors_cons (D I: ind) (N NI: ctx) (X K K1 K2 K3 K4: expr) (ni npi: nat) (C C2: ctors):
+  $ sinst I z ni npi K K1 $ > $ ind_nested I NI $ > $ rst I NI K1 K2 $ > $ pinst z X K2 K3 $ > $ spz D N z K3 K4 $ >
+  $ spz_ctors D N I X ni npi C C2 $ > $ spz_ctors D N I X ni npi (ccons K C) (ccons K4 C2) $;
+--| `aux_data D I X j i`: type `j` of `D` has the type of `I`'s type `i` at
+--| `X`'s arguments and its constructors specialized.
+term aux_data: ind > ind > expr > nat > nat > wff;
+axiom aux_data_i (D I: ind) (b bi: blk) (P Pi N: ctx) (T Ti: tys) (j i npi ni mi: nat) (X F Fi: expr) (C Ci: ctors):
+  $ ind_data D b P T $ > $ ind_nested D N $ > $ ind_data I bi Pi Ti $ > $ nth_ty T j F C $ > $ nth_ty Ti i Fi Ci $ >
+  $ pinst z X Fi F $ > $ ind_arity I npi ni mi $ > $ spz_ctors D N I X ni npi Ci C $ > $ aux_data D I X j i $;
+--| `nst_ok G D j N2`: the occurrences `N2` (from auxiliary type `j` on) come
+--| in groups, one per declared type of a well-formed block `I` in order with
+--| the same arguments (`nst_group`, types `i` to `ni0`; `I.all` excludes
+--| `I`'s own auxiliary types), each with the data above.
+term nst_ok: ctx > ind > nat > ctx > wff;
+term nst_group: ctx > ind > ind > expr > nat > nat > nat > ctx > ctx > wff;
+axiom nst_ok_nil (G: ctx) (D: ind) (j: nat): $ nst_ok G D j [] $;
+axiom nst_ok_cons (G: ctx) (D I: ind) (j j2 npi ni mi ni0: nat) (X: expr) (N2 N3 NI: ctx):
+  $ spine_ty X I z npi $ > $ ind_wf G I $ > $ ind_arity I npi ni mi $ > $ ind_nested I NI $ > $ ndecl NI ni ni0 $ >
+  $ nst_group G D I X j z ni0 (X :: N2) N3 $ > $ add j ni0 j2 $ > $ nst_ok G D j2 N3 $ > $ nst_ok G D j (X :: N2) $;
+axiom nst_group_done (G: ctx) (D I: ind) (X0: expr) (j ni: nat) (N: ctx): $ nst_group G D I X0 j ni ni N N $;
+axiom nst_group_cons (G: ctx) (D I: ind) (X0 X: expr) (j i ni npi: nat) (N N2: ctx):
+  $ i < ni $ > $ spine_ty X0 I z npi $ > $ rehead (ind_ty I z) (ind_ty I i) npi X0 X $ > $ aux_data D I X j i $ >
+  $ nst_group G D I X0 (s j) (s i) ni N N2 $ > $ nst_group G D I X0 j i ni (X :: N) N2 $;
+
 --| A well-formed block, in context `G` (`l`, the block's universe, is the first
 --| type's).
-term ind_wf: ctx > ind > wff;
-axiom ind_wf_i (G G2: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (np n m k: nat) (l: lvl) (F: expr) (C: ctors):
+axiom ind_wf_i (G G2: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (np n m k n0: nat) (l: lvl) (F: expr) (C: ctors):
   $ tys_ok G D $ > $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ capp P G G2 $ >
-  $ nth_ty T z F C $ > $ isort F k l $ > $ tys_wf D n np l z G2 T $ > $ ind_wf G D $;
+  $ nth_ty T z F C $ > $ isort F k l $ > $ tys_wf D n np l z G2 T $ >
+  $ ind_nested D N $ > $ ndecl N n n0 $ > $ nst_ok G D n0 N $ > $ ind_wf G D $;
 
 -- The elimination level (`isLargeEliminator`) --------------------------------------
 
@@ -824,19 +940,35 @@ axiom rec_rhs_i (D: ind) (b: blk) (P: ctx) (T: tys) (v: lvl) (i c np n m k nf a 
 
 axiom ind_ty_ty (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (i: nat) (F R: expr) (C: ctors):
   $ tys_ok G D $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ pis P F R $ > $ ⊩ G, ind_ty D i : R $;
-axiom ind_ctor_ty (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (i c np n m: nat) (F K K2 R: expr) (C: ctors):
+axiom ind_ctor_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (i c np n m: nat) (F K K2 K3 R: expr) (C: ctors):
   $ ind_wf G D $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ nth_ctor C c K $ > $ clen P np $ > $ ntys T n m $ >
-  $ sinst D z n np K K2 $ > $ pis P K2 R $ > $ ⊩ G, ind_ctor D i c : R $;
-axiom ind_rec_ty (G: ctx) (D: ind) (i: nat) (v: lvl) (R: expr):
-  $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_ty D v i R $ > $ ⊩ G, ind_rec D i v : R $;
+  $ sinst D z n np K K2 $ > $ ind_nested D N $ > $ rst D N K2 K3 $ > $ pis P K3 R $ > $ ⊩ G, ind_ctor D i c : R $;
+axiom ind_rec_ty (G: ctx) (D: ind) (N: ctx) (i: nat) (v: lvl) (R0 R: expr):
+  $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_ty D v i R0 $ > $ ind_nested D N $ > $ rst D N R0 R $ > $ ⊩ G, ind_rec D i v : R $;
+--| `rec_rule D v i c R`: the rule's right-hand side, restored.
+term rec_rule: ind > lvl > nat > nat > expr > wff;
+axiom rec_rule_i (D: ind) (N: ctx) (v: lvl) (i c: nat) (R0 R: expr):
+  $ rec_rhs D v i c R0 $ > $ ind_nested D N $ > $ rst D N R0 R $ > $ rec_rule D v i c R $;
 --| Iota: `ind_rec D i v ps ms ns is (ind_ctor D2 i c qs fs) ≡ R ps ms ns fs`
 --| whenever the left side is well typed (which makes `D2` an instance of `D`
 --| at equivalent levels and `qs`, `is` agree with the recursor's, as in
 --| nanoda's `reduce_rec`).
 axiom ind_iota (G: ctx) (D D2: ind) (i c: nat) (v: lvl) (np n m a0 a ni k nf nq: nat) (R e3 e4 Y maj rhs0 rhs T: expr):
-  $ spine_rec e4 D i v k $ > $ spine_ctor maj D2 i c nq $ > $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_rhs D v i c R $ >
+  $ spine_rec e4 D i v k $ > $ spine_ctor maj D2 i c nq $ > $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_rule D v i c R $ >
   $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m a $ > $ nidx D i ni $ > $ add a ni k $ > $ nfields D i c nf $ >
   $ add np nf nq $ > $ rehead (ind_rec D i v) R a e3 rhs0 $ > $ drop ni e4 e3 $ > $ drop nf maj Y $ >
+  $ rehead Y rhs0 nf maj rhs $ > $ ⊩ G, e4 @ maj : T $ > $ ⊢ G, e4 @ maj ≡ rhs : T $;
+--| Iota of the recursor of an auxiliary type `i` (the occurrence `I Ds`) on
+--| `I`'s constructor `c`: `ind_rec D i v ps ms ns is (ind_ctor I2 ii c qs fs)
+--| ≡ R ps ms ns fs` when well typed (which makes `I2` an instance of `I` and
+--| `qs` the occurrence's arguments at `ps`); the fields are the last `nf`
+--| arguments of the major premise, as in `inductive_reduce_rec`.
+axiom ind_iota_nst (G: ctx) (D I I2: ind) (N: ctx) (i ii c: nat) (v: lvl) (np n m a0 a ni k nf nq npi: nat)
+    (R e3 e4 X Y maj rhs0 rhs T: expr):
+  $ spine_rec e4 D i v k $ > $ spine_ctor maj I2 ii c nq $ > $ ind_wf G D $ > $ elim_ok G D v $ >
+  $ ind_nested D N $ > $ aux_of D N i X $ > $ spine_ty X I ii npi $ > $ rec_rule D v i c R $ >
+  $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m a $ > $ nidx D i ni $ > $ add a ni k $ > $ nfields D i c nf $ >
+  $ add npi nf nq $ > $ rehead (ind_rec D i v) R a e3 rhs0 $ > $ drop ni e4 e3 $ > $ drop nf maj Y $ >
   $ rehead Y rhs0 nf maj rhs $ > $ ⊩ G, e4 @ maj : T $ > $ ⊢ G, e4 @ maj ≡ rhs : T $;
 
 -- Structures: projections and eta ------------------------------------------------------
@@ -867,22 +999,16 @@ axiom fprops_z (D: ind) (n np: nat) (Ctx: ctx) (d: nat) (K: expr): $ fprops D n 
 axiom fprops_s (D: ind) (n np: nat) (Ctx: ctx) (d cnt k: nat) (A A2 B: expr):
   $ add d np k $ > $ sinst D z n k A A2 $ > $ ⊩ Ctx, A2 : srt lz $ > $ fprops D n np (A2 :: Ctx) (s d) cnt B $ >
   $ fprops D n np Ctx d (s cnt) (Π A. B) $;
---| `pinst i S A R`: `S = ind_ty D j @ p0 .. p(np-1)`; `R` is `A` (under `i`
---| field binders over the parameters) with the parameters put in, outermost
---| first (`p0` at `# (i + np - 1)`, then `p1` at `# (i + np - 2)`, ...: each
---| substituted term is lifted over the binders below it). `qinst b e k j A R`:
---| `R` is `A` with the `k` remaining fields `j`, `j+1`, ... (field `j` at
---| `# (k-1)`) replaced by the projections of `e`.
-term pinst: nat > expr > expr > expr > wff;
-axiom pinst_head (i: nat) (D: ind) (j: nat) (A: expr): $ pinst i (ind_ty D j) A A $;
-axiom pinst_app (i: nat) (S a A A1 R: expr): $ pinst (s i) S A A1 $ > $ inst i A1 a R $ > $ pinst i (S @ a) A R $;
+--| `qinst b e k j A R`: `R` is `A` with the `k` remaining fields `j`,
+--| `j+1`, ... (field `j` at `# (k-1)`) replaced by the projections of `e`.
 term qinst: blk > expr > nat > nat > expr > expr > wff;
 axiom qinst_z (b: blk) (e A: expr) (j: nat): $ qinst b e z j A A $;
 axiom qinst_s (b: blk) (e A A1 R: expr) (k j: nat):
   $ inst k A (proj b j e) A1 $ > $ qinst b e k (s j) A1 R $ > $ qinst b e (s k) j A R $;
-axiom proj_ty (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (j i np: nat) (e e2 S A A1 R: expr):
+axiom proj_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (j i np: nat) (e e2 S A A1 A2 R: expr):
   $ ⊢ G, e ≡ e2 : S $ > $ spine_ty S D j np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ struct_like D j $ >
-  $ proj_ok G D j i $ > $ clen P np $ > $ field_ty D j i A $ > $ pinst i S A A1 $ > $ qinst b e i z A1 R $ >
+  $ proj_ok G D j i $ > $ clen P np $ > $ field_ty D j i A $ > $ ind_nested D N $ > $ rst D N A A2 $ > $ pinst i S A2 A1 $ >
+  $ qinst b e i z A1 R $ >
   $ ⊢ G, proj b i e ≡ proj b i e2 : R $;
 --| `proj b i (ind_ctor D2 j z qs fs) ≡ fs[i]` when well typed.
 axiom proj_mk (G: ctx) (D2: ind) (b: blk) (j i np n m nf nq ii: nat) (M f T: expr):
@@ -928,8 +1054,9 @@ axiom eeqv_ind_ctor (D D2: ind) (i c: nat): $ ind_eqv D D2 $ > $ eeqv (ind_ctor 
 axiom eeqv_ind_rec (D D2: ind) (i: nat) (v v2: lvl):
   $ ind_eqv D D2 $ > $ v ≈ v2 $ > $ eeqv (ind_rec D i v) (ind_rec D2 i v2) $;
 axiom eeqv_proj (b: blk) (i: nat) (e e2: expr): $ eeqv e e2 $ > $ eeqv (proj b i e) (proj b i e2) $;
-axiom ind_eqv_i (D D2: ind) (b: blk) (P P2: ctx) (T T2: tys):
-  $ ind_data D b P T $ > $ ind_data D2 b P2 T2 $ > $ ceqv P P2 $ > $ teqv T T2 $ > $ ind_eqv D D2 $;
+axiom ind_eqv_i (D D2: ind) (b: blk) (P P2 N N2: ctx) (T T2: tys):
+  $ ind_data D b P T $ > $ ind_data D2 b P2 T2 $ > $ ceqv P P2 $ > $ teqv T T2 $ >
+  $ ind_nested D N $ > $ ind_nested D2 N2 $ > $ ceqv N N2 $ > $ ind_eqv D D2 $;
 axiom ceqv_nil: $ ceqv [] [] $;
 axiom ceqv_cons (A A2: expr) (G G2: ctx): $ eeqv A A2 $ > $ ceqv G G2 $ > $ ceqv (A :: G) (A2 :: G2) $;
 axiom teqv_nil: $ teqv tnil tnil $;
