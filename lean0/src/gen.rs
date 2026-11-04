@@ -162,7 +162,7 @@ impl Gen {
     pub fn new(spec_src: &str) -> R<Self> {
         let mut env = Env::new();
         mm0kit::parse::parse_into(&mut env, spec_src).map_err(|e| format!("spec: {}", e.0))?;
-        let lean = Lean::new(&env);
+        let lean = Lean::new(&mut env);
         let bins = Bins::new(&env);
         let mut terms = Names::default();
         let mut thms = Names::default();
@@ -993,7 +993,7 @@ fn quot_spec<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util:
     let us2: Vec<E> = (0..n).map(|i| g.env.var(1 + (n + i) as u16)).collect();
     // the spec's typing axiom at `G, us`: `ty G (c us) T`
     let ty_th = g.env.thm_id(ty_ax);
-    let concl = g.env.thms[ty_th.0 as usize].concl;
+    let concl = g.env.plain_concl(ty_th);
     let args: Vec<E> = std::iter::once(gv).chain(us.iter().copied()).collect();
     let stmt = g.env.subst(concl, &args);
     let Some((_, [_, c1, spec_t])) = g.env.head(stmt) else { return Err(format!("{ty_ax}: not a typing")) };

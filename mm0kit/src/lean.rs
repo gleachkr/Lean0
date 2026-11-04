@@ -68,6 +68,8 @@ pub struct Lean {
     /// The spec's `proj` term (`proj b i e`), if the spec has it.
     pub proj_id: Option<TId>,
     nats: Vec<E>,
+    /// The spec's numerals `n1`..`n9` (definitions of `s^k z`), by their term.
+    numerals: HashMap<TId, usize>,
     /// `closed k (c us)` lemma for each constant (by its head term), taking `k` then the levels.
     pub const_closed: HashMap<TId, ThId>,
     /// The structural `closed`, `lift` and `inst` axioms of `proj`.
@@ -84,7 +86,9 @@ pub struct Lean {
 }
 
 impl Lean {
-    pub fn new(env: &Env) -> Self {
+    /// The spec's numerals become abbreviations (`Env::set_abbreviations`): proofs only see
+    /// `s` chains, as `nat` builds them.
+    pub fn new(env: &mut Env) -> Self {
         let t = |n: &str| env.term_id(n);
         let ids = Ids {
             z: t("z"),
@@ -113,16 +117,20 @@ impl Lean {
                 const_closed.insert(t(term), env.thm_id(ax));
             }
         }
+        let numerals: HashMap<TId, usize> =
+            (1..=9).map(|k| (format!("n{k}"), k)).filter(|(n, _)| env.has_term(n)).map(|(n, k)| (t(&n), k)).collect();
         let proj_id = env.has_term("proj").then(|| t("proj"));
         let proj_rules = proj_id.filter(|_| env.has_thm("closed_proj")).map(|_| ProjRules {
             closed: env.thm_id("closed_proj"),
             lift: env.thm_id("lift_proj"),
             inst: env.thm_id("inst_proj"),
         });
+        env.set_abbreviations(&numerals.keys().copied().collect::<Vec<_>>());
         Lean {
             ids,
             proj_id,
             nats: Vec::new(),
+            numerals,
             const_closed,
             proj_rules,
             fvb_memo: HashMap::default(),
@@ -183,6 +191,7 @@ impl Lean {
                     n += 1;
                     e = *p
                 }
+                (t, []) => return Some(n + self.numerals.get(&t)?),
                 _ => return None,
             }
         }
@@ -333,7 +342,7 @@ impl Lean {
 
     /// `le i k` where `k` is an arbitrary nat expression `s^m k0`: needs `i <= m`.
     pub fn le_e(&mut self, env: &mut Env, i: usize, k: E) -> Result<P> {
-        if let Some(m) = self.numeral(env, k) {
+        if let Some(m) = self.nat_val(env, k) {
             return self.le(env, i, m)
         }
         // peel `i` successors off `k`
@@ -370,18 +379,6 @@ impl Lean {
             p = env.thm_n("add_s", &[ie, a, b], &[p])?;
         }
         fact(env, &format!("{FACT_PREFIX}add_{i}_{n}"), p, n + 1)
-    }
-
-    /// `n` if `k` is the numeral `s^n z`.
-    fn numeral(&self, env: &Env, mut k: E) -> Option<usize> {
-        let mut n = 0;
-        loop {
-            match env.head(k)? {
-                (t, [p]) if t == self.ids.s => (k, n) = (*p, n + 1),
-                (t, []) if t == self.ids.z => return Some(n),
-                _ => return None,
-            }
-        }
     }
 
     // ------------------------------------------------------------------ closed / lift / inst

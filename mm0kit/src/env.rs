@@ -160,6 +160,9 @@ pub struct Env {
     /// Keys of `split_lemmas` and `sigs` added since the last `compact_nodes`.
     recent_lemmas: Vec<(E, u32)>,
     recent_sigs: Vec<Sig>,
+    /// For each theorem whose conclusion mentions an abbreviation (`set_abbreviations`), the
+    /// conclusion with the abbreviations unfolded.
+    plain_concls: Vec<Option<E>>,
 }
 
 /// A lemma signature: argument sorts and hypotheses.
@@ -446,7 +449,44 @@ impl Env {
             })?);
         }
         let concl = self.subst(pat_concl, args);
-        Ok(self.mk_pf(Pf::Thm { thm, args: args.into(), hyps: hs.into(), concl }, concl))
+        let p = self.mk_pf(Pf::Thm { thm, args: args.into(), hyps: hs.into(), concl }, concl);
+        let plain = self.plain_concl(thm);
+        if plain == pat_concl {
+            return Ok(p)
+        }
+        let target = self.subst(plain, args);
+        self.convert(p, target)
+    }
+
+    /// A theorem's conclusion with the abbreviations unfolded, as `thm` proves it.
+    pub fn plain_concl(&self, thm: ThId) -> E {
+        self.plain_concls.get(thm.0 as usize).copied().flatten().unwrap_or(self.thms[thm.0 as usize].concl)
+    }
+
+    /// Treat the definitions `defs` as abbreviations (the spec's numerals): a theorem declared
+    /// so far whose conclusion mentions one is applied with its conclusion unfolded (`thm`
+    /// adds the conversion), so that proofs work with the unfolded forms only.
+    pub fn set_abbreviations(&mut self, defs: &[TId]) {
+        self.plain_concls = (0..self.thms.len())
+            .map(|i| {
+                let c = self.thms[i].concl;
+                let c2 = self.expand(c, defs);
+                (c2 != c).then_some(c2)
+            })
+            .collect();
+    }
+
+    /// `e` with the definitions `defs` unfolded (a statement: a small tree).
+    fn expand(&mut self, e: E, defs: &[TId]) -> E {
+        let Node::App(t, xs) = self.node(e) else { return e };
+        let xs: Vec<E> = xs.to_vec().into_iter().map(|x| self.expand(x, defs)).collect();
+        let e2 = self.app(t, &xs);
+        if defs.contains(&t) {
+            let u = self.unfold(e2).unwrap();
+            self.expand(u, defs)
+        } else {
+            e2
+        }
     }
 
     pub fn thm_n(&mut self, name: &str, args: &[E], hyps: &[P]) -> Result<P> {

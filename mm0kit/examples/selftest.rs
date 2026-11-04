@@ -11,7 +11,7 @@ fn main() {
     let src = std::fs::read_to_string(&args[1]).unwrap();
     let mut env = Env::new();
     mm0kit::parse::parse_into(&mut env, &src).unwrap();
-    let mut lean = Lean::new(&env);
+    let mut lean = Lean::new(&mut env);
     let mut lv = Levels::new();
     let n_spec = env.order.len();
     let (ctx, lvl) = (env.sort_names["ctx"], env.sort_names["lvl"]);

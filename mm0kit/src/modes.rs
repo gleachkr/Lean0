@@ -569,6 +569,8 @@ fn nat_term(h: &mut Horn, env: &mut Env, ids: &Ids, e: E) -> Option<Nat> {
                 n += 1;
             }
             Node::App(t, _) if t == ids.z => return Some((None, n)),
+            // a numeral `n3`
+            Node::App(t, _) if env.is_def(t) => e = env.unfold(e)?,
             _ => return None,
         }
     }
