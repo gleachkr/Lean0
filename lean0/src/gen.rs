@@ -652,7 +652,7 @@ impl Gen {
                 if !quot_spec(&mut el, &sig, info.ty)? {
                     opaque(&mut el, &sig, info.ty, "quotient primitive")?;
                     if sig.lean_name == "Quot.lift" || sig.lean_name == "Quot.ind" {
-                        quot_axiom(&mut el, &sig)?;
+                        quot_axiom(&mut el, &sig, info.ty)?;
                     }
                 }
             }
@@ -838,9 +838,10 @@ pub(crate) fn apps(g: &mut Gen, f: E, args: &[E]) -> E {
     args.iter().fold(f, |f, &a| g.lean.app(&mut g.env, f, a))
 }
 
-/// An opaque constant (`term`), with its well-formedness theorem and `constDF` and closedness
-/// axioms. Used for Lean axioms, inductive types, constructors, recursors, quotient primitives
-/// and opaque definitions.
+/// An opaque constant: its own atom (`term c_atom: atom`) and the public definition
+/// `def c (us): expr = $ cst c_atom (lcons u1 ... lnil) $` (audit §10), with its
+/// well-formedness and closedness theorems and its `constDF` axiom. Used for Lean axioms,
+/// inductive types, constructors, recursors, quotient primitives and opaque definitions.
 fn opaque<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::ExprPtr<'t>, what: &str) -> R<TId> {
     let (st, pt) = el.infer(ty)?;
     let (level, pt) = el.as_sort(pt, st)?;
@@ -851,7 +852,22 @@ fn opaque<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::Ex
     let lean_name = &sig.lean_name;
     let expr_s = g.env.sort_names["expr"];
     let lvl_args = g.lvl_args(&sig.lvl_names);
-    let term = add_term(&mut g.env, &sig.cname, lvl_args, expr_s, TermKind::Term, &format!("Lean {what} `{lean_name}`."))?;
+    let atom_s = g.env.sort_names["atom"];
+    let atom_name = g.terms.fresh(&format!("{}_atom", sig.cname));
+    let atom = add_term(&mut g.env, &atom_name, vec![], atom_s, TermKind::Term, &format!("The atom of Lean {what} `{lean_name}`."))?;
+    let atom = g.env.app(atom, &[]);
+    // the level list at the given levels
+    let lvl_list = |g: &mut Gen, us: &[E]| {
+        let mut ls = g.env.app_n("lnil", &[]);
+        for &l in us.iter().rev() {
+            ls = g.env.app_n("lcons", &[l, ls]);
+        }
+        ls
+    };
+    let body_lvls: Vec<E> = (0..n).map(|i| g.env.var(i as u16)).collect();
+    let ls = lvl_list(g, &body_lvls);
+    let body = g.env.app_n("cst", &[atom, ls]);
+    let term = add_term(&mut g.env, &sig.cname, lvl_args, expr_s, TermKind::Def { body, public_body: true }, &format!("Lean {what} `{lean_name}`."))?;
     // theorem c_wf (G) (us): ty G T (srt u)
     let gv = g.env.var(0);
     let su = g.lean.srt(&mut g.env, u);
@@ -875,12 +891,19 @@ fn opaque<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::Ex
     let df_concl = g.lean.deq(&mut g.env, gv, c1, c2, t);
     let df_name = g.thms.fresh(&format!("{}_df", sig.cname));
     let df = add_thm(&mut g.env, &df_name, df_args, hyps, df_concl, true, false, None, &format!("`{lean_name}` has its type, at any equivalent levels (`constDF`)."))?;
-    // axiom c_closed (k: nat) (us): closed k (c us)
+    // theorem c_closed (k: nat) (us): closed k (c us), by `closed_cst`
     let kv = g.env.var(0);
     let cl_concl = g.env.app_n("closed", &[kv, c1]);
     let cl_args = g.k_args(&sig.lvl_names);
     let cl_name = g.thms.fresh(&format!("{}_closed", sig.cname));
-    let cl = add_thm(&mut g.env, &cl_name, cl_args, vec![], cl_concl, true, false, None, &format!("`{lean_name}` has no loose bound variables."))?;
+    let pc = if g.replay {
+        None
+    } else {
+        let ls = lvl_list(g, &us);
+        let p = g.env.thm_n("closed_cst", &[kv, atom, ls], &[]).map_err(|e| e.0)?;
+        Some(g.env.convert(p, cl_concl).map_err(|e| e.0)?)
+    };
+    let cl = add_thm(&mut g.env, &cl_name, cl_args, vec![], cl_concl, false, false, pc, &format!("`{lean_name}` has no loose bound variables."))?;
     g.lean.const_closed.insert(term, cl);
     g.consts.insert(lean_name.clone(), ConstInfo { term, kind: ConstKind::Opaque, nlevels: n, ty_thm: df });
     Ok(term)
@@ -888,10 +911,12 @@ fn opaque<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::Ex
 
 /// Iota rules of a recursor: for each constructor `c`, a definition `R_c` holding the rule's
 /// right-hand side and the axiom
-/// `ty G (rec ps ms mins is (c cps fs)) T > deq G (rec ps ms mins is (c cps fs)) (R_c ps ms mins fs) T`.
-/// The constructor's parameters, levels and the indices are separate variables, as in nanoda,
-/// which does not compare them with the recursor's; the typing premise forces them to agree.
+/// `sty G rec RT (rec ps ms mins is (c cps fs)) T > deq G (rec ps ms mins is (c cps fs)) (R_c ps ms mins fs) T`
+/// (`RT` the recursor's type). The constructor's parameters, levels and the indices are
+/// separate variables, as in nanoda, which does not compare them with the recursor's; the
+/// typing premise forces them to agree.
 fn recursor_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &nanoda_lib::env::RecursorData<'t>, rhss: &[E]) -> R<()> {
+    let rty = el.tr(rd.info.ty)?;
     for (rule, &rhs) in rd.rec_rules.iter().zip(rhss) {
         let ctor_lean = el.g.lean_name(el.tc, rule.ctor_name);
         let Some(cd) = el.tc.env.get_constructor(&rule.ctor_name).cloned() else { return Err(format!("unknown constructor {ctor_lean}")) };
@@ -928,7 +953,7 @@ fn recursor_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &nanoda_lib
         let lhs = apps(g, r, &[ps.clone(), ms.clone(), mins.clone(), is, vec![major]].concat());
         let d = g.env.app(def, &us);
         let rhs = apps(g, d, &[ps, ms, mins, fs].concat());
-        let hyp = g.env.app_n("ty", &[gv, lhs, tv]);
+        let hyp = g.env.app_n("sty", &[gv, r, rty, lhs, tv]);
         let concl = g.lean.deq(&mut g.env, gv, lhs, rhs, tv);
         let name = g.thms.fresh(&format!("{def_name}_iota"));
         let th = add_thm(&mut g.env, &name, v.args, vec![hyp], concl, true, false, None,
@@ -938,8 +963,10 @@ fn recursor_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &nanoda_lib
     Ok(())
 }
 
-/// `Quot.lift f h (Quot.mk r a) ≡ f a` and `Quot.ind f (Quot.mk r a) ≡ f a`, under a typing premise.
-fn quot_axiom<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig) -> R<()> {
+/// `Quot.lift f h (Quot.mk r a) ≡ f a` and `Quot.ind f (Quot.mk r a) ≡ f a`, under the premise
+/// that the arguments have their binders' types in the primitive's type `ty` (`sty`).
+fn quot_axiom<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::ExprPtr<'t>) -> R<()> {
+    let qty = el.tr(ty)?;
     let g = &mut *el.g;
     let Some(mk) = g.consts.get("Quot.mk").cloned() else { return Err("Quot.mk must precede Quot.lift and Quot.ind".into()) };
     let nargs = if sig.lean_name == "Quot.lift" { 5 } else { 4 };
@@ -956,7 +983,7 @@ fn quot_axiom<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig) -> R<()> {
     let h = g.const_term(&sig.lean_name, &us).ok_or("quotient term")?;
     let lhs = apps(g, h, &[xs.clone(), vec![q]].concat());
     let rhs = g.lean.app(&mut g.env, xs[3], a);
-    let hyp = g.env.app_n("ty", &[gv, lhs, tv]);
+    let hyp = g.env.app_n("sty", &[gv, h, qty, lhs, tv]);
     let concl = g.lean.deq(&mut g.env, gv, lhs, rhs, tv);
     let name = g.thms.fresh(&format!("{}_mk", sig.cname));
     let th = add_thm(&mut g.env, &name, v.args, vec![hyp], concl, true, false, None, &format!("Reduction of `{}` on `Quot.mk`.", sig.lean_name))?;

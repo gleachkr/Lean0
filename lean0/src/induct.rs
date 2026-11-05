@@ -977,6 +977,9 @@ pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &Recurs
         }
     }
     let rhss: Vec<E> = rd.rec_rules.iter().map(|r| el.tr(r.val)).collect::<R<_>>()?;
+    // the recursor's type at its levels `us` (variables `1..`, after `G`), where the iota
+    // lemmas' `sty` premise starts
+    let rty = el.tr(rd.info.ty)?;
     for (rule, &rhs) in rd.rec_rules.iter().zip(&rhss) {
         let ctor_lean = el.g.lean_name(el.tc, rule.ctor_name);
         let Some(cd) = el.tc.env.get_constructor(&rule.ctor_name).cloned() else { return Err(format!("unknown constructor {ctor_lean}")) };
@@ -1027,7 +1030,7 @@ pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &Recurs
         let lhs = apps(g, r, &[ps.clone(), ms.clone(), mins.clone(), is, vec![major]].concat());
         let dv = g.env.app(def, &us);
         let rhs = apps(g, dv, &[ps, ms, mins, fs].concat());
-        let hyp = g.env.app_n("ty", &[gv, lhs, tv]);
+        let hyp = g.env.app_n("sty", &[gv, r, rty, lhs, tv]);
         let concl = g.lean.deq(&mut g.env, gv, lhs, rhs, tv);
         let name = g.thms.fresh(&format!("{def_name}_iota"));
         let rule_ax = if aux { "ind_iota_nst" } else { "ind_iota" };

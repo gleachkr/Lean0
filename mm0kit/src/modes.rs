@@ -139,8 +139,12 @@ pub const TABLE: &[(&str, Kind, &str)] = &[
     ("nonrec", Kind::Check, ""),
     ("eta_ok", Kind::Check, ""),
     ("projs", Kind::Fn, "++++-"),
+    // typed application spines: the head given up to its head constructor (a head that is
+    // itself an application would make `sty_nil` and `sty_app` overlap)
+    ("sty", Kind::Fn, "+*++-"),
     // level equivalence of expressions
     ("eeqv", Kind::Check, ""),
+    ("lseqv", Kind::Check, ""),
     ("ind_eqv", Kind::Check, ""),
     ("ceqv", Kind::Check, ""),
     ("teqv", Kind::Check, ""),

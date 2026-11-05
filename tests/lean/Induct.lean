@@ -41,7 +41,7 @@ theorem ev_rec_ex : Ev.rec (motive_1 := fun _ => Nat) (motive_2 := fun _ => Nat)
     (fun _ ih => ih + 1) (Ev.succ (Od.succ Ev.zero)) = 2 := rfl
 
 -- An opaque constant at the block's level in a structure's field: the structure's lemmas need
--- the constant's level congruence (`Opq_eeqv`).
+-- the constant's level congruence (`eeqv_cst`, the constant being `cst Opq_atom ...`).
 axiom Opq : Type u
 structure OpqS where
   x : Opq.{u}

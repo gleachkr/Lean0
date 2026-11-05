@@ -1551,6 +1551,25 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         self.cast(pf, ft, tcur)
     }
 
+    /// `sty G h A (h args) T` for a head `h` with type `A`, a `Π` telescope over `args`
+    /// as written (a recursor's or a quotient primitive's type): each argument typed at its
+    /// binder's type, `T` the rest of `A`. The premise of the reduction rules (audit §4).
+    fn sty_spine(&mut self, h: ExprPtr<'t>, args: &[ExprPtr<'t>]) -> R<(ExprPtr<'t>, P)> {
+        let (mut ty, _) = self.infer(h)?;
+        let (g, he, te) = (self.ctx(), self.tr(h)?, self.tr(ty)?);
+        let mut ps = mm(self.g.lean.sty_nil(&mut self.g.env, g, he, te))?;
+        for &a in args {
+            let Expr::Pi { binder_type, body, .. } = self.read(ty) else {
+                return Err("reduction rule: the head's type is not a telescope over its arguments".into())
+            };
+            let (at, pa) = self.infer(a)?;
+            let pa = self.cast(pa, at, binder_type)?;
+            ps = mm(self.g.lean.sty_app(&mut self.g.env, ps, pa))?;
+            ty = self.tc.ctx.inst(body, &[a]);
+        }
+        Ok((ty, ps))
+    }
+
     /// `rec … major rest ≡ R_c … fields rest` (or the `Quot.lift`/`Quot.ind` rule): first the
     /// major premise is replaced by the constructor application nanoda found (by reduction,
     /// K or structure eta, all justified by asking nanoda `major ≡ major'`), then the axiom.
@@ -1606,7 +1625,7 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         } else {
             self.app_cong(lhs, lhs2)?.1
         };
-        let (tl2, pl2) = self.infer(lhs2)?;
+        let (tl2, pl2) = self.sty_spine(f, &args2)?;
         // the axiom's arguments
         let g = self.ctx();
         let mut a = vec![g];

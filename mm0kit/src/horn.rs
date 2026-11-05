@@ -372,16 +372,16 @@ impl Horn {
                 if let Some(&p) = self.facts.get(&g) {
                     return Ok(Pending::Done(p))
                 }
-            } else {
-                // a fact may determine the goal's metavariables (`deq G e e2 ?S`)
-                let facts: Vec<(E, P)> = self.facts.iter().filter(|(f, _)| env.head(**f).is_some_and(|(t, _)| t == head)).map(|(&f, &p)| (f, p)).collect();
-                for (f, p) in facts {
-                    let mark = self.trail.len();
-                    if self.unify(env, goal, f) {
-                        return Ok(Pending::Done(p))
-                    }
-                    self.undo(mark);
+            }
+            // a fact may determine the goal's metavariables (`deq G e e2 ?S`), or match a
+            // ground goal only up to unfolding (a numeral `n1` against `s z`)
+            let facts: Vec<(E, P)> = self.facts.iter().filter(|(f, _)| env.head(**f).is_some_and(|(t, _)| t == head)).map(|(&f, &p)| (f, p)).collect();
+            for (f, p) in facts {
+                let mark = self.trail.len();
+                if self.unify(env, goal, f) {
+                    return Ok(Pending::Done(p))
                 }
+                self.undo(mark);
             }
         }
         let finish = |this: &mut Self, env: &mut Env, r: Result<P>| match r {

@@ -32,8 +32,8 @@ delimiter $ ( ) , . # $;
 --|   schema once the certificate proves the block legal (`ind_wf`).
 --|   A nested block is the mutual block the kernel checks in its place,
 --|   with the nested occurrences restored in what it states (`ind_mkn`).
---|   Axioms and opaques are MM0 `term`s, each with two generated axioms:
---|   its `constDF` instance and `closed k (c us)` for every `k`.
+--|   Axioms and opaques are atoms at their levels (`cst`), each with one
+--|   generated axiom, its `constDF` instance.
 --| * Universe parameters are MM0 variables of sort `lvl`, so the `l.WF U`
 --|   side conditions are vacuous and are dropped.
 --| * Meta-level operations (liftN, inst, Lookup) are syntax-directed
@@ -173,6 +173,14 @@ notation lam (A e: expr): expr = ($λ$:20) A ($.$:0) e;
 term pi: expr > expr > expr;
 notation pi (A B: expr): expr = ($\Pi$:20) A ($.$:0) B;
 notation pi (A B: expr): expr = ($Π$:20) A ($.$:0) B;
+--| An opaque constant (a Lean axiom, an opaque definition, a constant left to
+--| the generated axioms): an atom, which a certificate declares as
+--| `term X_atom: atom` and uses in exactly one definition
+--| `def X (us): expr = $ cst X_atom (lcons u1 ... lnil) $`, at its universe
+--| levels. Nothing in the spec tells two atoms apart; that each constant has
+--| its own is checked by `lean0 check` (audit §8).
+strict free sort atom;
+term cst: atom > lvls > expr;
 
 --| `closed k e`: every loose bound variable of `e` is below `k`
 --| (`ClosedN e k`, VExpr.lean:99-104).
@@ -185,6 +193,7 @@ axiom closed_lam (k: nat) (A b: expr):
   $ closed k A $ > $ closed (s k) b $ > $ closed k (λ A. b) $;
 axiom closed_pi (k: nat) (A b: expr):
   $ closed k A $ > $ closed (s k) b $ > $ closed k (Π A. b) $;
+axiom closed_cst (k: nat) (a: atom) (S: lvls): $ closed k (cst a S) $;
 
 --| `lift n k e e2`: `e2 = liftN n e k` (VExpr.lean:17, 38-44).
 term lift: nat > nat > expr > expr > wff;
@@ -852,6 +861,21 @@ def ty (G: ctx) (e A: expr): wff = $ ⊢ G, e ≡ e : A $;
 notation ty (G: ctx) (e A: expr): wff = ($||-$:0) G ($,$:0) e ($:$:0) A;
 notation ty (G: ctx) (e A: expr): wff = ($⊩$:0) G ($,$:0) e ($:$:0) A;
 
+-- Typed application spines -------------------------------------------------
+
+--| `sty G h A e T`: `e` is the head `h` applied to arguments, each typed at
+--| its binder's type in the telescope `A` (instantiated with the arguments
+--| before it, with no conversion between the steps), and `T` is what is left
+--| of `A` after the last one. The reduction rules of the recursors and of the
+--| quotient primitives (Part III) take this premise, with the head's own type
+--| as `A`, rather than a typing of their whole left side: that the arguments
+--| are in the head's domain is then stated, not read off a derivation by
+--| inversion (audit §4).
+term sty: ctx > expr > expr > expr > expr > wff;
+axiom sty_nil (G: ctx) (h A: expr): $ sty G h A h A $;
+axiom sty_app (G: ctx) (h A f a B C C2: expr):
+  $ sty G h A f (Π B. C) $ > $ ⊩ G, a : B $ > $ inst 0 C a C2 $ > $ sty G h A (f @ a) C2 $;
+
 -- Level equivalence of expressions -----------------------------------------
 
 --| `eeqv e e2`: `e` and `e2` agree except at levels, which are equivalent.
@@ -870,6 +894,11 @@ axiom eeqv_app (f a f2 a2: expr): $ eeqv f f2 $ > $ eeqv a a2 $ > $ eeqv (f @ a)
 axiom eeqv_lam (A b A2 b2: expr): $ eeqv A A2 $ > $ eeqv b b2 $ > $ eeqv (λ A. b) (λ A2. b2) $;
 axiom eeqv_pi (A b A2 b2: expr): $ eeqv A A2 $ > $ eeqv b b2 $ > $ eeqv (Π A. b) (Π A2. b2) $;
 axiom eeqv_lit (n: bin): $ eeqv (lit n) (lit n) $;
+--| `lseqv S S2`: the level lists are equivalent entry by entry.
+term lseqv: lvls > lvls > wff;
+axiom lseqv_nil: $ lseqv lnil lnil $;
+axiom lseqv_cons (l l2: lvl) (S S2: lvls): $ l ≈ l2 $ > $ lseqv S S2 $ > $ lseqv (lcons l S) (lcons l2 S2) $;
+axiom eeqv_cst (a: atom) (S S2: lvls): $ lseqv S S2 $ > $ eeqv (cst a S) (cst a S2) $;
 axiom eeqv_ind_ty (D D2: ind) (i: nat): $ ind_eqv D D2 $ > $ eeqv (ind_ty D i) (ind_ty D2 i) $;
 axiom eeqv_ind_ctor (D D2: ind) (i c: nat): $ ind_eqv D D2 $ > $ eeqv (ind_ctor D i c) (ind_ctor D2 i c) $;
 axiom eeqv_ind_rec (D D2: ind) (i: nat) (v v2: lvl):
@@ -1120,6 +1149,8 @@ term dec_eqs: ctx > expr > expr > expr > expr > expr > expr > expr > expr > expr
 axiom dec_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF: expr):
   $ closed 0 B $ > $ closed 0 t $ > $ closed 0 u $ > $ closed 0 Not $ > $ closed 0 Dec $ >
   $ closed 0 dite $ > $ closed 0 T $ > $ closed 0 R $ > $ closed 0 ofT $ > $ closed 0 ofF $ >
+  $ ⊩ G, ofT : Π (srt lz). Π (T @ #0 @ t). #1 $ >
+  $ ⊩ G, ofF : Π (srt lz). Π (T @ #0 @ u). Not @ #1 $ >
   $ ⊢ (Π (Not @ #2). nat_ty) :: (Π #1. nat_ty) :: (T @ #0 @ t) :: srt lz :: G,
       dite @ #3 @ (R @ #3 @ t @ #2) @ #1 @ #0 ≡ #1 @ (ofT @ #3 @ #2) : nat_ty $ >
   $ ⊢ (Π (Not @ #2). nat_ty) :: (Π #1. nat_ty) :: (T @ #0 @ u) :: srt lz :: G,
@@ -1144,6 +1175,8 @@ term natle_dec: ctx > expr > expr > expr > expr > expr > expr > expr > expr > ex
 axiom natle_dec_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf: expr):
   $ dec_eqs G B t u Not Dec dite T R ofT ofF $ > $ ble_eqs G ble B t u $ >
   $ closed 0 leN $ > $ closed 0 dleN $ > $ closed 0 pf $ >
+  $ ⊩ G, leN : Π nat_ty. Π nat_ty. srt lz $ >
+  $ ⊩ G, pf : Π nat_ty. Π nat_ty. T @ (leN @ #1 @ #0) @ (ble @ #1 @ #0) $ >
   $ ⊢ nat_ty :: nat_ty :: G,
       dleN @ #1 @ #0 ≡ R @ (leN @ #1 @ #0) @ (ble @ #1 @ #0) @ (pf @ #1 @ #0) : Dec @ (leN @ #1 @ #0) $ >
   $ natle_dec G B t u Not Dec dite T R ofT ofF leN dleN ble pf $;
@@ -1153,6 +1186,8 @@ term nateq_dec: ctx > expr > expr > expr > expr > expr > expr > expr > expr > ex
 axiom nateq_dec_i (G: ctx) (B t u Not Dec dite T R ofT ofF eqN deqN beq pq: expr):
   $ dec_eqs G B t u Not Dec dite T R ofT ofF $ > $ beq_eqs G beq B t u $ >
   $ closed 0 eqN $ > $ closed 0 deqN $ > $ closed 0 pq $ >
+  $ ⊩ G, eqN : Π nat_ty. Π nat_ty. srt lz $ >
+  $ ⊩ G, pq : Π nat_ty. Π nat_ty. T @ (eqN @ #1 @ #0) @ (beq @ #1 @ #0) $ >
   $ ⊢ nat_ty :: nat_ty :: G,
       deqN @ #1 @ #0 ≡ R @ (eqN @ #1 @ #0) @ (beq @ #1 @ #0) @ (pq @ #1 @ #0) : Dec @ (eqN @ #1 @ #0) $ >
   $ nateq_dec G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $;
@@ -1185,6 +1220,10 @@ axiom div_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f
   $ natle_dec G B t u Not Dec dite T R ofT ofF leN dleN ble pf $ > $ sub_eqs G sub p $ >
   $ closed 0 f $ > $ closed 0 go $ > $ closed 0 pfs $ > $ closed 0 lem $ >
   $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
+  $ ⊩ G, go : Π nat_ty. Π (leN @ lit1 @ #0). Π nat_ty. Π nat_ty. Π (leN @ (nat_succ @ #0) @ #1). nat_ty $ >
+  $ ⊩ G, pfs : Π nat_ty. leN @ (nat_succ @ #0) @ (nat_succ @ #0) $ >
+  $ ⊩ G, lem : Π nat_ty. Π nat_ty. Π nat_ty. Π (leN @ lit1 @ #1). Π (leN @ #2 @ #3).
+      Π (leN @ (nat_succ @ #4) @ (nat_succ @ #2)). leN @ (nat_succ @ (sub @ #5 @ #4)) @ #3 $ >
   $ ⊢ nat_ty :: nat_ty :: G,
       f @ #1 @ #0 ≡ dite @ (leN @ lit1 @ #0) @ (dleN @ lit1 @ #0)
         @ (λ (leN @ lit1 @ #0). go @ #1 @ #0 @ (nat_succ @ #2) @ #2 @ (pfs @ #2))
@@ -1207,6 +1246,10 @@ axiom mod_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p i
   $ ite_eqs G B t u T R ite $ >
   $ closed 0 f $ > $ closed 0 go $ > $ closed 0 pfs $ > $ closed 0 lem $ >
   $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
+  $ ⊩ G, go : Π nat_ty. Π (leN @ lit1 @ #0). Π nat_ty. Π nat_ty. Π (leN @ (nat_succ @ #0) @ #1). nat_ty $ >
+  $ ⊩ G, pfs : Π nat_ty. leN @ (nat_succ @ #0) @ (nat_succ @ #0) $ >
+  $ ⊩ G, lem : Π nat_ty. Π nat_ty. Π nat_ty. Π (leN @ lit1 @ #1). Π (leN @ #2 @ #3).
+      Π (leN @ (nat_succ @ #4) @ (nat_succ @ #2)). leN @ (nat_succ @ (sub @ #5 @ #4)) @ #3 $ >
   $ ⊢ nat_ty :: G, f @ lit0 @ #0 ≡ lit0 : nat_ty $ >
   $ ⊢ nat_ty :: nat_ty :: G,
       f @ (nat_succ @ #1) @ #0 ≡ ite @ (leN @ #0 @ (nat_succ @ #1)) @ (dleN @ #0 @ (nat_succ @ #1))
@@ -1235,6 +1278,11 @@ axiom fix_eqs_i (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: 
   $ closed 0 ite $ > $ closed 0 bp $ > $ closed 0 bd $ > $ closed 0 beq $ >
   $ closed 0 fix $ > $ closed 0 go $ > $ closed 0 eager $ > $ closed 0 al $ > $ closed 0 motive $ >
   $ closed 0 hm $ > $ closed 0 ltN $ > $ closed 0 pfx $ > $ closed 0 pfgo $ >
+  $ ⊩ G, ltN : Π nat_ty. Π nat_ty. srt lz $ >
+  $ ⊩ G, go @ al @ motive @ hm : Π (fix_fty al motive hm ltN). Π nat_ty. Π al. Π (ltN @ (hm @ #0) @ #1). motive @ #1 $ >
+  $ ⊩ G, pfx : Π al. ltN @ (hm @ #0) @ (eager @ (nat_succ @ (hm @ #0))) $ >
+  $ ⊩ G, pfgo : Π nat_ty. Π al. Π (ltN @ (hm @ #0) @ (nat_succ @ #1)). Π al. Π (ltN @ (hm @ #0) @ (hm @ #2)).
+      ltN @ (hm @ #1) @ #4 $ >
   $ ⊢ al :: fix_fty al motive hm ltN :: G,
       fix @ al @ motive @ hm @ #1 @ #0 ≡ go @ al @ motive @ hm @ #1 @ (eager @ (nat_succ @ (hm @ #0))) @ #0 @ (pfx @ #0) : motive @ #0 $ >
   $ ⊢ nat_ty :: G, eager @ #0 ≡ ite @ (bp @ (beq @ #0 @ #0)) @ (bd @ (beq @ #0 @ #0)) @ #0 @ #0 : nat_ty $ >
@@ -1256,6 +1304,9 @@ axiom gcd_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p i
   $ fix_eqs G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ >
   $ closed 0 f $ > $ closed 0 pack $ > $ closed 0 F $ > $ closed 0 pfF $ >
   $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
+  $ ⊩ G, F : fix_fty al motive hm ltN $ > $ ⊩ G, pack : Π nat_ty. Π nat_ty. al $ >
+  $ ⊩ G, pfF : Π nat_ty. Π nat_ty. Π (Not @ (eqN @ #1 @ lit0)).
+      ltN @ (hm @ (pack @ (fm @ #1 @ #2) @ #2)) @ (hm @ (pack @ #2 @ #1)) $ >
   $ ⊢ nat_ty :: nat_ty :: G, f @ #1 @ #0 ≡ fix @ al @ motive @ hm @ F @ (pack @ #1 @ #0) : nat_ty $ >
   $ ⊢ nat_ty :: nat_ty :: G, hm @ (pack @ #1 @ #0) ≡ #1 : nat_ty $ >
   $ ⊢ (Π al. Π (ltN @ (hm @ #0) @ (hm @ (pack @ lit0 @ #1))). motive @ #1) :: nat_ty :: G,
@@ -1288,6 +1339,9 @@ axiom bitwise_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub
   $ fix_eqs G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ >
   $ closed 0 fb $ > $ closed 0 pack $ > $ closed 0 Fb $ > $ closed 0 pfB $ > $ closed 0 dec $ >
   $ ⊩ G, fb : Π (Π B. Π B. B). Π nat_ty. Π nat_ty. nat_ty $ >
+  $ ⊩ G, Fb : Π (Π B. Π B. B). fix_fty al motive hm ltN $ > $ ⊩ G, pack : Π nat_ty. Π nat_ty. al $ >
+  $ ⊩ G, pfB : Π nat_ty. Π nat_ty. Π (Not @ (eqN @ #1 @ lit0)).
+      ltN @ (hm @ (pack @ (fd @ #2 @ lit2) @ (fd @ #1 @ lit2))) @ (hm @ (pack @ #2 @ #1)) $ >
   $ ⊢ nat_ty :: nat_ty :: (Π B. Π B. B) :: G,
       fb @ #2 @ #1 @ #0 ≡ fix @ al @ motive @ hm @ (Fb @ #2) @ (pack @ #1 @ #0) : nat_ty $ >
   $ ⊢ nat_ty :: nat_ty :: G, hm @ (pack @ #1 @ #0) ≡ #1 : nat_ty $ >
@@ -1317,7 +1371,7 @@ axiom bitwise_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub
 term bitop_eqs: ctx > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > wff;
 axiom bitop_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4: expr):
   $ bitwise_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ >
-  $ closed 0 f $ > $ closed 0 bf $ > $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
+  $ closed 0 f $ > $ closed 0 bf $ > $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ > $ ⊩ G, bf : Π B. Π B. B $ >
   $ ⊢ G, f ≡ fb @ bf : Π nat_ty. Π nat_ty. nat_ty $ >
   $ ⊢ G, bf @ t @ t ≡ r1 : B $ > $ ⊢ G, bf @ t @ u ≡ r2 : B $ >
   $ ⊢ G, bf @ u @ t ≡ r3 : B $ > $ ⊢ G, bf @ u @ u ≡ r4 : B $ >
@@ -1441,26 +1495,30 @@ axiom ind_ctor_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (i c np n m: na
 axiom ind_rec_ty (G: ctx) (D: ind) (N: ctx) (i: nat) (v: lvl) (R0 R: expr):
   $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_ty D v i R0 $ > $ ind_nested D N $ > $ rst D N R0 R $ > $ ⊩ G, ind_rec D i v : R $;
 --| Iota: `ind_rec D i v ps ms ns is (ind_ctor D2 i c qs fs) ≡ R ps ms ns fs`
---| whenever the left side is well typed (which makes `D2` an instance of `D`
---| at equivalent levels and `qs`, `is` agree with the recursor's, as in
---| nanoda's `reduce_rec`).
-axiom ind_iota (G: ctx) (D D2: ind) (i c: nat) (v: lvl) (np n m a0 a ni k nf nq: nat) (R e3 e4 Y maj rhs0 rhs T: expr):
+--| whenever every argument has its binder's type in the recursor's type
+--| (`sty`; this makes `D2` an instance of `D` at equivalent levels and `qs`,
+--| `is` agree with the recursor's, as in nanoda's `reduce_rec`).
+axiom ind_iota (G: ctx) (D D2: ind) (N: ctx) (i c: nat) (v: lvl) (np n m a0 a ni k nf nq: nat)
+    (R e3 e4 Y maj rhs0 rhs R0 RT T: expr):
   $ spine (ind_rec D i v) e4 k $ > $ spine (ind_ctor D2 i c) maj nq $ > $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_rule D v i c R $ >
   $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m a $ > $ nidx D i ni $ > $ add a ni k $ > $ nfields D i c nf $ >
   $ add np nf nq $ > $ rehead (ind_rec D i v) R a e3 rhs0 $ > $ spine e3 e4 ni $ > $ spine Y maj nf $ >
-  $ rehead Y rhs0 nf maj rhs $ > $ ⊩ G, e4 @ maj : T $ > $ ⊢ G, e4 @ maj ≡ rhs : T $;
+  $ rehead Y rhs0 nf maj rhs $ > $ rec_ty D v i R0 $ > $ ind_nested D N $ > $ rst D N R0 RT $ >
+  $ sty G (ind_rec D i v) RT (e4 @ maj) T $ > $ ⊢ G, e4 @ maj ≡ rhs : T $;
 --| Iota of the recursor of an auxiliary type `i` (the occurrence `I Ds`) on
 --| `I`'s constructor `c`: `ind_rec D i v ps ms ns is (ind_ctor I2 ii c qs fs)
---| ≡ R ps ms ns fs` when well typed (which makes `I2` an instance of `I` and
---| `qs` the occurrence's arguments at `ps`); the fields are the last `nf`
---| arguments of the major premise, as in `inductive_reduce_rec`.
+--| ≡ R ps ms ns fs` when every argument has its binder's type (`sty`; this
+--| makes `I2` an instance of `I` and `qs` the occurrence's arguments at
+--| `ps`); the fields are the last `nf` arguments of the major premise, as in
+--| `inductive_reduce_rec`.
 axiom ind_iota_nst (G: ctx) (D I I2: ind) (N: ctx) (i ii c: nat) (v: lvl) (np n m a0 a ni k nf nq npi: nat)
-    (R e3 e4 X Y maj rhs0 rhs T: expr):
+    (R e3 e4 X Y maj rhs0 rhs R0 RT T: expr):
   $ spine (ind_rec D i v) e4 k $ > $ spine (ind_ctor I2 ii c) maj nq $ > $ ind_wf G D $ > $ elim_ok G D v $ >
   $ ind_nested D N $ > $ aux_of D N i X $ > $ spine (ind_ty I ii) X npi $ > $ rec_rule D v i c R $ >
   $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m a $ > $ nidx D i ni $ > $ add a ni k $ > $ nfields D i c nf $ >
   $ add npi nf nq $ > $ rehead (ind_rec D i v) R a e3 rhs0 $ > $ spine e3 e4 ni $ > $ spine Y maj nf $ >
-  $ rehead Y rhs0 nf maj rhs $ > $ ⊩ G, e4 @ maj : T $ > $ ⊢ G, e4 @ maj ≡ rhs : T $;
+  $ rehead Y rhs0 nf maj rhs $ > $ rec_ty D v i R0 $ > $ rst D N R0 RT $ >
+  $ sty G (ind_rec D i v) RT (e4 @ maj) T $ > $ ⊢ G, e4 @ maj ≡ rhs : T $;
 axiom proj_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (j i np: nat) (e e2 S A A1 A2 R: expr):
   $ ⊢ G, e ≡ e2 : S $ > $ spine (ind_ty D j) S np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ struct_like D j $ >
   $ proj_ok G D j i $ > $ clen P np $ > $ field_ty D j i A $ > $ ind_nested D N $ > $ rst D N A A2 $ > $ pinst i S A2 A1 $ >
@@ -1494,14 +1552,15 @@ axiom quot_ind_ty (G: ctx) (u: lvl):
   $ ty G (quot_ind u) (pi (srt u) (pi (pi (bvar 0) (pi (bvar 1) (srt lz))) (pi (pi (app (app (quot u) (bvar 1)) (bvar 0)) (srt lz)) (pi (pi (bvar 2) (app (bvar 1) (app (app (app (quot_mk u) (bvar 3)) (bvar 2)) (bvar 0)))) (pi (app (app (quot u) (bvar 3)) (bvar 2)) (app (bvar 2) (bvar 0))))))) $;
 
 --| Reduction of `Quot.lift f h (Quot.mk r a)` to `f a` and of
---| `Quot.ind h (Quot.mk r a)` to `h a`, when the left side is well typed (as
---| nanoda's `reduce_quot`, which checks only the spine: typing makes the
---| constructor's `α` and `r` the primitive's).
+--| `Quot.ind h (Quot.mk r a)` to `h a`, when every argument has its binder's
+--| type in the primitive's type (`sty`), as nanoda's `reduce_quot`, which
+--| checks only the spine: the typing makes the constructor's `α` and `r` the
+--| primitive's.
 axiom quot_lift_mk (G: ctx) (u v: lvl) (x1 x2 x3 x4 x5: expr) (v1: lvl) (y1 y2 a T: expr):
-  $ ty G (app (app (app (app (app (app (quot_lift u v) x1) x2) x3) x4) x5) (app (app (app (quot_mk v1) y1) y2) a)) T $ >
+  $ sty G (quot_lift u v) (pi (srt u) (pi (pi (bvar 0) (pi (bvar 1) (srt lz))) (pi (srt v) (pi (pi (bvar 2) (bvar 1)) (pi (pi (bvar 3) (pi (bvar 4) (pi (app (app (bvar 4) (bvar 1)) (bvar 0)) (app (app (app (ind_ty (eq_D v) 0) (bvar 4)) (app (bvar 3) (bvar 2))) (app (bvar 3) (bvar 1)))))) (pi (app (app (quot u) (bvar 4)) (bvar 3)) (bvar 3))))))) (app (app (app (app (app (app (quot_lift u v) x1) x2) x3) x4) x5) (app (app (app (quot_mk v1) y1) y2) a)) T $ >
   $ deq G (app (app (app (app (app (app (quot_lift u v) x1) x2) x3) x4) x5) (app (app (app (quot_mk v1) y1) y2) a)) (app x4 a) T $;
 axiom quot_ind_mk (G: ctx) (u: lvl) (x1 x2 x3 x4: expr) (v1: lvl) (y1 y2 a T: expr):
-  $ ty G (app (app (app (app (app (quot_ind u) x1) x2) x3) x4) (app (app (app (quot_mk v1) y1) y2) a)) T $ >
+  $ sty G (quot_ind u) (pi (srt u) (pi (pi (bvar 0) (pi (bvar 1) (srt lz))) (pi (pi (app (app (quot u) (bvar 1)) (bvar 0)) (srt lz)) (pi (pi (bvar 2) (app (bvar 1) (app (app (app (quot_mk u) (bvar 3)) (bvar 2)) (bvar 0)))) (pi (app (app (quot u) (bvar 3)) (bvar 2)) (app (bvar 2) (bvar 0))))))) (app (app (app (app (app (quot_ind u) x1) x2) x3) x4) (app (app (app (quot_mk v1) y1) y2) a)) T $ >
   $ deq G (app (app (app (app (app (quot_ind u) x1) x2) x3) x4) (app (app (app (quot_mk v1) y1) y2) a)) (app x4 a) T $;
 
 -- Literals (audit §5) ------------------------------------------------------

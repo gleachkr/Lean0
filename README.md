@@ -70,8 +70,9 @@ trust:
   per accelerated `Nat` operation whose defining equations could not be 
   derived (`Nat.add` on numerals is addition, and so on; none in Init), and 
   one per 
-  opaque constant that an inductive declaration mentions at its universe 
-  levels (the constant at equivalent levels is the same expression). `lean0 
+  theorem constant that an inductive declaration mentions at its universe 
+  levels (the constant at equivalent levels is the same expression; opaque 
+  constants and Lean axioms are atoms of the spec, `cst`, and need none). `lean0 
   gen` reports how many blocks the schema left to these axioms, and the 
   assumptions are inspectable in the generated `.mm0` file;
 - that the `.mm0` file the verifier reads is in fact the spec followed by the 
@@ -89,7 +90,7 @@ names, with the statement Lean gives it, you need to trust:
   declaration back into Lean expressions (a nested block's with its 
   occurrences restored) and compares them with the export (of the generated 
   axioms above it checks only the shape of the syntactic ones, `closed` and 
-  `eeqv`).
+  `eeqv`, and that each opaque constant is an atom of its own).
 
 ## Prior Art
 
@@ -146,7 +147,8 @@ of Lean's `Init` and all of `Std`:
   generated axioms remain, 521 of them the typing and closedness of 261 opaque 
   constants and Lean axioms (`IO` and `Float` primitives, mostly), the rest 
   the literal operations, the two nested types and level congruence for 24 
-  opaque constants in inductive declarations;
+  opaque constants in inductive declarations (since this run, opaque constants 
+  and Lean axioms are atoms of the spec, and their closedness is a theorem);
 - `Std` (103,256 declarations with `Init`): 195 certificates, 335.7 GB, 
   generated in 3 hours on 8 cores. This run predates the schema (it has the 
   inductive types as generated axioms) and is not redone yet. One declaration

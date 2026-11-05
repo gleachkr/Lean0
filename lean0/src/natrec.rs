@@ -133,6 +133,25 @@ fn typing(el: &mut El<'_, '_, '_, '_>, lean: &str) -> R<P> {
     mm(el.g.env.thm(th, &[gv], &[]))
 }
 
+/// `⊩ G, e : ty`, from `e`'s inferred type: a premise stating the type of a helper the
+/// equations apply (audit §5: the instances are taken at its values).
+fn typed<'t>(el: &mut El<'_, '_, 't, '_>, e: Ex<'t>, ty: Ex<'t>) -> R<P> {
+    let (t, p) = el.infer(e)?;
+    el.cast(p, t, ty)
+}
+
+/// `Bool → Bool → Bool`.
+fn bool_fn<'t>(el: &mut El<'_, '_, 't, '_>, v: &Voc<'t>) -> Ex<'t> {
+    let inner = pi(el, "y", v.bool_, v.bool_);
+    pi(el, "x", v.bool_, inner)
+}
+
+/// `Π x y : Nat. body` with `body` built at depth 2 (`y` is `#0`, `x` is `#1`).
+fn pi_nat2<'t>(el: &mut El<'_, '_, 't, '_>, v: &Voc<'t>, body: Ex<'t>) -> Ex<'t> {
+    let inner = pi(el, "y", v.nat, body);
+    pi(el, "x", v.nat, inner)
+}
+
 fn rule<'t>(el: &mut El<'_, '_, 't, '_>, rel: &str, args: &[Ex<'t>], hyps: &[P]) -> R<P> {
     let mut targs = vec![el.g.env.var(0)];
     for &a in args {
@@ -461,6 +480,18 @@ fn probe_proof<'t>(el: &mut El<'_, '_, 't, '_>, f: Ex<'t>) -> R<Ex<'t>> {
 fn dec_eqs<'t>(el: &mut El<'_, '_, 't, '_>, v: &Voc<'t>, dite: bool) -> R<P> {
     let args: Vec<Ex<'t>> = if dite { v.d().to_vec() } else { v.ite_args().to_vec() };
     let mut hyps = closed_all(el, &args)?;
+    if dite {
+        // `ofT : Π p : Prop. T p t → p`, `ofF : Π p : Prop. T p u → Not p`
+        for (of, b) in [(v.of_t, v.tt), (v.of_f, v.ff)] {
+            let p0 = var(el, 0);
+            let tpb = v.t(el, p0, b);
+            let p1 = var(el, 1);
+            let res = if b == v.tt { p1 } else { v.no(el, p1) };
+            let inner = pi(el, "H", tpb, res);
+            let ty = pi(el, "p", v.prop, inner);
+            hyps.push(typed(el, of, ty)?);
+        }
+    }
     for b in [v.tt, v.ff] {
         hyps.push(eqn(el, |el| {
             let p = open(el, "p", v.prop)?;
@@ -490,6 +521,14 @@ fn cond_dec<'t>(el: &mut El<'_, '_, 't, '_>, v: &Voc<'t>, eq_dec: bool) -> R<P> 
     let (rel, bool_op, [r, d, b, pf]) = if eq_dec { ("nateq_dec", "Nat.beq", v.nateq()) } else { ("natle_dec", "Nat.ble", v.natle()) };
     let mut hyps = vec![dec_eqs(el, v, true)?, fact(el, bool_op)?];
     hyps.extend(closed_all(el, &[r, d, pf])?);
+    // `r : Nat → Nat → Prop`, `pf : Π x y. T (r x y) (b x y)`
+    let rty = pi_nat2(el, v, v.prop);
+    hyps.push(typed(el, r, rty)?);
+    let (x, y) = (var(el, 1), var(el, 0));
+    let (rxy, bxy) = (app(el, r, &[x, y]), app(el, b, &[x, y]));
+    let tb = v.t(el, rxy, bxy);
+    let pfty = pi_nat2(el, v, tb);
+    hyps.push(typed(el, pf, pfty)?);
     hyps.push(eqn(el, |el| {
         let (x, y) = (open(el, "x", v.nat)?, open(el, "y", v.nat)?);
         let lhs = app(el, d, &[x, y]);
@@ -558,6 +597,45 @@ fn fuel_eqs<'t>(el: &mut El<'_, '_, 't, '_>, v: &Voc<'t>, u: &Fuel<'t>, lean: &s
     }
     hyps.extend(closed_all(el, &[u.f, u.go, u.pfs, u.lem])?);
     hyps.push(typing(el, lean)?);
+    let subc = konst(el, "Nat.sub", &[])?;
+    {
+        // `go : Π y. le 1 y → Π fuel x. le (succ x) fuel → Nat`
+        let (x0, f1) = (var(el, 0), var(el, 1));
+        let sx = v.s(el, x0);
+        let h = app(el, v.le, &[sx, f1]);
+        let body = pi(el, "h", h, v.nat);
+        let body = pi(el, "x", v.nat, body);
+        let body = pi(el, "fuel", v.nat, body);
+        let y0 = var(el, 0);
+        let hy = app(el, v.le, &[v.lit1, y0]);
+        let body = pi(el, "hy", hy, body);
+        let ty = pi(el, "y", v.nat, body);
+        hyps.push(typed(el, u.go, ty)?);
+        // `pfs : Π x. le (succ x) (succ x)`
+        let x0 = var(el, 0);
+        let sx = v.s(el, x0);
+        let body = app(el, v.le, &[sx, sx]);
+        let ty = pi(el, "x", v.nat, body);
+        hyps.push(typed(el, u.pfs, ty)?);
+        // `lem : Π x y fuel. le 1 y → le y x → le (succ x) (succ fuel) → le (succ (sub x y)) fuel`
+        let (x5, y4, f3) = (var(el, 5), var(el, 4), var(el, 3));
+        let sub = app(el, subc, &[x5, y4]);
+        let ssub = v.s(el, sub);
+        let res = app(el, v.le, &[ssub, f3]);
+        let (x4, f2) = (var(el, 4), var(el, 2));
+        let (sx, sf) = (v.s(el, x4), v.s(el, f2));
+        let hfuel = app(el, v.le, &[sx, sf]);
+        let body = pi(el, "hfuel", hfuel, res);
+        let (y2, x3) = (var(el, 2), var(el, 3));
+        let hle = app(el, v.le, &[y2, x3]);
+        let body = pi(el, "hle", hle, body);
+        let y1 = var(el, 1);
+        let hy = app(el, v.le, &[v.lit1, y1]);
+        let body = pi(el, "hy", hy, body);
+        let body = pi(el, "fuel", v.nat, body);
+        let ty = pi_nat2(el, v, body);
+        hyps.push(typed(el, u.lem, ty)?);
+    }
     if is_mod {
         hyps.push(eqn(el, |el| {
             let x = open(el, "x", v.nat)?;
@@ -614,6 +692,49 @@ fn fuel_eqs<'t>(el: &mut El<'_, '_, 't, '_>, v: &Voc<'t>, u: &Fuel<'t>, lean: &s
 fn fix_eqs<'t>(el: &mut El<'_, '_, 't, '_>, v: &Voc<'t>, w: &Wf<'t>) -> R<P> {
     let args = fix_args(v, w);
     let mut hyps = closed_all(el, &args)?;
+    // `lt : Nat → Nat → Prop`
+    let ltty = pi_nat2(el, v, v.prop);
+    hyps.push(typed(el, v.lt, ltty)?);
+    // `go al motive hm : Π F : fix_fty. Π fuel x. lt (hm x) fuel → motive x`
+    {
+        let go3 = app(el, w.go, &[w.al, w.motive, w.hm]);
+        let x1 = var(el, 1);
+        let mx = app(el, w.motive, &[x1]);
+        let (x0, f1) = (var(el, 0), var(el, 1));
+        let hx = app(el, w.hm, &[x0]);
+        let h = app(el, v.lt, &[hx, f1]);
+        let body = pi(el, "h", h, mx);
+        let body = pi(el, "x", w.al, body);
+        let body = pi(el, "fuel", v.nat, body);
+        let fty = w.fty(el, v);
+        let ty = pi(el, "F", fty, body);
+        hyps.push(typed(el, go3, ty)?);
+        // `pfx : Π x : al. lt (hm x) (eager (succ (hm x)))`
+        let x0 = var(el, 0);
+        let hx = app(el, w.hm, &[x0]);
+        let shx = v.s(el, hx);
+        let eg = app(el, w.eager, &[shx]);
+        let body = app(el, v.lt, &[hx, eg]);
+        let ty = pi(el, "x", w.al, body);
+        hyps.push(typed(el, w.pfx, ty)?);
+        // `pfgo : Π t x. lt (hm x) (succ t) → Π y. lt (hm y) (hm x) → lt (hm y) t`
+        let (y1, t4) = (var(el, 1), var(el, 4));
+        let hy1 = app(el, w.hm, &[y1]);
+        let res = app(el, v.lt, &[hy1, t4]);
+        let (y0, x2) = (var(el, 0), var(el, 2));
+        let (hy0, hx2) = (app(el, w.hm, &[y0]), app(el, w.hm, &[x2]));
+        let hyt = app(el, v.lt, &[hy0, hx2]);
+        let body = pi(el, "hy", hyt, res);
+        let body = pi(el, "y", w.al, body);
+        let (x0, t1) = (var(el, 0), var(el, 1));
+        let hx0 = app(el, w.hm, &[x0]);
+        let st = v.s(el, t1);
+        let ht = app(el, v.lt, &[hx0, st]);
+        let body = pi(el, "h", ht, body);
+        let body = pi(el, "x", w.al, body);
+        let ty = pi(el, "t", v.nat, body);
+        hyps.push(typed(el, w.pfgo, ty)?);
+    }
     hyps.push(eqn_at(el, |el| {
         let fty = w.fty(el, v);
         let (f, x) = (open(el, "F", fty)?, open(el, "x", w.al)?);
@@ -672,6 +793,30 @@ fn rec_parts<'t>(el: &mut El<'_, '_, 't, '_>, v: &Voc<'t>, lean: &str) -> R<Rec<
     Ok(Rec { w, f: konst(el, lean, &[])?, pack, pf })
 }
 
+/// `pack : Nat → Nat → al` and the recursive call's lemma
+/// `pf : Π a b. Not (a = 0) → lt (hm (pack a' b')) (hm (pack a b))`, with `(a', b')` the
+/// call's arguments (`next a b`, built at the depth of the lemma's result).
+fn rec_typings<'t, N>(el: &mut El<'_, '_, 't, '_>, v: &Voc<'t>, r: &Rec<'t>, next: N) -> R<Vec<P>>
+where
+    N: FnOnce(&mut El<'_, '_, 't, '_>, Ex<'t>, Ex<'t>) -> R<(Ex<'t>, Ex<'t>)>,
+{
+    let w = &r.w;
+    let packty = pi_nat2(el, v, w.al);
+    let p1 = typed(el, r.pack, packty)?;
+    let (a2, b1) = (var(el, 2), var(el, 1));
+    let (na, nb) = next(el, a2, b1)?;
+    let (pn, pab) = (app(el, r.pack, &[na, nb]), app(el, r.pack, &[a2, b1]));
+    let (hn, hab) = (app(el, w.hm, &[pn]), app(el, w.hm, &[pab]));
+    let res = app(el, v.lt, &[hn, hab]);
+    let a1 = var(el, 1);
+    let e0 = app(el, v.eq, &[a1, v.lit0]);
+    let ne0 = v.no(el, e0);
+    let body = pi(el, "H", ne0, res);
+    let ty = pi_nat2(el, v, body);
+    let p2 = typed(el, r.pf, ty)?;
+    Ok(vec![p1, p2])
+}
+
 /// The arguments of `gcd_eqs` after `G`.
 fn gcd_args<'t>(el: &mut El<'_, '_, 't, '_>, v: &Voc<'t>, r: &Rec<'t>) -> R<Vec<E>> {
     let um = fuel(el, "Nat.mod")?;
@@ -691,6 +836,13 @@ fn gcd_eqs<'t>(el: &mut El<'_, '_, 't, '_>, v: &Voc<'t>, r: &Rec<'t>, targs: &[E
     let mut hyps = vec![fact(el, "Nat.mod")?, cond_dec(el, v, true)?, bool_dec(el, v)?, fix_eqs(el, v, w)?];
     hyps.extend(closed_all(el, &[r.f, r.pack, w.f_lam, r.pf])?);
     hyps.push(typing(el, "Nat.gcd")?);
+    let fty = w.fty(el, v);
+    hyps.push(typed(el, w.f_lam, fty)?);
+    let fm = konst(el, "Nat.mod", &[])?;
+    hyps.extend(rec_typings(el, v, r, |el, a, b| {
+        let m = app(el, fm, &[b, a]);
+        Ok((m, a))
+    })?);
     hyps.push(eqn(el, |el| {
         let (m, n) = (open(el, "m", v.nat)?, open(el, "n", v.nat)?);
         let lhs = app(el, r.f, &[m, n]);
@@ -754,10 +906,18 @@ fn bitwise_eqs<'t>(el: &mut El<'_, '_, 't, '_>, v: &Voc<'t>, r: &Rec<'t>, targs:
     let mut hyps = vec![fact(el, "Nat.div")?, fact(el, "Nat.mod")?, cond_dec(el, v, true)?, bool_dec(el, v)?, fact(el, "Nat.add")?, fix_eqs(el, v, w)?];
     hyps.extend(closed_all(el, &[r.f, r.pack, w.f_lam, r.pf, v.decide])?);
     hyps.push(typing(el, "Nat.bitwise")?);
-    let bbb = {
-        let inner = pi(el, "y", v.bool_, v.bool_);
-        pi(el, "x", v.bool_, inner)
-    };
+    {
+        let fty = w.fty(el, v);
+        let bbb = bool_fn(el, v);
+        let ty = pi(el, "bf", bbb, fty);
+        hyps.push(typed(el, w.f_lam, ty)?);
+    }
+    let fd = konst(el, "Nat.div", &[])?;
+    hyps.extend(rec_typings(el, v, r, |el, a, b| {
+        let (a2, b2) = (app(el, fd, &[a, v.lit2]), app(el, fd, &[b, v.lit2]));
+        Ok((a2, b2))
+    })?);
+    let bbb = bool_fn(el, v);
     hyps.push(eqn(el, |el| {
         let (f, n, m) = (open(el, "f", bbb)?, open(el, "n", v.nat)?, open(el, "m", v.nat)?);
         let lhs = app(el, r.f, &[f, n, m]);
@@ -867,6 +1027,8 @@ fn bitop_eqs<'t>(el: &mut El<'_, '_, 't, '_>, v: &Voc<'t>, r: &Rec<'t>, lean: &s
     let mut hyps = vec![fact(el, "Nat.bitwise")?];
     hyps.extend(closed_all(el, &[f, bf])?);
     hyps.push(typing(el, lean)?);
+    let bbb = bool_fn(el, v);
+    hyps.push(typed(el, bf, bbb)?);
     let fb = app(el, r.f, &[bf]);
     hyps.push(el.defeq(f, fb)?);
     for (i, (a, b)) in [(v.tt, v.tt), (v.tt, v.ff), (v.ff, v.tt), (v.ff, v.ff)].into_iter().enumerate() {

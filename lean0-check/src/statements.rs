@@ -86,6 +86,8 @@ pub struct Stmt {
     binders: Vec<(String, String)>,
     hyps: Vec<M>,
     concl: Option<M>,
+    /// A `term`'s sort or a `def`'s return sort, as written.
+    ret: String,
     doc: String,
     /// From the spec (`spec_statements`), not a certificate: it stands for a Lean declaration
     /// only when the export has it.
@@ -166,6 +168,11 @@ fn parse_stmt(st: &str, doc: String) -> Result<Stmt, String> {
     }
     let r = r.strip_prefix(':').ok_or_else(|| format!("{name}: expected `:`"))?.trim();
     let maths: Vec<&str> = r.split('$').collect();
+    let ret = match kind {
+        "term" => r.to_string(),
+        "def" => r.split_once('=').map_or(r, |x| x.0).trim().to_string(),
+        _ => String::new(),
+    };
     let (hyps, concl) = match kind {
         "term" => (Vec::new(), None),
         "def" => match r.split_once('=') {
@@ -179,7 +186,7 @@ fn parse_stmt(st: &str, doc: String) -> Result<Stmt, String> {
             (ms, Some(c))
         }
     };
-    Ok(Stmt { kind: kind.to_string(), name, binders, hyps, concl, doc, spec: false })
+    Ok(Stmt { kind: kind.to_string(), name, binders, hyps, concl, ret, doc, spec: false })
 }
 
 /// The Lean name in a doc comment "... `NAME` ..." after `prefix`.
@@ -390,6 +397,32 @@ pub fn check(export: &ExportFile<'_>, stmts: &[Stmt]) -> Report {
         }
         let proved = s.kind == "theorem" && c.head == "ty" && s.hyps.is_empty();
         claims.entry(lean).or_default().push(TypeClaim { stmt: &s.name, levels: lvls[..n].to_vec(), ty, proved });
+    }
+    // an opaque constant is `def c (us): expr = $ cst A (lcons u1 ... lnil) $` over its own
+    // levels in order, with `A` a `term A: atom` that no other definition uses: two constants
+    // sharing an atom would be definitionally equal (audit §8)
+    let atoms: std::collections::HashSet<&str> =
+        stmts.iter().filter(|s| s.kind == "term" && s.binders.is_empty() && s.ret == "atom").map(|s| s.name.as_str()).collect();
+    let mut atom_user: HashMap<&str, &str> = HashMap::new();
+    for s in stmts {
+        let Some(b) = s.concl.as_ref().filter(|b| s.kind == "def" && b.head == "cst") else { continue };
+        let lvls_ok = |mut l: &M| {
+            for (v, sort) in &s.binders {
+                match (l.head.as_str(), l.args.as_slice()) {
+                    ("lcons", [x, rest]) if sort == "lvl" && x.args.is_empty() && x.head == *v => l = rest,
+                    _ => return false,
+                }
+            }
+            l.head == "lnil" && l.args.is_empty()
+        };
+        match b.args.as_slice() {
+            [a, l] if a.args.is_empty() && atoms.contains(a.head.as_str()) && lvls_ok(l) => {
+                if let Some(prev) = atom_user.insert(a.head.as_str(), s.name.as_str()) {
+                    problems.push(format!("`{}`: the atom of both `{prev}` and `{}`", a.head, s.name));
+                }
+            }
+            _ => problems.push(format!("`{}`: not of the form `cst X_atom (lcons u1 ... lnil)` over its own levels", s.name)),
+        }
     }
     // the syntactic axioms about a constant `c` (an opaque, an axiom, a stage-A constant):
     // `axiom c_closed (k: nat) (us): closed k (c us)` and the level congruence

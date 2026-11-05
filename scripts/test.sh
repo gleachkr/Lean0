@@ -90,6 +90,10 @@ stmt_neg 's/Lean definition `rfl`/Lean definition `rfl2`/'
 # A nested block's occurrences restore its constructors' types: `S.node : Array S → S`
 # stated with the occurrence `List S` is caught.
 stmt_neg '/^def S_D/s/(cons (app (ind_ty (Array_D lz) z) (bvar z))/(cons (app (ind_ty (List_D lz) z) (bvar z))/' nested
+# An opaque constant is its own atom at its own levels: two constants sharing an atom would
+# be definitionally equal (`eeqv_cst`), and a permuted level list another constant.
+stmt_neg 's/cst Inh_atom/cst Pt_atom/' core
+stmt_neg 's/cst Pt_atom (lcons a (lcons b lnil))/cst Pt_atom (lcons b (lcons a lnil))/' core
 rm -f build/gen/initsample/neg.mm0 build/gen/nested/neg.mm0
 
 # Sharded generation (`--jobs`) must give the same statements, and a certificate both accept.
@@ -177,7 +181,7 @@ for th in Eq_rec_refl_iota MyNat_rec_succ_iota MyList_rec_cons_iota Prod_eta PUn
           Prod_proj_0_mk And_proj_1_df; do
   tamper induct rejected --tamper-theorem "$th"
 done
-for ax in inst_proj ind_iota proj_ty quot_lift_mk lit_succ Opq_eeqv; do tamper induct rejected --tamper-axiom "$ax"; done
+for ax in inst_proj ind_iota proj_ty quot_lift_mk lit_succ eeqv_cst; do tamper induct rejected --tamper-axiom "$ax"; done
 # ... and rules they do not use are harmless, which shows the test can tell the difference.
 tamper induct accepted --tamper-axiom quot_ind_mk
 tamper induct accepted --tamper-axiom eta

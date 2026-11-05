@@ -111,7 +111,7 @@ impl Lean {
         };
         let mut const_closed = HashMap::default();
         // a Nat literal `lit n` is closed like a constant, and so are the inductive constants
-        for (term, ax) in [("lit", "closed_lit"), ("ind_ty", "closed_ind_ty"), ("ind_ctor", "closed_ind_ctor"), ("ind_rec", "closed_ind_rec"),
+        for (term, ax) in [("lit", "closed_lit"), ("cst", "closed_cst"), ("ind_ty", "closed_ind_ty"), ("ind_ctor", "closed_ind_ctor"), ("ind_rec", "closed_ind_rec"),
             ("quot", "closed_quot"), ("quot_mk", "closed_quot_mk"), ("quot_lift", "closed_quot_lift"), ("quot_ind", "closed_quot_ind")] {
             if env.has_term(term) && env.has_thm(ax) {
                 const_closed.insert(t(term), env.thm_id(ax));
@@ -598,6 +598,29 @@ impl Lean {
         let (_, x, x2, _) = self.deq_parts(env, pa);
         let (r, pi) = self.inst(env, 0, b, x)?;
         env.thm_n("appDF", &[g, f, f2, a, b, x, x2, r], &[pf, pa, pi])
+    }
+
+    /// `sty_nil`: `sty G h A h A`.
+    pub fn sty_nil(&mut self, env: &mut Env, g: E, h: E, a: E) -> Result<P> {
+        env.thm_n("sty_nil", &[g, h, a], &[])
+    }
+
+    /// `sty_app`: `ps: sty G h A f (pi B C)`, `pa: ty G a B`; the conclusion is
+    /// `sty G h A (app f a) C2` with `C2` the instantiation of `C` at `a`.
+    pub fn sty_app(&mut self, env: &mut Env, ps: P, pa: P) -> Result<P> {
+        let c = env.concl(ps);
+        let sty = env.term_id("sty");
+        let Some((t, &[g, h, a0, f, fty])) = env.head(c) else { bail!("sty_app: not an sty: {}", env.show(c, &[])) };
+        if t != sty {
+            bail!("sty_app: not an sty: {}", env.show(c, &[]))
+        }
+        let View::Pi(b, cb) = self.view(env, fty) else { bail!("sty_app: the head's type is not a pi here: {}", env.show(fty, &[])) };
+        let (_, x, _, xty) = self.deq_parts(env, pa);
+        if xty != b {
+            bail!("sty_app: argument type mismatch:\n  {}\n  {}", env.show(xty, &[]), env.show(b, &[]))
+        }
+        let (c2, pi) = self.inst(env, 0, cb, x)?;
+        env.thm_n("sty_app", &[g, h, a0, f, x, b, cb, c2], &[ps, pa, pi])
     }
 
     /// `lamDF`: `pa: deq G A A2 (srt u)`, `pb: deq (cons A G) b b2 B`.
