@@ -21,6 +21,18 @@ l7: $ G , k = ⟨ a , b ⟩ ⇒ k ∊ A × B $ by cxp_intro_eq [l4, l5, l6]
 l8: $ G , k = ⟨ a , b ⟩ ⇒ ⟨ a , b ⟩ ∈ A × B $ by wcel_intro [l4, l7]
 l9: $ G ⇒ ⟨ a , b ⟩ ∈ A × B $ by isset_elim [l3, l8]
 
+cxp_intro_c
+-----------
+l1: $ G , u = C , u ∊ A , v = D , v ∊ B ⇒ u ∊ A $ by ax
+l2: $ G , u = C , u ∊ A , v = D , v ∊ B ⇒ v ∊ B $ by ax
+l3: $ G , u = C , u ∊ A , v = D , v ∊ B ⇒ ⟨ u , v ⟩ ∈ A × B $ by cxp_intro [l1, l2]
+l4: $ G , u = C , u ∊ A , v = D , v ∊ B ⇒ u = C $ by ax
+l5: $ G , u = C , u ∊ A , v = D , v ∊ B ⇒ v = D $ by ax
+l6: $ G , u = C , u ∊ A , v = D , v ∊ B ⇒ ⟨ u , v ⟩ = ⟨ C , D ⟩ $ by opair_eq [l4, l5]
+l7: $ G , u = C , u ∊ A , v = D , v ∊ B ⇒ ⟨ C , D ⟩ ∈ A × B $ by wcel_eq_l [l6, l3]
+l8: $ G , u = C , u ∊ A ⇒ ⟨ C , D ⟩ ∈ A × B $ by wcel_elim [#2, l7]
+l9: $ G ⇒ ⟨ C , D ⟩ ∈ A × B $ by wcel_elim [#1, l8]
+
 cxp_elim
 --------
 l1: $ G ⇒ ∃ x ∃ y (c = ⟨ x , y ⟩ ∧ x ∊ A ∧ y ∊ B) $ by cab_elim [#1]
@@ -279,6 +291,16 @@ l8: $ G , z ∊ B ⇒ ⟨ a , z ⟩ ∈ A × B $ by cxp_intro [l7, l6]
 l9: $ G , z ∊ B ⇒ z ∊ crn (A × B) $ by crn_intro [l8]
 l10: $ G ⇒ crn (A × B) = B $ by eq_intro [l5, l9]
 
+cdm_empty
+---------
+l1: $ G , x ∊ cdm ∅ ⇒ x ∊ cdm ∅ $ by ax
+l2: $ G , x ∊ cdm ∅ , ⟨ x , y ⟩ ∈ ∅ , z = ⟨ x , y ⟩ , z ∊ ∅ ⇒ z ∊ ∅ $ by ax
+l3: $ G , x ∊ cdm ∅ , ⟨ x , y ⟩ ∈ ∅ , z = ⟨ x , y ⟩ , z ∊ ∅ ⇒ ⊥ $ by empty_elim [l2]
+l4: $ G , x ∊ cdm ∅ , ⟨ x , y ⟩ ∈ ∅ ⇒ ⟨ x , y ⟩ ∈ ∅ $ by ax
+l5: $ G , x ∊ cdm ∅ , ⟨ x , y ⟩ ∈ ∅ ⇒ ⊥ $ by wcel_elim [l4, l3]
+l6: $ G , x ∊ cdm ∅ ⇒ ⊥ $ by cdm_elim [l1, l5]
+l7: $ G ⇒ cdm ∅ = ∅ $ by empty_eq_intro [l6]
+
 rel_subset_cxp
 --------------
 l1: $ G , z ∊ R ⇒ z ∊ R $ by ax
@@ -343,6 +365,20 @@ l20: $ G ⇒ crn R ⊆ ⋃ ⋃ R $ by subset_intro [l19]
 l21: $ G ⇒ isset (⋃ R) $ by cuni_set [#1]
 l22: $ G ⇒ isset (⋃ ⋃ R) $ by cuni_set [l21]
 l23: $ G ⇒ isset (crn R) $ by subset_isset [l22, l20]
+
+functional_set
+--------------
+l1: $ G , y ∊ crn F , ⟨ x , y ⟩ ∈ F ⇒ ⟨ x , y ⟩ ∈ F $ by ax
+l2: $ G , y ∊ crn F , ⟨ x , y ⟩ ∈ F ⇒ x ∊ cdm F $ by cdm_intro [l1]
+l3: $ G , y ∊ crn F , ⟨ x , y ⟩ ∈ F ⇒ y ∊ img F (cdm F) $ by img_intro [l2, l1]
+l4: $ G , y ∊ crn F ⇒ y ∊ crn F $ by ax
+l5: $ G , y ∊ crn F ⇒ y ∊ img F (cdm F) $ by crn_elim [l4, l3]
+l6: $ G ⇒ crn F ⊆ img F (cdm F) $ by subset_intro [l5]
+l7: $ G ⇒ isset (img F (cdm F)) $ by img_set [#1, #3]
+l8: $ G ⇒ isset (crn F) $ by subset_isset [l7, l6]
+l9: $ G ⇒ isset (cdm F × crn F) $ by cxp_set [#3, l8]
+l10: $ G ⇒ F ⊆ cdm F × crn F $ by rel_subset_cxp [#2]
+l11: $ G ⇒ isset F $ by subset_isset [l9, l10]
 
 cdm_congr
 ---------
@@ -549,6 +585,25 @@ l9: $ w ∊ ccom S R ⇒ ∃ u ∃ v (w = ⟨ u , v ⟩) $ by ex_elim [l2, l8]
 l10: $ G , w ∊ ccom S R ⇒ ∃ u ∃ v (w = ⟨ u , v ⟩) $ by weaken [l9]
 l11: $ G ⇒ rel (ccom S R) $ by rel_intro [l10]
 
+ccom_functional
+---------------
+a1: $ G , ⟨ x , y ⟩ ∈ ccom F R , ⟨ x , z ⟩ ∈ ccom F R , ⟨ x , u ⟩ ∈ R , ⟨ u , y ⟩ ∈ F , ⟨ x , v ⟩ ∈ R , ⟨ v , z ⟩ ∈ F ⇒ ⟨ x , u ⟩ ∈ R $ by ax
+a2: $ G , ⟨ x , y ⟩ ∈ ccom F R , ⟨ x , z ⟩ ∈ ccom F R , ⟨ x , u ⟩ ∈ R , ⟨ u , y ⟩ ∈ F , ⟨ x , v ⟩ ∈ R , ⟨ v , z ⟩ ∈ F ⇒ ⟨ x , v ⟩ ∈ R $ by ax
+a3: $ G , ⟨ x , y ⟩ ∈ ccom F R , ⟨ x , z ⟩ ∈ ccom F R , ⟨ x , u ⟩ ∈ R , ⟨ u , y ⟩ ∈ F , ⟨ x , v ⟩ ∈ R , ⟨ v , z ⟩ ∈ F ⇒ functional R $ by weaken [#2]
+a4: $ G , ⟨ x , y ⟩ ∈ ccom F R , ⟨ x , z ⟩ ∈ ccom F R , ⟨ x , u ⟩ ∈ R , ⟨ u , y ⟩ ∈ F , ⟨ x , v ⟩ ∈ R , ⟨ v , z ⟩ ∈ F ⇒ u = v $ by functional_elim [a3, a1, a2]
+a5: $ G , ⟨ x , y ⟩ ∈ ccom F R , ⟨ x , z ⟩ ∈ ccom F R , ⟨ x , u ⟩ ∈ R , ⟨ u , y ⟩ ∈ F , ⟨ x , v ⟩ ∈ R , ⟨ v , z ⟩ ∈ F ⇒ v = u $ by eq_sym [a4]
+a6: $ G , ⟨ x , y ⟩ ∈ ccom F R , ⟨ x , z ⟩ ∈ ccom F R , ⟨ x , u ⟩ ∈ R , ⟨ u , y ⟩ ∈ F , ⟨ x , v ⟩ ∈ R , ⟨ v , z ⟩ ∈ F ⇒ ⟨ v , z ⟩ = ⟨ u , z ⟩ $ by opair_eq [a5, eq_refl []]
+a7: $ G , ⟨ x , y ⟩ ∈ ccom F R , ⟨ x , z ⟩ ∈ ccom F R , ⟨ x , u ⟩ ∈ R , ⟨ u , y ⟩ ∈ F , ⟨ x , v ⟩ ∈ R , ⟨ v , z ⟩ ∈ F ⇒ ⟨ v , z ⟩ ∈ F $ by ax
+a8: $ G , ⟨ x , y ⟩ ∈ ccom F R , ⟨ x , z ⟩ ∈ ccom F R , ⟨ x , u ⟩ ∈ R , ⟨ u , y ⟩ ∈ F , ⟨ x , v ⟩ ∈ R , ⟨ v , z ⟩ ∈ F ⇒ ⟨ u , z ⟩ ∈ F $ by wcel_eq_l [a6, a7]
+a9: $ G , ⟨ x , y ⟩ ∈ ccom F R , ⟨ x , z ⟩ ∈ ccom F R , ⟨ x , u ⟩ ∈ R , ⟨ u , y ⟩ ∈ F , ⟨ x , v ⟩ ∈ R , ⟨ v , z ⟩ ∈ F ⇒ ⟨ u , y ⟩ ∈ F $ by ax
+a10: $ G , ⟨ x , y ⟩ ∈ ccom F R , ⟨ x , z ⟩ ∈ ccom F R , ⟨ x , u ⟩ ∈ R , ⟨ u , y ⟩ ∈ F , ⟨ x , v ⟩ ∈ R , ⟨ v , z ⟩ ∈ F ⇒ functional F $ by weaken [#1]
+a11: $ G , ⟨ x , y ⟩ ∈ ccom F R , ⟨ x , z ⟩ ∈ ccom F R , ⟨ x , u ⟩ ∈ R , ⟨ u , y ⟩ ∈ F , ⟨ x , v ⟩ ∈ R , ⟨ v , z ⟩ ∈ F ⇒ y = z $ by functional_elim [a10, a9, a8]
+b1: $ G , ⟨ x , y ⟩ ∈ ccom F R , ⟨ x , z ⟩ ∈ ccom F R , ⟨ x , u ⟩ ∈ R , ⟨ u , y ⟩ ∈ F ⇒ ⟨ x , z ⟩ ∈ ccom F R $ by ax
+b2: $ G , ⟨ x , y ⟩ ∈ ccom F R , ⟨ x , z ⟩ ∈ ccom F R , ⟨ x , u ⟩ ∈ R , ⟨ u , y ⟩ ∈ F ⇒ y = z $ by ccom_elim [b1, a11]
+b3: $ G , ⟨ x , y ⟩ ∈ ccom F R , ⟨ x , z ⟩ ∈ ccom F R ⇒ ⟨ x , y ⟩ ∈ ccom F R $ by ax
+b4: $ G , ⟨ x , y ⟩ ∈ ccom F R , ⟨ x , z ⟩ ∈ ccom F R ⇒ y = z $ by ccom_elim [b3, b2]
+b5: $ G ⇒ functional (ccom F R) $ by functional_intro [b4]
+
 ccom_congr
 ----------
 l0: $ ⟨ x , y ⟩ ≐ ⟨ x , y ⟩ $ by ceqt_refl
@@ -686,8 +741,16 @@ l4: $ G , ⟨ z , y ⟩ ∈ cres R A ⇒ z ∊ A $ by and_elim_l [l3]
 l5: $ G , z ∊ cdm (cres R A) ⇒ z ∊ A $ by cdm_elim [l1, l4]
 l6: $ G ⇒ cdm (cres R A) ⊆ A $ by subset_intro [l5]
 
-lemma x1_cres_sub_img (G: hyps) (F A: class): $ G ⇒ cres F A ⊆ A × img F A $
-----
+cdm_cres_intro
+--------------
+l1: $ G , ⟨ w , v ⟩ ∈ R ⇒ ⟨ w , v ⟩ ∈ R $ by ax
+l2: $ G , ⟨ w , v ⟩ ∈ R ⇒ w ∊ A $ by weaken [#1]
+l3: $ G , ⟨ w , v ⟩ ∈ R ⇒ ⟨ w , v ⟩ ∈ cres R A $ by cres_intro [l2, l1]
+l4: $ G , ⟨ w , v ⟩ ∈ R ⇒ w ∊ cdm (cres R A) $ by cdm_intro [l3]
+l5: $ G ⇒ w ∊ cdm (cres R A) $ by cdm_elim [#2, l4]
+
+cres_subset_cxp
+---------------
 l1: $ z ∊ cres F A ⇒ z ∊ cres F A $ by ax
 l2: $ z ∊ cres F A ⇒ ∃ x ∃ y (z = ⟨ x , y ⟩ ∧ x ∊ A ∧ ⟨ x , y ⟩ ∈ F) $ by cab_elim [l1]
 l3: $ z = ⟨ x , y ⟩ ∧ x ∊ A ∧ ⟨ x , y ⟩ ∈ F ⇒ z = ⟨ x , y ⟩ ∧ x ∊ A ∧ ⟨ x , y ⟩ ∈ F $ by ax
@@ -707,7 +770,7 @@ cres_set
 --------
 l1: $ G ⇒ isset (img F A) $ by img_set [#1, #2]
 l2: $ G ⇒ isset (A × img F A) $ by cxp_set [#2, l1]
-l3: $ G ⇒ cres F A ⊆ A × img F A $ by x1_cres_sub_img
+l3: $ G ⇒ cres F A ⊆ A × img F A $ by cres_subset_cxp
 l4: $ G ⇒ isset (cres F A) $ by subset_isset [l2, l3]
 
 cres_congr
@@ -762,6 +825,23 @@ sb_c_cres
 ---------
 l1: $ (⟦ x / t ⟧ {z | ∃ u ∃ v (z = ⟨ u , v ⟩ ∧ u ∊ A ∧ ⟨ u , v ⟩ ∈ R)}) ≐ {z | ∃ u ∃ v (z = ⟨ u , v ⟩ ∧ u ∊ (⟦ x / t ⟧ A) ∧ ⟨ u , v ⟩ ∈ (⟦ x / t ⟧ R))} $ by ceqt_refl
 
+img_cres
+--------
+l1: $ G , z ∊ img (cres F A) A ⇒ z ∊ img (cres F A) A $ by ax
+l2: $ G , z ∊ img (cres F A) A , u ∊ A , ⟨ u , z ⟩ ∈ cres F A ⇒ ⟨ u , z ⟩ ∈ cres F A $ by ax
+l3: $ G , z ∊ img (cres F A) A , u ∊ A , ⟨ u , z ⟩ ∈ cres F A ⇒ u ∊ A ∧ ⟨ u , z ⟩ ∈ F $ by cres_elim [l2]
+l4: $ G , z ∊ img (cres F A) A , u ∊ A , ⟨ u , z ⟩ ∈ cres F A ⇒ ⟨ u , z ⟩ ∈ F $ by and_elim_r [l3]
+l5: $ G , z ∊ img (cres F A) A , u ∊ A , ⟨ u , z ⟩ ∈ cres F A ⇒ u ∊ A $ by ax
+l6: $ G , z ∊ img (cres F A) A , u ∊ A , ⟨ u , z ⟩ ∈ cres F A ⇒ z ∊ img F A $ by img_intro [l5, l4]
+l7: $ G , z ∊ img (cres F A) A ⇒ z ∊ img F A $ by img_elim [l1, l6]
+l8: $ G , z ∊ img F A ⇒ z ∊ img F A $ by ax
+l9: $ G , z ∊ img F A , u ∊ A , ⟨ u , z ⟩ ∈ F ⇒ u ∊ A $ by ax
+l10: $ G , z ∊ img F A , u ∊ A , ⟨ u , z ⟩ ∈ F ⇒ ⟨ u , z ⟩ ∈ F $ by ax
+l11: $ G , z ∊ img F A , u ∊ A , ⟨ u , z ⟩ ∈ F ⇒ ⟨ u , z ⟩ ∈ cres F A $ by cres_intro [l9, l10]
+l12: $ G , z ∊ img F A , u ∊ A , ⟨ u , z ⟩ ∈ F ⇒ z ∊ img (cres F A) A $ by img_intro [l9, l11]
+l13: $ G , z ∊ img F A ⇒ z ∊ img (cres F A) A $ by img_elim [l8, l12]
+l14: $ G ⇒ img (cres F A) A = img F A $ by eq_intro [l7, l13]
+
 functional_subset
 -----------------
 l1: $ G , ⟨ x , y ⟩ ∈ F , ⟨ x , z ⟩ ∈ F ⇒ ⟨ x , y ⟩ ∈ F $ by ax
@@ -813,6 +893,35 @@ l3: $ G , y ∊ B , ⟨ z , y ⟩ ∈ F ⇒ ⟨ z , y ⟩ ∈ F $ by ax
 l4: $ G , y ∊ B , ⟨ z , y ⟩ ∈ F ⇒ z ∊ cdm F $ by cdm_intro [l3]
 l5: $ G , z ∊ A ⇒ z ∊ cdm F $ by fn_into_elim [l1, l2, l4]
 l6: $ G ⇒ A ⊆ cdm F $ by subset_intro [l5]
+
+fn_into_cres
+------------
+l1: $ G ⇒ functional F $ by fn_into_functional [#1]
+l2: $ G ⇒ functional (cres F A) $ by functional_cres [l1]
+l3: $ G , u ∊ A ⇒ fn_into F A B $ by weaken [#1]
+l4: $ G , u ∊ A ⇒ u ∊ A $ by ax
+l5: $ G , u ∊ A , v ∊ B , ⟨ u , v ⟩ ∈ F ⇒ v ∊ B $ by ax
+l6: $ G , u ∊ A , v ∊ B , ⟨ u , v ⟩ ∈ F ⇒ ⟨ u , v ⟩ ∈ F $ by ax
+l7: $ G , u ∊ A , v ∊ B , ⟨ u , v ⟩ ∈ F ⇒ u ∊ A $ by ax
+l8: $ G , u ∊ A , v ∊ B , ⟨ u , v ⟩ ∈ F ⇒ ⟨ u , v ⟩ ∈ cres F A $ by cres_intro [l7, l6]
+l9: $ G , u ∊ A , v ∊ B , ⟨ u , v ⟩ ∈ F ⇒ v ∊ B ∧ ⟨ u , v ⟩ ∈ cres F A $ by and_intro [l5, l8]
+l10: $ G , u ∊ A , v ∊ B , ⟨ u , v ⟩ ∈ F ⇒ ∃ y (y ∊ B ∧ ⟨ u , y ⟩ ∈ cres F A) $ by ex_intro (x := $ y $, t := $ v $, p := $ y ∊ B ∧ ⟨ u , y ⟩ ∈ cres F A $) [l9]
+l11: $ G , u ∊ A ⇒ ∃ y (y ∊ B ∧ ⟨ u , y ⟩ ∈ cres F A) $ by fn_into_elim [l3, l4, l10]
+l12: $ G ⇒ fn_into (cres F A) A B $ by fn_into_intro [l2, l11]
+
+fn_into_subset_cod
+------------------
+l1: $ G ⇒ functional F $ by fn_into_functional [#1]
+l2: $ G , x ∊ A ⇒ fn_into F A B $ by weaken [#1]
+l3: $ G , x ∊ A ⇒ x ∊ A $ by ax
+l4: $ G , x ∊ A , v ∊ B , ⟨ x , v ⟩ ∈ F ⇒ v ∊ B $ by ax
+l5: $ G , x ∊ A , v ∊ B , ⟨ x , v ⟩ ∈ F ⇒ B ⊆ C $ by weaken [#2]
+l6: $ G , x ∊ A , v ∊ B , ⟨ x , v ⟩ ∈ F ⇒ v ∊ C $ by subset_elim [l5, l4]
+l7: $ G , x ∊ A , v ∊ B , ⟨ x , v ⟩ ∈ F ⇒ ⟨ x , v ⟩ ∈ F $ by ax
+l8: $ G , x ∊ A , v ∊ B , ⟨ x , v ⟩ ∈ F ⇒ v ∊ C ∧ ⟨ x , v ⟩ ∈ F $ by and_intro [l6, l7]
+l9: $ G , x ∊ A , v ∊ B , ⟨ x , v ⟩ ∈ F ⇒ ∃ y (y ∊ C ∧ ⟨ x , y ⟩ ∈ F) $ by ex_intro (t := $ v $) [l8]
+l10: $ G , x ∊ A ⇒ ∃ y (y ∊ C ∧ ⟨ x , y ⟩ ∈ F) $ by fn_into_elim [l2, l3, l9]
+l11: $ G ⇒ fn_into F A C $ by fn_into_intro [l1, l10]
 
 ap_intro
 --------

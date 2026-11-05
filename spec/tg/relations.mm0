@@ -28,6 +28,8 @@ theorem cxp_intro_eq (G: hyps) (A B: class) (a b c: set):
   $ G ⇒ c = ⟨ a , b ⟩ $ > $ G ⇒ a ∊ A $ > $ G ⇒ b ∊ B $ > $ G ⇒ c ∊ A × B $;
 theorem cxp_intro (G: hyps) (A B: class) (a b: set):
   $ G ⇒ a ∊ A $ > $ G ⇒ b ∊ B $ > $ G ⇒ ⟨ a , b ⟩ ∈ A × B $;
+--| Class form of `cxp_intro`.
+theorem cxp_intro_c (G: hyps) (A B C D: class): $ G ⇒ C ∈ A $ > $ G ⇒ D ∈ B $ > $ G ⇒ ⟨ C , D ⟩ ∈ A × B $;
 --| @freshen H x
 --| @freshen H y
 --| @freshen d x
@@ -99,10 +101,15 @@ theorem cdm_mono (G: hyps) (R S: class): $ G ⇒ R ⊆ S $ > $ G ⇒ cdm R ⊆ c
 theorem crn_mono (G: hyps) (R S: class): $ G ⇒ R ⊆ S $ > $ G ⇒ crn R ⊆ crn S $;
 theorem cdm_cxp (G: hyps) (A B: class) (b: set): $ G ⇒ b ∊ B $ > $ G ⇒ cdm (A × B) = A $;
 theorem crn_cxp (G: hyps) (A B: class) (a: set): $ G ⇒ a ∊ A $ > $ G ⇒ crn (A × B) = B $;
+--| The empty set has an empty domain.
+theorem cdm_empty (G: hyps): $ G ⇒ cdm ∅ = ∅ $;
 theorem rel_subset_cxp (G: hyps) (R: class): $ G ⇒ rel R $ > $ G ⇒ R ⊆ cdm R × crn R $;
 --| `cdm R ⊆ ⋃ ⋃ R`, and the same for the range.
 theorem cdm_set (G: hyps) (R: class): $ G ⇒ isset R $ > $ G ⇒ isset (cdm R) $;
 theorem crn_set (G: hyps) (R: class): $ G ⇒ isset R $ > $ G ⇒ isset (crn R) $;
+--| A functional relation on a set is a set (its range is the image of the domain).
+theorem functional_set (G: hyps) (F: class):
+  $ G ⇒ functional F $ > $ G ⇒ rel F $ > $ G ⇒ isset (cdm F) $ > $ G ⇒ isset F $;
 --| @congr
 theorem cdm_congr (R S: class): $ R ≐ S $ > $ cdm R ≐ cdm S $;
 --| @congr
@@ -150,6 +157,9 @@ theorem ccom_elim {y: set} (G: hyps y) (H: hyps) (S R: class) (a c: set) (d: fml
   $ G ⇒ ⟨ a , c ⟩ ∈ ccom S R $ > $ H , ⟨ a , y ⟩ ∈ R , ⟨ y , c ⟩ ∈ S ⇒ d $ >
   $ G , H ⇒ d $;
 theorem ccom_rel (G: hyps) (S R: class): $ G ⇒ rel (ccom S R) $;
+--| The composite of two functional classes is functional.
+theorem ccom_functional (G: hyps) (F R: class):
+  $ G ⇒ functional F $ > $ G ⇒ functional R $ > $ G ⇒ functional (ccom F R) $;
 --| @congr
 theorem ccom_congr (R S T U: class):
   $ R ≐ S $ > $ T ≐ U $ > $ ccom R T ≐ ccom S U $;
@@ -167,6 +177,11 @@ theorem cres_elim (G: hyps) (R A: class) (a b: set):
 theorem cres_rel (G: hyps) (R A: class): $ G ⇒ rel (cres R A) $;
 theorem cres_subset (G: hyps) (R A: class): $ G ⇒ cres R A ⊆ R $;
 theorem cres_cdm (G: hyps) (R A: class): $ G ⇒ cdm (cres R A) ⊆ A $;
+--| An element of the domain in the restricting class is in the restriction's domain.
+theorem cdm_cres_intro (G: hyps) (R A: class) (w: set):
+  $ G ⇒ w ∊ A $ > $ G ⇒ w ∊ cdm R $ > $ G ⇒ w ∊ cdm (cres R A) $;
+--| A restriction lies in the product of the restricting class and the image.
+theorem cres_subset_cxp (G: hyps) (F A: class): $ G ⇒ cres F A ⊆ A × img F A $;
 theorem cres_set (G: hyps) (F A: class):
   $ G ⇒ functional F $ > $ G ⇒ isset A $ > $ G ⇒ isset (cres F A) $;
 --| @congr
@@ -178,6 +193,8 @@ theorem cres_eq (G: hyps) (R S A B: class):
 --| @rewrite
 theorem sb_c_cres {x: set} (t: set x) (R A: class x):
   $ (⟦ x / t ⟧ (cres R A)) ≐ cres (⟦ x / t ⟧ R) (⟦ x / t ⟧ A) $;
+--| The image of `A` under a restriction to `A`.
+theorem img_cres (G: hyps) (F A: class): $ G ⇒ img (cres F A) A = img F A $;
 
 -- --------------------------------------------------------------------------
 -- Functional classes and functions into a class
@@ -200,6 +217,11 @@ theorem fn_into_elim {y: set} (G: hyps y) (H: hyps) (F A B: class) (a: set) (c: 
   $ G , H ⇒ c $;
 theorem fn_into_cdm (G: hyps) (F A B: class):
   $ G ⇒ fn_into F A B $ > $ G ⇒ A ⊆ cdm F $;
+--| A function on `A` restricted to `A` is still a function on `A`.
+theorem fn_into_cres (G: hyps) (F A B: class): $ G ⇒ fn_into F A B $ > $ G ⇒ fn_into (cres F A) A B $;
+--| A function into `B` is a function into any superclass of `B`.
+theorem fn_into_subset_cod (G: hyps) (F A B C: class):
+  $ G ⇒ fn_into F A B $ > $ G ⇒ B ⊆ C $ > $ G ⇒ fn_into F A C $;
 
 -- --------------------------------------------------------------------------
 -- Functions as traces: `ap`, `lam`, `pi`

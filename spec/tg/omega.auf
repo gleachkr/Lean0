@@ -13,6 +13,15 @@ l8: $ _ ⇒ ¬ a ∊ a $ by all_elim [l7]
 l9: $ G ⇒ ¬ a ∊ a $ by weaken [l8]
 l10: $ G ⇒ ⊥ $ by not_elim [l9, #1]
 
+notin_self_c
+------------
+l1: $ G , u = A , u ∊ A ⇒ u ∊ A $ by ax
+l2: $ G , u = A , u ∊ A ⇒ u = A $ by ax
+l3: $ G , u = A , u ∊ A ⇒ A = u $ by eq_sym [l2]
+l4: $ G , u = A , u ∊ A ⇒ u ∊ u $ by welc_eq [l3, l1]
+l5: $ G , u = A , u ∊ A ⇒ ⊥ $ by notin_self [l4]
+l6: $ G ⇒ ⊥ $ by wcel_elim [#1, l5]
+
 notin_cycle
 -----------
 l1: $ ∀ y (y ∊ x → ∀ w (w ∊ y → ¬ y ∊ w)) , z ∊ x , x ∊ z ⇒ ∀ y (y ∊ x → ∀ w (w ∊ y → ¬ y ∊ w)) $ by ax
@@ -35,6 +44,21 @@ l17: $ _ ⇒ b ∊ a → ¬ a ∊ b $ by all_elim [l16]
 l18: $ G ⇒ b ∊ a → ¬ a ∊ b $ by weaken [l17]
 l19: $ G ⇒ ¬ a ∊ b $ by imp_elim [l18, #2]
 l20: $ G ⇒ ⊥ $ by not_elim [l19, #1]
+
+notin_cycle_c
+-------------
+m1: $ G , u = A , u ∊ B ⇒ B ∈ A $ by weaken [#2]
+m2: $ G , u = A , u ∊ B ⇒ u = A $ by ax
+m3: $ G , u = A , u ∊ B ⇒ A = u $ by eq_sym [m2]
+m4: $ G , u = A , u ∊ B ⇒ B ∈ u $ by wcel_eq_r [m3, m1]
+m5: $ G , u = A , u ∊ B , v = B , v ∊ u ⇒ v ∊ u $ by ax
+m6: $ G , u = A , u ∊ B , v = B , v ∊ u ⇒ u ∊ B $ by ax
+m7: $ G , u = A , u ∊ B , v = B , v ∊ u ⇒ v = B $ by ax
+m8: $ G , u = A , u ∊ B , v = B , v ∊ u ⇒ B = v $ by eq_sym [m7]
+m9: $ G , u = A , u ∊ B , v = B , v ∊ u ⇒ u ∊ v $ by welc_eq [m8, m6]
+m10: $ G , u = A , u ∊ B , v = B , v ∊ u ⇒ ⊥ $ by notin_cycle [m9, m5]
+m11: $ G , u = A , u ∊ B ⇒ ⊥ $ by wcel_elim [m4, m10]
+m12: $ G ⇒ ⊥ $ by wcel_elim [#1, m11]
 
 suc_ne_empty
 ------------
@@ -70,23 +94,29 @@ l15: $ G , a ∊ b ⇒ b ∊ a ∨ b = a $ by weaken [l7]
 l16: $ G , a ∊ b ⇒ a = b $ by or_elim [l15, l12, l14]
 l17: $ G ⇒ a = b $ by or_elim [l3, l16, l8]
 
+suc_inj_c
+---------
+l1: $ G , u = A , v = B ⇒ u = A $ by ax
+l2: $ G , u = A , v = B ⇒ v = B $ by ax
+l3: $ G , u = A , v = B ⇒ suc u = suc A $ by suc_eq [l1]
+l4: $ G , u = A , v = B ⇒ suc v = suc B $ by suc_eq [l2]
+l5: $ G , u = A , v = B ⇒ suc A = suc B $ by weaken [#3]
+l6: $ G , u = A , v = B ⇒ suc u = suc B $ by eq_trans [l3, l5]
+l7: $ G , u = A , v = B ⇒ suc B = suc v $ by eq_sym [l4]
+l8: $ G , u = A , v = B ⇒ suc u = suc v $ by eq_trans [l6, l7]
+l9: $ G , u = A , v = B ⇒ u = v $ by suc_inj [l8]
+l10: $ G , u = A , v = B ⇒ A = u $ by eq_sym [l1]
+l11: $ G , u = A , v = B ⇒ A = v $ by eq_trans [l10, l9]
+l12: $ G , u = A , v = B ⇒ A = B $ by eq_trans [l11, l2]
+l13: $ G , u = A ⇒ isset B $ by weaken [#2]
+l14: $ G , u = A ⇒ A = B $ by isset_elim [l13, l12]
+l15: $ G ⇒ A = B $ by isset_elim [#1, l14]
+
 omega_intro
 -----------
 l1: $ G ⇒ inductive y → a ∊ y $ by imp_intro [#1]
 l2: $ G ⇒ ∀ y (inductive y → a ∊ y) $ by all_intro [l1]
 l3: $ G ⇒ a ∊ {x | ∀ y (inductive y → x ∊ y)} $ by cab_intro (x := $ x $, t := $ a $, p := $ ∀ y (inductive y → x ∊ y) $) [l2]
-
-wcel_cin
---------
-l1: $ G , x = A , x ∊ B ⇒ x = A $ by ax
-l2: $ G , x = A , x ∊ B ⇒ x ∊ B $ by ax
-l3: $ G , x = A , x ∊ B ⇒ A = x $ by eq_sym [l1]
-l4: $ G , x = A , x ∊ B ⇒ A ∈ C $ by weaken [#2]
-l5: $ G , x = A , x ∊ B ⇒ x ∈ C $ by wcel_eq_l [l3, l4]
-l6: $ G , x = A , x ∊ B ⇒ x ∊ C $ by wcel_welc [l5]
-l7: $ G , x = A , x ∊ B ⇒ x ∊ B ∩ C $ by cin_intro [l2, l6]
-l8: $ G , x = A , x ∊ B ⇒ A ∈ B ∩ C $ by wcel_intro [l1, l7]
-l9: $ G ⇒ A ∈ B ∩ C $ by wcel_elim [#1, l8]
 
 omega_elim
 ----------
@@ -160,6 +190,15 @@ l15: $ G , z = suc a ⇒ z = suc a $ by ax
 l16: $ G , z = suc a ⇒ suc a ∈ ω $ by wcel_intro [l15, l14]
 l17: $ G ⇒ suc a ∈ ω $ by isset_elim [l2, l16]
 
+omega_suc_c
+-----------
+l1: $ G , v = A , v ∊ ω ⇒ v ∊ ω $ by ax
+l2: $ G , v = A , v ∊ ω ⇒ suc v ∈ ω $ by omega_suc [l1]
+l3: $ G , v = A , v ∊ ω ⇒ v = A $ by ax
+l4: $ G , v = A , v ∊ ω ⇒ suc v = suc A $ by suc_eq [l3]
+l5: $ G , v = A , v ∊ ω ⇒ suc A ∈ ω $ by wcel_eq_l [l4, l2]
+l6: $ G ⇒ suc A ∈ ω $ by wcel_elim [#1, l5]
+
 omega_inductive
 ---------------
 l1: $ G ⇒ ∅ ∈ ω $ by omega_zero
@@ -201,16 +240,6 @@ l17: $ G , z ∊ ω ⇒ z ∊ ω ∩ P $ by omega_elim [l15, l16]
 l18: $ G , z ∊ ω ⇒ z ∊ P $ by cin_elim_r [l17]
 l19: $ G ⇒ ω ⊆ P $ by subset_intro [l18]
 
-wcel_cpw
---------
-l1: $ G , x = B ⇒ x = B $ by ax
-l2: $ G , x = B ⇒ B = x $ by eq_sym [l1]
-l3: $ G , x = B ⇒ B ⊆ A $ by weaken [#2]
-l4: $ G , x = B ⇒ x ⊆ A $ by subset_eq_l [l2, l3]
-l5: $ G , x = B ⇒ x ∊ 𝒫 A $ by cpw_intro [l4]
-l6: $ G , x = B ⇒ B ∈ 𝒫 A $ by wcel_intro [l1, l5]
-l7: $ G ⇒ B ∈ 𝒫 A $ by isset_elim [#1, l6]
-
 omega_ind_f
 -----------
 l1: $ G , y ∊ ω ∧ y ∊ {x | p} ⇒ y ∊ ω ∧ y ∊ {x | p} $ by ax
@@ -230,6 +259,26 @@ l14: $ G , x ∊ ω ⇒ x ∊ {x | p} $ by subset_elim [l13, l12]
 l15: $ G , x ∊ ω ⇒ p $ by cab_elim (x := $ x $, t := $ x $, p := $ p $) [l14]
 l16: $ G ⇒ x ∊ ω → p $ by imp_intro [l15]
 l17: $ G ⇒ ∀ x (x ∊ ω → p) $ by all_intro [l16]
+
+omega_ind_named
+---------------
+l1: $ G , z = ∅ ⇒ z ∊ {x | p} $ by cab_intro [#1]
+l2: $ G , z = ∅ ⇒ z = ∅ $ by ax
+l3: $ G , z = ∅ ⇒ ∅ ∈ {x | p} $ by wcel_intro [l2, l1]
+l4: $ G ⇒ isset ∅ $ by ax_empty
+l5: $ G ⇒ ∅ ∈ {x | p} $ by isset_elim [l4, l3]
+l6: $ G , y ∊ ω , [x/y] p , z = suc y ⇒ z ∊ {x | p} $ by cab_intro [#2]
+l7: $ G , y ∊ ω , [x/y] p , z = suc y ⇒ z = suc y $ by ax
+l8: $ G , y ∊ ω , [x/y] p , z = suc y ⇒ suc y ∈ {x | p} $ by wcel_intro [l7, l6]
+l9: $ G , y ∊ ω , [x/y] p ⇒ isset y $ by isset_var
+l10: $ G , y ∊ ω , [x/y] p ⇒ isset (suc y) $ by suc_set [l9]
+l11: $ G , y ∊ ω , [x/y] p ⇒ suc y ∈ {x | p} $ by isset_elim [l10, l8]
+l12: $ G , y ∊ ω ⇒ [x/y] p → suc y ∈ {x | p} $ by imp_intro [l11]
+l13: $ G ⇒ y ∊ ω → [x/y] p → suc y ∈ {x | p} $ by imp_intro [l12]
+l14: $ G ⇒ ∀ y (y ∊ ω → [x/y] p → suc y ∈ {x | p}) $ by all_intro [l13]
+l15: $ G ⇒ ∀ x (x ∊ ω → p) $ by omega_ind_f [l5, l14]
+l16: $ G ⇒ a ∊ ω → [x/a] p $ by all_elim [l15]
+l17: $ G ⇒ [x/a] p $ by imp_elim [l16, #3]
 
 omega_trans
 -----------
@@ -394,9 +443,27 @@ l42: $ G , u ∊ ω ∧ u ∊ {w | a ∊ w → suc a ∈ suc w} ⇒ suc u ∈ {w
 l43: $ G ⇒ u ∊ ω ∧ u ∊ {w | a ∊ w → suc a ∈ suc w} → suc u ∈ {w | a ∊ w → suc a ∈ suc w} $ by imp_intro [l42]
 l44: $ G ⇒ ∀ u (u ∊ ω ∧ u ∊ {w | a ∊ w → suc a ∈ suc w} → suc u ∈ {w | a ∊ w → suc a ∈ suc w}) $ by all_intro [l43]
 l45: $ G ⇒ ω ⊆ {w | a ∊ w → suc a ∈ suc w} $ by omega_ind [l11, l44]
-l46: $ G ⇒ b ∊ {w | a ∊ w → suc a ∈ suc w} $ by subset_elim [l45, #2]
+l46: $ G ⇒ b ∊ {w | a ∊ w → suc a ∈ suc w} $ by subset_elim [l45, #1]
 l47: $ G ⇒ a ∊ b → suc a ∈ suc b $ by cab_elim (x := $ w $, t := $ b $, p := $ a ∊ w → suc a ∈ suc w $) [l46]
-l48: $ G ⇒ suc a ∈ suc b $ by imp_elim [l47, #3]
+l48: $ G ⇒ suc a ∈ suc b $ by imp_elim [l47, #2]
+
+omega_suc_mono_c
+----------------
+l1: $ G , v = B , v ∊ ω , u = A , u ∊ v ⇒ v ∊ ω $ by ax
+l2: $ G , v = B , v ∊ ω , u = A , u ∊ v ⇒ u ∊ v $ by ax
+l3: $ G , v = B , v ∊ ω , u = A , u ∊ v ⇒ suc u ∈ suc v $ by omega_suc_mono [l1, l2]
+l4: $ G , v = B , v ∊ ω , u = A , u ∊ v ⇒ u = A $ by ax
+l5: $ G , v = B , v ∊ ω , u = A , u ∊ v ⇒ suc u = suc A $ by suc_eq [l4]
+l6: $ G , v = B , v ∊ ω , u = A , u ∊ v ⇒ v = B $ by ax
+l7: $ G , v = B , v ∊ ω , u = A , u ∊ v ⇒ suc v = suc B $ by suc_eq [l6]
+l8: $ G , v = B , v ∊ ω , u = A , u ∊ v ⇒ suc A ∈ suc v $ by wcel_eq_l [l5, l3]
+l9: $ G , v = B , v ∊ ω , u = A , u ∊ v ⇒ suc A ∈ suc B $ by wcel_eq_r [l7, l8]
+l10: $ G , v = B , v ∊ ω ⇒ A ∈ B $ by weaken [#2]
+l11: $ G , v = B , v ∊ ω ⇒ v = B $ by ax
+l12: $ G , v = B , v ∊ ω ⇒ B = v $ by eq_sym [l11]
+l13: $ G , v = B , v ∊ ω ⇒ A ∈ v $ by wcel_eq_r [l12, l10]
+l14: $ G , v = B , v ∊ ω ⇒ suc A ∈ suc B $ by wcel_elim [l13, l9]
+l15: $ G ⇒ suc A ∈ suc B $ by wcel_elim [#1, l14]
 
 omega_zero_le
 -------------
@@ -472,11 +539,9 @@ l29: $ G , u ∊ ω ∧ u ∊ {w | ∀ v (v ∊ ω → w ∊ v ∨ w = v ∨ v �
 l30: $ G , u ∊ ω ∧ u ∊ {w | ∀ v (v ∊ ω → w ∊ v ∨ w = v ∨ v ∊ w)} , z = suc u , v ∊ ω ⇒ u ∊ v ∨ u = v ∨ v ∊ u $ by imp_elim [l28, l29]
 l31: $ G , u ∊ ω ∧ u ∊ {w | ∀ v (v ∊ ω → w ∊ v ∨ w = v ∨ v ∊ w)} , z = suc u , v ∊ ω ⇒ z = suc u $ by ax
 l32: $ G , u ∊ ω ∧ u ∊ {w | ∀ v (v ∊ ω → w ∊ v ∨ w = v ∨ v ∊ w)} , z = suc u , v ∊ ω ⇒ suc u = z $ by eq_sym [l31]
-l33: $ G , u ∊ ω ∧ u ∊ {w | ∀ v (v ∊ ω → w ∊ v ∨ w = v ∨ v ∊ w)} , z = suc u , v ∊ ω ⇒ u ∊ ω $ by weaken [l24]
 l34: $ G , u ∊ ω ∧ u ∊ {w | ∀ v (v ∊ ω → w ∊ v ∨ w = v ∨ v ∊ w)} , z = suc u , v ∊ ω , u ∊ v ⇒ u ∊ v $ by ax
-l35: $ G , u ∊ ω ∧ u ∊ {w | ∀ v (v ∊ ω → w ∊ v ∨ w = v ∨ v ∊ w)} , z = suc u , v ∊ ω , u ∊ v ⇒ u ∊ ω $ by weaken [l33]
 l36: $ G , u ∊ ω ∧ u ∊ {w | ∀ v (v ∊ ω → w ∊ v ∨ w = v ∨ v ∊ w)} , z = suc u , v ∊ ω , u ∊ v ⇒ v ∊ ω $ by weaken [l29]
-l37: $ G , u ∊ ω ∧ u ∊ {w | ∀ v (v ∊ ω → w ∊ v ∨ w = v ∨ v ∊ w)} , z = suc u , v ∊ ω , u ∊ v ⇒ suc u ∈ suc v $ by omega_suc_mono [l35, l36, l34]
+l37: $ G , u ∊ ω ∧ u ∊ {w | ∀ v (v ∊ ω → w ∊ v ∨ w = v ∨ v ∊ w)} , z = suc u , v ∊ ω , u ∊ v ⇒ suc u ∈ suc v $ by omega_suc_mono [l36, l34]
 l38: $ G , u ∊ ω ∧ u ∊ {w | ∀ v (v ∊ ω → w ∊ v ∨ w = v ∨ v ∊ w)} , z = suc u , v ∊ ω , u ∊ v ⇒ suc u = z $ by weaken [l32]
 l39: $ G , u ∊ ω ∧ u ∊ {w | ∀ v (v ∊ ω → w ∊ v ∨ w = v ∨ v ∊ w)} , z = suc u , v ∊ ω , u ∊ v ⇒ z ∈ suc v $ by wcel_eq_l [l38, l37]
 l40: $ G , u ∊ ω ∧ u ∊ {w | ∀ v (v ∊ ω → w ∊ v ∨ w = v ∨ v ∊ w)} , z = suc u , v ∊ ω , u ∊ v ⇒ z ∊ suc v $ by wcel_welc [l39]
@@ -555,6 +620,16 @@ l6: $ G , ⟨ a , y ⟩ ∈ F ⇒ ⟨ a , y ⟩ = ⟨ a , fv F a ⟩ $ by opair_
 l7: $ G , ⟨ a , y ⟩ ∈ F ⇒ ⟨ a , fv F a ⟩ ∈ F $ by wcel_eq_l [l6, l2]
 l8: $ G ⇒ ⟨ a , fv F a ⟩ ∈ F $ by cdm_elim [#2, l7]
 
+fv_pair_move
+------------
+l1: $ G ⇒ fv R u = v $ by fv_val [#1, #3]
+l2: $ G ⇒ fv S u = fv R u $ by eq_sym [#5]
+l3: $ G ⇒ fv S u = v $ by eq_trans [l2, l1]
+l4: $ G ⇒ ⟨ u , fv S u ⟩ ∈ S $ by fv_in [#2, #4]
+l5: $ G ⇒ u = u $ by eq_refl
+l6: $ G ⇒ ⟨ u , fv S u ⟩ = ⟨ u , v ⟩ $ by opair_eq [l5, l3]
+l7: $ G ⇒ ⟨ u , v ⟩ ∈ S $ by wcel_eq_l [l6, l4]
+
 fv_set
 ------
 l1: $ G ⇒ isset (ap F a) $ by ap_functional_set [#1]
@@ -616,6 +691,34 @@ l2: $ G ⇒ ⋃ (ap F A) = ⋃ (ap H B) $ by cuni_eq [l1]
 sb_c_fv
 -------
 l1: $ (⟦ x / t ⟧ (⋃ (ap F A))) ≐ ⋃ (ap (⟦ x / t ⟧ F) (⟦ x / t ⟧ A)) $ by ceqt_refl
+
+fv_val_c
+--------
+l1: $ G , x = A , y = B ⇒ x = A $ by ax
+l2: $ G , x = A , y = B ⇒ y = B $ by ax
+l3: $ G , x = A , y = B ⇒ A = x $ by eq_sym [l1]
+l4: $ G , x = A , y = B ⇒ B = y $ by eq_sym [l2]
+l5: $ G , x = A , y = B ⇒ ⟨ A , B ⟩ = ⟨ x , y ⟩ $ by opair_eq [l3, l4]
+l6: $ G , x = A , y = B ⇒ ⟨ A , B ⟩ ∈ F $ by weaken [#2]
+l7: $ G , x = A , y = B ⇒ ⟨ x , y ⟩ ∈ F $ by wcel_eq_l [l5, l6]
+l8: $ G , x = A , y = B ⇒ functional F $ by weaken [#1]
+l9: $ G , x = A , y = B ⇒ fv F x = y $ by fv_val [l8, l7]
+l10: $ G , x = A , y = B ⇒ F = F $ by eq_refl
+l11: $ G , x = A , y = B ⇒ fv F A = fv F x $ by fv_eq [l10, l3]
+l12: $ G , x = A , y = B ⇒ fv F A = y $ by eq_trans [l11, l9]
+l13: $ G , x = A , y = B ⇒ fv F A = B $ by eq_trans [l12, l2]
+l14: $ G , x = A ⇒ fv F A = B $ by isset_elim [#4, l13]
+l15: $ G ⇒ fv F A = B $ by isset_elim [#3, l14]
+
+fv_set_c
+--------
+a1: $ G , w = A ⇒ functional F $ by weaken [#1]
+a2: $ G , w = A ⇒ isset (fv F w) $ by fv_set [a1]
+a3: $ G , w = A ⇒ w = A $ by ax
+a4: $ G , w = A ⇒ F = F $ by eq_refl
+a5: $ G , w = A ⇒ fv F w = fv F A $ by fv_eq [a4, a3]
+a6: $ G , w = A ⇒ isset (fv F A) $ by isset_eq [a5, a2]
+a7: $ G ⇒ isset (fv F A) $ by isset_elim [#2, a6]
 
 omapx_congr
 -----------
@@ -846,28 +949,6 @@ t12: $ G , i ∊ ω , functional g , rel g , cdm g = suc i , fv g ∅ = A , ∀ 
 t13: $ G , i ∊ ω , functional g , rel g , cdm g = suc i , fv g ∅ = A , ∀ k (k ∊ i → fv g (suc k) = fv F (fv g k)) , j ∊ ω , functional h , rel h , cdm h = suc j , fv h ∅ = A , ∀ k (k ∊ j → fv h (suc k) = fv F (fv h k)) ⇒ fv g a = fv h a $ by o2_agree_core [t1, t2, t3, t4, t5, t6, t7, t8, t12, t9, t10]
 t14: $ G , i ∊ ω , functional g , rel g , cdm g = suc i , fv g ∅ = A , ∀ k (k ∊ i → fv g (suc k) = fv F (fv g k)) ⇒ fv g a = fv h a $ by omapx_elim [#2, t13]
 t15: $ G ⇒ fv g a = fv h a $ by omapx_elim [#1, t14]
-
-csn_opair_elim
---------------
-l1: $ G , z = ⟨ a , b ⟩ , z ∊ csn ⟨ s , c ⟩ ⇒ z ∊ csn ⟨ s , c ⟩ $ by ax
-l2: $ G , z = ⟨ a , b ⟩ , z ∊ csn ⟨ s , c ⟩ ⇒ z = ⟨ s , c ⟩ $ by csn_elim [l1]
-l3: $ G , z = ⟨ a , b ⟩ , z ∊ csn ⟨ s , c ⟩ ⇒ z = ⟨ a , b ⟩ $ by ax
-l4: $ G , z = ⟨ a , b ⟩ , z ∊ csn ⟨ s , c ⟩ ⇒ ⟨ a , b ⟩ = z $ by eq_sym [l3]
-l5: $ G , z = ⟨ a , b ⟩ , z ∊ csn ⟨ s , c ⟩ ⇒ ⟨ a , b ⟩ = ⟨ s , c ⟩ $ by eq_trans [l4, l2]
-l6: $ G , z = ⟨ a , b ⟩ , z ∊ csn ⟨ s , c ⟩ ⇒ a = s $ by opair_inj_l [l5]
-l7: $ G , z = ⟨ a , b ⟩ , z ∊ csn ⟨ s , c ⟩ ⇒ b = c $ by opair_inj_r [l5]
-l8: $ G , z = ⟨ a , b ⟩ , z ∊ csn ⟨ s , c ⟩ ⇒ a = s ∧ b = c $ by and_intro [l6, l7]
-l9: $ G ⇒ a = s ∧ b = c $ by wcel_elim [#1, l8]
-
-csn_opair_intro
----------------
-l1: $ G ⇒ isset s $ by isset_var
-l2: $ G ⇒ isset c $ by isset_var
-l3: $ G ⇒ isset ⟨ s , c ⟩ $ by opair_set [l1, l2]
-l4: $ G , z = ⟨ s , c ⟩ ⇒ z = ⟨ s , c ⟩ $ by ax
-l5: $ G , z = ⟨ s , c ⟩ ⇒ z ∊ csn ⟨ s , c ⟩ $ by csn_intro [l4]
-l6: $ G , z = ⟨ s , c ⟩ ⇒ ⟨ s , c ⟩ ∈ csn ⟨ s , c ⟩ $ by wcel_intro [l4, l5]
-l7: $ G ⇒ ⟨ s , c ⟩ ∈ csn ⟨ s , c ⟩ $ by isset_elim [l3, l6]
 
 cun_csn_opair_intro
 -------------------
@@ -1499,9 +1580,7 @@ l5: $ G , z = ∅ , z ∊ ω ⇒ ∃ u (u ∊ omapx A F ∧ z ∊ cdm u) $ by om
 l6: $ G , z = ∅ , z ∊ ω , u ∊ omapx A F ∧ z ∊ cdm u ⇒ u ∊ omapx A F ∧ z ∊ cdm u $ by ax
 l7: $ G , z = ∅ , z ∊ ω , u ∊ omapx A F ∧ z ∊ cdm u ⇒ u ∊ omapx A F $ by and_elim_l [l6]
 l8: $ G , z = ∅ , z ∊ ω , u ∊ omapx A F ∧ z ∊ cdm u ⇒ z ∊ cdm u $ by and_elim_r [l6]
-l9: $ G , z = ∅ , z ∊ ω , u ∊ omapx A F ∧ z ∊ cdm u ⇒ isset A $ by weaken [#1]
-l10: $ G , z = ∅ , z ∊ ω , u ∊ omapx A F ∧ z ∊ cdm u ⇒ functional F $ by weaken [#2]
-l11: $ G , z = ∅ , z ∊ ω , u ∊ omapx A F ∧ z ∊ cdm u ⇒ functional (omrec A F) $ by omrec_functional [l9, l10]
+l11: $ G , z = ∅ , z ∊ ω , u ∊ omapx A F ∧ z ∊ cdm u ⇒ functional (omrec A F) $ by omrec_functional
 l12: $ G , z = ∅ , z ∊ ω , u ∊ omapx A F ∧ z ∊ cdm u ⇒ fv (omrec A F) z = fv u z $ by omrec_fv [l11, l7, l8]
 l13: $ G , z = ∅ , z ∊ ω , u ∊ omapx A F ∧ z ∊ cdm u ⇒ z = ∅ $ by ax
 l14: $ G , z = ∅ , z ∊ ω , u ∊ omapx A F ∧ z ∊ cdm u ⇒ omrec A F = omrec A F $ by eq_refl
@@ -1530,9 +1609,7 @@ l9: $ G , w = suc n , w ∊ ω , u ∊ omapx A F ∧ w ∊ cdm u ⇒ w = suc n $
 l10: $ G , w = suc n , w ∊ ω , u ∊ omapx A F ∧ w ∊ cdm u ⇒ n ∊ cdm u ∧ fv u (suc n) = fv F (fv u n) $ by omapx_step [l7, l9, l8]
 l11: $ G , w = suc n , w ∊ ω , u ∊ omapx A F ∧ w ∊ cdm u ⇒ n ∊ cdm u $ by and_elim_l [l10]
 l12: $ G , w = suc n , w ∊ ω , u ∊ omapx A F ∧ w ∊ cdm u ⇒ fv u (suc n) = fv F (fv u n) $ by and_elim_r [l10]
-l13: $ G , w = suc n , w ∊ ω , u ∊ omapx A F ∧ w ∊ cdm u ⇒ isset A $ by weaken [#1]
-l14: $ G , w = suc n , w ∊ ω , u ∊ omapx A F ∧ w ∊ cdm u ⇒ functional F $ by weaken [#2]
-l15: $ G , w = suc n , w ∊ ω , u ∊ omapx A F ∧ w ∊ cdm u ⇒ functional (omrec A F) $ by omrec_functional [l13, l14]
+l15: $ G , w = suc n , w ∊ ω , u ∊ omapx A F ∧ w ∊ cdm u ⇒ functional (omrec A F) $ by omrec_functional
 l16: $ G , w = suc n , w ∊ ω , u ∊ omapx A F ∧ w ∊ cdm u ⇒ fv (omrec A F) w = fv u w $ by omrec_fv [l15, l7, l8]
 l17: $ G , w = suc n , w ∊ ω , u ∊ omapx A F ∧ w ∊ cdm u ⇒ fv (omrec A F) n = fv u n $ by omrec_fv [l15, l7, l11]
 l18: $ G , w = suc n , w ∊ ω , u ∊ omapx A F ∧ w ∊ cdm u ⇒ omrec A F = omrec A F $ by eq_refl
@@ -1552,7 +1629,7 @@ l31: $ G ⇒ fv (omrec A F) (suc n) = fv F (fv (omrec A F) n) $ by wcel_elim [l1
 
 omrec_unique
 ------------
-l1: $ G ⇒ functional (omrec A F) $ by omrec_functional [#1, #2]
+l1: $ G ⇒ functional (omrec A F) $ by omrec_functional
 l2: $ G ⇒ rel (omrec A F) $ by omrec_rel
 l3: $ G ⇒ cdm (omrec A F) = ω $ by omrec_cdm [#1, #2]
 l4: $ G ⇒ ω = cdm (omrec A F) $ by eq_sym [l3]

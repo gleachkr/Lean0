@@ -269,43 +269,68 @@ l21: $ G , x ∊ ω ⇒ p $ by imp_elim [l20, l18]
 l22: $ G ⇒ x ∊ ω → p $ by imp_intro [l21]
 l23: $ G ⇒ ∀ x (x ∊ ω → p) $ by all_intro [l22]
 
-lemma q1_omega_suc_cls (G: hyps) (A: class): $ G ⇒ A ∈ ω $ > $ G ⇒ suc A ∈ ω $
-----
-l1: $ G , v = A , v ∊ ω ⇒ v ∊ ω $ by ax
-l2: $ G , v = A , v ∊ ω ⇒ suc v ∈ ω $ by omega_suc [l1]
-l3: $ G , v = A , v ∊ ω ⇒ v = A $ by ax
-l4: $ G , v = A , v ∊ ω ⇒ suc v = suc A $ by suc_eq [l3]
-l5: $ G , v = A , v ∊ ω ⇒ suc A ∈ ω $ by wcel_eq_l [l4, l2]
-l6: $ G ⇒ suc A ∈ ω $ by wcel_elim [#1, l5]
-
 two_omega
 ---------
 l1: $ G ⇒ ∅ ∈ ω $ by omega_zero
-l2: $ G ⇒ suc ∅ ∈ ω $ by q1_omega_suc_cls [l1]
-l3: $ G ⇒ suc (suc ∅) ∈ ω $ by q1_omega_suc_cls [l2]
+l2: $ G ⇒ suc ∅ ∈ ω $ by omega_suc_c [l1]
+l3: $ G ⇒ suc (suc ∅) ∈ ω $ by omega_suc_c [l2]
 l4: $ G ⇒ two = suc (suc ∅) $ by two_eq_suc
 l5: $ G ⇒ suc (suc ∅) = two $ by eq_sym [l4]
 l6: $ G ⇒ two ∈ ω $ by wcel_eq_l [l5, l3]
+
+two_names
+---------
+l1: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ t = two $ by ax
+l2: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ e = ∅ $ by ax
+l3: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ o = suc e $ by ax
+l4: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ two = suc (suc ∅) $ by two_eq_suc
+l5: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ suc e = suc ∅ $ by suc_eq [l2]
+l6: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ o = suc ∅ $ by eq_trans [l3, l5]
+l7: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ suc o = suc (suc ∅) $ by suc_eq [l6]
+l8a: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ t = suc (suc ∅) $ by eq_trans [l1, l4]
+l8b: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ suc (suc ∅) = suc o $ by eq_sym [l7]
+l8: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ t = suc o $ by eq_trans [l8a, l8b]
+l9: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ suc o = t $ by eq_sym [l8]
+l10: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ o ∊ suc o $ by suc_self
+l11: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ o ∊ t $ by welc_eq [l9, l10]
+l12: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ e ∊ suc e $ by suc_self
+l13: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ suc e = o $ by eq_sym [l3]
+l14: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ e ∊ o $ by welc_eq [l13, l12]
+l15: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ e ∊ suc o $ by suc_intro_l [l14]
+l16: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ e ∊ t $ by welc_eq [l9, l15]
+r1: $ G , t = two , e = ∅ , o = suc e , t ∊ ω , e ∊ t ⇒ o ∊ t → c $ by imp_intro [#1]
+r2: $ G , t = two , e = ∅ , o = suc e , t ∊ ω ⇒ e ∊ t → o ∊ t → c $ by imp_intro [r1]
+r3: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ e ∊ t → o ∊ t → c $ by weaken [r2]
+r4: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ o ∊ t → c $ by imp_elim [r3, l16]
+r5: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ c $ by imp_elim [r4, l11]
+r6: $ G , t = two , t ∊ ω , e = ∅ ⇒ isset e $ by isset_var
+r7: $ G , t = two , t ∊ ω , e = ∅ ⇒ isset (suc e) $ by suc_set [r6]
+r8: $ G , t = two , t ∊ ω , e = ∅ ⇒ c $ by isset_elim [r7, r5]
+r9: $ G , t = two , t ∊ ω ⇒ isset ∅ $ by ax_empty
+r10: $ G , t = two , t ∊ ω ⇒ c $ by isset_elim [r9, r8]
+r11: $ G ⇒ two ∈ ω $ by two_omega
+r12: $ G ⇒ c $ by wcel_elim [r11, r10]
 
 ndvd_intro
 ----------
 l1: $ G ⇒ c ∊ ω ∧ b = nmul a c $ by and_intro [#1, #2]
 l2: $ G ⇒ ndvd a b $ by ex_intro (x := $ u $, t := $ c $, p := $ u ∊ ω ∧ b = nmul a u $) [l1]
 
-lemma q1_ndvd_c (G: hyps) (a b: set) (C: class): $ G ⇒ C ∈ ω $ > $ G ⇒ b = nmul a C $ > $ G ⇒ ndvd a b $
-----
+ndvd_intro_c
+------------
 l1: $ G , v = C , v ∊ ω ⇒ v ∊ ω $ by ax
 l2: $ G , v = C , v ∊ ω ⇒ v = C $ by ax
-l3: $ G , v = C , v ∊ ω ⇒ a = a $ by eq_refl
-l4: $ G , v = C , v ∊ ω ⇒ nmul a v = nmul a C $ by nmul_eq [l3, l2]
-l5: $ G , v = C , v ∊ ω ⇒ nmul a C = nmul a v $ by eq_sym [l4]
-l6: $ G , v = C , v ∊ ω ⇒ b = nmul a C $ by weaken [#2]
-l7: $ G , v = C , v ∊ ω ⇒ b = nmul a v $ by eq_trans [l6, l5]
-l8: $ G , v = C , v ∊ ω ⇒ ndvd a b $ by ndvd_intro [l1, l7]
-l9: $ G ⇒ ndvd a b $ by wcel_elim [#1, l8]
+l3: $ G , v = C , v ∊ ω ⇒ A = A $ by eq_refl
+l4: $ G , v = C , v ∊ ω ⇒ nmul A v = nmul A C $ by nmul_eq [l3, l2]
+l5: $ G , v = C , v ∊ ω ⇒ nmul A C = nmul A v $ by eq_sym [l4]
+l6: $ G , v = C , v ∊ ω ⇒ B = nmul A C $ by weaken [#2]
+l7: $ G , v = C , v ∊ ω ⇒ B = nmul A v $ by eq_trans [l6, l5]
+l8: $ G , v = C , v ∊ ω ⇒ v ∊ ω ∧ B = nmul A v $ by and_intro [l1, l7]
+l9: $ G , v = C , v ∊ ω ⇒ ndvd A B $ by ex_intro (x := $ u $, t := $ v $, p := $ u ∊ ω ∧ B = nmul A u $) [l8]
+l10: $ G ⇒ ndvd A B $ by wcel_elim [#1, l9]
 
-lemma q1_ndvd_u {u: set} (G: hyps) (A B: class): $ G ⇒ ndvd A B $ > $ G ⇒ ∃ u (u ∊ ω ∧ B = nmul A u) $
-----
+ndvd_elim
+---------
 l1: $ (∃ c (c ∊ ω ∧ B = nmul A c)) ⟺ ∃ u (u ∊ ω ∧ B = nmul A u) $ by ex_alpha
 l2: $ G ⇒ (∃ c (c ∊ ω ∧ B = nmul A c)) ↔ ∃ u (u ∊ ω ∧ B = nmul A u) $ by weaken [l1]
 l3: $ G ⇒ ∃ u (u ∊ ω ∧ B = nmul A u) $ by bi_elim_l [l2, #1]
@@ -313,10 +338,10 @@ l3: $ G ⇒ ∃ u (u ∊ ω ∧ B = nmul A u) $ by bi_elim_l [l2, #1]
 ndvd_refl
 ---------
 l1: $ G ⇒ ∅ ∈ ω $ by omega_zero
-l2: $ G ⇒ suc ∅ ∈ ω $ by q1_omega_suc_cls [l1]
+l2: $ G ⇒ suc ∅ ∈ ω $ by omega_suc_c [l1]
 l3: $ G ⇒ nmul a (suc ∅) = a $ by nmul_one [#1]
 l4: $ G ⇒ a = nmul a (suc ∅) $ by eq_sym [l3]
-l5: $ G ⇒ ndvd a a $ by q1_ndvd_c [l2, l4]
+l5: $ G ⇒ ndvd a a $ by ndvd_intro_c [l2, l4]
 
 ndvd_zero
 ---------
@@ -343,8 +368,8 @@ l4: $ G ⇒ ndvd (suc ∅) a $ by ex_intro (x := $ u $, t := $ a $, p := $ u ∊
 
 ndvd_trans
 ----------
-l1: $ G ⇒ ∃ u (u ∊ ω ∧ b = nmul a u) $ by q1_ndvd_u [#2]
-l2: $ G ⇒ ∃ w (w ∊ ω ∧ c = nmul b w) $ by q1_ndvd_u [#3]
+l1: $ G ⇒ ∃ u (u ∊ ω ∧ b = nmul a u) $ by ndvd_elim [#2]
+l2: $ G ⇒ ∃ w (w ∊ ω ∧ c = nmul b w) $ by ndvd_elim [#3]
 l3: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul b w ⇒ u ∊ ω ∧ b = nmul a u $ by ax
 l4: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul b w ⇒ w ∊ ω ∧ c = nmul b w $ by ax
 l5: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul b w ⇒ u ∊ ω $ by and_elim_l [l3]
@@ -358,15 +383,15 @@ l12: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul b w ⇒ nmul (nmul 
 l13: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul b w ⇒ c = nmul (nmul a u) w $ by eq_trans [l8, l11]
 l14: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul b w ⇒ c = nmul a (nmul u w) $ by eq_trans [l13, l12]
 l15: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul b w ⇒ nmul u w ∈ ω $ by nmul_omega [l5, l7]
-l16: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul b w ⇒ ndvd a c $ by q1_ndvd_c [l15, l14]
+l16: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul b w ⇒ ndvd a c $ by ndvd_intro_c [l15, l14]
 l17: $ G , u ∊ ω ∧ b = nmul a u ⇒ ∃ w (w ∊ ω ∧ c = nmul b w) $ by weaken [l2]
 l18: $ G , u ∊ ω ∧ b = nmul a u ⇒ ndvd a c $ by ex_elim [l17, l16]
 l19: $ G ⇒ ndvd a c $ by ex_elim [l1, l18]
 
 ndvd_nadd
 ---------
-l1: $ G ⇒ ∃ u (u ∊ ω ∧ b = nmul a u) $ by q1_ndvd_u [#2]
-l2: $ G ⇒ ∃ w (w ∊ ω ∧ c = nmul a w) $ by q1_ndvd_u [#3]
+l1: $ G ⇒ ∃ u (u ∊ ω ∧ b = nmul a u) $ by ndvd_elim [#2]
+l2: $ G ⇒ ∃ w (w ∊ ω ∧ c = nmul a w) $ by ndvd_elim [#3]
 l3: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul a w ⇒ u ∊ ω ∧ b = nmul a u $ by ax
 l4: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul a w ⇒ w ∊ ω ∧ c = nmul a w $ by ax
 l5: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul a w ⇒ u ∊ ω $ by and_elim_l [l3]
@@ -383,7 +408,7 @@ l15: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul a w , z = nadd b c 
 l16: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul a w , z = nadd b c ⇒ nadd b c = nmul a (nadd u w) $ by weaken [l13]
 l17: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul a w , z = nadd b c ⇒ z = nmul a (nadd u w) $ by eq_trans [l15, l16]
 l18: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul a w , z = nadd b c ⇒ nadd u w ∈ ω $ by weaken [l14]
-l19: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul a w , z = nadd b c ⇒ ndvd a z $ by q1_ndvd_c [l18, l17]
+l19: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul a w , z = nadd b c ⇒ ndvd a z $ by ndvd_intro_c [l18, l17]
 l20: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul a w , z = nadd b c ⇒ a = a $ by eq_refl
 l21: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul a w , z = nadd b c ⇒ ndvd a (nadd b c) $ by ndvd_eq [l20, l15, l19]
 l22: $ G , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ c = nmul a w ⇒ isset (nadd b c) $ by nadd_set
@@ -392,22 +417,9 @@ l24: $ G , u ∊ ω ∧ b = nmul a u ⇒ ∃ w (w ∊ ω ∧ c = nmul a w) $ by 
 l25: $ G , u ∊ ω ∧ b = nmul a u ⇒ ndvd a (nadd b c) $ by ex_elim [l24, l23]
 l26: $ G ⇒ ndvd a (nadd b c) $ by ex_elim [l1, l25]
 
-lemma q1_ndvd_cc (G: hyps) (a: set) (B C: class): $ G ⇒ C ∈ ω $ > $ G ⇒ B = nmul a C $ > $ G ⇒ ndvd a B $
-----
-l1: $ G , v = C , v ∊ ω ⇒ v ∊ ω $ by ax
-l2: $ G , v = C , v ∊ ω ⇒ v = C $ by ax
-l3: $ G , v = C , v ∊ ω ⇒ a = a $ by eq_refl
-l4: $ G , v = C , v ∊ ω ⇒ nmul a v = nmul a C $ by nmul_eq [l3, l2]
-l5: $ G , v = C , v ∊ ω ⇒ nmul a C = nmul a v $ by eq_sym [l4]
-l6: $ G , v = C , v ∊ ω ⇒ B = nmul a C $ by weaken [#2]
-l7: $ G , v = C , v ∊ ω ⇒ B = nmul a v $ by eq_trans [l6, l5]
-l8: $ G , v = C , v ∊ ω ⇒ v ∊ ω ∧ B = nmul a v $ by and_intro [l1, l7]
-l9: $ G , v = C , v ∊ ω ⇒ ndvd a B $ by ex_intro (x := $ u $, t := $ v $, p := $ u ∊ ω ∧ B = nmul a u $) [l8]
-l10: $ G ⇒ ndvd a B $ by wcel_elim [#1, l9]
-
 ndvd_nmul_l
 -----------
-l1: $ G ⇒ ∃ u (u ∊ ω ∧ b = nmul a u) $ by q1_ndvd_u [#3]
+l1: $ G ⇒ ∃ u (u ∊ ω ∧ b = nmul a u) $ by ndvd_elim [#3]
 l2: $ G , u ∊ ω ∧ b = nmul a u ⇒ u ∊ ω ∧ b = nmul a u $ by ax
 l3: $ G , u ∊ ω ∧ b = nmul a u ⇒ u ∊ ω $ by and_elim_l [l2]
 l4: $ G , u ∊ ω ∧ b = nmul a u ⇒ b = nmul a u $ by and_elim_r [l2]
@@ -424,12 +436,12 @@ l14: $ G , u ∊ ω ∧ b = nmul a u ⇒ nmul (nmul a u) c = nmul a (nmul u c) $
 l15: $ G , u ∊ ω ∧ b = nmul a u ⇒ nmul c b = nmul (nmul a u) c $ by eq_trans [l11, l13]
 l16: $ G , u ∊ ω ∧ b = nmul a u ⇒ nmul c b = nmul a (nmul u c) $ by eq_trans [l15, l14]
 l17: $ G , u ∊ ω ∧ b = nmul a u ⇒ nmul u c ∈ ω $ by nmul_omega [l3, l6]
-l18: $ G , u ∊ ω ∧ b = nmul a u ⇒ ndvd a (nmul c b) $ by q1_ndvd_cc [l17, l16]
+l18: $ G , u ∊ ω ∧ b = nmul a u ⇒ ndvd a (nmul c b) $ by ndvd_intro_c [l17, l16]
 l19: $ G ⇒ ndvd a (nmul c b) $ by ex_elim [l1, l18]
 
 lemma q1_zero_dvd (G: hyps) (a: set) (B: class): $ G ⇒ ∅ = a $ > $ G ⇒ ndvd a B $ > $ G ⇒ a = B $
 ----
-l1: $ G ⇒ ∃ u (u ∊ ω ∧ B = nmul a u) $ by q1_ndvd_u [#2]
+l1: $ G ⇒ ∃ u (u ∊ ω ∧ B = nmul a u) $ by ndvd_elim [#2]
 l2: $ G , u ∊ ω ∧ B = nmul a u ⇒ u ∊ ω ∧ B = nmul a u $ by ax
 l3: $ G , u ∊ ω ∧ B = nmul a u ⇒ u ∊ ω $ by and_elim_l [l2]
 l4: $ G , u ∊ ω ∧ B = nmul a u ⇒ B = nmul a u $ by and_elim_r [l2]
@@ -468,8 +480,8 @@ q3: $ G , ∅ ∈ a , i = nadd b c , i ∊ ω ⇒ a = a $ by eq_refl
 q4: $ G , ∅ ∈ a , i = nadd b c , i ∊ ω ⇒ ndvd a (nadd b c) $ by weaken [#5]
 q5: $ G , ∅ ∈ a , i = nadd b c , i ∊ ω ⇒ ndvd a i $ by ndvd_eq [q3, q2, q4]
 q6a: $ G , ∅ ∈ a , i = nadd b c , i ∊ ω ⇒ ndvd a b $ by weaken [#4]
-q6: $ G , ∅ ∈ a , i = nadd b c , i ∊ ω ⇒ ∃ u (u ∊ ω ∧ b = nmul a u) $ by q1_ndvd_u [q6a]
-q7: $ G , ∅ ∈ a , i = nadd b c , i ∊ ω ⇒ ∃ w (w ∊ ω ∧ i = nmul a w) $ by q1_ndvd_u [q5]
+q6: $ G , ∅ ∈ a , i = nadd b c , i ∊ ω ⇒ ∃ u (u ∊ ω ∧ b = nmul a u) $ by ndvd_elim [q6a]
+q7: $ G , ∅ ∈ a , i = nadd b c , i ∊ ω ⇒ ∃ w (w ∊ ω ∧ i = nmul a w) $ by ndvd_elim [q5]
 r1: $ G , ∅ ∈ a , i = nadd b c , i ∊ ω , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ i = nmul a w ⇒ u ∊ ω ∧ b = nmul a u $ by ax
 r2: $ G , ∅ ∈ a , i = nadd b c , i ∊ ω , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ i = nmul a w ⇒ u ∊ ω $ by and_elim_l [r1]
 r3: $ G , ∅ ∈ a , i = nadd b c , i ∊ ω , u ∊ ω ∧ b = nmul a u , w ∊ ω ∧ i = nmul a w ⇒ b = nmul a u $ by and_elim_r [r1]
@@ -553,15 +565,9 @@ p4: $ G , ∅ ∈ a ⇒ ndvd a c $ by wcel_elim [p3, q10]
 m1: $ G ⇒ ∅ ∈ a ∨ ∅ = a $ by omega_zero_le [#1]
 m2: $ G ⇒ ndvd a c $ by or_elim [m1, p4, z13]
 
-lemma q1_empty_notin (G: hyps): $ G ⇒ ∅ ∈ ∅ $ > $ G ⇒ ⊥ $
-----
-l1: $ G , v = ∅ , v ∊ ∅ ⇒ v ∊ ∅ $ by ax
-l2: $ G , v = ∅ , v ∊ ∅ ⇒ ⊥ $ by empty_elim [l1]
-l3: $ G ⇒ ⊥ $ by wcel_elim [#1, l2]
-
 ndvd_le
 -------
-l1: $ G ⇒ ∃ u (u ∊ ω ∧ b = nmul a u) $ by q1_ndvd_u [#4]
+l1: $ G ⇒ ∃ u (u ∊ ω ∧ b = nmul a u) $ by ndvd_elim [#4]
 l2: $ G , u ∊ ω ∧ b = nmul a u ⇒ u ∊ ω ∧ b = nmul a u $ by ax
 l3: $ G , u ∊ ω ∧ b = nmul a u ⇒ u ∊ ω $ by and_elim_l [l2]
 l4: $ G , u ∊ ω ∧ b = nmul a u ⇒ b = nmul a u $ by and_elim_r [l2]
@@ -577,7 +583,7 @@ a7: $ G , u ∊ ω ∧ b = nmul a u , ∅ = u ⇒ b = nmul a ∅ $ by eq_trans [
 a8: $ G , u ∊ ω ∧ b = nmul a u , ∅ = u ⇒ b = ∅ $ by eq_trans [a7, a5]
 a9: $ G , u ∊ ω ∧ b = nmul a u , ∅ = u ⇒ ∅ ∈ b $ by weaken [#3]
 a10: $ G , u ∊ ω ∧ b = nmul a u , ∅ = u ⇒ ∅ ∈ ∅ $ by wcel_eq_r [a8, a9]
-a11: $ G , u ∊ ω ∧ b = nmul a u , ∅ = u ⇒ ⊥ $ by q1_empty_notin [a10]
+a11: $ G , u ∊ ω ∧ b = nmul a u , ∅ = u ⇒ ⊥ $ by notin_self_c [a10]
 a12: $ G , u ∊ ω ∧ b = nmul a u , ∅ = u ⇒ a ⊆ b $ by bot_elim [a11]
 b1: $ G , u ∊ ω ∧ b = nmul a u , ∅ ∈ u ⇒ u ∊ ω $ by weaken [l3]
 b2: $ G , u ∊ ω ∧ b = nmul a u , ∅ ∈ u ⇒ ∅ ∈ u $ by ax
@@ -641,28 +647,6 @@ l4: $ G ⇒ {x | x ∊ ω ∧ ((b = ∅ ∧ x = ∅) ∨ (∅ ∈ b ∧ ∃ y (y
 l5: $ G ⇒ isset ω $ by omega_set
 l6: $ G ⇒ isset {x | x ∊ ω ∧ ((b = ∅ ∧ x = ∅) ∨ (∅ ∈ b ∧ ∃ y (y ∊ b ∧ nadd (nmul x b) y = a)))} $ by subset_isset [l5, l4]
 l7: $ G ⇒ isset (⋃ {x | x ∊ ω ∧ ((b = ∅ ∧ x = ∅) ∨ (∅ ∈ b ∧ ∃ y (y ∊ b ∧ nadd (nmul x b) y = a)))}) $ by cuni_set [l6]
-
---| Induction on `ω` for a formula, with the cases at a named set (copied from arith.auf's `n2_ind`).
-lemma q2_ind {x y z: set} (G: hyps) (p: fml x) (a: set):
-  $ G , z = ∅ ⇒ [x/z] p $ > $ G , y ∊ ω , [x/y] p , z = suc y ⇒ [x/z] p $ > $ G ⇒ a ∊ ω $ > $ G ⇒ [x/a] p $
-----
-l1: $ G , z = ∅ ⇒ z ∊ {x | p} $ by cab_intro [#1]
-l2: $ G , z = ∅ ⇒ z = ∅ $ by ax
-l3: $ G , z = ∅ ⇒ ∅ ∈ {x | p} $ by wcel_intro [l2, l1]
-l4: $ G ⇒ isset ∅ $ by ax_empty
-l5: $ G ⇒ ∅ ∈ {x | p} $ by isset_elim [l4, l3]
-l6: $ G , y ∊ ω , [x/y] p , z = suc y ⇒ z ∊ {x | p} $ by cab_intro [#2]
-l7: $ G , y ∊ ω , [x/y] p , z = suc y ⇒ z = suc y $ by ax
-l8: $ G , y ∊ ω , [x/y] p , z = suc y ⇒ suc y ∈ {x | p} $ by wcel_intro [l7, l6]
-l9: $ G , y ∊ ω , [x/y] p ⇒ isset y $ by isset_var
-l10: $ G , y ∊ ω , [x/y] p ⇒ isset (suc y) $ by suc_set [l9]
-l11: $ G , y ∊ ω , [x/y] p ⇒ suc y ∈ {x | p} $ by isset_elim [l10, l8]
-l12: $ G , y ∊ ω ⇒ [x/y] p → suc y ∈ {x | p} $ by imp_intro [l11]
-l13: $ G ⇒ y ∊ ω → [x/y] p → suc y ∈ {x | p} $ by imp_intro [l12]
-l14: $ G ⇒ ∀ y (y ∊ ω → [x/y] p → suc y ∈ {x | p}) $ by all_intro [l13]
-l15: $ G ⇒ ∀ x (x ∊ ω → p) $ by omega_ind_f [l5, l14]
-l16: $ G ⇒ a ∊ ω → [x/a] p $ by all_elim [l15]
-l17: $ G ⇒ [x/a] p $ by imp_elim [l16, #3]
 
 --| The step of Euclid's existence proof: from `u·b + v = y` with `v < b`, a
 --| quotient and remainder for `z = suc y`.
@@ -794,7 +778,7 @@ t11b: $ G , y ∊ ω , ∃ q ∃ r (q ∊ ω ∧ r ∊ b ∧ nadd (nmul q b) r =
 t11c: $ G , y ∊ ω , ∃ q ∃ r (q ∊ ω ∧ r ∊ b ∧ nadd (nmul q b) r = y) , z = suc y , ∃ r (u ∊ ω ∧ r ∊ b ∧ nadd (nmul u b) r = y) ⇒ ∃ v (u ∊ ω ∧ v ∊ b ∧ nadd (nmul u b) v = y) $ by bi_elim_l [t11b, t11]
 t12: $ G , y ∊ ω , ∃ q ∃ r (q ∊ ω ∧ r ∊ b ∧ nadd (nmul q b) r = y) , z = suc y , ∃ r (u ∊ ω ∧ r ∊ b ∧ nadd (nmul u b) r = y) ⇒ ∃ q ∃ r (q ∊ ω ∧ r ∊ b ∧ nadd (nmul q b) r = z) $ by ex_elim [t11c, t10]
 t13: $ G , y ∊ ω , ∃ q ∃ r (q ∊ ω ∧ r ∊ b ∧ nadd (nmul q b) r = y) , z = suc y ⇒ ∃ q ∃ r (q ∊ ω ∧ r ∊ b ∧ nadd (nmul q b) r = z) $ by ex_elim [t2, t12]
-i1: $ G ⇒ ∃ q ∃ r (q ∊ ω ∧ r ∊ b ∧ nadd (nmul q b) r = a) $ by q2_ind (x := $ x $, y := $ y $, z := $ z $, p := $ ∃ q ∃ r (q ∊ ω ∧ r ∊ b ∧ nadd (nmul q b) r = x) $, a := $ a $) [b18, t13, #1]
+i1: $ G ⇒ ∃ q ∃ r (q ∊ ω ∧ r ∊ b ∧ nadd (nmul q b) r = a) $ by omega_ind_named (x := $ x $, y := $ y $, z := $ z $, p := $ ∃ q ∃ r (q ∊ ω ∧ r ∊ b ∧ nadd (nmul q b) r = x) $, a := $ a $) [b18, t13, #1]
 
 --| The strict case of uniqueness: `q < c` and `q·b + r = c·b + d` with `r < b` is impossible.
 lemma q2_uniq_lt (G: hyps) (b q r c d f g: set):
@@ -933,14 +917,6 @@ ce3: $ G , f = nmul q b ⇒ q = c ∧ r = d $ by isset_elim [ce2, ce1]
 ce4: $ G ⇒ isset (nmul q b) $ by nmul_set
 ce5: $ G ⇒ q = c ∧ r = d $ by isset_elim [ce4, ce3]
 
---| A positive remainder bound: `r < b` gives `0 < b`.
-lemma q2_zero_lt (G: hyps) (b r: set): $ G ⇒ b ∊ ω $ > $ G ⇒ r ∊ b $ > $ G ⇒ ∅ ∈ b $
-----
-l1: $ G ⇒ r ∊ ω $ by omega_elem_omega [#1, #2]
-l2: $ G ⇒ suc r ⊆ b $ by omega_elem_suc_subset [l1, #1, #2]
-l3: $ G ⇒ ∅ ∈ suc r $ by nzero_lt_suc [l1]
-l4: $ G ⇒ ∅ ∈ b $ by wcel_subset [l2, l3]
-
 ndiv_char
 ---------
 a1: $ G , v ∊ {x | x ∊ ω ∧ ((b = ∅ ∧ x = ∅) ∨ (∅ ∈ b ∧ ∃ y (y ∊ b ∧ nadd (nmul x b) y = a)))} ⇒ v ∊ {x | x ∊ ω ∧ ((b = ∅ ∧ x = ∅) ∨ (∅ ∈ b ∧ ∃ y (y ∊ b ∧ nadd (nmul x b) y = a)))} $ by ax
@@ -974,7 +950,7 @@ c3: $ G , v ∊ {x | x ∊ ω ∧ ((b = ∅ ∧ x = ∅) ∨ (∅ ∈ b ∧ ∃ 
 a5: $ G , v ∊ {x | x ∊ ω ∧ ((b = ∅ ∧ x = ∅) ∨ (∅ ∈ b ∧ ∃ y (y ∊ b ∧ nadd (nmul x b) y = a)))} ⇒ v = q $ by or_elim [a4, p5, c3]
 b1: $ G ⇒ r ∊ b ∧ nadd (nmul q b) r = a $ by and_intro [#3, #4]
 b2: $ G ⇒ ∃ y (y ∊ b ∧ nadd (nmul q b) y = a) $ by ex_intro (x := $ y $, t := $ r $, p := $ y ∊ b ∧ nadd (nmul q b) y = a $) [b1]
-b3: $ G ⇒ ∅ ∈ b $ by q2_zero_lt [#1, #3]
+b3: $ G ⇒ ∅ ∈ b $ by nzero_lt [#1, #3]
 b4: $ G ⇒ ∅ ∈ b ∧ ∃ y (y ∊ b ∧ nadd (nmul q b) y = a) $ by and_intro [b3, b2]
 b5: $ G ⇒ (b = ∅ ∧ q = ∅) ∨ (∅ ∈ b ∧ ∃ y (y ∊ b ∧ nadd (nmul q b) y = a)) $ by or_intro_r [b4]
 b6: $ G ⇒ q ∊ ω ∧ ((b = ∅ ∧ q = ∅) ∨ (∅ ∈ b ∧ ∃ y (y ∊ b ∧ nadd (nmul q b) y = a))) $ by and_intro [#2, b5]
@@ -1246,7 +1222,7 @@ s8: $ G ⇒ nmod a b = a $ by isset_elim [s7, s5]
 
 --| One subtraction step of Lean's `Nat.div`/`Nat.mod` recursion: for `b ≤ a`,
 --| `a - b` has the quotient one less and the same remainder.
-lemma q2_sub_elim {s p v: set} (G: hyps) (a b: set) (c: fml):
+lemma q2_sub_elim {s p: set} (G: hyps) (a b: set) (c: fml):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ ∅ ∈ b $ > $ G ⇒ b ⊆ a $ >
   $ G , s = nsub a b , p ∊ ω , ndiv a b = suc p , ndiv s b = p , nmod a b = nmod s b ⇒ c $ > $ G ⇒ c $
 ----
@@ -1365,7 +1341,7 @@ s7: $ G , i = nsub a b , j ∊ ω , ndiv a b = suc j , ndiv i b = j , nmod a b =
 s8: $ G , i = nsub a b , j ∊ ω , ndiv a b = suc j , ndiv i b = j , nmod a b = nmod i b ⇒ suc j = suc (ndiv (nsub a b) b) $ by eq_sym [s7]
 s9: $ G , i = nsub a b , j ∊ ω , ndiv a b = suc j , ndiv i b = j , nmod a b = nmod i b ⇒ ndiv a b = suc j $ by ax
 s10: $ G , i = nsub a b , j ∊ ω , ndiv a b = suc j , ndiv i b = j , nmod a b = nmod i b ⇒ ndiv a b = suc (ndiv (nsub a b) b) $ by eq_trans [s9, s8]
-s11: $ G ⇒ ndiv a b = suc (ndiv (nsub a b) b) $ by q2_sub_elim (s := $ i $, p := $ j $, v := $ v $, G := $ G $, a := $ a $, b := $ b $, c := $ ndiv a b = suc (ndiv (nsub a b) b) $) [#1, #2, #3, #4, s10]
+s11: $ G ⇒ ndiv a b = suc (ndiv (nsub a b) b) $ by q2_sub_elim (s := $ i $, p := $ j $, G := $ G $, a := $ a $, b := $ b $, c := $ ndiv a b = suc (ndiv (nsub a b) b) $) [#1, #2, #3, #4, s10]
 
 nmod_sub
 --------
@@ -1376,13 +1352,13 @@ s4: $ G , i = nsub a b , j ∊ ω , ndiv a b = suc j , ndiv i b = j , nmod a b =
 s7: $ G , i = nsub a b , j ∊ ω , ndiv a b = suc j , ndiv i b = j , nmod a b = nmod i b ⇒ nmod i b = nmod (nsub a b) b $ by eq_sym [s4]
 s9: $ G , i = nsub a b , j ∊ ω , ndiv a b = suc j , ndiv i b = j , nmod a b = nmod i b ⇒ nmod a b = nmod i b $ by ax
 s10: $ G , i = nsub a b , j ∊ ω , ndiv a b = suc j , ndiv i b = j , nmod a b = nmod i b ⇒ nmod a b = nmod (nsub a b) b $ by eq_trans [s9, s7]
-s11: $ G ⇒ nmod a b = nmod (nsub a b) b $ by q2_sub_elim (s := $ i $, p := $ j $, v := $ v $, G := $ G $, a := $ a $, b := $ b $, c := $ nmod a b = nmod (nsub a b) b $) [#1, #2, #3, #4, s10]
+s11: $ G ⇒ nmod a b = nmod (nsub a b) b $ by q2_sub_elim (s := $ i $, p := $ j $, G := $ G $, a := $ a $, b := $ b $, c := $ nmod a b = nmod (nsub a b) b $) [#1, #2, #3, #4, s10]
 
 ndiv_lt_self
 ------------
 o1: $ G , k = suc ∅ , k ∊ b ⇒ k ∊ b $ by ax
 o2_w65: $ G , k = suc ∅ , k ∊ b ⇒ b ∊ ω $ by weaken [#2]
-o2: $ G , k = suc ∅ , k ∊ b ⇒ ∅ ∈ b $ by q2_zero_lt [o2_w65, o1]
+o2: $ G , k = suc ∅ , k ∊ b ⇒ ∅ ∈ b $ by nzero_lt [o2_w65, o1]
 o3: $ G , k = suc ∅ , k ∊ b ⇒ k ∊ ω $ by omega_elem_omega [o2_w65, o1]
 p1: $ G , k = suc ∅ , k ∊ b , u ∊ ω , v ∊ b , nadd (nmul u b) v = a , ndiv a b = u , nmod a b = v ⇒ u ∊ ω $ by ax
 p2: $ G , k = suc ∅ , k ∊ b , u ∊ ω , v ∊ b , nadd (nmul u b) v = a , ndiv a b = u , nmod a b = v ⇒ ∅ ∈ u ∨ ∅ = u $ by omega_zero_le [p1]
@@ -1513,41 +1489,6 @@ f13_w86: $ G , ∅ ∈ a ⇒ a ∊ ω $ by weaken [#2]
 f13: $ G , ∅ ∈ a ⇒ ndvd d b $ by ndivmod_elim [f13_w85, f13_w86, f12, f11]
 f14: $ G ⇒ ndvd d b $ by or_elim [o1, f13, z9]
 
---| Name `two`, its elements `0` and `1`.
-lemma q2_two_names {t e o: set} (G: hyps) (c: fml):
-  $ G , t = two , e = ∅ , o = suc e , t ∊ ω , e ∊ t , o ∊ t ⇒ c $ > $ G ⇒ c $
-----
-l1: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ t = two $ by ax
-l2: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ e = ∅ $ by ax
-l3: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ o = suc e $ by ax
-l4: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ two = suc (suc ∅) $ by two_eq_suc
-l5: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ suc e = suc ∅ $ by suc_eq [l2]
-l6: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ o = suc ∅ $ by eq_trans [l3, l5]
-l7: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ suc o = suc (suc ∅) $ by suc_eq [l6]
-l8a: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ t = suc (suc ∅) $ by eq_trans [l1, l4]
-l8b: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ suc (suc ∅) = suc o $ by eq_sym [l7]
-l8: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ t = suc o $ by eq_trans [l8a, l8b]
-l9: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ suc o = t $ by eq_sym [l8]
-l10: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ o ∊ suc o $ by suc_self
-l11: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ o ∊ t $ by welc_eq [l9, l10]
-l12: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ e ∊ suc e $ by suc_self
-l13: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ suc e = o $ by eq_sym [l3]
-l14: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ e ∊ o $ by welc_eq [l13, l12]
-l15: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ e ∊ suc o $ by suc_intro_l [l14]
-l16: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ e ∊ t $ by welc_eq [l9, l15]
-r1: $ G , t = two , e = ∅ , o = suc e , t ∊ ω , e ∊ t ⇒ o ∊ t → c $ by imp_intro [#1]
-r2: $ G , t = two , e = ∅ , o = suc e , t ∊ ω ⇒ e ∊ t → o ∊ t → c $ by imp_intro [r1]
-r3: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ e ∊ t → o ∊ t → c $ by weaken [r2]
-r4: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ o ∊ t → c $ by imp_elim [r3, l16]
-r5: $ G , t = two , t ∊ ω , e = ∅ , o = suc e ⇒ c $ by imp_elim [r4, l11]
-r6: $ G , t = two , t ∊ ω , e = ∅ ⇒ isset e $ by isset_var
-r7: $ G , t = two , t ∊ ω , e = ∅ ⇒ isset (suc e) $ by suc_set [r6]
-r8: $ G , t = two , t ∊ ω , e = ∅ ⇒ c $ by isset_elim [r7, r5]
-r9: $ G , t = two , t ∊ ω ⇒ isset ∅ $ by ax_empty
-r10: $ G , t = two , t ∊ ω ⇒ c $ by isset_elim [r9, r8]
-r11: $ G ⇒ two ∈ ω $ by two_omega
-r12: $ G ⇒ c $ by wcel_elim [r11, r10]
-
 --| The elements of `two` are `0` and `1`.
 lemma q2_two_cases (G: hyps) (t e o w: set):
   $ G ⇒ t = two $ > $ G ⇒ e = ∅ $ > $ G ⇒ o = suc e $ > $ G ⇒ w ∊ t $ > $ G ⇒ w = e ∨ w = o $
@@ -1619,7 +1560,7 @@ f4: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k , f = ndb
 f5: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k , f = ndbl a ⇒ ndiv (ndbl a) two = a $ by eq_trans [f4, f3]
 f6: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k ⇒ isset (ndbl a) $ by nadd_set
 f7: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k ⇒ ndiv (ndbl a) two = a $ by isset_elim [f6, f5]
-f8: $ G ⇒ ndiv (ndbl a) two = a $ by q2_two_names [f7]
+f8: $ G ⇒ ndiv (ndbl a) two = a $ by two_names [f7]
 
 nmod_dbl_two
 ------------
@@ -1637,7 +1578,7 @@ f5b: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k , f = nd
 f5: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k , f = ndbl a ⇒ nmod (ndbl a) two = ∅ $ by eq_trans [f5a, f5b]
 f6: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k ⇒ isset (ndbl a) $ by nadd_set
 f7: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k ⇒ nmod (ndbl a) two = ∅ $ by isset_elim [f6, f5]
-f8: $ G ⇒ nmod (ndbl a) two = ∅ $ by q2_two_names [f7]
+f8: $ G ⇒ nmod (ndbl a) two = ∅ $ by two_names [f7]
 
 ndiv_dbl1_two
 -------------
@@ -1661,7 +1602,7 @@ f6b: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k , f = nd
 f6c: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k , f = ndbl a ⇒ ndiv (suc (ndbl a)) two = a $ by isset_elim [f6b, f5]
 f6: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k ⇒ isset (ndbl a) $ by nadd_set
 f7: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k ⇒ ndiv (suc (ndbl a)) two = a $ by isset_elim [f6, f6c]
-f8: $ G ⇒ ndiv (suc (ndbl a)) two = a $ by q2_two_names [f7]
+f8: $ G ⇒ ndiv (suc (ndbl a)) two = a $ by two_names [f7]
 
 nmod_dbl1_two
 -------------
@@ -1690,7 +1631,7 @@ f6b: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k , f = nd
 f6c: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k , f = ndbl a ⇒ nmod (suc (ndbl a)) two = suc ∅ $ by isset_elim [f6b, f5]
 f6: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k ⇒ isset (ndbl a) $ by nadd_set
 f7: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k ⇒ nmod (suc (ndbl a)) two = suc ∅ $ by isset_elim [f6, f6c]
-f8: $ G ⇒ nmod (suc (ndbl a)) two = suc ∅ $ by q2_two_names [f7]
+f8: $ G ⇒ nmod (suc (ndbl a)) two = suc ∅ $ by two_names [f7]
 
 omega_parity
 ------------
@@ -1727,10 +1668,10 @@ k2: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k , u ∊ �
 k3: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k , u ∊ ω , v ∊ k , nadd (nmul u k) v = a , ndiv a k = u , nmod a k = v , f = ndbl u ⇒ ∃ q (q ∊ ω ∧ (a = ndbl q ∨ a = suc (ndbl q))) $ by ex_intro (x := $ q $, t := $ u $, p := $ q ∊ ω ∧ (a = ndbl q ∨ a = suc (ndbl q)) $) [k2]
 k4: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k , u ∊ ω , v ∊ k , nadd (nmul u k) v = a , ndiv a k = u , nmod a k = v ⇒ isset (ndbl u) $ by nadd_set
 k5: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k , u ∊ ω , v ∊ k , nadd (nmul u k) v = a , ndiv a k = u , nmod a k = v ⇒ ∃ q (q ∊ ω ∧ (a = ndbl q ∨ a = suc (ndbl q))) $ by isset_elim [k4, k3]
-k6: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k ⇒ ∅ ∈ k $ by wcel_intro [ax [], ax []]
+k6: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k ⇒ ∅ ∈ k $ by wcel_intro (a := $ i $) [ax [], ax []]
 k7_w101: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k ⇒ a ∊ ω $ by weaken [#1]
 k7: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k ⇒ ∃ q (q ∊ ω ∧ (a = ndbl q ∨ a = suc (ndbl q))) $ by ndivmod_elim [k7_w101, ax [], k6, k5]
-k8: $ G ⇒ ∃ q (q ∊ ω ∧ (a = ndbl q ∨ a = suc (ndbl q))) $ by q2_two_names [k7]
+k8: $ G ⇒ ∃ q (q ∊ ω ∧ (a = ndbl q ∨ a = suc (ndbl q))) $ by two_names [k7]
 
 nmod_two_cases
 --------------
@@ -1753,10 +1694,10 @@ j5: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k , u ∊ �
 j6: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k , u ∊ ω , v ∊ k , nadd (nmul u k) v = a , ndiv a k = u , nmod a k = v , v = j ⇒ nmod a two = suc ∅ $ by eq_trans [j5, j4]
 j7: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k , u ∊ ω , v ∊ k , nadd (nmul u k) v = a , ndiv a k = u , nmod a k = v , v = j ⇒ nmod a two = ∅ ∨ nmod a two = suc ∅ $ by or_intro_r [j6]
 k1: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k , u ∊ ω , v ∊ k , nadd (nmul u k) v = a , ndiv a k = u , nmod a k = v ⇒ nmod a two = ∅ ∨ nmod a two = suc ∅ $ by or_elim [g1, h3, j7]
-k6: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k ⇒ ∅ ∈ k $ by wcel_intro [ax [], ax []]
+k6: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k ⇒ ∅ ∈ k $ by wcel_intro (a := $ i $) [ax [], ax []]
 k7_w104: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k ⇒ a ∊ ω $ by weaken [#1]
 k7: $ G , k = two , i = ∅ , j = suc i , k ∊ ω , i ∊ k , j ∊ k ⇒ nmod a two = ∅ ∨ nmod a two = suc ∅ $ by ndivmod_elim [k7_w104, ax [], k6, k1]
-k8: $ G ⇒ nmod a two = ∅ ∨ nmod a two = suc ∅ $ by q2_two_names [k7]
+k8: $ G ⇒ nmod a two = ∅ ∨ nmod a two = suc ∅ $ by two_names [k7]
 
 ngcd_set
 --------

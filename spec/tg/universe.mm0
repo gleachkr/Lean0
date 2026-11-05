@@ -5,7 +5,9 @@
 -- least of them (`nextu`); and the sequence `uni` of the universes of the
 -- model: `fv uni ∅ = two` and `fv uni (suc n)` is the least universe
 -- containing `fv uni n` and `ω`, so that each is an element and a subset of
--- the next. Imports lfp.mm0; proofs in universe.auf.
+-- the next. The closure rules take set variables, with class forms (`_c`,
+-- under `A ∈ U` or `isset A` premises) beside them. Imports lfp.mm0; proofs
+-- in universe.auf.
 
 import "lfp.mm0";
 
@@ -16,17 +18,35 @@ import "lfp.mm0";
 theorem universe_trans (G: hyps) (U: class): $ G ⇒ universe U $ > $ G ⇒ transitive U $;
 theorem universe_elem_subset (G: hyps) (U: class) (a: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ a ⊆ U $;
+--| Class form of `universe_elem_subset`.
+theorem universe_elem_subset_c (G: hyps) (U A: class):
+  $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ A ⊆ U $;
 theorem universe_elem_elem (G: hyps) (U: class) (a b: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ b ∊ a $ > $ G ⇒ b ∊ U $;
+--| Class form of `universe_elem_elem`.
+theorem universe_elem_elem_c (G: hyps) (U A B: class):
+  $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ B ∈ A $ > $ G ⇒ B ∈ U $;
 theorem universe_cpr (G: hyps) (U: class) (a b: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ b ∊ U $ > $ G ⇒ cpr a b ∈ U $;
+--| Class form of `universe_cpr`.
+theorem universe_cpr_c (G: hyps) (U A B: class):
+  $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ B ∈ U $ > $ G ⇒ cpr A B ∈ U $;
 theorem universe_cpw (G: hyps) (U: class) (a: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ 𝒫 a ∈ U $;
+--| Class form of `universe_cpw`.
+theorem universe_cpw_c (G: hyps) (U A: class):
+  $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ 𝒫 A ∈ U $;
 theorem universe_cuni_fn (G: hyps) (U: class) (a f: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ fn_into f a U $ > $ G ⇒ ⋃ (img f a) ∈ U $;
+--| `universe_cuni_fn` for a functional class.
+theorem universe_cuni_fn_c (G: hyps) (U F: class) (a: set):
+  $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ fn_into F a U $ > $ G ⇒ ⋃ (img F a) ∈ U $;
 --| A subclass of an element is an element.
 theorem universe_subset (G: hyps) (U A: class) (a: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ A ⊆ a $ > $ G ⇒ A ∈ U $;
+--| Class form of `universe_subset`.
+theorem universe_subset_c (G: hyps) (U A B: class):
+  $ G ⇒ universe U $ > $ G ⇒ B ∈ U $ > $ G ⇒ A ⊆ B $ > $ G ⇒ A ∈ U $;
 theorem universe_csn (G: hyps) (U: class) (a: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ csn a ∈ U $;
 theorem universe_opair (G: hyps) (U: class) (a b: set):
@@ -36,8 +56,14 @@ theorem universe_empty (G: hyps) (U: class) (a: set):
 --| The union of an element: the family indexed by it with the identity.
 theorem universe_cuni (G: hyps) (U: class) (a: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ ⋃ a ∈ U $;
+--| Class form of `universe_cuni`.
+theorem universe_cuni_c (G: hyps) (U A: class):
+  $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ ⋃ A ∈ U $;
 theorem universe_cun (G: hyps) (U: class) (a b: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ b ∊ U $ > $ G ⇒ a ∪ b ∈ U $;
+--| Class form of `universe_cun`.
+theorem universe_cun_c (G: hyps) (U A B: class):
+  $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ B ∈ U $ > $ G ⇒ A ∪ B ∈ U $;
 theorem universe_suc (G: hyps) (U: class) (a: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ suc a ∈ U $;
 theorem universe_cin (G: hyps) (U: class) (a b: set):
@@ -46,6 +72,9 @@ theorem universe_sep (G: hyps) {x: set} (U: class) (a: set) (p: fml x):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ {x | x ∊ a ∧ p} ∈ U $;
 theorem universe_cxp (G: hyps) (U: class) (a b: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ b ∊ U $ > $ G ⇒ a × b ∈ U $;
+--| Class form of `universe_cxp`.
+theorem universe_cxp_c (G: hyps) (U A B: class):
+  $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ B ∈ U $ > $ G ⇒ A × B ∈ U $;
 --| `cdm a ⊆ ⋃ ⋃ a`, and the same for the range.
 theorem universe_cdm (G: hyps) (U: class) (a: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ cdm a ∈ U $;
@@ -60,6 +89,9 @@ theorem universe_cres (G: hyps) (U A: class) (a: set):
 --| The image of an element under a function into the universe.
 theorem universe_img_fn (G: hyps) (U: class) (a f: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ fn_into f a U $ > $ G ⇒ img f a ∈ U $;
+--| `universe_img_fn` for a functional class.
+theorem universe_img_fn_c (G: hyps) (U F: class) (a: set):
+  $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ fn_into F a U $ > $ G ⇒ img F a ∈ U $;
 --| The same for a class operation `x ↦ B` with values in the universe: the
 --| family's image and its union are elements.
 theorem universe_img_op (G: hyps) {x: set} (U: class) (B: class x) (a: set):
@@ -123,6 +155,9 @@ theorem sb_c_univs {x: set} (t: set x) (A: class x):
 --| The intersection of a nonempty class of universes is a universe.
 theorem universe_cint (G: hyps) {y: set} (A: class) (b: set):
   $ G ⇒ b ∊ A $ > $ G ⇒ ∀ y (y ∊ A → universe y) $ > $ G ⇒ universe (cint A) $;
+--| The intersection of two universes is a universe.
+theorem cin_universe (G: hyps) (U V: class):
+  $ G ⇒ universe U $ > $ G ⇒ universe V $ > $ G ⇒ universe (U ∩ V) $;
 theorem nextu_universe (G: hyps) (a: set): $ G ⇒ universe (nextu a) $;
 theorem nextu_elem (G: hyps) (a: set): $ G ⇒ a ∊ nextu a $;
 theorem nextu_set (G: hyps) (a: set): $ G ⇒ isset (nextu a) $;
@@ -136,6 +171,15 @@ theorem nextu_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ nextu A = nex
 --| @rewrite
 theorem sb_c_nextu {x: set} (t: set x) (A: class x):
   $ (⟦ x / t ⟧ (nextu A)) ≐ nextu (⟦ x / t ⟧ A) $;
+--| Class form of `nextu_universe`.
+theorem nextu_universe_c (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ universe (nextu A) $;
+--| Class form of `nextu_elem`.
+theorem nextu_elem_c (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ A ∈ nextu A $;
+--| Class form of `nextu_set`.
+theorem nextu_set_c (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ isset (nextu A) $;
+--| Class form of `nextu_least`.
+theorem nextu_least_c (G: hyps) (U A: class):
+  $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ nextu A ⊆ U $;
 
 -- --------------------------------------------------------------------------
 -- The universes of the model
@@ -164,7 +208,7 @@ theorem uni_two (G: hyps) (n: set):
   $ G ⇒ n ∊ ω $ > $ G ⇒ two ∈ fv uni (suc n) $;
 --| The sequence is cumulative.
 theorem uni_mono (G: hyps) (m n: set):
-  $ G ⇒ m ∊ ω $ > $ G ⇒ n ∊ ω $ > $ G ⇒ m ∊ n $ > $ G ⇒ fv uni m ∈ fv uni n $;
+  $ G ⇒ n ∊ ω $ > $ G ⇒ m ∊ n $ > $ G ⇒ fv uni m ∈ fv uni n $;
 theorem uni_mono_subset (G: hyps) (m n: set):
   $ G ⇒ m ∊ ω $ > $ G ⇒ n ∊ ω $ > $ G ⇒ m ⊆ n $ > $ G ⇒ fv uni m ⊆ fv uni n $;
 --| `U_{n+1}` is contained in every universe containing `U_n` and `ω`.

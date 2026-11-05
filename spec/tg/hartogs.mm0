@@ -77,6 +77,9 @@ theorem injects_ccnv_functional (G: hyps) (F A B: class):
   $ G ⇒ injects F A B $ > $ G ⇒ functional (ccnv (cres F A)) $;
 theorem injects_ccnv_fv (G: hyps) (F A B: class) (a: set):
   $ G ⇒ injects F A B $ > $ G ⇒ a ∊ A $ > $ G ⇒ fv (ccnv (cres F A)) (fv F a) = a $;
+--| The inverse at a value given by a pair of the injection.
+theorem injects_ccnv_fv_pair (G: hyps) (F A B: class) (k z: set):
+  $ G ⇒ injects F A B $ > $ G ⇒ z ∊ A $ > $ G ⇒ ⟨ z , k ⟩ ∈ F $ > $ G ⇒ fv (ccnv (cres F A)) k = z $;
 --| The identity on `A` and the composite of two injections.
 theorem injects_id (G: hyps) {x: set} (A B: class):
   $ G ⇒ A ⊆ B $ > $ G ⇒ injects (cres (cgr x x) A) A B $;
@@ -94,16 +97,19 @@ theorem sb_f_injects {x: set} (t: set x) (F A B: class x):
 
 theorem inj_into_intro (G: hyps) (A B: class) (f: set):
   $ G ⇒ injects f A B $ > $ G ⇒ inj_into A B $;
+--| Class form of `inj_into_intro`: an injection that is a set.
+theorem inj_into_intro_c (G: hyps) (F A B: class):
+  $ G ⇒ isset F $ > $ G ⇒ injects F A B $ > $ G ⇒ inj_into A B $;
 --| @freshen H f
 --| @freshen c f
 theorem inj_into_elim {f: set} (G: hyps f) (H: hyps) (A B: class) (c: fml):
   $ G ⇒ inj_into A B $ > $ H , injects f A B ⇒ c $ > $ G , H ⇒ c $;
---| A class that injects into a set is a set.
+--| A class that injects into any class is a set (the injection is a set).
 theorem inj_into_set (G: hyps) (A B: class):
   $ G ⇒ inj_into A B $ > $ G ⇒ isset A $;
-theorem inj_into_refl (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ inj_into A A $;
 theorem inj_into_subset (G: hyps) (A B: class):
   $ G ⇒ isset A $ > $ G ⇒ A ⊆ B $ > $ G ⇒ inj_into A B $;
+theorem inj_into_refl (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ inj_into A A $;
 theorem inj_into_trans (G: hyps) (A B C: class):
   $ G ⇒ inj_into A B $ > $ G ⇒ inj_into B C $ > $ G ⇒ inj_into A C $;
 theorem inj_into_subset_dom (G: hyps) (A B C: class):
@@ -123,11 +129,13 @@ theorem injs_intro (G: hyps) (A B: class) (f: set):
   $ G ⇒ injects f A B $ > $ G ⇒ f ⊆ A × B $ > $ G ⇒ f ∊ injs A B $;
 theorem injs_elim (G: hyps) (A B: class) (f: set):
   $ G ⇒ f ∊ injs A B $ > $ G ⇒ injects f A B $;
+--| A member of `injs A B` lies in `A × B`.
+theorem injs_elim_sub (G: hyps) (A B: class) (f: set): $ G ⇒ f ∊ injs A B $ > $ G ⇒ f ⊆ A × B $;
 theorem injs_set (G: hyps) (A B: class):
   $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ isset (injs A B) $;
 --| Restricting an injection gives a member of `injs`.
-theorem injs_nonempty (G: hyps) {f: set} (A B: class):
-  $ G ⇒ inj_into A B $ > $ G ⇒ ∃ f (f ∊ injs A B) $;
+theorem injs_nonempty (G: hyps) {u: set} (A B: class):
+  $ G ⇒ inj_into A B $ > $ G ⇒ ∃ u (u ∊ injs A B) $;
 --| @congr
 theorem injs_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ injs A C ≐ injs B D $;
 theorem injs_eq (G: hyps) (A B C D: class):
@@ -242,6 +250,9 @@ theorem hartogs_universe (G: hyps) (U: class) (s: set):
 --| A choice function picks an element of each nonempty member.
 theorem chooses_fv (G: hyps) {y: set} (f a b: set):
   $ G ⇒ chooses f a $ > $ G ⇒ b ∊ a $ > $ G ⇒ ∃ y (y ∊ b) $ > $ G ⇒ fv f b ∈ b $;
+--| Class form of `chooses_fv`.
+theorem chooses_fv_c (G: hyps) {y: set} (f a: set) (B: class):
+  $ G ⇒ chooses f a $ > $ G ⇒ B ∈ a $ > $ G ⇒ ∃ y (y ∊ B) $ > $ G ⇒ fv f B ∈ B $;
 --| A uniform choice of injections: when every member `fv f x`, `x ∊ a`,
 --| injects into `s`, some function `g` picks an injection `fv g x` for each.
 theorem choice_injs (G: hyps) {x g: set} (a s f: set):
@@ -277,6 +288,7 @@ theorem shiftp_inj (G: hyps) (X Y: class):
 theorem shiftp_set (G: hyps) (x: set): $ G ⇒ isset (shiftp x) $;
 --| @congr
 theorem shiftp_congr (X Y: class): $ X ≐ Y $ > $ shiftp X ≐ shiftp Y $;
+theorem shiftp_eq (G: hyps) (X Y: class): $ G ⇒ X = Y $ > $ G ⇒ shiftp X = shiftp Y $;
 --| @rewrite
 theorem sb_c_shiftp {x: set} (t: set x) (X: class x):
   $ (⟦ x / t ⟧ (shiftp X)) ≐ shiftp (⟦ x / t ⟧ X) $;
@@ -291,6 +303,7 @@ theorem inj_into_cxp_cpw (G: hyps) (a: set):
   $ G ⇒ inj_into (a × 𝒫 (a × ω)) (𝒫 (a × ω)) $;
 --| @congr
 theorem shift_congr (A B: class): $ A ≐ B $ > $ shift A ≐ shift B $;
+theorem shift_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ shift A = shift B $;
 --| @rewrite
 theorem sb_c_shift {x: set} (t: set x) (A: class x):
   $ (⟦ x / t ⟧ (shift A)) ≐ shift (⟦ x / t ⟧ A) $;

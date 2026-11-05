@@ -17,6 +17,22 @@ cpr_elim
 l1: $ G ⇒ c ∊ {y | y = A ∨ y = B} $ by weaken [#1]
 l2: $ G ⇒ c = A ∨ c = B $ by cab_elim (x := $ y $, t := $ c $, p := $ y = A ∨ y = B $) [l1]
 
+cpr_intro_l_c
+-------------
+l1: $ G , v = A ⇒ v = A $ by ax
+l2: $ G , v = A ⇒ v = A ∨ v = B $ by or_intro_l [l1]
+l3: $ G , v = A ⇒ v ∊ cpr A B $ by cpr_intro [l2]
+l4: $ G , v = A ⇒ A ∈ cpr A B $ by wcel_intro [l1, l3]
+l5: $ G ⇒ A ∈ cpr A B $ by isset_elim [#1, l4]
+
+cpr_intro_r_c
+-------------
+l1: $ G , v = B ⇒ v = B $ by ax
+l2: $ G , v = B ⇒ v = A ∨ v = B $ by or_intro_r [l1]
+l3: $ G , v = B ⇒ v ∊ cpr A B $ by cpr_intro [l2]
+l4: $ G , v = B ⇒ B ∈ cpr A B $ by wcel_intro [l1, l3]
+l5: $ G ⇒ B ∈ cpr A B $ by isset_elim [#1, l4]
+
 cpr_comm
 --------
 l1: $ G , u ∊ cpr A B ⇒ u ∊ cpr A B $ by ax
@@ -113,6 +129,17 @@ csn_inj
 l1: $ G ⇒ a ∊ csn a $ by csn_intro_var
 l2: $ G ⇒ a ∊ csn b $ by welc_eq [#1, l1]
 l3: $ G ⇒ a = b $ by csn_elim [l2]
+
+csn_inj_c
+---------
+k1: $ G , z = A ⇒ z = A $ by ax
+k2: $ G , z = A ⇒ z ∊ csn A $ by csn_intro [k1]
+k3: $ G , z = A ⇒ csn A = csn B $ by weaken [#2]
+k4: $ G , z = A ⇒ z ∊ csn B $ by welc_eq [k3, k2]
+k5: $ G , z = A ⇒ z = B $ by csn_elim [k4]
+k6: $ G , z = A ⇒ A = z $ by eq_sym [k1]
+k7: $ G , z = A ⇒ A = B $ by eq_trans [k6, k5]
+k8: $ G ⇒ A = B $ by isset_elim [#1, k7]
 
 csn_eq_cpr
 ----------
@@ -236,6 +263,55 @@ l34: $ G , cpr c d = csn a , cpr a b = csn c ⇒ b = d $ by eq_trans [l32, l33]
 l35: $ G , cpr c d = csn a ⇒ b = d $ by or_elim [l19, l34, l25]
 l36: $ G ⇒ b = d $ by or_elim [l7, l35, l14]
 
+opair_inj_c
+-----------
+l1: $ G , x = A , y = B , z = C , u = D ⇒ x = A $ by ax
+l2: $ G , x = A , y = B , z = C , u = D ⇒ y = B $ by ax
+l3: $ G , x = A , y = B , z = C , u = D ⇒ z = C $ by ax
+l4: $ G , x = A , y = B , z = C , u = D ⇒ u = D $ by ax
+l5: $ G , x = A , y = B , z = C , u = D ⇒ ⟨ x , y ⟩ = ⟨ A , B ⟩ $ by opair_eq [l1, l2]
+l6: $ G , x = A , y = B , z = C , u = D ⇒ ⟨ A , B ⟩ = ⟨ C , D ⟩ $ by weaken [#1]
+l7: $ G , x = A , y = B , z = C , u = D ⇒ C = z $ by eq_sym [l3]
+l8: $ G , x = A , y = B , z = C , u = D ⇒ D = u $ by eq_sym [l4]
+l9: $ G , x = A , y = B , z = C , u = D ⇒ ⟨ C , D ⟩ = ⟨ z , u ⟩ $ by opair_eq [l7, l8]
+l10: $ G , x = A , y = B , z = C , u = D ⇒ ⟨ x , y ⟩ = ⟨ C , D ⟩ $ by eq_trans [l5, l6]
+l11: $ G , x = A , y = B , z = C , u = D ⇒ ⟨ x , y ⟩ = ⟨ z , u ⟩ $ by eq_trans [l10, l9]
+l12: $ G , x = A , y = B , z = C , u = D ⇒ x = z $ by opair_inj_l [l11]
+l13: $ G , x = A , y = B , z = C , u = D ⇒ y = u $ by opair_inj_r [l11]
+l14: $ G , x = A , y = B , z = C , u = D ⇒ A = x $ by eq_sym [l1]
+l15: $ G , x = A , y = B , z = C , u = D ⇒ A = z $ by eq_trans [l14, l12]
+l16: $ G , x = A , y = B , z = C , u = D ⇒ A = C $ by eq_trans [l15, l3]
+l17: $ G , x = A , y = B , z = C , u = D ⇒ B = y $ by eq_sym [l2]
+l18: $ G , x = A , y = B , z = C , u = D ⇒ B = u $ by eq_trans [l17, l13]
+l19: $ G , x = A , y = B , z = C , u = D ⇒ B = D $ by eq_trans [l18, l4]
+l20: $ G , x = A , y = B , z = C , u = D ⇒ A = C ∧ B = D $ by and_intro [l16, l19]
+l21: $ G , x = A , y = B , z = C ⇒ A = C ∧ B = D $ by isset_elim [#5, l20]
+l22: $ G , x = A , y = B ⇒ A = C ∧ B = D $ by isset_elim [#4, l21]
+l23: $ G , x = A ⇒ A = C ∧ B = D $ by isset_elim [#3, l22]
+l24: $ G ⇒ A = C ∧ B = D $ by isset_elim [#2, l23]
+
+csn_opair_elim
+--------------
+l1: $ G , z = ⟨ a , b ⟩ , z ∊ csn ⟨ s , c ⟩ ⇒ z ∊ csn ⟨ s , c ⟩ $ by ax
+l2: $ G , z = ⟨ a , b ⟩ , z ∊ csn ⟨ s , c ⟩ ⇒ z = ⟨ s , c ⟩ $ by csn_elim [l1]
+l3: $ G , z = ⟨ a , b ⟩ , z ∊ csn ⟨ s , c ⟩ ⇒ z = ⟨ a , b ⟩ $ by ax
+l4: $ G , z = ⟨ a , b ⟩ , z ∊ csn ⟨ s , c ⟩ ⇒ ⟨ a , b ⟩ = z $ by eq_sym [l3]
+l5: $ G , z = ⟨ a , b ⟩ , z ∊ csn ⟨ s , c ⟩ ⇒ ⟨ a , b ⟩ = ⟨ s , c ⟩ $ by eq_trans [l4, l2]
+l6: $ G , z = ⟨ a , b ⟩ , z ∊ csn ⟨ s , c ⟩ ⇒ a = s $ by opair_inj_l [l5]
+l7: $ G , z = ⟨ a , b ⟩ , z ∊ csn ⟨ s , c ⟩ ⇒ b = c $ by opair_inj_r [l5]
+l8: $ G , z = ⟨ a , b ⟩ , z ∊ csn ⟨ s , c ⟩ ⇒ a = s ∧ b = c $ by and_intro [l6, l7]
+l9: $ G ⇒ a = s ∧ b = c $ by wcel_elim [#1, l8]
+
+csn_opair_intro
+---------------
+l1: $ G ⇒ isset s $ by isset_var
+l2: $ G ⇒ isset c $ by isset_var
+l3: $ G ⇒ isset ⟨ s , c ⟩ $ by opair_set [l1, l2]
+l4: $ G , z = ⟨ s , c ⟩ ⇒ z = ⟨ s , c ⟩ $ by ax
+l5: $ G , z = ⟨ s , c ⟩ ⇒ z ∊ csn ⟨ s , c ⟩ $ by csn_intro [l4]
+l6: $ G , z = ⟨ s , c ⟩ ⇒ ⟨ s , c ⟩ ∈ csn ⟨ s , c ⟩ $ by wcel_intro [l4, l5]
+l7: $ G ⇒ ⟨ s , c ⟩ ∈ csn ⟨ s , c ⟩ $ by isset_elim [l3, l6]
+
 --| The diagonal of a class: the pairs `⟨ y , y ⟩` with `y ∊ A` (for separation).
 def sep_diag (A: class) (.w .y: set): class = $ {w | ∃ y (y ∊ A ∧ w = ⟨ y , y ⟩)} $
 
@@ -334,6 +410,61 @@ l4: $ G , u = B ⇒ A ⊆ u $ by subset_eq_r [l2, l3]
 l5: $ G , u = B ⇒ isset A $ by subset_set [l4]
 l6: $ G ⇒ isset A $ by isset_elim [#1, l5]
 
+lemma p0_pick (G: hyps) {u: set} (A: class): $ G ⇒ ∃ u (isset A → u = A) $
+----
+l1: $ G ⇒ isset A ∨ ¬ isset A $ by excluded_middle
+l2: $ G , isset A ⇒ isset A $ by ax
+l3: $ G , isset A , v = A ⇒ v = A $ by ax
+l4: $ G , isset A , v = A ⇒ isset A → v = A $ by imp_intro (p := $ isset A $) [l3]
+l5: $ G , isset A , v = A ⇒ ∃ u (isset A → u = A) $ by ex_intro (x := $ u $, t := $ v $, p := $ isset A → u = A $) [l4]
+l6: $ G , isset A ⇒ ∃ u (isset A → u = A) $ by isset_elim [l2, l5]
+n1: $ G , ¬ isset A , isset A ⇒ ¬ isset A $ by ax
+n2: $ G , ¬ isset A , isset A ⇒ isset A $ by ax
+n3: $ G , ¬ isset A , isset A ⇒ ⊥ $ by not_elim [n1, n2]
+n4: $ G , ¬ isset A , isset A ⇒ v = A $ by bot_elim [n3]
+n5: $ G , ¬ isset A ⇒ isset A → v = A $ by imp_intro [n4]
+n6: $ G , ¬ isset A ⇒ ∃ u (isset A → u = A) $ by ex_intro (x := $ u $, t := $ v $, p := $ isset A → u = A $) [n5]
+l7: $ G ⇒ ∃ u (isset A → u = A) $ by or_elim [l1, l6, n6]
+
+lemma p0_cpr_sub (G: hyps) (A B: class) (u v: set): $ G ⇒ isset A → u = A $ > $ G ⇒ isset B → v = B $ > $ G ⇒ cpr A B ⊆ cpr u v $
+----
+l1: $ G , w ∊ cpr A B ⇒ w ∊ cpr A B $ by ax
+l2: $ G , w ∊ cpr A B ⇒ w = A ∨ w = B $ by cpr_elim [l1]
+l3: $ G , w ∊ cpr A B , w = A ⇒ w = A $ by ax
+l4: $ G , w ∊ cpr A B , w = A ⇒ isset A $ by isset_intro [l3]
+l5: $ G , w ∊ cpr A B , w = A ⇒ isset A → u = A $ by weaken [#1]
+l6: $ G , w ∊ cpr A B , w = A ⇒ u = A $ by imp_elim [l5, l4]
+l7: $ G , w ∊ cpr A B , w = A ⇒ A = u $ by eq_sym [l6]
+l8: $ G , w ∊ cpr A B , w = A ⇒ w = u $ by eq_trans [l3, l7]
+l9: $ G , w ∊ cpr A B , w = A ⇒ w = u ∨ w = v $ by or_intro_l [l8]
+m3: $ G , w ∊ cpr A B , w = B ⇒ w = B $ by ax
+m4: $ G , w ∊ cpr A B , w = B ⇒ isset B $ by isset_intro [m3]
+m5: $ G , w ∊ cpr A B , w = B ⇒ isset B → v = B $ by weaken [#2]
+m6: $ G , w ∊ cpr A B , w = B ⇒ v = B $ by imp_elim [m5, m4]
+m7: $ G , w ∊ cpr A B , w = B ⇒ B = v $ by eq_sym [m6]
+m8: $ G , w ∊ cpr A B , w = B ⇒ w = v $ by eq_trans [m3, m7]
+m9: $ G , w ∊ cpr A B , w = B ⇒ w = u ∨ w = v $ by or_intro_r [m8]
+l10: $ G , w ∊ cpr A B ⇒ w = u ∨ w = v $ by or_elim [l2, l9, m9]
+l11: $ G , w ∊ cpr A B ⇒ w ∊ cpr u v $ by cpr_intro [l10]
+l12: $ G ⇒ cpr A B ⊆ cpr u v $ by subset_intro [l11]
+
+cpr_isset
+---------
+l1: $ G ⇒ ∃ u (isset A → u = A) $ by p0_pick
+l2: $ G ⇒ ∃ v (isset B → v = B) $ by p0_pick
+l3: $ G , isset A → u = A , isset B → v = B ⇒ isset A → u = A $ by ax
+l4: $ G , isset A → u = A , isset B → v = B ⇒ isset B → v = B $ by ax
+l5: $ G , isset A → u = A , isset B → v = B ⇒ cpr A B ⊆ cpr u v $ by p0_cpr_sub [l3, l4]
+l6: $ G , isset A → u = A , isset B → v = B ⇒ isset (cpr u v) $ by ax_pair
+l7: $ G , isset A → u = A , isset B → v = B ⇒ isset (cpr A B) $ by subset_isset [l6, l5]
+l8: $ G , isset A → u = A ⇒ ∃ v (isset B → v = B) $ by weaken [l2]
+l9: $ G , isset A → u = A ⇒ isset (cpr A B) $ by ex_elim [l8, l7]
+l10: $ G ⇒ isset (cpr A B) $ by ex_elim [l1, l9]
+
+opair_isset
+-----------
+l1: $ G ⇒ isset (cpr (csn A) (cpr A B)) $ by cpr_isset
+
 cuni_intro
 ----------
 l1: $ G ⇒ b ∊ A ∧ a ∊ b $ by and_intro [#2, #1]
@@ -353,6 +484,16 @@ l8: $ H , y ∊ A ∧ a ∊ y ⇒ a ∊ y → c $ by imp_elim [l7, l5]
 l9: $ H , y ∊ A ∧ a ∊ y ⇒ c $ by imp_elim [l8, l6]
 l10: $ G , H ⇒ c $ by ex_elim [l1, l9]
 
+wcel_cuni_elim
+--------------
+l1: $ H , w = C , w ∊ ⋃ A ⇒ w ∊ ⋃ A $ by ax
+l2: $ H , w = C , y ∊ A , w ∊ y ⇒ w = C $ by ax
+l3: $ H , w = C , y ∊ A , w ∊ y ⇒ w ∊ y $ by ax
+l4: $ H , w = C , y ∊ A , w ∊ y ⇒ C ∈ y $ by wcel_intro [l2, l3]
+l5: $ H , w = C , y ∊ A , w ∊ y ⇒ d $ by cut [l4, #2]
+l6: $ H , w = C , w ∊ ⋃ A ⇒ d $ by cuni_elim [l1, l5]
+l7: $ G , H ⇒ d $ by wcel_elim [#1, l6]
+
 cuni_set
 --------
 l1: $ x = A ⇒ x = A $ by ax
@@ -367,6 +508,24 @@ l1: $ G , z ∊ a ⇒ z ∊ a $ by ax
 l2: $ G , z ∊ a ⇒ a ∊ A $ by weaken [#1]
 l3: $ G , z ∊ a ⇒ z ∊ ⋃ A $ by cuni_intro [l1, l2]
 l4: $ G ⇒ a ⊆ ⋃ A $ by subset_intro [l3]
+
+cuni_csn
+--------
+l1: $ G , z ∊ ⋃ (csn A) ⇒ z ∊ ⋃ (csn A) $ by ax
+l2: $ G , z ∊ ⋃ (csn A) , y ∊ csn A , z ∊ y ⇒ y ∊ csn A $ by ax
+l3: $ G , z ∊ ⋃ (csn A) , y ∊ csn A , z ∊ y ⇒ y = A $ by csn_elim [l2]
+l4: $ G , z ∊ ⋃ (csn A) , y ∊ csn A , z ∊ y ⇒ z ∊ y $ by ax
+l5: $ G , z ∊ ⋃ (csn A) , y ∊ csn A , z ∊ y ⇒ z ∊ A $ by welc_eq [l3, l4]
+l6: $ G , z ∊ ⋃ (csn A) ⇒ z ∊ A $ by cuni_elim [l1, l5]
+l7: $ G , z ∊ A ⇒ A ∈ csn A $ by cpr_intro_l_c [weaken [#1]]
+l8: $ G , z ∊ A , w = A , w ∊ csn A ⇒ w = A $ by ax
+l9: $ G , z ∊ A , w = A , w ∊ csn A ⇒ A = w $ by eq_sym [l8]
+l10: $ G , z ∊ A , w = A , w ∊ csn A ⇒ z ∊ A $ by ax
+l11: $ G , z ∊ A , w = A , w ∊ csn A ⇒ z ∊ w $ by welc_eq [l9, l10]
+l12: $ G , z ∊ A , w = A , w ∊ csn A ⇒ w ∊ csn A $ by ax
+l13: $ G , z ∊ A , w = A , w ∊ csn A ⇒ z ∊ ⋃ (csn A) $ by cuni_intro [l11, l12]
+l14: $ G , z ∊ A ⇒ z ∊ ⋃ (csn A) $ by wcel_elim [l7, l13]
+l15: $ G ⇒ ⋃ (csn A) = A $ by eq_intro [l6, l14]
 
 cun_intro_l
 -----------
@@ -470,6 +629,16 @@ l1: $ G ⇒ a ∊ {z | z ⊆ A} $ by cab_intro (x := $ z $, t := $ a $, p := $ z
 cpw_elim
 --------
 l1: $ G ⇒ a ⊆ A $ by cab_elim (x := $ z $, t := $ a $, p := $ z ⊆ A $) [#1]
+
+wcel_cpw
+--------
+l1: $ G , x = B ⇒ x = B $ by ax
+l2: $ G , x = B ⇒ B = x $ by eq_sym [l1]
+l3: $ G , x = B ⇒ B ⊆ A $ by weaken [#2]
+l4: $ G , x = B ⇒ x ⊆ A $ by subset_eq_l [l2, l3]
+l5: $ G , x = B ⇒ x ∊ 𝒫 A $ by cpw_intro [l4]
+l6: $ G , x = B ⇒ B ∈ 𝒫 A $ by wcel_intro [l1, l5]
+l7: $ G ⇒ B ∈ 𝒫 A $ by isset_elim [#1, l6]
 
 cpw_set
 -------
@@ -610,6 +779,18 @@ cin_elim_r
 ----------
 l1: $ G ⇒ a ∊ A ∧ a ∊ B $ by cab_elim (x := $ z $, t := $ a $, p := $ z ∊ A ∧ z ∊ B $) [#1]
 l2: $ G ⇒ a ∊ B $ by and_elim_r [l1]
+
+wcel_cin
+--------
+l1: $ G , x = A , x ∊ B ⇒ x = A $ by ax
+l2: $ G , x = A , x ∊ B ⇒ x ∊ B $ by ax
+l3: $ G , x = A , x ∊ B ⇒ A = x $ by eq_sym [l1]
+l4: $ G , x = A , x ∊ B ⇒ A ∈ C $ by weaken [#2]
+l5: $ G , x = A , x ∊ B ⇒ x ∈ C $ by wcel_eq_l [l3, l4]
+l6: $ G , x = A , x ∊ B ⇒ x ∊ C $ by wcel_welc [l5]
+l7: $ G , x = A , x ∊ B ⇒ x ∊ B ∩ C $ by cin_intro [l2, l6]
+l8: $ G , x = A , x ∊ B ⇒ A ∈ B ∩ C $ by wcel_intro [l1, l7]
+l9: $ G ⇒ A ∈ B ∩ C $ by wcel_elim [#1, l8]
 
 cin_congr
 ---------

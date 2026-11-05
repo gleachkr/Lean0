@@ -11,9 +11,16 @@ import "relations.mm0";
 -- --------------------------------------------------------------------------
 
 theorem notin_self (G: hyps) (a: set): $ G ⇒ a ∊ a $ > $ G ⇒ ⊥ $;
+--| Class form of `notin_self`.
+theorem notin_self_c (G: hyps) (A: class): $ G ⇒ A ∈ A $ > $ G ⇒ ⊥ $;
 theorem notin_cycle (G: hyps) (a b: set): $ G ⇒ a ∊ b $ > $ G ⇒ b ∊ a $ > $ G ⇒ ⊥ $;
+--| Class form of `notin_cycle`.
+theorem notin_cycle_c (G: hyps) (A B: class): $ G ⇒ A ∈ B $ > $ G ⇒ B ∈ A $ > $ G ⇒ ⊥ $;
 theorem suc_ne_empty (G: hyps) (A: class): $ G ⇒ suc A = ∅ $ > $ G ⇒ ⊥ $;
 theorem suc_inj (G: hyps) (a b: set): $ G ⇒ suc a = suc b $ > $ G ⇒ a = b $;
+--| Class form of `suc_inj`.
+theorem suc_inj_c (G: hyps) (A B: class):
+  $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ suc A = suc B $ > $ G ⇒ A = B $;
 
 -- --------------------------------------------------------------------------
 -- ω, the least inductive class
@@ -26,21 +33,25 @@ prefix omega: $ω$ prec max;
 --| @freshen G y
 theorem omega_intro (G: hyps) {y: set} (a: set):
   $ G , inductive y ⇒ a ∊ y $ > $ G ⇒ a ∊ ω $;
-theorem wcel_cin (G: hyps) (A B C: class): $ G ⇒ A ∈ B $ > $ G ⇒ A ∈ C $ > $ G ⇒ A ∈ B ∩ C $;
 theorem omega_elim (G: hyps) (A: class) (a: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ inductive A $ > $ G ⇒ a ∊ A $;
 theorem omega_zero (G: hyps): $ G ⇒ ∅ ∈ ω $;
 theorem omega_suc (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ suc a ∈ ω $;
+--| Class form of `omega_suc`.
+theorem omega_suc_c (G: hyps) (A: class): $ G ⇒ A ∈ ω $ > $ G ⇒ suc A ∈ ω $;
 theorem omega_inductive (G: hyps): $ G ⇒ inductive ω $;
 --| `ω` is a subclass of the inductive set given by infinity.
 theorem omega_set (G: hyps): $ G ⇒ isset ω $;
 --| Induction, for a class and for a formula.
 theorem omega_ind (G: hyps) {x: set} (P: class):
   $ G ⇒ ∅ ∈ P $ > $ G ⇒ ∀ x (x ∊ ω ∧ x ∊ P → suc x ∈ P) $ > $ G ⇒ ω ⊆ P $;
-theorem wcel_cpw (G: hyps) (A B: class): $ G ⇒ isset B $ > $ G ⇒ B ⊆ A $ > $ G ⇒ B ∈ 𝒫 A $;
 theorem omega_ind_f (G: hyps) {x y: set} (p: fml x):
   $ G ⇒ ∅ ∈ {x | p} $ > $ G ⇒ ∀ y (y ∊ ω → [x/y] p → suc y ∈ {x | p}) $ >
   $ G ⇒ ∀ x (x ∊ ω → p) $;
+--| Induction with the cases at a named set `z`: `z = ∅`, and `z = suc y` given the case at `y`.
+theorem omega_ind_named {x y z: set} (G: hyps) (p: fml x) (a: set):
+  $ G , z = ∅ ⇒ [x/z] p $ > $ G , y ∊ ω , [x/y] p , z = suc y ⇒ [x/z] p $ > $ G ⇒ a ∊ ω $ >
+  $ G ⇒ [x/a] p $;
 
 -- --------------------------------------------------------------------------
 -- The order of the natural numbers (membership)
@@ -54,7 +65,10 @@ theorem omega_elem_omega (G: hyps) (a b: set):
 theorem omega_cases (G: hyps) {y: set} (a: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ a = ∅ ∨ ∃ y (y ∊ ω ∧ a = suc y) $;
 theorem omega_suc_mono (G: hyps) (a b: set):
-  $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ a ∊ b $ > $ G ⇒ suc a ∈ suc b $;
+  $ G ⇒ b ∊ ω $ > $ G ⇒ a ∊ b $ > $ G ⇒ suc a ∈ suc b $;
+--| Class form of `omega_suc_mono`.
+theorem omega_suc_mono_c (G: hyps) (A B: class):
+  $ G ⇒ B ∈ ω $ > $ G ⇒ A ∈ B $ > $ G ⇒ suc A ∈ suc B $;
 theorem omega_zero_le (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ ∅ ∈ a ∨ ∅ = a $;
 theorem omega_tricho (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ a ∊ b ∨ a = b ∨ b ∊ a $;
@@ -73,6 +87,10 @@ theorem fv_val (G: hyps) (F: class) (a b: set):
   $ G ⇒ functional F $ > $ G ⇒ ⟨ a , b ⟩ ∈ F $ > $ G ⇒ fv F a = b $;
 theorem fv_in (G: hyps) (F: class) (a: set):
   $ G ⇒ functional F $ > $ G ⇒ a ∊ cdm F $ > $ G ⇒ ⟨ a , fv F a ⟩ ∈ F $;
+--| A pair of one function is a pair of another with the same value at its first component.
+theorem fv_pair_move (G: hyps) (R S: class) (u v: set):
+  $ G ⇒ functional R $ > $ G ⇒ functional S $ > $ G ⇒ ⟨ u , v ⟩ ∈ R $ > $ G ⇒ u ∊ cdm S $ >
+  $ G ⇒ fv R u = fv S u $ > $ G ⇒ ⟨ u , v ⟩ ∈ S $;
 theorem fv_set (G: hyps) (F: class) (a: set):
   $ G ⇒ functional F $ > $ G ⇒ isset (fv F a) $;
 theorem fv_empty (G: hyps) (F: class) (a: set):
@@ -90,6 +108,11 @@ theorem fv_eq (G: hyps) (F H A B: class):
 --| @rewrite
 theorem sb_c_fv {x: set} (t: set x) (F A: class x):
   $ (⟦ x / t ⟧ (fv F A)) ≐ fv (⟦ x / t ⟧ F) (⟦ x / t ⟧ A) $;
+--| Class form of `fv_val`.
+theorem fv_val_c (G: hyps) (F A B: class):
+  $ G ⇒ functional F $ > $ G ⇒ ⟨ A , B ⟩ ∈ F $ > $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ fv F A = B $;
+--| Class form of `fv_set`.
+theorem fv_set_c (G: hyps) (F A: class): $ G ⇒ functional F $ > $ G ⇒ isset A $ > $ G ⇒ isset (fv F A) $;
 
 -- --------------------------------------------------------------------------
 -- Recursion on ω
@@ -115,8 +138,6 @@ theorem omega_suc_elem_omega (G: hyps) (i a: set): $ G ⇒ i ∊ ω $ > $ G ⇒ 
 theorem omapx_agree (G: hyps) (A F: class) (g h a: set):
   $ G ⇒ g ∊ omapx A F $ > $ G ⇒ h ∊ omapx A F $ >
   $ G ⇒ a ∊ cdm g $ > $ G ⇒ a ∊ cdm h $ > $ G ⇒ fv g a = fv h a $;
-theorem csn_opair_elim (G: hyps) (a b s c: set): $ G ⇒ ⟨ a , b ⟩ ∈ csn ⟨ s , c ⟩ $ > $ G ⇒ a = s ∧ b = c $;
-theorem csn_opair_intro (G: hyps) (s c: set): $ G ⇒ ⟨ s , c ⟩ ∈ csn ⟨ s , c ⟩ $;
 theorem cun_csn_opair_intro (G: hyps) (R: class) (s c: set): $ G ⇒ ⟨ s , c ⟩ ∈ R ∪ csn ⟨ s , c ⟩ $;
 theorem cun_csn_opair_elim (G: hyps) (R: class) (a b s c: set): $ G ⇒ ⟨ a , b ⟩ ∈ R ∪ csn ⟨ s , c ⟩ $ > $ G ⇒ ⟨ a , b ⟩ ∈ R ∨ (a = s ∧ b = c) $;
 theorem fv_cun_csn_other (G: hyps) (R A: class) (s c: set): $ G ⇒ isset A $ > $ G ⇒ A = s → ⊥ $ > $ G ⇒ fv (R ∪ csn ⟨ s , c ⟩) A = fv R A $;
@@ -132,8 +153,7 @@ theorem omapx_cdm (G: hyps) (A F: class) (g a: set): $ G ⇒ g ∊ omapx A F $ >
 theorem omapx_step (G: hyps) (A F: class) (g m n: set): $ G ⇒ g ∊ omapx A F $ > $ G ⇒ m = suc n $ > $ G ⇒ m ∊ cdm g $ > $ G ⇒ n ∊ cdm g ∧ fv g (suc n) = fv F (fv g n) $;
 theorem omrec_intro (G: hyps) (A F: class) (g a b: set): $ G ⇒ g ∊ omapx A F $ > $ G ⇒ ⟨ a , b ⟩ ∈ g $ > $ G ⇒ ⟨ a , b ⟩ ∈ omrec A F $;
 theorem omrec_elim (G: hyps) {g: set} (A F: class) (a b: set): $ G ⇒ ⟨ a , b ⟩ ∈ omrec A F $ > $ G ⇒ ∃ g (g ∊ omapx A F ∧ ⟨ a , b ⟩ ∈ g) $;
-theorem omrec_functional (G: hyps) (A F: class):
-  $ G ⇒ isset A $ > $ G ⇒ functional F $ > $ G ⇒ functional (omrec A F) $;
+theorem omrec_functional (G: hyps) (A F: class): $ G ⇒ functional (omrec A F) $;
 theorem omrec_rel (G: hyps) (A F: class): $ G ⇒ rel (omrec A F) $;
 theorem omrec_cdm (G: hyps) (A F: class):
   $ G ⇒ isset A $ > $ G ⇒ functional F $ > $ G ⇒ cdm (omrec A F) = ω $;

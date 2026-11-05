@@ -33,18 +33,6 @@ k7: $ G ⇒ csn ⟨ a , w ⟩ = y $ by eq_sym [#2]
 k8: $ G ⇒ y ⊆ suc a × ω $ by subset_eq_l [k7, k6]
 k9: $ G ⇒ y ∊ 𝒫 (suc a × ω) $ by cpw_intro [k8]
 
-lemma c1_csn_inj_cls (G: hyps) (A B: class):
-  $ G ⇒ isset A $ > $ G ⇒ csn A = csn B $ > $ G ⇒ A = B $
-----
-k1: $ G , z = A ⇒ z = A $ by ax
-k2: $ G , z = A ⇒ z ∊ csn A $ by csn_intro [k1]
-k3: $ G , z = A ⇒ csn A = csn B $ by weaken [#2]
-k4: $ G , z = A ⇒ z ∊ csn B $ by welc_eq [k3, k2]
-k5: $ G , z = A ⇒ z = B $ by csn_elim [k4]
-k6: $ G , z = A ⇒ A = z $ by eq_sym [k1]
-k7: $ G , z = A ⇒ A = B $ by eq_trans [k6, k5]
-k8: $ G ⇒ A = B $ by isset_elim [#1, k7]
-
 inj_into_omega_cpw
 ------------------
 m1: $ G ⇒ functional (cgr x (csn ⟨ a , x ⟩)) $ by cgr_functional
@@ -71,7 +59,7 @@ k6: $ G , ⟨ u , w ⟩ ∈ cgr x (csn ⟨ a , x ⟩) , ⟨ v , w ⟩ ∈ cgr x 
 k7: $ G , ⟨ u , w ⟩ ∈ cgr x (csn ⟨ a , x ⟩) , ⟨ v , w ⟩ ∈ cgr x (csn ⟨ a , x ⟩) ⇒ isset a $ by isset_var
 k8: $ G , ⟨ u , w ⟩ ∈ cgr x (csn ⟨ a , x ⟩) , ⟨ v , w ⟩ ∈ cgr x (csn ⟨ a , x ⟩) ⇒ isset u $ by isset_var
 k9: $ G , ⟨ u , w ⟩ ∈ cgr x (csn ⟨ a , x ⟩) , ⟨ v , w ⟩ ∈ cgr x (csn ⟨ a , x ⟩) ⇒ isset ⟨ a , u ⟩ $ by opair_set [k7, k8]
-k10: $ G , ⟨ u , w ⟩ ∈ cgr x (csn ⟨ a , x ⟩) , ⟨ v , w ⟩ ∈ cgr x (csn ⟨ a , x ⟩) ⇒ ⟨ a , u ⟩ = ⟨ a , v ⟩ $ by c1_csn_inj_cls [k9, k6]
+k10: $ G , ⟨ u , w ⟩ ∈ cgr x (csn ⟨ a , x ⟩) , ⟨ v , w ⟩ ∈ cgr x (csn ⟨ a , x ⟩) ⇒ ⟨ a , u ⟩ = ⟨ a , v ⟩ $ by csn_inj_c [k9, k6]
 k11: $ G , ⟨ u , w ⟩ ∈ cgr x (csn ⟨ a , x ⟩) , ⟨ v , w ⟩ ∈ cgr x (csn ⟨ a , x ⟩) ⇒ u = v $ by opair_inj_r [k10]
 l1: $ G ⇒ injective (cgr x (csn ⟨ a , x ⟩)) $ by injective_intro [k11]
 l2: $ G ⇒ injective (cres (cgr x (csn ⟨ a , x ⟩)) ω) $ by injective_cres [l1]
@@ -106,38 +94,6 @@ f5: $ G , f = cres (cgr x (csn ⟨ a , x ⟩)) ω ⇒ 𝒫 (suc a × ω) = 𝒫 
 f6: $ G , f = cres (cgr x (csn ⟨ a , x ⟩)) ω ⇒ injects f ω (𝒫 (suc a × ω)) $ by injects_eq [f2, f4, f5, f3]
 f7: $ G , f = cres (cgr x (csn ⟨ a , x ⟩)) ω ⇒ inj_into ω (𝒫 (suc a × ω)) $ by inj_into_intro [f6]
 f8: $ G ⇒ inj_into ω (𝒫 (suc a × ω)) $ by isset_elim [r15, f7]
-
-lemma c1_cres_set (G: hyps) (R A: class):
-  $ G ⇒ functional R $ > $ G ⇒ isset A $ > $ G ⇒ isset (cres R A) $
-----
-k1: $ G ⇒ isset (img R A) $ by img_set [#1, #2]
-k2: $ G ⇒ isset (A × img R A) $ by cxp_set [#2, k1]
-r1: $ G , z ∊ cres R A ⇒ rel (cres R A) $ by cres_rel
-r2: $ G , z ∊ cres R A ⇒ z ∊ cres R A $ by ax
-r3: $ G , z ∊ cres R A , z = ⟨ i , j ⟩ ⇒ z = ⟨ i , j ⟩ $ by ax
-r4: $ G , z ∊ cres R A , z = ⟨ i , j ⟩ ⇒ z ∊ cres R A $ by ax
-r5: $ G , z ∊ cres R A , z = ⟨ i , j ⟩ ⇒ z ∈ cres R A $ by welc_wcel [r4]
-r6: $ G , z ∊ cres R A , z = ⟨ i , j ⟩ ⇒ ⟨ i , j ⟩ ∈ cres R A $ by wcel_eq_l [r3, r5]
-r7: $ G , z ∊ cres R A , z = ⟨ i , j ⟩ ⇒ i ∊ A ∧ ⟨ i , j ⟩ ∈ R $ by cres_elim [r6]
-r8: $ G , z ∊ cres R A , z = ⟨ i , j ⟩ ⇒ i ∊ A $ by and_elim_l [r7]
-r9: $ G , z ∊ cres R A , z = ⟨ i , j ⟩ ⇒ ⟨ i , j ⟩ ∈ R $ by and_elim_r [r7]
-r10: $ G , z ∊ cres R A , z = ⟨ i , j ⟩ ⇒ j ∊ img R A $ by img_intro [r8, r9]
-r11: $ G , z ∊ cres R A , z = ⟨ i , j ⟩ ⇒ z ∊ A × img R A $ by cxp_intro_eq [r3, r8, r10]
-r12: $ G , z ∊ cres R A ⇒ z ∊ A × img R A $ by rel_elim [r1, r2, r11]
-r13: $ G ⇒ cres R A ⊆ A × img R A $ by subset_intro [r12]
-r14: $ G ⇒ isset (cres R A) $ by subset_isset [k2, r13]
-
-lemma c1_inj_into_cls (G: hyps) (F A B: class):
-  $ G ⇒ isset F $ > $ G ⇒ injects F A B $ > $ G ⇒ inj_into A B $
-----
-f1: $ G , f = F ⇒ f = F $ by ax
-f2: $ G , f = F ⇒ F = f $ by eq_sym [f1]
-f3: $ G , f = F ⇒ injects F A B $ by weaken [#2]
-f4: $ G , f = F ⇒ A = A $ by eq_refl
-f5: $ G , f = F ⇒ B = B $ by eq_refl
-f6: $ G , f = F ⇒ injects f A B $ by injects_eq [f2, f4, f5, f3]
-f7: $ G , f = F ⇒ inj_into A B $ by inj_into_intro [f6]
-f8: $ G ⇒ inj_into A B $ by isset_elim [#1, f7]
 
 lemma c1_cgr_val {x v: set} (G: hyps) (B: class x) (A C T: class) (w: set):
   $ G ⇒ w ∊ A $ > $ G ⇒ (⟦ x / w ⟧ B) = T $ > $ G ⇒ T ∈ C $ >
@@ -411,8 +367,8 @@ i11: $ G ⇒ injective (cres (cres (cgr x {y | (x ∊ ω ∧ y ∊ suc x) ∨ (�
 i12: $ G ⇒ injects (cres (cgr x {y | (x ∊ ω ∧ y ∊ suc x) ∨ (¬ x ∊ ω ∧ ¬ x = a ∧ y ∊ x)}) (suc a)) (suc a) a $ by injects_intro [w4, i11]
 t1: $ G ⇒ isset a $ by isset_var
 t2: $ G ⇒ isset (suc a) $ by suc_set [t1]
-t3: $ G ⇒ isset (cres (cgr x {y | (x ∊ ω ∧ y ∊ suc x) ∨ (¬ x ∊ ω ∧ ¬ x = a ∧ y ∊ x)}) (suc a)) $ by c1_cres_set [m1, t2]
-t4: $ G ⇒ inj_into (suc a) a $ by c1_inj_into_cls [t3, i12]
+t3: $ G ⇒ isset (cres (cgr x {y | (x ∊ ω ∧ y ∊ suc x) ∨ (¬ x ∊ ω ∧ ¬ x = a ∧ y ∊ x)}) (suc a)) $ by cres_set [m1, t2]
+t4: $ G ⇒ inj_into (suc a) a $ by inj_into_intro_c [t3, i12]
 
 hartogs_suc
 -----------
@@ -622,21 +578,9 @@ l15: $ (z ∊ (⟦ x / u ⟧ B) → ∃ f (functional f ∧ cdm f ⊆ A ∧ crn 
 l16: $ ∀ z (z ∊ (⟦ x / u ⟧ B) → ∃ f (functional f ∧ cdm f ⊆ A ∧ crn f ⊆ u ∧ z ∊ cap x B (crn f))) ⟺ ∀ z (z ∊ (⟦ x / u ⟧ D) → ∃ f (functional f ∧ cdm f ⊆ C ∧ crn f ⊆ u ∧ z ∊ cap x D (crn f))) $ by all_congr [l15]
 l17: $ ∀ u ∀ z (z ∊ (⟦ x / u ⟧ B) → ∃ f (functional f ∧ cdm f ⊆ A ∧ crn f ⊆ u ∧ z ∊ cap x B (crn f))) ⟺ ∀ u ∀ z (z ∊ (⟦ x / u ⟧ D) → ∃ f (functional f ∧ cdm f ⊆ C ∧ crn f ⊆ u ∧ z ∊ cap x D (crn f))) $ by all_congr [l16]
 
-lemma c1_sb_c_swap {x y: set} (t: set y) (u: set) (B: class x y):
-  $ (⟦ y / t ⟧ (⟦ x / u ⟧ B)) ≐ (⟦ x / u ⟧ (⟦ y / t ⟧ B)) $
-----
-l1: $ cap x B u ≐ (⟦ x / u ⟧ B) $ by cap_var
-l2: $ (⟦ x / u ⟧ B) ≐ cap x B u $ by ceqt_sym [l1]
-l3: $ seqt t t $ by seqt_refl
-l4: $ (⟦ y / t ⟧ (⟦ x / u ⟧ B)) ≐ (⟦ y / t ⟧ (cap x B u)) $ by sb_c_congr [l3, l2]
-l5: $ (⟦ y / t ⟧ (cap x B u)) ≐ cap x (⟦ y / t ⟧ B) u $ by sb_c_cap
-l6: $ cap x (⟦ y / t ⟧ B) u ≐ (⟦ x / u ⟧ (⟦ y / t ⟧ B)) $ by cap_var
-l7: $ (⟦ y / t ⟧ (⟦ x / u ⟧ B)) ≐ cap x (⟦ y / t ⟧ B) u $ by ceqt_trans [l4, l5]
-l8: $ (⟦ y / t ⟧ (⟦ x / u ⟧ B)) ≐ (⟦ x / u ⟧ (⟦ y / t ⟧ B)) $ by ceqt_trans [l7, l6]
-
 sb_f_cont
 ---------
-l1: $ (⟦ y / t ⟧ (⟦ x / u ⟧ B)) ≐ (⟦ x / u ⟧ (⟦ y / t ⟧ B)) $ by c1_sb_c_swap
+l1: $ (⟦ y / t ⟧ (⟦ x / u ⟧ B)) ≐ (⟦ x / u ⟧ (⟦ y / t ⟧ B)) $ by sb_c_swap
 l0: $ seqt z z $ by seqt_refl
 l2: $ (z ∊ (⟦ y / t ⟧ (⟦ x / u ⟧ B))) ⟺ (z ∊ (⟦ x / u ⟧ (⟦ y / t ⟧ B))) $ by welc_congr [l0, l1]
 l3: $ ∃ f (functional f ∧ cdm f ⊆ (⟦ y / t ⟧ A) ∧ crn f ⊆ u ∧ z ∊ cap x (⟦ y / t ⟧ B) (crn f)) ⟺ ∃ f (functional f ∧ cdm f ⊆ (⟦ y / t ⟧ A) ∧ crn f ⊆ u ∧ z ∊ cap x (⟦ y / t ⟧ B) (crn f)) $ by iff_refl
@@ -675,116 +619,6 @@ p10: $ G , z ∊ (⟦ x / u ⟧ B) ⇒ functional f ∧ cdm f ⊆ A ∧ crn f �
 p11: $ G , z ∊ (⟦ x / u ⟧ B) ⇒ ∀ f (functional f ∧ cdm f ⊆ A ∧ crn f ⊆ u ∧ z ∊ cap x B (crn f) → functional f ∧ cdm f ⊆ C ∧ crn f ⊆ u ∧ z ∊ cap x B (crn f)) $ by all_intro [p10]
 p12: $ G , z ∊ (⟦ x / u ⟧ B) ⇒ ∃ f (functional f ∧ cdm f ⊆ C ∧ crn f ⊆ u ∧ z ∊ cap x B (crn f)) $ by ex_mp [p11, l3]
 p13: $ G ⇒ cont x B C $ by cont_intro [p12]
-
--- The class arguments of `cap x B C` must not mention `x`, but `stgb x B a`,
--- `fv (stg x B) a` and `lfp x B` do (MM0 counts the bound occurrence). The
--- lemmas below (copied from lfp.auf's `l1_*` kit) handle a class `E` that
--- mentions `x` only bound, as witnessed by the vacuity premise `⟦ x / u ⟧ E ≐ E`.
-lemma c2_sb_c_cap_same {x: set} (t: set x) (B: class x) (C: class x):
-  $ (⟦ x / t ⟧ (cap x B C)) ≐ cap x B C $
-----
-l1: $ (⟦ x / t ⟧ {y | ∃ x (x = C ∧ y ∊ B)}) ≐ {y | ∃ x (x = C ∧ y ∊ B)} $ by ceqt_refl
-
-lemma c2_sb_c_stg_same {x: set} (t: set x) (B: class x):
-  $ (⟦ x / t ⟧ (stg x B)) ≐ stg x B $
-----
-l1: $ (⟦ x / t ⟧ (cap x B (⋃ (crn g)))) ≐ cap x B (⋃ (crn g)) $ by c2_sb_c_cap_same
-l2: $ cgr g (⟦ x / t ⟧ (cap x B (⋃ (crn g)))) ≐ cgr g (cap x B (⋃ (crn g))) $ by cgr_congr [l1]
-l3: $ (⟦ x / t ⟧ (trec (cgr g (cap x B (⋃ (crn g)))))) ≐ trec (cgr g (cap x B (⋃ (crn g)))) $ by trec_congr [l2]
-
-lemma c2_sb_c_stgb_same {x: set} (t: set x) (B: class x) (C: class):
-  $ (⟦ x / t ⟧ (stgb x B C)) ≐ stgb x B C $
-----
-l1: $ (⟦ x / t ⟧ (stg x B)) ≐ stg x B $ by c2_sb_c_stg_same
-l2: $ C ≐ C $ by ceqt_refl
-l3: $ cres (⟦ x / t ⟧ (stg x B)) C ≐ cres (stg x B) C $ by cres_congr [l1, l2]
-l4: $ crn (cres (⟦ x / t ⟧ (stg x B)) C) ≐ crn (cres (stg x B) C) $ by crn_congr [l3]
-l5: $ (⟦ x / t ⟧ (⋃ (crn (cres (stg x B) C)))) ≐ ⋃ (crn (cres (stg x B) C)) $ by cuni_congr [l4]
-
-lemma c2_fvstg_closed {x: set} (t: set x) (B: class x) (A: class):
-  $ (⟦ x / t ⟧ (fv (stg x B) A)) ≐ fv (stg x B) A $
-----
-d1: $ (⟦ x / t ⟧ (stg x B)) ≐ stg x B $ by c2_sb_c_stg_same
-d2: $ A ≐ A $ by ceqt_refl
-d3: $ (⟦ x / t ⟧ (fv (stg x B) A)) ≐ fv (stg x B) A $ by fv_congr [d1, d2]
-
-lemma c2_capv_alpha {x u: set} (B: class x) (E: class x):
-  $ (⟦ x / u ⟧ E) ≐ E $ > $ cap x B E ≐ cap u (⟦ x / u ⟧ B) E $
-----
-a1: $ ∃ x (x = E ∧ y ∊ B) ⟺ ∃ u (u = (⟦ x / u ⟧ E) ∧ y ∊ (⟦ x / u ⟧ B)) $ by ex_alpha
-a2: $ cv u ≐ cv u $ by ceqt_refl
-a3: $ (u = (⟦ x / u ⟧ E)) ⟺ (u = E) $ by ceq_congr [a2, #1]
-a4: $ (y ∊ (⟦ x / u ⟧ B)) ⟺ (y ∊ (⟦ x / u ⟧ B)) $ by iff_refl
-a5: $ (u = (⟦ x / u ⟧ E) ∧ y ∊ (⟦ x / u ⟧ B)) ⟺ (u = E ∧ y ∊ (⟦ x / u ⟧ B)) $ by and_congr [a3, a4]
-a6: $ ∃ u (u = (⟦ x / u ⟧ E) ∧ y ∊ (⟦ x / u ⟧ B)) ⟺ ∃ u (u = E ∧ y ∊ (⟦ x / u ⟧ B)) $ by ex_congr [a5]
-a7: $ ∃ x (x = E ∧ y ∊ B) ⟺ ∃ u (u = E ∧ y ∊ (⟦ x / u ⟧ B)) $ by iff_trans [a1, a6]
-a8: $ {y | ∃ x (x = E ∧ y ∊ B)} ≐ {y | ∃ u (u = E ∧ y ∊ (⟦ x / u ⟧ B))} $ by cab_congr [a7]
-
-lemma c2_mono_alpha {x u: set} (G: hyps x) (B: class x):
-  $ G ⇒ mono x B $ > $ G ⇒ mono u (⟦ x / u ⟧ B) $
-----
-b1: $ G , i ⊆ j ⇒ mono x B $ by weaken [#1]
-b2: $ G , i ⊆ j ⇒ i ⊆ j $ by ax
-b3: $ G , i ⊆ j ⇒ (⟦ x / i ⟧ B) ⊆ (⟦ x / j ⟧ B) $ by mono_elim [b1, b2]
-b4: $ G ⇒ mono u (⟦ x / u ⟧ B) $ by mono_intro (x := $ u $, u := $ i $, v := $ j $, B := $ ⟦ x / u ⟧ B $) [b3]
-
-lemma c2_capv_eq {x u: set} (G: hyps x) (B: class x) (E: class x) (a: set):
-  $ (⟦ x / u ⟧ E) ≐ E $ > $ G ⇒ a = E $ > $ G ⇒ cap x B E = (⟦ x / a ⟧ B) $
-----
-e1: $ cap x B E ≐ cap u (⟦ x / u ⟧ B) E $ by c2_capv_alpha [#1]
-e2: $ G ⇒ cap x B E = cap u (⟦ x / u ⟧ B) E $ by weaken [e1]
-e3: $ G ⇒ cap u (⟦ x / u ⟧ B) E = (⟦ x / a ⟧ B) $ by cap_eq (x := $ u $, B := $ ⟦ x / u ⟧ B $, C := $ E $, a := $ a $) [#2]
-e4: $ G ⇒ cap x B E = (⟦ x / a ⟧ B) $ by eq_trans [e2, e3]
-
-lemma c2_capv_eq_arg {x u: set} (G: hyps x) (B: class x) (C E: class x):
-  $ (⟦ x / u ⟧ C) ≐ C $ > $ (⟦ x / u ⟧ E) ≐ E $ > $ G ⇒ C = E $ > $ G ⇒ cap x B C = cap x B E $
-----
-f1: $ cap x B C ≐ cap u (⟦ x / u ⟧ B) C $ by c2_capv_alpha [#1]
-f2: $ cap x B E ≐ cap u (⟦ x / u ⟧ B) E $ by c2_capv_alpha [#2]
-f3: $ G ⇒ cap x B C = cap u (⟦ x / u ⟧ B) C $ by weaken [f1]
-f4: $ G ⇒ cap x B E = cap u (⟦ x / u ⟧ B) E $ by weaken [f2]
-f5: $ G ⇒ cap u (⟦ x / u ⟧ B) C = cap u (⟦ x / u ⟧ B) E $ by cap_eq_arg (x := $ u $, B := $ ⟦ x / u ⟧ B $, C := $ C $, E := $ E $) [#3]
-f6: $ G ⇒ cap u (⟦ x / u ⟧ B) E = cap x B E $ by eq_sym [f4]
-f7: $ G ⇒ cap x B C = cap u (⟦ x / u ⟧ B) E $ by eq_trans [f3, f5]
-f8: $ G ⇒ cap x B C = cap x B E $ by eq_trans [f7, f6]
-
-lemma c2_capv_mono {x u: set} (G: hyps x) (B: class x) (C E: class x):
-  $ (⟦ x / u ⟧ C) ≐ C $ > $ (⟦ x / u ⟧ E) ≐ E $ > $ G ⇒ mono x B $ > $ G ⇒ isset C $ > $ G ⇒ isset E $ > $ G ⇒ C ⊆ E $ >
-  $ G ⇒ cap x B C ⊆ cap x B E $
-----
-g1: $ cap x B C ≐ cap u (⟦ x / u ⟧ B) C $ by c2_capv_alpha [#1]
-g2: $ cap x B E ≐ cap u (⟦ x / u ⟧ B) E $ by c2_capv_alpha [#2]
-g3: $ G ⇒ cap x B C = cap u (⟦ x / u ⟧ B) C $ by weaken [g1]
-g4: $ G ⇒ cap x B E = cap u (⟦ x / u ⟧ B) E $ by weaken [g2]
-g5: $ G ⇒ mono u (⟦ x / u ⟧ B) $ by c2_mono_alpha [#3]
-g6: $ G ⇒ cap u (⟦ x / u ⟧ B) C ⊆ cap u (⟦ x / u ⟧ B) E $ by mono_cap (x := $ u $, B := $ ⟦ x / u ⟧ B $, C := $ C $, D := $ E $) [g5, #4, #5, #6]
-g7: $ G ⇒ cap u (⟦ x / u ⟧ B) C = cap x B C $ by eq_sym [g3]
-g8: $ G ⇒ cap u (⟦ x / u ⟧ B) E = cap x B E $ by eq_sym [g4]
-g9: $ G ⇒ cap x B C ⊆ cap u (⟦ x / u ⟧ B) E $ by subset_eq_l [g7, g6]
-g10: $ G ⇒ cap x B C ⊆ cap x B E $ by subset_eq_r [g8, g9]
-
-lemma c2_stgb_eq {x: set} (G: hyps x) (B: class x) (C E: class):
-  $ G ⇒ C = E $ > $ G ⇒ stgb x B C = stgb x B E $
-----
-l1: $ G ⇒ stg x B = stg x B $ by eq_refl
-l2: $ G ⇒ cres (stg x B) C = cres (stg x B) E $ by cres_eq [l1, #1]
-l3: $ G ⇒ crn (cres (stg x B) C) = crn (cres (stg x B) E) $ by crn_eq [l2]
-l4: $ G ⇒ ⋃ (crn (cres (stg x B) C)) = ⋃ (crn (cres (stg x B) E)) $ by cuni_eq [l3]
-
---| `stgb_intro` at a class index.
-lemma c2_stgb_intro_c {x: set} (G: hyps x) (B: class x) (D: class) (a c: set):
-  $ G ⇒ ord a $ > $ G ⇒ D ∈ a $ > $ G ⇒ c ∊ fv (stg x B) D $ > $ G ⇒ c ∊ stgb x B a $
-----
-r1: $ G , k = D , k ∊ a ⇒ k = D $ by ax
-r2: $ G , k = D , k ∊ a ⇒ k ∊ a $ by ax
-r3: $ G , k = D , k ∊ a ⇒ D = k $ by eq_sym [r1]
-r4: $ G , k = D , k ∊ a ⇒ stg x B = stg x B $ by eq_refl
-r5: $ G , k = D , k ∊ a ⇒ fv (stg x B) D = fv (stg x B) k $ by fv_eq [r4, r3]
-r6: $ G , k = D , k ∊ a ⇒ c ∊ fv (stg x B) D $ by weaken [#3]
-r7: $ G , k = D , k ∊ a ⇒ c ∊ fv (stg x B) k $ by welc_eq [r5, r6]
-r8: $ G , k = D , k ∊ a ⇒ ord a $ by weaken [#1]
-r9: $ G , k = D , k ∊ a ⇒ c ∊ stgb x B a $ by stgb_intro [r8, r2, r7]
-r10: $ G ⇒ c ∊ stgb x B a $ by wcel_elim [#2, r9]
 
 --| The least stage containing the value `fv f u` (an element of
 --| `stgb x B c`), as a set `j ∊ c`. The context may mention `y` and `k` (the
@@ -985,12 +819,12 @@ m3: $ G , c = clord a ⇒ ord (clord a) $ by clord_ord
 m4: $ G , c = clord a ⇒ clord a = c $ by eq_sym [m2]
 m5: $ G , c = clord a ⇒ ord c $ by ord_eq [m4, m3]
 m6: $ G , c = clord a ⇒ isset (stgb x B c) $ by stgb_set [m5]
-m7: $ G , c = clord a ⇒ stgb x B c = stgb x B (clord a) $ by c2_stgb_eq [m2]
+m7: $ G , c = clord a ⇒ stgb x B c = stgb x B (clord a) $ by stgb_eq [m2]
 m8: $ G , c = clord a ⇒ isset (stgb x B (clord a)) $ by isset_eq [m7, m6]
 n1: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) ⇒ z ∊ cap x B (stgb x B (clord a)) $ by ax
-n2: $ (⟦ x / u ⟧ (stgb x B (clord a))) ≐ stgb x B (clord a) $ by c2_sb_c_stgb_same
+n2: $ (⟦ x / u ⟧ (stgb x B (clord a))) ≐ stgb x B (clord a) $ by sb_c_stgb_same
 n3: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) ⇒ w = stgb x B (clord a) $ by ax
-n4: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) ⇒ cap x B (stgb x B (clord a)) = (⟦ x / w ⟧ B) $ by c2_capv_eq [n2, n3]
+n4: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) ⇒ cap x B (stgb x B (clord a)) = (⟦ x / w ⟧ B) $ by capv_eq [n2, n3]
 n5: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) ⇒ z ∊ (⟦ x / w ⟧ B) $ by welc_eq [n4, n1]
 n6: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) ⇒ cont x B a $ by weaken [#3]
 n7: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) ⇒ ∃ f (functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f)) $ by cont_elim [n6, n5]
@@ -1020,10 +854,10 @@ q5: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord 
 q6: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) , functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f) , v ∊ c ∧ crn f ⊆ fv (stg x B) v ⇒ isset (crn f) $ by crn_set [q5]
 q7: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) , functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f) , v ∊ c ∧ crn f ⊆ fv (stg x B) v ⇒ isset (fv (stg x B) v) $ by stg_set
 q8: $ (⟦ x / u ⟧ (crn f)) ≐ crn f $ by ceqt_refl
-q9: $ (⟦ x / u ⟧ (fv (stg x B) v)) ≐ fv (stg x B) v $ by c2_fvstg_closed
+q9: $ (⟦ x / u ⟧ (fv (stg x B) v)) ≐ fv (stg x B) v $ by sb_c_fvstg_vac
 q9a: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) , functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f) , v ∊ c ∧ crn f ⊆ fv (stg x B) v ⇒ mono x B $ by weaken [#1]
 q9b: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) , functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f) , v ∊ c ∧ crn f ⊆ fv (stg x B) v ⇒ setop x B $ by weaken [#2]
-q10: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) , functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f) , v ∊ c ∧ crn f ⊆ fv (stg x B) v ⇒ cap x B (crn f) ⊆ cap x B (fv (stg x B) v) $ by c2_capv_mono [q8, q9, q9a, q6, q7, q3]
+q10: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) , functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f) , v ∊ c ∧ crn f ⊆ fv (stg x B) v ⇒ cap x B (crn f) ⊆ cap x B (fv (stg x B) v) $ by capv_mono [q8, q9, q9a, q6, q7, q3]
 q10a: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) , functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f) , v ∊ c ∧ crn f ⊆ fv (stg x B) v ⇒ z ∊ cap x B (crn f) $ by weaken [o7]
 q11: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) , functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f) , v ∊ c ∧ crn f ⊆ fv (stg x B) v ⇒ z ∊ cap x B (fv (stg x B) v) $ by subset_elim [q10, q10a]
 q12: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) , functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f) , v ∊ c ∧ crn f ⊆ fv (stg x B) v ⇒ fv (stg x B) (suc v) = cap x B (fv (stg x B) v) $ by stg_suc [q9a, q9b, q4]
@@ -1034,7 +868,7 @@ q15: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord
 q16: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) , functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f) , v ∊ c ∧ crn f ⊆ fv (stg x B) v ⇒ suc v ∈ clord a $ by clord_suc [q15]
 q16a: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) , functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f) , v ∊ c ∧ crn f ⊆ fv (stg x B) v ⇒ clord a = c $ by eq_sym [q14a]
 q17: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) , functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f) , v ∊ c ∧ crn f ⊆ fv (stg x B) v ⇒ suc v ∈ c $ by wcel_eq_r [q16a, q16]
-q18: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) , functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f) , v ∊ c ∧ crn f ⊆ fv (stg x B) v ⇒ z ∊ stgb x B c $ by c2_stgb_intro_c [q3a, q17, q14]
+q18: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) , functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f) , v ∊ c ∧ crn f ⊆ fv (stg x B) v ⇒ z ∊ stgb x B c $ by stgb_intro_c [q3a, q17, q14]
 q18a: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) , functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f) , v ∊ c ∧ crn f ⊆ fv (stg x B) v ⇒ stgb x B c = stgb x B (clord a) $ by weaken [m7]
 q19: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) , functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f) , v ∊ c ∧ crn f ⊆ fv (stg x B) v ⇒ z ∊ stgb x B (clord a) $ by welc_eq [q18a, q18]
 o21: $ G , c = clord a , w = stgb x B (clord a) , z ∊ cap x B (stgb x B (clord a)) , functional f ∧ cdm f ⊆ a ∧ crn f ⊆ w ∧ z ∊ cap x B (crn f) ⇒ z ∊ stgb x B (clord a) $ by ex_elim [o20, q19]
@@ -1057,11 +891,11 @@ lemma c2_stable {x: set} (G: hyps x) (B: class x) (a c: set):
 ----
 a4: $ G ⇒ ord c $ by c2_clord_ord_var [#4]
 a8: $ G ⇒ cap x B (stgb x B (clord a)) ⊆ stgb x B (clord a) $ by stgb_clord_closed [#1, #2, #3]
-a9: $ G ⇒ stgb x B c = stgb x B (clord a) $ by c2_stgb_eq [#4]
+a9: $ G ⇒ stgb x B c = stgb x B (clord a) $ by stgb_eq [#4]
 a10: $ G ⇒ stgb x B (clord a) = stgb x B c $ by eq_sym [a9]
-a11: $ (⟦ x / u ⟧ (stgb x B c)) ≐ stgb x B c $ by c2_sb_c_stgb_same
-a12: $ (⟦ x / u ⟧ (stgb x B (clord a))) ≐ stgb x B (clord a) $ by c2_sb_c_stgb_same
-a13: $ G ⇒ cap x B (stgb x B c) = cap x B (stgb x B (clord a)) $ by c2_capv_eq_arg [a11, a12, a9]
+a11: $ (⟦ x / u ⟧ (stgb x B c)) ≐ stgb x B c $ by sb_c_stgb_same
+a12: $ (⟦ x / u ⟧ (stgb x B (clord a))) ≐ stgb x B (clord a) $ by sb_c_stgb_same
+a13: $ G ⇒ cap x B (stgb x B c) = cap x B (stgb x B (clord a)) $ by capv_eq_arg [a11, a12, a9]
 a13a: $ G ⇒ cap x B (stgb x B (clord a)) = cap x B (stgb x B c) $ by eq_sym [a13]
 a14a: $ G ⇒ cap x B (stgb x B c) ⊆ stgb x B (clord a) $ by subset_eq_l [a13a, a8]
 a14: $ G ⇒ cap x B (stgb x B c) ⊆ stgb x B c $ by subset_eq_r [a10, a14a]
@@ -1084,8 +918,8 @@ b12: $ G , z ∊ stgb x B c ⇒ z ∊ fv (stg x B) c $ by ex_elim [b2, b11]
 b13: $ G ⇒ stgb x B c ⊆ fv (stg x B) c $ by subset_intro [b12]
 b14: $ G ⇒ fv (stg x B) c = stgb x B c $ by subset_antisym [a16, b13]
 b15: $ G ⇒ fv (stg x B) (suc c) = cap x B (fv (stg x B) c) $ by stg_suc [#1, #2, a4]
-b16: $ (⟦ x / u ⟧ (fv (stg x B) c)) ≐ fv (stg x B) c $ by c2_fvstg_closed
-b17: $ G ⇒ cap x B (fv (stg x B) c) = cap x B (stgb x B c) $ by c2_capv_eq_arg [b16, a11, b14]
+b16: $ (⟦ x / u ⟧ (fv (stg x B) c)) ≐ fv (stg x B) c $ by sb_c_fvstg_vac
+b17: $ G ⇒ cap x B (fv (stg x B) c) = cap x B (stgb x B c) $ by capv_eq_arg [b16, a11, b14]
 b18: $ G ⇒ fv (stg x B) (suc c) = cap x B (stgb x B c) $ by eq_trans [b15, b17]
 b20: $ G ⇒ fv (stg x B) (suc c) = fv (stg x B) c $ by eq_trans [b18, a15a]
 
@@ -1148,18 +982,6 @@ c10: $ G , c = clord a ⇒ isset (fv (stg x B) c) $ by stg_set
 c11: $ G , c = clord a ⇒ isset (lfp x B) $ by isset_eq [c9, c10]
 c12: $ G ⇒ isset (lfp x B) $ by isset_elim [c1, c11]
 
-lemma c2_lfp_closed {x: set} (t: set x) (B: class x): $ (⟦ x / t ⟧ (lfp x B)) ≐ lfp x B $
-----
-d1: $ (⟦ x / t ⟧ (stg x B)) ≐ stg x B $ by c2_sb_c_stg_same
-d2: $ a ≐ a $ by ceqt_refl
-d3: $ fv (⟦ x / t ⟧ (stg x B)) a ≐ fv (stg x B) a $ by fv_congr [d1, d2]
-d4: $ seqt y y $ by seqt_refl
-d5: $ (y ∊ fv (⟦ x / t ⟧ (stg x B)) a) ⟺ (y ∊ fv (stg x B) a) $ by welc_congr [d4, d3]
-d6: $ ord a ⟺ ord a $ by iff_refl
-d7: $ (ord a ∧ y ∊ fv (⟦ x / t ⟧ (stg x B)) a) ⟺ (ord a ∧ y ∊ fv (stg x B) a) $ by and_congr [d6, d5]
-d8: $ (∃ a (ord a ∧ y ∊ fv (⟦ x / t ⟧ (stg x B)) a)) ⟺ ∃ a (ord a ∧ y ∊ fv (stg x B) a) $ by ex_congr [d7]
-d9: $ (⟦ x / t ⟧ {y | ∃ a (ord a ∧ y ∊ fv (stg x B) a)}) ≐ {y | ∃ a (ord a ∧ y ∊ fv (stg x B) a)} $ by cab_congr [d8]
-
 lfp_cont_ind
 ------------
 c1: $ G ⇒ isset (lfp x B) $ by lfp_cont_set [#1, #2, #3]
@@ -1167,8 +989,8 @@ d1: $ G , c = lfp x B , i ⊆ c ⇒ i ⊆ c $ by ax
 d2: $ G , c = lfp x B , i ⊆ c ⇒ mono x B $ by weaken [#1]
 d3: $ G , c = lfp x B , i ⊆ c ⇒ (⟦ x / i ⟧ B) ⊆ (⟦ x / c ⟧ B) $ by mono_elim [d2, d1]
 d4: $ G , c = lfp x B , i ⊆ c ⇒ c = lfp x B $ by ax
-d5: $ (⟦ x / u ⟧ (lfp x B)) ≐ lfp x B $ by c2_lfp_closed
-d6: $ G , c = lfp x B , i ⊆ c ⇒ cap x B (lfp x B) = (⟦ x / c ⟧ B) $ by c2_capv_eq [d5, d4]
+d5: $ (⟦ x / u ⟧ (lfp x B)) ≐ lfp x B $ by sb_c_lfp_vac
+d6: $ G , c = lfp x B , i ⊆ c ⇒ cap x B (lfp x B) = (⟦ x / c ⟧ B) $ by capv_eq [d5, d4]
 d7a: $ G , c = lfp x B , i ⊆ c ⇒ setop x B $ by weaken [#2]
 d7b: $ G , c = lfp x B , i ⊆ c ⇒ cont x B a $ by weaken [#3]
 d7: $ G , c = lfp x B , i ⊆ c ⇒ cap x B (lfp x B) = lfp x B $ by lfp_cont_fix [d2, d7a, d7b]
@@ -1230,9 +1052,9 @@ y1: $ G , ord k , ∀ j (j ∊ k → j ∊ U → fv (stg x B) j ∈ U) , k ∊ U
 y2: $ G , ord k , ∀ j (j ∊ k → j ∊ U → fv (stg x B) j ∈ U) , k ∊ U , v = stgb x B k , v ∊ U ⇒ ∀ u (u ∊ U → (⟦ x / u ⟧ B) ∈ U) $ by weaken [#3]
 y3: $ G , ord k , ∀ j (j ∊ k → j ∊ U → fv (stg x B) j ∈ U) , k ∊ U , v = stgb x B k , v ∊ U ⇒ v ∊ U → (⟦ x / v ⟧ B) ∈ U $ by all_elim (t := $ v $) [y2]
 y4: $ G , ord k , ∀ j (j ∊ k → j ∊ U → fv (stg x B) j ∈ U) , k ∊ U , v = stgb x B k , v ∊ U ⇒ (⟦ x / v ⟧ B) ∈ U $ by imp_elim [y3, y1]
-y5: $ (⟦ x / u ⟧ (stgb x B k)) ≐ stgb x B k $ by c2_sb_c_stgb_same
+y5: $ (⟦ x / u ⟧ (stgb x B k)) ≐ stgb x B k $ by sb_c_stgb_same
 y6: $ G , ord k , ∀ j (j ∊ k → j ∊ U → fv (stg x B) j ∈ U) , k ∊ U , v = stgb x B k , v ∊ U ⇒ v = stgb x B k $ by ax
-y7: $ G , ord k , ∀ j (j ∊ k → j ∊ U → fv (stg x B) j ∈ U) , k ∊ U , v = stgb x B k , v ∊ U ⇒ cap x B (stgb x B k) = (⟦ x / v ⟧ B) $ by c2_capv_eq [y5, y6]
+y7: $ G , ord k , ∀ j (j ∊ k → j ∊ U → fv (stg x B) j ∈ U) , k ∊ U , v = stgb x B k , v ∊ U ⇒ cap x B (stgb x B k) = (⟦ x / v ⟧ B) $ by capv_eq [y5, y6]
 y8: $ G , ord k , ∀ j (j ∊ k → j ∊ U → fv (stg x B) j ∈ U) , k ∊ U , v = stgb x B k , v ∊ U ⇒ setop x B $ by weaken [#2]
 y9: $ G , ord k , ∀ j (j ∊ k → j ∊ U → fv (stg x B) j ∈ U) , k ∊ U , v = stgb x B k , v ∊ U ⇒ ord k $ by ax
 y10: $ G , ord k , ∀ j (j ∊ k → j ∊ U → fv (stg x B) j ∈ U) , k ∊ U , v = stgb x B k , v ∊ U ⇒ fv (stg x B) k = cap x B (stgb x B k) $ by stg_eq [y8, y9]

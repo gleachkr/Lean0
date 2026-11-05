@@ -41,11 +41,17 @@ theorem cuni_least (G: hyps) {x: set} (A B: class):
 --| An ordinal: a transitive class of transitive sets.
 def ord (A: class) (.x: set): fml = $ transitive A ∧ ∀ x (x ∊ A → transitive x) $;
 
+--| @congr
+theorem ord_congr (A B: class): $ A ≐ B $ > $ ord A ⟺ ord B $;
+--| @rewrite
+theorem sb_f_ord {x: set} (t: set x) (A: class x):
+  $ [x/t] (ord A) ⟺ ord (⟦ x / t ⟧ A) $;
 theorem ord_intro (G: hyps) {x: set} (A: class):
   $ G ⇒ transitive A $ > $ G ⇒ ∀ x (x ∊ A → transitive x) $ > $ G ⇒ ord A $;
 theorem ord_trans (G: hyps) (A: class): $ G ⇒ ord A $ > $ G ⇒ transitive A $;
 theorem ord_elem_trans (G: hyps) (A: class) (a: set):
   $ G ⇒ ord A $ > $ G ⇒ a ∊ A $ > $ G ⇒ transitive a $;
+theorem ord_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ ord A $ > $ G ⇒ ord B $;
 --| An element of an ordinal is an ordinal.
 theorem ord_elem (G: hyps) (A: class) (a: set):
   $ G ⇒ ord A $ > $ G ⇒ a ∊ A $ > $ G ⇒ ord a $;
@@ -62,12 +68,6 @@ theorem ord_cin (G: hyps) (A B: class):
 --| A transitive subclass of an ordinal is an ordinal.
 theorem ord_subset (G: hyps) (A B: class):
   $ G ⇒ ord B $ > $ G ⇒ transitive A $ > $ G ⇒ A ⊆ B $ > $ G ⇒ ord A $;
---| @congr
-theorem ord_congr (A B: class): $ A ≐ B $ > $ ord A ⟺ ord B $;
-theorem ord_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ ord A $ > $ G ⇒ ord B $;
---| @rewrite
-theorem sb_f_ord {x: set} (t: set x) (A: class x):
-  $ [x/t] (ord A) ⟺ ord (⟦ x / t ⟧ A) $;
 
 -- --------------------------------------------------------------------------
 -- Transfinite induction and the order of the ordinals
@@ -146,6 +146,11 @@ theorem cap_elim {x: set} (G: hyps x) (B: class x) (C: class) (b: set):
   $ G ⇒ b ∊ cap x B C $ > $ G ⇒ ∃ x (x = C ∧ b ∊ B) $;
 theorem cap_elim_isset {x: set} (G: hyps x) (B: class x) (C: class) (b: set):
   $ G ⇒ b ∊ cap x B C $ > $ G ⇒ isset C $;
+--| The membership form of `cap_eq_arg`.
+theorem welc_cap_eq {x: set} (G: hyps x) (B: class x) (C E: class) (b: set):
+  $ G ⇒ C = E $ > $ G ⇒ b ∊ cap x B C $ > $ G ⇒ b ∊ cap x B E $;
+theorem cap_eq_arg {x: set} (G: hyps x) (B: class x) (C E: class):
+  $ G ⇒ C = E $ > $ G ⇒ cap x B C = cap x B E $;
 theorem cap_eq {x: set} (G: hyps x) (B: class x) (C: class) (a: set):
   $ G ⇒ a = C $ > $ G ⇒ cap x B C = (⟦ x / a ⟧ B) $;
 theorem cap_empty {x: set} (G: hyps x) (B: class x) (C: class):
@@ -153,8 +158,6 @@ theorem cap_empty {x: set} (G: hyps x) (B: class x) (C: class):
 --| @congr
 theorem cap_congr {x: set} (B D: class x) (C E: class):
   $ B ≐ D $ > $ C ≐ E $ > $ cap x B C ≐ cap x D E $;
-theorem cap_eq_arg {x: set} (G: hyps x) (B: class x) (C E: class):
-  $ G ⇒ C = E $ > $ G ⇒ cap x B C = cap x B E $;
 --| @rewrite
 theorem sb_c_cap {x y: set} (t: set y) (B: class x y) (C: class y):
   $ (⟦ y / t ⟧ (cap x B C)) ≐ cap x (⟦ y / t ⟧ B) (⟦ y / t ⟧ C) $;
@@ -172,6 +175,9 @@ theorem cgr_cdm_elim {x: set} (G: hyps x) (B: class x) (a: set):
 --| The value of the graph is the operation.
 theorem fv_cgr {x: set} (G: hyps x) (B: class x) (a: set):
   $ G ⇒ isset (⟦ x / a ⟧ B) $ > $ G ⇒ fv (cgr x B) a = (⟦ x / a ⟧ B) $;
+--| The graph of an operation with values in `C` on `A` is a function on `A` into `C`.
+theorem cgr_fn_into {x: set} (G: hyps x) (A C: class) (B: class x):
+  $ G ⇒ ∀ x (x ∊ A → B ∈ C) $ > $ G ⇒ fn_into (cgr x B) A C $;
 --| The identity function on `A` is the graph of `x ↦ x` restricted to `A`.
 theorem cgr_id_fn_into (G: hyps) {x: set} (A B: class):
   $ G ⇒ A ⊆ B $ > $ G ⇒ fn_into (cres (cgr x x) A) A B $;
@@ -212,7 +218,7 @@ theorem cres_cun_csn_self (G: hyps) (R: class) (a c: set):
 theorem cdm_cun_csn (G: hyps) (R: class) (a c: set):
   $ G ⇒ cdm (R ∪ csn ⟨ a , c ⟩) = cdm R ∪ csn a $;
 theorem fv_cun_csn_self (G: hyps) (R: class) (a c: set):
-  $ G ⇒ rel R $ > $ G ⇒ cdm R = a $ > $ G ⇒ fv (R ∪ csn ⟨ a , c ⟩) a = c $;
+  $ G ⇒ cdm R = a $ > $ G ⇒ fv (R ∪ csn ⟨ a , c ⟩) a = c $;
 theorem functional_cun_csn (G: hyps) (R: class) (a c: set):
   $ G ⇒ functional R $ > $ G ⇒ ¬ a ∊ cdm R $ > $ G ⇒ functional (R ∪ csn ⟨ a , c ⟩) $;
 theorem rel_cun_csn (G: hyps) (R: class) (a c: set):
@@ -232,6 +238,12 @@ theorem fv_subset (G: hyps) (F H: class) (a: set):
   $ G ⇒ functional H $ > $ G ⇒ F ⊆ H $ > $ G ⇒ a ∊ cdm F $ > $ G ⇒ fv F a = fv H a $;
 theorem fv_cres (G: hyps) (F A: class) (a: set):
   $ G ⇒ functional F $ > $ G ⇒ a ∊ A $ > $ G ⇒ fv (cres F A) a = fv F a $;
+--| The value of a restricted graph.
+theorem fv_cres_cgr {x: set} (G: hyps x) (B: class x) (A: class) (b: set):
+  $ G ⇒ b ∊ A $ > $ G ⇒ isset (⟦ x / b ⟧ B) $ > $ G ⇒ fv (cres (cgr x B) A) b = (⟦ x / b ⟧ B) $;
+--| A function and a subfunction agree on part of the subfunction's domain.
+theorem cres_subfun (G: hyps) (R S A: class):
+  $ G ⇒ functional S $ > $ G ⇒ R ⊆ S $ > $ G ⇒ A ⊆ cdm R $ > $ G ⇒ cres S A = cres R A $;
 
 theorem trapx_elim {a k: set} (G: hyps a k) (H: hyps k) (F: class) (g: set) (c: fml k):
   $ G ⇒ g ∊ trapx F $ >
@@ -278,6 +290,9 @@ theorem trapx_cuni (G: hyps) {x: set} (F: class) (a: set):
 --| limit and successor steps).
 theorem trapx_exists (G: hyps) {g: set} (F: class) (a: set):
   $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ ∃ g (g ∊ trapx F ∧ cdm g = a) $;
+--| An approximation defined at `a` exists for every ordinal `a`.
+theorem trapx_exists_at {g: set} (G: hyps g) (F: class) (a: set):
+  $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ ∃ g (g ∊ trapx F ∧ a ∊ cdm g) $;
 --| @congr
 theorem trapx_congr (F H: class): $ F ≐ H $ > $ trapx F ≐ trapx H $;
 --| @rewrite

@@ -11,6 +11,9 @@
 --
 -- Every operation is stated for set variables; the hypotheses `a ∊ ω` are
 -- those needed (the recursion equations hold for any set `a` and `b ∊ ω`).
+-- The laws used at class terms (`suc a`, `nadd a b`, ...) also have class
+-- forms, named `X_c` (not to be confused with the carry identities
+-- `nadd_dbl_dbl_c` and the like), with premises `A ∈ ω` or `isset A`.
 
 import "hartogs.mm0";
 
@@ -78,19 +81,39 @@ theorem sb_c_nmax {x: set} (t: set x) (A B: class x):
 -- --------------------------------------------------------------------------
 
 theorem nadd_set (G: hyps) (a b: set): $ G ⇒ isset (nadd a b) $;
+--| Class form of `nadd_set`.
+theorem nadd_set_c (G: hyps) (A B: class): $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ isset (nadd A B) $;
 theorem nadd_zero (G: hyps) (a: set): $ G ⇒ nadd a ∅ = a $;
+--| Class form of `nadd_zero`.
+theorem nadd_zero_c (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ nadd A ∅ = A $;
 theorem nadd_suc (G: hyps) (a b: set):
   $ G ⇒ b ∊ ω $ > $ G ⇒ nadd a (suc b) = suc (nadd a b) $;
+--| Class form of `nadd_suc`.
+theorem nadd_suc_c (G: hyps) (A B: class):
+  $ G ⇒ isset A $ > $ G ⇒ B ∈ ω $ > $ G ⇒ nadd A (suc B) = suc (nadd A B) $;
 theorem nadd_omega (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nadd a b ∈ ω $;
+--| Class form of `nadd_omega`.
+theorem nadd_omega_c (G: hyps) (A B: class):
+  $ G ⇒ A ∈ ω $ > $ G ⇒ B ∈ ω $ > $ G ⇒ nadd A B ∈ ω $;
 theorem zero_nadd (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ nadd ∅ a = a $;
 theorem suc_nadd (G: hyps) (a b: set):
   $ G ⇒ b ∊ ω $ > $ G ⇒ nadd (suc a) b = suc (nadd a b) $;
+--| Class form of `suc_nadd`.
+theorem suc_nadd_c (G: hyps) (A B: class):
+  $ G ⇒ isset A $ > $ G ⇒ B ∈ ω $ > $ G ⇒ nadd (suc A) B = suc (nadd A B) $;
 theorem nadd_comm (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nadd a b = nadd b a $;
+--| Class form of `nadd_comm`.
+theorem nadd_comm_c (G: hyps) (A B: class):
+  $ G ⇒ A ∈ ω $ > $ G ⇒ B ∈ ω $ > $ G ⇒ nadd A B = nadd B A $;
 theorem nadd_assoc (G: hyps) (a b c: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ c ∊ ω $ >
   $ G ⇒ nadd (nadd a b) c = nadd a (nadd b c) $;
+--| Class form of `nadd_assoc`.
+theorem nadd_assoc_c (G: hyps) (A B C: class):
+  $ G ⇒ A ∈ ω $ > $ G ⇒ B ∈ ω $ > $ G ⇒ C ∈ ω $ >
+  $ G ⇒ nadd (nadd A B) C = nadd A (nadd B C) $;
 theorem nadd_cancel_r (G: hyps) (a b c: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ c ∊ ω $ > $ G ⇒ nadd a c = nadd b c $ > $ G ⇒ a = b $;
 theorem nadd_cancel_l (G: hyps) (a b c: set):
@@ -102,14 +125,22 @@ theorem nadd_le_l (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ a ⊆ nadd a b $;
 theorem nadd_le_r (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ b ⊆ nadd a b $;
+theorem nlt_le (G: hyps) (a b: set):
+  $ G ⇒ b ∊ ω $ > $ G ⇒ a ∊ b $ > $ G ⇒ a ⊆ b $;
 theorem nadd_lt_suc (G: hyps) (a b: set):
-  $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ a ∊ nadd a (suc b) $;
+  $ G ⇒ b ∊ ω $ > $ G ⇒ a ∊ nadd a (suc b) $;
 theorem nadd_suc_ne (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nadd a (suc b) = a $ > $ G ⇒ ⊥ $;
 theorem nadd_mono_lt (G: hyps) (a b c: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ c ∊ ω $ > $ G ⇒ a ∊ b $ > $ G ⇒ nadd a c ∈ nadd b c $;
+--| Class form of `nadd_mono_lt`.
+theorem nadd_mono_lt_c (G: hyps) (A B C: class):
+  $ G ⇒ A ∈ ω $ > $ G ⇒ B ∈ ω $ > $ G ⇒ C ∈ ω $ > $ G ⇒ A ∈ B $ > $ G ⇒ nadd A C ∈ nadd B C $;
 theorem nadd_mono_le (G: hyps) (a b c: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ c ∊ ω $ > $ G ⇒ a ⊆ b $ > $ G ⇒ nadd a c ⊆ nadd b c $;
+--| Class form of `nadd_mono_le`.
+theorem nadd_mono_le_c (G: hyps) (A B C: class):
+  $ G ⇒ A ∈ ω $ > $ G ⇒ B ∈ ω $ > $ G ⇒ C ∈ ω $ > $ G ⇒ A ⊆ B $ > $ G ⇒ nadd A C ⊆ nadd B C $;
 theorem nadd_lt_cancel (G: hyps) (a b c: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ c ∊ ω $ > $ G ⇒ nadd a c ∈ nadd b c $ > $ G ⇒ a ∊ b $;
 --| `a ≤ b` and `a < b` as the existence of a difference.
@@ -121,7 +152,7 @@ theorem nlt_ex (G: hyps) {c: set} (a b: set):
 theorem nle_of_nadd (G: hyps) (a b c: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ c ∊ ω $ > $ G ⇒ nadd a c = b $ > $ G ⇒ a ⊆ b $;
 theorem nlt_of_nadd_suc (G: hyps) (a b c: set):
-  $ G ⇒ a ∊ ω $ > $ G ⇒ c ∊ ω $ > $ G ⇒ nadd a (suc c) = b $ > $ G ⇒ a ∊ b $;
+  $ G ⇒ c ∊ ω $ > $ G ⇒ nadd a (suc c) = b $ > $ G ⇒ a ∊ b $;
 theorem not_nle_of_nadd_suc (G: hyps) (a b c: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ c ∊ ω $ > $ G ⇒ nadd b (suc c) = a $ > $ G ⇒ ¬ a ⊆ b $;
 theorem ne_of_nadd_suc (G: hyps) (a b c: set):
@@ -135,6 +166,9 @@ theorem ndbl_omega (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ ndbl a ∈ �
 theorem ndbl_zero (G: hyps): $ G ⇒ ndbl ∅ = ∅ $;
 theorem ndbl_suc (G: hyps) (a: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ ndbl (suc a) = suc (suc (ndbl a)) $;
+--| Class form of `ndbl_suc`.
+theorem ndbl_suc_c (G: hyps) (A: class):
+  $ G ⇒ A ∈ ω $ > $ G ⇒ ndbl (suc A) = suc (suc (ndbl A)) $;
 theorem ndbl_nadd (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ ndbl (nadd a b) = nadd (ndbl a) (ndbl b) $;
 --| `2a + (2b + 1) = 2(a + b) + 1`, `(2a + 1) + 2b = 2(a + b) + 1`,
@@ -172,27 +206,50 @@ theorem two_eq_suc (G: hyps): $ G ⇒ two = suc (suc ∅) $;
 -- --------------------------------------------------------------------------
 
 theorem nmul_set (G: hyps) (a b: set): $ G ⇒ isset (nmul a b) $;
+--| Class form of `nmul_set`.
+theorem nmul_set_c (G: hyps) (A B: class): $ G ⇒ isset B $ > $ G ⇒ isset (nmul A B) $;
 theorem nmul_zero (G: hyps) (a: set): $ G ⇒ nmul a ∅ = ∅ $;
+--| Class form of `nmul_zero`.
+theorem nmul_zero_c (G: hyps) (A: class): $ G ⇒ nmul A ∅ = ∅ $;
 theorem nmul_suc (G: hyps) (a b: set):
   $ G ⇒ b ∊ ω $ > $ G ⇒ nmul a (suc b) = nadd (nmul a b) a $;
+--| Class form of `nmul_suc`.
+theorem nmul_suc_c (G: hyps) (A B: class):
+  $ G ⇒ isset A $ > $ G ⇒ B ∈ ω $ > $ G ⇒ nmul A (suc B) = nadd (nmul A B) A $;
 theorem nmul_omega (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nmul a b ∈ ω $;
+--| Class form of `nmul_omega`.
+theorem nmul_omega_c (G: hyps) (A B: class):
+  $ G ⇒ A ∈ ω $ > $ G ⇒ B ∈ ω $ > $ G ⇒ nmul A B ∈ ω $;
 theorem zero_nmul (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ nmul ∅ a = ∅ $;
 theorem nmul_one (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ nmul a (suc ∅) = a $;
+--| Class form of `nmul_one`.
+theorem nmul_one_c (G: hyps) (A: class): $ G ⇒ A ∈ ω $ > $ G ⇒ nmul A (suc ∅) = A $;
 theorem one_nmul (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ nmul (suc ∅) a = a $;
 theorem suc_nmul (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nmul (suc a) b = nadd (nmul a b) b $;
 theorem nmul_comm (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nmul a b = nmul b a $;
+--| Class form of `nmul_comm`.
+theorem nmul_comm_c (G: hyps) (A B: class):
+  $ G ⇒ A ∈ ω $ > $ G ⇒ B ∈ ω $ > $ G ⇒ nmul A B = nmul B A $;
 theorem nmul_nadd (G: hyps) (a b c: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ c ∊ ω $ >
   $ G ⇒ nmul a (nadd b c) = nadd (nmul a b) (nmul a c) $;
+--| Class form of `nmul_nadd`.
+theorem nmul_nadd_c (G: hyps) (A B C: class):
+  $ G ⇒ A ∈ ω $ > $ G ⇒ B ∈ ω $ > $ G ⇒ C ∈ ω $ >
+  $ G ⇒ nmul A (nadd B C) = nadd (nmul A B) (nmul A C) $;
 theorem nadd_nmul (G: hyps) (a b c: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ c ∊ ω $ >
   $ G ⇒ nmul (nadd a b) c = nadd (nmul a c) (nmul b c) $;
 theorem nmul_assoc (G: hyps) (a b c: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ c ∊ ω $ >
   $ G ⇒ nmul (nmul a b) c = nmul a (nmul b c) $;
+--| Class form of `nmul_assoc`.
+theorem nmul_assoc_c (G: hyps) (A B C: class):
+  $ G ⇒ A ∈ ω $ > $ G ⇒ B ∈ ω $ > $ G ⇒ C ∈ ω $ >
+  $ G ⇒ nmul (nmul A B) C = nmul A (nmul B C) $;
 --| The digit identities of `bmul`: `a · 2b = 2(a · b)`, `a · (2b + 1) = 2(a · b) + a`.
 theorem nmul_dbl (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nmul a (ndbl b) = ndbl (nmul a b) $;
@@ -214,6 +271,9 @@ theorem npow_set (G: hyps) (a b: set): $ G ⇒ isset (npow a b) $;
 theorem npow_zero (G: hyps) (a: set): $ G ⇒ npow a ∅ = suc ∅ $;
 theorem npow_suc (G: hyps) (a b: set):
   $ G ⇒ b ∊ ω $ > $ G ⇒ npow a (suc b) = nmul (npow a b) a $;
+--| Class form of `npow_suc`.
+theorem npow_suc_c (G: hyps) (A B: class):
+  $ G ⇒ isset A $ > $ G ⇒ B ∈ ω $ > $ G ⇒ npow A (suc B) = nmul (npow A B) A $;
 theorem npow_omega (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ npow a b ∈ ω $;
 theorem npow_one (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ npow a (suc ∅) = a $;
@@ -234,15 +294,27 @@ theorem npow_dbl1 (G: hyps) (a b: set):
 
 --| The predecessor of a natural number is its union.
 theorem cuni_omega (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ ⋃ a ∈ ω $;
+--| Class form of `cuni_omega`.
+theorem cuni_omega_c (G: hyps) (A: class): $ G ⇒ A ∈ ω $ > $ G ⇒ ⋃ A ∈ ω $;
 theorem cuni_suc_omega (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ ⋃ (suc a) = a $;
 theorem nsub_set (G: hyps) (a b: set): $ G ⇒ isset (nsub a b) $;
+--| Class form of `nsub_set`.
+theorem nsub_set_c (G: hyps) (A B: class): $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ isset (nsub A B) $;
 theorem nsub_zero (G: hyps) (a: set): $ G ⇒ nsub a ∅ = a $;
+--| Class form of `nsub_zero`.
+theorem nsub_zero_c (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ nsub A ∅ = A $;
 theorem nsub_suc (G: hyps) (a b: set):
   $ G ⇒ b ∊ ω $ > $ G ⇒ nsub a (suc b) = ⋃ (nsub a b) $;
+--| Class form of `nsub_suc`.
+theorem nsub_suc_c (G: hyps) (A B: class):
+  $ G ⇒ isset A $ > $ G ⇒ B ∈ ω $ > $ G ⇒ nsub A (suc B) = ⋃ (nsub A B) $;
 theorem nsub_omega (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nsub a b ∈ ω $;
 theorem suc_nsub_suc (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nsub (suc a) (suc b) = nsub a b $;
+--| Class form of `suc_nsub_suc`.
+theorem suc_nsub_suc_c (G: hyps) (A B: class):
+  $ G ⇒ A ∈ ω $ > $ G ⇒ B ∈ ω $ > $ G ⇒ nsub (suc A) (suc B) = nsub A B $;
 theorem zero_nsub (G: hyps) (b: set): $ G ⇒ b ∊ ω $ > $ G ⇒ nsub ∅ b = ∅ $;
 --| The facts behind `nat_sub_lit` and `nat_sub_lit0`: `(c + b) - b = c`, and
 --| `a - b = 0` when `a ≤ b`.
@@ -255,28 +327,26 @@ theorem nsub_le (G: hyps) (a b: set):
 theorem nadd_nsub (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ b ⊆ a $ > $ G ⇒ nadd (nsub a b) b = a $;
 
+theorem nmax_eq_l (G: hyps) (a b: set): $ G ⇒ b ⊆ a $ > $ G ⇒ nmax a b = a $;
+theorem nmax_eq_r (G: hyps) (a b: set): $ G ⇒ a ⊆ b $ > $ G ⇒ nmax a b = b $;
+theorem nmax_cases (G: hyps) (a b: set):
+  $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nmax a b = a ∨ nmax a b = b $;
 theorem nmax_omega (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nmax a b ∈ ω $;
 theorem nmax_le_l (G: hyps) (a b: set): $ G ⇒ a ⊆ nmax a b $;
 theorem nmax_le_r (G: hyps) (a b: set): $ G ⇒ b ⊆ nmax a b $;
 theorem nmax_least (G: hyps) (a b c: set):
   $ G ⇒ a ⊆ c $ > $ G ⇒ b ⊆ c $ > $ G ⇒ nmax a b ⊆ c $;
-theorem nmax_eq_l (G: hyps) (a b: set): $ G ⇒ b ⊆ a $ > $ G ⇒ nmax a b = a $;
-theorem nmax_eq_r (G: hyps) (a b: set): $ G ⇒ a ⊆ b $ > $ G ⇒ nmax a b = b $;
 theorem nmax_comm (G: hyps) (a b: set): $ G ⇒ nmax a b = nmax b a $;
-theorem nmax_cases (G: hyps) (a b: set):
-  $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nmax a b = a ∨ nmax a b = b $;
 
 -- --------------------------------------------------------------------------
 -- The order on ω
 -- --------------------------------------------------------------------------
 
 theorem nlt_suc_le (G: hyps) (a b: set):
-  $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ a ∊ suc b $ > $ G ⇒ a ⊆ b $;
+  $ G ⇒ b ∊ ω $ > $ G ⇒ a ∊ suc b $ > $ G ⇒ a ⊆ b $;
 theorem nle_lt_suc (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ a ⊆ b $ > $ G ⇒ a ∊ suc b $;
-theorem nlt_le (G: hyps) (a b: set):
-  $ G ⇒ b ∊ ω $ > $ G ⇒ a ∊ b $ > $ G ⇒ a ⊆ b $;
 theorem nle_lt_or_eq (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ a ⊆ b $ > $ G ⇒ a ∊ b ∨ a = b $;
 theorem nlt_or_le (G: hyps) (a b: set):
@@ -287,5 +357,7 @@ theorem nlt_le_trans (G: hyps) (a b c: set):
 theorem nle_lt_trans (G: hyps) (a b c: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ c ∊ ω $ > $ G ⇒ a ⊆ b $ > $ G ⇒ b ∊ c $ > $ G ⇒ a ∊ c $;
 theorem nzero_lt_suc (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ ∅ ∈ suc a $;
+--| A natural number with an element is positive.
+theorem nzero_lt (G: hyps) (b r: set): $ G ⇒ b ∊ ω $ > $ G ⇒ r ∊ b $ > $ G ⇒ ∅ ∈ b $;
 theorem nlt_zero_ex (G: hyps) {y: set} (a: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ ∅ ∈ a $ > $ G ⇒ ∃ y (y ∊ ω ∧ a = suc y) $;
