@@ -79,7 +79,9 @@ impl Hooks for Facts {
             return None
         }
         let &(l, p) = self.tys.get(&(ctx, e))?;
+        // a definition of a sort (`Prop`) is read as the sort
         let want = h.zonk(env, args[2]);
+        let want = env.unfold(want).unwrap_or(want);
         let sl = lean.srt(env, l);
         if h.unify(env, want, sl) {
             return Some(Ok(p))

@@ -126,14 +126,14 @@ fn fact(el: &mut El<'_, '_, '_, '_>, lean: &str) -> R<P> {
     mm(el.g.env.thm(th, &[gv], &[]))
 }
 
-/// `⊩ G, c : T` for the constant `lean`, from its typing lemma.
+/// `⟨ G ⊢ c : T ⟩` for the constant `lean`, from its typing lemma.
 fn typing(el: &mut El<'_, '_, '_, '_>, lean: &str) -> R<P> {
     let th = el.g.consts[lean].ty_thm;
     let gv = el.g.env.var(0);
     mm(el.g.env.thm(th, &[gv], &[]))
 }
 
-/// `⊩ G, e : ty`, from `e`'s inferred type: a premise stating the type of a helper the
+/// `⟨ G ⊢ e : ty ⟩`, from `e`'s inferred type: a premise stating the type of a helper the
 /// equations apply (audit §5: the instances are taken at its values).
 fn typed<'t>(el: &mut El<'_, '_, 't, '_>, e: Ex<'t>, ty: Ex<'t>) -> R<P> {
     let (t, p) = el.infer(e)?;

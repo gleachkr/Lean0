@@ -1,4 +1,4 @@
-delimiter $ ( ) , . # $;
+delimiter $ ( ) . # $;
 
 --| LeanTT: Lean 4's kernel as an MM0 theory, transcribed from Lean4Lean
 --| (digama0/lean4lean @ 67f63b0: Theory/VLevel.lean, Theory/VExpr.lean,
@@ -54,13 +54,15 @@ delimiter $ ( ) , . # $;
 --| * `eeqv_df`: expressions of the same shape at equivalent levels are
 --|   definitionally equal (generalizing `sortDF` and `constDF`).
 --|
---| Notations: `⊢ Γ, e ≡ e2 : A` for the judgment and `⊩ Γ, e : A` for typing,
+--| Notations: `⟦ Γ ⊢ e ≡ e2 : A ⟧` for the judgment and `⟨ Γ ⊢ e : A ⟩` for typing,
 --| `λ A. e`, `Π A. B`, `f @ a`, `#i` for a bound variable, `A :: Γ` and `[]`
---| for contexts, `a ⊔ b` for `max`, `≤`, `<` and `≈` (level equivalence), and
---| the numerals `0` to `9` (`z` and the definitions `n1` to `n9`). Each has an ASCII form too (`|- G, e == e2 : A`, `||- G, e : A`, `\ A. e`,
---| `\Pi A. B`, `\/`, `<=`, `~=`), declared first; the Unicode one is declared
---| last, the form Aufbau prints. A term with a notation can still be written as
---| an application (`deq G e e2 A`), as the generated statements are.
+--| for contexts, `a ⊔ b` for `max`, `≤`, `<` and `≈` (level equivalence), the
+--| numerals `0` to `9` (`z` and the definitions `n1` to `n9`), `Prop` for
+--| `srt lz`, and `ℕ` for `nat_ty`. The Unicode ones have an ASCII form too
+--| (`[[ G |- e == e2 : A ]]`, `<< G |- e : A >>`, `\ A. e`, `\Pi A. B`, `\/`,
+--| `<=`, `~=`), declared first; the Unicode one is declared last, the form
+--| Aufbau prints. A term with a notation can still be written as an application
+--| (`deq G e e2 A`), as the generated statements are.
 --|
 --| @hole _wff
 strict provable sort wff;
@@ -164,6 +166,8 @@ strict free sort expr;
 term bvar: nat > expr;
 prefix bvar: $#$ prec max;
 term srt: lvl > expr;
+--| The sort of propositions.
+def Prop: expr = $ srt lz $;
 term app: expr > expr > expr;
 infixl app: $@$ prec 1000;
 term lam: expr > expr > expr;
@@ -582,6 +586,7 @@ axiom closed_quot_ind (k: nat) (u: lvl): $ closed k (quot_ind u) $;
 
 --| Lean's `Nat`, `Nat.zero` and `Nat.succ`.
 def nat_ty: expr = $ ind_ty nat_D 0 $;
+prefix nat_ty: $ℕ$ prec max;
 def nat_zero: expr = $ ind_ctor nat_D 0 0 $;
 def nat_succ: expr = $ ind_ctor nat_D 0 1 $;
 
@@ -853,13 +858,13 @@ axiom ulevel_le (l u: lvl): $ l ⊔ u ≈ l $ > $ ulevel l u $;
 --| The judgment `Γ ⊢ e ≡ e2 : A` (IsDefEq, Typing/Basic.lean:18-56). Its
 --| rules are in Part III.
 term deq: ctx > expr > expr > expr > wff;
-notation deq (G: ctx) (e e2 A: expr): wff = ($|-$:0) G ($,$:0) e ($==$:0) e2 ($:$:0) A;
-notation deq (G: ctx) (e e2 A: expr): wff = ($⊢$:0) G ($,$:0) e ($≡$:0) e2 ($:$:0) A;
+notation deq (G: ctx) (e e2 A: expr): wff = ($[[$:0) G ($|-$:0) e ($==$:0) e2 ($:$:0) A ($]]$:0);
+notation deq (G: ctx) (e e2 A: expr): wff = ($⟦$:0) G ($⊢$:0) e ($≡$:0) e2 ($:$:0) A ($⟧$:0);
 
 --| `Γ ⊢ e : A` is the diagonal of the judgment.
-def ty (G: ctx) (e A: expr): wff = $ ⊢ G, e ≡ e : A $;
-notation ty (G: ctx) (e A: expr): wff = ($||-$:0) G ($,$:0) e ($:$:0) A;
-notation ty (G: ctx) (e A: expr): wff = ($⊩$:0) G ($,$:0) e ($:$:0) A;
+def ty (G: ctx) (e A: expr): wff = $ ⟦ G ⊢ e ≡ e : A ⟧ $;
+notation ty (G: ctx) (e A: expr): wff = ($<<$:0) G ($|-$:0) e ($:$:0) A ($>>$:0);
+notation ty (G: ctx) (e A: expr): wff = ($⟨$:0) G ($⊢$:0) e ($:$:0) A ($⟩$:0);
 
 -- Typed application spines -------------------------------------------------
 
@@ -874,7 +879,7 @@ notation ty (G: ctx) (e A: expr): wff = ($⊩$:0) G ($,$:0) e ($:$:0) A;
 term sty: ctx > expr > expr > expr > expr > wff;
 axiom sty_nil (G: ctx) (h A: expr): $ sty G h A h A $;
 axiom sty_app (G: ctx) (h A f a B C C2: expr):
-  $ sty G h A f (Π B. C) $ > $ ⊩ G, a : B $ > $ inst 0 C a C2 $ > $ sty G h A (f @ a) C2 $;
+  $ sty G h A f (Π B. C) $ > $ ⟨ G ⊢ a : B ⟩ $ > $ inst 0 C a C2 $ > $ sty G h A (f @ a) C2 $;
 
 -- Level equivalence of expressions -----------------------------------------
 
@@ -932,7 +937,7 @@ axiom cseqv_cons (K K2: expr) (C C2: ctors): $ eeqv K K2 $ > $ cseqv C C2 $ > $ 
 --| parameters and indices (`checkConstructors`).
 term cwf: ind > nat > nat > lvl > nat > ctx > nat > expr > wff;
 axiom cwf_pi (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (A B A2: expr) (u: lvl):
-  $ add d np k $ > $ sinst D 0 n k A A2 $ > $ ⊩ Ctx, A2 : srt u $ > $ ulevel l u $ > $ ipos D n np d A $ >
+  $ add d np k $ > $ sinst D 0 n k A A2 $ > $ ⟨ Ctx ⊢ A2 : srt u ⟩ $ > $ ulevel l u $ > $ ipos D n np d A $ >
   $ cwf D n np l i (A2 :: Ctx) (s d) B $ > $ cwf D n np l i Ctx d (Π A. B) $;
 axiom cwf_res (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d: nat) (K: expr):
   $ indapp D n np d K i $ > $ cwf D n np l i Ctx d K $;
@@ -952,12 +957,12 @@ axiom tys_wf_cons (D: ind) (n np: nat) (l l2: lvl) (i k: nat) (Ctx: ctx) (F: exp
 term ctx_wf: ctx > ctx > wff;
 axiom ctx_wf_nil (G: ctx): $ ctx_wf G [] $;
 axiom ctx_wf_cons (G P G2: ctx) (A: expr) (u: lvl):
-  $ ctx_wf G P $ > $ capp P G G2 $ > $ ⊩ G2, A : srt u $ > $ ctx_wf G (A :: P) $;
+  $ ctx_wf G P $ > $ capp P G G2 $ > $ ⟨ G2 ⊢ A : srt u ⟩ $ > $ ctx_wf G (A :: P) $;
 --| `tys_ty Ctx T`: each type's type is a type in `Ctx = P ++ G`.
 term tys_ty: ctx > tys > wff;
 axiom tys_ty_nil (Ctx: ctx): $ tys_ty Ctx tnil $;
 axiom tys_ty_cons (Ctx: ctx) (F: expr) (C: ctors) (T: tys) (u: lvl):
-  $ ⊩ Ctx, F : srt u $ > $ tys_ty Ctx T $ > $ tys_ty Ctx (tcons F C T) $;
+  $ ⟨ Ctx ⊢ F : srt u ⟩ $ > $ tys_ty Ctx T $ > $ tys_ty Ctx (tcons F C T) $;
 --| `tys_ok G D`: the parameters are types over the earlier ones and the types'
 --| types are types: what typing `ind_ty D i` needs (the kernel adds the types
 --| before it checks the constructors; a block whose constructors are not
@@ -1017,7 +1022,7 @@ axiom fir_arg (D: ind) (np: nat) (Ctx: ctx) (d k: nat) (A A2 B: expr):
   $ leaf_has 0 B $ > $ add d np k $ > $ sinst D 0 1 k A A2 $ > $ fir D np (A2 :: Ctx) (s d) B $ >
   $ fir D np Ctx d (Π A. B) $;
 axiom fir_prop (D: ind) (np: nat) (Ctx: ctx) (d k: nat) (A A2 B: expr):
-  $ add d np k $ > $ sinst D 0 1 k A A2 $ > $ ⊩ Ctx, A2 : srt lz $ > $ fir D np (A2 :: Ctx) (s d) B $ >
+  $ add d np k $ > $ sinst D 0 1 k A A2 $ > $ ⟨ Ctx ⊢ A2 : Prop ⟩ $ > $ fir D np (A2 :: Ctx) (s d) B $ >
   $ fir D np Ctx d (Π A. B) $;
 
 -- Projections from a structure that may be a proposition (`infer_proj`) ----
@@ -1035,7 +1040,7 @@ axiom proj_ok_prop (G G2: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (j i np n m: 
 --| `fprops D n np Ctx d cnt K`: the next `cnt` fields of `K` are propositions.
 axiom fprops_z (D: ind) (n np: nat) (Ctx: ctx) (d: nat) (K: expr): $ fprops D n np Ctx d 0 K $;
 axiom fprops_s (D: ind) (n np: nat) (Ctx: ctx) (d cnt k: nat) (A A2 B: expr):
-  $ add d np k $ > $ sinst D 0 n k A A2 $ > $ ⊩ Ctx, A2 : srt lz $ > $ fprops D n np (A2 :: Ctx) (s d) cnt B $ >
+  $ add d np k $ > $ sinst D 0 n k A A2 $ > $ ⟨ Ctx ⊢ A2 : Prop ⟩ $ > $ fprops D n np (A2 :: Ctx) (s d) cnt B $ >
   $ fprops D n np Ctx d (s cnt) (Π A. B) $;
 
 -- The defining equations of the literal operations (audit §5) --------------
@@ -1043,7 +1048,7 @@ axiom fprops_s (D: ind) (n np: nat) (Ctx: ctx) (d cnt k: nat) (A A2 B: expr):
 -- literals with GMP. Each `*_eqs` relation states, of a closed function of the
 -- right type, the defining equations Lean4Lean checks of the environment's
 -- function (`Primitive.lean`), over fresh variables (`#0` and `#1` of
--- type `nat_ty`); the rules `nat_*_lit` (Part III) then give the operation's
+-- type `ℕ`); the rules `nat_*_lit` (Part III) then give the operation's
 -- value on literals. A certificate proves the equations of the environment's
 -- `Nat.add` (and so on) once, when it is declared. `Nat.pred`, `Nat.add` and
 -- `Nat.mul` enter the equations of `Nat.sub`, `Nat.mul`, `Nat.pow` and
@@ -1054,40 +1059,40 @@ axiom fprops_s (D: ind) (n np: nat) (Ctx: ctx) (d cnt k: nat) (A A2 B: expr):
 --| `f x (succ y) ≡ succ (f x y)`: Lean's `Nat.add`.
 term add_eqs: ctx > expr > wff;
 axiom add_eqs_i (G: ctx) (f: expr):
-  $ closed 0 f $ > $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
-  $ ⊢ nat_ty :: G, f @ #0 @ nat_zero ≡ #0 : nat_ty $ >
-  $ ⊢ nat_ty :: nat_ty :: G, f @ #1 @ (nat_succ @ #0) ≡ nat_succ @ (f @ #1 @ #0) : nat_ty $ >
+  $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
+  $ ⟦ ℕ :: G ⊢ f @ #0 @ nat_zero ≡ #0 : ℕ ⟧ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢ f @ #1 @ (nat_succ @ #0) ≡ nat_succ @ (f @ #1 @ #0) : ℕ ⟧ $ >
   $ add_eqs G f $;
 --| `pred_eqs G p`: `p 0 ≡ 0` and `p (succ x) ≡ x`: Lean's `Nat.pred`.
 term pred_eqs: ctx > expr > wff;
 axiom pred_eqs_i (G: ctx) (p: expr):
-  $ closed 0 p $ > $ ⊩ G, p : Π nat_ty. nat_ty $ >
-  $ ⊢ G, p @ nat_zero ≡ nat_zero : nat_ty $ >
-  $ ⊢ nat_ty :: G, p @ (nat_succ @ #0) ≡ #0 : nat_ty $ >
+  $ closed 0 p $ > $ ⟨ G ⊢ p : Π ℕ. ℕ ⟩ $ >
+  $ ⟦ G ⊢ p @ nat_zero ≡ nat_zero : ℕ ⟧ $ >
+  $ ⟦ ℕ :: G ⊢ p @ (nat_succ @ #0) ≡ #0 : ℕ ⟧ $ >
   $ pred_eqs G p $;
 --| `sub_eqs G f p`: with `pred_eqs G p`, `f x 0 ≡ x` and `f x (succ y) ≡ p (f x y)`:
 --| Lean's `Nat.sub`.
 term sub_eqs: ctx > expr > expr > wff;
 axiom sub_eqs_i (G: ctx) (f p: expr):
-  $ pred_eqs G p $ > $ closed 0 f $ > $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
-  $ ⊢ nat_ty :: G, f @ #0 @ nat_zero ≡ #0 : nat_ty $ >
-  $ ⊢ nat_ty :: nat_ty :: G, f @ #1 @ (nat_succ @ #0) ≡ p @ (f @ #1 @ #0) : nat_ty $ >
+  $ pred_eqs G p $ > $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
+  $ ⟦ ℕ :: G ⊢ f @ #0 @ nat_zero ≡ #0 : ℕ ⟧ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢ f @ #1 @ (nat_succ @ #0) ≡ p @ (f @ #1 @ #0) : ℕ ⟧ $ >
   $ sub_eqs G f p $;
 --| `mul_eqs G f fa`: with `add_eqs G fa`, `f x 0 ≡ 0` and `f x (succ y) ≡ fa (f x y) x`:
 --| Lean's `Nat.mul`.
 term mul_eqs: ctx > expr > expr > wff;
 axiom mul_eqs_i (G: ctx) (f fa: expr):
-  $ add_eqs G fa $ > $ closed 0 f $ > $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
-  $ ⊢ nat_ty :: G, f @ #0 @ nat_zero ≡ nat_zero : nat_ty $ >
-  $ ⊢ nat_ty :: nat_ty :: G, f @ #1 @ (nat_succ @ #0) ≡ fa @ (f @ #1 @ #0) @ #1 : nat_ty $ >
+  $ add_eqs G fa $ > $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
+  $ ⟦ ℕ :: G ⊢ f @ #0 @ nat_zero ≡ nat_zero : ℕ ⟧ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢ f @ #1 @ (nat_succ @ #0) ≡ fa @ (f @ #1 @ #0) @ #1 : ℕ ⟧ $ >
   $ mul_eqs G f fa $;
 --| `pow_eqs G f fm fa`: with `mul_eqs G fm fa`, `f x 0 ≡ succ 0` and
 --| `f x (succ y) ≡ fm (f x y) x`: Lean's `Nat.pow`.
 term pow_eqs: ctx > expr > expr > expr > wff;
 axiom pow_eqs_i (G: ctx) (f fm fa: expr):
-  $ mul_eqs G fm fa $ > $ closed 0 f $ > $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
-  $ ⊢ nat_ty :: G, f @ #0 @ nat_zero ≡ nat_succ @ nat_zero : nat_ty $ >
-  $ ⊢ nat_ty :: nat_ty :: G, f @ #1 @ (nat_succ @ #0) ≡ fm @ (f @ #1 @ #0) @ #1 : nat_ty $ >
+  $ mul_eqs G fm fa $ > $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
+  $ ⟦ ℕ :: G ⊢ f @ #0 @ nat_zero ≡ nat_succ @ nat_zero : ℕ ⟧ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢ f @ #1 @ (nat_succ @ #0) ≡ fm @ (f @ #1 @ #0) @ #1 : ℕ ⟧ $ >
   $ pow_eqs G f fm fa $;
 --| `beq_eqs G f B t u`: `f : Nat → Nat → B` with `f 0 0 ≡ t`, `f 0 (succ y) ≡ u`,
 --| `f (succ x) 0 ≡ u` and `f (succ x) (succ y) ≡ f x y`, where `B`, `t` and `u` are
@@ -1095,37 +1100,37 @@ axiom pow_eqs_i (G: ctx) (f fm fa: expr):
 term beq_eqs: ctx > expr > expr > expr > expr > wff;
 axiom beq_eqs_i (G: ctx) (f B t u: expr):
   $ closed 0 f $ > $ closed 0 B $ > $ closed 0 t $ > $ closed 0 u $ >
-  $ ⊩ G, f : Π nat_ty. Π nat_ty. B $ >
-  $ ⊢ G, f @ nat_zero @ nat_zero ≡ t : B $ >
-  $ ⊢ nat_ty :: G, f @ nat_zero @ (nat_succ @ #0) ≡ u : B $ >
-  $ ⊢ nat_ty :: G, f @ (nat_succ @ #0) @ nat_zero ≡ u : B $ >
-  $ ⊢ nat_ty :: nat_ty :: G, f @ (nat_succ @ #1) @ (nat_succ @ #0) ≡ f @ #1 @ #0 : B $ >
+  $ ⟨ G ⊢ f : Π ℕ. Π ℕ. B ⟩ $ >
+  $ ⟦ G ⊢ f @ nat_zero @ nat_zero ≡ t : B ⟧ $ >
+  $ ⟦ ℕ :: G ⊢ f @ nat_zero @ (nat_succ @ #0) ≡ u : B ⟧ $ >
+  $ ⟦ ℕ :: G ⊢ f @ (nat_succ @ #0) @ nat_zero ≡ u : B ⟧ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢ f @ (nat_succ @ #1) @ (nat_succ @ #0) ≡ f @ #1 @ #0 : B ⟧ $ >
   $ beq_eqs G f B t u $;
 --| `ble_eqs G f B t u`: `f 0 y ≡ t`, `f (succ x) 0 ≡ u` and `f (succ x) (succ y) ≡ f x y`:
 --| Lean's `Nat.ble`.
 term ble_eqs: ctx > expr > expr > expr > expr > wff;
 axiom ble_eqs_i (G: ctx) (f B t u: expr):
   $ closed 0 f $ > $ closed 0 B $ > $ closed 0 t $ > $ closed 0 u $ >
-  $ ⊩ G, f : Π nat_ty. Π nat_ty. B $ >
-  $ ⊢ nat_ty :: G, f @ nat_zero @ #0 ≡ t : B $ >
-  $ ⊢ nat_ty :: G, f @ (nat_succ @ #0) @ nat_zero ≡ u : B $ >
-  $ ⊢ nat_ty :: nat_ty :: G, f @ (nat_succ @ #1) @ (nat_succ @ #0) ≡ f @ #1 @ #0 : B $ >
+  $ ⟨ G ⊢ f : Π ℕ. Π ℕ. B ⟩ $ >
+  $ ⟦ ℕ :: G ⊢ f @ nat_zero @ #0 ≡ t : B ⟧ $ >
+  $ ⟦ ℕ :: G ⊢ f @ (nat_succ @ #0) @ nat_zero ≡ u : B ⟧ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢ f @ (nat_succ @ #1) @ (nat_succ @ #0) ≡ f @ #1 @ #0 : B ⟧ $ >
   $ ble_eqs G f B t u $;
 --| `shl_eqs G f fm fa`: with `mul_eqs G fm fa`, `f x 0 ≡ x` and
 --| `f x (succ y) ≡ f (fm 2 x) y`: Lean's `Nat.shiftLeft`.
 term shl_eqs: ctx > expr > expr > expr > wff;
 axiom shl_eqs_i (G: ctx) (f fm fa: expr):
-  $ mul_eqs G fm fa $ > $ closed 0 f $ > $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
-  $ ⊢ nat_ty :: G, f @ #0 @ nat_zero ≡ #0 : nat_ty $ >
-  $ ⊢ nat_ty :: nat_ty :: G, f @ #1 @ (nat_succ @ #0) ≡ f @ (fm @ lit (bd0 (bd1 b0)) @ #1) @ #0 : nat_ty $ >
+  $ mul_eqs G fm fa $ > $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
+  $ ⟦ ℕ :: G ⊢ f @ #0 @ nat_zero ≡ #0 : ℕ ⟧ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢ f @ #1 @ (nat_succ @ #0) ≡ f @ (fm @ lit (bd0 (bd1 b0)) @ #1) @ #0 : ℕ ⟧ $ >
   $ shl_eqs G f fm fa $;
 --| `shr_eqs G f fd`: `f x 0 ≡ x` and `f x (succ y) ≡ fd (f x y) 2`, with `fd` closed:
 --| Lean's `Nat.shiftRight`, with `Nat.div`.
 term shr_eqs: ctx > expr > expr > wff;
 axiom shr_eqs_i (G: ctx) (f fd: expr):
-  $ closed 0 f $ > $ closed 0 fd $ > $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
-  $ ⊢ nat_ty :: G, f @ #0 @ nat_zero ≡ #0 : nat_ty $ >
-  $ ⊢ nat_ty :: nat_ty :: G, f @ #1 @ (nat_succ @ #0) ≡ fd @ (f @ #1 @ #0) @ lit (bd0 (bd1 b0)) : nat_ty $ >
+  $ closed 0 f $ > $ closed 0 fd $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
+  $ ⟦ ℕ :: G ⊢ f @ #0 @ nat_zero ≡ #0 : ℕ ⟧ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢ f @ #1 @ (nat_succ @ #0) ≡ fd @ (f @ #1 @ #0) @ lit (bd0 (bd1 b0)) : ℕ ⟧ $ >
   $ shr_eqs G f fd $;
 
 -- The division-like operations (audit §5) ----------------------------------
@@ -1141,7 +1146,7 @@ axiom shr_eqs_i (G: ctx) (f fd: expr):
 --| `dec_eqs G B t u Not Dec dite T R ofT ofF`: a reflection of decisions
 --| (Lean4Lean's `Reflection`): `R p b H : Dec p` decides the proposition `p`
 --| by the Bool `b`, given `H : T p b`, and the dependent conditional at
---| `nat_ty` reduces on it: `dite p (R p t H) a b ≡ a (ofT p H)` and
+--| `ℕ` reduces on it: `dite p (R p t H) a b ≡ a (ofT p H)` and
 --| `dite p (R p u H) a b ≡ b (ofF p H)` (`checkNatDITE`), for fresh
 --| `p : Prop`, `H`, `a` and `b`. In Lean, `Decidable.intro`, `Bool.Reflects`
 --| and `@dite Nat`.
@@ -1149,23 +1154,23 @@ term dec_eqs: ctx > expr > expr > expr > expr > expr > expr > expr > expr > expr
 axiom dec_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF: expr):
   $ closed 0 B $ > $ closed 0 t $ > $ closed 0 u $ > $ closed 0 Not $ > $ closed 0 Dec $ >
   $ closed 0 dite $ > $ closed 0 T $ > $ closed 0 R $ > $ closed 0 ofT $ > $ closed 0 ofF $ >
-  $ ⊩ G, ofT : Π (srt lz). Π (T @ #0 @ t). #1 $ >
-  $ ⊩ G, ofF : Π (srt lz). Π (T @ #0 @ u). Not @ #1 $ >
-  $ ⊢ (Π (Not @ #2). nat_ty) :: (Π #1. nat_ty) :: (T @ #0 @ t) :: srt lz :: G,
-      dite @ #3 @ (R @ #3 @ t @ #2) @ #1 @ #0 ≡ #1 @ (ofT @ #3 @ #2) : nat_ty $ >
-  $ ⊢ (Π (Not @ #2). nat_ty) :: (Π #1. nat_ty) :: (T @ #0 @ u) :: srt lz :: G,
-      dite @ #3 @ (R @ #3 @ u @ #2) @ #1 @ #0 ≡ #0 @ (ofF @ #3 @ #2) : nat_ty $ >
+  $ ⟨ G ⊢ ofT : Π Prop. Π (T @ #0 @ t). #1 ⟩ $ >
+  $ ⟨ G ⊢ ofF : Π Prop. Π (T @ #0 @ u). Not @ #1 ⟩ $ >
+  $ ⟦ (Π (Not @ #2). ℕ) :: (Π #1. ℕ) :: (T @ #0 @ t) :: Prop :: G ⊢
+      dite @ #3 @ (R @ #3 @ t @ #2) @ #1 @ #0 ≡ #1 @ (ofT @ #3 @ #2) : ℕ ⟧ $ >
+  $ ⟦ (Π (Not @ #2). ℕ) :: (Π #1. ℕ) :: (T @ #0 @ u) :: Prop :: G ⊢
+      dite @ #3 @ (R @ #3 @ u @ #2) @ #1 @ #0 ≡ #0 @ (ofF @ #3 @ #2) : ℕ ⟧ $ >
   $ dec_eqs G B t u Not Dec dite T R ofT ofF $;
---| `ite_eqs G B t u T R ite`: the conditional at `nat_ty` reduces on the
+--| `ite_eqs G B t u T R ite`: the conditional at `ℕ` reduces on the
 --| reflection: `ite p (R p t H) a b ≡ a` and `ite p (R p u H) a b ≡ b`
 --| (`checkITE`). In Lean, `@ite Nat`.
 term ite_eqs: ctx > expr > expr > expr > expr > expr > expr > wff;
 axiom ite_eqs_i (G: ctx) (B t u T R ite: expr):
   $ closed 0 B $ > $ closed 0 t $ > $ closed 0 u $ > $ closed 0 T $ > $ closed 0 R $ > $ closed 0 ite $ >
-  $ ⊢ nat_ty :: nat_ty :: (T @ #0 @ t) :: srt lz :: G,
-      ite @ #3 @ (R @ #3 @ t @ #2) @ #1 @ #0 ≡ #1 : nat_ty $ >
-  $ ⊢ nat_ty :: nat_ty :: (T @ #0 @ u) :: srt lz :: G,
-      ite @ #3 @ (R @ #3 @ u @ #2) @ #1 @ #0 ≡ #0 : nat_ty $ >
+  $ ⟦ ℕ :: ℕ :: (T @ #0 @ t) :: Prop :: G ⊢
+      ite @ #3 @ (R @ #3 @ t @ #2) @ #1 @ #0 ≡ #1 : ℕ ⟧ $ >
+  $ ⟦ ℕ :: ℕ :: (T @ #0 @ u) :: Prop :: G ⊢
+      ite @ #3 @ (R @ #3 @ u @ #2) @ #1 @ #0 ≡ #0 : ℕ ⟧ $ >
   $ ite_eqs G B t u T R ite $;
 --| `natle_dec G B t u Not Dec dite T R ofT ofF leN dleN ble pf`: with the
 --| reflection, `dleN x y ≡ R (leN x y) (ble x y) (pf x y)` for fresh `x y`,
@@ -1175,10 +1180,10 @@ term natle_dec: ctx > expr > expr > expr > expr > expr > expr > expr > expr > ex
 axiom natle_dec_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf: expr):
   $ dec_eqs G B t u Not Dec dite T R ofT ofF $ > $ ble_eqs G ble B t u $ >
   $ closed 0 leN $ > $ closed 0 dleN $ > $ closed 0 pf $ >
-  $ ⊩ G, leN : Π nat_ty. Π nat_ty. srt lz $ >
-  $ ⊩ G, pf : Π nat_ty. Π nat_ty. T @ (leN @ #1 @ #0) @ (ble @ #1 @ #0) $ >
-  $ ⊢ nat_ty :: nat_ty :: G,
-      dleN @ #1 @ #0 ≡ R @ (leN @ #1 @ #0) @ (ble @ #1 @ #0) @ (pf @ #1 @ #0) : Dec @ (leN @ #1 @ #0) $ >
+  $ ⟨ G ⊢ leN : Π ℕ. Π ℕ. Prop ⟩ $ >
+  $ ⟨ G ⊢ pf : Π ℕ. Π ℕ. T @ (leN @ #1 @ #0) @ (ble @ #1 @ #0) ⟩ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢
+      dleN @ #1 @ #0 ≡ R @ (leN @ #1 @ #0) @ (ble @ #1 @ #0) @ (pf @ #1 @ #0) : Dec @ (leN @ #1 @ #0) ⟧ $ >
   $ natle_dec G B t u Not Dec dite T R ofT ofF leN dleN ble pf $;
 --| `nateq_dec G ... eqN deqN beq pq`: likewise `deqN x y ≡ R (eqN x y) (beq x y) (pq x y)`
 --| with `Nat.beq`'s equations (`Condition.natEq`): Lean's `Nat.decEq`.
@@ -1186,26 +1191,26 @@ term nateq_dec: ctx > expr > expr > expr > expr > expr > expr > expr > expr > ex
 axiom nateq_dec_i (G: ctx) (B t u Not Dec dite T R ofT ofF eqN deqN beq pq: expr):
   $ dec_eqs G B t u Not Dec dite T R ofT ofF $ > $ beq_eqs G beq B t u $ >
   $ closed 0 eqN $ > $ closed 0 deqN $ > $ closed 0 pq $ >
-  $ ⊩ G, eqN : Π nat_ty. Π nat_ty. srt lz $ >
-  $ ⊩ G, pq : Π nat_ty. Π nat_ty. T @ (eqN @ #1 @ #0) @ (beq @ #1 @ #0) $ >
-  $ ⊢ nat_ty :: nat_ty :: G,
-      deqN @ #1 @ #0 ≡ R @ (eqN @ #1 @ #0) @ (beq @ #1 @ #0) @ (pq @ #1 @ #0) : Dec @ (eqN @ #1 @ #0) $ >
+  $ ⟨ G ⊢ eqN : Π ℕ. Π ℕ. Prop ⟩ $ >
+  $ ⟨ G ⊢ pq : Π ℕ. Π ℕ. T @ (eqN @ #1 @ #0) @ (beq @ #1 @ #0) ⟩ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢
+      deqN @ #1 @ #0 ≡ R @ (eqN @ #1 @ #0) @ (beq @ #1 @ #0) @ (pq @ #1 @ #0) : Dec @ (eqN @ #1 @ #0) ⟧ $ >
   $ nateq_dec G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $;
 --| `bool_dec G B t u Not dite ite bp bd`: a condition on a Bool
 --| (`Condition.bool`: `bp b` is `b = true`, decided by `bd b`): the
---| conditionals at `nat_ty` reduce on `bp t` and `bp u`, for fresh `a b`:
+--| conditionals at `ℕ` reduce on `bp t` and `bp u`, for fresh `a b`:
 --| `dite (bp t) (bd t) (λ _. a) (λ _. b) ≡ a`, `ite (bp t) (bd t) a b ≡ a`,
 --| and the `u` cases to `b`.
 term bool_dec: ctx > expr > expr > expr > expr > expr > expr > expr > expr > wff;
 axiom bool_dec_i (G: ctx) (B t u Not dite ite bp bd: expr):
   $ closed 0 B $ > $ closed 0 t $ > $ closed 0 u $ > $ closed 0 Not $ >
   $ closed 0 dite $ > $ closed 0 ite $ > $ closed 0 bp $ > $ closed 0 bd $ >
-  $ ⊢ nat_ty :: nat_ty :: G,
-      dite @ (bp @ t) @ (bd @ t) @ (λ (bp @ t). #2) @ (λ (Not @ (bp @ t)). #1) ≡ #1 : nat_ty $ >
-  $ ⊢ nat_ty :: nat_ty :: G,
-      dite @ (bp @ u) @ (bd @ u) @ (λ (bp @ u). #2) @ (λ (Not @ (bp @ u)). #1) ≡ #0 : nat_ty $ >
-  $ ⊢ nat_ty :: nat_ty :: G, ite @ (bp @ t) @ (bd @ t) @ #1 @ #0 ≡ #1 : nat_ty $ >
-  $ ⊢ nat_ty :: nat_ty :: G, ite @ (bp @ u) @ (bd @ u) @ #1 @ #0 ≡ #0 : nat_ty $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢
+      dite @ (bp @ t) @ (bd @ t) @ (λ (bp @ t). #2) @ (λ (Not @ (bp @ t)). #1) ≡ #1 : ℕ ⟧ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢
+      dite @ (bp @ u) @ (bd @ u) @ (λ (bp @ u). #2) @ (λ (Not @ (bp @ u)). #1) ≡ #0 : ℕ ⟧ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢ ite @ (bp @ t) @ (bd @ t) @ #1 @ #0 ≡ #1 : ℕ ⟧ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢ ite @ (bp @ u) @ (bd @ u) @ #1 @ #0 ≡ #0 : ℕ ⟧ $ >
   $ bool_dec G B t u Not dite ite bp bd $;
 --| `div_eqs G ... leN dleN ble pf sub p f go pfs lem`: Lean4Lean's
 --| `checkNatDiv`: with `Nat.decLe`'s reflection and `Nat.sub`'s equations,
@@ -1219,19 +1224,19 @@ term div_eqs: ctx > expr > expr > expr > expr > expr > expr > expr > expr > expr
 axiom div_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr):
   $ natle_dec G B t u Not Dec dite T R ofT ofF leN dleN ble pf $ > $ sub_eqs G sub p $ >
   $ closed 0 f $ > $ closed 0 go $ > $ closed 0 pfs $ > $ closed 0 lem $ >
-  $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
-  $ ⊩ G, go : Π nat_ty. Π (leN @ lit1 @ #0). Π nat_ty. Π nat_ty. Π (leN @ (nat_succ @ #0) @ #1). nat_ty $ >
-  $ ⊩ G, pfs : Π nat_ty. leN @ (nat_succ @ #0) @ (nat_succ @ #0) $ >
-  $ ⊩ G, lem : Π nat_ty. Π nat_ty. Π nat_ty. Π (leN @ lit1 @ #1). Π (leN @ #2 @ #3).
-      Π (leN @ (nat_succ @ #4) @ (nat_succ @ #2)). leN @ (nat_succ @ (sub @ #5 @ #4)) @ #3 $ >
-  $ ⊢ nat_ty :: nat_ty :: G,
+  $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
+  $ ⟨ G ⊢ go : Π ℕ. Π (leN @ lit1 @ #0). Π ℕ. Π ℕ. Π (leN @ (nat_succ @ #0) @ #1). ℕ ⟩ $ >
+  $ ⟨ G ⊢ pfs : Π ℕ. leN @ (nat_succ @ #0) @ (nat_succ @ #0) ⟩ $ >
+  $ ⟨ G ⊢ lem : Π ℕ. Π ℕ. Π ℕ. Π (leN @ lit1 @ #1). Π (leN @ #2 @ #3).
+      Π (leN @ (nat_succ @ #4) @ (nat_succ @ #2)). leN @ (nat_succ @ (sub @ #5 @ #4)) @ #3 ⟩ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢
       f @ #1 @ #0 ≡ dite @ (leN @ lit1 @ #0) @ (dleN @ lit1 @ #0)
         @ (λ (leN @ lit1 @ #0). go @ #1 @ #0 @ (nat_succ @ #2) @ #2 @ (pfs @ #2))
-        @ (λ (Not @ (leN @ lit1 @ #0)). lit0) : nat_ty $ >
-  $ ⊢ (leN @ (nat_succ @ #3) @ (nat_succ @ #0)) :: nat_ty :: (leN @ lit1 @ #0) :: nat_ty :: nat_ty :: G,
+        @ (λ (Not @ (leN @ lit1 @ #0)). lit0) : ℕ ⟧ $ >
+  $ ⟦ (leN @ (nat_succ @ #3) @ (nat_succ @ #0)) :: ℕ :: (leN @ lit1 @ #0) :: ℕ :: ℕ :: G ⊢
       go @ #3 @ #2 @ (nat_succ @ #1) @ #4 @ #0 ≡ dite @ (leN @ #3 @ #4) @ (dleN @ #3 @ #4)
         @ (λ (leN @ #3 @ #4). nat_succ @ (go @ #4 @ #3 @ #2 @ (sub @ #5 @ #4) @ (lem @ #5 @ #4 @ #2 @ #3 @ #0 @ #1)))
-        @ (λ (Not @ (leN @ #3 @ #4)). lit0) : nat_ty $ >
+        @ (λ (Not @ (leN @ #3 @ #4)). lit0) : ℕ ⟧ $ >
   $ div_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $;
 --| `mod_eqs G ... sub p ite f go pfs lem`: Lean4Lean's `checkNatMod`: `f 0 x ≡ 0`,
 --| `f (succ x) y ≡ ite (leN y (succ x)) (dleN y (succ x))
@@ -1245,22 +1250,22 @@ axiom mod_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p i
   $ natle_dec G B t u Not Dec dite T R ofT ofF leN dleN ble pf $ > $ sub_eqs G sub p $ >
   $ ite_eqs G B t u T R ite $ >
   $ closed 0 f $ > $ closed 0 go $ > $ closed 0 pfs $ > $ closed 0 lem $ >
-  $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
-  $ ⊩ G, go : Π nat_ty. Π (leN @ lit1 @ #0). Π nat_ty. Π nat_ty. Π (leN @ (nat_succ @ #0) @ #1). nat_ty $ >
-  $ ⊩ G, pfs : Π nat_ty. leN @ (nat_succ @ #0) @ (nat_succ @ #0) $ >
-  $ ⊩ G, lem : Π nat_ty. Π nat_ty. Π nat_ty. Π (leN @ lit1 @ #1). Π (leN @ #2 @ #3).
-      Π (leN @ (nat_succ @ #4) @ (nat_succ @ #2)). leN @ (nat_succ @ (sub @ #5 @ #4)) @ #3 $ >
-  $ ⊢ nat_ty :: G, f @ lit0 @ #0 ≡ lit0 : nat_ty $ >
-  $ ⊢ nat_ty :: nat_ty :: G,
+  $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
+  $ ⟨ G ⊢ go : Π ℕ. Π (leN @ lit1 @ #0). Π ℕ. Π ℕ. Π (leN @ (nat_succ @ #0) @ #1). ℕ ⟩ $ >
+  $ ⟨ G ⊢ pfs : Π ℕ. leN @ (nat_succ @ #0) @ (nat_succ @ #0) ⟩ $ >
+  $ ⟨ G ⊢ lem : Π ℕ. Π ℕ. Π ℕ. Π (leN @ lit1 @ #1). Π (leN @ #2 @ #3).
+      Π (leN @ (nat_succ @ #4) @ (nat_succ @ #2)). leN @ (nat_succ @ (sub @ #5 @ #4)) @ #3 ⟩ $ >
+  $ ⟦ ℕ :: G ⊢ f @ lit0 @ #0 ≡ lit0 : ℕ ⟧ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢
       f @ (nat_succ @ #1) @ #0 ≡ ite @ (leN @ #0 @ (nat_succ @ #1)) @ (dleN @ #0 @ (nat_succ @ #1))
         @ (dite @ (leN @ lit1 @ #0) @ (dleN @ lit1 @ #0)
           @ (λ (leN @ lit1 @ #0). go @ #1 @ #0 @ (nat_succ @ (nat_succ @ #2)) @ (nat_succ @ #2) @ (pfs @ (nat_succ @ #2)))
           @ (λ (Not @ (leN @ lit1 @ #0)). nat_succ @ #2))
-        @ (nat_succ @ #1) : nat_ty $ >
-  $ ⊢ (leN @ (nat_succ @ #3) @ (nat_succ @ #0)) :: nat_ty :: (leN @ lit1 @ #0) :: nat_ty :: nat_ty :: G,
+        @ (nat_succ @ #1) : ℕ ⟧ $ >
+  $ ⟦ (leN @ (nat_succ @ #3) @ (nat_succ @ #0)) :: ℕ :: (leN @ lit1 @ #0) :: ℕ :: ℕ :: G ⊢
       go @ #3 @ #2 @ (nat_succ @ #1) @ #4 @ #0 ≡ dite @ (leN @ #3 @ #4) @ (dleN @ #3 @ #4)
         @ (λ (leN @ #3 @ #4). go @ #4 @ #3 @ #2 @ (sub @ #5 @ #4) @ (lem @ #5 @ #4 @ #2 @ #3 @ #0 @ #1))
-        @ (λ (Not @ (leN @ #3 @ #4)). #5) : nat_ty $ >
+        @ (λ (Not @ (leN @ #3 @ #4)). #5) : ℕ ⟧ $ >
   $ mod_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $;
 --| The type of the functional of a well-founded fixpoint over the measure
 --| `hm : al → nat`: `Π x : al. (Π y : al. ltN (hm y) (hm x) → motive y) → motive x`.
@@ -1278,17 +1283,17 @@ axiom fix_eqs_i (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: 
   $ closed 0 ite $ > $ closed 0 bp $ > $ closed 0 bd $ > $ closed 0 beq $ >
   $ closed 0 fix $ > $ closed 0 go $ > $ closed 0 eager $ > $ closed 0 al $ > $ closed 0 motive $ >
   $ closed 0 hm $ > $ closed 0 ltN $ > $ closed 0 pfx $ > $ closed 0 pfgo $ >
-  $ ⊩ G, ltN : Π nat_ty. Π nat_ty. srt lz $ >
-  $ ⊩ G, go @ al @ motive @ hm : Π (fix_fty al motive hm ltN). Π nat_ty. Π al. Π (ltN @ (hm @ #0) @ #1). motive @ #1 $ >
-  $ ⊩ G, pfx : Π al. ltN @ (hm @ #0) @ (eager @ (nat_succ @ (hm @ #0))) $ >
-  $ ⊩ G, pfgo : Π nat_ty. Π al. Π (ltN @ (hm @ #0) @ (nat_succ @ #1)). Π al. Π (ltN @ (hm @ #0) @ (hm @ #2)).
-      ltN @ (hm @ #1) @ #4 $ >
-  $ ⊢ al :: fix_fty al motive hm ltN :: G,
-      fix @ al @ motive @ hm @ #1 @ #0 ≡ go @ al @ motive @ hm @ #1 @ (eager @ (nat_succ @ (hm @ #0))) @ #0 @ (pfx @ #0) : motive @ #0 $ >
-  $ ⊢ nat_ty :: G, eager @ #0 ≡ ite @ (bp @ (beq @ #0 @ #0)) @ (bd @ (beq @ #0 @ #0)) @ #0 @ #0 : nat_ty $ >
-  $ ⊢ (ltN @ (hm @ #0) @ (nat_succ @ #1)) :: al :: nat_ty :: fix_fty al motive hm ltN :: G,
+  $ ⟨ G ⊢ ltN : Π ℕ. Π ℕ. Prop ⟩ $ >
+  $ ⟨ G ⊢ go @ al @ motive @ hm : Π (fix_fty al motive hm ltN). Π ℕ. Π al. Π (ltN @ (hm @ #0) @ #1). motive @ #1 ⟩ $ >
+  $ ⟨ G ⊢ pfx : Π al. ltN @ (hm @ #0) @ (eager @ (nat_succ @ (hm @ #0))) ⟩ $ >
+  $ ⟨ G ⊢ pfgo : Π ℕ. Π al. Π (ltN @ (hm @ #0) @ (nat_succ @ #1)). Π al. Π (ltN @ (hm @ #0) @ (hm @ #2)).
+      ltN @ (hm @ #1) @ #4 ⟩ $ >
+  $ ⟦ al :: fix_fty al motive hm ltN :: G ⊢
+      fix @ al @ motive @ hm @ #1 @ #0 ≡ go @ al @ motive @ hm @ #1 @ (eager @ (nat_succ @ (hm @ #0))) @ #0 @ (pfx @ #0) : motive @ #0 ⟧ $ >
+  $ ⟦ ℕ :: G ⊢ eager @ #0 ≡ ite @ (bp @ (beq @ #0 @ #0)) @ (bd @ (beq @ #0 @ #0)) @ #0 @ #0 : ℕ ⟧ $ >
+  $ ⟦ (ltN @ (hm @ #0) @ (nat_succ @ #1)) :: al :: ℕ :: fix_fty al motive hm ltN :: G ⊢
       go @ al @ motive @ hm @ #3 @ (nat_succ @ #2) @ #1 @ #0
-        ≡ #3 @ #1 @ (λ al. λ (ltN @ (hm @ #0) @ (hm @ #2)). go @ al @ motive @ hm @ #5 @ #4 @ #1 @ (pfgo @ #4 @ #3 @ #2 @ #1 @ #0)) : motive @ #1 $ >
+        ≡ #3 @ #1 @ (λ al. λ (ltN @ (hm @ #0) @ (hm @ #2)). go @ al @ motive @ hm @ #5 @ #4 @ #1 @ (pfgo @ #4 @ #3 @ #2 @ #1 @ #0)) : motive @ #1 ⟧ $ >
   $ fix_eqs G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $;
 --| `gcd_eqs G ... f pack F pfF`: Lean4Lean's `checkNatGcd`: with `Nat.mod`'s
 --| equations, `Nat.decEq`'s reflection, the Bool condition and the fixpoint,
@@ -1303,19 +1308,19 @@ axiom gcd_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p i
   $ bool_dec G B t u Not dite ite bp bd $ >
   $ fix_eqs G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ >
   $ closed 0 f $ > $ closed 0 pack $ > $ closed 0 F $ > $ closed 0 pfF $ >
-  $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ >
-  $ ⊩ G, F : fix_fty al motive hm ltN $ > $ ⊩ G, pack : Π nat_ty. Π nat_ty. al $ >
-  $ ⊩ G, pfF : Π nat_ty. Π nat_ty. Π (Not @ (eqN @ #1 @ lit0)).
-      ltN @ (hm @ (pack @ (fm @ #1 @ #2) @ #2)) @ (hm @ (pack @ #2 @ #1)) $ >
-  $ ⊢ nat_ty :: nat_ty :: G, f @ #1 @ #0 ≡ fix @ al @ motive @ hm @ F @ (pack @ #1 @ #0) : nat_ty $ >
-  $ ⊢ nat_ty :: nat_ty :: G, hm @ (pack @ #1 @ #0) ≡ #1 : nat_ty $ >
-  $ ⊢ (Π al. Π (ltN @ (hm @ #0) @ (hm @ (pack @ lit0 @ #1))). motive @ #1) :: nat_ty :: G,
-      F @ (pack @ lit0 @ #1) @ #0 ≡ #1 : motive @ (pack @ lit0 @ #1) $ >
-  $ ⊢ (Π al. Π (ltN @ (hm @ #0) @ (hm @ (pack @ (nat_succ @ #3) @ #2))). motive @ #1)
-        :: (Not @ (eqN @ (nat_succ @ #1) @ lit0)) :: nat_ty :: nat_ty :: G,
+  $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
+  $ ⟨ G ⊢ F : fix_fty al motive hm ltN ⟩ $ > $ ⟨ G ⊢ pack : Π ℕ. Π ℕ. al ⟩ $ >
+  $ ⟨ G ⊢ pfF : Π ℕ. Π ℕ. Π (Not @ (eqN @ #1 @ lit0)).
+      ltN @ (hm @ (pack @ (fm @ #1 @ #2) @ #2)) @ (hm @ (pack @ #2 @ #1)) ⟩ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢ f @ #1 @ #0 ≡ fix @ al @ motive @ hm @ F @ (pack @ #1 @ #0) : ℕ ⟧ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢ hm @ (pack @ #1 @ #0) ≡ #1 : ℕ ⟧ $ >
+  $ ⟦ (Π al. Π (ltN @ (hm @ #0) @ (hm @ (pack @ lit0 @ #1))). motive @ #1) :: ℕ :: G ⊢
+      F @ (pack @ lit0 @ #1) @ #0 ≡ #1 : motive @ (pack @ lit0 @ #1) ⟧ $ >
+  $ ⟦ (Π al. Π (ltN @ (hm @ #0) @ (hm @ (pack @ (nat_succ @ #3) @ #2))). motive @ #1)
+        :: (Not @ (eqN @ (nat_succ @ #1) @ lit0)) :: ℕ :: ℕ :: G ⊢
       F @ (pack @ (nat_succ @ #3) @ #2) @ #0
         ≡ #0 @ (pack @ (fm @ #2 @ (nat_succ @ #3)) @ (nat_succ @ #3)) @ (pfF @ (nat_succ @ #3) @ #2 @ #1)
-        : motive @ (pack @ (nat_succ @ #3) @ #2) $ >
+        : motive @ (pack @ (nat_succ @ #3) @ #2) ⟧ $ >
   $ gcd_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $;
 --| `bitwise_eqs G ... fb pack Fb pfB dec`: Lean4Lean's `checkNatBitwise`:
 --| with the equations of `Nat.div`, `Nat.mod` and `Nat.add`, `Nat.decEq`'s
@@ -1338,15 +1343,15 @@ axiom bitwise_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub
   $ add_eqs G fa $ >
   $ fix_eqs G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ >
   $ closed 0 fb $ > $ closed 0 pack $ > $ closed 0 Fb $ > $ closed 0 pfB $ > $ closed 0 dec $ >
-  $ ⊩ G, fb : Π (Π B. Π B. B). Π nat_ty. Π nat_ty. nat_ty $ >
-  $ ⊩ G, Fb : Π (Π B. Π B. B). fix_fty al motive hm ltN $ > $ ⊩ G, pack : Π nat_ty. Π nat_ty. al $ >
-  $ ⊩ G, pfB : Π nat_ty. Π nat_ty. Π (Not @ (eqN @ #1 @ lit0)).
-      ltN @ (hm @ (pack @ (fd @ #2 @ lit2) @ (fd @ #1 @ lit2))) @ (hm @ (pack @ #2 @ #1)) $ >
-  $ ⊢ nat_ty :: nat_ty :: (Π B. Π B. B) :: G,
-      fb @ #2 @ #1 @ #0 ≡ fix @ al @ motive @ hm @ (Fb @ #2) @ (pack @ #1 @ #0) : nat_ty $ >
-  $ ⊢ nat_ty :: nat_ty :: G, hm @ (pack @ #1 @ #0) ≡ #1 : nat_ty $ >
-  $ ⊢ (T @ #1 @ #0) :: B :: srt lz :: G, dec @ #2 @ (R @ #2 @ #1 @ #0) ≡ #1 : B $ >
-  $ ⊢ (Π al. Π (ltN @ (hm @ #0) @ (hm @ (pack @ #2 @ #1))). motive @ #1) :: nat_ty :: nat_ty :: (Π B. Π B. B) :: G,
+  $ ⟨ G ⊢ fb : Π (Π B. Π B. B). Π ℕ. Π ℕ. ℕ ⟩ $ >
+  $ ⟨ G ⊢ Fb : Π (Π B. Π B. B). fix_fty al motive hm ltN ⟩ $ > $ ⟨ G ⊢ pack : Π ℕ. Π ℕ. al ⟩ $ >
+  $ ⟨ G ⊢ pfB : Π ℕ. Π ℕ. Π (Not @ (eqN @ #1 @ lit0)).
+      ltN @ (hm @ (pack @ (fd @ #2 @ lit2) @ (fd @ #1 @ lit2))) @ (hm @ (pack @ #2 @ #1)) ⟩ $ >
+  $ ⟦ ℕ :: ℕ :: (Π B. Π B. B) :: G ⊢
+      fb @ #2 @ #1 @ #0 ≡ fix @ al @ motive @ hm @ (Fb @ #2) @ (pack @ #1 @ #0) : ℕ ⟧ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢ hm @ (pack @ #1 @ #0) ≡ #1 : ℕ ⟧ $ >
+  $ ⟦ (T @ #1 @ #0) :: B :: Prop :: G ⊢ dec @ #2 @ (R @ #2 @ #1 @ #0) ≡ #1 : B ⟧ $ >
+  $ ⟦ (Π al. Π (ltN @ (hm @ #0) @ (hm @ (pack @ #2 @ #1))). motive @ #1) :: ℕ :: ℕ :: (Π B. Π B. B) :: G ⊢
       Fb @ #3 @ (pack @ #2 @ #1) @ #0
         ≡ dite @ (eqN @ #2 @ lit0) @ (deqN @ #2 @ lit0)
           @ (λ (eqN @ #2 @ lit0). dite @ (bp @ (#4 @ u @ t)) @ (bd @ (#4 @ u @ t))
@@ -1361,7 +1366,7 @@ axiom bitwise_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub
                         fa @ (fa @ (#3 @ (pack @ (fd @ #5 @ lit2) @ (fd @ #4 @ lit2)) @ (pfB @ #5 @ #4 @ #2)) @ (#3 @ (pack @ (fd @ #5 @ lit2) @ (fd @ #4 @ lit2)) @ (pfB @ #5 @ #4 @ #2))) @ lit1)
                     @ (λ (Not @ (bp @ (#5 @ (dec @ (eqN @ (fm @ #4 @ lit2) @ lit1) @ (deqN @ (fm @ #4 @ lit2) @ lit1)) @ (dec @ (eqN @ (fm @ #3 @ lit2) @ lit1) @ (deqN @ (fm @ #3 @ lit2) @ lit1))))).
                         fa @ (#3 @ (pack @ (fd @ #5 @ lit2) @ (fd @ #4 @ lit2)) @ (pfB @ #5 @ #4 @ #2)) @ (#3 @ (pack @ (fd @ #5 @ lit2) @ (fd @ #4 @ lit2)) @ (pfB @ #5 @ #4 @ #2)))))
-        : motive @ (pack @ #2 @ #1) $ >
+        : motive @ (pack @ #2 @ #1) ⟧ $ >
   $ bitwise_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $;
 --| `bitop_eqs G ... f bf r1 r2 r3 r4`: `f ≡ fb bf` for a Bool function `bf`
 --| with the truth table `bf t t ≡ r1`, `bf t u ≡ r2`, `bf u t ≡ r3`,
@@ -1371,10 +1376,10 @@ axiom bitwise_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub
 term bitop_eqs: ctx > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > expr > wff;
 axiom bitop_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4: expr):
   $ bitwise_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ >
-  $ closed 0 f $ > $ closed 0 bf $ > $ ⊩ G, f : Π nat_ty. Π nat_ty. nat_ty $ > $ ⊩ G, bf : Π B. Π B. B $ >
-  $ ⊢ G, f ≡ fb @ bf : Π nat_ty. Π nat_ty. nat_ty $ >
-  $ ⊢ G, bf @ t @ t ≡ r1 : B $ > $ ⊢ G, bf @ t @ u ≡ r2 : B $ >
-  $ ⊢ G, bf @ u @ t ≡ r3 : B $ > $ ⊢ G, bf @ u @ u ≡ r4 : B $ >
+  $ closed 0 f $ > $ closed 0 bf $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ > $ ⟨ G ⊢ bf : Π B. Π B. B ⟩ $ >
+  $ ⟦ G ⊢ f ≡ fb @ bf : Π ℕ. Π ℕ. ℕ ⟧ $ >
+  $ ⟦ G ⊢ bf @ t @ t ≡ r1 : B ⟧ $ > $ ⟦ G ⊢ bf @ t @ u ≡ r2 : B ⟧ $ >
+  $ ⟦ G ⊢ bf @ u @ t ≡ r3 : B ⟧ $ > $ ⟦ G ⊢ bf @ u @ u ≡ r4 : B ⟧ $ >
   $ bitop_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4 $;
 
 ---------------------------------------------------------------------------
@@ -1435,65 +1440,65 @@ axiom leqv_inst (S: lvls) (l r l2 r2: lvl):
 -- The judgment (IsDefEq, Typing/Basic.lean:18-56) --------------------------
 
 axiom bvar (G: ctx) (i: nat) (A: expr):
-  $ lookup G i A $ > $ ⊢ G, #i ≡ #i : A $;
+  $ lookup G i A $ > $ ⟦ G ⊢ #i ≡ #i : A ⟧ $;
 axiom symm (G: ctx) (e e2 A: expr):
-  $ ⊢ G, e ≡ e2 : A $ > $ ⊢ G, e2 ≡ e : A $;
+  $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ ⟦ G ⊢ e2 ≡ e : A ⟧ $;
 axiom trans (G: ctx) (e1 e2 e3 A: expr):
-  $ ⊢ G, e1 ≡ e2 : A $ > $ ⊢ G, e2 ≡ e3 : A $ > $ ⊢ G, e1 ≡ e3 : A $;
+  $ ⟦ G ⊢ e1 ≡ e2 : A ⟧ $ > $ ⟦ G ⊢ e2 ≡ e3 : A ⟧ $ > $ ⟦ G ⊢ e1 ≡ e3 : A ⟧ $;
 axiom sortDF (G: ctx) (l l2: lvl):
-  $ l ≈ l2 $ > $ ⊢ G, srt l ≡ srt l2 : srt (ls l) $;
+  $ l ≈ l2 $ > $ ⟦ G ⊢ srt l ≡ srt l2 : srt (ls l) ⟧ $;
 axiom appDF (G: ctx) (f f2 A B a a2 R: expr):
-  $ ⊢ G, f ≡ f2 : Π A. B $ > $ ⊢ G, a ≡ a2 : A $ > $ inst 0 B a R $ >
-  $ ⊢ G, f @ a ≡ f2 @ a2 : R $;
+  $ ⟦ G ⊢ f ≡ f2 : Π A. B ⟧ $ > $ ⟦ G ⊢ a ≡ a2 : A ⟧ $ > $ inst 0 B a R $ >
+  $ ⟦ G ⊢ f @ a ≡ f2 @ a2 : R ⟧ $;
 axiom lamDF (G: ctx) (u: lvl) (A A2 b b2 B: expr):
-  $ ⊢ G, A ≡ A2 : srt u $ > $ ⊢ A :: G, b ≡ b2 : B $ >
-  $ ⊢ G, λ A. b ≡ λ A2. b2 : Π A. B $;
+  $ ⟦ G ⊢ A ≡ A2 : srt u ⟧ $ > $ ⟦ A :: G ⊢ b ≡ b2 : B ⟧ $ >
+  $ ⟦ G ⊢ λ A. b ≡ λ A2. b2 : Π A. B ⟧ $;
 axiom forallEDF (G: ctx) (u v: lvl) (A A2 B B2: expr):
-  $ ⊢ G, A ≡ A2 : srt u $ > $ ⊢ A :: G, B ≡ B2 : srt v $ >
-  $ ⊢ G, Π A. B ≡ Π A2. B2 : srt (limax u v) $;
+  $ ⟦ G ⊢ A ≡ A2 : srt u ⟧ $ > $ ⟦ A :: G ⊢ B ≡ B2 : srt v ⟧ $ >
+  $ ⟦ G ⊢ Π A. B ≡ Π A2. B2 : srt (limax u v) ⟧ $;
 axiom defeqDF (G: ctx) (u: lvl) (A B e e2: expr):
-  $ ⊢ G, A ≡ B : srt u $ > $ ⊢ G, e ≡ e2 : A $ > $ ⊢ G, e ≡ e2 : B $;
+  $ ⟦ G ⊢ A ≡ B : srt u ⟧ $ > $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ ⟦ G ⊢ e ≡ e2 : B ⟧ $;
 axiom beta (G: ctx) (A e B a r R: expr):
-  $ ⊢ A :: G, e ≡ e : B $ > $ ⊢ G, a ≡ a : A $ > $ inst 0 e a r $ > $ inst 0 B a R $ >
-  $ ⊢ G, (λ A. e) @ a ≡ r : R $;
+  $ ⟦ A :: G ⊢ e ≡ e : B ⟧ $ > $ ⟦ G ⊢ a ≡ a : A ⟧ $ > $ inst 0 e a r $ > $ inst 0 B a R $ >
+  $ ⟦ G ⊢ (λ A. e) @ a ≡ r : R ⟧ $;
 axiom eta (G: ctx) (A B e e1: expr):
-  $ ⊢ G, e ≡ e : Π A. B $ > $ lift 1 0 e e1 $ >
-  $ ⊢ G, λ A. e1 @ #0 ≡ e : Π A. B $;
+  $ ⟦ G ⊢ e ≡ e : Π A. B ⟧ $ > $ lift 1 0 e e1 $ >
+  $ ⟦ G ⊢ λ A. e1 @ #0 ≡ e : Π A. B ⟧ $;
 axiom proofIrrel (G: ctx) (p h h2: expr):
-  $ ⊢ G, p ≡ p : srt lz $ > $ ⊢ G, h ≡ h : p $ > $ ⊢ G, h2 ≡ h2 : p $ >
-  $ ⊢ G, h ≡ h2 : p $;
+  $ ⟦ G ⊢ p ≡ p : Prop ⟧ $ > $ ⟦ G ⊢ h ≡ h : p ⟧ $ > $ ⟦ G ⊢ h2 ≡ h2 : p ⟧ $ >
+  $ ⟦ G ⊢ h ≡ h2 : p ⟧ $;
 
 -- Admissible rules (theorems of Lean4Lean, here axioms) --------------------
 
 --| Substitution: `IsDefEq.instN`, Typing/Lemmas.lean:634 (see
 --| notes/audit-lean-mm0.md §6).
 axiom instDF (k: nat) (G0 G1 G: ctx) (A0 a e e2 A r r2 R: expr):
-  $ ⊢ G0, a ≡ a : A0 $ > $ cinst k G0 A0 a G1 G $ > $ ⊢ G1, e ≡ e2 : A $ >
+  $ ⟦ G0 ⊢ a ≡ a : A0 ⟧ $ > $ cinst k G0 A0 a G1 G $ > $ ⟦ G1 ⊢ e ≡ e2 : A ⟧ $ >
   $ inst k e a r $ > $ inst k e2 a r2 $ > $ inst k A a R $ >
-  $ ⊢ G, r ≡ r2 : R $;
+  $ ⟦ G ⊢ r ≡ r2 : R ⟧ $;
 
 --| Weakening: `IsDefEq.weakN`, Typing/Lemmas.lean:501, for `Ctx.LiftN n 0`
 --| (see notes/audit-lean-mm0.md §6).
 axiom weakDF (n: nat) (G G2: ctx) (e e2 A r r2 R: expr):
-  $ ⊢ G, e ≡ e2 : A $ > $ cext n G G2 $ >
+  $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ cext n G G2 $ >
   $ lift n 0 e r $ > $ lift n 0 e2 r2 $ > $ lift n 0 A R $ >
-  $ ⊢ G2, r ≡ r2 : R $;
+  $ ⟦ G2 ⊢ r ≡ r2 : R ⟧ $;
 
 -- Level equivalence of expressions -----------------------------------------
 
 --| Expressions of the same shape at equivalent levels denote the same value,
 --| so they are definitionally equal (this generalizes `sortDF` and `constDF`).
-axiom eeqv_df (G: ctx) (e e2 A: expr): $ ⊩ G, e : A $ > $ eeqv e e2 $ > $ ⊢ G, e ≡ e2 : A $;
+axiom eeqv_df (G: ctx) (e e2 A: expr): $ ⟨ G ⊢ e : A ⟩ $ > $ eeqv e e2 $ > $ ⟦ G ⊢ e ≡ e2 : A ⟧ $;
 
 -- Inductive types: typing, iota, projections and eta (audit §4) ------------
 
 axiom ind_ty_ty (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (i: nat) (F R: expr) (C: ctors):
-  $ tys_ok G D $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ pis P F R $ > $ ⊩ G, ind_ty D i : R $;
+  $ tys_ok G D $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ pis P F R $ > $ ⟨ G ⊢ ind_ty D i : R ⟩ $;
 axiom ind_ctor_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (i c np n m: nat) (F K K2 K3 R: expr) (C: ctors):
   $ ind_wf G D $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ nth_ctor C c K $ > $ clen P np $ > $ ntys T n m $ >
-  $ sinst D 0 n np K K2 $ > $ ind_nested D N $ > $ rst D N K2 K3 $ > $ pis P K3 R $ > $ ⊩ G, ind_ctor D i c : R $;
+  $ sinst D 0 n np K K2 $ > $ ind_nested D N $ > $ rst D N K2 K3 $ > $ pis P K3 R $ > $ ⟨ G ⊢ ind_ctor D i c : R ⟩ $;
 axiom ind_rec_ty (G: ctx) (D: ind) (N: ctx) (i: nat) (v: lvl) (R0 R: expr):
-  $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_ty D v i R0 $ > $ ind_nested D N $ > $ rst D N R0 R $ > $ ⊩ G, ind_rec D i v : R $;
+  $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_ty D v i R0 $ > $ ind_nested D N $ > $ rst D N R0 R $ > $ ⟨ G ⊢ ind_rec D i v : R ⟩ $;
 --| Iota: `ind_rec D i v ps ms ns is (ind_ctor D2 i c qs fs) ≡ R ps ms ns fs`
 --| whenever every argument has its binder's type in the recursor's type
 --| (`sty`; this makes `D2` an instance of `D` at equivalent levels and `qs`,
@@ -1504,7 +1509,7 @@ axiom ind_iota (G: ctx) (D D2: ind) (N: ctx) (i c: nat) (v: lvl) (np n m a0 a ni
   $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m a $ > $ nidx D i ni $ > $ add a ni k $ > $ nfields D i c nf $ >
   $ add np nf nq $ > $ rehead (ind_rec D i v) R a e3 rhs0 $ > $ spine e3 e4 ni $ > $ spine Y maj nf $ >
   $ rehead Y rhs0 nf maj rhs $ > $ rec_ty D v i R0 $ > $ ind_nested D N $ > $ rst D N R0 RT $ >
-  $ sty G (ind_rec D i v) RT (e4 @ maj) T $ > $ ⊢ G, e4 @ maj ≡ rhs : T $;
+  $ sty G (ind_rec D i v) RT (e4 @ maj) T $ > $ ⟦ G ⊢ e4 @ maj ≡ rhs : T ⟧ $;
 --| Iota of the recursor of an auxiliary type `i` (the occurrence `I Ds`) on
 --| `I`'s constructor `c`: `ind_rec D i v ps ms ns is (ind_ctor I2 ii c qs fs)
 --| ≡ R ps ms ns fs` when every argument has its binder's type (`sty`; this
@@ -1518,19 +1523,19 @@ axiom ind_iota_nst (G: ctx) (D I I2: ind) (N: ctx) (i ii c: nat) (v: lvl) (np n 
   $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m a $ > $ nidx D i ni $ > $ add a ni k $ > $ nfields D i c nf $ >
   $ add npi nf nq $ > $ rehead (ind_rec D i v) R a e3 rhs0 $ > $ spine e3 e4 ni $ > $ spine Y maj nf $ >
   $ rehead Y rhs0 nf maj rhs $ > $ rec_ty D v i R0 $ > $ rst D N R0 RT $ >
-  $ sty G (ind_rec D i v) RT (e4 @ maj) T $ > $ ⊢ G, e4 @ maj ≡ rhs : T $;
+  $ sty G (ind_rec D i v) RT (e4 @ maj) T $ > $ ⟦ G ⊢ e4 @ maj ≡ rhs : T ⟧ $;
 axiom proj_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (j i np: nat) (e e2 S A A1 A2 R: expr):
-  $ ⊢ G, e ≡ e2 : S $ > $ spine (ind_ty D j) S np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ struct_like D j $ >
+  $ ⟦ G ⊢ e ≡ e2 : S ⟧ $ > $ spine (ind_ty D j) S np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ struct_like D j $ >
   $ proj_ok G D j i $ > $ clen P np $ > $ field_ty D j i A $ > $ ind_nested D N $ > $ rst D N A A2 $ > $ pinst i S A2 A1 $ >
   $ qinst b e i 0 A1 R $ >
-  $ ⊢ G, proj b i e ≡ proj b i e2 : R $;
+  $ ⟦ G ⊢ proj b i e ≡ proj b i e2 : R ⟧ $;
 --| `proj b i (ind_ctor D2 j z qs fs) ≡ fs[i]` when well typed.
 axiom proj_mk (G: ctx) (D2: ind) (b: blk) (j i np n m nf nq ii: nat) (M Y f T: expr):
   $ spine (ind_ctor D2 j 0) M nq $ > $ ind_arity D2 np n m $ > $ nfields D2 j 0 nf $ > $ add np nf nq $ >
-  $ add ii (s i) nf $ > $ spine (Y @ f) M ii $ > $ ⊩ G, proj b i M : T $ > $ ⊢ G, proj b i M ≡ f : T $;
+  $ add ii (s i) nf $ > $ spine (Y @ f) M ii $ > $ ⟨ G ⊢ proj b i M : T ⟩ $ > $ ⟦ G ⊢ proj b i M ≡ f : T ⟧ $;
 axiom ind_eta (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (j np nf: nat) (e S Y M: expr):
-  $ ⊩ G, e : S $ > $ spine (ind_ty D j) S np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ eta_ok D j $ > $ clen P np $ >
-  $ rehead (ind_ty D j) (ind_ctor D j 0) np S Y $ > $ nfields D j 0 nf $ > $ projs b e nf Y M $ > $ ⊢ G, e ≡ M : S $;
+  $ ⟨ G ⊢ e : S ⟩ $ > $ spine (ind_ty D j) S np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ eta_ok D j $ > $ clen P np $ >
+  $ rehead (ind_ty D j) (ind_ctor D j 0) np S Y $ > $ nfields D j 0 nf $ > $ projs b e nf Y M $ > $ ⟦ G ⊢ e ≡ M : S ⟧ $;
 
 -- Quotients (audit §4) -----------------------------------------------------
 -- The kernel's types of the primitives (`Quot.lift`'s mentions `Eq`), and
@@ -1538,18 +1543,21 @@ axiom ind_eta (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (j np nf: nat) (e S Y
 
 --| `Quot : Π (α : Sort u). (α → α → Prop) → Sort u`
 axiom quot_ty (G: ctx) (u: lvl):
-  $ ty G (quot u) (pi (srt u) (pi (pi (bvar 0) (pi (bvar 1) (srt lz))) (srt u))) $;
+  $ ⟨ G ⊢ quot u : Π (srt u). Π (Π #0. Π #1. Prop). srt u ⟩ $;
 --| `Quot.mk : Π (α : Sort u) (r : α → α → Prop). α → Quot r`
 axiom quot_mk_ty (G: ctx) (u: lvl):
-  $ ty G (quot_mk u) (pi (srt u) (pi (pi (bvar 0) (pi (bvar 1) (srt lz))) (pi (bvar 1) (app (app (quot u) (bvar 2)) (bvar 1))))) $;
+  $ ⟨ G ⊢ quot_mk u : Π (srt u). Π (Π #0. Π #1. Prop). Π #1. quot u @ #2 @ #1 ⟩ $;
 --| `Quot.lift : Π (α : Sort u) (r : α → α → Prop) (β : Sort v) (f : α → β).
 --|   (Π a b. r a b → Eq (f a) (f b)) → Quot r → β`
 axiom quot_lift_ty (G: ctx) (u v: lvl):
-  $ ty G (quot_lift u v) (pi (srt u) (pi (pi (bvar 0) (pi (bvar 1) (srt lz))) (pi (srt v) (pi (pi (bvar 2) (bvar 1)) (pi (pi (bvar 3) (pi (bvar 4) (pi (app (app (bvar 4) (bvar 1)) (bvar 0)) (app (app (app (ind_ty (eq_D v) 0) (bvar 4)) (app (bvar 3) (bvar 2))) (app (bvar 3) (bvar 1)))))) (pi (app (app (quot u) (bvar 4)) (bvar 3)) (bvar 3))))))) $;
+  $ ⟨ G ⊢ quot_lift u v : Π (srt u). Π (Π #0. Π #1. Prop). Π (srt v). Π (Π #2. #1).
+      Π (Π #3. Π #4. Π (#4 @ #1 @ #0). ind_ty (eq_D v) 0 @ #4 @ (#3 @ #2) @ (#3 @ #1)).
+      Π (quot u @ #4 @ #3). #3 ⟩ $;
 --| `Quot.ind : Π (α : Sort u) (r : α → α → Prop) (β : Quot r → Prop).
 --|   (Π a. β (Quot.mk r a)) → Π q. β q`
 axiom quot_ind_ty (G: ctx) (u: lvl):
-  $ ty G (quot_ind u) (pi (srt u) (pi (pi (bvar 0) (pi (bvar 1) (srt lz))) (pi (pi (app (app (quot u) (bvar 1)) (bvar 0)) (srt lz)) (pi (pi (bvar 2) (app (bvar 1) (app (app (app (quot_mk u) (bvar 3)) (bvar 2)) (bvar 0)))) (pi (app (app (quot u) (bvar 3)) (bvar 2)) (app (bvar 2) (bvar 0))))))) $;
+  $ ⟨ G ⊢ quot_ind u : Π (srt u). Π (Π #0. Π #1. Prop). Π (Π (quot u @ #1 @ #0). Prop).
+      Π (Π #2. #1 @ (quot_mk u @ #3 @ #2 @ #0)). Π (quot u @ #3 @ #2). #2 @ #0 ⟩ $;
 
 --| Reduction of `Quot.lift f h (Quot.mk r a)` to `f a` and of
 --| `Quot.ind h (Quot.mk r a)` to `h a`, when every argument has its binder's
@@ -1557,11 +1565,16 @@ axiom quot_ind_ty (G: ctx) (u: lvl):
 --| checks only the spine: the typing makes the constructor's `α` and `r` the
 --| primitive's.
 axiom quot_lift_mk (G: ctx) (u v: lvl) (x1 x2 x3 x4 x5: expr) (v1: lvl) (y1 y2 a T: expr):
-  $ sty G (quot_lift u v) (pi (srt u) (pi (pi (bvar 0) (pi (bvar 1) (srt lz))) (pi (srt v) (pi (pi (bvar 2) (bvar 1)) (pi (pi (bvar 3) (pi (bvar 4) (pi (app (app (bvar 4) (bvar 1)) (bvar 0)) (app (app (app (ind_ty (eq_D v) 0) (bvar 4)) (app (bvar 3) (bvar 2))) (app (bvar 3) (bvar 1)))))) (pi (app (app (quot u) (bvar 4)) (bvar 3)) (bvar 3))))))) (app (app (app (app (app (app (quot_lift u v) x1) x2) x3) x4) x5) (app (app (app (quot_mk v1) y1) y2) a)) T $ >
-  $ deq G (app (app (app (app (app (app (quot_lift u v) x1) x2) x3) x4) x5) (app (app (app (quot_mk v1) y1) y2) a)) (app x4 a) T $;
+  $ sty G (quot_lift u v) (Π (srt u). Π (Π #0. Π #1. Prop). Π (srt v). Π (Π #2. #1).
+      Π (Π #3. Π #4. Π (#4 @ #1 @ #0). ind_ty (eq_D v) 0 @ #4 @ (#3 @ #2) @ (#3 @ #1)).
+      Π (quot u @ #4 @ #3). #3)
+      (quot_lift u v @ x1 @ x2 @ x3 @ x4 @ x5 @ (quot_mk v1 @ y1 @ y2 @ a)) T $ >
+  $ ⟦ G ⊢ quot_lift u v @ x1 @ x2 @ x3 @ x4 @ x5 @ (quot_mk v1 @ y1 @ y2 @ a) ≡ x4 @ a : T ⟧ $;
 axiom quot_ind_mk (G: ctx) (u: lvl) (x1 x2 x3 x4: expr) (v1: lvl) (y1 y2 a T: expr):
-  $ sty G (quot_ind u) (pi (srt u) (pi (pi (bvar 0) (pi (bvar 1) (srt lz))) (pi (pi (app (app (quot u) (bvar 1)) (bvar 0)) (srt lz)) (pi (pi (bvar 2) (app (bvar 1) (app (app (app (quot_mk u) (bvar 3)) (bvar 2)) (bvar 0)))) (pi (app (app (quot u) (bvar 3)) (bvar 2)) (app (bvar 2) (bvar 0))))))) (app (app (app (app (app (quot_ind u) x1) x2) x3) x4) (app (app (app (quot_mk v1) y1) y2) a)) T $ >
-  $ deq G (app (app (app (app (app (quot_ind u) x1) x2) x3) x4) (app (app (app (quot_mk v1) y1) y2) a)) (app x4 a) T $;
+  $ sty G (quot_ind u) (Π (srt u). Π (Π #0. Π #1. Prop). Π (Π (quot u @ #1 @ #0). Prop).
+      Π (Π #2. #1 @ (quot_mk u @ #3 @ #2 @ #0)). Π (quot u @ #3 @ #2). #2 @ #0)
+      (quot_ind u @ x1 @ x2 @ x3 @ x4 @ (quot_mk v1 @ y1 @ y2 @ a)) T $ >
+  $ ⟦ G ⊢ quot_ind u @ x1 @ x2 @ x3 @ x4 @ (quot_mk v1 @ y1 @ y2 @ a) ≡ x4 @ a : T ⟧ $;
 
 -- Literals (audit §5) ------------------------------------------------------
 -- The ties to Lean's `Nat`, and the value of each accelerated operation on
@@ -1569,86 +1582,86 @@ axiom quot_ind_mk (G: ctx) (u: lvl) (x1 x2 x3 x4: expr) (v1: lvl) (y1 y2 a T: ex
 -- a binary-arithmetic premise.
 
 --| The literal `0` is `Nat.zero`, and `n+1` is `Nat.succ n`.
-axiom lit_zero (G: ctx): $ deq G (lit b0) (ind_ctor nat_D 0 0) (ind_ty nat_D 0) $;
+axiom lit_zero (G: ctx): $ ⟦ G ⊢ lit b0 ≡ ind_ctor nat_D 0 0 : ind_ty nat_D 0 ⟧ $;
 axiom lit_succ (G: ctx) (a b: bin):
-  $ bsucc a b $ > $ deq G (lit b) (app (ind_ctor nat_D 0 1) (lit a)) (ind_ty nat_D 0) $;
+  $ bsucc a b $ > $ ⟦ G ⊢ lit b ≡ ind_ctor nat_D 0 1 @ lit a : ind_ty nat_D 0 ⟧ $;
 
 --| `f a b ≡ a + b` on literals, with `f` Lean's `Nat.add` (`add_eqs`, Part II).
 axiom nat_add_lit (G: ctx) (f: expr) (a b c: bin):
-  $ add_eqs G f $ > $ badd a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+  $ add_eqs G f $ > $ badd a b c $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
 --| `f a b ≡ a - b` on literals: `c + b = a`, or `a + c = b` and the difference is 0.
 axiom nat_sub_lit (G: ctx) (f p: expr) (a b c: bin):
-  $ sub_eqs G f p $ > $ badd c b a $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+  $ sub_eqs G f p $ > $ badd c b a $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
 axiom nat_sub_lit0 (G: ctx) (f p: expr) (a b c: bin):
-  $ sub_eqs G f p $ > $ badd a c b $ > $ ⊢ G, f @ lit a @ lit b ≡ lit b0 : nat_ty $;
+  $ sub_eqs G f p $ > $ badd a c b $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit b0 : ℕ ⟧ $;
 --| `f a b ≡ a · b` on literals.
 axiom nat_mul_lit (G: ctx) (f fa: expr) (a b c: bin):
-  $ mul_eqs G f fa $ > $ bmul a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+  $ mul_eqs G f fa $ > $ bmul a b c $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
 --| `f a b ≡ a ^ b` on literals.
 axiom nat_pow_lit (G: ctx) (f fm fa: expr) (a b c: bin):
-  $ pow_eqs G f fm fa $ > $ bpow a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+  $ pow_eqs G f fm fa $ > $ bpow a b c $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
 --| `f a a ≡ t`, and `f a b ≡ u` when `a + c + 1 = b` or `b + c + 1 = a`.
 axiom nat_beq_lit (G: ctx) (f B t u: expr) (a: bin):
-  $ beq_eqs G f B t u $ > $ ⊢ G, f @ lit a @ lit a ≡ t : B $;
+  $ beq_eqs G f B t u $ > $ ⟦ G ⊢ f @ lit a @ lit a ≡ t : B ⟧ $;
 axiom nat_beq_lit_lt (G: ctx) (f B t u: expr) (a b c: bin):
-  $ beq_eqs G f B t u $ > $ baddc a c b $ > $ ⊢ G, f @ lit a @ lit b ≡ u : B $;
+  $ beq_eqs G f B t u $ > $ baddc a c b $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ u : B ⟧ $;
 axiom nat_beq_lit_gt (G: ctx) (f B t u: expr) (a b c: bin):
-  $ beq_eqs G f B t u $ > $ baddc b c a $ > $ ⊢ G, f @ lit a @ lit b ≡ u : B $;
+  $ beq_eqs G f B t u $ > $ baddc b c a $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ u : B ⟧ $;
 --| `f a b ≡ t` when `a + c = b`, and `≡ u` when `b + c + 1 = a`.
 axiom nat_ble_lit (G: ctx) (f B t u: expr) (a b c: bin):
-  $ ble_eqs G f B t u $ > $ badd a c b $ > $ ⊢ G, f @ lit a @ lit b ≡ t : B $;
+  $ ble_eqs G f B t u $ > $ badd a c b $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ t : B ⟧ $;
 axiom nat_ble_lit_gt (G: ctx) (f B t u: expr) (a b c: bin):
-  $ ble_eqs G f B t u $ > $ baddc b c a $ > $ ⊢ G, f @ lit a @ lit b ≡ u : B $;
+  $ ble_eqs G f B t u $ > $ baddc b c a $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ u : B ⟧ $;
 --| `f a b ≡ a · 2^b` on literals.
 axiom nat_shl_lit (G: ctx) (f fm fa: expr) (a b p c: bin):
   $ shl_eqs G f fm fa $ > $ bpow (bd0 (bd1 b0)) b p $ > $ bmul a p c $ >
-  $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+  $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
 --| `f a b` on literals, a shift at a time: `f a 0 ≡ a`, and `f a (b+1) ≡ c2` from
 --| `f a b ≡ c` and `fd c 2 ≡ c2` (the division by 2, as the certificate derives it).
 axiom nat_shr_lit_z (G: ctx) (f fd: expr) (a: bin):
-  $ shr_eqs G f fd $ > $ ⊢ G, f @ lit a @ lit b0 ≡ lit a : nat_ty $;
+  $ shr_eqs G f fd $ > $ ⟦ G ⊢ f @ lit a @ lit b0 ≡ lit a : ℕ ⟧ $;
 axiom nat_shr_lit_s (G: ctx) (f fd: expr) (a b b2 c c2: bin):
-  $ shr_eqs G f fd $ > $ bsucc b b2 $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $ >
-  $ ⊢ G, fd @ lit c @ lit (bd0 (bd1 b0)) ≡ lit c2 : nat_ty $ >
-  $ ⊢ G, f @ lit a @ lit b2 ≡ lit c2 : nat_ty $;
+  $ shr_eqs G f fd $ > $ bsucc b b2 $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $ >
+  $ ⟦ G ⊢ fd @ lit c @ lit (bd0 (bd1 b0)) ≡ lit c2 : ℕ ⟧ $ >
+  $ ⟦ G ⊢ f @ lit a @ lit b2 ≡ lit c2 : ℕ ⟧ $;
 --| `f a b ≡ q` on literals when `q·b + r = a` and `r < b`, and `f a 0 ≡ 0`.
 axiom nat_div_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr) (a b q m r x: bin):
   $ div_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ >
-  $ bmul q b m $ > $ badd m r a $ > $ baddc r x b $ > $ ⊢ G, f @ lit a @ lit b ≡ lit q : nat_ty $;
+  $ bmul q b m $ > $ badd m r a $ > $ baddc r x b $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit q : ℕ ⟧ $;
 axiom nat_div_lit0 (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr) (a: bin):
   $ div_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ >
-  $ ⊢ G, f @ lit a @ lit0 ≡ lit0 : nat_ty $;
+  $ ⟦ G ⊢ f @ lit a @ lit0 ≡ lit0 : ℕ ⟧ $;
 --| `f a b ≡ r` on literals when `q·b + r = a` and `r < b`, and `f a 0 ≡ a`.
 axiom nat_mod_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr) (a b q m r x: bin):
   $ mod_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ >
-  $ bmul q b m $ > $ badd m r a $ > $ baddc r x b $ > $ ⊢ G, f @ lit a @ lit b ≡ lit r : nat_ty $;
+  $ bmul q b m $ > $ badd m r a $ > $ baddc r x b $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit r : ℕ ⟧ $;
 axiom nat_mod_lit0 (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr) (a: bin):
   $ mod_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ >
-  $ ⊢ G, f @ lit a @ lit0 ≡ lit a : nat_ty $;
+  $ ⟦ G ⊢ f @ lit a @ lit0 ≡ lit a : ℕ ⟧ $;
 --| `f a b ≡ g` on literals when `g` divides `a` and `b` and `x·a = y·b + g`
 --| (or `y·b = x·a + g`).
 axiom nat_gcd_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr) (a b g p2 q x y m n: bin):
   $ gcd_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ >
   $ bmul g p2 a $ > $ bmul g q b $ > $ bmul x a m $ > $ bmul y b n $ > $ badd n g m $ >
-  $ ⊢ G, f @ lit a @ lit b ≡ lit g : nat_ty $;
+  $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit g : ℕ ⟧ $;
 axiom nat_gcd_lit2 (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr) (a b g p2 q x y m n: bin):
   $ gcd_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ >
   $ bmul g p2 a $ > $ bmul g q b $ > $ bmul x a m $ > $ bmul y b n $ > $ badd m g n $ >
-  $ ⊢ G, f @ lit a @ lit b ≡ lit g : nat_ty $;
+  $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit g : ℕ ⟧ $;
 --| `f a b` on literals for the truth tables of and, or and xor.
 axiom nat_land_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf: expr) (a b c: bin):
   $ bitop_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf t u u u $ >
-  $ band a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+  $ band a b c $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
 axiom nat_lor_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf: expr) (a b c: bin):
   $ bitop_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf t t t u $ >
-  $ bor a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+  $ bor a b c $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
 axiom nat_xor_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf: expr) (a b c: bin):
   $ bitop_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf u t t u $ >
-  $ bxor a b c $ > $ ⊢ G, f @ lit a @ lit b ≡ lit c : nat_ty $;
+  $ bxor a b c $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
 
 -- Statements ---------------------------------------------------------------
 
 --| `inh G A`: `A` is inhabited in `Γ`. Theorems are stated this way so that
 --| their proof terms stay inside the proof file.
 term inh: ctx > expr > wff;
-axiom inh_i (G: ctx) (e A: expr): $ ⊢ G, e ≡ e : A $ > $ inh G A $;
+axiom inh_i (G: ctx) (e A: expr): $ ⟦ G ⊢ e ≡ e : A ⟧ $ > $ inh G A $;
