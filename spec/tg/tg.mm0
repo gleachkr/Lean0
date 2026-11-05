@@ -1,0 +1,534 @@
+-- tg.mm0: Tarski–Grothendieck set theory as a natural-deduction theory.
+--
+-- This file is the trusted set-theoretic base on which spec/lean.mm0 is
+-- reduced to theorems. Everything here is an axiom, a primitive term, or a
+-- definition; the proofs of the theorems it declares are in tg.auf. A reader
+-- checks three things: that the deduction rules are the usual
+-- natural-deduction rules, that the substitution equations define
+-- substitution, and that the set axioms are ZFC's with the universe axiom.
+--
+-- Sorts. `fml` is the sort of formulas; nothing of that sort is ever asserted.
+-- `wff` is the sort of judgments, the only provable sort: a sequent `G ⇒ p`
+-- (the formula `p` is derivable from the hypotheses `G`), and the three
+-- equivalences the proof compiler rewrites with (`p ⟺ q` and `A ≐ B`, which
+-- are sequents from no hypotheses, and `s ⟚ t` between sequents). Hypotheses
+-- form a context `G` joined by `,` and treated as a set (ACUI). Classes are as
+-- in set.mm: a set variable is coerced to the class of its members, `a ∊ A` is
+-- membership of a set variable in a class, and the general `A ∈ B`, equality
+-- `A = B` and `isset A` are definitions. Substitution `[x/t] p` and `⟦ x / t ⟧ A`
+-- of a set variable `t` for `x` is a term with defining equations, one per
+-- primitive constructor, plus the laws the equations do not give on a
+-- schematic formula (composition, vacuity under a rebinding of the same
+-- variable, alpha-renaming of `∀`, `∃` and `{x | p}`); for defined terms the
+-- equations are theorems.
+--
+-- The deduction layer follows Aufbau's zermelo.mm0 and its manual: the
+-- propositional rules share their context and weakening is a rule; the
+-- quantifier and equality rules join the contexts of their premises. Names and
+-- tokens avoid those of spec/lean.mm0, with which this file is joined.
+
+delimiter $ ( ) { } [ / ] , | $;
+
+sort fml;
+strict provable sort wff;
+--| @vars x y z u v w a b c f g i j k
+sort set;
+strict sort class;
+sort hyps;
+
+-- --------------------------------------------------------------------------
+-- Formulas
+-- --------------------------------------------------------------------------
+
+term im (p q: fml): fml;
+infixr im: $->$ prec 25;
+infixr im: $→$ prec 25;
+
+term not (p: fml): fml;
+prefix not: $~$ prec 41;
+prefix not: $¬$ prec 41;
+
+term and (p q: fml): fml;
+infixr and: $/\$ prec 30;
+infixr and: $∧$ prec 30;
+
+term or (p q: fml): fml;
+infixr or: $\/$ prec 28;
+infixr or: $∨$ prec 28;
+
+term bi (p q: fml): fml;
+infixr bi: $<->$ prec 20;
+infixr bi: $↔$ prec 20;
+
+term bot: fml;
+prefix bot: $F.$ prec max;
+prefix bot: $⊥$ prec max;
+
+term all {x: set} (p: fml x): fml;
+prefix all: $A.$ prec 41;
+prefix all: $∀$ prec 41;
+
+term ex {x: set} (p: fml x): fml;
+prefix ex: $E.$ prec 41;
+prefix ex: $∃$ prec 41;
+
+term sb_f {x: set} (t: set x) (p: fml x): fml;
+notation sb_f {x: set} (t: set x) (p: fml x): fml =
+  ($[$:41) x ($/$:0) t ($]$:0) p;
+
+-- --------------------------------------------------------------------------
+-- Classes
+-- --------------------------------------------------------------------------
+
+term cv (a: set): class;
+coercion cv: set > class;
+
+term cab {x: set} (p: fml x): class;
+notation cab {x: set} (p: fml x): class = (${$:max) x ($|$:0) p ($}$:0);
+
+term welc (a: set) (A: class): fml;
+infixl welc: $ec.$ prec 50;
+infixl welc: $∊$ prec 50;
+
+term sb_c {x: set} (t: set x) (A: class x): class;
+notation sb_c {x: set} (t: set x) (A: class x): class =
+  ($⟦$:41) x ($/$:0) t ($⟧$:0) A;
+
+-- --------------------------------------------------------------------------
+-- Judgments
+-- --------------------------------------------------------------------------
+
+term hyps_eq (G H: hyps): wff;
+term emp: hyps;
+notation emp: hyps = ($_$:max);
+
+--| @acui hyps_assoc hyps_comm emp hyps_idem
+term join (G H: hyps): hyps;
+infixl join: $,$ prec 5;
+
+term hyp (p: fml): hyps;
+coercion hyp: fml > hyps;
+
+term nd (G: hyps) (p: fml): wff;
+infixl nd: $=>$ prec 0;
+infixl nd: $⇒$ prec 0;
+
+term seq_eq (s t: wff): wff;
+infixl seq_eq: $<==>$ prec 1;
+infixl seq_eq: $⟚$ prec 1;
+
+--| Equivalence of formulas: provable from no hypotheses.
+def iff (p q: fml): wff = $ _ ⇒ p ↔ q $;
+infixr iff: $<=>$ prec 20;
+infixr iff: $⟺$ prec 20;
+
+-- --------------------------------------------------------------------------
+-- The equivalence bundles of the judgment layer
+-- --------------------------------------------------------------------------
+
+--| @relation hyps hyps_eq hyps_refl hyps_trans hyps_sym _
+axiom hyps_refl (G: hyps): $ hyps_eq G G $;
+axiom hyps_trans (G H K: hyps):
+  $ hyps_eq G H $ > $ hyps_eq H K $ > $ hyps_eq G K $;
+axiom hyps_sym (G H: hyps): $ hyps_eq G H $ > $ hyps_eq H G $;
+axiom hyps_assoc (G H K: hyps):
+  $ hyps_eq ((G , H) , K) (G , (H , K)) $;
+axiom hyps_comm (G H: hyps): $ hyps_eq (G , H) (H , G) $;
+axiom hyps_idem (G: hyps): $ hyps_eq (G , G) G $;
+axiom hyps_unit (G: hyps): $ hyps_eq (emp , G) G $;
+
+--| @relation wff seq_eq seq_refl seq_trans seq_sym seq_mp
+axiom seq_refl (s: wff): $ s ⟚ s $;
+axiom seq_trans (s t u: wff): $ s ⟚ t $ > $ t ⟚ u $ > $ s ⟚ u $;
+axiom seq_sym (s t: wff): $ s ⟚ t $ > $ t ⟚ s $;
+axiom seq_mp (s t: wff): $ s ⟚ t $ > $ s $ > $ t $;
+
+-- --------------------------------------------------------------------------
+-- Natural-deduction rules
+-- --------------------------------------------------------------------------
+
+axiom ax (G: hyps) (p: fml): $ G , p ⇒ p $;
+axiom weaken (G H: hyps) (p: fml): $ G ⇒ p $ > $ G , H ⇒ p $;
+
+axiom imp_intro (G: hyps) (p q: fml):
+  $ G , p ⇒ q $ > $ G ⇒ p → q $;
+axiom imp_elim (G: hyps) (p q: fml):
+  $ G ⇒ p → q $ > $ G ⇒ p $ > $ G ⇒ q $;
+
+axiom and_intro (G: hyps) (p q: fml):
+  $ G ⇒ p $ > $ G ⇒ q $ > $ G ⇒ p ∧ q $;
+axiom and_elim_l (G: hyps) (p q: fml):
+  $ G ⇒ p ∧ q $ > $ G ⇒ p $;
+axiom and_elim_r (G: hyps) (p q: fml):
+  $ G ⇒ p ∧ q $ > $ G ⇒ q $;
+
+axiom or_intro_l (G: hyps) (p q: fml):
+  $ G ⇒ p $ > $ G ⇒ p ∨ q $;
+axiom or_intro_r (G: hyps) (p q: fml):
+  $ G ⇒ q $ > $ G ⇒ p ∨ q $;
+axiom or_elim (G: hyps) (p q r: fml):
+  $ G ⇒ p ∨ q $ > $ G , p ⇒ r $ > $ G , q ⇒ r $ > $ G ⇒ r $;
+
+axiom bi_intro (G: hyps) (p q: fml):
+  $ G , p ⇒ q $ > $ G , q ⇒ p $ > $ G ⇒ p ↔ q $;
+axiom bi_elim_l (G: hyps) (p q: fml):
+  $ G ⇒ p ↔ q $ > $ G ⇒ p $ > $ G ⇒ q $;
+axiom bi_elim_r (G: hyps) (p q: fml):
+  $ G ⇒ p ↔ q $ > $ G ⇒ q $ > $ G ⇒ p $;
+
+axiom not_intro (G: hyps) (p: fml):
+  $ G , p ⇒ ⊥ $ > $ G ⇒ ¬ p $;
+axiom not_elim (G: hyps) (p: fml):
+  $ G ⇒ ¬ p $ > $ G ⇒ p $ > $ G ⇒ ⊥ $;
+axiom bot_elim (G: hyps) (p: fml):
+  $ G ⇒ ⊥ $ > $ G ⇒ p $;
+
+axiom excluded_middle (G: hyps) (p: fml): $ G ⇒ p ∨ ¬ p $;
+
+--| @freshen G x
+axiom all_intro (G: hyps) {x: set} (p: fml x):
+  $ G ⇒ p $ > $ G ⇒ ∀ x p $;
+
+--| @view {x:set}(G:hyps x)(t:set x)(p:fml x)(q:fml): $ G ⇒ ∀ x p $ > $ G ⇒ q $
+--| @recover t q p x
+--| @auto forward
+axiom all_elim {x: set} (G: hyps x) (t: set x) (p: fml x):
+  $ G ⇒ ∀ x p $ > $ G ⇒ [x/t] p $;
+
+--| @view {x:set}(G:hyps x)(t:set x)(p:fml x)(q:fml x): $ G ⇒ q $ > $ G ⇒ ∃ x p $
+--| @recover t q p x
+axiom ex_intro {x: set} (G: hyps x) (t: set x) (p: fml x):
+  $ G ⇒ [x/t] p $ > $ G ⇒ ∃ x p $;
+
+--| @freshen H x
+--| @freshen c x
+axiom ex_elim {x: set} (G: hyps x) (H: hyps) (p: fml x) (c: fml):
+  $ G ⇒ ∃ x p $ > $ H , p ⇒ c $ > $ G , H ⇒ c $;
+
+-- --------------------------------------------------------------------------
+-- The equivalence bundle for formulas and the congruences of the connectives
+-- are theorems (tg.auf); the congruences of the judgment layer are axioms.
+-- --------------------------------------------------------------------------
+
+--| @relation fml iff iff_refl iff_trans iff_sym _
+theorem iff_refl (p: fml): $ p ⟺ p $;
+theorem iff_trans (p q r: fml): $ p ⟺ q $ > $ q ⟺ r $ > $ p ⟺ r $;
+theorem iff_sym (p q: fml): $ p ⟺ q $ > $ q ⟺ p $;
+
+--| @congr
+axiom join_congr (G1 G2 H1 H2: hyps):
+  $ hyps_eq G1 G2 $ > $ hyps_eq H1 H2 $ >
+  $ hyps_eq (G1 , H1) (G2 , H2) $;
+
+--| @congr
+axiom hyp_congr (p q: fml): $ p ⟺ q $ > $ hyps_eq (hyp p) (hyp q) $;
+
+--| Equivalent formulas are interderivable from equal hypotheses.
+--| @congr
+axiom nd_congr (G H: hyps) (p q: fml):
+  $ hyps_eq G H $ > $ p ⟺ q $ > $ (G ⇒ p) ⟚ (H ⇒ q) $;
+
+--| @congr
+theorem im_congr (p q r s: fml):
+  $ p ⟺ q $ > $ r ⟺ s $ > $ (p → r) ⟺ (q → s) $;
+--| @congr
+theorem not_congr (p q: fml): $ p ⟺ q $ > $ ¬ p ⟺ ¬ q $;
+--| @congr
+theorem and_congr (p q r s: fml):
+  $ p ⟺ q $ > $ r ⟺ s $ > $ (p ∧ r) ⟺ (q ∧ s) $;
+--| @congr
+theorem or_congr (p q r s: fml):
+  $ p ⟺ q $ > $ r ⟺ s $ > $ (p ∨ r) ⟺ (q ∨ s) $;
+--| @congr
+theorem bi_congr (p q r s: fml):
+  $ p ⟺ q $ > $ r ⟺ s $ > $ (p ↔ r) ⟺ (q ↔ s) $;
+--| @congr
+theorem iff_congr (p q r s: fml):
+  $ p ⟺ q $ > $ r ⟺ s $ > $ (p ⟺ r) ⟚ (q ⟺ s) $;
+
+-- --------------------------------------------------------------------------
+-- Substitution: the defining equations for the primitive constructors
+-- --------------------------------------------------------------------------
+
+--| @rewrite
+axiom sb_f_vac {x: set} (t: set x) (p: fml): $ [x/t] p ⟺ p $;
+--| @rewrite
+axiom sb_f_id {x: set} (p: fml x): $ [x/x] p ⟺ p $;
+--| @rewrite
+axiom sb_f_im {x: set} (t: set x) (p q: fml x):
+  $ [x/t] (p → q) ⟺ ([x/t] p → [x/t] q) $;
+--| @rewrite
+axiom sb_f_not {x: set} (t: set x) (p: fml x):
+  $ [x/t] (¬ p) ⟺ ¬ [x/t] p $;
+--| @rewrite
+axiom sb_f_and {x: set} (t: set x) (p q: fml x):
+  $ [x/t] (p ∧ q) ⟺ ([x/t] p ∧ [x/t] q) $;
+--| @rewrite
+axiom sb_f_or {x: set} (t: set x) (p q: fml x):
+  $ [x/t] (p ∨ q) ⟺ ([x/t] p ∨ [x/t] q) $;
+--| @rewrite
+axiom sb_f_bi {x: set} (t: set x) (p q: fml x):
+  $ [x/t] (p ↔ q) ⟺ ([x/t] p ↔ [x/t] q) $;
+--| @rewrite
+axiom sb_f_all {x y: set} (t: set x) (p: fml x y):
+  $ [x/t] (∀ y p) ⟺ ∀ y [x/t] p $;
+--| @rewrite
+axiom sb_f_ex {x y: set} (t: set x) (p: fml x y):
+  $ [x/t] (∃ y p) ⟺ ∃ y [x/t] p $;
+--| @rewrite
+axiom sb_f_welc_var_vac {x: set} (t: set x) (A: class):
+  $ [x/t] (x ∊ A) ⟺ t ∊ A $;
+--| @rewrite
+axiom sb_f_welc_other_vac {x y: set} (t: set x) (A: class):
+  $ [x/t] (y ∊ A) ⟺ y ∊ A $;
+--| @rewrite
+axiom sb_f_welc_var {x: set} (t: set x) (A: class x):
+  $ [x/t] (x ∊ A) ⟺ t ∊ (⟦ x / t ⟧ A) $;
+--| @rewrite
+axiom sb_f_welc_other {x y: set} (t: set x) (A: class x):
+  $ [x/t] (y ∊ A) ⟺ y ∊ (⟦ x / t ⟧ A) $;
+
+--| @alpha x y
+axiom all_alpha {x y: set} (p: fml x):
+  $ ∀ x p ⟺ ∀ y ([x/y] p) $;
+--| @alpha x y
+axiom ex_alpha {x y: set} (p: fml x):
+  $ ∃ x p ⟺ ∃ y ([x/y] p) $;
+
+-- Substitution laws that the equations above do not give (they are schemas
+-- over a formula `p`, and nothing here does induction on formulas):
+-- composition, and vacuity when the same variable is rebound. Each is the
+-- usual fact about substitution as a function on formulas. Added 2026-11-04,
+-- after the first library rounds; the class versions and `cab_alpha` are
+-- below.
+--| @rewrite
+axiom sb_f_comp {x y: set} (t: set x y) (p: fml x):
+  $ [y/t] ([x/y] p) ⟺ [x/t] p $;
+--| @rewrite
+axiom sb_f_sb_same {x: set} (t: set x) (u: set) (p: fml x):
+  $ [x/t] ([x/u] p) ⟺ [x/u] p $;
+--| @rewrite
+axiom sb_f_all_same {x: set} (t: set x) (p: fml x):
+  $ [x/t] (∀ x p) ⟺ ∀ x p $;
+--| @rewrite
+axiom sb_f_ex_same {x: set} (t: set x) (p: fml x):
+  $ [x/t] (∃ x p) ⟺ ∃ x p $;
+
+-- --------------------------------------------------------------------------
+-- Equality, membership and sethood, as definitions
+-- --------------------------------------------------------------------------
+
+def ceq (A B: class) (.x: set): fml = $ ∀ x (x ∊ A ↔ x ∊ B) $;
+infixl ceq: $=$ prec 50;
+
+def wcel (A B: class) (.x: set): fml = $ ∃ x (x = A ∧ x ∊ B) $;
+infixl wcel: $e.$ prec 50;
+infixl wcel: $∈$ prec 50;
+
+def isset (A: class) (.x: set): fml = $ ∃ x (x = A) $;
+
+def subset (A B: class) (.x: set): fml = $ ∀ x (x ∊ A → x ∊ B) $;
+infixl subset: $C_$ prec 50;
+infixl subset: $⊆$ prec 50;
+
+--| Provable equality of classes, and of sets: the relations the compiler
+--| rewrites with.
+def ceqt (A B: class): wff = $ _ ⇒ A = B $;
+infixl ceqt: $=.$ prec 50;
+infixl ceqt: $≐$ prec 50;
+def seqt (a b: set): wff = $ a ≐ b $;
+
+--| Leibniz's law. With `=` defined by extension, its atomic instances are the
+--| axiom of extensionality.
+--| @view (G H:hyps){z:set}(a b:set)(p:fml z)(q r:fml): $ G ⇒ a = b $ > $ H ⇒ q $ > $ G,H ⇒ r $
+--| @abstract p q r z a b
+--| @fresh z
+axiom eq_replace (G H: hyps) {z: set} (a b: set) (p: fml z):
+  $ G ⇒ a = b $ > $ H ⇒ [z/a] p $ > $ G , H ⇒ [z/b] p $;
+
+--| Class abstraction.
+axiom cab_intro {x: set} (G: hyps x) (t: set x) (p: fml x):
+  $ G ⇒ [x/t] p $ > $ G ⇒ t ∊ {x | p} $;
+axiom cab_elim {x: set} (G: hyps x) (t: set x) (p: fml x):
+  $ G ⇒ t ∊ {x | p} $ > $ G ⇒ [x/t] p $;
+
+--| @relation class ceqt ceqt_refl ceqt_trans ceqt_sym _
+theorem ceqt_refl (A: class): $ A ≐ A $;
+theorem ceqt_trans (A B C: class): $ A ≐ B $ > $ B ≐ C $ > $ A ≐ C $;
+theorem ceqt_sym (A B: class): $ A ≐ B $ > $ B ≐ A $;
+
+--| @relation set seqt seqt_refl seqt_trans seqt_sym _
+theorem seqt_refl (a: set): $ seqt a a $;
+theorem seqt_trans (a b c: set): $ seqt a b $ > $ seqt b c $ > $ seqt a c $;
+theorem seqt_sym (a b: set): $ seqt a b $ > $ seqt b a $;
+
+-- --------------------------------------------------------------------------
+-- Substitution into class terms: the equations for the two primitive
+-- constructors, `cv` and `cab`, and the congruences of substitution
+-- --------------------------------------------------------------------------
+
+--| @rewrite
+axiom sb_c_var {x: set} (t: set x): $ (⟦ x / t ⟧ x) ≐ t $;
+--| @rewrite
+axiom sb_c_other {x y: set} (t: set x): $ (⟦ x / t ⟧ y) ≐ y $;
+--| @rewrite
+axiom sb_c_irrel {x: set} (t: set x) (A: class): $ (⟦ x / t ⟧ A) ≐ A $;
+--| @rewrite
+axiom sb_c_cab {x y: set} (t: set x) (p: fml x y):
+  $ (⟦ x / t ⟧ {y | p}) ≐ {y | [x/t] p} $;
+--| @congr
+axiom sb_f_congr {x: set} (t u: set x) (p q: fml x):
+  $ seqt t u $ > $ p ⟺ q $ > $ [x/t] p ⟺ [x/u] q $;
+--| @congr
+axiom sb_c_congr {x: set} (t u: set x) (A B: class x):
+  $ seqt t u $ > $ A ≐ B $ > $ (⟦ x / t ⟧ A) ≐ (⟦ x / u ⟧ B) $;
+
+-- The substitution laws for classes, and alpha-renaming of an abstraction.
+--| @rewrite
+axiom sb_c_comp {x y: set} (t: set x y) (A: class x):
+  $ (⟦ y / t ⟧ (⟦ x / y ⟧ A)) ≐ (⟦ x / t ⟧ A) $;
+--| @rewrite
+axiom sb_c_sb_same {x: set} (t: set x) (u: set) (A: class x):
+  $ (⟦ x / t ⟧ (⟦ x / u ⟧ A)) ≐ (⟦ x / u ⟧ A) $;
+--| @rewrite
+axiom sb_c_cab_same {x: set} (t: set x) (p: fml x):
+  $ (⟦ x / t ⟧ {x | p}) ≐ {x | p} $;
+--| @alpha x y
+axiom cab_alpha {x y: set} (p: fml x):
+  $ {x | p} ≐ {y | [x/y] p} $;
+
+-- --------------------------------------------------------------------------
+-- Congruences of the quantifiers, the class constructors, and substitution
+-- equations for the defined notions (theorems)
+-- --------------------------------------------------------------------------
+
+--| @congr
+theorem all_congr {x: set} (p q: fml x):
+  $ p ⟺ q $ > $ ∀ x p ⟺ ∀ x q $;
+--| @congr
+theorem ex_congr {x: set} (p q: fml x):
+  $ p ⟺ q $ > $ ∃ x p ⟺ ∃ x q $;
+
+--| @congr
+theorem cv_congr (a b: set): $ seqt a b $ > $ cv a ≐ cv b $;
+--| @congr
+theorem welc_congr (a b: set) (A B: class):
+  $ seqt a b $ > $ A ≐ B $ > $ (a ∊ A) ⟺ (b ∊ B) $;
+--| @congr
+theorem cab_congr {x: set} (p q: fml x):
+  $ p ⟺ q $ > $ {x | p} ≐ {x | q} $;
+theorem ceq_subst (G: hyps) (A B C D: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ G , A = C ⇒ B = D $;
+--| @congr
+theorem ceq_congr (A B C D: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ (A = C) ⟺ (B = D) $;
+--| @congr
+theorem ceqt_congr (A B C D: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ (A ≐ C) ⟚ (B ≐ D) $;
+
+-- Substitution equations for defined notions: theorems, enrolled as rewrite
+-- rules like the axioms above.
+
+--| @rewrite
+theorem sb_f_ceq {x: set} (t: set x) (A B: class x):
+  $ [x/t] (A = B) ⟺ (⟦ x / t ⟧ A) = (⟦ x / t ⟧ B) $;
+--| @rewrite
+theorem sb_f_wcel {x: set} (t: set x) (A B: class x):
+  $ [x/t] (A ∈ B) ⟺ (⟦ x / t ⟧ A) ∈ (⟦ x / t ⟧ B) $;
+--| @rewrite
+theorem sb_f_isset {x: set} (t: set x) (A: class x):
+  $ [x/t] (isset A) ⟺ isset (⟦ x / t ⟧ A) $;
+--| @rewrite
+theorem sb_f_subset {x: set} (t: set x) (A B: class x):
+  $ [x/t] (A ⊆ B) ⟺ (⟦ x / t ⟧ A) ⊆ (⟦ x / t ⟧ B) $;
+
+-- --------------------------------------------------------------------------
+-- Set-forming operations, as definitions
+-- --------------------------------------------------------------------------
+
+def empty (.x: set): class = $ {x | ⊥} $;
+prefix empty: $∅$ prec max;
+
+def cpr (A B: class) (.x: set): class = $ {x | x = A ∨ x = B} $;
+def csn (A: class): class = $ cpr A A $;
+def opair (A B: class): class = $ cpr (csn A) (cpr A B) $;
+notation opair (A B: class): class = ($⟨$:max) A ($,$:5) B ($⟩$:0);
+
+def cuni (A: class) (.x .y: set): class = $ {x | ∃ y (y ∊ A ∧ x ∊ y)} $;
+prefix cuni: $U.$ prec 80;
+prefix cuni: $⋃$ prec 80;
+
+def cpw (A: class) (.x: set): class = $ {x | x ⊆ A} $;
+prefix cpw: $P.$ prec 80;
+prefix cpw: $𝒫$ prec 80;
+
+def cun (A B: class) (.x: set): class = $ {x | x ∊ A ∨ x ∊ B} $;
+infixl cun: $u.$ prec 60;
+infixl cun: $∪$ prec 60;
+
+def suc (A: class): class = $ A ∪ csn A $;
+
+--| A class of ordered pairs with at most one value at each argument.
+def functional (F: class) (.x .y .z: set): fml =
+  $ ∀ x ∀ y ∀ z (⟨ x , y ⟩ ∈ F ∧ ⟨ x , z ⟩ ∈ F → y = z) $;
+
+--| The image of `A` under `F`.
+def img (F A: class) (.x .y: set): class =
+  $ {y | ∃ x (x ∊ A ∧ ⟨ x , y ⟩ ∈ F)} $;
+
+--| `F` is defined on every element of `A` with a value in `B`.
+def fn_into (F A B: class) (.x .y: set): fml =
+  $ functional F ∧ ∀ x (x ∊ A → ∃ y (y ∊ B ∧ ⟨ x , y ⟩ ∈ F)) $;
+
+def inductive (A: class) (.y: set): fml =
+  $ ∅ ∈ A ∧ ∀ y (y ∊ A → suc y ∈ A) $;
+
+def transitive (A: class) (.x .y: set): fml =
+  $ ∀ x (x ∊ A → ∀ y (y ∊ x → y ∊ A)) $;
+
+--| `F` picks an element of each nonempty element of `A`.
+def chooses (F A: class) (.x .y: set): fml =
+  $ functional F ∧
+    ∀ x (x ∊ A → ∃ y (y ∊ x) → ∃ y (y ∊ x ∧ ⟨ x , y ⟩ ∈ F)) $;
+
+--| A Grothendieck universe: transitive and closed under pairs, power sets and
+--| unions of families indexed by an element.
+def universe (U: class) (.x .y .f: set): fml =
+  $ transitive U ∧
+    ∀ x ∀ y (x ∊ U ∧ y ∊ U → cpr x y ∈ U) ∧
+    ∀ x (x ∊ U → 𝒫 x ∈ U) ∧
+    ∀ x ∀ f (x ∊ U ∧ fn_into f x U → ⋃ (img f x) ∈ U) $;
+
+-- Substitution through a defined class operation.
+
+--| @rewrite
+theorem sb_c_cpr {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (cpr A B)) ≐ cpr (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+
+-- --------------------------------------------------------------------------
+-- The set axioms
+-- --------------------------------------------------------------------------
+
+axiom ax_empty (G: hyps): $ G ⇒ isset ∅ $;
+axiom ax_pair (G: hyps) (a b: set): $ G ⇒ isset (cpr a b) $;
+axiom ax_union (G: hyps) (a: set): $ G ⇒ isset (⋃ a) $;
+axiom ax_power (G: hyps) (a: set): $ G ⇒ isset (𝒫 a) $;
+axiom ax_replace (G: hyps) (a: set) (F: class):
+  $ G ⇒ functional F $ > $ G ⇒ isset (img F a) $;
+axiom ax_infinity {x: set} (G: hyps): $ G ⇒ ∃ x inductive x $;
+--| Foundation, as induction on membership.
+--| @freshen G x
+axiom ax_induction {x y: set} (G: hyps) (p: fml x):
+  $ G , ∀ y (y ∊ x → [x/y] p) ⇒ p $ > $ G ⇒ ∀ x p $;
+axiom ax_choice {f: set} (G: hyps) (a: set): $ G ⇒ ∃ f chooses f a $;
+axiom ax_universe {u: set} (G: hyps) (a: set): $ G ⇒ ∃ u (a ∊ u ∧ universe u) $;
+
+-- --------------------------------------------------------------------------
+-- First consequences (proofs in tg.auf)
+-- --------------------------------------------------------------------------
+theorem eq_refl (G: hyps) (A: class): $ G ⇒ A = A $;
+theorem wcel_set (a: set) (A: class): $ (a ∈ A) ⟺ (a ∊ A) $;
+theorem isset_var (G: hyps) (a: set): $ G ⇒ isset a $;
+theorem empty_elim (G: hyps) (a: set): $ G ⇒ a ∊ ∅ $ > $ G ⇒ ⊥ $;
+theorem cpr_intro_l (G: hyps) (a b: set): $ G ⇒ a ∊ cpr a b $;
+theorem subset_refl (G: hyps) (A: class): $ G ⇒ A ⊆ A $;

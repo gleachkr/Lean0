@@ -1,0 +1,249 @@
+-- lfp.mm0: inductive definitions. A class operation `x ↦ B` is an operator on
+-- sets; `mono`, `setop` and `bounded` say it is monotone, set-valued, and
+-- maps subsets of a carrier `C` to subsets of `C`. Its stages `stg x B` are
+-- the function on the ordinals with
+-- `fv (stg x B) a = B (⋃ of the stages below a)` (so
+-- `stg (suc a) = B (stg a)` and a limit stage is the union of the earlier
+-- ones); the least fixed point `lfp x B` is the union of all stages. For a
+-- bounded operator the stages stabilize (Burali-Forti), `lfp x B` is a fixed
+-- point, it is contained in every prefixed point (the induction principle),
+-- and it is a set. Recursion on stages is the same machinery applied to an
+-- operator on graphs: the least fixed point of an operator that preserves
+-- functions is a function (`lfp_functional`). Imports ordinals.mm0; proofs in
+-- lfp.auf.
+
+import "ordinals.mm0";
+
+-- --------------------------------------------------------------------------
+-- Operators
+-- --------------------------------------------------------------------------
+
+--| The operation `x ↦ B` is monotone: `u ⊆ v` implies `B u ⊆ B v`.
+def mono {x: set} (B: class x) (.u .v: set): fml =
+  $ ∀ u ∀ v (u ⊆ v → (⟦ x / u ⟧ B) ⊆ (⟦ x / v ⟧ B)) $;
+--| The operation is set-valued.
+def setop {x: set} (B: class x): fml = $ ∀ x (isset B) $;
+--| The operation maps subsets of `C` to subsets of `C`.
+def bounded {x: set} (B: class x) (C: class) (.u: set): fml =
+  $ ∀ u (u ⊆ C → (⟦ x / u ⟧ B) ⊆ C) $;
+
+--| @freshen G u
+--| @freshen G v
+theorem mono_intro {x: set} (G: hyps x) {u v: set} (B: class x):
+  $ G , u ⊆ v ⇒ (⟦ x / u ⟧ B) ⊆ (⟦ x / v ⟧ B) $ > $ G ⇒ mono x B $;
+theorem mono_elim {x: set} (G: hyps x) (B: class x) (a b: set):
+  $ G ⇒ mono x B $ > $ G ⇒ a ⊆ b $ > $ G ⇒ (⟦ x / a ⟧ B) ⊆ (⟦ x / b ⟧ B) $;
+--| Monotonicity at classes, through `cap`.
+theorem mono_cap {x: set} (G: hyps x) (B: class x) (C D: class):
+  $ G ⇒ mono x B $ > $ G ⇒ isset C $ > $ G ⇒ isset D $ > $ G ⇒ C ⊆ D $ >
+  $ G ⇒ cap x B C ⊆ cap x B D $;
+--| @freshen G x
+theorem setop_intro {x: set} (G: hyps) (B: class x):
+  $ G ⇒ isset B $ > $ G ⇒ setop x B $;
+theorem setop_elim {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ setop x B $ > $ G ⇒ isset (⟦ x / a ⟧ B) $;
+theorem setop_cap {x: set} (G: hyps x) (B: class x) (C: class):
+  $ G ⇒ setop x B $ > $ G ⇒ isset C $ > $ G ⇒ isset (cap x B C) $;
+--| @freshen G u
+theorem bounded_intro {x: set} (G: hyps x) {u: set} (B: class x) (C: class):
+  $ G , u ⊆ C ⇒ (⟦ x / u ⟧ B) ⊆ C $ > $ G ⇒ bounded x B C $;
+theorem bounded_elim {x: set} (G: hyps x) (B: class x) (C: class) (a: set):
+  $ G ⇒ bounded x B C $ > $ G ⇒ a ⊆ C $ > $ G ⇒ (⟦ x / a ⟧ B) ⊆ C $;
+theorem bounded_cap {x: set} (G: hyps x) (B: class x) (C D: class):
+  $ G ⇒ bounded x B C $ > $ G ⇒ isset D $ > $ G ⇒ D ⊆ C $ > $ G ⇒ cap x B D ⊆ C $;
+--| @congr
+theorem mono_congr {x: set} (B D: class x): $ B ≐ D $ > $ mono x B ⟺ mono x D $;
+--| @congr
+theorem setop_congr {x: set} (B D: class x): $ B ≐ D $ > $ setop x B ⟺ setop x D $;
+--| @congr
+theorem bounded_congr {x: set} (B D: class x) (C E: class):
+  $ B ≐ D $ > $ C ≐ E $ > $ bounded x B C ⟺ bounded x D E $;
+--| Substitutions of distinct variables commute (through `cap_var`: the
+--| substitution of a set variable is the application `cap`).
+theorem sb_c_swap {x y: set} (t: set y) (u: set) (B: class x y): $ (⟦ y / t ⟧ (⟦ x / u ⟧ B)) ≐ (⟦ x / u ⟧ (⟦ y / t ⟧ B)) $;
+--| @rewrite
+theorem sb_f_mono {x y: set} (t: set y) (B: class x y):
+  $ [y/t] (mono x B) ⟺ mono x (⟦ y / t ⟧ B) $;
+--| @rewrite
+theorem sb_f_setop {x y: set} (t: set y) (B: class x y):
+  $ [y/t] (setop x B) ⟺ setop x (⟦ y / t ⟧ B) $;
+--| @rewrite
+theorem sb_f_bounded {x y: set} (t: set y) (B: class x y) (C: class y):
+  $ [y/t] (bounded x B C) ⟺ bounded x (⟦ y / t ⟧ B) (⟦ y / t ⟧ C) $;
+
+-- --------------------------------------------------------------------------
+-- The stages
+-- --------------------------------------------------------------------------
+
+--| The stages: by transfinite recursion, the stage at `a` is `B` applied to
+--| the union of the values of the earlier stages (`g` is the restriction of
+--| the stage function to `a`, `⋃ (crn g)` the union of the stages below `a`).
+def stg {x: set} (B: class x) (.g: set): class =
+  $ trec (cgr g (cap x B (⋃ (crn g)))) $;
+--| The union of the stages below `A`.
+def stgb {x: set} (B: class x) (A: class): class = $ ⋃ (crn (cres (stg x B) A)) $;
+
+theorem stg_functional {x: set} (G: hyps x) (B: class x): $ G ⇒ functional (stg x B) $;
+theorem stg_rel {x: set} (G: hyps x) (B: class x): $ G ⇒ rel (stg x B) $;
+theorem stg_cdm {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ ord a $ > $ G ⇒ a ∊ cdm (stg x B) $;
+theorem stg_set {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ isset (fv (stg x B) a) $;
+theorem stgb_set {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ ord a $ > $ G ⇒ isset (stgb x B a) $;
+theorem sb_c_cap_same {x: set} (t: set x) (B: class x) (C: class x): $ (⟦ x / t ⟧ (cap x B C)) ≐ cap x B C $;
+theorem sb_c_stg_same {x: set} (t: set x) (B: class x): $ (⟦ x / t ⟧ (stg x B)) ≐ stg x B $;
+theorem sb_c_stgb_same {x: set} (t: set x) (B: class x) (C: class): $ (⟦ x / t ⟧ (stgb x B C)) ≐ stgb x B C $;
+theorem capv_alpha {x u: set} (B: class x) (E: class x): $ (⟦ x / u ⟧ E) ≐ E $ > $ cap x B E ≐ cap u (⟦ x / u ⟧ B) E $;
+theorem mono_alpha {x u: set} (G: hyps x) (B: class x): $ G ⇒ mono x B $ > $ G ⇒ mono u (⟦ x / u ⟧ B) $;
+theorem setop_alpha {x u: set} (G: hyps x) (B: class x): $ G ⇒ setop x B $ > $ G ⇒ setop u (⟦ x / u ⟧ B) $;
+theorem bounded_alpha {x u: set} (G: hyps x) (B: class x) (C: class): $ G ⇒ bounded x B C $ > $ G ⇒ bounded u (⟦ x / u ⟧ B) C $;
+theorem capv_eq {x u: set} (G: hyps x) (B: class x) (E: class x) (a: set): $ (⟦ x / u ⟧ E) ≐ E $ > $ G ⇒ a = E $ > $ G ⇒ cap x B E = (⟦ x / a ⟧ B) $;
+theorem capv_eq_arg {x u: set} (G: hyps x) (B: class x) (C E: class x): $ (⟦ x / u ⟧ C) ≐ C $ > $ (⟦ x / u ⟧ E) ≐ E $ > $ G ⇒ C = E $ > $ G ⇒ cap x B C = cap x B E $;
+theorem capv_mono {x u: set} (G: hyps x) (B: class x) (C E: class x): $ (⟦ x / u ⟧ C) ≐ C $ > $ (⟦ x / u ⟧ E) ≐ E $ > $ G ⇒ mono x B $ > $ G ⇒ isset C $ > $ G ⇒ isset E $ > $ G ⇒ C ⊆ E $ > $ G ⇒ cap x B C ⊆ cap x B E $;
+theorem capv_bounded {x u: set} (G: hyps x) (B: class x) (C: class) (D: class x): $ (⟦ x / u ⟧ D) ≐ D $ > $ G ⇒ bounded x B C $ > $ G ⇒ isset D $ > $ G ⇒ D ⊆ C $ > $ G ⇒ cap x B D ⊆ C $;
+--| The recursion equation of the stages.
+theorem stg_eq {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ setop x B $ > $ G ⇒ ord a $ > $ G ⇒ fv (stg x B) a = cap x B (stgb x B a) $;
+theorem stgb_intro {x: set} (G: hyps x) (B: class x) (a b c: set):
+  $ G ⇒ ord a $ > $ G ⇒ b ∊ a $ > $ G ⇒ c ∊ fv (stg x B) b $ > $ G ⇒ c ∊ stgb x B a $;
+theorem stgb_elim {x: set} (G: hyps x) {b: set} (B: class x) (a c: set):
+  $ G ⇒ c ∊ stgb x B a $ > $ G ⇒ ∃ b (b ∊ a ∧ c ∊ fv (stg x B) b) $;
+theorem stgb_mono {x: set} (G: hyps x) (B: class x) (C D: class):
+  $ G ⇒ C ⊆ D $ > $ G ⇒ stgb x B C ⊆ stgb x B D $;
+theorem stg_subset_stgb {x: set} (G: hyps x) (B: class x) (a b: set):
+  $ G ⇒ ord b $ > $ G ⇒ a ∊ b $ > $ G ⇒ fv (stg x B) a ⊆ stgb x B b $;
+--| The stages increase.
+theorem stg_mono {x: set} (G: hyps x) (B: class x) (a b: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ ord a $ > $ G ⇒ ord b $ > $ G ⇒ a ⊆ b $ >
+  $ G ⇒ fv (stg x B) a ⊆ fv (stg x B) b $;
+theorem stg_chain {x: set} (G: hyps x) (B: class x) (a b: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ ord a $ > $ G ⇒ ord b $ >
+  $ G ⇒ fv (stg x B) a ⊆ fv (stg x B) b ∨ fv (stg x B) b ⊆ fv (stg x B) a $;
+theorem stgb_eq {x: set} (G: hyps x) (B: class x) (C E: class): $ G ⇒ C = E $ > $ G ⇒ stgb x B C = stgb x B E $;
+--| The successor and zero stages.
+theorem stgb_suc {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ ord a $ >
+  $ G ⇒ stgb x B (suc a) = fv (stg x B) a $;
+theorem stg_suc {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ ord a $ >
+  $ G ⇒ fv (stg x B) (suc a) = cap x B (fv (stg x B) a) $;
+theorem stgb_empty {x: set} (G: hyps x) (B: class x): $ G ⇒ stgb x B ∅ = ∅ $;
+theorem stg_empty {x: set} (G: hyps x) (B: class x):
+  $ G ⇒ setop x B $ > $ G ⇒ fv (stg x B) ∅ = cap x B ∅ $;
+--| The stages of a bounded operator stay in the carrier, and the stages of
+--| any operator stay in a prefixed point.
+theorem stgb_bounded {x: set} (G: hyps x) (B: class x) (C: class) (a: set):
+  $ G ⇒ bounded x B C $ > $ G ⇒ setop x B $ > $ G ⇒ ord a $ > $ G ⇒ stgb x B a ⊆ C $;
+theorem stg_bounded {x: set} (G: hyps x) (B: class x) (C: class) (a: set):
+  $ G ⇒ bounded x B C $ > $ G ⇒ setop x B $ > $ G ⇒ ord a $ > $ G ⇒ fv (stg x B) a ⊆ C $;
+theorem stg_subset_prefix {x: set} (G: hyps x) (B: class x) (a c: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ (⟦ x / c ⟧ B) ⊆ c $ > $ G ⇒ ord a $ >
+  $ G ⇒ fv (stg x B) a ⊆ c $;
+--| @congr
+theorem stg_congr {x: set} (B D: class x): $ B ≐ D $ > $ stg x B ≐ stg x D $;
+--| @congr
+theorem stgb_congr {x: set} (B D: class x) (C E: class):
+  $ B ≐ D $ > $ C ≐ E $ > $ stgb x B C ≐ stgb x D E $;
+--| @rewrite
+theorem sb_c_stg {x y: set} (t: set y) (B: class x y):
+  $ (⟦ y / t ⟧ (stg x B)) ≐ stg x (⟦ y / t ⟧ B) $;
+--| @rewrite
+theorem sb_c_stgb {x y: set} (t: set y) (B: class x y) (C: class y):
+  $ (⟦ y / t ⟧ (stgb x B C)) ≐ stgb x (⟦ y / t ⟧ B) (⟦ y / t ⟧ C) $;
+
+-- --------------------------------------------------------------------------
+-- The least fixed point
+-- --------------------------------------------------------------------------
+
+--| The union of all stages.
+def lfp {x: set} (B: class x) (.a .y: set): class =
+  $ {y | ∃ a (ord a ∧ y ∊ fv (stg x B) a)} $;
+
+theorem lfp_intro {x: set} (G: hyps x) (B: class x) (a c: set):
+  $ G ⇒ ord a $ > $ G ⇒ c ∊ fv (stg x B) a $ > $ G ⇒ c ∊ lfp x B $;
+theorem lfp_elim {x: set} (G: hyps x) {a: set} (B: class x) (c: set):
+  $ G ⇒ c ∊ lfp x B $ > $ G ⇒ ∃ a (ord a ∧ c ∊ fv (stg x B) a) $;
+theorem stg_subset_lfp {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ ord a $ > $ G ⇒ fv (stg x B) a ⊆ lfp x B $;
+theorem stgb_subset_lfp {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ ord a $ > $ G ⇒ stgb x B a ⊆ lfp x B $;
+theorem lfp_bounded {x: set} (G: hyps x) (B: class x) (C: class):
+  $ G ⇒ bounded x B C $ > $ G ⇒ setop x B $ > $ G ⇒ lfp x B ⊆ C $;
+theorem lfp_set {x: set} (G: hyps x) (B: class x) (C: class):
+  $ G ⇒ bounded x B C $ > $ G ⇒ setop x B $ > $ G ⇒ isset C $ > $ G ⇒ isset (lfp x B) $;
+--| The least fixed point is contained in every prefixed point.
+theorem lfp_least {x: set} (G: hyps x) (B: class x) (c: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ (⟦ x / c ⟧ B) ⊆ c $ > $ G ⇒ lfp x B ⊆ c $;
+theorem sb_c_stg_vac {x: set} (t: set x) (B: class x): $ (⟦ x / t ⟧ (stg x B)) ≐ stg x B $;
+theorem cap_set_vac {x w: set} (G: hyps x) (B: class x) (C: class x) (s: set): $ (⟦ x / w ⟧ C) ≐ C $ > $ (⟦ x / s ⟧ C) ≐ C $ > $ G ⇒ s = C $ > $ G ⇒ cap x B C = (⟦ x / s ⟧ B) $;
+theorem sb_c_stgb_vac {x: set} (t: set x) (B: class x) (A: class): $ (⟦ x / t ⟧ (stgb x B A)) ≐ stgb x B A $;
+theorem sb_c_fvstg_vac {x: set} (t: set x) (B: class x) (A: class): $ (⟦ x / t ⟧ (fv (stg x B) A)) ≐ fv (stg x B) A $;
+theorem sb_c_lfp_vac {x: set} (t: set x) (B: class x): $ (⟦ x / t ⟧ (lfp x B)) ≐ lfp x B $;
+--| Once two consecutive stages coincide, every later stage is that stage,
+--| and so is the least fixed point.
+theorem stg_stable_above {x: set} (G: hyps x) (B: class x) (a b: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ ord a $ >
+  $ G ⇒ fv (stg x B) (suc a) = fv (stg x B) a $ > $ G ⇒ ord b $ > $ G ⇒ a ⊆ b $ >
+  $ G ⇒ fv (stg x B) b = fv (stg x B) a $;
+theorem lfp_eq_stg {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ ord a $ >
+  $ G ⇒ fv (stg x B) (suc a) = fv (stg x B) a $ > $ G ⇒ lfp x B = fv (stg x B) a $;
+theorem lfp_fix_of_stable {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ ord a $ >
+  $ G ⇒ fv (stg x B) (suc a) = fv (stg x B) a $ > $ G ⇒ cap x B (lfp x B) = lfp x B $;
+--| Distinct stages of distinct ordinals, as long as the stages have not
+--| stabilized.
+theorem stg_strict {x: set} (G: hyps x) (B: class x) (a b: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ ord b $ > $ G ⇒ a ∊ b $ >
+  $ G ⇒ ¬ fv (stg x B) (suc a) = fv (stg x B) a $ > $ G ⇒ ¬ fv (stg x B) a = fv (stg x B) b $;
+--| The stages of a bounded operator stabilize: otherwise `a ↦ stg a` would be
+--| an injection of the ordinals into `𝒫 C`, and its inverse image of `𝒫 C`
+--| a set of all ordinals (`ax_replace`, Burali-Forti).
+theorem stg_stable {x: set} (G: hyps x) {a: set} (B: class x) (C: class):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ bounded x B C $ > $ G ⇒ isset C $ >
+  $ G ⇒ ∃ a (ord a ∧ fv (stg x B) (suc a) = fv (stg x B) a) $;
+--| The least fixed point of a bounded operator is a fixed point.
+theorem lfp_fix {x: set} (G: hyps x) (B: class x) (C: class):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ bounded x B C $ > $ G ⇒ isset C $ >
+  $ G ⇒ cap x B (lfp x B) = lfp x B $;
+theorem lfp_closed {x: set} (G: hyps x) (B: class x) (C: class) (c: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ bounded x B C $ > $ G ⇒ isset C $ >
+  $ G ⇒ c ∊ cap x B (lfp x B) $ > $ G ⇒ c ∊ lfp x B $;
+--| Induction: a property that the operator propagates (from a set of members
+--| of the fixed point that have it to its image) holds on the fixed point.
+theorem lfp_ind {x y u: set} (G: hyps x y) (B: class x) (C: class) (p: fml y):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ bounded x B C $ > $ G ⇒ isset C $ >
+  $ G ⇒ ∀ u (u ⊆ lfp x B → u ⊆ {y | p} → (⟦ x / u ⟧ B) ⊆ {y | p}) $ >
+  $ G ⇒ lfp x B ⊆ {y | p} $;
+--| @congr
+theorem lfp_congr {x: set} (B D: class x): $ B ≐ D $ > $ lfp x B ≐ lfp x D $;
+--| @rewrite
+theorem sb_c_lfp {x y: set} (t: set y) (B: class x y):
+  $ (⟦ y / t ⟧ (lfp x B)) ≐ lfp x (⟦ y / t ⟧ B) $;
+
+-- --------------------------------------------------------------------------
+-- Recursion on stages: operators on graphs
+-- --------------------------------------------------------------------------
+
+--| Every stage of an operator that preserves functions is a function (the
+--| union of the earlier stages is a chain), and so is the least fixed point.
+theorem stg_functional_val {x u: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ >
+  $ G ⇒ ∀ u (functional u → functional (⟦ x / u ⟧ B)) $ > $ G ⇒ ord a $ >
+  $ G ⇒ functional (fv (stg x B) a) $;
+theorem lfp_pair_elim {x a: set} (G: hyps x a) (H: hyps x) (B: class x) (i j: set) (c: fml x): $ G ⇒ ⟨ i , j ⟩ ∈ lfp x B $ > $ H , ord a , ⟨ i , j ⟩ ∈ fv (stg x B) a ⇒ c $ > $ G , H ⇒ c $;
+theorem lfp_functional {x u: set} (G: hyps x) (B: class x):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ >
+  $ G ⇒ ∀ u (functional u → functional (⟦ x / u ⟧ B)) $ > $ G ⇒ functional (lfp x B) $;
+theorem stg_rel_val {x u: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ >
+  $ G ⇒ ∀ u (rel u → rel (⟦ x / u ⟧ B)) $ > $ G ⇒ ord a $ > $ G ⇒ rel (fv (stg x B) a) $;
+theorem lfp_rel {x u: set} (G: hyps x) (B: class x):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ >
+  $ G ⇒ ∀ u (rel u → rel (⟦ x / u ⟧ B)) $ > $ G ⇒ rel (lfp x B) $;
+--| A stage's value at an argument is the fixed point's value.
+theorem lfp_fv {x u: set} (G: hyps x) (B: class x) (a c: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ >
+  $ G ⇒ ∀ u (functional u → functional (⟦ x / u ⟧ B)) $ > $ G ⇒ ord a $ >
+  $ G ⇒ c ∊ cdm (fv (stg x B) a) $ > $ G ⇒ fv (lfp x B) c = fv (fv (stg x B) a) c $;

@@ -1,0 +1,267 @@
+-- basic.mm0: first consequences of the base: derived deduction rules,
+-- equality, sethood and membership, subsets, and for every definition of
+-- tg.mm0 its congruence (`@congr`), its equality lemma under hypotheses
+-- (`X_eq`: equal arguments give equal results, in a context) and its
+-- substitution equation (`@rewrite`). Imports the base; proofs in basic.auf.
+--
+-- Naming. `X_intro`/`X_elim` are the rules of a defined notion `X`; `X_eq`
+-- rewrites with an equality proved in a context (the `@congr` theorems only
+-- rewrite with equalities proved from no hypotheses); `sb_f_X`/`sb_c_X` are
+-- the substitution equations. Every `_eq` lemma rewrites left to right: its
+-- equality premises are `A = B` and the conclusion is about `B`.
+
+import "tg.mm0";
+
+-- --------------------------------------------------------------------------
+-- Derived deduction rules
+-- --------------------------------------------------------------------------
+
+theorem cut (G H: hyps) (p c: fml): $ G ⇒ p $ > $ H , p ⇒ c $ > $ G , H ⇒ c $;
+theorem imp_use (G: hyps) (p q: fml): $ G ⇒ p → q $ > $ G , p ⇒ q $;
+theorem bi_use_l (G: hyps) (p q: fml): $ G ⇒ p ↔ q $ > $ G , p ⇒ q $;
+theorem bi_use_r (G: hyps) (p q: fml): $ G ⇒ p ↔ q $ > $ G , q ⇒ p $;
+theorem bi_sym (G: hyps) (p q: fml): $ G ⇒ p ↔ q $ > $ G ⇒ q ↔ p $;
+theorem bi_trans (G: hyps) (p q r: fml):
+  $ G ⇒ p ↔ q $ > $ G ⇒ q ↔ r $ > $ G ⇒ p ↔ r $;
+theorem not_use (G: hyps) (p: fml): $ G ⇒ ¬ p $ > $ G , p ⇒ ⊥ $;
+theorem by_contra (G: hyps) (p: fml): $ G , ¬ p ⇒ ⊥ $ > $ G ⇒ p $;
+theorem not_not_elim (G: hyps) (p: fml): $ G ⇒ ¬ ¬ p $ > $ G ⇒ p $;
+theorem not_not_intro (G: hyps) (p: fml): $ G ⇒ p $ > $ G ⇒ ¬ ¬ p $;
+theorem and_comm (G: hyps) (p q: fml): $ G ⇒ p ∧ q $ > $ G ⇒ q ∧ p $;
+theorem or_comm (G: hyps) (p q: fml): $ G ⇒ p ∨ q $ > $ G ⇒ q ∨ p $;
+--| @freshen G x
+theorem all_mp (G: hyps) {x: set} (p q: fml x):
+  $ G ⇒ ∀ x (p → q) $ > $ G ⇒ ∀ x p $ > $ G ⇒ ∀ x q $;
+--| @freshen G x
+theorem ex_mp (G: hyps) {x: set} (p q: fml x):
+  $ G ⇒ ∀ x (p → q) $ > $ G ⇒ ∃ x p $ > $ G ⇒ ∃ x q $;
+
+-- --------------------------------------------------------------------------
+-- Equality
+-- --------------------------------------------------------------------------
+
+theorem eq_sym (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ B = A $;
+theorem eq_trans (G: hyps) (A B C: class):
+  $ G ⇒ A = B $ > $ G ⇒ B = C $ > $ G ⇒ A = C $;
+--| Extensionality, as an introduction rule.
+--| @freshen G x
+theorem eq_intro (G: hyps) {x: set} (A B: class):
+  $ G , x ∊ A ⇒ x ∊ B $ > $ G , x ∊ B ⇒ x ∊ A $ > $ G ⇒ A = B $;
+theorem welc_eq (G: hyps) (A B: class) (a: set):
+  $ G ⇒ A = B $ > $ G ⇒ a ∊ A $ > $ G ⇒ a ∊ B $;
+theorem welc_eq_set (G: hyps) (a b: set) (A: class):
+  $ G ⇒ a = b $ > $ G ⇒ a ∊ A $ > $ G ⇒ b ∊ A $;
+--| Leibniz's law in a shared context.
+--| @view (G:hyps){z:set}(a b:set)(p:fml z)(q r:fml): $ G ⇒ a = b $ > $ G ⇒ q $ > $ G ⇒ r $
+--| @abstract p q r z a b
+--| @fresh z
+theorem eq_subst (G: hyps) {z: set} (a b: set) (p: fml z):
+  $ G ⇒ a = b $ > $ G ⇒ [z/a] p $ > $ G ⇒ [z/b] p $;
+--| Moving a substitution instance along an equality of set variables.
+theorem sb_f_eq {x: set} (G: hyps x) (p: fml x) (u a: set): $ G ⇒ u = a $ > $ G ⇒ [x/u] p $ > $ G ⇒ [x/a] p $;
+theorem sb_c_eq {x: set} (G: hyps x) (B: class x) (u a: set): $ G ⇒ u = a $ > $ G ⇒ (⟦ x / u ⟧ B) = (⟦ x / a ⟧ B) $;
+
+-- --------------------------------------------------------------------------
+-- Sethood and membership of classes
+-- --------------------------------------------------------------------------
+
+theorem isset_intro (G: hyps) (A: class) (a: set): $ G ⇒ a = A $ > $ G ⇒ isset A $;
+--| @freshen H x
+--| @freshen c x
+theorem isset_elim {x: set} (G: hyps x) (H: hyps) (A: class) (c: fml):
+  $ G ⇒ isset A $ > $ H , x = A ⇒ c $ > $ G , H ⇒ c $;
+theorem isset_eq (G: hyps) (A B: class):
+  $ G ⇒ A = B $ > $ G ⇒ isset A $ > $ G ⇒ isset B $;
+theorem wcel_intro (G: hyps) (A B: class) (a: set):
+  $ G ⇒ a = A $ > $ G ⇒ a ∊ B $ > $ G ⇒ A ∈ B $;
+--| @freshen H x
+--| @freshen c x
+theorem wcel_elim {x: set} (G: hyps x) (H: hyps) (A B: class) (c: fml):
+  $ G ⇒ A ∈ B $ > $ H , x = A , x ∊ B ⇒ c $ > $ G , H ⇒ c $;
+theorem wcel_isset (G: hyps) (A B: class): $ G ⇒ A ∈ B $ > $ G ⇒ isset A $;
+theorem welc_wcel (G: hyps) (a: set) (A: class): $ G ⇒ a ∊ A $ > $ G ⇒ a ∈ A $;
+theorem wcel_welc (G: hyps) (a: set) (A: class): $ G ⇒ a ∈ A $ > $ G ⇒ a ∊ A $;
+theorem wcel_eq_l (G: hyps) (A B C: class):
+  $ G ⇒ A = B $ > $ G ⇒ A ∈ C $ > $ G ⇒ B ∈ C $;
+theorem wcel_eq_r (G: hyps) (A B C: class):
+  $ G ⇒ B = C $ > $ G ⇒ A ∈ B $ > $ G ⇒ A ∈ C $;
+
+-- --------------------------------------------------------------------------
+-- Subsets and the empty set
+-- --------------------------------------------------------------------------
+
+--| @freshen G x
+theorem subset_intro (G: hyps) {x: set} (A B: class):
+  $ G , x ∊ A ⇒ x ∊ B $ > $ G ⇒ A ⊆ B $;
+theorem subset_elim (G: hyps) (A B: class) (a: set):
+  $ G ⇒ A ⊆ B $ > $ G ⇒ a ∊ A $ > $ G ⇒ a ∊ B $;
+theorem wcel_subset (G: hyps) (A B C: class):
+  $ G ⇒ A ⊆ B $ > $ G ⇒ C ∈ A $ > $ G ⇒ C ∈ B $;
+theorem subset_trans (G: hyps) (A B C: class):
+  $ G ⇒ A ⊆ B $ > $ G ⇒ B ⊆ C $ > $ G ⇒ A ⊆ C $;
+theorem subset_antisym (G: hyps) (A B: class):
+  $ G ⇒ A ⊆ B $ > $ G ⇒ B ⊆ A $ > $ G ⇒ A = B $;
+theorem eq_subset (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ A ⊆ B $;
+theorem subset_eq_l (G: hyps) (A B C: class):
+  $ G ⇒ A = B $ > $ G ⇒ A ⊆ C $ > $ G ⇒ B ⊆ C $;
+theorem subset_eq_r (G: hyps) (A B C: class):
+  $ G ⇒ B = C $ > $ G ⇒ A ⊆ B $ > $ G ⇒ A ⊆ C $;
+theorem empty_subset (G: hyps) (A: class): $ G ⇒ ∅ ⊆ A $;
+theorem subset_empty (G: hyps) (A: class): $ G ⇒ A ⊆ ∅ $ > $ G ⇒ A = ∅ $;
+--| @freshen G x
+theorem empty_eq_intro (G: hyps) {x: set} (A: class):
+  $ G , x ∊ A ⇒ ⊥ $ > $ G ⇒ A = ∅ $;
+theorem empty_eq_elim (G: hyps) (A: class) (a: set):
+  $ G ⇒ A = ∅ $ > $ G ⇒ a ∊ A $ > $ G ⇒ ⊥ $;
+
+-- --------------------------------------------------------------------------
+-- Congruences of the defined notions (with equalities proved from no
+-- hypotheses; the relation of each argument's sort)
+-- --------------------------------------------------------------------------
+
+--| @congr
+theorem wcel_congr (A B C D: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ (A ∈ C) ⟺ (B ∈ D) $;
+--| @congr
+theorem isset_congr (A B: class): $ A ≐ B $ > $ isset A ⟺ isset B $;
+--| @congr
+theorem subset_congr (A B C D: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ (A ⊆ C) ⟺ (B ⊆ D) $;
+--| @congr
+theorem cpr_congr (A B C D: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ cpr A C ≐ cpr B D $;
+--| @congr
+theorem csn_congr (A B: class): $ A ≐ B $ > $ csn A ≐ csn B $;
+--| @congr
+theorem opair_congr (A B C D: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ ⟨ A , C ⟩ ≐ ⟨ B , D ⟩ $;
+--| @congr
+theorem cuni_congr (A B: class): $ A ≐ B $ > $ ⋃ A ≐ ⋃ B $;
+--| @congr
+theorem cpw_congr (A B: class): $ A ≐ B $ > $ 𝒫 A ≐ 𝒫 B $;
+--| @congr
+theorem cun_congr (A B C D: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ (A ∪ C) ≐ (B ∪ D) $;
+--| @congr
+theorem suc_congr (A B: class): $ A ≐ B $ > $ suc A ≐ suc B $;
+--| @congr
+theorem functional_congr (A B: class):
+  $ A ≐ B $ > $ functional A ⟺ functional B $;
+--| @congr
+theorem img_congr (A B C D: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ img A C ≐ img B D $;
+--| @congr
+theorem fn_into_congr (A B C D E F: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ fn_into A C E ⟺ fn_into B D F $;
+--| @congr
+theorem inductive_congr (A B: class):
+  $ A ≐ B $ > $ inductive A ⟺ inductive B $;
+--| @congr
+theorem transitive_congr (A B: class):
+  $ A ≐ B $ > $ transitive A ⟺ transitive B $;
+--| @congr
+theorem chooses_congr (A B C D: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ chooses A C ⟺ chooses B D $;
+--| @congr
+theorem universe_congr (A B: class):
+  $ A ≐ B $ > $ universe A ⟺ universe B $;
+
+-- --------------------------------------------------------------------------
+-- Substitution equations of the defined notions (theorems, enrolled as
+-- rewrite rules; `sb_c_cpr` and the four `sb_f_*` of the base are the model)
+-- --------------------------------------------------------------------------
+
+--| @rewrite
+theorem sb_c_csn {x: set} (t: set x) (A: class x):
+  $ (⟦ x / t ⟧ (csn A)) ≐ csn (⟦ x / t ⟧ A) $;
+--| @rewrite
+theorem sb_c_opair {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ ⟨ A , B ⟩) ≐ ⟨ ⟦ x / t ⟧ A , ⟦ x / t ⟧ B ⟩ $;
+--| @rewrite
+theorem sb_c_cuni {x: set} (t: set x) (A: class x):
+  $ (⟦ x / t ⟧ (⋃ A)) ≐ ⋃ (⟦ x / t ⟧ A) $;
+--| @rewrite
+theorem sb_c_cpw {x: set} (t: set x) (A: class x):
+  $ (⟦ x / t ⟧ (𝒫 A)) ≐ 𝒫 (⟦ x / t ⟧ A) $;
+--| @rewrite
+theorem sb_c_cun {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (A ∪ B)) ≐ (⟦ x / t ⟧ A) ∪ (⟦ x / t ⟧ B) $;
+--| @rewrite
+theorem sb_c_suc {x: set} (t: set x) (A: class x):
+  $ (⟦ x / t ⟧ (suc A)) ≐ suc (⟦ x / t ⟧ A) $;
+--| @rewrite
+theorem sb_c_img {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (img A B)) ≐ img (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+--| @rewrite
+theorem sb_f_functional {x: set} (t: set x) (A: class x):
+  $ [x/t] (functional A) ⟺ functional (⟦ x / t ⟧ A) $;
+--| @rewrite
+theorem sb_f_fn_into {x: set} (t: set x) (A B C: class x):
+  $ [x/t] (fn_into A B C) ⟺ fn_into (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+--| @rewrite
+theorem sb_f_inductive {x: set} (t: set x) (A: class x):
+  $ [x/t] (inductive A) ⟺ inductive (⟦ x / t ⟧ A) $;
+--| @rewrite
+theorem sb_f_transitive {x: set} (t: set x) (A: class x):
+  $ [x/t] (transitive A) ⟺ transitive (⟦ x / t ⟧ A) $;
+--| @rewrite
+theorem sb_f_chooses {x: set} (t: set x) (A B: class x):
+  $ [x/t] (chooses A B) ⟺ chooses (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+--| @rewrite
+theorem sb_f_universe {x: set} (t: set x) (A: class x):
+  $ [x/t] (universe A) ⟺ universe (⟦ x / t ⟧ A) $;
+
+-- --------------------------------------------------------------------------
+-- Equality lemmas in a context: equal arguments, equal results (`X_eq`), and
+-- the membership forms `welc_X_eq` they are proved from
+-- --------------------------------------------------------------------------
+
+theorem welc_cpr_eq (G: hyps) (A B C D: class) (a: set):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ a ∊ cpr A C $ > $ G ⇒ a ∊ cpr B D $;
+theorem cpr_eq (G: hyps) (A B C D: class):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ cpr A C = cpr B D $;
+theorem csn_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ csn A = csn B $;
+theorem opair_eq (G: hyps) (A B C D: class):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ ⟨ A , C ⟩ = ⟨ B , D ⟩ $;
+theorem welc_cuni_eq (G: hyps) (A B: class) (a: set):
+  $ G ⇒ A = B $ > $ G ⇒ a ∊ ⋃ A $ > $ G ⇒ a ∊ ⋃ B $;
+theorem cuni_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ ⋃ A = ⋃ B $;
+theorem welc_cpw_eq (G: hyps) (A B: class) (a: set):
+  $ G ⇒ A = B $ > $ G ⇒ a ∊ 𝒫 A $ > $ G ⇒ a ∊ 𝒫 B $;
+theorem cpw_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ 𝒫 A = 𝒫 B $;
+theorem welc_cun_eq (G: hyps) (A B C D: class) (a: set):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ a ∊ A ∪ C $ > $ G ⇒ a ∊ B ∪ D $;
+theorem cun_eq (G: hyps) (A B C D: class):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ A ∪ C = B ∪ D $;
+theorem suc_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ suc A = suc B $;
+theorem welc_img_eq (G: hyps) (A B C D: class) (a: set):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ a ∊ img A C $ > $ G ⇒ a ∊ img B D $;
+theorem img_eq (G: hyps) (A B C D: class):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ img A C = img B D $;
+theorem functional_eq (G: hyps) (A B: class):
+  $ G ⇒ A = B $ > $ G ⇒ functional A $ > $ G ⇒ functional B $;
+theorem fn_into_eq (G: hyps) (A B C D E F: class):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ E = F $ >
+  $ G ⇒ fn_into A C E $ > $ G ⇒ fn_into B D F $;
+theorem inductive_eq (G: hyps) (A B: class):
+  $ G ⇒ A = B $ > $ G ⇒ inductive A $ > $ G ⇒ inductive B $;
+theorem transitive_eq (G: hyps) (A B: class):
+  $ G ⇒ A = B $ > $ G ⇒ transitive A $ > $ G ⇒ transitive B $;
+theorem chooses_eq (G: hyps) (A B C D: class):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ chooses A C $ > $ G ⇒ chooses B D $;
+theorem universe_eq (G: hyps) (A B: class):
+  $ G ⇒ A = B $ > $ G ⇒ universe A $ > $ G ⇒ universe B $;
+
+-- --------------------------------------------------------------------------
+-- A substitution equation the base lacks: membership of a set variable that
+-- is a regular argument of a theorem. The base's `sb_f_welc_other` binds its
+-- `y`, and a bound binder is only ever instantiated by a bound variable.
+-- (Proved through `wcel_set`, so it comes after `wcel_congr`.)
+-- --------------------------------------------------------------------------
+
+--| @rewrite
+theorem sb_f_welc_set {x: set} (t: set x) (a: set) (A: class x):
+  $ [x/t] (a ∊ A) ⟺ a ∊ (⟦ x / t ⟧ A) $;
+
+--| Two abstractions with equivalent bodies, under hypotheses, are equal.
+theorem cab_eq (G: hyps) {x: set} (p q: fml x): $ G ⇒ ∀ x (p ↔ q) $ > $ G ⇒ {x | p} = {x | q} $;

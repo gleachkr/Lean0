@@ -1,0 +1,158 @@
+-- omega.mm0: the natural numbers: consequences of foundation, `ω` as the
+-- least inductive class, induction on `ω`, the order of the natural numbers,
+-- function values, and the recursion theorem on `ω` (a function `omrec A F`
+-- with `omrec A F ∅ = A` and `omrec A F (suc n) = F (omrec A F n)`). Imports
+-- relations.mm0; proofs in omega.auf. Arithmetic is a later file.
+
+import "relations.mm0";
+
+-- --------------------------------------------------------------------------
+-- Consequences of foundation
+-- --------------------------------------------------------------------------
+
+theorem notin_self (G: hyps) (a: set): $ G ⇒ a ∊ a $ > $ G ⇒ ⊥ $;
+theorem notin_cycle (G: hyps) (a b: set): $ G ⇒ a ∊ b $ > $ G ⇒ b ∊ a $ > $ G ⇒ ⊥ $;
+theorem suc_ne_empty (G: hyps) (A: class): $ G ⇒ suc A = ∅ $ > $ G ⇒ ⊥ $;
+theorem suc_inj (G: hyps) (a b: set): $ G ⇒ suc a = suc b $ > $ G ⇒ a = b $;
+
+-- --------------------------------------------------------------------------
+-- ω, the least inductive class
+-- --------------------------------------------------------------------------
+
+def omega (.x .y: set): class = $ {x | ∀ y (inductive y → x ∊ y)} $;
+prefix omega: $om.$ prec max;
+prefix omega: $ω$ prec max;
+
+--| @freshen G y
+theorem omega_intro (G: hyps) {y: set} (a: set):
+  $ G , inductive y ⇒ a ∊ y $ > $ G ⇒ a ∊ ω $;
+theorem wcel_cin (G: hyps) (A B C: class): $ G ⇒ A ∈ B $ > $ G ⇒ A ∈ C $ > $ G ⇒ A ∈ B ∩ C $;
+theorem omega_elim (G: hyps) (A: class) (a: set):
+  $ G ⇒ a ∊ ω $ > $ G ⇒ inductive A $ > $ G ⇒ a ∊ A $;
+theorem omega_zero (G: hyps): $ G ⇒ ∅ ∈ ω $;
+theorem omega_suc (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ suc a ∈ ω $;
+theorem omega_inductive (G: hyps): $ G ⇒ inductive ω $;
+--| `ω` is a subclass of the inductive set given by infinity.
+theorem omega_set (G: hyps): $ G ⇒ isset ω $;
+--| Induction, for a class and for a formula.
+theorem omega_ind (G: hyps) {x: set} (P: class):
+  $ G ⇒ ∅ ∈ P $ > $ G ⇒ ∀ x (x ∊ ω ∧ x ∊ P → suc x ∈ P) $ > $ G ⇒ ω ⊆ P $;
+theorem wcel_cpw (G: hyps) (A B: class): $ G ⇒ isset B $ > $ G ⇒ B ⊆ A $ > $ G ⇒ B ∈ 𝒫 A $;
+theorem omega_ind_f (G: hyps) {x y: set} (p: fml x):
+  $ G ⇒ ∅ ∈ {x | p} $ > $ G ⇒ ∀ y (y ∊ ω → [x/y] p → suc y ∈ {x | p}) $ >
+  $ G ⇒ ∀ x (x ∊ ω → p) $;
+
+-- --------------------------------------------------------------------------
+-- The order of the natural numbers (membership)
+-- --------------------------------------------------------------------------
+
+theorem omega_trans (G: hyps): $ G ⇒ transitive ω $;
+theorem omega_elem_subset (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ a ⊆ ω $;
+theorem omega_elem_trans (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ transitive a $;
+theorem omega_elem_omega (G: hyps) (a b: set):
+  $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ a $ > $ G ⇒ b ∊ ω $;
+theorem omega_cases (G: hyps) {y: set} (a: set):
+  $ G ⇒ a ∊ ω $ > $ G ⇒ a = ∅ ∨ ∃ y (y ∊ ω ∧ a = suc y) $;
+theorem omega_suc_mono (G: hyps) (a b: set):
+  $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ a ∊ b $ > $ G ⇒ suc a ∈ suc b $;
+theorem omega_zero_le (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ ∅ ∈ a ∨ ∅ = a $;
+theorem omega_tricho (G: hyps) (a b: set):
+  $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ a ∊ b ∨ a = b ∨ b ∊ a $;
+theorem omega_elem_suc_subset (G: hyps) (a b: set):
+  $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ a ∊ b $ > $ G ⇒ suc a ⊆ b $;
+
+-- --------------------------------------------------------------------------
+-- Function values
+-- --------------------------------------------------------------------------
+
+--| The value of a functional class at `A`: the union of its singleton of
+--| values (`∅` outside the domain).
+def fv (F A: class): class = $ ⋃ (ap F A) $;
+
+theorem fv_val (G: hyps) (F: class) (a b: set):
+  $ G ⇒ functional F $ > $ G ⇒ ⟨ a , b ⟩ ∈ F $ > $ G ⇒ fv F a = b $;
+theorem fv_in (G: hyps) (F: class) (a: set):
+  $ G ⇒ functional F $ > $ G ⇒ a ∊ cdm F $ > $ G ⇒ ⟨ a , fv F a ⟩ ∈ F $;
+theorem fv_set (G: hyps) (F: class) (a: set):
+  $ G ⇒ functional F $ > $ G ⇒ isset (fv F a) $;
+theorem fv_empty (G: hyps) (F: class) (a: set):
+  $ G ⇒ a ∊ cdm F → ⊥ $ > $ G ⇒ fv F a = ∅ $;
+--| Two functional classes with the same domain and the same values are equal.
+--| @freshen G x
+theorem fv_ext (G: hyps) {x: set} (F H: class):
+  $ G ⇒ functional F $ > $ G ⇒ functional H $ > $ G ⇒ rel F $ > $ G ⇒ rel H $ >
+  $ G ⇒ cdm F = cdm H $ > $ G , x ∊ cdm F ⇒ fv F x = fv H x $ > $ G ⇒ F = H $;
+--| @congr
+theorem fv_congr (F H A B: class):
+  $ F ≐ H $ > $ A ≐ B $ > $ fv F A ≐ fv H B $;
+theorem fv_eq (G: hyps) (F H A B: class):
+  $ G ⇒ F = H $ > $ G ⇒ A = B $ > $ G ⇒ fv F A = fv H B $;
+--| @rewrite
+theorem sb_c_fv {x: set} (t: set x) (F A: class x):
+  $ (⟦ x / t ⟧ (fv F A)) ≐ fv (⟦ x / t ⟧ F) (⟦ x / t ⟧ A) $;
+
+-- --------------------------------------------------------------------------
+-- Recursion on ω
+-- --------------------------------------------------------------------------
+
+--| The approximations: functions `g` on an initial segment `suc n` of `ω`
+--| that start at `A` and step by `F`.
+def omapx (A F: class) (.g .n .k: set): class =
+  $ {g | ∃ n (n ∊ ω ∧ functional g ∧ rel g ∧ cdm g = suc n ∧ fv g ∅ = A ∧
+      ∀ k (k ∊ n → fv g (suc k) = fv F (fv g k)))} $;
+--| The function defined by recursion: the union of the approximations.
+def omrec (A F: class): class = $ ⋃ (omapx A F) $;
+
+--| @congr
+theorem omapx_congr (A B F H: class): $ A ≐ B $ > $ F ≐ H $ > $ omapx A F ≐ omapx B H $;
+theorem omapx_eq (G: hyps) (A B F H: class):
+  $ G ⇒ A = B $ > $ G ⇒ F = H $ > $ G ⇒ omapx A F = omapx B H $;
+
+theorem omapx_elim {n k: set} (G: hyps n k) (H: hyps k) (A F: class) (g: set) (c: fml k): $ G ⇒ g ∊ omapx A F $ > $ H , n ∊ ω , functional g , rel g , cdm g = suc n , fv g ∅ = A , ∀ k (k ∊ n → fv g (suc k) = fv F (fv g k)) ⇒ c $ > $ G , H ⇒ c $;
+theorem omega_suc_elem (G: hyps) (i w a: set): $ G ⇒ i ∊ ω $ > $ G ⇒ w ∊ suc i $ > $ G ⇒ a ∊ w $ > $ G ⇒ a ∊ i $;
+theorem omega_suc_elem_omega (G: hyps) (i a: set): $ G ⇒ i ∊ ω $ > $ G ⇒ a ∊ suc i $ > $ G ⇒ a ∊ ω $;
+--| Two approximations agree where both are defined.
+theorem omapx_agree (G: hyps) (A F: class) (g h a: set):
+  $ G ⇒ g ∊ omapx A F $ > $ G ⇒ h ∊ omapx A F $ >
+  $ G ⇒ a ∊ cdm g $ > $ G ⇒ a ∊ cdm h $ > $ G ⇒ fv g a = fv h a $;
+theorem csn_opair_elim (G: hyps) (a b s c: set): $ G ⇒ ⟨ a , b ⟩ ∈ csn ⟨ s , c ⟩ $ > $ G ⇒ a = s ∧ b = c $;
+theorem csn_opair_intro (G: hyps) (s c: set): $ G ⇒ ⟨ s , c ⟩ ∈ csn ⟨ s , c ⟩ $;
+theorem cun_csn_opair_intro (G: hyps) (R: class) (s c: set): $ G ⇒ ⟨ s , c ⟩ ∈ R ∪ csn ⟨ s , c ⟩ $;
+theorem cun_csn_opair_elim (G: hyps) (R: class) (a b s c: set): $ G ⇒ ⟨ a , b ⟩ ∈ R ∪ csn ⟨ s , c ⟩ $ > $ G ⇒ ⟨ a , b ⟩ ∈ R ∨ (a = s ∧ b = c) $;
+theorem fv_cun_csn_other (G: hyps) (R A: class) (s c: set): $ G ⇒ isset A $ > $ G ⇒ A = s → ⊥ $ > $ G ⇒ fv (R ∪ csn ⟨ s , c ⟩) A = fv R A $;
+theorem omapx_intro {g k: set} (G: hyps g k) (A F B: class) (i: set): $ G ⇒ isset B $ > $ G ⇒ i ∊ ω $ > $ G ⇒ functional B $ > $ G ⇒ rel B $ > $ G ⇒ cdm B = suc i $ > $ G ⇒ fv B ∅ = A $ > $ G ⇒ ∀ k (k ∊ i → fv B (suc k) = fv F (fv B k)) $ > $ G ⇒ ∃ g (g ∊ omapx A F ∧ cdm g = suc i) $;
+--| An approximation defined at `n` exists for every `n ∊ ω`.
+theorem omapx_exists (G: hyps) {g: set} (A F: class) (n: set):
+  $ G ⇒ isset A $ > $ G ⇒ functional F $ > $ G ⇒ n ∊ ω $ >
+  $ G ⇒ ∃ g (g ∊ omapx A F ∧ n ∊ cdm g) $;
+theorem omapx_functional (G: hyps) (A F: class) (g: set): $ G ⇒ g ∊ omapx A F $ > $ G ⇒ functional g $;
+theorem omapx_rel (G: hyps) (A F: class) (g: set): $ G ⇒ g ∊ omapx A F $ > $ G ⇒ rel g $;
+theorem omapx_zero (G: hyps) (A F: class) (g: set): $ G ⇒ g ∊ omapx A F $ > $ G ⇒ fv g ∅ = A $;
+theorem omapx_cdm (G: hyps) (A F: class) (g a: set): $ G ⇒ g ∊ omapx A F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ a ∊ ω $;
+theorem omapx_step (G: hyps) (A F: class) (g m n: set): $ G ⇒ g ∊ omapx A F $ > $ G ⇒ m = suc n $ > $ G ⇒ m ∊ cdm g $ > $ G ⇒ n ∊ cdm g ∧ fv g (suc n) = fv F (fv g n) $;
+theorem omrec_intro (G: hyps) (A F: class) (g a b: set): $ G ⇒ g ∊ omapx A F $ > $ G ⇒ ⟨ a , b ⟩ ∈ g $ > $ G ⇒ ⟨ a , b ⟩ ∈ omrec A F $;
+theorem omrec_elim (G: hyps) {g: set} (A F: class) (a b: set): $ G ⇒ ⟨ a , b ⟩ ∈ omrec A F $ > $ G ⇒ ∃ g (g ∊ omapx A F ∧ ⟨ a , b ⟩ ∈ g) $;
+theorem omrec_functional (G: hyps) (A F: class):
+  $ G ⇒ isset A $ > $ G ⇒ functional F $ > $ G ⇒ functional (omrec A F) $;
+theorem omrec_rel (G: hyps) (A F: class): $ G ⇒ rel (omrec A F) $;
+theorem omrec_cdm (G: hyps) (A F: class):
+  $ G ⇒ isset A $ > $ G ⇒ functional F $ > $ G ⇒ cdm (omrec A F) = ω $;
+theorem omrec_fv (G: hyps) (A F: class) (g a: set): $ G ⇒ functional (omrec A F) $ > $ G ⇒ g ∊ omapx A F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ fv (omrec A F) a = fv g a $;
+theorem omrec_zero (G: hyps) (A F: class):
+  $ G ⇒ isset A $ > $ G ⇒ functional F $ > $ G ⇒ fv (omrec A F) ∅ = A $;
+theorem omrec_suc (G: hyps) (A F: class) (n: set):
+  $ G ⇒ isset A $ > $ G ⇒ functional F $ > $ G ⇒ n ∊ ω $ >
+  $ G ⇒ fv (omrec A F) (suc n) = fv F (fv (omrec A F) n) $;
+--| Uniqueness: any function on `ω` satisfying the equations is `omrec A F`.
+theorem omrec_unique (G: hyps) {n: set} (A F: class) (h: set):
+  $ G ⇒ isset A $ > $ G ⇒ functional F $ > $ G ⇒ functional h $ > $ G ⇒ rel h $ >
+  $ G ⇒ cdm h = ω $ > $ G ⇒ fv h ∅ = A $ >
+  $ G ⇒ ∀ n (n ∊ ω → fv h (suc n) = fv F (fv h n)) $ > $ G ⇒ h = omrec A F $;
+--| @congr
+theorem omrec_congr (A B F H: class):
+  $ A ≐ B $ > $ F ≐ H $ > $ omrec A F ≐ omrec B H $;
+theorem omrec_eq (G: hyps) (A B F H: class):
+  $ G ⇒ A = B $ > $ G ⇒ F = H $ > $ G ⇒ omrec A F = omrec B H $;
+--| @rewrite
+theorem sb_c_omrec {x: set} (t: set x) (A F: class x):
+  $ (⟦ x / t ⟧ (omrec A F)) ≐ omrec (⟦ x / t ⟧ A) (⟦ x / t ⟧ F) $;

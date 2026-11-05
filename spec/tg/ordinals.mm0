@@ -1,0 +1,322 @@
+-- ordinals.mm0: the ordinals: transitive classes, ordinals as transitive sets
+-- of transitive sets (foundation makes them well-ordered by `∊`), transfinite
+-- induction, trichotomy, suprema, Burali-Forti, the application `cap` and the
+-- graph `cgr` of a class operation `x ↦ B`, and the recursion theorem on the
+-- ordinals: `trec F` is the function on the ordinals with
+-- `fv (trec F) a = fv F (cres (trec F) a)` (the value at `a` is `F` applied
+-- to the restriction to `a`). Imports omega.mm0; proofs in ordinals.auf.
+
+import "omega.mm0";
+
+-- --------------------------------------------------------------------------
+-- Transitive classes
+-- --------------------------------------------------------------------------
+
+--| @freshen G x
+--| @freshen G y
+theorem transitive_intro (G: hyps) {x y: set} (A: class):
+  $ G , x ∊ A , y ∊ x ⇒ y ∊ A $ > $ G ⇒ transitive A $;
+theorem transitive_elim (G: hyps) (A: class) (a b: set):
+  $ G ⇒ transitive A $ > $ G ⇒ a ∊ A $ > $ G ⇒ b ∊ a $ > $ G ⇒ b ∊ A $;
+theorem transitive_subset (G: hyps) (A: class) (a: set):
+  $ G ⇒ transitive A $ > $ G ⇒ a ∊ A $ > $ G ⇒ a ⊆ A $;
+theorem transitive_empty (G: hyps): $ G ⇒ transitive ∅ $;
+theorem transitive_suc (G: hyps) (A: class):
+  $ G ⇒ transitive A $ > $ G ⇒ transitive (suc A) $;
+theorem transitive_cuni (G: hyps) {x: set} (A: class):
+  $ G ⇒ ∀ x (x ∊ A → transitive x) $ > $ G ⇒ transitive (⋃ A) $;
+theorem transitive_cin (G: hyps) (A B: class):
+  $ G ⇒ transitive A $ > $ G ⇒ transitive B $ > $ G ⇒ transitive (A ∩ B) $;
+theorem transitive_cuni_subset (G: hyps) (A: class):
+  $ G ⇒ transitive A $ > $ G ⇒ ⋃ A ⊆ A $;
+theorem cuni_suc (G: hyps) (a: set): $ G ⇒ transitive a $ > $ G ⇒ ⋃ (suc a) = a $;
+--| The union is the least upper bound of its members.
+theorem cuni_least (G: hyps) {x: set} (A B: class):
+  $ G ⇒ ∀ x (x ∊ A → x ⊆ B) $ > $ G ⇒ ⋃ A ⊆ B $;
+
+-- --------------------------------------------------------------------------
+-- Ordinals
+-- --------------------------------------------------------------------------
+
+--| An ordinal: a transitive class of transitive sets.
+def ord (A: class) (.x: set): fml = $ transitive A ∧ ∀ x (x ∊ A → transitive x) $;
+
+theorem ord_intro (G: hyps) {x: set} (A: class):
+  $ G ⇒ transitive A $ > $ G ⇒ ∀ x (x ∊ A → transitive x) $ > $ G ⇒ ord A $;
+theorem ord_trans (G: hyps) (A: class): $ G ⇒ ord A $ > $ G ⇒ transitive A $;
+theorem ord_elem_trans (G: hyps) (A: class) (a: set):
+  $ G ⇒ ord A $ > $ G ⇒ a ∊ A $ > $ G ⇒ transitive a $;
+--| An element of an ordinal is an ordinal.
+theorem ord_elem (G: hyps) (A: class) (a: set):
+  $ G ⇒ ord A $ > $ G ⇒ a ∊ A $ > $ G ⇒ ord a $;
+theorem ord_elem_subset (G: hyps) (A: class) (a: set):
+  $ G ⇒ ord A $ > $ G ⇒ a ∊ A $ > $ G ⇒ a ⊆ A $;
+theorem ord_empty (G: hyps): $ G ⇒ ord ∅ $;
+theorem ord_suc (G: hyps) (A: class): $ G ⇒ ord A $ > $ G ⇒ ord (suc A) $;
+theorem ord_omega (G: hyps): $ G ⇒ ord ω $;
+theorem ord_omega_elem (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ ord a $;
+theorem ord_cuni (G: hyps) {x: set} (A: class):
+  $ G ⇒ ∀ x (x ∊ A → ord x) $ > $ G ⇒ ord (⋃ A) $;
+theorem ord_cin (G: hyps) (A B: class):
+  $ G ⇒ ord A $ > $ G ⇒ ord B $ > $ G ⇒ ord (A ∩ B) $;
+--| A transitive subclass of an ordinal is an ordinal.
+theorem ord_subset (G: hyps) (A B: class):
+  $ G ⇒ ord B $ > $ G ⇒ transitive A $ > $ G ⇒ A ⊆ B $ > $ G ⇒ ord A $;
+--| @congr
+theorem ord_congr (A B: class): $ A ≐ B $ > $ ord A ⟺ ord B $;
+theorem ord_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ ord A $ > $ G ⇒ ord B $;
+--| @rewrite
+theorem sb_f_ord {x: set} (t: set x) (A: class x):
+  $ [x/t] (ord A) ⟺ ord (⟦ x / t ⟧ A) $;
+
+-- --------------------------------------------------------------------------
+-- Transfinite induction and the order of the ordinals
+-- --------------------------------------------------------------------------
+
+--| Transfinite induction, for a formula (from `ax_induction`) and for a class.
+--| @freshen G x
+theorem ord_ind_f (G: hyps) {x y: set} (p: fml x):
+  $ G , ord x , ∀ y (y ∊ x → [x/y] p) ⇒ p $ > $ G ⇒ ∀ x (ord x → p) $;
+theorem ord_ind (G: hyps) {x: set} (P: class):
+  $ G ⇒ ∀ x (ord x → x ⊆ P → x ∊ P) $ > $ G ⇒ ∀ x (ord x → x ∊ P) $;
+--| A nonempty class of ordinals has an `∊`-least element.
+theorem ord_least (G: hyps) {x y: set} (P: class) (a: set):
+  $ G ⇒ ord a $ > $ G ⇒ a ∊ P $ >
+  $ G ⇒ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) $;
+--| Trichotomy, by a double transfinite induction.
+theorem ord_tricho (G: hyps) (a b: set):
+  $ G ⇒ ord a $ > $ G ⇒ ord b $ > $ G ⇒ a ∊ b ∨ a = b ∨ b ∊ a $;
+theorem ord_subset_or (G: hyps) (a b: set):
+  $ G ⇒ ord a $ > $ G ⇒ ord b $ > $ G ⇒ a ⊆ b ∨ b ⊆ a $;
+theorem ord_elem_or_subset (G: hyps) (a b: set):
+  $ G ⇒ ord a $ > $ G ⇒ ord b $ > $ G ⇒ a ∊ b ∨ b ⊆ a $;
+theorem ord_subset_elem (G: hyps) (a b: set):
+  $ G ⇒ ord a $ > $ G ⇒ ord b $ > $ G ⇒ a ⊆ b $ > $ G ⇒ ¬ a = b $ > $ G ⇒ a ∊ b $;
+theorem ord_not_elem_subset (G: hyps) (a b: set):
+  $ G ⇒ ord a $ > $ G ⇒ ord b $ > $ G ⇒ ¬ a ∊ b $ > $ G ⇒ b ⊆ a $;
+theorem ord_elem_not_subset (G: hyps) (a b: set):
+  $ G ⇒ a ∊ b $ > $ G ⇒ b ⊆ a $ > $ G ⇒ ⊥ $;
+theorem ord_elem_suc_subset (G: hyps) (a b: set):
+  $ G ⇒ ord b $ > $ G ⇒ a ∊ b $ > $ G ⇒ suc a ⊆ b $;
+theorem ord_suc_subset_elem (G: hyps) (a b: set):
+  $ G ⇒ suc a ⊆ b $ > $ G ⇒ a ∊ b $;
+theorem ord_suc_elem_suc (G: hyps) (a b: set):
+  $ G ⇒ ord b $ > $ G ⇒ a ∊ b $ > $ G ⇒ suc a ∈ suc b $;
+theorem ord_suc_elem_suc_elim (G: hyps) (a b: set):
+  $ G ⇒ ord b $ > $ G ⇒ suc a ∈ suc b $ > $ G ⇒ a ∊ b $;
+--| Nothing lies between `a` and `suc a`.
+theorem ord_no_between (G: hyps) (a b: set):
+  $ G ⇒ a ∊ b $ > $ G ⇒ b ∊ suc a $ > $ G ⇒ ⊥ $;
+theorem ord_suc_subset (G: hyps) (a b: set):
+  $ G ⇒ ord a $ > $ G ⇒ ord b $ > $ G ⇒ a ⊆ b $ > $ G ⇒ suc a ⊆ suc b $;
+
+-- --------------------------------------------------------------------------
+-- Suprema; every ordinal is a limit or a successor; Burali-Forti
+-- --------------------------------------------------------------------------
+
+theorem ord_cuni_subset (G: hyps) (a: set): $ G ⇒ ord a $ > $ G ⇒ ⋃ a ⊆ a $;
+theorem ord_cuni_ord (G: hyps) (a: set): $ G ⇒ ord a $ > $ G ⇒ ord (⋃ a) $;
+--| The union of a class of ordinals bounded by `b` is bounded by `b`.
+theorem ord_cuni_bound (G: hyps) {x: set} (A: class) (b: set):
+  $ G ⇒ ord b $ > $ G ⇒ ∀ x (x ∊ A → x ∊ b) $ > $ G ⇒ ⋃ A ⊆ b $;
+--| An ordinal is its own union (a limit, or `∅`) or the successor of its union.
+theorem ord_cuni_or_suc (G: hyps) (a: set):
+  $ G ⇒ ord a $ > $ G ⇒ a = ⋃ a ∨ a = suc (⋃ a) $;
+--| Burali-Forti: no set contains every ordinal.
+theorem ord_not_set (G: hyps) {x: set} (a: set):
+  $ G ⇒ ∀ x (ord x → x ∊ a) $ > $ G ⇒ ⊥ $;
+
+-- --------------------------------------------------------------------------
+-- Application and graph of a class operation `x ↦ B`
+-- --------------------------------------------------------------------------
+
+--| The operation applied to a class: `B` at `C` when `C` is a set, `∅`
+--| otherwise. At a set variable it is the substitution (`cap_var`).
+def cap {x: set} (B: class x) (C: class) (.y: set): class =
+  $ {y | ∃ x (x = C ∧ y ∊ B)} $;
+--| The graph of the operation: the pairs `⟨ x , B ⟩` with `B` a set.
+def cgr {x: set} (B: class x) (.y .z: set): class =
+  $ {z | ∃ x ∃ y (z = ⟨ x , y ⟩ ∧ y = B)} $;
+
+--| @rewrite
+theorem cap_var {x: set} (B: class x) (a: set): $ cap x B a ≐ (⟦ x / a ⟧ B) $;
+theorem cap_intro {x: set} (G: hyps x) (B: class x) (C: class) (a b: set):
+  $ G ⇒ a = C $ > $ G ⇒ b ∊ (⟦ x / a ⟧ B) $ > $ G ⇒ b ∊ cap x B C $;
+theorem cap_elim {x: set} (G: hyps x) (B: class x) (C: class) (b: set):
+  $ G ⇒ b ∊ cap x B C $ > $ G ⇒ ∃ x (x = C ∧ b ∊ B) $;
+theorem cap_elim_isset {x: set} (G: hyps x) (B: class x) (C: class) (b: set):
+  $ G ⇒ b ∊ cap x B C $ > $ G ⇒ isset C $;
+theorem cap_eq {x: set} (G: hyps x) (B: class x) (C: class) (a: set):
+  $ G ⇒ a = C $ > $ G ⇒ cap x B C = (⟦ x / a ⟧ B) $;
+theorem cap_empty {x: set} (G: hyps x) (B: class x) (C: class):
+  $ G ⇒ ¬ isset C $ > $ G ⇒ cap x B C = ∅ $;
+--| @congr
+theorem cap_congr {x: set} (B D: class x) (C E: class):
+  $ B ≐ D $ > $ C ≐ E $ > $ cap x B C ≐ cap x D E $;
+theorem cap_eq_arg {x: set} (G: hyps x) (B: class x) (C E: class):
+  $ G ⇒ C = E $ > $ G ⇒ cap x B C = cap x B E $;
+--| @rewrite
+theorem sb_c_cap {x y: set} (t: set y) (B: class x y) (C: class y):
+  $ (⟦ y / t ⟧ (cap x B C)) ≐ cap x (⟦ y / t ⟧ B) (⟦ y / t ⟧ C) $;
+
+theorem cgr_intro {x: set} (G: hyps x) (B: class x) (a b: set):
+  $ G ⇒ b = (⟦ x / a ⟧ B) $ > $ G ⇒ ⟨ a , b ⟩ ∈ cgr x B $;
+theorem cgr_elim {x: set} (G: hyps x) (B: class x) (a b: set):
+  $ G ⇒ ⟨ a , b ⟩ ∈ cgr x B $ > $ G ⇒ b = (⟦ x / a ⟧ B) $;
+theorem cgr_functional {x: set} (G: hyps x) (B: class x): $ G ⇒ functional (cgr x B) $;
+theorem cgr_rel {x: set} (G: hyps x) (B: class x): $ G ⇒ rel (cgr x B) $;
+theorem cgr_cdm {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ isset (⟦ x / a ⟧ B) $ > $ G ⇒ a ∊ cdm (cgr x B) $;
+theorem cgr_cdm_elim {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ a ∊ cdm (cgr x B) $ > $ G ⇒ isset (⟦ x / a ⟧ B) $;
+--| The value of the graph is the operation.
+theorem fv_cgr {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ isset (⟦ x / a ⟧ B) $ > $ G ⇒ fv (cgr x B) a = (⟦ x / a ⟧ B) $;
+--| The identity function on `A` is the graph of `x ↦ x` restricted to `A`.
+theorem cgr_id_fn_into (G: hyps) {x: set} (A B: class):
+  $ G ⇒ A ⊆ B $ > $ G ⇒ fn_into (cres (cgr x x) A) A B $;
+theorem img_cgr_id (G: hyps) {x: set} (A: class): $ G ⇒ img (cgr x x) A = A $;
+--| @congr
+theorem cgr_congr {x: set} (B D: class x): $ B ≐ D $ > $ cgr x B ≐ cgr x D $;
+--| Graphs of operations equal at every argument, under hypotheses.
+theorem cgr_eq {x: set} (G: hyps) (B D: class x): $ G ⇒ ∀ x (B = D) $ > $ G ⇒ cgr x B = cgr x D $;
+--| @rewrite
+theorem sb_c_cgr {x y: set} (t: set y) (B: class x y):
+  $ (⟦ y / t ⟧ (cgr x B)) ≐ cgr x (⟦ y / t ⟧ B) $;
+
+-- --------------------------------------------------------------------------
+-- Transfinite recursion
+-- --------------------------------------------------------------------------
+
+--| The approximations: functions `g` on an ordinal `a` whose value at each
+--| `k ∊ a` is `F` applied to the restriction of `g` to `k`.
+def trapx (F: class) (.g .a .k: set): class =
+  $ {g | ∃ a (ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧
+      ∀ k (k ∊ a → fv g k = fv F (cres g k)))} $;
+--| The approximations indexed by their domains, as a functional class.
+def trapxd (F: class) (.a .g .z: set): class =
+  $ {z | ∃ a ∃ g (z = ⟨ a , g ⟩ ∧ g ∊ trapx F ∧ cdm g = a)} $;
+--| The function defined by recursion: the union of the approximations.
+def trec (F: class): class = $ ⋃ (trapx F) $;
+
+--| Restricting a relation to its domain, and cutting a new pair off.
+theorem cres_cdm_self (G: hyps) (R: class): $ G ⇒ rel R $ > $ G ⇒ cres R (cdm R) = R $;
+theorem cres_subset_cdm (G: hyps) (R A: class):
+  $ G ⇒ rel R $ > $ G ⇒ cdm R ⊆ A $ > $ G ⇒ cres R A = R $;
+theorem cres_cres (G: hyps) (R A B: class):
+  $ G ⇒ A ⊆ B $ > $ G ⇒ cres (cres R B) A = cres R A $;
+theorem cres_mono (G: hyps) (R S A: class):
+  $ G ⇒ R ⊆ S $ > $ G ⇒ cres R A ⊆ cres S A $;
+theorem cres_cun_csn_self (G: hyps) (R: class) (a c: set):
+  $ G ⇒ rel R $ > $ G ⇒ cdm R = a $ > $ G ⇒ cres (R ∪ csn ⟨ a , c ⟩) a = R $;
+theorem cdm_cun_csn (G: hyps) (R: class) (a c: set):
+  $ G ⇒ cdm (R ∪ csn ⟨ a , c ⟩) = cdm R ∪ csn a $;
+theorem fv_cun_csn_self (G: hyps) (R: class) (a c: set):
+  $ G ⇒ rel R $ > $ G ⇒ cdm R = a $ > $ G ⇒ fv (R ∪ csn ⟨ a , c ⟩) a = c $;
+theorem functional_cun_csn (G: hyps) (R: class) (a c: set):
+  $ G ⇒ functional R $ > $ G ⇒ ¬ a ∊ cdm R $ > $ G ⇒ functional (R ∪ csn ⟨ a , c ⟩) $;
+theorem rel_cun_csn (G: hyps) (R: class) (a c: set):
+  $ G ⇒ rel R $ > $ G ⇒ rel (R ∪ csn ⟨ a , c ⟩) $;
+--| The union of a chain of functions is a function.
+--| @freshen G x
+--| @freshen G y
+theorem functional_cuni_chain (G: hyps) {x y: set} (A: class):
+  $ G ⇒ ∀ x (x ∊ A → functional x) $ >
+  $ G ⇒ ∀ x ∀ y (x ∊ A ∧ y ∊ A → x ⊆ y ∨ y ⊆ x) $ > $ G ⇒ functional (⋃ A) $;
+theorem rel_cuni (G: hyps) {x: set} (A: class):
+  $ G ⇒ ∀ x (x ∊ A → rel x) $ > $ G ⇒ rel (⋃ A) $;
+theorem cdm_cuni (G: hyps) {x: set} (A: class):
+  $ G ⇒ cdm (⋃ A) = ⋃ (img (cgr x (cdm x)) A) $;
+--| The value of a subfunction is the value of the function.
+theorem fv_subset (G: hyps) (F H: class) (a: set):
+  $ G ⇒ functional H $ > $ G ⇒ F ⊆ H $ > $ G ⇒ a ∊ cdm F $ > $ G ⇒ fv F a = fv H a $;
+theorem fv_cres (G: hyps) (F A: class) (a: set):
+  $ G ⇒ functional F $ > $ G ⇒ a ∊ A $ > $ G ⇒ fv (cres F A) a = fv F a $;
+
+theorem trapx_elim {a k: set} (G: hyps a k) (H: hyps k) (F: class) (g: set) (c: fml k):
+  $ G ⇒ g ∊ trapx F $ >
+  $ H , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ c $ >
+  $ G , H ⇒ c $;
+theorem trapx_intro {k: set} (G: hyps k) (F B: class) (a: set):
+  $ G ⇒ isset B $ > $ G ⇒ ord a $ > $ G ⇒ functional B $ > $ G ⇒ rel B $ > $ G ⇒ cdm B = a $ >
+  $ G ⇒ ∀ k (k ∊ a → fv B k = fv F (cres B k)) $ > $ G ⇒ B ∈ trapx F $;
+theorem trapx_functional (G: hyps) (F: class) (g: set):
+  $ G ⇒ g ∊ trapx F $ > $ G ⇒ functional g $;
+theorem trapx_rel (G: hyps) (F: class) (g: set): $ G ⇒ g ∊ trapx F $ > $ G ⇒ rel g $;
+theorem trapx_ord (G: hyps) (F: class) (g: set): $ G ⇒ g ∊ trapx F $ > $ G ⇒ ord (cdm g) $;
+theorem trapx_step (G: hyps) (F: class) (g a: set):
+  $ G ⇒ g ∊ trapx F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ fv g a = fv F (cres g a) $;
+--| Two approximations agree where both are defined (transfinite induction).
+theorem trapx_agree (G: hyps) (F: class) (g h a: set):
+  $ G ⇒ g ∊ trapx F $ > $ G ⇒ h ∊ trapx F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ a ∊ cdm h $ >
+  $ G ⇒ fv g a = fv h a $;
+theorem trapx_agree_cres (G: hyps) (F: class) (g h a: set):
+  $ G ⇒ g ∊ trapx F $ > $ G ⇒ h ∊ trapx F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ a ∊ cdm h $ >
+  $ G ⇒ cres g a = cres h a $;
+theorem trapx_subset (G: hyps) (F: class) (g h: set):
+  $ G ⇒ g ∊ trapx F $ > $ G ⇒ h ∊ trapx F $ > $ G ⇒ cdm g ⊆ cdm h $ > $ G ⇒ g ⊆ h $;
+theorem trapx_chain (G: hyps) (F: class) (g h: set):
+  $ G ⇒ g ∊ trapx F $ > $ G ⇒ h ∊ trapx F $ > $ G ⇒ g ⊆ h ∨ h ⊆ g $;
+--| The restriction of an approximation to an element of its domain is one.
+theorem trapx_cres (G: hyps) (F: class) (g a: set):
+  $ G ⇒ g ∊ trapx F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ cres g a ∈ trapx F $;
+--| Extending an approximation on `a` by its value at `a`.
+theorem trapx_extend (G: hyps) (F: class) (g a: set):
+  $ G ⇒ functional F $ > $ G ⇒ g ∊ trapx F $ > $ G ⇒ cdm g = a $ >
+  $ G ⇒ g ∪ csn ⟨ a , fv F g ⟩ ∈ trapx F $;
+theorem trapxd_intro (G: hyps) (F: class) (g a: set):
+  $ G ⇒ g ∊ trapx F $ > $ G ⇒ cdm g = a $ > $ G ⇒ ⟨ a , g ⟩ ∈ trapxd F $;
+theorem trapxd_elim (G: hyps) (F: class) (g a: set):
+  $ G ⇒ ⟨ a , g ⟩ ∈ trapxd F $ > $ G ⇒ g ∊ trapx F ∧ cdm g = a $;
+theorem trapxd_functional (G: hyps) (F: class): $ G ⇒ functional (trapxd F) $;
+--| The union of the approximations on the elements of an ordinal `a` is an
+--| approximation on `⋃ a` (the limit step).
+theorem trapx_cuni (G: hyps) {x: set} (F: class) (a: set):
+  $ G ⇒ ord a $ > $ G ⇒ ∀ x (x ∊ a → x ∊ cdm (trapxd F)) $ >
+  $ G ⇒ ⋃ (img (trapxd F) a) ∈ trapx F ∧ cdm (⋃ (img (trapxd F) a)) = ⋃ a $;
+--| An approximation on every ordinal exists (transfinite induction, by the
+--| limit and successor steps).
+theorem trapx_exists (G: hyps) {g: set} (F: class) (a: set):
+  $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ ∃ g (g ∊ trapx F ∧ cdm g = a) $;
+--| @congr
+theorem trapx_congr (F H: class): $ F ≐ H $ > $ trapx F ≐ trapx H $;
+--| @rewrite
+theorem sb_c_trapx {x: set} (t: set x) (F: class x):
+  $ (⟦ x / t ⟧ (trapx F)) ≐ trapx (⟦ x / t ⟧ F) $;
+--| @congr
+theorem trapxd_congr (F H: class): $ F ≐ H $ > $ trapxd F ≐ trapxd H $;
+--| @rewrite
+theorem sb_c_trapxd {x: set} (t: set x) (F: class x):
+  $ (⟦ x / t ⟧ (trapxd F)) ≐ trapxd (⟦ x / t ⟧ F) $;
+
+theorem trec_intro (G: hyps) (F: class) (g a b: set):
+  $ G ⇒ g ∊ trapx F $ > $ G ⇒ ⟨ a , b ⟩ ∈ g $ > $ G ⇒ ⟨ a , b ⟩ ∈ trec F $;
+theorem trec_elim (G: hyps) {g: set} (F: class) (a b: set):
+  $ G ⇒ ⟨ a , b ⟩ ∈ trec F $ > $ G ⇒ ∃ g (g ∊ trapx F ∧ ⟨ a , b ⟩ ∈ g) $;
+theorem trec_functional (G: hyps) (F: class): $ G ⇒ functional (trec F) $;
+theorem trec_rel (G: hyps) (F: class): $ G ⇒ rel (trec F) $;
+theorem trec_cdm_ord (G: hyps) (F: class) (a: set):
+  $ G ⇒ a ∊ cdm (trec F) $ > $ G ⇒ ord a $;
+theorem trec_cdm (G: hyps) (F: class) (a: set):
+  $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ a ∊ cdm (trec F) $;
+theorem trec_fv (G: hyps) (F: class) (g a: set):
+  $ G ⇒ g ∊ trapx F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ fv (trec F) a = fv g a $;
+theorem trec_cres (G: hyps) (F: class) (g a: set):
+  $ G ⇒ g ∊ trapx F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ cres (trec F) a = cres g a $;
+theorem trec_cres_apx (G: hyps) (F: class) (a: set):
+  $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ cres (trec F) a ∈ trapx F $;
+--| The recursion equation.
+theorem trec_eq (G: hyps) (F: class) (a: set):
+  $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ fv (trec F) a = fv F (cres (trec F) a) $;
+--| Uniqueness: a function on the ordinals satisfying the equation is `trec F`.
+theorem trec_unique (G: hyps) {x: set} (F H: class):
+  $ G ⇒ functional F $ > $ G ⇒ functional H $ > $ G ⇒ rel H $ >
+  $ G ⇒ ∀ x (x ∊ cdm H ↔ ord x) $ >
+  $ G ⇒ ∀ x (ord x → fv H x = fv F (cres H x)) $ > $ G ⇒ H = trec F $;
+--| @congr
+theorem trec_congr (F H: class): $ F ≐ H $ > $ trec F ≐ trec H $;
+--| (`trec_eq` is the recursion equation.)
+theorem trec_eq_cong (G: hyps) (F H: class): $ G ⇒ F = H $ > $ G ⇒ trec F = trec H $;
+--| @rewrite
+theorem sb_c_trec {x: set} (t: set x) (F: class x):
+  $ (⟦ x / t ⟧ (trec F)) ≐ trec (⟦ x / t ⟧ F) $;

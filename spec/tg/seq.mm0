@@ -1,0 +1,162 @@
+-- seq.mm0: finite sequences. A sequence over `A` is a function from a natural
+-- number `n` (its length, `cdm s`) into `A`, with no other pairs (`fseq A`).
+-- `scons a s` puts `a` in front (index `0`, the rest shifted up: the de
+-- Bruijn order of a context `a :: s`), `ssnoc s a` appends at the end,
+-- `scat s t` concatenates; a function `F` maps a sequence `s` to `ccom F s`
+-- (`F` after `s`). Induction on sequences is by `scons`. Sequences over an
+-- element of a universe are in the universe, and so is the set of them when
+-- `ω` is. Imports arith2.mm0; proofs in seq.auf.
+
+import "arith2.mm0";
+
+-- --------------------------------------------------------------------------
+-- The definitions
+-- --------------------------------------------------------------------------
+
+--| The finite sequences over `A`.
+def fseq (A: class) (.n .s: set): class =
+  $ {s | ∃ n (n ∊ ω ∧ rel s ∧ cdm s = n ∧ fn_into s n A)} $;
+--| `A` in front of `S`.
+def scons (A S: class) (.i .y .z: set): class =
+  $ csn ⟨ ∅ , A ⟩ ∪ {z | ∃ i ∃ y (z = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S)} $;
+--| `A` after the end of `S`.
+def ssnoc (S A: class): class = $ S ∪ csn ⟨ cdm S , A ⟩ $;
+--| `S` followed by `T`.
+def scat (S T: class) (.i .y .z: set): class =
+  $ S ∪ {z | ∃ i ∃ y (z = ⟨ nadd (cdm S) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ T)} $;
+
+--| @congr
+theorem fseq_congr (A B: class): $ A ≐ B $ > $ fseq A ≐ fseq B $;
+theorem fseq_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ fseq A = fseq B $;
+--| @rewrite
+theorem sb_c_fseq {x: set} (t: set x) (A: class x):
+  $ (⟦ x / t ⟧ (fseq A)) ≐ fseq (⟦ x / t ⟧ A) $;
+--| @congr
+theorem scons_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ scons A C ≐ scons B D $;
+theorem scons_eq (G: hyps) (A B C D: class):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ scons A C = scons B D $;
+--| @rewrite
+theorem sb_c_scons {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (scons A B)) ≐ scons (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+--| @congr
+theorem ssnoc_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ ssnoc A C ≐ ssnoc B D $;
+theorem ssnoc_eq (G: hyps) (A B C D: class):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ ssnoc A C = ssnoc B D $;
+--| @rewrite
+theorem sb_c_ssnoc {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (ssnoc A B)) ≐ ssnoc (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+--| @congr
+theorem scat_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ scat A C ≐ scat B D $;
+theorem scat_eq (G: hyps) (A B C D: class):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ scat A C = scat B D $;
+--| @rewrite
+theorem sb_c_scat {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (scat A B)) ≐ scat (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+
+-- --------------------------------------------------------------------------
+-- Sequences
+-- --------------------------------------------------------------------------
+
+theorem fseq_intro (G: hyps) (A: class) (s n: set):
+  $ G ⇒ n ∊ ω $ > $ G ⇒ rel s $ > $ G ⇒ cdm s = n $ > $ G ⇒ fn_into s n A $ > $ G ⇒ s ∊ fseq A $;
+--| A function whose domain is a natural number and whose values are in `A`.
+theorem fseq_of_fn (G: hyps) (A: class) (s: set):
+  $ G ⇒ functional s $ > $ G ⇒ rel s $ > $ G ⇒ cdm s ∈ ω $ > $ G ⇒ crn s ⊆ A $ > $ G ⇒ s ∊ fseq A $;
+theorem fseq_functional (G: hyps) (A: class) (s: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ functional s $;
+theorem fseq_rel (G: hyps) (A: class) (s: set): $ G ⇒ s ∊ fseq A $ > $ G ⇒ rel s $;
+theorem fseq_len (G: hyps) (A: class) (s: set): $ G ⇒ s ∊ fseq A $ > $ G ⇒ cdm s ∈ ω $;
+theorem fseq_fn_into (G: hyps) (A: class) (s: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ fn_into s (cdm s) A $;
+theorem fseq_fv (G: hyps) (A: class) (s i: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ i ∊ cdm s $ > $ G ⇒ fv s i ∈ A $;
+theorem fseq_crn (G: hyps) (A: class) (s: set): $ G ⇒ s ∊ fseq A $ > $ G ⇒ crn s ⊆ A $;
+theorem fseq_mono (G: hyps) (A B: class): $ G ⇒ A ⊆ B $ > $ G ⇒ fseq A ⊆ fseq B $;
+--| `fseq A ⊆ 𝒫 (ω × A)`.
+theorem fseq_set (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ isset (fseq A) $;
+--| Two sequences of the same length with the same components are equal.
+theorem fseq_ext (G: hyps) {i: set} (A B: class) (s t: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq B $ > $ G ⇒ cdm s = cdm t $ >
+  $ G ⇒ ∀ i (i ∊ cdm s → fv s i = fv t i) $ > $ G ⇒ s = t $;
+theorem fseq_empty (G: hyps) (A: class): $ G ⇒ ∅ ∈ fseq A $;
+theorem fseq_len_zero (G: hyps) (A: class) (s: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ cdm s = ∅ $ > $ G ⇒ s = ∅ $;
+
+-- --------------------------------------------------------------------------
+-- In front, at the end, and concatenation
+-- --------------------------------------------------------------------------
+
+theorem scons_pair (G: hyps) {i: set} (U A S: class) (v: set): $ G ⇒ ⟨ U , v ⟩ ∈ scons A S $ > $ G ⇒ isset U $ > $ G ⇒ isset A $ > $ G ⇒ (U = ∅ ∧ v = A) ∨ ∃ i (U = suc i ∧ ⟨ i , v ⟩ ∈ S) $;
+theorem scons_fseq (G: hyps) (A: class) (a s: set):
+  $ G ⇒ a ∊ A $ > $ G ⇒ s ∊ fseq A $ > $ G ⇒ scons a s ∈ fseq A $;
+theorem scons_len (G: hyps) (A: class) (a s: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ cdm (scons a s) = suc (cdm s) $;
+theorem scons_fv_zero (G: hyps) (a s: set): $ G ⇒ fv (scons a s) ∅ = a $;
+theorem scons_fv_suc (G: hyps) (a s i: set): $ G ⇒ fv (scons a s) (suc i) = fv s i $;
+theorem scons_inj (G: hyps) (a b s t: set):
+  $ G ⇒ rel s $ > $ G ⇒ rel t $ > $ G ⇒ scons a s = scons b t $ > $ G ⇒ a = b ∧ s = t $;
+theorem scons_ne_empty (G: hyps) (a s: set): $ G ⇒ scons a s = ∅ $ > $ G ⇒ ⊥ $;
+--| A sequence is empty or a `scons`.
+theorem fseq_cases (G: hyps) {x y: set} (A: class) (s: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ s = ∅ ∨ ∃ x ∃ y (x ∊ A ∧ y ∊ fseq A ∧ s = scons x y) $;
+--| Induction on sequences.
+theorem fseq_ind (G: hyps) {x y: set} (A P: class):
+  $ G ⇒ ∅ ∈ P $ > $ G ⇒ ∀ x ∀ y (x ∊ A → y ∊ fseq A → y ∊ P → scons x y ∈ P) $ >
+  $ G ⇒ fseq A ⊆ P $;
+
+theorem ssnoc_fseq (G: hyps) (A: class) (s a: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ a ∊ A $ > $ G ⇒ ssnoc s a ∈ fseq A $;
+theorem ssnoc_len (G: hyps) (A: class) (s a: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ cdm (ssnoc s a) = suc (cdm s) $;
+theorem ssnoc_fv_last (G: hyps) (A: class) (s a: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ fv (ssnoc s a) (cdm s) = a $;
+theorem ssnoc_fv_lt (G: hyps) (A: class) (s a i: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ i ∊ cdm s $ > $ G ⇒ fv (ssnoc s a) i = fv s i $;
+
+theorem scat_fseq (G: hyps) (A: class) (s t: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq A $ > $ G ⇒ scat s t ∈ fseq A $;
+theorem scat_len (G: hyps) (A: class) (s t: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq A $ > $ G ⇒ cdm (scat s t) = nadd (cdm s) (cdm t) $;
+theorem scat_fv_l (G: hyps) (A: class) (s t i: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq A $ > $ G ⇒ i ∊ cdm s $ > $ G ⇒ fv (scat s t) i = fv s i $;
+theorem scat_fv_r (G: hyps) (A: class) (s t i: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq A $ > $ G ⇒ i ∊ cdm t $ >
+  $ G ⇒ fv (scat s t) (nadd (cdm s) i) = fv t i $;
+theorem scat_empty_l (G: hyps) (A: class) (t: set): $ G ⇒ t ∊ fseq A $ > $ G ⇒ scat ∅ t = t $;
+theorem scat_empty_r (G: hyps) (s: set): $ G ⇒ scat s ∅ = s $;
+theorem scat_scons (G: hyps) (A: class) (a s t: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq A $ > $ G ⇒ scat (scons a s) t = scons a (scat s t) $;
+theorem scat_ssnoc (G: hyps) (A: class) (s t a: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq A $ > $ G ⇒ scat s (ssnoc t a) = ssnoc (scat s t) a $;
+theorem scat_assoc (G: hyps) (A: class) (s t u: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq A $ > $ G ⇒ u ∊ fseq A $ >
+  $ G ⇒ scat (scat s t) u = scat s (scat t u) $;
+theorem ssnoc_scat (G: hyps) (A: class) (s a: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ ssnoc s a = scat s (scons a ∅) $;
+
+-- --------------------------------------------------------------------------
+-- Mapping a function over a sequence
+-- --------------------------------------------------------------------------
+
+theorem fv_ccom (G: hyps) (F: class) (s i: set):
+  $ G ⇒ functional F $ > $ G ⇒ functional s $ > $ G ⇒ i ∊ cdm s $ > $ G ⇒ fv s i ∈ cdm F $ >
+  $ G ⇒ fv (ccom F s) i = fv F (fv s i) $;
+theorem ccom_fseq (G: hyps) (F A B: class) (s: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ fn_into F A B $ > $ G ⇒ ccom F s ∈ fseq B $;
+theorem ccom_len (G: hyps) (F A B: class) (s: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ fn_into F A B $ > $ G ⇒ cdm (ccom F s) = cdm s $;
+theorem ccom_empty (G: hyps) (F: class): $ G ⇒ ccom F ∅ = ∅ $;
+theorem ccom_scons (G: hyps) (F: class) (a s: set):
+  $ G ⇒ functional F $ > $ G ⇒ a ∊ cdm F $ > $ G ⇒ ccom F (scons a s) = scons (fv F a) (ccom F s) $;
+--| Mapping by a function or by an extension of it gives the same sequence.
+theorem ccom_subset_eq (G: hyps) (H K: class) (s: set):
+  $ G ⇒ functional K $ > $ G ⇒ H ⊆ K $ > $ G ⇒ crn s ⊆ cdm H $ > $ G ⇒ ccom H s = ccom K s $;
+
+-- --------------------------------------------------------------------------
+-- Sequences in a universe
+-- --------------------------------------------------------------------------
+
+theorem universe_fseq_elem (G: hyps) (U: class) (a s: set):
+  $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ s ∊ fseq a $ > $ G ⇒ s ∈ U $;
+theorem universe_fseq (G: hyps) (U: class) (a: set):
+  $ G ⇒ universe U $ > $ G ⇒ ω ∈ U $ > $ G ⇒ a ∊ U $ > $ G ⇒ fseq a ∈ U $;

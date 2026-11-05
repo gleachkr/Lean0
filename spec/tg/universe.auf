@@ -1,0 +1,1238 @@
+-- Proofs for universe.mm0.
+
+universe_trans
+--------------
+l1: $ G ⇒ transitive U $ by and_elim_l [#1]
+
+universe_elem_subset
+--------------------
+l1: $ G ⇒ transitive U $ by universe_trans [#1]
+l2: $ G ⇒ a ⊆ U $ by transitive_subset [l1, #2]
+
+universe_elem_elem
+------------------
+l1: $ G ⇒ transitive U $ by universe_trans [#1]
+l2: $ G ⇒ b ∊ U $ by transitive_elim [l1, #2, #3]
+
+universe_cpr
+------------
+l1: $ G ⇒ ∀ x ∀ y (x ∊ U ∧ y ∊ U → cpr x y ∈ U) ∧ ∀ x (x ∊ U → 𝒫 x ∈ U) ∧ ∀ x ∀ f (x ∊ U ∧ fn_into f x U → ⋃ (img f x) ∈ U) $ by and_elim_r [#1]
+l2: $ G ⇒ ∀ x ∀ y (x ∊ U ∧ y ∊ U → cpr x y ∈ U) $ by and_elim_l [l1]
+l3: $ G ⇒ ∀ y (a ∊ U ∧ y ∊ U → cpr a y ∈ U) $ by all_elim [l2]
+l4: $ G ⇒ a ∊ U ∧ b ∊ U → cpr a b ∈ U $ by all_elim [l3]
+l5: $ G ⇒ a ∊ U ∧ b ∊ U $ by and_intro [#2, #3]
+l6: $ G ⇒ cpr a b ∈ U $ by imp_elim [l4, l5]
+
+universe_cpw
+------------
+l1: $ G ⇒ ∀ x ∀ y (x ∊ U ∧ y ∊ U → cpr x y ∈ U) ∧ ∀ x (x ∊ U → 𝒫 x ∈ U) ∧ ∀ x ∀ f (x ∊ U ∧ fn_into f x U → ⋃ (img f x) ∈ U) $ by and_elim_r [#1]
+l2: $ G ⇒ ∀ x (x ∊ U → 𝒫 x ∈ U) ∧ ∀ x ∀ f (x ∊ U ∧ fn_into f x U → ⋃ (img f x) ∈ U) $ by and_elim_r [l1]
+l3: $ G ⇒ ∀ x (x ∊ U → 𝒫 x ∈ U) $ by and_elim_l [l2]
+l4: $ G ⇒ a ∊ U → 𝒫 a ∈ U $ by all_elim [l3]
+l5: $ G ⇒ 𝒫 a ∈ U $ by imp_elim [l4, #2]
+
+universe_cuni_fn
+----------------
+l1: $ G ⇒ ∀ x ∀ y (x ∊ U ∧ y ∊ U → cpr x y ∈ U) ∧ ∀ x (x ∊ U → 𝒫 x ∈ U) ∧ ∀ x ∀ g (x ∊ U ∧ fn_into g x U → ⋃ (img g x) ∈ U) $ by and_elim_r [#1]
+l2: $ G ⇒ ∀ x (x ∊ U → 𝒫 x ∈ U) ∧ ∀ x ∀ g (x ∊ U ∧ fn_into g x U → ⋃ (img g x) ∈ U) $ by and_elim_r [l1]
+l3: $ G ⇒ ∀ x ∀ g (x ∊ U ∧ fn_into g x U → ⋃ (img g x) ∈ U) $ by and_elim_r [l2]
+l4: $ G ⇒ ∀ g (a ∊ U ∧ fn_into g a U → ⋃ (img g a) ∈ U) $ by all_elim [l3]
+l5: $ G ⇒ a ∊ U ∧ fn_into f a U → ⋃ (img f a) ∈ U $ by all_elim [l4]
+l6: $ G ⇒ a ∊ U ∧ fn_into f a U $ by and_intro [#2, #3]
+l7: $ G ⇒ ⋃ (img f a) ∈ U $ by imp_elim [l5, l6]
+
+universe_subset
+---------------
+l1: $ G ⇒ isset A $ by subset_set [#3]
+l2: $ G ⇒ A ∈ 𝒫 a $ by wcel_cpw [l1, #3]
+l3: $ G ⇒ 𝒫 a ∈ U $ by universe_cpw [#1, #2]
+l0: $ G ⇒ transitive U $ by universe_trans [#1]
+l4: $ G , u = 𝒫 a , u ∊ U ⇒ u = 𝒫 a $ by ax
+l5: $ G , u = 𝒫 a , u ∊ U ⇒ 𝒫 a = u $ by eq_sym [l4]
+l6: $ G , u = 𝒫 a , u ∊ U ⇒ A ∈ 𝒫 a $ by weaken [l2]
+l7: $ G , u = 𝒫 a , u ∊ U ⇒ A ∈ u $ by wcel_eq_r [l5, l6]
+l8: $ G , u = 𝒫 a , u ∊ U , v = A , v ∊ u ⇒ v ∊ u $ by ax
+l9: $ G , u = 𝒫 a , u ∊ U , v = A , v ∊ u ⇒ u ∊ U $ by ax
+l10: $ G , u = 𝒫 a , u ∊ U , v = A , v ∊ u ⇒ transitive U $ by weaken [l0]
+l11: $ G , u = 𝒫 a , u ∊ U , v = A , v ∊ u ⇒ v ∊ U $ by transitive_elim [l10, l9, l8]
+l12: $ G , u = 𝒫 a , u ∊ U , v = A , v ∊ u ⇒ v = A $ by ax
+l13: $ G , u = 𝒫 a , u ∊ U , v = A , v ∊ u ⇒ A ∈ U $ by wcel_intro [l12, l11]
+l14: $ G , u = 𝒫 a , u ∊ U ⇒ A ∈ U $ by wcel_elim [l7, l13]
+l15: $ G ⇒ A ∈ U $ by wcel_elim [l3, l14]
+
+universe_csn
+------------
+l1: $ G ⇒ csn a ∈ U $ by universe_cpr [#1, #2, #2]
+
+--| A pair of elements (classes) is an element.
+lemma u1_cpr_cls (G: hyps) (U A B: class):
+  $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ B ∈ U $ > $ G ⇒ cpr A B ∈ U $
+----
+l1: $ G , u = A , u ∊ U , v = B , v ∊ U ⇒ universe U $ by weaken [#1]
+l2: $ G , u = A , u ∊ U , v = B , v ∊ U ⇒ u ∊ U $ by ax
+l3: $ G , u = A , u ∊ U , v = B , v ∊ U ⇒ v ∊ U $ by ax
+l4: $ G , u = A , u ∊ U , v = B , v ∊ U ⇒ cpr u v ∈ U $ by universe_cpr [l1, l2, l3]
+l5: $ G , u = A , u ∊ U , v = B , v ∊ U ⇒ u = A $ by ax
+l6: $ G , u = A , u ∊ U , v = B , v ∊ U ⇒ v = B $ by ax
+l7: $ G , u = A , u ∊ U , v = B , v ∊ U ⇒ cpr u v = cpr A B $ by cpr_eq [l5, l6]
+l8: $ G , u = A , u ∊ U , v = B , v ∊ U ⇒ cpr A B ∈ U $ by wcel_eq_l [l7, l4]
+l9: $ G , u = A , u ∊ U ⇒ B ∈ U $ by weaken [#3]
+l10: $ G , u = A , u ∊ U ⇒ cpr A B ∈ U $ by wcel_elim [l9, l8]
+l11: $ G ⇒ cpr A B ∈ U $ by wcel_elim [#2, l10]
+
+universe_opair
+--------------
+l1: $ G ⇒ csn a ∈ U $ by universe_csn [#1, #2]
+l2: $ G ⇒ cpr a b ∈ U $ by universe_cpr [#1, #2, #3]
+l3: $ G ⇒ cpr (csn a) (cpr a b) ∈ U $ by u1_cpr_cls [#1, l1, l2]
+
+universe_empty
+--------------
+l1: $ G ⇒ ∅ ⊆ a $ by empty_subset
+l2: $ G ⇒ ∅ ∈ U $ by universe_subset [#1, #2, l1]
+
+--| The restriction of a functional class to a set is a set.
+lemma u1_cres_set (G: hyps) (F: class) (a: set):
+  $ G ⇒ functional F $ > $ G ⇒ isset (cres F a) $
+----
+l1: $ G , z ∊ cres F a ⇒ z ∊ cres F a $ by ax
+l2: $ G , z ∊ cres F a ⇒ rel (cres F a) $ by cres_rel
+l3: $ G , z ∊ cres F a , z = ⟨ u , v ⟩ ⇒ z = ⟨ u , v ⟩ $ by ax
+l4: $ G , z ∊ cres F a , z = ⟨ u , v ⟩ ⇒ z ∊ cres F a $ by ax
+l5: $ G , z ∊ cres F a , z = ⟨ u , v ⟩ ⇒ ⟨ u , v ⟩ ∈ cres F a $ by wcel_intro [l3, l4]
+l6: $ G , z ∊ cres F a , z = ⟨ u , v ⟩ ⇒ u ∊ a ∧ ⟨ u , v ⟩ ∈ F $ by cres_elim [l5]
+l7: $ G , z ∊ cres F a , z = ⟨ u , v ⟩ ⇒ u ∊ a $ by and_elim_l [l6]
+l8: $ G , z ∊ cres F a , z = ⟨ u , v ⟩ ⇒ ⟨ u , v ⟩ ∈ F $ by and_elim_r [l6]
+l9: $ G , z ∊ cres F a , z = ⟨ u , v ⟩ ⇒ v ∊ img F a $ by img_intro [l7, l8]
+l10: $ G , z ∊ cres F a , z = ⟨ u , v ⟩ ⇒ z ∊ a × img F a $ by cxp_intro_eq [l3, l7, l9]
+l11: $ G , z ∊ cres F a ⇒ z ∊ a × img F a $ by rel_elim [l2, l1, l10]
+l12: $ G ⇒ cres F a ⊆ a × img F a $ by subset_intro [l11]
+l13: $ G ⇒ isset a $ by isset_var
+l14: $ G ⇒ isset (img F a) $ by img_set [#1, l13]
+l15: $ G ⇒ isset (a × img F a) $ by cxp_set [l13, l14]
+l16: $ G ⇒ isset (cres F a) $ by subset_isset [l15, l12]
+
+lemma u1_fn_into_cres (G: hyps) (F B: class) (a: set):
+  $ G ⇒ fn_into F a B $ > $ G ⇒ fn_into (cres F a) a B $
+----
+l1: $ G ⇒ functional F $ by fn_into_functional [#1]
+l2: $ G ⇒ functional (cres F a) $ by functional_cres [l1]
+l3: $ G , u ∊ a ⇒ fn_into F a B $ by weaken [#1]
+l4: $ G , u ∊ a ⇒ u ∊ a $ by ax
+l5: $ G , u ∊ a , v ∊ B , ⟨ u , v ⟩ ∈ F ⇒ v ∊ B $ by ax
+l6: $ G , u ∊ a , v ∊ B , ⟨ u , v ⟩ ∈ F ⇒ ⟨ u , v ⟩ ∈ F $ by ax
+l7: $ G , u ∊ a , v ∊ B , ⟨ u , v ⟩ ∈ F ⇒ u ∊ a $ by ax
+l8: $ G , u ∊ a , v ∊ B , ⟨ u , v ⟩ ∈ F ⇒ ⟨ u , v ⟩ ∈ cres F a $ by cres_intro [l7, l6]
+l9: $ G , u ∊ a , v ∊ B , ⟨ u , v ⟩ ∈ F ⇒ v ∊ B ∧ ⟨ u , v ⟩ ∈ cres F a $ by and_intro [l5, l8]
+l10: $ G , u ∊ a , v ∊ B , ⟨ u , v ⟩ ∈ F ⇒ ∃ y (y ∊ B ∧ ⟨ u , y ⟩ ∈ cres F a) $ by ex_intro (x := $ y $, t := $ v $, p := $ y ∊ B ∧ ⟨ u , y ⟩ ∈ cres F a $) [l9]
+l11: $ G , u ∊ a ⇒ ∃ y (y ∊ B ∧ ⟨ u , y ⟩ ∈ cres F a) $ by fn_into_elim [l3, l4, l10]
+l12: $ G ⇒ fn_into (cres F a) a B $ by fn_into_intro [l2, l11]
+
+--| The image of `A` under a restriction to `A`.
+lemma u1_img_cres (G: hyps) (F A: class): $ G ⇒ img (cres F A) A = img F A $
+----
+l1: $ G , z ∊ img (cres F A) A ⇒ z ∊ img (cres F A) A $ by ax
+l2: $ G , z ∊ img (cres F A) A , u ∊ A , ⟨ u , z ⟩ ∈ cres F A ⇒ ⟨ u , z ⟩ ∈ cres F A $ by ax
+l3: $ G , z ∊ img (cres F A) A , u ∊ A , ⟨ u , z ⟩ ∈ cres F A ⇒ u ∊ A ∧ ⟨ u , z ⟩ ∈ F $ by cres_elim [l2]
+l4: $ G , z ∊ img (cres F A) A , u ∊ A , ⟨ u , z ⟩ ∈ cres F A ⇒ ⟨ u , z ⟩ ∈ F $ by and_elim_r [l3]
+l5: $ G , z ∊ img (cres F A) A , u ∊ A , ⟨ u , z ⟩ ∈ cres F A ⇒ u ∊ A $ by ax
+l6: $ G , z ∊ img (cres F A) A , u ∊ A , ⟨ u , z ⟩ ∈ cres F A ⇒ z ∊ img F A $ by img_intro [l5, l4]
+l7: $ G , z ∊ img (cres F A) A ⇒ z ∊ img F A $ by img_elim [l1, l6]
+l8: $ G , z ∊ img F A ⇒ z ∊ img F A $ by ax
+l9: $ G , z ∊ img F A , u ∊ A , ⟨ u , z ⟩ ∈ F ⇒ u ∊ A $ by ax
+l10: $ G , z ∊ img F A , u ∊ A , ⟨ u , z ⟩ ∈ F ⇒ ⟨ u , z ⟩ ∈ F $ by ax
+l11: $ G , z ∊ img F A , u ∊ A , ⟨ u , z ⟩ ∈ F ⇒ ⟨ u , z ⟩ ∈ cres F A $ by cres_intro [l9, l10]
+l12: $ G , z ∊ img F A , u ∊ A , ⟨ u , z ⟩ ∈ F ⇒ z ∊ img (cres F A) A $ by img_intro [l9, l11]
+l13: $ G , z ∊ img F A ⇒ z ∊ img (cres F A) A $ by img_elim [l8, l12]
+l14: $ G ⇒ img (cres F A) A = img F A $ by eq_intro [l7, l13]
+
+--| `universe_cuni_fn` for a functional class: restrict it to the index set.
+lemma u1_cuni_fncls (G: hyps) (U F: class) (a: set):
+  $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ fn_into F a U $ > $ G ⇒ ⋃ (img F a) ∈ U $
+----
+l1: $ G ⇒ functional F $ by fn_into_functional [#3]
+l2: $ G ⇒ isset (cres F a) $ by u1_cres_set [l1]
+l3: $ G ⇒ fn_into (cres F a) a U $ by u1_fn_into_cres [#3]
+l4: $ G , f = cres F a ⇒ f = cres F a $ by ax
+l5: $ G , f = cres F a ⇒ cres F a = f $ by eq_sym [l4]
+l6: $ G , f = cres F a ⇒ a = a $ by eq_refl
+l7: $ G , f = cres F a ⇒ U = U $ by eq_refl
+l8: $ G , f = cres F a ⇒ fn_into (cres F a) a U $ by weaken [l3]
+l9: $ G , f = cres F a ⇒ fn_into f a U $ by fn_into_eq [l5, l6, l7, l8]
+l10: $ G , f = cres F a ⇒ universe U $ by weaken [#1]
+l11: $ G , f = cres F a ⇒ a ∊ U $ by weaken [#2]
+l12: $ G , f = cres F a ⇒ ⋃ (img f a) ∈ U $ by universe_cuni_fn [l10, l11, l9]
+l13: $ G , f = cres F a ⇒ img f a = img (cres F a) a $ by img_eq [l4, l6]
+l14: $ G , f = cres F a ⇒ img (cres F a) a = img F a $ by u1_img_cres
+l15: $ G , f = cres F a ⇒ img f a = img F a $ by eq_trans [l13, l14]
+l16: $ G , f = cres F a ⇒ ⋃ (img f a) = ⋃ (img F a) $ by cuni_eq [l15]
+l17: $ G , f = cres F a ⇒ ⋃ (img F a) ∈ U $ by wcel_eq_l [l16, l12]
+l18: $ G ⇒ ⋃ (img F a) ∈ U $ by isset_elim [l2, l17]
+
+universe_cuni
+-------------
+l1: $ G ⇒ a ⊆ U $ by universe_elem_subset [#1, #2]
+l2: $ G ⇒ fn_into (cres (cgr y y) a) a U $ by cgr_id_fn_into [l1]
+l3: $ G ⇒ ⋃ (img (cres (cgr y y) a) a) ∈ U $ by u1_cuni_fncls [#1, #2, l2]
+l4: $ G ⇒ img (cres (cgr y y) a) a = img (cgr y y) a $ by u1_img_cres
+l5: $ G ⇒ img (cgr y y) a = a $ by img_cgr_id
+l6: $ G ⇒ img (cres (cgr y y) a) a = a $ by eq_trans [l4, l5]
+l7: $ G ⇒ ⋃ (img (cres (cgr y y) a) a) = ⋃ a $ by cuni_eq [l6]
+l8: $ G ⇒ ⋃ a ∈ U $ by wcel_eq_l [l7, l3]
+
+--| The union of an element (a class).
+lemma u1_cuni_cls (G: hyps) (U A: class):
+  $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ ⋃ A ∈ U $
+----
+l1: $ G , u = A , u ∊ U ⇒ universe U $ by weaken [#1]
+l2: $ G , u = A , u ∊ U ⇒ u ∊ U $ by ax
+l3: $ G , u = A , u ∊ U ⇒ ⋃ u ∈ U $ by universe_cuni [l1, l2]
+l4: $ G , u = A , u ∊ U ⇒ u = A $ by ax
+l5: $ G , u = A , u ∊ U ⇒ ⋃ u = ⋃ A $ by cuni_eq [l4]
+l6: $ G , u = A , u ∊ U ⇒ ⋃ A ∈ U $ by wcel_eq_l [l5, l3]
+l7: $ G ⇒ ⋃ A ∈ U $ by wcel_elim [#2, l6]
+
+--| The union of two elements (classes).
+lemma u1_cun_cls (G: hyps) (U A B: class):
+  $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ B ∈ U $ > $ G ⇒ A ∪ B ∈ U $
+----
+l1: $ G ⇒ isset A $ by wcel_isset [#2]
+l2: $ G ⇒ isset B $ by wcel_isset [#3]
+l3: $ G ⇒ A ∪ B = ⋃ (cpr A B) $ by cun_cpr [l1, l2]
+l4: $ G ⇒ cpr A B ∈ U $ by u1_cpr_cls [#1, #2, #3]
+l5: $ G ⇒ ⋃ (cpr A B) ∈ U $ by u1_cuni_cls [#1, l4]
+l6: $ G ⇒ ⋃ (cpr A B) = A ∪ B $ by eq_sym [l3]
+l7: $ G ⇒ A ∪ B ∈ U $ by wcel_eq_l [l6, l5]
+
+universe_cun
+------------
+l1: $ G ⇒ a ∈ U $ by welc_wcel [#2]
+l2: $ G ⇒ b ∈ U $ by welc_wcel [#3]
+l3: $ G ⇒ a ∪ b ∈ U $ by u1_cun_cls [#1, l1, l2]
+
+universe_suc
+------------
+l1: $ G ⇒ a ∈ U $ by welc_wcel [#2]
+l2: $ G ⇒ csn a ∈ U $ by universe_csn [#1, #2]
+l3: $ G ⇒ a ∪ csn a ∈ U $ by u1_cun_cls [#1, l1, l2]
+
+universe_cin
+------------
+l1: $ G ⇒ a ∩ b ⊆ a $ by cin_subset_l
+l2: $ G ⇒ a ∩ b ∈ U $ by universe_subset [#1, #2, l1]
+
+universe_sep
+------------
+l1: $ G , z ∊ {x | x ∊ a ∧ p} ⇒ z ∊ {x | x ∊ a ∧ p} $ by ax
+l2: $ G , z ∊ {x | x ∊ a ∧ p} ⇒ z ∊ a ∧ [x/z] p $ by cab_elim [l1]
+l3: $ G , z ∊ {x | x ∊ a ∧ p} ⇒ z ∊ a $ by and_elim_l [l2]
+l4: $ G ⇒ {x | x ∊ a ∧ p} ⊆ a $ by subset_intro [l3]
+l5: $ G ⇒ {x | x ∊ a ∧ p} ∈ U $ by universe_subset [#1, #2, l4]
+
+--| A subclass of an element (a class) is an element.
+lemma u1_subset_cls (G: hyps) (U A B: class):
+  $ G ⇒ universe U $ > $ G ⇒ B ∈ U $ > $ G ⇒ A ⊆ B $ > $ G ⇒ A ∈ U $
+----
+l1: $ G , u = B , u ∊ U ⇒ universe U $ by weaken [#1]
+l2: $ G , u = B , u ∊ U ⇒ u ∊ U $ by ax
+l3: $ G , u = B , u ∊ U ⇒ u = B $ by ax
+l4: $ G , u = B , u ∊ U ⇒ B = u $ by eq_sym [l3]
+l5: $ G , u = B , u ∊ U ⇒ A ⊆ B $ by weaken [#3]
+l6: $ G , u = B , u ∊ U ⇒ A ⊆ u $ by subset_eq_r [l4, l5]
+l7: $ G , u = B , u ∊ U ⇒ A ∈ U $ by universe_subset [l1, l2, l6]
+l8: $ G ⇒ A ∈ U $ by wcel_elim [#2, l7]
+
+--| The power set of an element (a class).
+lemma u1_cpw_cls (G: hyps) (U A: class):
+  $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ 𝒫 A ∈ U $
+----
+l1: $ G , u = A , u ∊ U ⇒ universe U $ by weaken [#1]
+l2: $ G , u = A , u ∊ U ⇒ u ∊ U $ by ax
+l3: $ G , u = A , u ∊ U ⇒ 𝒫 u ∈ U $ by universe_cpw [l1, l2]
+l4: $ G , u = A , u ∊ U ⇒ u = A $ by ax
+l5: $ G , u = A , u ∊ U ⇒ 𝒫 u = 𝒫 A $ by cpw_eq [l4]
+l6: $ G , u = A , u ∊ U ⇒ 𝒫 A ∈ U $ by wcel_eq_l [l5, l3]
+l7: $ G ⇒ 𝒫 A ∈ U $ by wcel_elim [#2, l6]
+
+universe_cxp
+------------
+l1: $ G , z ∊ a × b ⇒ z ∊ a × b $ by ax
+l2: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b ⇒ u ∊ a $ by ax
+l3: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b ⇒ v ∊ b $ by ax
+l4: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b ⇒ u ∊ a ∪ b $ by cun_intro_l [l2]
+l5: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b ⇒ v ∊ a ∪ b $ by cun_intro_r [l3]
+l6: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b , w ∊ ⟨ u , v ⟩ ⇒ w ∊ cpr (csn u) (cpr u v) $ by ax
+l7: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b , w ∊ ⟨ u , v ⟩ ⇒ w = csn u ∨ w = cpr u v $ by cpr_elim [l6]
+l8: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b , w ∊ ⟨ u , v ⟩ , w = csn u ⇒ w = csn u $ by ax
+l9: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b , w ∊ ⟨ u , v ⟩ , w = csn u ⇒ csn u = w $ by eq_sym [l8]
+l10: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b , w ∊ ⟨ u , v ⟩ , w = csn u ⇒ u ∊ a ∪ b $ by weaken [l4]
+l11: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b , w ∊ ⟨ u , v ⟩ , w = csn u ⇒ csn u ⊆ a ∪ b $ by csn_subset [l10]
+l12: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b , w ∊ ⟨ u , v ⟩ , w = csn u ⇒ w ⊆ a ∪ b $ by subset_eq_l [l9, l11]
+l13: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b , w ∊ ⟨ u , v ⟩ , w = csn u ⇒ w ∊ 𝒫 (a ∪ b) $ by cpw_intro [l12]
+l14: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b , w ∊ ⟨ u , v ⟩ , w = cpr u v ⇒ w = cpr u v $ by ax
+l15: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b , w ∊ ⟨ u , v ⟩ , w = cpr u v ⇒ cpr u v = w $ by eq_sym [l14]
+l16: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b , w ∊ ⟨ u , v ⟩ , w = cpr u v ⇒ u ∊ a ∪ b $ by weaken [l4]
+l17: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b , w ∊ ⟨ u , v ⟩ , w = cpr u v ⇒ v ∊ a ∪ b $ by weaken [l5]
+l18: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b , w ∊ ⟨ u , v ⟩ , w = cpr u v ⇒ cpr u v ⊆ a ∪ b $ by cpr_subset [l16, l17]
+l19: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b , w ∊ ⟨ u , v ⟩ , w = cpr u v ⇒ w ⊆ a ∪ b $ by subset_eq_l [l15, l18]
+l20: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b , w ∊ ⟨ u , v ⟩ , w = cpr u v ⇒ w ∊ 𝒫 (a ∪ b) $ by cpw_intro [l19]
+l21: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b , w ∊ ⟨ u , v ⟩ ⇒ w ∊ 𝒫 (a ∪ b) $ by or_elim [l7, l13, l20]
+l22: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b ⇒ ⟨ u , v ⟩ ⊆ 𝒫 (a ∪ b) $ by subset_intro [l21]
+l23: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b ⇒ z = ⟨ u , v ⟩ $ by ax
+l24: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b ⇒ ⟨ u , v ⟩ = z $ by eq_sym [l23]
+l25: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b ⇒ z ⊆ 𝒫 (a ∪ b) $ by subset_eq_l [l24, l22]
+l26: $ G , z ∊ a × b , z = ⟨ u , v ⟩ , u ∊ a , v ∊ b ⇒ z ∊ 𝒫 𝒫 (a ∪ b) $ by cpw_intro [l25]
+l27: $ G , z ∊ a × b ⇒ z ∊ 𝒫 𝒫 (a ∪ b) $ by cxp_elim [l1, l26]
+l28: $ G ⇒ a × b ⊆ 𝒫 𝒫 (a ∪ b) $ by subset_intro [l27]
+l29: $ G ⇒ a ∪ b ∈ U $ by universe_cun [#1, #2, #3]
+l30: $ G ⇒ 𝒫 (a ∪ b) ∈ U $ by u1_cpw_cls [#1, l29]
+l31: $ G ⇒ 𝒫 𝒫 (a ∪ b) ∈ U $ by u1_cpw_cls [#1, l30]
+l32: $ G ⇒ a × b ∈ U $ by u1_subset_cls [#1, l31, l28]
+
+universe_cdm
+------------
+l1: $ G , z ∊ cdm a ⇒ z ∊ cdm a $ by ax
+l2: $ G , z ∊ cdm a , ⟨ z , v ⟩ ∈ a ⇒ ⟨ z , v ⟩ ∈ a $ by ax
+l3: $ G , z ∊ cdm a , ⟨ z , v ⟩ ∈ a , k = ⟨ z , v ⟩ , k ∊ a ⇒ isset z $ by isset_var
+l4: $ G , z ∊ cdm a , ⟨ z , v ⟩ ∈ a , k = ⟨ z , v ⟩ , k ∊ a ⇒ isset (csn z) $ by csn_set [l3]
+l5: $ G , z ∊ cdm a , ⟨ z , v ⟩ ∈ a , k = ⟨ z , v ⟩ , k ∊ a , w = csn z ⇒ w = csn z $ by ax
+l6: $ G , z ∊ cdm a , ⟨ z , v ⟩ ∈ a , k = ⟨ z , v ⟩ , k ∊ a , w = csn z ⇒ w = csn z ∨ w = cpr z v $ by or_intro_l [l5]
+l7: $ G , z ∊ cdm a , ⟨ z , v ⟩ ∈ a , k = ⟨ z , v ⟩ , k ∊ a , w = csn z ⇒ w ∊ cpr (csn z) (cpr z v) $ by cpr_intro [l6]
+l8: $ G , z ∊ cdm a , ⟨ z , v ⟩ ∈ a , k = ⟨ z , v ⟩ , k ∊ a , w = csn z ⇒ k = ⟨ z , v ⟩ $ by ax
+l9: $ G , z ∊ cdm a , ⟨ z , v ⟩ ∈ a , k = ⟨ z , v ⟩ , k ∊ a , w = csn z ⇒ ⟨ z , v ⟩ = k $ by eq_sym [l8]
+l10: $ G , z ∊ cdm a , ⟨ z , v ⟩ ∈ a , k = ⟨ z , v ⟩ , k ∊ a , w = csn z ⇒ w ∊ k $ by welc_eq [l9, l7]
+l11: $ G , z ∊ cdm a , ⟨ z , v ⟩ ∈ a , k = ⟨ z , v ⟩ , k ∊ a , w = csn z ⇒ k ∊ a $ by ax
+l12: $ G , z ∊ cdm a , ⟨ z , v ⟩ ∈ a , k = ⟨ z , v ⟩ , k ∊ a , w = csn z ⇒ w ∊ ⋃ a $ by cuni_intro [l10, l11]
+l13: $ G , z ∊ cdm a , ⟨ z , v ⟩ ∈ a , k = ⟨ z , v ⟩ , k ∊ a , w = csn z ⇒ csn z = w $ by eq_sym [l5]
+l14: $ G , z ∊ cdm a , ⟨ z , v ⟩ ∈ a , k = ⟨ z , v ⟩ , k ∊ a , w = csn z ⇒ z ∊ csn z $ by csn_intro_var
+l15: $ G , z ∊ cdm a , ⟨ z , v ⟩ ∈ a , k = ⟨ z , v ⟩ , k ∊ a , w = csn z ⇒ z ∊ w $ by welc_eq [l13, l14]
+l16: $ G , z ∊ cdm a , ⟨ z , v ⟩ ∈ a , k = ⟨ z , v ⟩ , k ∊ a , w = csn z ⇒ z ∊ ⋃ ⋃ a $ by cuni_intro [l15, l12]
+l17: $ G , z ∊ cdm a , ⟨ z , v ⟩ ∈ a , k = ⟨ z , v ⟩ , k ∊ a ⇒ z ∊ ⋃ ⋃ a $ by isset_elim [l4, l16]
+l18: $ G , z ∊ cdm a , ⟨ z , v ⟩ ∈ a ⇒ z ∊ ⋃ ⋃ a $ by wcel_elim [l2, l17]
+l19: $ G , z ∊ cdm a ⇒ z ∊ ⋃ ⋃ a $ by cdm_elim [l1, l18]
+l20: $ G ⇒ cdm a ⊆ ⋃ ⋃ a $ by subset_intro [l19]
+l21: $ G ⇒ ⋃ a ∈ U $ by universe_cuni [#1, #2]
+l22: $ G ⇒ ⋃ ⋃ a ∈ U $ by u1_cuni_cls [#1, l21]
+l23: $ G ⇒ cdm a ∈ U $ by u1_subset_cls [#1, l22, l20]
+
+universe_crn
+------------
+l1: $ G , z ∊ crn a ⇒ z ∊ crn a $ by ax
+l2: $ G , z ∊ crn a , ⟨ u , z ⟩ ∈ a ⇒ ⟨ u , z ⟩ ∈ a $ by ax
+l3: $ G , z ∊ crn a , ⟨ u , z ⟩ ∈ a , k = ⟨ u , z ⟩ , k ∊ a ⇒ isset (cpr u z) $ by ax_pair
+l5: $ G , z ∊ crn a , ⟨ u , z ⟩ ∈ a , k = ⟨ u , z ⟩ , k ∊ a , w = cpr u z ⇒ w = cpr u z $ by ax
+l6: $ G , z ∊ crn a , ⟨ u , z ⟩ ∈ a , k = ⟨ u , z ⟩ , k ∊ a , w = cpr u z ⇒ w = csn u ∨ w = cpr u z $ by or_intro_r [l5]
+l7: $ G , z ∊ crn a , ⟨ u , z ⟩ ∈ a , k = ⟨ u , z ⟩ , k ∊ a , w = cpr u z ⇒ w ∊ cpr (csn u) (cpr u z) $ by cpr_intro [l6]
+l8: $ G , z ∊ crn a , ⟨ u , z ⟩ ∈ a , k = ⟨ u , z ⟩ , k ∊ a , w = cpr u z ⇒ k = ⟨ u , z ⟩ $ by ax
+l9: $ G , z ∊ crn a , ⟨ u , z ⟩ ∈ a , k = ⟨ u , z ⟩ , k ∊ a , w = cpr u z ⇒ ⟨ u , z ⟩ = k $ by eq_sym [l8]
+l10: $ G , z ∊ crn a , ⟨ u , z ⟩ ∈ a , k = ⟨ u , z ⟩ , k ∊ a , w = cpr u z ⇒ w ∊ k $ by welc_eq [l9, l7]
+l11: $ G , z ∊ crn a , ⟨ u , z ⟩ ∈ a , k = ⟨ u , z ⟩ , k ∊ a , w = cpr u z ⇒ k ∊ a $ by ax
+l12: $ G , z ∊ crn a , ⟨ u , z ⟩ ∈ a , k = ⟨ u , z ⟩ , k ∊ a , w = cpr u z ⇒ w ∊ ⋃ a $ by cuni_intro [l10, l11]
+l13: $ G , z ∊ crn a , ⟨ u , z ⟩ ∈ a , k = ⟨ u , z ⟩ , k ∊ a , w = cpr u z ⇒ cpr u z = w $ by eq_sym [l5]
+l14: $ G , z ∊ crn a , ⟨ u , z ⟩ ∈ a , k = ⟨ u , z ⟩ , k ∊ a , w = cpr u z ⇒ z ∊ cpr u z $ by cpr_intro_r
+l15: $ G , z ∊ crn a , ⟨ u , z ⟩ ∈ a , k = ⟨ u , z ⟩ , k ∊ a , w = cpr u z ⇒ z ∊ w $ by welc_eq [l13, l14]
+l16: $ G , z ∊ crn a , ⟨ u , z ⟩ ∈ a , k = ⟨ u , z ⟩ , k ∊ a , w = cpr u z ⇒ z ∊ ⋃ ⋃ a $ by cuni_intro [l15, l12]
+l17: $ G , z ∊ crn a , ⟨ u , z ⟩ ∈ a , k = ⟨ u , z ⟩ , k ∊ a ⇒ z ∊ ⋃ ⋃ a $ by isset_elim [l3, l16]
+l18: $ G , z ∊ crn a , ⟨ u , z ⟩ ∈ a ⇒ z ∊ ⋃ ⋃ a $ by wcel_elim [l2, l17]
+l19: $ G , z ∊ crn a ⇒ z ∊ ⋃ ⋃ a $ by crn_elim [l1, l18]
+l20: $ G ⇒ crn a ⊆ ⋃ ⋃ a $ by subset_intro [l19]
+l21: $ G ⇒ ⋃ a ∈ U $ by universe_cuni [#1, #2]
+l22: $ G ⇒ ⋃ ⋃ a ∈ U $ by u1_cuni_cls [#1, l21]
+l23: $ G ⇒ crn a ∈ U $ by u1_subset_cls [#1, l22, l20]
+
+universe_ap
+-----------
+l1: $ G ⇒ ap a b ⊆ crn a $ by ap_subset_crn
+l2: $ G ⇒ crn a ∈ U $ by universe_crn [#1, #2]
+l3: $ G ⇒ ap a b ∈ U $ by u1_subset_cls [#1, l2, l1]
+
+universe_fv
+-----------
+l1: $ G ⇒ ap a b ∈ U $ by universe_ap [#1, #2]
+l2: $ G ⇒ ⋃ (ap a b) ∈ U $ by u1_cuni_cls [#1, l1]
+
+universe_cres
+-------------
+l1: $ G ⇒ cres a A ⊆ a $ by cres_subset
+l2: $ G ⇒ cres a A ∈ U $ by universe_subset [#1, #2, l1]
+
+--| The graph of an operation with values in `U` is a function from `a` into `U`.
+lemma u1_cgr_fn_into {x: set} (G: hyps x) (U: class) (B: class x) (a: set):
+  $ G ⇒ ∀ x (x ∊ a → B ∈ U) $ > $ G ⇒ fn_into (cgr x B) a U $
+----
+l1: $ G ⇒ functional (cgr x B) $ by cgr_functional
+l2: $ G , u ∊ a ⇒ ∀ x (x ∊ a → B ∈ U) $ by weaken [#1]
+l3: $ G , u ∊ a ⇒ u ∊ a → (⟦ x / u ⟧ B) ∈ U $ by all_elim [l2]
+l4: $ G , u ∊ a ⇒ u ∊ a $ by ax
+l5: $ G , u ∊ a ⇒ (⟦ x / u ⟧ B) ∈ U $ by imp_elim [l3, l4]
+l6: $ G , u ∊ a , k = (⟦ x / u ⟧ B) , k ∊ U ⇒ k = (⟦ x / u ⟧ B) $ by ax
+l7: $ G , u ∊ a , k = (⟦ x / u ⟧ B) , k ∊ U ⇒ ⟨ u , k ⟩ ∈ cgr x B $ by cgr_intro [l6]
+l8: $ G , u ∊ a , k = (⟦ x / u ⟧ B) , k ∊ U ⇒ k ∊ U $ by ax
+l9: $ G , u ∊ a , k = (⟦ x / u ⟧ B) , k ∊ U ⇒ k ∊ U ∧ ⟨ u , k ⟩ ∈ cgr x B $ by and_intro [l8, l7]
+l10: $ G , u ∊ a , k = (⟦ x / u ⟧ B) , k ∊ U ⇒ ∃ y (y ∊ U ∧ ⟨ u , y ⟩ ∈ cgr x B) $ by ex_intro (x := $ y $, t := $ k $, p := $ y ∊ U ∧ ⟨ u , y ⟩ ∈ cgr x B $) [l9]
+l11: $ G , u ∊ a ⇒ ∃ y (y ∊ U ∧ ⟨ u , y ⟩ ∈ cgr x B) $ by wcel_elim [l5, l10]
+l12: $ G ⇒ fn_into (cgr x B) a U $ by fn_into_intro [l1, l11]
+
+universe_img_fn
+---------------
+l1: $ G ⇒ functional f $ by fn_into_functional [#3]
+l2: $ G , x ∊ a ⇒ fn_into f a U $ by weaken [#3]
+l3: $ G , x ∊ a ⇒ x ∊ a $ by ax
+l4: $ G , x ∊ a , v ∊ U , ⟨ x , v ⟩ ∈ f , w ∊ ap f x ⇒ w ∊ ap f x $ by ax
+l5: $ G , x ∊ a , v ∊ U , ⟨ x , v ⟩ ∈ f , w ∊ ap f x ⇒ ⟨ x , w ⟩ ∈ f $ by ap_elim [l4]
+l6: $ G , x ∊ a , v ∊ U , ⟨ x , v ⟩ ∈ f , w ∊ ap f x ⇒ ⟨ x , v ⟩ ∈ f $ by ax
+l7: $ G , x ∊ a , v ∊ U , ⟨ x , v ⟩ ∈ f , w ∊ ap f x ⇒ functional f $ by weaken [l1]
+l8: $ G , x ∊ a , v ∊ U , ⟨ x , v ⟩ ∈ f , w ∊ ap f x ⇒ w = v $ by functional_elim [l7, l5, l6]
+l9: $ G , x ∊ a , v ∊ U , ⟨ x , v ⟩ ∈ f , w ∊ ap f x ⇒ w ∊ csn v $ by csn_intro [l8]
+l10: $ G , x ∊ a , v ∊ U , ⟨ x , v ⟩ ∈ f ⇒ ap f x ⊆ csn v $ by subset_intro [l9]
+l11: $ G , x ∊ a , v ∊ U , ⟨ x , v ⟩ ∈ f ⇒ universe U $ by weaken [#1]
+l12: $ G , x ∊ a , v ∊ U , ⟨ x , v ⟩ ∈ f ⇒ v ∊ U $ by ax
+l13: $ G , x ∊ a , v ∊ U , ⟨ x , v ⟩ ∈ f ⇒ csn v ∈ U $ by universe_csn [l11, l12]
+l14: $ G , x ∊ a , v ∊ U , ⟨ x , v ⟩ ∈ f ⇒ ap f x ∈ U $ by u1_subset_cls [l11, l13, l10]
+l15: $ G , x ∊ a ⇒ ap f x ∈ U $ by fn_into_elim [l2, l3, l14]
+l16: $ G ⇒ x ∊ a → ap f x ∈ U $ by imp_intro [l15]
+l17: $ G ⇒ ∀ x (x ∊ a → ap f x ∈ U) $ by all_intro [l16]
+l18: $ G ⇒ fn_into (cgr x (ap f x)) a U $ by u1_cgr_fn_into [l17]
+l19: $ G ⇒ ⋃ (img (cgr x (ap f x)) a) ∈ U $ by u1_cuni_fncls [#1, #2, l18]
+l20: $ G , z ∊ img f a ⇒ z ∊ img f a $ by ax
+l21: $ G , z ∊ img f a , u ∊ a , ⟨ u , z ⟩ ∈ f ⇒ functional f $ by weaken [l1]
+l22: $ G , z ∊ img f a , u ∊ a , ⟨ u , z ⟩ ∈ f ⇒ isset (ap f u) $ by ap_functional_set [l21]
+l23: $ G , z ∊ img f a , u ∊ a , ⟨ u , z ⟩ ∈ f , k = ap f u ⇒ ⟨ u , z ⟩ ∈ f $ by ax
+l24: $ G , z ∊ img f a , u ∊ a , ⟨ u , z ⟩ ∈ f , k = ap f u ⇒ z ∊ ap f u $ by ap_intro [l23]
+l25: $ G , z ∊ img f a , u ∊ a , ⟨ u , z ⟩ ∈ f , k = ap f u ⇒ k = ap f u $ by ax
+l26: $ G , z ∊ img f a , u ∊ a , ⟨ u , z ⟩ ∈ f , k = ap f u ⇒ ap f u = k $ by eq_sym [l25]
+l27: $ G , z ∊ img f a , u ∊ a , ⟨ u , z ⟩ ∈ f , k = ap f u ⇒ z ∊ k $ by welc_eq [l26, l24]
+l28: $ G , z ∊ img f a , u ∊ a , ⟨ u , z ⟩ ∈ f , k = ap f u ⇒ ⟨ u , k ⟩ ∈ cgr x (ap f x) $ by cgr_intro (x := $ x $, B := $ ap f x $, a := $ u $, b := $ k $) [l25]
+l29: $ G , z ∊ img f a , u ∊ a , ⟨ u , z ⟩ ∈ f , k = ap f u ⇒ u ∊ a $ by ax
+l30: $ G , z ∊ img f a , u ∊ a , ⟨ u , z ⟩ ∈ f , k = ap f u ⇒ k ∊ img (cgr x (ap f x)) a $ by img_intro [l29, l28]
+l31: $ G , z ∊ img f a , u ∊ a , ⟨ u , z ⟩ ∈ f , k = ap f u ⇒ z ∊ ⋃ (img (cgr x (ap f x)) a) $ by cuni_intro [l27, l30]
+l32: $ G , z ∊ img f a , u ∊ a , ⟨ u , z ⟩ ∈ f ⇒ z ∊ ⋃ (img (cgr x (ap f x)) a) $ by isset_elim [l22, l31]
+l33: $ G , z ∊ img f a ⇒ z ∊ ⋃ (img (cgr x (ap f x)) a) $ by img_elim [l20, l32]
+l34: $ G ⇒ img f a ⊆ ⋃ (img (cgr x (ap f x)) a) $ by subset_intro [l33]
+l35: $ G ⇒ img f a ∈ U $ by u1_subset_cls [#1, l19, l34]
+
+--| `universe_img_fn` for a functional class: restrict it to the index set.
+lemma u1_img_fncls (G: hyps) (U F: class) (a: set):
+  $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ fn_into F a U $ > $ G ⇒ img F a ∈ U $
+----
+l1: $ G ⇒ functional F $ by fn_into_functional [#3]
+l2: $ G ⇒ isset (cres F a) $ by u1_cres_set [l1]
+l3: $ G ⇒ fn_into (cres F a) a U $ by u1_fn_into_cres [#3]
+l4: $ G , f = cres F a ⇒ f = cres F a $ by ax
+l5: $ G , f = cres F a ⇒ cres F a = f $ by eq_sym [l4]
+l6: $ G , f = cres F a ⇒ a = a $ by eq_refl
+l7: $ G , f = cres F a ⇒ U = U $ by eq_refl
+l8: $ G , f = cres F a ⇒ fn_into (cres F a) a U $ by weaken [l3]
+l9: $ G , f = cres F a ⇒ fn_into f a U $ by fn_into_eq [l5, l6, l7, l8]
+l10: $ G , f = cres F a ⇒ universe U $ by weaken [#1]
+l11: $ G , f = cres F a ⇒ a ∊ U $ by weaken [#2]
+l12: $ G , f = cres F a ⇒ img f a ∈ U $ by universe_img_fn [l10, l11, l9]
+l13: $ G , f = cres F a ⇒ img f a = img (cres F a) a $ by img_eq [l4, l6]
+l14: $ G , f = cres F a ⇒ img (cres F a) a = img F a $ by u1_img_cres
+l15: $ G , f = cres F a ⇒ img f a = img F a $ by eq_trans [l13, l14]
+l16: $ G , f = cres F a ⇒ img F a ∈ U $ by wcel_eq_l [l15, l12]
+l17: $ G ⇒ img F a ∈ U $ by isset_elim [l2, l16]
+
+universe_img_op
+---------------
+l1: $ G ⇒ fn_into (cgr x B) a U $ by u1_cgr_fn_into [#3]
+l2: $ G ⇒ img (cgr x B) a ∈ U $ by u1_img_fncls [#1, #2, l1]
+
+universe_cuni_op
+----------------
+l1: $ G ⇒ fn_into (cgr x B) a U $ by u1_cgr_fn_into [#3]
+l2: $ G ⇒ ⋃ (img (cgr x B) a) ∈ U $ by u1_cuni_fncls [#1, #2, l1]
+
+--| The product of two elements (classes).
+lemma u1_cxp_cls (G: hyps) (U A B: class):
+  $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ B ∈ U $ > $ G ⇒ A × B ∈ U $
+----
+l1: $ G , u = A , u ∊ U , v = B , v ∊ U ⇒ universe U $ by weaken [#1]
+l2: $ G , u = A , u ∊ U , v = B , v ∊ U ⇒ u ∊ U $ by ax
+l3: $ G , u = A , u ∊ U , v = B , v ∊ U ⇒ v ∊ U $ by ax
+l4: $ G , u = A , u ∊ U , v = B , v ∊ U ⇒ u × v ∈ U $ by universe_cxp [l1, l2, l3]
+l5: $ G , u = A , u ∊ U , v = B , v ∊ U ⇒ u = A $ by ax
+l6: $ G , u = A , u ∊ U , v = B , v ∊ U ⇒ v = B $ by ax
+l7: $ G , u = A , u ∊ U , v = B , v ∊ U ⇒ u × v = A × B $ by cxp_eq [l5, l6]
+l8: $ G , u = A , u ∊ U , v = B , v ∊ U ⇒ A × B ∈ U $ by wcel_eq_l [l7, l4]
+l9: $ G , u = A , u ∊ U ⇒ B ∈ U $ by weaken [#3]
+l10: $ G , u = A , u ∊ U ⇒ A × B ∈ U $ by wcel_elim [l9, l8]
+l11: $ G ⇒ A × B ∈ U $ by wcel_elim [#2, l10]
+
+universe_lam
+------------
+l1: $ G , a = A , a ∊ U , u ∊ a ⇒ a = A $ by ax
+l2: $ G , a = A , a ∊ U , u ∊ a ⇒ u ∊ a $ by ax
+l3: $ G , a = A , a ∊ U , u ∊ a ⇒ u ∊ A $ by welc_eq [l1, l2]
+l4: $ G , a = A , a ∊ U , u ∊ a ⇒ ∀ x (x ∊ A → B ∈ U) $ by weaken [#3]
+l5: $ G , a = A , a ∊ U , u ∊ a ⇒ u ∊ A → (⟦ x / u ⟧ B) ∈ U $ by all_elim [l4]
+l6: $ G , a = A , a ∊ U , u ∊ a ⇒ (⟦ x / u ⟧ B) ∈ U $ by imp_elim [l5, l3]
+l7: $ G , a = A , a ∊ U , u ∊ a ⇒ universe U $ by weaken [#1]
+l8: $ G , a = A , a ∊ U , u ∊ a ⇒ a ∊ U $ by ax
+l9: $ G , a = A , a ∊ U , u ∊ a ⇒ u ∊ U $ by universe_elem_elem [l7, l8, l2]
+l10: $ G , a = A , a ∊ U , u ∊ a ⇒ csn u ∈ U $ by universe_csn [l7, l9]
+l11: $ G , a = A , a ∊ U , u ∊ a ⇒ csn u × (⟦ x / u ⟧ B) ∈ U $ by u1_cxp_cls [l7, l10, l6]
+l12: $ G , a = A , a ∊ U ⇒ u ∊ a → csn u × (⟦ x / u ⟧ B) ∈ U $ by imp_intro [l11]
+l13: $ G , a = A , a ∊ U ⇒ ∀ u (u ∊ a → csn u × (⟦ x / u ⟧ B) ∈ U) $ by all_intro [l12]
+l14: $ ∀ x (x ∊ a → csn x × B ∈ U) ⟺ ∀ u (u ∊ a → csn u × (⟦ x / u ⟧ B) ∈ U) $ by all_alpha
+l15: $ G , a = A , a ∊ U ⇒ ∀ x (x ∊ a → csn x × B ∈ U) ↔ ∀ u (u ∊ a → csn u × (⟦ x / u ⟧ B) ∈ U) $ by weaken [l14]
+l16: $ G , a = A , a ∊ U ⇒ ∀ x (x ∊ a → csn x × B ∈ U) $ by bi_elim_r [l15, l13]
+l17: $ G , a = A , a ∊ U ⇒ fn_into (cgr x (csn x × B)) a U $ by u1_cgr_fn_into [l16]
+l18: $ G , a = A , a ∊ U ⇒ universe U $ by weaken [#1]
+l19: $ G , a = A , a ∊ U ⇒ a ∊ U $ by ax
+l20: $ G , a = A , a ∊ U ⇒ ⋃ (img (cgr x (csn x × B)) a) ∈ U $ by u1_cuni_fncls [l18, l19, l17]
+l21: $ G , a = A , a ∊ U , w ∊ lam x A B ⇒ w ∊ lam x A B $ by ax
+l22: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ ∀ x (x ∊ A → B ∈ U) $ by weaken [#3]
+l23: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ u ∊ A → (⟦ x / u ⟧ B) ∈ U $ by all_elim [l22]
+l24: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ u ∊ A $ by ax
+l25: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ (⟦ x / u ⟧ B) ∈ U $ by imp_elim [l23, l24]
+l26: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ isset (⟦ x / u ⟧ B) $ by wcel_isset [l25]
+l27: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ isset u $ by isset_var
+l28: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ isset (csn u) $ by csn_set [l27]
+l29: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ isset (csn u × (⟦ x / u ⟧ B)) $ by cxp_set [l28, l26]
+l30: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) , k = csn u × (⟦ x / u ⟧ B) ⇒ u ∊ csn u $ by csn_intro_var
+l31: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) , k = csn u × (⟦ x / u ⟧ B) ⇒ v ∊ (⟦ x / u ⟧ B) $ by ax
+l32: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) , k = csn u × (⟦ x / u ⟧ B) ⇒ w = ⟨ u , v ⟩ $ by ax
+l33: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) , k = csn u × (⟦ x / u ⟧ B) ⇒ w ∊ csn u × (⟦ x / u ⟧ B) $ by cxp_intro_eq [l32, l30, l31]
+l34: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) , k = csn u × (⟦ x / u ⟧ B) ⇒ k = csn u × (⟦ x / u ⟧ B) $ by ax
+l35: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) , k = csn u × (⟦ x / u ⟧ B) ⇒ csn u × (⟦ x / u ⟧ B) = k $ by eq_sym [l34]
+l36: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) , k = csn u × (⟦ x / u ⟧ B) ⇒ w ∊ k $ by welc_eq [l35, l33]
+l37: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) , k = csn u × (⟦ x / u ⟧ B) ⇒ ⟨ u , k ⟩ ∈ cgr x (csn x × B) $ by cgr_intro (x := $ x $, B := $ csn x × B $, a := $ u $, b := $ k $) [l34]
+l38: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) , k = csn u × (⟦ x / u ⟧ B) ⇒ a = A $ by ax
+l39: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) , k = csn u × (⟦ x / u ⟧ B) ⇒ A = a $ by eq_sym [l38]
+l40: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) , k = csn u × (⟦ x / u ⟧ B) ⇒ u ∊ A $ by ax
+l41: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) , k = csn u × (⟦ x / u ⟧ B) ⇒ u ∊ a $ by welc_eq [l39, l40]
+l42: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) , k = csn u × (⟦ x / u ⟧ B) ⇒ k ∊ img (cgr x (csn x × B)) a $ by img_intro [l41, l37]
+l43: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) , k = csn u × (⟦ x / u ⟧ B) ⇒ w ∊ ⋃ (img (cgr x (csn x × B)) a) $ by cuni_intro [l36, l42]
+l44: $ G , a = A , a ∊ U , w ∊ lam x A B , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ w ∊ ⋃ (img (cgr x (csn x × B)) a) $ by isset_elim [l29, l43]
+l45: $ G , a = A , a ∊ U , w ∊ lam x A B ⇒ w ∊ ⋃ (img (cgr x (csn x × B)) a) $ by lam_elim_mem [l21, l44]
+l46: $ G , a = A , a ∊ U ⇒ lam x A B ⊆ ⋃ (img (cgr x (csn x × B)) a) $ by subset_intro [l45]
+l47: $ G , a = A , a ∊ U ⇒ lam x A B ∈ U $ by u1_subset_cls [l18, l20, l46]
+l48: $ G ⇒ lam x A B ∈ U $ by wcel_elim [#2, l47]
+
+universe_pi
+-----------
+l1: $ G , u ∊ A ⇒ ∀ x (x ∊ A → B ∈ U) $ by weaken [#3]
+l2: $ G , u ∊ A ⇒ u ∊ A → (⟦ x / u ⟧ B) ∈ U $ by all_elim [l1]
+l3: $ G , u ∊ A ⇒ u ∊ A $ by ax
+l4: $ G , u ∊ A ⇒ (⟦ x / u ⟧ B) ∈ U $ by imp_elim [l2, l3]
+l5: $ G , u ∊ A ⇒ universe U $ by weaken [#1]
+l6: $ G , u ∊ A ⇒ ⋃ (⟦ x / u ⟧ B) ∈ U $ by u1_cuni_cls [l5, l4]
+l7: $ G ⇒ u ∊ A → ⋃ (⟦ x / u ⟧ B) ∈ U $ by imp_intro [l6]
+l8: $ G ⇒ ∀ u (u ∊ A → ⋃ (⟦ x / u ⟧ B) ∈ U) $ by all_intro [l7]
+l9: $ ∀ x (x ∊ A → ⋃ B ∈ U) ⟺ ∀ u (u ∊ A → ⋃ (⟦ x / u ⟧ B) ∈ U) $ by all_alpha
+l10: $ G ⇒ ∀ x (x ∊ A → ⋃ B ∈ U) ↔ ∀ u (u ∊ A → ⋃ (⟦ x / u ⟧ B) ∈ U) $ by weaken [l9]
+l11: $ G ⇒ ∀ x (x ∊ A → ⋃ B ∈ U) $ by bi_elim_r [l10, l8]
+l12: $ G ⇒ lam x A (⋃ B) ∈ U $ by universe_lam [#1, #2, l11]
+l13: $ G ⇒ 𝒫 (lam x A (⋃ B)) ∈ U $ by u1_cpw_cls [#1, l12]
+l14: $ G , w ∊ pi x A B ⇒ w ∊ pi x A B $ by ax
+l15: $ G , w ∊ pi x A B ⇒ w ⊆ lam x A (⋃ B) $ by pi_elim_sub [l14]
+l16: $ G , w ∊ pi x A B ⇒ w ∊ 𝒫 (lam x A (⋃ B)) $ by cpw_intro [l15]
+l17: $ G ⇒ pi x A B ⊆ 𝒫 (lam x A (⋃ B)) $ by subset_intro [l16]
+l18: $ G ⇒ pi x A B ∈ U $ by u1_subset_cls [#1, l13, l17]
+
+universe_two
+------------
+l1: $ G ⇒ ∅ ∈ U $ by universe_empty [#1, #2]
+l2: $ G ⇒ csn ∅ ∈ U $ by u1_cpr_cls [#1, l1, l1]
+l3: $ G ⇒ cpr ∅ (csn ∅) ∈ U $ by u1_cpr_cls [#1, l1, l2]
+
+--| A class is the abstraction of its membership.
+lemma u1_cab_welc {x: set} (G: hyps) (A: class): $ G ⇒ A = {x | x ∊ A} $
+----
+l1: $ G , z ∊ A ⇒ z ∊ A $ by ax
+l2: $ G , z ∊ A ⇒ z ∊ {x | x ∊ A} $ by cab_intro (x := $ x $, t := $ z $, p := $ x ∊ A $) [l1]
+l3: $ G , z ∊ {x | x ∊ A} ⇒ z ∊ {x | x ∊ A} $ by ax
+l4: $ G , z ∊ {x | x ∊ A} ⇒ z ∊ A $ by cab_elim (x := $ x $, t := $ z $, p := $ x ∊ A $) [l3]
+l5: $ G ⇒ A = {x | x ∊ A} $ by eq_intro [l2, l4]
+
+universe_omega_elem
+-------------------
+l1: $ G ⇒ ∅ ∈ U $ by universe_empty [#1, #2]
+l2: $ G ⇒ U = {x | x ∊ U} $ by u1_cab_welc
+l3: $ G ⇒ ∅ ∈ {x | x ∊ U} $ by wcel_eq_r [l2, l1]
+l4: $ G , y ∊ ω , y ∊ U ⇒ universe U $ by weaken [#1]
+l5: $ G , y ∊ ω , y ∊ U ⇒ y ∊ U $ by ax
+l6: $ G , y ∊ ω , y ∊ U ⇒ suc y ∈ U $ by universe_suc [l4, l5]
+l7: $ G , y ∊ ω , y ∊ U ⇒ U = {x | x ∊ U} $ by u1_cab_welc
+l8: $ G , y ∊ ω , y ∊ U ⇒ suc y ∈ {x | x ∊ U} $ by wcel_eq_r [l7, l6]
+l9: $ G , y ∊ ω ⇒ y ∊ U → suc y ∈ {x | x ∊ U} $ by imp_intro [l8]
+l10: $ G ⇒ y ∊ ω → y ∊ U → suc y ∈ {x | x ∊ U} $ by imp_intro [l9]
+l11: $ G ⇒ ∀ y (y ∊ ω → y ∊ U → suc y ∈ {x | x ∊ U}) $ by all_intro [l10]
+l12: $ G ⇒ ∀ x (x ∊ ω → x ∊ U) $ by omega_ind_f (x := $ x $, y := $ y $, p := $ x ∊ U $) [l3, l11]
+l13: $ G ⇒ n ∊ ω → n ∊ U $ by all_elim [l12]
+l14: $ G ⇒ n ∊ U $ by imp_elim [l13, #3]
+
+universe_omega_subset
+---------------------
+l1: $ G , z ∊ ω ⇒ universe U $ by weaken [#1]
+l2: $ G , z ∊ ω ⇒ a ∊ U $ by weaken [#2]
+l3: $ G , z ∊ ω ⇒ z ∊ ω $ by ax
+l4: $ G , z ∊ ω ⇒ z ∊ U $ by universe_omega_elem [l1, l2, l3]
+l5: $ G ⇒ ω ⊆ U $ by subset_intro [l4]
+
+cint_intro
+----------
+l1: $ G ⇒ y ∊ A → a ∊ y $ by imp_intro [#1]
+l2: $ G ⇒ ∀ y (y ∊ A → a ∊ y) $ by all_intro [l1]
+l3: $ G ⇒ a ∊ {x | ∀ y (y ∊ A → x ∊ y)} $ by cab_intro (x := $ x $, t := $ a $, p := $ ∀ y (y ∊ A → x ∊ y) $) [l2]
+
+cint_elim
+---------
+l1: $ G ⇒ ∀ y (y ∊ A → a ∊ y) $ by cab_elim (x := $ x $, t := $ a $, p := $ ∀ y (y ∊ A → x ∊ y) $) [#1]
+l2: $ G ⇒ b ∊ A → a ∊ b $ by all_elim (t := $ b $) [l1]
+l3: $ G ⇒ a ∊ b $ by imp_elim [l2, #2]
+
+cint_subset
+-----------
+l1: $ G , x ∊ cint A ⇒ x ∊ cint A $ by ax
+l2: $ G , x ∊ cint A ⇒ b ∊ A $ by weaken [#1]
+l3: $ G , x ∊ cint A ⇒ x ∊ b $ by cint_elim [l1, l2]
+l4: $ G ⇒ cint A ⊆ b $ by subset_intro [l3]
+
+cint_set
+--------
+l1: $ G ⇒ cint A ⊆ b $ by cint_subset [#1]
+l2: $ G ⇒ isset (cint A) $ by subset_set [l1]
+
+cint_mono
+---------
+l1: $ G , z ∊ cint B , y ∊ A ⇒ y ∊ A $ by ax
+l2: $ G , z ∊ cint B , y ∊ A ⇒ A ⊆ B $ by weaken [#1]
+l3: $ G , z ∊ cint B , y ∊ A ⇒ y ∊ B $ by subset_elim [l2, l1]
+l4: $ G , z ∊ cint B , y ∊ A ⇒ z ∊ cint B $ by ax
+l5: $ G , z ∊ cint B , y ∊ A ⇒ z ∊ y $ by cint_elim [l4, l3]
+l6: $ G , z ∊ cint B ⇒ z ∊ cint A $ by cint_intro [l5]
+l7: $ G ⇒ cint B ⊆ cint A $ by subset_intro [l6]
+
+cint_congr
+----------
+l0: $ seqt y y $ by seqt_refl
+l1: $ (y ∊ A) ⟺ (y ∊ B) $ by welc_congr [l0, #1]
+l2: $ (x ∊ y) ⟺ (x ∊ y) $ by iff_refl
+l3: $ (y ∊ A → x ∊ y) ⟺ (y ∊ B → x ∊ y) $ by im_congr [l1, l2]
+l4: $ ∀ y (y ∊ A → x ∊ y) ⟺ ∀ y (y ∊ B → x ∊ y) $ by all_congr [l3]
+l5: $ {x | ∀ y (y ∊ A → x ∊ y)} ≐ {x | ∀ y (y ∊ B → x ∊ y)} $ by cab_congr [l4]
+
+cint_eq
+-------
+l1: $ G ⇒ B = A $ by eq_sym [#1]
+l2: $ G ⇒ B ⊆ A $ by eq_subset [l1]
+l3: $ G ⇒ A ⊆ B $ by eq_subset [#1]
+l4: $ G ⇒ cint A ⊆ cint B $ by cint_mono [l2]
+l5: $ G ⇒ cint B ⊆ cint A $ by cint_mono [l3]
+l6: $ G ⇒ cint A = cint B $ by subset_antisym [l4, l5]
+
+sb_c_cint
+---------
+l1: $ (⟦ x / t ⟧ {u | ∀ v (v ∊ A → u ∊ v)}) ≐ {u | ∀ v (v ∊ (⟦ x / t ⟧ A) → u ∊ v)} $ by ceqt_refl
+
+univs_intro
+-----------
+l1: $ G ⇒ universe u ∧ A ∈ u $ by and_intro [#1, #2]
+l2: $ G ⇒ u ∊ {w | universe w ∧ A ∈ w} $ by cab_intro (x := $ w $, t := $ u $, p := $ universe w ∧ A ∈ w $) [l1]
+
+univs_elim
+----------
+l1: $ G ⇒ universe u ∧ A ∈ u $ by cab_elim (x := $ w $, t := $ u $, p := $ universe w ∧ A ∈ w $) [#1]
+
+univs_nonempty
+--------------
+l1: $ G , a ∊ u ∧ universe u ⇒ a ∊ u ∧ universe u $ by ax
+l2: $ G , a ∊ u ∧ universe u ⇒ a ∊ u $ by and_elim_l [l1]
+l3: $ G , a ∊ u ∧ universe u ⇒ universe u $ by and_elim_r [l1]
+l4: $ G , a ∊ u ∧ universe u ⇒ a ∈ u $ by welc_wcel [l2]
+l5: $ G , a ∊ u ∧ universe u ⇒ u ∊ univs a $ by univs_intro [l3, l4]
+l6: $ G ⇒ a ∊ u ∧ universe u → u ∊ univs a $ by imp_intro [l5]
+l7: $ G ⇒ ∀ u (a ∊ u ∧ universe u → u ∊ univs a) $ by all_intro [l6]
+l8: $ G ⇒ ∃ u (a ∊ u ∧ universe u) $ by ax_universe
+l9: $ G ⇒ ∃ u (u ∊ univs a) $ by ex_mp [l7, l8]
+
+univs_congr
+-----------
+l0: $ u ≐ u $ by ceqt_refl
+l1: $ (A ∈ u) ⟺ (B ∈ u) $ by wcel_congr [#1, l0]
+l2: $ universe u ⟺ universe u $ by iff_refl
+l3: $ (universe u ∧ A ∈ u) ⟺ (universe u ∧ B ∈ u) $ by and_congr [l2, l1]
+l4: $ {u | universe u ∧ A ∈ u} ≐ {u | universe u ∧ B ∈ u} $ by cab_congr [l3]
+
+sb_c_univs
+----------
+l1: $ (⟦ x / t ⟧ {v | universe v ∧ A ∈ v}) ≐ {v | universe v ∧ (⟦ x / t ⟧ A) ∈ v} $ by ceqt_refl
+
+lemma u2_univ (G: hyps) {y: set} (A: class) (w: set):
+  $ G ⇒ ∀ y (y ∊ A → universe y) $ > $ G ⇒ w ∊ A $ > $ G ⇒ universe w $
+----
+l1: $ G ⇒ w ∊ A → universe w $ by all_elim (t := $ w $) [#1]
+l2: $ G ⇒ universe w $ by imp_elim [l1, #2]
+
+lemma u2_wcel_cint (G: hyps) {w: set} (A C: class):
+  $ G ⇒ isset C $ > $ G , w ∊ A ⇒ C ∈ w $ > $ G ⇒ C ∈ cint A $
+----
+l1: $ G , v = C ⇒ v = C $ by ax
+l2: $ G , v = C , w ∊ A ⇒ C ∈ w $ by weaken [#2]
+l3: $ G , v = C , w ∊ A ⇒ v = C $ by ax
+l4: $ G , v = C , w ∊ A ⇒ C = v $ by eq_sym [l3]
+l5: $ G , v = C , w ∊ A ⇒ v ∈ w $ by wcel_eq_l [l4, l2]
+l6: $ G , v = C , w ∊ A ⇒ v ∊ w $ by wcel_welc [l5]
+l7: $ G , v = C ⇒ v ∊ cint A $ by cint_intro [l6]
+l8: $ G , v = C ⇒ C ∈ cint A $ by wcel_intro [l1, l7]
+l9: $ G ⇒ C ∈ cint A $ by isset_elim [#1, l8]
+
+lemma u2_fn_into_mono (G: hyps) (F A B C: class):
+  $ G ⇒ fn_into F A B $ > $ G ⇒ B ⊆ C $ > $ G ⇒ fn_into F A C $
+----
+l1: $ G ⇒ functional F $ by fn_into_functional [#1]
+l2: $ G , x ∊ A ⇒ fn_into F A B $ by weaken [#1]
+l3: $ G , x ∊ A ⇒ x ∊ A $ by ax
+l4: $ G , x ∊ A , v ∊ B , ⟨ x , v ⟩ ∈ F ⇒ v ∊ B $ by ax
+l5: $ G , x ∊ A , v ∊ B , ⟨ x , v ⟩ ∈ F ⇒ B ⊆ C $ by weaken [#2]
+l6: $ G , x ∊ A , v ∊ B , ⟨ x , v ⟩ ∈ F ⇒ v ∊ C $ by subset_elim [l5, l4]
+l7: $ G , x ∊ A , v ∊ B , ⟨ x , v ⟩ ∈ F ⇒ ⟨ x , v ⟩ ∈ F $ by ax
+l8: $ G , x ∊ A , v ∊ B , ⟨ x , v ⟩ ∈ F ⇒ v ∊ C ∧ ⟨ x , v ⟩ ∈ F $ by and_intro [l6, l7]
+l9: $ G , x ∊ A , v ∊ B , ⟨ x , v ⟩ ∈ F ⇒ ∃ y (y ∊ C ∧ ⟨ x , y ⟩ ∈ F) $ by ex_intro (t := $ v $) [l8]
+l10: $ G , x ∊ A ⇒ ∃ y (y ∊ C ∧ ⟨ x , y ⟩ ∈ F) $ by fn_into_elim [l2, l3, l9]
+l11: $ G ⇒ fn_into F A C $ by fn_into_intro [l1, l10]
+
+universe_cint
+-------------
+t1: $ G , z ∊ cint A , u ∊ z , w ∊ A ⇒ w ∊ A $ by ax
+t2: $ G , z ∊ cint A , u ∊ z , w ∊ A ⇒ ∀ y (y ∊ A → universe y) $ by weaken [#2]
+t3: $ G , z ∊ cint A , u ∊ z , w ∊ A ⇒ universe w $ by u2_univ [t2, t1]
+t4: $ G , z ∊ cint A , u ∊ z , w ∊ A ⇒ z ∊ cint A $ by ax
+t5: $ G , z ∊ cint A , u ∊ z , w ∊ A ⇒ z ∊ w $ by cint_elim [t4, t1]
+t6: $ G , z ∊ cint A , u ∊ z , w ∊ A ⇒ u ∊ z $ by ax
+t7: $ G , z ∊ cint A , u ∊ z , w ∊ A ⇒ u ∊ w $ by universe_elem_elem [t3, t5, t6]
+t8: $ G , z ∊ cint A , u ∊ z ⇒ u ∊ cint A $ by cint_intro [t7]
+t9: $ G ⇒ transitive (cint A) $ by transitive_intro [t8]
+p1: $ G , z ∊ cint A ∧ u ∊ cint A ⇒ z ∊ cint A ∧ u ∊ cint A $ by ax
+p2: $ G , z ∊ cint A ∧ u ∊ cint A ⇒ z ∊ cint A $ by and_elim_l [p1]
+p3: $ G , z ∊ cint A ∧ u ∊ cint A ⇒ u ∊ cint A $ by and_elim_r [p1]
+p4: $ G , z ∊ cint A ∧ u ∊ cint A , w ∊ A ⇒ w ∊ A $ by ax
+p5: $ G , z ∊ cint A ∧ u ∊ cint A , w ∊ A ⇒ ∀ y (y ∊ A → universe y) $ by weaken [#2]
+p6: $ G , z ∊ cint A ∧ u ∊ cint A , w ∊ A ⇒ universe w $ by u2_univ [p5, p4]
+p7: $ G , z ∊ cint A ∧ u ∊ cint A , w ∊ A ⇒ z ∊ cint A $ by weaken [p2]
+p8: $ G , z ∊ cint A ∧ u ∊ cint A , w ∊ A ⇒ z ∊ w $ by cint_elim [p7, p4]
+p9: $ G , z ∊ cint A ∧ u ∊ cint A , w ∊ A ⇒ u ∊ cint A $ by weaken [p3]
+p10: $ G , z ∊ cint A ∧ u ∊ cint A , w ∊ A ⇒ u ∊ w $ by cint_elim [p9, p4]
+p11: $ G , z ∊ cint A ∧ u ∊ cint A , w ∊ A ⇒ cpr z u ∈ w $ by universe_cpr [p6, p8, p10]
+p12: $ G , z ∊ cint A ∧ u ∊ cint A ⇒ isset (cpr z u) $ by ax_pair
+p13: $ G , z ∊ cint A ∧ u ∊ cint A ⇒ cpr z u ∈ cint A $ by u2_wcel_cint [p12, p11]
+p14: $ G ⇒ z ∊ cint A ∧ u ∊ cint A → cpr z u ∈ cint A $ by imp_intro [p13]
+p15: $ G ⇒ ∀ u (z ∊ cint A ∧ u ∊ cint A → cpr z u ∈ cint A) $ by all_intro [p14]
+p16: $ G ⇒ ∀ z ∀ u (z ∊ cint A ∧ u ∊ cint A → cpr z u ∈ cint A) $ by all_intro [p15]
+q1: $ G , z ∊ cint A , w ∊ A ⇒ w ∊ A $ by ax
+q2: $ G , z ∊ cint A , w ∊ A ⇒ ∀ y (y ∊ A → universe y) $ by weaken [#2]
+q3: $ G , z ∊ cint A , w ∊ A ⇒ universe w $ by u2_univ [q2, q1]
+q4: $ G , z ∊ cint A , w ∊ A ⇒ z ∊ cint A $ by ax
+q5: $ G , z ∊ cint A , w ∊ A ⇒ z ∊ w $ by cint_elim [q4, q1]
+q6: $ G , z ∊ cint A , w ∊ A ⇒ 𝒫 z ∈ w $ by universe_cpw [q3, q5]
+q7: $ G , z ∊ cint A ⇒ isset (𝒫 z) $ by ax_power
+q8: $ G , z ∊ cint A ⇒ 𝒫 z ∈ cint A $ by u2_wcel_cint [q7, q6]
+q9: $ G ⇒ z ∊ cint A → 𝒫 z ∈ cint A $ by imp_intro [q8]
+q10: $ G ⇒ ∀ z (z ∊ cint A → 𝒫 z ∈ cint A) $ by all_intro [q9]
+r1: $ G , z ∊ cint A ∧ fn_into f z (cint A) ⇒ z ∊ cint A ∧ fn_into f z (cint A) $ by ax
+r2: $ G , z ∊ cint A ∧ fn_into f z (cint A) ⇒ z ∊ cint A $ by and_elim_l [r1]
+r3: $ G , z ∊ cint A ∧ fn_into f z (cint A) ⇒ fn_into f z (cint A) $ by and_elim_r [r1]
+r4: $ G , z ∊ cint A ∧ fn_into f z (cint A) , w ∊ A ⇒ w ∊ A $ by ax
+r5: $ G , z ∊ cint A ∧ fn_into f z (cint A) , w ∊ A ⇒ ∀ y (y ∊ A → universe y) $ by weaken [#2]
+r6: $ G , z ∊ cint A ∧ fn_into f z (cint A) , w ∊ A ⇒ universe w $ by u2_univ [r5, r4]
+r7: $ G , z ∊ cint A ∧ fn_into f z (cint A) , w ∊ A ⇒ z ∊ cint A $ by weaken [r2]
+r8: $ G , z ∊ cint A ∧ fn_into f z (cint A) , w ∊ A ⇒ z ∊ w $ by cint_elim [r7, r4]
+r9: $ G , z ∊ cint A ∧ fn_into f z (cint A) , w ∊ A ⇒ fn_into f z (cint A) $ by weaken [r3]
+r10: $ G , z ∊ cint A ∧ fn_into f z (cint A) , w ∊ A ⇒ cint A ⊆ w $ by cint_subset [r4]
+r11: $ G , z ∊ cint A ∧ fn_into f z (cint A) , w ∊ A ⇒ fn_into f z w $ by u2_fn_into_mono [r9, r10]
+r12: $ G , z ∊ cint A ∧ fn_into f z (cint A) , w ∊ A ⇒ ⋃ (img f z) ∈ w $ by universe_cuni_fn [r6, r8, r11]
+r13: $ G , z ∊ cint A ∧ fn_into f z (cint A) ⇒ functional f $ by fn_into_functional [r3]
+r14: $ G , z ∊ cint A ∧ fn_into f z (cint A) ⇒ isset z $ by isset_var
+r15: $ G , z ∊ cint A ∧ fn_into f z (cint A) ⇒ isset (img f z) $ by img_set [r13, r14]
+r16: $ G , z ∊ cint A ∧ fn_into f z (cint A) ⇒ isset (⋃ (img f z)) $ by cuni_set [r15]
+r17: $ G , z ∊ cint A ∧ fn_into f z (cint A) ⇒ ⋃ (img f z) ∈ cint A $ by u2_wcel_cint [r16, r12]
+r18: $ G ⇒ z ∊ cint A ∧ fn_into f z (cint A) → ⋃ (img f z) ∈ cint A $ by imp_intro [r17]
+r19: $ G ⇒ ∀ f (z ∊ cint A ∧ fn_into f z (cint A) → ⋃ (img f z) ∈ cint A) $ by all_intro [r18]
+r20: $ G ⇒ ∀ z ∀ f (z ∊ cint A ∧ fn_into f z (cint A) → ⋃ (img f z) ∈ cint A) $ by all_intro [r19]
+c1: $ G ⇒ ∀ z (z ∊ cint A → 𝒫 z ∈ cint A) ∧ ∀ z ∀ f (z ∊ cint A ∧ fn_into f z (cint A) → ⋃ (img f z) ∈ cint A) $ by and_intro [q10, r20]
+c2: $ G ⇒ ∀ z ∀ u (z ∊ cint A ∧ u ∊ cint A → cpr z u ∈ cint A) ∧ ∀ z (z ∊ cint A → 𝒫 z ∈ cint A) ∧ ∀ z ∀ f (z ∊ cint A ∧ fn_into f z (cint A) → ⋃ (img f z) ∈ cint A) $ by and_intro [p16, c1]
+c3: $ G ⇒ transitive (cint A) ∧ ∀ z ∀ u (z ∊ cint A ∧ u ∊ cint A → cpr z u ∈ cint A) ∧ ∀ z (z ∊ cint A → 𝒫 z ∈ cint A) ∧ ∀ z ∀ f (z ∊ cint A ∧ fn_into f z (cint A) → ⋃ (img f z) ∈ cint A) $ by and_intro [t9, c2]
+
+nextu_universe
+--------------
+l1: $ G ⇒ ∃ u (u ∊ univs a) $ by univs_nonempty
+l2: $ G , u ∊ univs a ⇒ u ∊ univs a $ by ax
+l3: $ G , v ∊ univs a ⇒ v ∊ univs a $ by ax
+l4: $ G , v ∊ univs a ⇒ universe v ∧ a ∈ v $ by univs_elim [l3]
+l5: $ G , v ∊ univs a ⇒ universe v $ by and_elim_l [l4]
+l6: $ G ⇒ v ∊ univs a → universe v $ by imp_intro [l5]
+l7: $ G ⇒ ∀ v (v ∊ univs a → universe v) $ by all_intro [l6]
+l8: $ G , u ∊ univs a ⇒ ∀ v (v ∊ univs a → universe v) $ by weaken [l7]
+l9: $ G , u ∊ univs a ⇒ universe (cint (univs a)) $ by universe_cint [l2, l8]
+l10: $ G ⇒ universe (nextu a) $ by ex_elim [l1, l9]
+
+nextu_elem
+----------
+l1: $ G , w ∊ univs a ⇒ w ∊ univs a $ by ax
+l2: $ G , w ∊ univs a ⇒ universe w ∧ a ∈ w $ by univs_elim [l1]
+l3: $ G , w ∊ univs a ⇒ a ∈ w $ by and_elim_r [l2]
+l4: $ G , w ∊ univs a ⇒ a ∊ w $ by wcel_welc [l3]
+l5: $ G ⇒ a ∊ cint (univs a) $ by cint_intro [l4]
+
+nextu_set
+---------
+l1: $ G ⇒ ∃ u (u ∊ univs a) $ by univs_nonempty
+l2: $ G , u ∊ univs a ⇒ u ∊ univs a $ by ax
+l3: $ G , u ∊ univs a ⇒ isset (cint (univs a)) $ by cint_set [l2]
+l4: $ G ⇒ isset (nextu a) $ by ex_elim [l1, l3]
+
+lemma u2_universe_cin (G: hyps) (U V: class):
+  $ G ⇒ universe U $ > $ G ⇒ universe V $ > $ G ⇒ universe (U ∩ V) $
+----
+t1: $ G ⇒ transitive U $ by universe_trans [#1]
+t2: $ G ⇒ transitive V $ by universe_trans [#2]
+t3: $ G ⇒ transitive (U ∩ V) $ by transitive_cin [t1, t2]
+p1: $ G , z ∊ U ∩ V ∧ u ∊ U ∩ V ⇒ z ∊ U ∩ V ∧ u ∊ U ∩ V $ by ax
+p2: $ G , z ∊ U ∩ V ∧ u ∊ U ∩ V ⇒ z ∊ U ∩ V $ by and_elim_l [p1]
+p3: $ G , z ∊ U ∩ V ∧ u ∊ U ∩ V ⇒ u ∊ U ∩ V $ by and_elim_r [p1]
+p4: $ G , z ∊ U ∩ V ∧ u ∊ U ∩ V ⇒ z ∊ U $ by cin_elim_l [p2]
+p5: $ G , z ∊ U ∩ V ∧ u ∊ U ∩ V ⇒ z ∊ V $ by cin_elim_r [p2]
+p6: $ G , z ∊ U ∩ V ∧ u ∊ U ∩ V ⇒ u ∊ U $ by cin_elim_l [p3]
+p7: $ G , z ∊ U ∩ V ∧ u ∊ U ∩ V ⇒ u ∊ V $ by cin_elim_r [p3]
+p8: $ G , z ∊ U ∩ V ∧ u ∊ U ∩ V ⇒ universe U $ by weaken [#1]
+p9: $ G , z ∊ U ∩ V ∧ u ∊ U ∩ V ⇒ universe V $ by weaken [#2]
+p10: $ G , z ∊ U ∩ V ∧ u ∊ U ∩ V ⇒ cpr z u ∈ U $ by universe_cpr [p8, p4, p6]
+p11: $ G , z ∊ U ∩ V ∧ u ∊ U ∩ V ⇒ cpr z u ∈ V $ by universe_cpr [p9, p5, p7]
+p12: $ G , z ∊ U ∩ V ∧ u ∊ U ∩ V ⇒ cpr z u ∈ U ∩ V $ by wcel_cin [p10, p11]
+p13: $ G ⇒ z ∊ U ∩ V ∧ u ∊ U ∩ V → cpr z u ∈ U ∩ V $ by imp_intro [p12]
+p14: $ G ⇒ ∀ u (z ∊ U ∩ V ∧ u ∊ U ∩ V → cpr z u ∈ U ∩ V) $ by all_intro [p13]
+p15: $ G ⇒ ∀ z ∀ u (z ∊ U ∩ V ∧ u ∊ U ∩ V → cpr z u ∈ U ∩ V) $ by all_intro [p14]
+q1: $ G , z ∊ U ∩ V ⇒ z ∊ U ∩ V $ by ax
+q2: $ G , z ∊ U ∩ V ⇒ z ∊ U $ by cin_elim_l [q1]
+q3: $ G , z ∊ U ∩ V ⇒ z ∊ V $ by cin_elim_r [q1]
+q4: $ G , z ∊ U ∩ V ⇒ universe U $ by weaken [#1]
+q5: $ G , z ∊ U ∩ V ⇒ universe V $ by weaken [#2]
+q6: $ G , z ∊ U ∩ V ⇒ 𝒫 z ∈ U $ by universe_cpw [q4, q2]
+q7: $ G , z ∊ U ∩ V ⇒ 𝒫 z ∈ V $ by universe_cpw [q5, q3]
+q8: $ G , z ∊ U ∩ V ⇒ 𝒫 z ∈ U ∩ V $ by wcel_cin [q6, q7]
+q9: $ G ⇒ z ∊ U ∩ V → 𝒫 z ∈ U ∩ V $ by imp_intro [q8]
+q10: $ G ⇒ ∀ z (z ∊ U ∩ V → 𝒫 z ∈ U ∩ V) $ by all_intro [q9]
+r1: $ G , z ∊ U ∩ V ∧ fn_into f z (U ∩ V) ⇒ z ∊ U ∩ V ∧ fn_into f z (U ∩ V) $ by ax
+r2: $ G , z ∊ U ∩ V ∧ fn_into f z (U ∩ V) ⇒ z ∊ U ∩ V $ by and_elim_l [r1]
+r3: $ G , z ∊ U ∩ V ∧ fn_into f z (U ∩ V) ⇒ fn_into f z (U ∩ V) $ by and_elim_r [r1]
+r4: $ G , z ∊ U ∩ V ∧ fn_into f z (U ∩ V) ⇒ z ∊ U $ by cin_elim_l [r2]
+r5: $ G , z ∊ U ∩ V ∧ fn_into f z (U ∩ V) ⇒ z ∊ V $ by cin_elim_r [r2]
+r6: $ G , z ∊ U ∩ V ∧ fn_into f z (U ∩ V) ⇒ U ∩ V ⊆ U $ by cin_subset_l
+r7: $ G , z ∊ U ∩ V ∧ fn_into f z (U ∩ V) ⇒ U ∩ V ⊆ V $ by cin_subset_r
+r8: $ G , z ∊ U ∩ V ∧ fn_into f z (U ∩ V) ⇒ fn_into f z U $ by u2_fn_into_mono [r3, r6]
+r9: $ G , z ∊ U ∩ V ∧ fn_into f z (U ∩ V) ⇒ fn_into f z V $ by u2_fn_into_mono [r3, r7]
+r10: $ G , z ∊ U ∩ V ∧ fn_into f z (U ∩ V) ⇒ universe U $ by weaken [#1]
+r11: $ G , z ∊ U ∩ V ∧ fn_into f z (U ∩ V) ⇒ universe V $ by weaken [#2]
+r12: $ G , z ∊ U ∩ V ∧ fn_into f z (U ∩ V) ⇒ ⋃ (img f z) ∈ U $ by universe_cuni_fn [r10, r4, r8]
+r13: $ G , z ∊ U ∩ V ∧ fn_into f z (U ∩ V) ⇒ ⋃ (img f z) ∈ V $ by universe_cuni_fn [r11, r5, r9]
+r14: $ G , z ∊ U ∩ V ∧ fn_into f z (U ∩ V) ⇒ ⋃ (img f z) ∈ U ∩ V $ by wcel_cin [r12, r13]
+r15: $ G ⇒ z ∊ U ∩ V ∧ fn_into f z (U ∩ V) → ⋃ (img f z) ∈ U ∩ V $ by imp_intro [r14]
+r16: $ G ⇒ ∀ f (z ∊ U ∩ V ∧ fn_into f z (U ∩ V) → ⋃ (img f z) ∈ U ∩ V) $ by all_intro [r15]
+r17: $ G ⇒ ∀ z ∀ f (z ∊ U ∩ V ∧ fn_into f z (U ∩ V) → ⋃ (img f z) ∈ U ∩ V) $ by all_intro [r16]
+c1: $ G ⇒ ∀ z (z ∊ U ∩ V → 𝒫 z ∈ U ∩ V) ∧ ∀ z ∀ f (z ∊ U ∩ V ∧ fn_into f z (U ∩ V) → ⋃ (img f z) ∈ U ∩ V) $ by and_intro [q10, r17]
+c2: $ G ⇒ ∀ z ∀ u (z ∊ U ∩ V ∧ u ∊ U ∩ V → cpr z u ∈ U ∩ V) ∧ ∀ z (z ∊ U ∩ V → 𝒫 z ∈ U ∩ V) ∧ ∀ z ∀ f (z ∊ U ∩ V ∧ fn_into f z (U ∩ V) → ⋃ (img f z) ∈ U ∩ V) $ by and_intro [p15, c1]
+c3: $ G ⇒ transitive (U ∩ V) ∧ ∀ z ∀ u (z ∊ U ∩ V ∧ u ∊ U ∩ V → cpr z u ∈ U ∩ V) ∧ ∀ z (z ∊ U ∩ V → 𝒫 z ∈ U ∩ V) ∧ ∀ z ∀ f (z ∊ U ∩ V ∧ fn_into f z (U ∩ V) → ⋃ (img f z) ∈ U ∩ V) $ by and_intro [t3, c2]
+
+nextu_least
+-----------
+l1: $ G ⇒ ∃ u (u ∊ univs a) $ by univs_nonempty
+l2: $ G , u ∊ univs a ⇒ u ∊ univs a $ by ax
+l3: $ G , u ∊ univs a ⇒ universe u ∧ a ∈ u $ by univs_elim [l2]
+l4: $ G , u ∊ univs a ⇒ universe u $ by and_elim_l [l3]
+l5: $ G , u ∊ univs a ⇒ a ∈ u $ by and_elim_r [l3]
+l6: $ G , u ∊ univs a ⇒ universe U $ by weaken [#1]
+l7: $ G , u ∊ univs a ⇒ universe (u ∩ U) $ by u2_universe_cin [l4, l6]
+l8: $ G , u ∊ univs a ⇒ isset u $ by isset_var
+l9: $ G , u ∊ univs a ⇒ isset (u ∩ U) $ by cin_set_l [l8]
+l10: $ G , u ∊ univs a , v = u ∩ U ⇒ v = u ∩ U $ by ax
+l11: $ G , u ∊ univs a , v = u ∩ U ⇒ u ∩ U = v $ by eq_sym [l10]
+l12: $ G , u ∊ univs a , v = u ∩ U ⇒ universe (u ∩ U) $ by weaken [l7]
+l13: $ G , u ∊ univs a , v = u ∩ U ⇒ universe v $ by universe_eq [l11, l12]
+l14: $ G , u ∊ univs a , v = u ∩ U ⇒ a ∈ u $ by weaken [l5]
+l15: $ G , u ∊ univs a , v = u ∩ U ⇒ a ∊ u $ by wcel_welc [l14]
+l16: $ G , u ∊ univs a , v = u ∩ U ⇒ a ∊ U $ by weaken [#2]
+l17: $ G , u ∊ univs a , v = u ∩ U ⇒ a ∊ u ∩ U $ by cin_intro [l15, l16]
+l18: $ G , u ∊ univs a , v = u ∩ U ⇒ a ∊ v $ by welc_eq [l11, l17]
+l19: $ G , u ∊ univs a , v = u ∩ U ⇒ a ∈ v $ by welc_wcel [l18]
+l20: $ G , u ∊ univs a , v = u ∩ U ⇒ v ∊ univs a $ by univs_intro [l13, l19]
+l21: $ G , u ∊ univs a , v = u ∩ U ⇒ cint (univs a) ⊆ v $ by cint_subset [l20]
+l22: $ G , u ∊ univs a , v = u ∩ U ⇒ v ⊆ u ∩ U $ by eq_subset [l10]
+l23: $ G , u ∊ univs a , v = u ∩ U ⇒ u ∩ U ⊆ U $ by cin_subset_r
+l24: $ G , u ∊ univs a , v = u ∩ U ⇒ v ⊆ U $ by subset_trans [l22, l23]
+l25: $ G , u ∊ univs a , v = u ∩ U ⇒ nextu a ⊆ U $ by subset_trans [l21, l24]
+l26: $ G , u ∊ univs a ⇒ nextu a ⊆ U $ by isset_elim [l9, l25]
+l27: $ G ⇒ nextu a ⊆ U $ by ex_elim [l1, l26]
+
+nextu_mono
+----------
+l1: $ G ⇒ universe (nextu b) $ by nextu_universe
+l2: $ G ⇒ nextu a ⊆ nextu b $ by nextu_least [l1, #1]
+
+nextu_congr
+-----------
+l1: $ univs A ≐ univs B $ by univs_congr [#1]
+l2: $ cint (univs A) ≐ cint (univs B) $ by cint_congr [l1]
+
+nextu_eq
+--------
+e1: $ G , u ∊ univs A ⇒ u ∊ univs A $ by ax
+e2: $ G , u ∊ univs A ⇒ universe u ∧ A ∈ u $ by univs_elim [e1]
+e3: $ G , u ∊ univs A ⇒ universe u $ by and_elim_l [e2]
+e4: $ G , u ∊ univs A ⇒ A ∈ u $ by and_elim_r [e2]
+e5: $ G , u ∊ univs A ⇒ A = B $ by weaken [#1]
+e6: $ G , u ∊ univs A ⇒ B ∈ u $ by wcel_eq_l [e5, e4]
+e7: $ G , u ∊ univs A ⇒ u ∊ univs B $ by univs_intro [e3, e6]
+f1: $ G , u ∊ univs B ⇒ u ∊ univs B $ by ax
+f2: $ G , u ∊ univs B ⇒ universe u ∧ B ∈ u $ by univs_elim [f1]
+f3: $ G , u ∊ univs B ⇒ universe u $ by and_elim_l [f2]
+f4: $ G , u ∊ univs B ⇒ B ∈ u $ by and_elim_r [f2]
+f5: $ G , u ∊ univs B ⇒ A = B $ by weaken [#1]
+f6: $ G , u ∊ univs B ⇒ B = A $ by eq_sym [f5]
+f7: $ G , u ∊ univs B ⇒ A ∈ u $ by wcel_eq_l [f6, f4]
+f8: $ G , u ∊ univs B ⇒ u ∊ univs A $ by univs_intro [f3, f7]
+g1: $ G ⇒ univs A = univs B $ by eq_intro [e7, f8]
+g2: $ G ⇒ cint (univs A) = cint (univs B) $ by cint_eq [g1]
+
+sb_c_nextu
+----------
+l1: $ (⟦ x / t ⟧ (cint (univs A))) ≐ cint (univs (⟦ x / t ⟧ A)) $ by ceqt_refl
+
+two_subset_omega
+----------------
+a1: $ G , z ∊ two ⇒ z ∊ two $ by ax
+a2: $ G , z ∊ two ⇒ z = ∅ ∨ z = csn ∅ $ by two_elim [a1]
+b1: $ G , z ∊ two , z = ∅ ⇒ z = ∅ $ by ax
+b2: $ G , z ∊ two , z = ∅ ⇒ ∅ = z $ by eq_sym [b1]
+b3: $ G , z ∊ two , z = ∅ ⇒ ∅ ∈ ω $ by omega_zero
+b4: $ G , z ∊ two , z = ∅ ⇒ z ∈ ω $ by wcel_eq_l [b2, b3]
+b5: $ G , z ∊ two , z = ∅ ⇒ z ∊ ω $ by wcel_welc [b4]
+d1: $ G , z ∊ two , z = csn ∅ , c = ∅ ⇒ c = ∅ $ by ax
+d2: $ G , z ∊ two , z = csn ∅ , c = ∅ ⇒ z = csn ∅ $ by ax
+d3: $ G , z ∊ two , z = csn ∅ , c = ∅ ⇒ ∅ = c $ by eq_sym [d1]
+d4: $ G , z ∊ two , z = csn ∅ , c = ∅ ⇒ ∅ ∈ ω $ by omega_zero
+d5: $ G , z ∊ two , z = csn ∅ , c = ∅ ⇒ c ∈ ω $ by wcel_eq_l [d3, d4]
+d6: $ G , z ∊ two , z = csn ∅ , c = ∅ ⇒ c ∊ ω $ by wcel_welc [d5]
+d7: $ G , z ∊ two , z = csn ∅ , c = ∅ ⇒ suc c ∈ ω $ by omega_suc [d6]
+s1: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ suc c ⇒ w ∊ suc c $ by ax
+s2: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ suc c ⇒ w ∊ c ∨ w = c $ by suc_elim [s1]
+s3: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ suc c , w ∊ c ⇒ w ∊ c $ by ax
+s4: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ suc c , w ∊ c ⇒ c = ∅ $ by ax
+s5: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ suc c , w ∊ c ⇒ w ∊ ∅ $ by welc_eq [s4, s3]
+s6: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ suc c , w ∊ c ⇒ ⊥ $ by empty_elim [s5]
+s7: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ suc c , w ∊ c ⇒ w ∊ z $ by bot_elim [s6]
+s8: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ suc c , w = c ⇒ w = c $ by ax
+s9: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ suc c , w = c ⇒ c = ∅ $ by ax
+s10: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ suc c , w = c ⇒ w = ∅ $ by eq_trans [s8, s9]
+s11: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ suc c , w = c ⇒ w ∊ csn ∅ $ by csn_intro [s10]
+s12: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ suc c , w = c ⇒ z = csn ∅ $ by ax
+s13: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ suc c , w = c ⇒ csn ∅ = z $ by eq_sym [s12]
+s14: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ suc c , w = c ⇒ w ∊ z $ by welc_eq [s13, s11]
+s15: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ suc c ⇒ w ∊ z $ by or_elim [s2, s7, s14]
+u1: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ z ⇒ w ∊ z $ by ax
+u2: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ z ⇒ z = csn ∅ $ by ax
+u3: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ z ⇒ w ∊ csn ∅ $ by welc_eq [u2, u1]
+u4: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ z ⇒ w = ∅ $ by csn_elim [u3]
+u5: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ z ⇒ ∅ = c $ by weaken [d3]
+u6: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ z ⇒ w = c $ by eq_trans [u4, u5]
+u7: $ G , z ∊ two , z = csn ∅ , c = ∅ , w ∊ z ⇒ w ∊ suc c $ by suc_intro_r [u6]
+v1: $ G , z ∊ two , z = csn ∅ , c = ∅ ⇒ suc c = z $ by eq_intro [s15, u7]
+v2: $ G , z ∊ two , z = csn ∅ , c = ∅ ⇒ z ∈ ω $ by wcel_eq_l [v1, d7]
+v3: $ G , z ∊ two , z = csn ∅ , c = ∅ ⇒ z ∊ ω $ by wcel_welc [v2]
+v4: $ G , z ∊ two , z = csn ∅ ⇒ isset ∅ $ by ax_empty
+v5: $ G , z ∊ two , z = csn ∅ ⇒ z ∊ ω $ by isset_elim [v4, v3]
+w1: $ G , z ∊ two ⇒ z ∊ ω $ by or_elim [a2, b5, v5]
+w2: $ G ⇒ two ⊆ ω $ by subset_intro [w1]
+
+uni_functional
+--------------
+l1: $ G ⇒ isset two $ by two_set
+l2: $ G ⇒ functional (cgr x (nextu (cpr x ω))) $ by cgr_functional
+l3: $ G ⇒ functional (omrec two (cgr x (nextu (cpr x ω)))) $ by omrec_functional [l1, l2]
+
+uni_cdm
+-------
+l1: $ G ⇒ isset two $ by two_set
+l2: $ G ⇒ functional (cgr x (nextu (cpr x ω))) $ by cgr_functional
+l3: $ G ⇒ cdm (omrec two (cgr x (nextu (cpr x ω)))) = ω $ by omrec_cdm [l1, l2]
+
+uni_set
+-------
+l1: $ G ⇒ functional uni $ by uni_functional
+l2: $ G ⇒ isset (fv uni n) $ by fv_set [l1]
+
+uni_zero
+--------
+l1: $ G ⇒ isset two $ by two_set
+l2: $ G ⇒ functional (cgr x (nextu (cpr x ω))) $ by cgr_functional
+l3: $ G ⇒ fv (omrec two (cgr x (nextu (cpr x ω)))) ∅ = two $ by omrec_zero [l1, l2]
+
+lemma u2_nextu_set_c (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ isset (nextu A) $
+----
+l1: $ G , v = A ⇒ v = A $ by ax
+l2: $ G , v = A ⇒ nextu v = nextu A $ by nextu_eq [l1]
+l3: $ G , v = A ⇒ isset (nextu v) $ by nextu_set
+l4: $ G , v = A ⇒ isset (nextu A) $ by isset_eq [l2, l3]
+l5: $ G ⇒ isset (nextu A) $ by isset_elim [#1, l4]
+
+lemma u2_nextu_universe_c (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ universe (nextu A) $
+----
+l1: $ G , v = A ⇒ v = A $ by ax
+l2: $ G , v = A ⇒ nextu v = nextu A $ by nextu_eq [l1]
+l3: $ G , v = A ⇒ universe (nextu v) $ by nextu_universe
+l4: $ G , v = A ⇒ universe (nextu A) $ by universe_eq [l2, l3]
+l5: $ G ⇒ universe (nextu A) $ by isset_elim [#1, l4]
+
+lemma u2_nextu_elem_c (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ A ∈ nextu A $
+----
+l1: $ G , v = A ⇒ v = A $ by ax
+l2: $ G , v = A ⇒ nextu v = nextu A $ by nextu_eq [l1]
+l3: $ G , v = A ⇒ v ∊ nextu v $ by nextu_elem
+l4: $ G , v = A ⇒ v ∈ nextu v $ by welc_wcel [l3]
+l5: $ G , v = A ⇒ v ∈ nextu A $ by wcel_eq_r [l2, l4]
+l6: $ G , v = A ⇒ A ∈ nextu A $ by wcel_eq_l [l1, l5]
+l7: $ G ⇒ A ∈ nextu A $ by isset_elim [#1, l6]
+
+lemma u2_nextu_least_c (G: hyps) (U A: class):
+  $ G ⇒ isset A $ > $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ nextu A ⊆ U $
+----
+l1: $ G , v = A ⇒ v = A $ by ax
+l2: $ G , v = A ⇒ A = v $ by eq_sym [l1]
+l3: $ G , v = A ⇒ A ∈ U $ by weaken [#3]
+l4: $ G , v = A ⇒ v ∈ U $ by wcel_eq_l [l2, l3]
+l5: $ G , v = A ⇒ v ∊ U $ by wcel_welc [l4]
+l6: $ G , v = A ⇒ universe U $ by weaken [#2]
+l7: $ G , v = A ⇒ nextu v ⊆ U $ by nextu_least [l6, l5]
+l8: $ G , v = A ⇒ nextu v = nextu A $ by nextu_eq [l1]
+l9: $ G , v = A ⇒ nextu A ⊆ U $ by subset_eq_l [l8, l7]
+l10: $ G ⇒ nextu A ⊆ U $ by isset_elim [#1, l9]
+
+lemma u2_cpr_wcel_l (G: hyps) (A B: class): $ G ⇒ isset A $ > $ G ⇒ A ∈ cpr A B $
+----
+l1: $ G , v = A ⇒ v = A $ by ax
+l2: $ G , v = A ⇒ v = A ∨ v = B $ by or_intro_l [l1]
+l3: $ G , v = A ⇒ v ∊ cpr A B $ by cpr_intro [l2]
+l4: $ G , v = A ⇒ A ∈ cpr A B $ by wcel_intro [l1, l3]
+l5: $ G ⇒ A ∈ cpr A B $ by isset_elim [#1, l4]
+
+lemma u2_cpr_wcel_r (G: hyps) (A B: class): $ G ⇒ isset B $ > $ G ⇒ B ∈ cpr A B $
+----
+l1: $ G , v = B ⇒ v = B $ by ax
+l2: $ G , v = B ⇒ v = A ∨ v = B $ by or_intro_r [l1]
+l3: $ G , v = B ⇒ v ∊ cpr A B $ by cpr_intro [l2]
+l4: $ G , v = B ⇒ B ∈ cpr A B $ by wcel_intro [l1, l3]
+l5: $ G ⇒ B ∈ cpr A B $ by isset_elim [#1, l4]
+
+lemma u2_universe_wcel_trans (G: hyps) (U A B: class):
+  $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ B ∈ A $ > $ G ⇒ B ∈ U $
+----
+t1: $ G , u = A , u ∊ U ⇒ u = A $ by ax
+t2: $ G , u = A , u ∊ U ⇒ A = u $ by eq_sym [t1]
+t3: $ G , u = A , u ∊ U ⇒ B ∈ A $ by weaken [#3]
+t4: $ G , u = A , u ∊ U ⇒ B ∈ u $ by wcel_eq_r [t2, t3]
+t5: $ G , u = A , u ∊ U , v = B , v ∊ u ⇒ v ∊ u $ by ax
+t6: $ G , u = A , u ∊ U , v = B , v ∊ u ⇒ u ∊ U $ by ax
+t7: $ G , u = A , u ∊ U , v = B , v ∊ u ⇒ universe U $ by weaken [#1]
+t8: $ G , u = A , u ∊ U , v = B , v ∊ u ⇒ v ∊ U $ by universe_elem_elem [t7, t6, t5]
+t9: $ G , u = A , u ∊ U , v = B , v ∊ u ⇒ v = B $ by ax
+t10: $ G , u = A , u ∊ U , v = B , v ∊ u ⇒ B ∈ U $ by wcel_intro [t9, t8]
+t11: $ G , u = A , u ∊ U ⇒ B ∈ U $ by wcel_elim [t4, t10]
+t12: $ G ⇒ B ∈ U $ by wcel_elim [#2, t11]
+
+lemma u2_universe_wcel_subset (G: hyps) (U A: class):
+  $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ A ⊆ U $
+----
+l1: $ G , v = A , v ∊ U ⇒ v ∊ U $ by ax
+l2: $ G , v = A , v ∊ U ⇒ universe U $ by weaken [#1]
+l3: $ G , v = A , v ∊ U ⇒ v ⊆ U $ by universe_elem_subset [l2, l1]
+l4: $ G , v = A , v ∊ U ⇒ v = A $ by ax
+l5: $ G , v = A , v ∊ U ⇒ A ⊆ U $ by subset_eq_l [l4, l3]
+l6: $ G ⇒ A ⊆ U $ by wcel_elim [#2, l5]
+
+uni_suc
+-------
+l1: $ G ⇒ isset two $ by two_set
+l2: $ G ⇒ functional (cgr x (nextu (cpr x ω))) $ by cgr_functional
+l3: $ G ⇒ fv (omrec two (cgr x (nextu (cpr x ω)))) (suc n) = fv (cgr x (nextu (cpr x ω))) (fv (omrec two (cgr x (nextu (cpr x ω)))) n) $ by omrec_suc [l1, l2, #1]
+l4: $ G ⇒ isset (fv uni n) $ by uni_set
+m1: $ G , v = fv uni n ⇒ v = fv uni n $ by ax
+m2: $ G , v = fv uni n ⇒ fv uni n = v $ by eq_sym [m1]
+m3: $ G , v = fv uni n ⇒ cgr x (nextu (cpr x ω)) = cgr x (nextu (cpr x ω)) $ by eq_refl
+m4: $ G , v = fv uni n ⇒ fv (cgr x (nextu (cpr x ω))) (fv uni n) = fv (cgr x (nextu (cpr x ω))) v $ by fv_eq [m3, m2]
+m5a: $ G , v = fv uni n ⇒ isset v $ by isset_var
+m5b: $ G , v = fv uni n ⇒ isset ω $ by omega_set
+m5: $ G , v = fv uni n ⇒ isset (cpr v ω) $ by cpr_set [m5a, m5b]
+m6: $ G , v = fv uni n ⇒ isset (nextu (cpr v ω)) $ by u2_nextu_set_c [m5]
+m7: $ G , v = fv uni n ⇒ fv (cgr x (nextu (cpr x ω))) v = nextu (cpr v ω) $ by fv_cgr (x := $ x $, B := $ nextu (cpr x ω) $, a := $ v $) [m6]
+m8: $ G , v = fv uni n ⇒ ω = ω $ by eq_refl
+m9: $ G , v = fv uni n ⇒ cpr v ω = cpr (fv uni n) ω $ by cpr_eq [m1, m8]
+m10: $ G , v = fv uni n ⇒ nextu (cpr v ω) = nextu (cpr (fv uni n) ω) $ by nextu_eq [m9]
+m11: $ G , v = fv uni n ⇒ fv uni (suc n) = fv (cgr x (nextu (cpr x ω))) (fv uni n) $ by weaken [l3]
+m12: $ G , v = fv uni n ⇒ fv uni (suc n) = fv (cgr x (nextu (cpr x ω))) v $ by eq_trans [m11, m4]
+m13: $ G , v = fv uni n ⇒ fv uni (suc n) = nextu (cpr v ω) $ by eq_trans [m12, m7]
+m14: $ G , v = fv uni n ⇒ fv uni (suc n) = nextu (cpr (fv uni n) ω) $ by eq_trans [m13, m10]
+m15: $ G ⇒ fv uni (suc n) = nextu (cpr (fv uni n) ω) $ by isset_elim [l4, m14]
+
+uni_universe
+------------
+l1: $ G ⇒ fv uni (suc n) = nextu (cpr (fv uni n) ω) $ by uni_suc [#1]
+l2: $ G ⇒ isset (fv uni n) $ by uni_set
+l3: $ G ⇒ isset ω $ by omega_set
+l4: $ G ⇒ isset (cpr (fv uni n) ω) $ by cpr_set [l2, l3]
+l5: $ G ⇒ universe (nextu (cpr (fv uni n) ω)) $ by u2_nextu_universe_c [l4]
+l6: $ G ⇒ nextu (cpr (fv uni n) ω) = fv uni (suc n) $ by eq_sym [l1]
+l7: $ G ⇒ universe (fv uni (suc n)) $ by universe_eq [l6, l5]
+
+uni_elem
+--------
+l1: $ G ⇒ fv uni (suc n) = nextu (cpr (fv uni n) ω) $ by uni_suc [#1]
+l2: $ G ⇒ isset (fv uni n) $ by uni_set
+l3: $ G ⇒ isset ω $ by omega_set
+l4: $ G ⇒ isset (cpr (fv uni n) ω) $ by cpr_set [l2, l3]
+l5: $ G ⇒ cpr (fv uni n) ω ∈ nextu (cpr (fv uni n) ω) $ by u2_nextu_elem_c [l4]
+l6: $ G ⇒ nextu (cpr (fv uni n) ω) = fv uni (suc n) $ by eq_sym [l1]
+l7: $ G ⇒ cpr (fv uni n) ω ∈ fv uni (suc n) $ by wcel_eq_r [l6, l5]
+l8: $ G ⇒ universe (fv uni (suc n)) $ by uni_universe [#1]
+l9: $ G ⇒ fv uni n ∈ cpr (fv uni n) ω $ by u2_cpr_wcel_l [l2]
+l10: $ G ⇒ fv uni n ∈ fv uni (suc n) $ by u2_universe_wcel_trans [l8, l7, l9]
+
+uni_omega
+---------
+l1: $ G ⇒ fv uni (suc n) = nextu (cpr (fv uni n) ω) $ by uni_suc [#1]
+l2: $ G ⇒ isset (fv uni n) $ by uni_set
+l3: $ G ⇒ isset ω $ by omega_set
+l4: $ G ⇒ isset (cpr (fv uni n) ω) $ by cpr_set [l2, l3]
+l5: $ G ⇒ cpr (fv uni n) ω ∈ nextu (cpr (fv uni n) ω) $ by u2_nextu_elem_c [l4]
+l6: $ G ⇒ nextu (cpr (fv uni n) ω) = fv uni (suc n) $ by eq_sym [l1]
+l7: $ G ⇒ cpr (fv uni n) ω ∈ fv uni (suc n) $ by wcel_eq_r [l6, l5]
+l8: $ G ⇒ universe (fv uni (suc n)) $ by uni_universe [#1]
+l9: $ G ⇒ ω ∈ cpr (fv uni n) ω $ by u2_cpr_wcel_r [l3]
+l10: $ G ⇒ ω ∈ fv uni (suc n) $ by u2_universe_wcel_trans [l8, l7, l9]
+
+uni_subset
+----------
+l1: $ G ⇒ universe (fv uni (suc n)) $ by uni_universe [#1]
+l2: $ G ⇒ fv uni n ∈ fv uni (suc n) $ by uni_elem [#1]
+l3: $ G ⇒ fv uni n ⊆ fv uni (suc n) $ by u2_universe_wcel_subset [l1, l2]
+
+uni_two
+-------
+l1: $ G ⇒ universe (fv uni (suc n)) $ by uni_universe [#1]
+l2: $ G ⇒ fv uni n ∈ fv uni (suc n) $ by uni_elem [#1]
+l3: $ G , v = fv uni n , v ∊ fv uni (suc n) ⇒ v ∊ fv uni (suc n) $ by ax
+l4: $ G , v = fv uni n , v ∊ fv uni (suc n) ⇒ universe (fv uni (suc n)) $ by weaken [l1]
+l5: $ G , v = fv uni n , v ∊ fv uni (suc n) ⇒ two ∈ fv uni (suc n) $ by universe_two [l4, l3]
+l6: $ G ⇒ two ∈ fv uni (suc n) $ by wcel_elim [l2, l5]
+
+uni_mono
+--------
+b1: $ G , c = ∅ ⇒ c = ∅ $ by ax
+b2: $ G , c = ∅ , m ∊ c ⇒ m ∊ c $ by ax
+b3: $ G , c = ∅ , m ∊ c ⇒ c = ∅ $ by ax
+b4: $ G , c = ∅ , m ∊ c ⇒ m ∊ ∅ $ by welc_eq [b3, b2]
+b5: $ G , c = ∅ , m ∊ c ⇒ ⊥ $ by empty_elim [b4]
+b6: $ G , c = ∅ , m ∊ c ⇒ fv uni m ∈ fv uni c $ by bot_elim [b5]
+b7: $ G , c = ∅ ⇒ m ∊ c → fv uni m ∈ fv uni c $ by imp_intro [b6]
+b8: $ G , c = ∅ ⇒ c ∊ {x | m ∊ x → fv uni m ∈ fv uni x} $ by cab_intro (x := $ x $, t := $ c $, p := $ m ∊ x → fv uni m ∈ fv uni x $) [b7]
+b9: $ G , c = ∅ ⇒ ∅ ∈ {x | m ∊ x → fv uni m ∈ fv uni x} $ by wcel_intro [b1, b8]
+b10: $ G ⇒ isset ∅ $ by ax_empty
+b11: $ G ⇒ ∅ ∈ {x | m ∊ x → fv uni m ∈ fv uni x} $ by isset_elim [b10, b9]
+s1: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w ⇒ m ∊ w $ by ax
+s2: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w ⇒ w = suc k $ by ax
+s3: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w ⇒ m ∊ suc k $ by welc_eq [s2, s1]
+s4: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w ⇒ m ∊ k ∨ m = k $ by suc_elim [s3]
+s5: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w ⇒ k ∊ ω $ by ax
+s6: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w ⇒ universe (fv uni (suc k)) $ by uni_universe [s5]
+s7: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w ⇒ fv uni k ∈ fv uni (suc k) $ by uni_elem [s5]
+a1: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m ∊ k ⇒ m ∊ k $ by ax
+a2: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m ∊ k ⇒ m ∊ k → fv uni m ∈ fv uni k $ by ax
+a3: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m ∊ k ⇒ fv uni m ∈ fv uni k $ by imp_elim [a2, a1]
+a4: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m ∊ k ⇒ universe (fv uni (suc k)) $ by weaken [s6]
+a5: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m ∊ k ⇒ fv uni k ∈ fv uni (suc k) $ by weaken [s7]
+a6: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m ∊ k ⇒ fv uni m ∈ fv uni (suc k) $ by u2_universe_wcel_trans [a4, a5, a3]
+c1: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m = k ⇒ m = k $ by ax
+c2: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m = k ⇒ uni = uni $ by eq_refl
+c3: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m = k ⇒ fv uni m = fv uni k $ by fv_eq [c2, c1]
+c4: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m = k ⇒ fv uni k = fv uni m $ by eq_sym [c3]
+c5: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m = k ⇒ fv uni k ∈ fv uni (suc k) $ by weaken [s7]
+c6: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m = k ⇒ fv uni m ∈ fv uni (suc k) $ by wcel_eq_l [c4, c5]
+s8: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w ⇒ fv uni m ∈ fv uni (suc k) $ by or_elim [s4, a6, c6]
+s9: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w ⇒ suc k = w $ by eq_sym [s2]
+s10: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w ⇒ uni = uni $ by eq_refl
+s11: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w ⇒ fv uni (suc k) = fv uni w $ by fv_eq [s10, s9]
+s12: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w ⇒ fv uni m ∈ fv uni w $ by wcel_eq_r [s11, s8]
+s13: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k ⇒ m ∊ w → fv uni m ∈ fv uni w $ by imp_intro [s12]
+s14: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k ⇒ w ∊ {x | m ∊ x → fv uni m ∈ fv uni x} $ by cab_intro (x := $ x $, t := $ w $, p := $ m ∊ x → fv uni m ∈ fv uni x $) [s13]
+s15: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k ⇒ w = suc k $ by ax
+s16: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k ⇒ suc k ∈ {x | m ∊ x → fv uni m ∈ fv uni x} $ by wcel_intro [s15, s14]
+s17: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) ⇒ isset k $ by isset_var
+s18: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) ⇒ isset (suc k) $ by suc_set [s17]
+s19: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) ⇒ suc k ∈ {x | m ∊ x → fv uni m ∈ fv uni x} $ by isset_elim [s18, s16]
+s20: $ G , k ∊ ω ⇒ (m ∊ k → fv uni m ∈ fv uni k) → suc k ∈ {x | m ∊ x → fv uni m ∈ fv uni x} $ by imp_intro [s19]
+s21: $ G ⇒ k ∊ ω → (m ∊ k → fv uni m ∈ fv uni k) → suc k ∈ {x | m ∊ x → fv uni m ∈ fv uni x} $ by imp_intro [s20]
+s22: $ G ⇒ ∀ k (k ∊ ω → (m ∊ k → fv uni m ∈ fv uni k) → suc k ∈ {x | m ∊ x → fv uni m ∈ fv uni x}) $ by all_intro [s21]
+f1: $ G ⇒ ∀ x (x ∊ ω → m ∊ x → fv uni m ∈ fv uni x) $ by omega_ind_f [b11, s22]
+f2: $ G ⇒ n ∊ ω → m ∊ n → fv uni m ∈ fv uni n $ by all_elim (t := $ n $) [f1]
+f3: $ G ⇒ m ∊ n → fv uni m ∈ fv uni n $ by imp_elim [f2, #2]
+f4: $ G ⇒ fv uni m ∈ fv uni n $ by imp_elim [f3, #3]
+
+uni_mono_subset
+---------------
+t1: $ G ⇒ m ∊ n ∨ m = n ∨ n ∊ m $ by omega_tricho [#1, #2]
+g1: $ G , m ∊ n ⇒ m ∊ n $ by ax
+g2a: $ G , m ∊ n ⇒ m ∊ ω $ by weaken [#1]
+g2b: $ G , m ∊ n ⇒ n ∊ ω $ by weaken [#2]
+g2: $ G , m ∊ n ⇒ fv uni m ∈ fv uni n $ by uni_mono [g2a, g2b, g1]
+g4: $ G , m ∊ n ⇒ n = ∅ ∨ ∃ k (k ∊ ω ∧ n = suc k) $ by omega_cases [g2b]
+h1: $ G , m ∊ n , n = ∅ ⇒ n = ∅ $ by ax
+h2: $ G , m ∊ n , n = ∅ ⇒ m ∊ n $ by ax
+h3: $ G , m ∊ n , n = ∅ ⇒ m ∊ ∅ $ by welc_eq [h1, h2]
+h4: $ G , m ∊ n , n = ∅ ⇒ ⊥ $ by empty_elim [h3]
+h5: $ G , m ∊ n , n = ∅ ⇒ fv uni m ⊆ fv uni n $ by bot_elim [h4]
+i1: $ G , m ∊ n , k ∊ ω ∧ n = suc k ⇒ k ∊ ω ∧ n = suc k $ by ax
+i2: $ G , m ∊ n , k ∊ ω ∧ n = suc k ⇒ k ∊ ω $ by and_elim_l [i1]
+i3: $ G , m ∊ n , k ∊ ω ∧ n = suc k ⇒ n = suc k $ by and_elim_r [i1]
+i4: $ G , m ∊ n , k ∊ ω ∧ n = suc k ⇒ universe (fv uni (suc k)) $ by uni_universe [i2]
+i5: $ G , m ∊ n , k ∊ ω ∧ n = suc k ⇒ suc k = n $ by eq_sym [i3]
+i6: $ G , m ∊ n , k ∊ ω ∧ n = suc k ⇒ uni = uni $ by eq_refl
+i7: $ G , m ∊ n , k ∊ ω ∧ n = suc k ⇒ fv uni (suc k) = fv uni n $ by fv_eq [i6, i5]
+i8: $ G , m ∊ n , k ∊ ω ∧ n = suc k ⇒ universe (fv uni n) $ by universe_eq [i7, i4]
+i9: $ G , m ∊ n , k ∊ ω ∧ n = suc k ⇒ fv uni m ∈ fv uni n $ by weaken [g2]
+i10: $ G , m ∊ n , k ∊ ω ∧ n = suc k ⇒ fv uni m ⊆ fv uni n $ by u2_universe_wcel_subset [i8, i9]
+j1: $ G , m ∊ n , ∃ k (k ∊ ω ∧ n = suc k) ⇒ ∃ k (k ∊ ω ∧ n = suc k) $ by ax
+j2: $ G , m ∊ n , ∃ k (k ∊ ω ∧ n = suc k) ⇒ fv uni m ⊆ fv uni n $ by ex_elim [j1, i10]
+j3: $ G , m ∊ n ⇒ fv uni m ⊆ fv uni n $ by or_elim [g4, h5, j2]
+e0: $ G , (m = n ∨ n ∊ m) ⇒ m = n ∨ n ∊ m $ by ax
+e1: $ G , (m = n ∨ n ∊ m) , m = n ⇒ m = n $ by ax
+e2: $ G , (m = n ∨ n ∊ m) , m = n ⇒ uni = uni $ by eq_refl
+e3: $ G , (m = n ∨ n ∊ m) , m = n ⇒ fv uni m = fv uni n $ by fv_eq [e2, e1]
+e4: $ G , (m = n ∨ n ∊ m) , m = n ⇒ fv uni m ⊆ fv uni n $ by eq_subset [e3]
+n1: $ G , (m = n ∨ n ∊ m) , n ∊ m ⇒ n ∊ m $ by ax
+n2: $ G , (m = n ∨ n ∊ m) , n ∊ m ⇒ m ⊆ n $ by weaken [#3]
+n3: $ G , (m = n ∨ n ∊ m) , n ∊ m ⇒ n ∊ n $ by subset_elim [n2, n1]
+n4: $ G , (m = n ∨ n ∊ m) , n ∊ m ⇒ ⊥ $ by notin_self [n3]
+n5: $ G , (m = n ∨ n ∊ m) , n ∊ m ⇒ fv uni m ⊆ fv uni n $ by bot_elim [n4]
+k1: $ G , (m = n ∨ n ∊ m) ⇒ fv uni m ⊆ fv uni n $ by or_elim [e0, e4, n5]
+k2: $ G ⇒ fv uni m ⊆ fv uni n $ by or_elim [t1, j3, k1]
+
+uni_least
+---------
+l1: $ G ⇒ isset (fv uni n) $ by uni_set
+l2: $ G ⇒ isset ω $ by omega_set
+l3: $ G ⇒ isset (cpr (fv uni n) ω) $ by cpr_set [l1, l2]
+k1: $ G , v = fv uni n , v ∊ U , z = ω , z ∊ U ⇒ v ∊ U $ by ax
+k2: $ G , v = fv uni n , v ∊ U , z = ω , z ∊ U ⇒ z ∊ U $ by ax
+k3: $ G , v = fv uni n , v ∊ U , z = ω , z ∊ U ⇒ universe U $ by weaken [#2]
+k4: $ G , v = fv uni n , v ∊ U , z = ω , z ∊ U ⇒ cpr v z ∈ U $ by universe_cpr [k3, k1, k2]
+k5: $ G , v = fv uni n , v ∊ U , z = ω , z ∊ U ⇒ v = fv uni n $ by ax
+k6: $ G , v = fv uni n , v ∊ U , z = ω , z ∊ U ⇒ z = ω $ by ax
+k7: $ G , v = fv uni n , v ∊ U , z = ω , z ∊ U ⇒ cpr v z = cpr (fv uni n) ω $ by cpr_eq [k5, k6]
+k8: $ G , v = fv uni n , v ∊ U , z = ω , z ∊ U ⇒ cpr (fv uni n) ω ∈ U $ by wcel_eq_l [k7, k4]
+k9a: $ G , v = fv uni n , v ∊ U ⇒ ω ∈ U $ by weaken [#4]
+k9: $ G , v = fv uni n , v ∊ U ⇒ cpr (fv uni n) ω ∈ U $ by wcel_elim [k9a, k8]
+k10: $ G ⇒ cpr (fv uni n) ω ∈ U $ by wcel_elim [#3, k9]
+k11: $ G ⇒ nextu (cpr (fv uni n) ω) ⊆ U $ by u2_nextu_least_c [l3, #2, k10]
+k12: $ G ⇒ fv uni (suc n) = nextu (cpr (fv uni n) ω) $ by uni_suc [#1]
+k13: $ G ⇒ nextu (cpr (fv uni n) ω) = fv uni (suc n) $ by eq_sym [k12]
+k14: $ G ⇒ fv uni (suc n) ⊆ U $ by subset_eq_l [k13, k11]

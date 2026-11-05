@@ -274,6 +274,8 @@ for where the proof bytes go.
 
 - `spec/lean.mm0`: the trusted MM0 spec of LeanTT; `spec/lib.auf`: derived rules (untrusted);
   `spec/examples/`: hand-proven certificates
+- `spec/tg/`: a Tarski–Grothendieck set-theory library in Aufbau (`tg.mm0` its 
+  base), toward a model of the spec in set theory; `scripts/tg-check.sh` verifies it
 - `lean0/`: the elaborator and generator, and the `lean0` binary (`src/bin/lean0/`)
 - `lean0-check/`: the trusted side of `lean0`: the statement checker, the text the verifiers
   check against, and the embedded spec

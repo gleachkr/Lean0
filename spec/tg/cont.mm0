@@ -1,0 +1,115 @@
+-- cont.mm0: continuous operators and their least fixed points. An operator
+-- `x ↦ B` is continuous with index set `A` (`cont x B A`) when every element
+-- of `B u` is already in `B` of the range of some function from a subset of
+-- `A` into `u`: each element depends on an `A`-indexed family of earlier
+-- elements (the fields of a constructor of an inductive type; the components
+-- of a tree). For a monotone, set-valued, continuous operator the stages stop
+-- growing at the ordinal `clord A = hartogs (𝒫 (suc A × ω))`: an `A`-indexed
+-- family of stages below it is bounded below it (`hartogs_bound`), and it is
+-- closed under successor (`hartogs_suc`: it injects `ω`). So the least fixed
+-- point is that stage, without a bounding carrier (`lfp_cont_fix`,
+-- `lfp_cont_ind`), and when the operator maps elements of a universe `U` to
+-- elements of `U` and `A ∊ U`, `ω ∈ U`, the least fixed point is in `U`
+-- (`lfp_universe`): the one place an inductive type's universe level is
+-- earned. Imports seq.mm0; proofs in cont.auf.
+
+import "seq.mm0";
+
+-- --------------------------------------------------------------------------
+-- The closure ordinal
+-- --------------------------------------------------------------------------
+
+--| The stage at which an `A`-continuous operator has stopped growing.
+def clord (A: class): class = $ hartogs (𝒫 ((suc A) × ω)) $;
+
+--| @congr
+theorem clord_congr (A B: class): $ A ≐ B $ > $ clord A ≐ clord B $;
+theorem clord_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ clord A = clord B $;
+--| @rewrite
+theorem sb_c_clord {x: set} (t: set x) (A: class x):
+  $ (⟦ x / t ⟧ (clord A)) ≐ clord (⟦ x / t ⟧ A) $;
+
+--| `n ↦ csn ⟨ a , n ⟩`.
+theorem inj_into_omega_cpw (G: hyps) (a: set): $ G ⇒ inj_into ω (𝒫 ((suc a) × ω)) $;
+--| An infinite ordinal absorbs one more element (`a ↦ ∅`, `n ↦ suc n` on `ω`).
+theorem ord_suc_inj_infinite (G: hyps) (a: set):
+  $ G ⇒ ord a $ > $ G ⇒ ω ⊆ a $ > $ G ⇒ inj_into (suc a) a $;
+--| The Hartogs number of a class into which `ω` injects is closed under successor.
+theorem hartogs_suc (G: hyps) (A: class) (b: set):
+  $ G ⇒ inj_into ω A $ > $ G ⇒ b ∊ hartogs A $ > $ G ⇒ suc b ∈ hartogs A $;
+theorem clord_ord (G: hyps) (a: set): $ G ⇒ ord (clord a) $;
+theorem clord_set (G: hyps) (a: set): $ G ⇒ isset (clord a) $;
+theorem clord_empty (G: hyps) (a: set): $ G ⇒ ∅ ∈ clord a $;
+theorem clord_suc (G: hyps) (a b: set): $ G ⇒ b ∊ clord a $ > $ G ⇒ suc b ∈ clord a $;
+--| A family of ordinals below `clord a` indexed by a subset of `a` is
+--| bounded below `clord a` (`hartogs_bound` at `suc a`).
+theorem clord_bound (G: hyps) {x: set} (a f: set):
+  $ G ⇒ functional f $ > $ G ⇒ cdm f ⊆ a $ > $ G ⇒ ∀ x (x ∊ cdm f → fv f x ∈ clord a) $ >
+  $ G ⇒ ⋃ (crn f) ∈ clord a $;
+theorem clord_universe (G: hyps) (U: class) (a: set):
+  $ G ⇒ universe U $ > $ G ⇒ ω ∈ U $ > $ G ⇒ a ∊ U $ > $ G ⇒ clord a ∈ U $;
+--| The least element of a nonempty class of ordinals is its intersection.
+theorem ord_cint (G: hyps) {y: set} (P: class) (a: set):
+  $ G ⇒ a ∊ P $ > $ G ⇒ ∀ y (y ∊ P → ord y) $ > $ G ⇒ cint P ∈ P $;
+
+-- --------------------------------------------------------------------------
+-- Continuous operators
+-- --------------------------------------------------------------------------
+
+--| `x ↦ B` is continuous with index set `A`.
+def cont {x: set} (B: class x) (A: class) (.u .z .f: set): fml =
+  $ ∀ u ∀ z (z ∊ (⟦ x / u ⟧ B) →
+      ∃ f (functional f ∧ cdm f ⊆ A ∧ crn f ⊆ u ∧ z ∊ cap x B (crn f))) $;
+
+--| @congr
+theorem cont_congr {x: set} (B D: class x) (A C: class):
+  $ B ≐ D $ > $ A ≐ C $ > $ cont x B A ⟺ cont x D C $;
+--| @rewrite
+theorem sb_f_cont {x y: set} (t: set y) (B: class x y) (A: class y):
+  $ [y/t] (cont x B A) ⟺ cont x (⟦ y / t ⟧ B) (⟦ y / t ⟧ A) $;
+--| @freshen G u
+--| @freshen G z
+theorem cont_intro {x: set} (G: hyps x) {u z f: set} (B: class x) (A: class):
+  $ G , z ∊ (⟦ x / u ⟧ B) ⇒ ∃ f (functional f ∧ cdm f ⊆ A ∧ crn f ⊆ u ∧ z ∊ cap x B (crn f)) $ >
+  $ G ⇒ cont x B A $;
+theorem cont_elim {x: set} (G: hyps x) {f: set} (B: class x) (A: class) (u z: set):
+  $ G ⇒ cont x B A $ > $ G ⇒ z ∊ (⟦ x / u ⟧ B) $ >
+  $ G ⇒ ∃ f (functional f ∧ cdm f ⊆ A ∧ crn f ⊆ u ∧ z ∊ cap x B (crn f)) $;
+theorem cont_mono_index {x: set} (G: hyps x) (B: class x) (A C: class):
+  $ G ⇒ cont x B A $ > $ G ⇒ A ⊆ C $ > $ G ⇒ cont x B C $;
+
+-- --------------------------------------------------------------------------
+-- The least fixed point of a continuous operator
+-- --------------------------------------------------------------------------
+
+--| The union of the stages below `clord a` is closed under the operator.
+theorem stgb_clord_closed {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ cont x B a $ >
+  $ G ⇒ cap x B (stgb x B (clord a)) ⊆ stgb x B (clord a) $;
+theorem stg_clord_stable {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ cont x B a $ >
+  $ G ⇒ fv (stg x B) (suc (clord a)) = fv (stg x B) (clord a) $;
+theorem lfp_cont_eq {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ cont x B a $ >
+  $ G ⇒ lfp x B = fv (stg x B) (clord a) $;
+theorem lfp_cont_fix {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ cont x B a $ >
+  $ G ⇒ cap x B (lfp x B) = lfp x B $;
+theorem lfp_cont_set {x: set} (G: hyps x) (B: class x) (a: set):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ cont x B a $ > $ G ⇒ isset (lfp x B) $;
+--| Induction (`lfp_ind` with the fixed point itself as the carrier).
+theorem lfp_cont_ind {x y u: set} (G: hyps x y) (B: class x) (a: set) (p: fml y):
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ cont x B a $ >
+  $ G ⇒ ∀ u (u ⊆ lfp x B → u ⊆ {y | p} → (⟦ x / u ⟧ B) ⊆ {y | p}) $ >
+  $ G ⇒ lfp x B ⊆ {y | p} $;
+--| The stages at ordinals of a universe are in the universe, when the
+--| operator maps its elements to elements.
+theorem stg_universe {x u: set} (G: hyps x) (B: class x) (U: class) (b: set):
+  $ G ⇒ universe U $ > $ G ⇒ setop x B $ > $ G ⇒ ∀ u (u ∊ U → (⟦ x / u ⟧ B) ∈ U) $ >
+  $ G ⇒ ord b $ > $ G ⇒ b ∊ U $ > $ G ⇒ fv (stg x B) b ∈ U $;
+--| The pilot: the least fixed point of a continuous operator on a universe
+--| is in the universe.
+theorem lfp_universe {x u: set} (G: hyps x) (B: class x) (U: class) (a: set):
+  $ G ⇒ universe U $ > $ G ⇒ ω ∈ U $ > $ G ⇒ a ∊ U $ >
+  $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ cont x B a $ >
+  $ G ⇒ ∀ u (u ∊ U → (⟦ x / u ⟧ B) ∈ U) $ > $ G ⇒ lfp x B ∈ U $;

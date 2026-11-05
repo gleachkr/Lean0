@@ -1,0 +1,162 @@
+-- pairs.mm0: the set-forming operations of the base: pairs and singletons,
+-- ordered pairs and their injectivity, separation and the sethood of the
+-- defined operations, unions, power sets, successors, images and functional
+-- classes, and binary intersection. Imports basic.mm0; proofs in pairs.auf.
+--
+-- Rules about a class operation take set variables where the statement is
+-- about elements (`a ∊ cpr A B`) and classes elsewhere; the injectivity
+-- lemmas are stated for set variables, which is how they are used.
+
+import "basic.mm0";
+
+-- --------------------------------------------------------------------------
+-- Pairs and singletons
+-- --------------------------------------------------------------------------
+
+theorem cpr_intro_r (G: hyps) (a b: set): $ G ⇒ b ∊ cpr a b $;
+theorem cpr_intro (G: hyps) (A B: class) (c: set):
+  $ G ⇒ c = A ∨ c = B $ > $ G ⇒ c ∊ cpr A B $;
+theorem cpr_elim (G: hyps) (A B: class) (c: set):
+  $ G ⇒ c ∊ cpr A B $ > $ G ⇒ c = A ∨ c = B $;
+theorem cpr_comm (G: hyps) (A B: class): $ G ⇒ cpr A B = cpr B A $;
+theorem cpr_subset (G: hyps) (A: class) (a b: set):
+  $ G ⇒ a ∊ A $ > $ G ⇒ b ∊ A $ > $ G ⇒ cpr a b ⊆ A $;
+theorem cpr_set (G: hyps) (A B: class):
+  $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ isset (cpr A B) $;
+--| With a proper class as the second component, the pair is the singleton of the first.
+theorem cpr_set_l (G: hyps) (A B: class): $ G ⇒ isset A $ > $ G ⇒ isset (cpr A B) $;
+theorem csn_intro (G: hyps) (A: class) (a: set): $ G ⇒ a = A $ > $ G ⇒ a ∊ csn A $;
+theorem csn_intro_var (G: hyps) (a: set): $ G ⇒ a ∊ csn a $;
+theorem csn_elim (G: hyps) (A: class) (a: set): $ G ⇒ a ∊ csn A $ > $ G ⇒ a = A $;
+theorem csn_subset (G: hyps) (A: class) (a: set): $ G ⇒ a ∊ A $ > $ G ⇒ csn a ⊆ A $;
+theorem csn_set (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ isset (csn A) $;
+theorem csn_inj (G: hyps) (a b: set): $ G ⇒ csn a = csn b $ > $ G ⇒ a = b $;
+theorem csn_eq_cpr (G: hyps) (a b c: set):
+  $ G ⇒ csn a = cpr b c $ > $ G ⇒ a = b ∧ a = c $;
+theorem cpr_inj_r (G: hyps) (a b c: set):
+  $ G ⇒ cpr a b = cpr a c $ > $ G ⇒ b = c $;
+
+-- --------------------------------------------------------------------------
+-- Ordered pairs
+-- --------------------------------------------------------------------------
+
+theorem opair_set (G: hyps) (A B: class):
+  $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ isset ⟨ A , B ⟩ $;
+theorem opair_set_l (G: hyps) (A B: class): $ G ⇒ isset A $ > $ G ⇒ isset ⟨ A , B ⟩ $;
+--| Equal pairs: a set component of one is a component of the other.
+theorem cpr_eq_elim_l (G: hyps) (A B C D: class):
+  $ G ⇒ cpr A B = cpr C D $ > $ G ⇒ isset A $ > $ G ⇒ A = C ∨ A = D $;
+theorem cpr_eq_elim_r (G: hyps) (A B C D: class):
+  $ G ⇒ cpr A B = cpr C D $ > $ G ⇒ isset B $ > $ G ⇒ B = C ∨ B = D $;
+theorem opair_inj_l (G: hyps) (a b c d: set):
+  $ G ⇒ ⟨ a , b ⟩ = ⟨ c , d ⟩ $ > $ G ⇒ a = c $;
+theorem opair_inj_r (G: hyps) (a b c d: set):
+  $ G ⇒ ⟨ a , b ⟩ = ⟨ c , d ⟩ $ > $ G ⇒ b = d $;
+
+-- --------------------------------------------------------------------------
+-- Separation, from replacement
+-- --------------------------------------------------------------------------
+
+--| A subclass of a set is a set (replacement along the identity on `A`).
+theorem subset_set (G: hyps) (A: class) (a: set): $ G ⇒ A ⊆ a $ > $ G ⇒ isset A $;
+--| A subclass of a set cut out by a formula is a set.
+theorem sep_set (G: hyps) {x: set} (a: set) (p: fml x):
+  $ G ⇒ isset {x | x ∊ a ∧ p} $;
+theorem subset_isset (G: hyps) (A B: class):
+  $ G ⇒ isset B $ > $ G ⇒ A ⊆ B $ > $ G ⇒ isset A $;
+
+-- --------------------------------------------------------------------------
+-- Unions
+-- --------------------------------------------------------------------------
+
+theorem cuni_intro (G: hyps) (A: class) (a b: set):
+  $ G ⇒ a ∊ b $ > $ G ⇒ b ∊ A $ > $ G ⇒ a ∊ ⋃ A $;
+--| @freshen H y
+--| @freshen c y
+theorem cuni_elim {y: set} (G: hyps y) (H: hyps) (A: class) (a: set) (c: fml):
+  $ G ⇒ a ∊ ⋃ A $ > $ H , y ∊ A , a ∊ y ⇒ c $ > $ G , H ⇒ c $;
+theorem cuni_set (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ isset (⋃ A) $;
+theorem cuni_subset (G: hyps) (A: class) (a: set): $ G ⇒ a ∊ A $ > $ G ⇒ a ⊆ ⋃ A $;
+theorem cun_intro_l (G: hyps) (A B: class) (a: set): $ G ⇒ a ∊ A $ > $ G ⇒ a ∊ A ∪ B $;
+theorem cun_intro_r (G: hyps) (A B: class) (a: set): $ G ⇒ a ∊ B $ > $ G ⇒ a ∊ A ∪ B $;
+theorem cun_elim (G: hyps) (A B: class) (a: set):
+  $ G ⇒ a ∊ A ∪ B $ > $ G ⇒ a ∊ A ∨ a ∊ B $;
+theorem cun_comm (G: hyps) (A B: class): $ G ⇒ A ∪ B = B ∪ A $;
+theorem cun_subset_l (G: hyps) (A B: class): $ G ⇒ A ⊆ A ∪ B $;
+theorem cun_subset_r (G: hyps) (A B: class): $ G ⇒ B ⊆ A ∪ B $;
+theorem cun_least (G: hyps) (A B C: class):
+  $ G ⇒ A ⊆ C $ > $ G ⇒ B ⊆ C $ > $ G ⇒ A ∪ B ⊆ C $;
+theorem cun_cpr (G: hyps) (A B: class):
+  $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ A ∪ B = ⋃ (cpr A B) $;
+theorem cun_set (G: hyps) (A B: class):
+  $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ isset (A ∪ B) $;
+
+-- --------------------------------------------------------------------------
+-- Power sets
+-- --------------------------------------------------------------------------
+
+theorem cpw_intro (G: hyps) (A: class) (a: set): $ G ⇒ a ⊆ A $ > $ G ⇒ a ∊ 𝒫 A $;
+theorem cpw_elim (G: hyps) (A: class) (a: set): $ G ⇒ a ∊ 𝒫 A $ > $ G ⇒ a ⊆ A $;
+theorem cpw_set (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ isset (𝒫 A) $;
+theorem cpw_mono (G: hyps) (A B: class): $ G ⇒ A ⊆ B $ > $ G ⇒ 𝒫 A ⊆ 𝒫 B $;
+theorem empty_cpw (G: hyps) (A: class): $ G ⇒ ∅ ∈ 𝒫 A $;
+
+-- --------------------------------------------------------------------------
+-- Successors
+-- --------------------------------------------------------------------------
+
+theorem suc_intro_l (G: hyps) (A: class) (a: set): $ G ⇒ a ∊ A $ > $ G ⇒ a ∊ suc A $;
+theorem suc_intro_r (G: hyps) (A: class) (a: set): $ G ⇒ a = A $ > $ G ⇒ a ∊ suc A $;
+theorem suc_elim (G: hyps) (A: class) (a: set):
+  $ G ⇒ a ∊ suc A $ > $ G ⇒ a ∊ A ∨ a = A $;
+theorem suc_set (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ isset (suc A) $;
+theorem suc_subset (G: hyps) (A: class): $ G ⇒ A ⊆ suc A $;
+theorem suc_self (G: hyps) (a: set): $ G ⇒ a ∊ suc a $;
+
+-- --------------------------------------------------------------------------
+-- Images and functional classes
+-- --------------------------------------------------------------------------
+
+theorem img_intro (G: hyps) (F A: class) (a b: set):
+  $ G ⇒ a ∊ A $ > $ G ⇒ ⟨ a , b ⟩ ∈ F $ > $ G ⇒ b ∊ img F A $;
+--| @freshen H x
+--| @freshen c x
+theorem img_elim {x: set} (G: hyps x) (H: hyps) (F A: class) (b: set) (c: fml):
+  $ G ⇒ b ∊ img F A $ > $ H , x ∊ A , ⟨ x , b ⟩ ∈ F ⇒ c $ > $ G , H ⇒ c $;
+theorem img_mono (G: hyps) (F A B: class):
+  $ G ⇒ A ⊆ B $ > $ G ⇒ img F A ⊆ img F B $;
+theorem img_set (G: hyps) (F A: class):
+  $ G ⇒ functional F $ > $ G ⇒ isset A $ > $ G ⇒ isset (img F A) $;
+--| @freshen G x
+--| @freshen G y
+--| @freshen G z
+theorem functional_intro (G: hyps) {x y z: set} (F: class):
+  $ G , ⟨ x , y ⟩ ∈ F , ⟨ x , z ⟩ ∈ F ⇒ y = z $ > $ G ⇒ functional F $;
+theorem functional_elim (G: hyps) (F: class) (a b c: set):
+  $ G ⇒ functional F $ > $ G ⇒ ⟨ a , b ⟩ ∈ F $ > $ G ⇒ ⟨ a , c ⟩ ∈ F $ >
+  $ G ⇒ b = c $;
+
+-- --------------------------------------------------------------------------
+-- Binary intersection
+-- --------------------------------------------------------------------------
+
+def cin (A B: class) (.x: set): class = $ {x | x ∊ A ∧ x ∊ B} $;
+infixl cin: $i.$ prec 60;
+infixl cin: $∩$ prec 60;
+
+theorem cin_intro (G: hyps) (A B: class) (a: set):
+  $ G ⇒ a ∊ A $ > $ G ⇒ a ∊ B $ > $ G ⇒ a ∊ A ∩ B $;
+theorem cin_elim_l (G: hyps) (A B: class) (a: set): $ G ⇒ a ∊ A ∩ B $ > $ G ⇒ a ∊ A $;
+theorem cin_elim_r (G: hyps) (A B: class) (a: set): $ G ⇒ a ∊ A ∩ B $ > $ G ⇒ a ∊ B $;
+--| @congr
+theorem cin_congr (A B C D: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ (A ∩ C) ≐ (B ∩ D) $;
+theorem cin_eq (G: hyps) (A B C D: class):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ A ∩ C = B ∩ D $;
+--| @rewrite
+theorem sb_c_cin {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (A ∩ B)) ≐ (⟦ x / t ⟧ A) ∩ (⟦ x / t ⟧ B) $;
+theorem cin_comm (G: hyps) (A B: class): $ G ⇒ A ∩ B = B ∩ A $;
+theorem cin_subset_l (G: hyps) (A B: class): $ G ⇒ A ∩ B ⊆ A $;
+theorem cin_subset_r (G: hyps) (A B: class): $ G ⇒ A ∩ B ⊆ B $;
+theorem cin_set_l (G: hyps) (A B: class): $ G ⇒ isset A $ > $ G ⇒ isset (A ∩ B) $;

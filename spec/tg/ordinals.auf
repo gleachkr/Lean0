@@ -1,0 +1,2263 @@
+-- Proofs for ordinals.mm0.
+
+transitive_intro
+----------------
+l1: $ G , x ∊ A ⇒ y ∊ x → y ∊ A $ by imp_intro [#1]
+l2: $ G , x ∊ A ⇒ ∀ y (y ∊ x → y ∊ A) $ by all_intro [l1]
+l3: $ G ⇒ x ∊ A → ∀ y (y ∊ x → y ∊ A) $ by imp_intro [l2]
+l4: $ G ⇒ ∀ x (x ∊ A → ∀ y (y ∊ x → y ∊ A)) $ by all_intro [l3]
+
+transitive_elim
+---------------
+l1: $ G ⇒ a ∊ A → ∀ v (v ∊ a → v ∊ A) $ by all_elim (t := $ a $) [#1]
+l2: $ G ⇒ ∀ v (v ∊ a → v ∊ A) $ by imp_elim [l1, #2]
+l3: $ G ⇒ b ∊ a → b ∊ A $ by all_elim (t := $ b $) [l2]
+l4: $ G ⇒ b ∊ A $ by imp_elim [l3, #3]
+
+transitive_subset
+-----------------
+l1: $ G ⇒ a ∊ A → ∀ v (v ∊ a → v ∊ A) $ by all_elim (t := $ a $) [#1]
+l2: $ G ⇒ ∀ v (v ∊ a → v ∊ A) $ by imp_elim [l1, #2]
+
+transitive_empty
+----------------
+l1: $ G , u ∊ ∅ , v ∊ u ⇒ u ∊ ∅ $ by ax
+l2: $ G , u ∊ ∅ , v ∊ u ⇒ ⊥ $ by empty_elim [l1]
+l3: $ G , u ∊ ∅ , v ∊ u ⇒ v ∊ ∅ $ by bot_elim [l2]
+l4: $ G ⇒ transitive ∅ $ by transitive_intro [l3]
+
+transitive_suc
+--------------
+l1: $ G , u ∊ suc A , v ∊ u ⇒ u ∊ suc A $ by ax
+l2: $ G , u ∊ suc A , v ∊ u ⇒ u ∊ A ∨ u = A $ by suc_elim [l1]
+l3: $ G , u ∊ suc A , v ∊ u , u ∊ A ⇒ transitive A $ by weaken [#1]
+l4: $ G , u ∊ suc A , v ∊ u , u ∊ A ⇒ u ∊ A $ by ax
+l5: $ G , u ∊ suc A , v ∊ u , u ∊ A ⇒ v ∊ u $ by ax
+l6: $ G , u ∊ suc A , v ∊ u , u ∊ A ⇒ v ∊ A $ by transitive_elim [l3, l4, l5]
+l7: $ G , u ∊ suc A , v ∊ u , u ∊ A ⇒ v ∊ suc A $ by suc_intro_l [l6]
+l8: $ G , u ∊ suc A , v ∊ u , u = A ⇒ u = A $ by ax
+l9: $ G , u ∊ suc A , v ∊ u , u = A ⇒ v ∊ u $ by ax
+l10: $ G , u ∊ suc A , v ∊ u , u = A ⇒ v ∊ A $ by welc_eq [l8, l9]
+l11: $ G , u ∊ suc A , v ∊ u , u = A ⇒ v ∊ suc A $ by suc_intro_l [l10]
+l12: $ G , u ∊ suc A , v ∊ u ⇒ v ∊ suc A $ by or_elim [l2, l7, l11]
+l13: $ G ⇒ transitive (suc A) $ by transitive_intro [l12]
+
+transitive_cuni
+---------------
+l1: $ G , u ∊ ⋃ A , v ∊ u ⇒ u ∊ ⋃ A $ by ax
+l2: $ G , u ∊ ⋃ A , v ∊ u , w ∊ A , u ∊ w ⇒ ∀ x (x ∊ A → transitive x) $ by weaken [#1]
+l3: $ G , u ∊ ⋃ A , v ∊ u , w ∊ A , u ∊ w ⇒ w ∊ A → transitive w $ by all_elim (t := $ w $) [l2]
+l4: $ G , u ∊ ⋃ A , v ∊ u , w ∊ A , u ∊ w ⇒ w ∊ A $ by ax
+l5: $ G , u ∊ ⋃ A , v ∊ u , w ∊ A , u ∊ w ⇒ transitive w $ by imp_elim [l3, l4]
+l6: $ G , u ∊ ⋃ A , v ∊ u , w ∊ A , u ∊ w ⇒ u ∊ w $ by ax
+l7: $ G , u ∊ ⋃ A , v ∊ u , w ∊ A , u ∊ w ⇒ v ∊ u $ by ax
+l8: $ G , u ∊ ⋃ A , v ∊ u , w ∊ A , u ∊ w ⇒ v ∊ w $ by transitive_elim [l5, l6, l7]
+l9: $ G , u ∊ ⋃ A , v ∊ u , w ∊ A , u ∊ w ⇒ v ∊ ⋃ A $ by cuni_intro [l8, l4]
+l10: $ G , u ∊ ⋃ A , v ∊ u ⇒ v ∊ ⋃ A $ by cuni_elim [l1, l9]
+l11: $ G ⇒ transitive (⋃ A) $ by transitive_intro [l10]
+
+transitive_cin
+--------------
+l1: $ G , u ∊ A ∩ B , v ∊ u ⇒ u ∊ A ∩ B $ by ax
+l2: $ G , u ∊ A ∩ B , v ∊ u ⇒ u ∊ A $ by cin_elim_l [l1]
+l3: $ G , u ∊ A ∩ B , v ∊ u ⇒ u ∊ B $ by cin_elim_r [l1]
+l4: $ G , u ∊ A ∩ B , v ∊ u ⇒ v ∊ u $ by ax
+l5: $ G , u ∊ A ∩ B , v ∊ u ⇒ transitive A $ by weaken [#1]
+l6: $ G , u ∊ A ∩ B , v ∊ u ⇒ transitive B $ by weaken [#2]
+l7: $ G , u ∊ A ∩ B , v ∊ u ⇒ v ∊ A $ by transitive_elim [l5, l2, l4]
+l8: $ G , u ∊ A ∩ B , v ∊ u ⇒ v ∊ B $ by transitive_elim [l6, l3, l4]
+l9: $ G , u ∊ A ∩ B , v ∊ u ⇒ v ∊ A ∩ B $ by cin_intro [l7, l8]
+l10: $ G ⇒ transitive (A ∩ B) $ by transitive_intro [l9]
+
+transitive_cuni_subset
+----------------------
+l1: $ G , u ∊ ⋃ A ⇒ u ∊ ⋃ A $ by ax
+l2: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ transitive A $ by weaken [#1]
+l3: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ w ∊ A $ by ax
+l4: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ u ∊ w $ by ax
+l5: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ u ∊ A $ by transitive_elim [l2, l3, l4]
+l6: $ G , u ∊ ⋃ A ⇒ u ∊ A $ by cuni_elim [l1, l5]
+l7: $ G ⇒ ⋃ A ⊆ A $ by subset_intro [l6]
+
+cuni_suc
+--------
+l1: $ G , u ∊ ⋃ (suc a) ⇒ u ∊ ⋃ (suc a) $ by ax
+l2: $ G , u ∊ ⋃ (suc a) , w ∊ suc a , u ∊ w ⇒ w ∊ suc a $ by ax
+l3: $ G , u ∊ ⋃ (suc a) , w ∊ suc a , u ∊ w ⇒ w ∊ a ∨ w = a $ by suc_elim [l2]
+l4: $ G , u ∊ ⋃ (suc a) , w ∊ suc a , u ∊ w , w ∊ a ⇒ transitive a $ by weaken [#1]
+l5: $ G , u ∊ ⋃ (suc a) , w ∊ suc a , u ∊ w , w ∊ a ⇒ w ∊ a $ by ax
+l6: $ G , u ∊ ⋃ (suc a) , w ∊ suc a , u ∊ w , w ∊ a ⇒ u ∊ w $ by ax
+l7: $ G , u ∊ ⋃ (suc a) , w ∊ suc a , u ∊ w , w ∊ a ⇒ u ∊ a $ by transitive_elim [l4, l5, l6]
+l8: $ G , u ∊ ⋃ (suc a) , w ∊ suc a , u ∊ w , w = a ⇒ w = a $ by ax
+l9: $ G , u ∊ ⋃ (suc a) , w ∊ suc a , u ∊ w , w = a ⇒ u ∊ w $ by ax
+l10: $ G , u ∊ ⋃ (suc a) , w ∊ suc a , u ∊ w , w = a ⇒ u ∊ a $ by welc_eq [l8, l9]
+l11: $ G , u ∊ ⋃ (suc a) , w ∊ suc a , u ∊ w ⇒ u ∊ a $ by or_elim [l3, l7, l10]
+l12: $ G , u ∊ ⋃ (suc a) ⇒ u ∊ a $ by cuni_elim [l1, l11]
+l13: $ G , u ∊ a ⇒ u ∊ a $ by ax
+l14: $ G , u ∊ a ⇒ a ∊ suc a $ by suc_self
+l15: $ G , u ∊ a ⇒ u ∊ ⋃ (suc a) $ by cuni_intro [l13, l14]
+l16: $ G ⇒ ⋃ (suc a) = a $ by eq_intro [l12, l15]
+
+cuni_least
+----------
+l1: $ G , u ∊ ⋃ A ⇒ u ∊ ⋃ A $ by ax
+l2: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ ∀ x (x ∊ A → x ⊆ B) $ by weaken [#1]
+l3: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ w ∊ A → w ⊆ B $ by all_elim (t := $ w $) [l2]
+l4: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ w ∊ A $ by ax
+l5: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ w ⊆ B $ by imp_elim [l3, l4]
+l6: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ u ∊ w $ by ax
+l7: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ u ∊ B $ by subset_elim [l5, l6]
+l8: $ G , u ∊ ⋃ A ⇒ u ∊ B $ by cuni_elim [l1, l7]
+l9: $ G ⇒ ⋃ A ⊆ B $ by subset_intro [l8]
+
+ord_intro
+---------
+l1: $ G ⇒ transitive A ∧ ∀ x (x ∊ A → transitive x) $ by and_intro [#1, #2]
+
+ord_trans
+---------
+l1: $ G ⇒ transitive A $ by and_elim_l [#1]
+
+ord_elem_trans
+--------------
+l1: $ G ⇒ ∀ u (u ∊ A → transitive u) $ by and_elim_r [#1]
+l2: $ G ⇒ a ∊ A → transitive a $ by all_elim (t := $ a $) [l1]
+l3: $ G ⇒ transitive a $ by imp_elim [l2, #2]
+
+ord_elem
+--------
+l1: $ G ⇒ transitive a $ by ord_elem_trans [#1, #2]
+l2: $ G , u ∊ a ⇒ ord A $ by weaken [#1]
+l3: $ G , u ∊ a ⇒ transitive A $ by ord_trans [l2]
+l4: $ G , u ∊ a ⇒ a ∊ A $ by weaken [#2]
+l5: $ G , u ∊ a ⇒ u ∊ a $ by ax
+l6: $ G , u ∊ a ⇒ u ∊ A $ by transitive_elim [l3, l4, l5]
+l7: $ G , u ∊ a ⇒ transitive u $ by ord_elem_trans [l2, l6]
+l8: $ G ⇒ u ∊ a → transitive u $ by imp_intro [l7]
+l9: $ G ⇒ ∀ u (u ∊ a → transitive u) $ by all_intro [l8]
+l10: $ G ⇒ ord a $ by ord_intro [l1, l9]
+
+ord_elem_subset
+---------------
+l1: $ G ⇒ transitive A $ by ord_trans [#1]
+l2: $ G ⇒ a ⊆ A $ by transitive_subset [l1, #2]
+
+ord_empty
+---------
+l1: $ G ⇒ transitive ∅ $ by transitive_empty
+l2: $ G , u ∊ ∅ ⇒ u ∊ ∅ $ by ax
+l3: $ G , u ∊ ∅ ⇒ ⊥ $ by empty_elim [l2]
+l4: $ G , u ∊ ∅ ⇒ transitive u $ by bot_elim [l3]
+l5: $ G ⇒ u ∊ ∅ → transitive u $ by imp_intro [l4]
+l6: $ G ⇒ ∀ u (u ∊ ∅ → transitive u) $ by all_intro [l5]
+l7: $ G ⇒ ord ∅ $ by ord_intro [l1, l6]
+
+ord_suc
+-------
+l1: $ G ⇒ transitive A $ by ord_trans [#1]
+l2: $ G ⇒ transitive (suc A) $ by transitive_suc [l1]
+l3: $ G , u ∊ suc A ⇒ u ∊ suc A $ by ax
+l4: $ G , u ∊ suc A ⇒ u ∊ A ∨ u = A $ by suc_elim [l3]
+l5: $ G , u ∊ suc A , u ∊ A ⇒ ord A $ by weaken [#1]
+l6: $ G , u ∊ suc A , u ∊ A ⇒ u ∊ A $ by ax
+l7: $ G , u ∊ suc A , u ∊ A ⇒ transitive u $ by ord_elem_trans [l5, l6]
+l8: $ G , u ∊ suc A , u = A ⇒ u = A $ by ax
+l9: $ G , u ∊ suc A , u = A ⇒ A = u $ by eq_sym [l8]
+l10: $ G , u ∊ suc A , u = A ⇒ transitive A $ by weaken [l1]
+l11: $ G , u ∊ suc A , u = A ⇒ transitive u $ by transitive_eq [l9, l10]
+l12: $ G , u ∊ suc A ⇒ transitive u $ by or_elim [l4, l7, l11]
+l13: $ G ⇒ u ∊ suc A → transitive u $ by imp_intro [l12]
+l14: $ G ⇒ ∀ u (u ∊ suc A → transitive u) $ by all_intro [l13]
+l15: $ G ⇒ ord (suc A) $ by ord_intro [l2, l14]
+
+ord_omega
+---------
+l1: $ G ⇒ transitive ω $ by omega_trans
+l2: $ G , u ∊ ω ⇒ u ∊ ω $ by ax
+l3: $ G , u ∊ ω ⇒ transitive u $ by omega_elem_trans [l2]
+l4: $ G ⇒ u ∊ ω → transitive u $ by imp_intro [l3]
+l5: $ G ⇒ ∀ u (u ∊ ω → transitive u) $ by all_intro [l4]
+l6: $ G ⇒ ord ω $ by ord_intro [l1, l5]
+
+ord_omega_elem
+--------------
+l1: $ G ⇒ ord ω $ by ord_omega
+l2: $ G ⇒ ord a $ by ord_elem [l1, #1]
+
+lemma d1_sb_f_ord_var {x: set} (t: set x): $ [x/t] (ord x) ⟺ ord t $
+----
+l1: $ [x/t] (transitive x ∧ ∀ v (v ∊ x → transitive v)) ⟺ (transitive t ∧ ∀ v (v ∊ t → transitive v)) $ by iff_refl
+
+ord_cuni
+--------
+l0: $ [x/u] (ord x) ⟺ ord u $ by d1_sb_f_ord_var
+l20: $ [x/w] (ord x) ⟺ ord w $ by d1_sb_f_ord_var
+l1: $ G , u ∊ A ⇒ ∀ x (x ∊ A → ord x) $ by weaken [#1]
+l2: $ G , u ∊ A ⇒ u ∊ A → [x/u] (ord x) $ by all_elim (t := $ u $) [l1]
+l3: $ G , u ∊ A ⇒ u ∊ A $ by ax
+l21: $ G , u ∊ A ⇒ [x/u] (ord x) $ by imp_elim [l2, l3]
+l22: $ G , u ∊ A ⇒ [x/u] (ord x) ↔ ord u $ by weaken [l0]
+l4: $ G , u ∊ A ⇒ ord u $ by bi_elim_l [l22, l21]
+l5: $ G , u ∊ A ⇒ transitive u $ by ord_trans [l4]
+l6: $ G ⇒ u ∊ A → transitive u $ by imp_intro [l5]
+l7: $ G ⇒ ∀ u (u ∊ A → transitive u) $ by all_intro [l6]
+l8: $ G ⇒ transitive (⋃ A) $ by transitive_cuni [l7]
+l9: $ G , u ∊ ⋃ A ⇒ u ∊ ⋃ A $ by ax
+l10: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ ∀ x (x ∊ A → ord x) $ by weaken [#1]
+l11: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ w ∊ A → [x/w] (ord x) $ by all_elim (t := $ w $) [l10]
+l12: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ w ∊ A $ by ax
+l23: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ [x/w] (ord x) $ by imp_elim [l11, l12]
+l24: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ [x/w] (ord x) ↔ ord w $ by weaken [l20]
+l13: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ ord w $ by bi_elim_l [l24, l23]
+l14: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ u ∊ w $ by ax
+l15: $ G , u ∊ ⋃ A , w ∊ A , u ∊ w ⇒ transitive u $ by ord_elem_trans [l13, l14]
+l16: $ G , u ∊ ⋃ A ⇒ transitive u $ by cuni_elim [l9, l15]
+l17: $ G ⇒ u ∊ ⋃ A → transitive u $ by imp_intro [l16]
+l18: $ G ⇒ ∀ u (u ∊ ⋃ A → transitive u) $ by all_intro [l17]
+l19: $ G ⇒ ord (⋃ A) $ by ord_intro [l8, l18]
+
+ord_cin
+-------
+l1: $ G ⇒ transitive A $ by ord_trans [#1]
+l2: $ G ⇒ transitive B $ by ord_trans [#2]
+l3: $ G ⇒ transitive (A ∩ B) $ by transitive_cin [l1, l2]
+l4: $ G , u ∊ A ∩ B ⇒ u ∊ A ∩ B $ by ax
+l5: $ G , u ∊ A ∩ B ⇒ u ∊ A $ by cin_elim_l [l4]
+l6: $ G , u ∊ A ∩ B ⇒ ord A $ by weaken [#1]
+l7: $ G , u ∊ A ∩ B ⇒ transitive u $ by ord_elem_trans [l6, l5]
+l8: $ G ⇒ u ∊ A ∩ B → transitive u $ by imp_intro [l7]
+l9: $ G ⇒ ∀ u (u ∊ A ∩ B → transitive u) $ by all_intro [l8]
+l10: $ G ⇒ ord (A ∩ B) $ by ord_intro [l3, l9]
+
+ord_subset
+----------
+l1: $ G , u ∊ A ⇒ u ∊ A $ by ax
+l2: $ G , u ∊ A ⇒ A ⊆ B $ by weaken [#3]
+l3: $ G , u ∊ A ⇒ u ∊ B $ by subset_elim [l2, l1]
+l4: $ G , u ∊ A ⇒ ord B $ by weaken [#1]
+l5: $ G , u ∊ A ⇒ transitive u $ by ord_elem_trans [l4, l3]
+l6: $ G ⇒ u ∊ A → transitive u $ by imp_intro [l5]
+l7: $ G ⇒ ∀ u (u ∊ A → transitive u) $ by all_intro [l6]
+l8: $ G ⇒ ord A $ by ord_intro [#2, l7]
+
+ord_congr
+---------
+l1: $ transitive A ⟺ transitive B $ by transitive_congr [#1]
+l0: $ seqt u u $ by seqt_refl
+l2: $ (u ∊ A) ⟺ (u ∊ B) $ by welc_congr [l0, #1]
+l3: $ transitive u ⟺ transitive u $ by iff_refl
+l4: $ (u ∊ A → transitive u) ⟺ (u ∊ B → transitive u) $ by im_congr [l2, l3]
+l5: $ ∀ u (u ∊ A → transitive u) ⟺ ∀ u (u ∊ B → transitive u) $ by all_congr [l4]
+l6: $ (transitive A ∧ ∀ u (u ∊ A → transitive u)) ⟺ (transitive B ∧ ∀ u (u ∊ B → transitive u)) $ by and_congr [l1, l5]
+
+ord_eq
+------
+l1: $ G ⇒ transitive A $ by ord_trans [#2]
+l2: $ G ⇒ transitive B $ by transitive_eq [#1, l1]
+l3: $ G ⇒ B = A $ by eq_sym [#1]
+l4: $ G , u ∊ B ⇒ u ∊ B $ by ax
+l5: $ G , u ∊ B ⇒ B = A $ by weaken [l3]
+l6: $ G , u ∊ B ⇒ u ∊ A $ by welc_eq [l5, l4]
+l7: $ G , u ∊ B ⇒ ord A $ by weaken [#2]
+l8: $ G , u ∊ B ⇒ transitive u $ by ord_elem_trans [l7, l6]
+l9: $ G ⇒ u ∊ B → transitive u $ by imp_intro [l8]
+l10: $ G ⇒ ∀ u (u ∊ B → transitive u) $ by all_intro [l9]
+l11: $ G ⇒ ord B $ by ord_intro [l2, l10]
+
+sb_f_ord
+--------
+l1: $ [x/t] (transitive A ∧ ∀ u (u ∊ A → transitive u)) ⟺ (transitive (⟦ x / t ⟧ A) ∧ ∀ u (u ∊ (⟦ x / t ⟧ A) → transitive u)) $ by iff_refl
+
+ord_ind_f
+---------
+l1: $ G , ∀ y (y ∊ x → ord y → [x/y] p) , ord x , z ∊ x ⇒ ∀ y (y ∊ x → ord y → [x/y] p) $ by ax
+l2: $ G , ∀ y (y ∊ x → ord y → [x/y] p) , ord x , z ∊ x ⇒ z ∊ x → ord z → [x/z] p $ by all_elim (t := $ z $) [l1]
+l3: $ G , ∀ y (y ∊ x → ord y → [x/y] p) , ord x , z ∊ x ⇒ z ∊ x $ by ax
+l4: $ G , ∀ y (y ∊ x → ord y → [x/y] p) , ord x , z ∊ x ⇒ ord z → [x/z] p $ by imp_elim [l2, l3]
+l5: $ G , ∀ y (y ∊ x → ord y → [x/y] p) , ord x , z ∊ x ⇒ ord x $ by ax
+l6: $ G , ∀ y (y ∊ x → ord y → [x/y] p) , ord x , z ∊ x ⇒ ord z $ by ord_elem [l5, l3]
+l7: $ G , ∀ y (y ∊ x → ord y → [x/y] p) , ord x , z ∊ x ⇒ [x/z] p $ by imp_elim [l4, l6]
+l8: $ G , ∀ y (y ∊ x → ord y → [x/y] p) , ord x ⇒ z ∊ x → [x/z] p $ by imp_intro [l7]
+l9: $ G , ∀ y (y ∊ x → ord y → [x/y] p) , ord x ⇒ ∀ z (z ∊ x → [x/z] p) $ by all_intro [l8]
+l10: $ ∀ z (z ∊ x → [x/z] p) ⟺ ∀ y (y ∊ x → [x/y] p) $ by all_alpha
+l11: $ G , ∀ y (y ∊ x → ord y → [x/y] p) , ord x ⇒ ∀ z (z ∊ x → [x/z] p) ↔ ∀ y (y ∊ x → [x/y] p) $ by weaken [l10]
+l12: $ G , ∀ y (y ∊ x → ord y → [x/y] p) , ord x ⇒ ∀ y (y ∊ x → [x/y] p) $ by bi_elim_l [l11, l9]
+l13: $ G , ∀ y (y ∊ x → ord y → [x/y] p) , ord x ⇒ p $ by cut [l12, #1]
+l14: $ G , ∀ y (y ∊ x → ord y → [x/y] p) ⇒ ord x → p $ by imp_intro [l13]
+l15: $ G ⇒ ∀ x (ord x → p) $ by ax_induction [l14]
+
+ord_ind
+-------
+l1: $ G , ord x , ∀ y (y ∊ x → y ∊ P) ⇒ ∀ x (ord x → x ⊆ P → x ∊ P) $ by weaken [#1]
+l2: $ G , ord x , ∀ y (y ∊ x → y ∊ P) ⇒ ord x → x ⊆ P → x ∊ P $ by all_elim (t := $ x $) [l1]
+l3: $ G , ord x , ∀ y (y ∊ x → y ∊ P) ⇒ ord x $ by ax
+l4: $ G , ord x , ∀ y (y ∊ x → y ∊ P) ⇒ x ⊆ P → x ∊ P $ by imp_elim [l2, l3]
+l5: $ G , ord x , ∀ y (y ∊ x → y ∊ P) ⇒ x ⊆ P $ by ax
+l6: $ G , ord x , ∀ y (y ∊ x → y ∊ P) ⇒ x ∊ P $ by imp_elim [l4, l5]
+l7: $ G ⇒ ∀ x (ord x → x ∊ P) $ by ord_ind_f (x := $ x $, y := $ y $, p := $ x ∊ P $) [l6]
+
+ord_least
+---------
+l1: $ G , ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) , ord z , ∀ w (w ∊ z → ¬ w ∊ P) , z ∊ P ⇒ z ∊ P $ by ax
+l2: $ G , ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) , ord z , ∀ w (w ∊ z → ¬ w ∊ P) , z ∊ P ⇒ ord z $ by ax
+l3: $ G , ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) , ord z , ∀ w (w ∊ z → ¬ w ∊ P) , z ∊ P ⇒ ∀ w (w ∊ z → ¬ w ∊ P) $ by ax
+l4: $ ∀ w (w ∊ z → ¬ w ∊ P) ⟺ ∀ y (y ∊ z → ¬ y ∊ P) $ by all_alpha
+l5: $ G , ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) , ord z , ∀ w (w ∊ z → ¬ w ∊ P) , z ∊ P ⇒ ∀ w (w ∊ z → ¬ w ∊ P) ↔ ∀ y (y ∊ z → ¬ y ∊ P) $ by weaken [l4]
+l6: $ G , ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) , ord z , ∀ w (w ∊ z → ¬ w ∊ P) , z ∊ P ⇒ ∀ y (y ∊ z → ¬ y ∊ P) $ by bi_elim_l [l5, l3]
+l7: $ G , ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) , ord z , ∀ w (w ∊ z → ¬ w ∊ P) , z ∊ P ⇒ ord z ∧ ∀ y (y ∊ z → ¬ y ∊ P) $ by and_intro [l2, l6]
+l8: $ G , ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) , ord z , ∀ w (w ∊ z → ¬ w ∊ P) , z ∊ P ⇒ z ∊ P ∧ ord z ∧ ∀ y (y ∊ z → ¬ y ∊ P) $ by and_intro [l1, l7]
+l9: $ G , ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) , ord z , ∀ w (w ∊ z → ¬ w ∊ P) , z ∊ P ⇒ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) $ by ex_intro (x := $ x $, t := $ z $, p := $ x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P) $) [l8]
+l10: $ G , ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) , ord z , ∀ w (w ∊ z → ¬ w ∊ P) , z ∊ P ⇒ ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) $ by ax
+l11: $ G , ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) , ord z , ∀ w (w ∊ z → ¬ w ∊ P) , z ∊ P ⇒ ⊥ $ by not_elim [l10, l9]
+l12: $ G , ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) , ord z , ∀ w (w ∊ z → ¬ w ∊ P) ⇒ ¬ z ∊ P $ by not_intro [l11]
+l13: $ G , ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) ⇒ ∀ z (ord z → ¬ z ∊ P) $ by ord_ind_f (x := $ z $, y := $ w $, p := $ ¬ z ∊ P $) [l12]
+l14: $ G , ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) ⇒ ord a → ¬ a ∊ P $ by all_elim (t := $ a $) [l13]
+l15: $ G , ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) ⇒ ord a $ by weaken [#1]
+l16: $ G , ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) ⇒ ¬ a ∊ P $ by imp_elim [l14, l15]
+l17: $ G , ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) ⇒ a ∊ P $ by weaken [#2]
+l18: $ G , ¬ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) ⇒ ⊥ $ by not_elim [l16, l17]
+l19: $ G ⇒ ∃ x (x ∊ P ∧ ord x ∧ ∀ y (y ∊ x → ¬ y ∊ P)) $ by by_contra [l18]
+
+lemma d2_tricho_core {z v w: set} (G: hyps z v w) (a b: set):
+  $ G ⇒ ord a $ > $ G ⇒ ord b $ > $ G ⇒ ∀ z (z ∊ a → ∀ v (ord v → z ∊ v ∨ z = v ∨ v ∊ z)) $ > $ G ⇒ ∀ w (w ∊ b → a ∊ w ∨ a = w ∨ w ∊ a) $ > $ G ⇒ a ∊ b ∨ a = b ∨ b ∊ a $
+----
+l1: $ G ⇒ a ∊ b ∨ ¬ a ∊ b $ by excluded_middle
+l2: $ G , a ∊ b ⇒ a ∊ b $ by ax
+l3: $ G , a ∊ b ⇒ a ∊ b ∨ a = b ∨ b ∊ a $ by or_intro_l [l2]
+l4: $ G , ¬ a ∊ b ⇒ b ∊ a ∨ ¬ b ∊ a $ by excluded_middle
+l5: $ G , ¬ a ∊ b , b ∊ a ⇒ b ∊ a $ by ax
+l6: $ G , ¬ a ∊ b , b ∊ a ⇒ a = b ∨ b ∊ a $ by or_intro_r [l5]
+l7: $ G , ¬ a ∊ b , b ∊ a ⇒ a ∊ b ∨ a = b ∨ b ∊ a $ by or_intro_r [l6]
+m1: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a ⇒ ∀ z (z ∊ a → ∀ v (ord v → z ∊ v ∨ z = v ∨ v ∊ z)) $ by weaken [#3]
+m2: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a ⇒ c ∊ a → ∀ v (ord v → c ∊ v ∨ c = v ∨ v ∊ c) $ by all_elim (t := $ c $) [m1]
+m3: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a ⇒ c ∊ a $ by ax
+m4: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a ⇒ ∀ v (ord v → c ∊ v ∨ c = v ∨ v ∊ c) $ by imp_elim [m2, m3]
+m5: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a ⇒ ord b → c ∊ b ∨ c = b ∨ b ∊ c $ by all_elim (t := $ b $) [m4]
+m6: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a ⇒ ord b $ by weaken [#2]
+m7: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a ⇒ c ∊ b ∨ c = b ∨ b ∊ c $ by imp_elim [m5, m6]
+m8: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a , c ∊ b ⇒ c ∊ b $ by ax
+m9: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a , c = b ∨ b ∊ c ⇒ c = b ∨ b ∊ c $ by ax
+m10: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a , c = b ∨ b ∊ c , c = b ⇒ c = b $ by ax
+m11: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a , c = b ∨ b ∊ c , c = b ⇒ c ∊ a $ by ax
+m12: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a , c = b ∨ b ∊ c , c = b ⇒ b ∊ a $ by welc_eq_set [m10, m11]
+m13: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a , c = b ∨ b ∊ c , c = b ⇒ ¬ b ∊ a $ by ax
+m14: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a , c = b ∨ b ∊ c , c = b ⇒ ⊥ $ by not_elim [m13, m12]
+m15: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a , c = b ∨ b ∊ c , c = b ⇒ c ∊ b $ by bot_elim [m14]
+m16: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a , c = b ∨ b ∊ c , b ∊ c ⇒ ord a $ by weaken [#1]
+m17: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a , c = b ∨ b ∊ c , b ∊ c ⇒ transitive a $ by ord_trans [m16]
+m18: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a , c = b ∨ b ∊ c , b ∊ c ⇒ c ∊ a $ by ax
+m19: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a , c = b ∨ b ∊ c , b ∊ c ⇒ b ∊ c $ by ax
+m20: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a , c = b ∨ b ∊ c , b ∊ c ⇒ b ∊ a $ by transitive_elim [m17, m18, m19]
+m21: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a , c = b ∨ b ∊ c , b ∊ c ⇒ ¬ b ∊ a $ by ax
+m22: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a , c = b ∨ b ∊ c , b ∊ c ⇒ ⊥ $ by not_elim [m21, m20]
+m23: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a , c = b ∨ b ∊ c , b ∊ c ⇒ c ∊ b $ by bot_elim [m22]
+m24: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a , c = b ∨ b ∊ c ⇒ c ∊ b $ by or_elim [m9, m15, m23]
+m25: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ a ⇒ c ∊ b $ by or_elim [m7, m8, m24]
+n1: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b ⇒ ∀ w (w ∊ b → a ∊ w ∨ a = w ∨ w ∊ a) $ by weaken [#4]
+n2: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b ⇒ c ∊ b → a ∊ c ∨ a = c ∨ c ∊ a $ by all_elim (t := $ c $) [n1]
+n3: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b ⇒ c ∊ b $ by ax
+n4: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b ⇒ a ∊ c ∨ a = c ∨ c ∊ a $ by imp_elim [n2, n3]
+n5: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a ∊ c ⇒ ord b $ by weaken [#2]
+n6: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a ∊ c ⇒ transitive b $ by ord_trans [n5]
+n7: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a ∊ c ⇒ c ∊ b $ by ax
+n8: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a ∊ c ⇒ a ∊ c $ by ax
+n9: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a ∊ c ⇒ a ∊ b $ by transitive_elim [n6, n7, n8]
+n10: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a ∊ c ⇒ ¬ a ∊ b $ by ax
+n11: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a ∊ c ⇒ ⊥ $ by not_elim [n10, n9]
+n12: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a ∊ c ⇒ c ∊ a $ by bot_elim [n11]
+n13: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a = c ∨ c ∊ a ⇒ a = c ∨ c ∊ a $ by ax
+n14: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a = c ∨ c ∊ a , a = c ⇒ a = c $ by ax
+n15: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a = c ∨ c ∊ a , a = c ⇒ c = a $ by eq_sym [n14]
+n16: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a = c ∨ c ∊ a , a = c ⇒ c ∊ b $ by ax
+n17: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a = c ∨ c ∊ a , a = c ⇒ a ∊ b $ by welc_eq_set [n15, n16]
+n18: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a = c ∨ c ∊ a , a = c ⇒ ¬ a ∊ b $ by ax
+n19: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a = c ∨ c ∊ a , a = c ⇒ ⊥ $ by not_elim [n18, n17]
+n20: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a = c ∨ c ∊ a , a = c ⇒ c ∊ a $ by bot_elim [n19]
+n21: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a = c ∨ c ∊ a , c ∊ a ⇒ c ∊ a $ by ax
+n22: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b , a = c ∨ c ∊ a ⇒ c ∊ a $ by or_elim [n13, n20, n21]
+n23: $ G , ¬ a ∊ b , ¬ b ∊ a , c ∊ b ⇒ c ∊ a $ by or_elim [n4, n12, n22]
+e1: $ G , ¬ a ∊ b , ¬ b ∊ a ⇒ a = b $ by eq_intro [m25, n23]
+e2: $ G , ¬ a ∊ b , ¬ b ∊ a ⇒ a = b ∨ b ∊ a $ by or_intro_l [e1]
+e3: $ G , ¬ a ∊ b , ¬ b ∊ a ⇒ a ∊ b ∨ a = b ∨ b ∊ a $ by or_intro_r [e2]
+l8: $ G , ¬ a ∊ b ⇒ a ∊ b ∨ a = b ∨ b ∊ a $ by or_elim [l4, l7, e3]
+l9: $ G ⇒ a ∊ b ∨ a = b ∨ b ∊ a $ by or_elim [l1, l3, l8]
+
+ord_tricho
+----------
+k1: $ G , ord u , ∀ z (z ∊ u → ∀ v (ord v → z ∊ v ∨ z = v ∨ v ∊ z)) , ord i , ∀ w (w ∊ i → u ∊ w ∨ u = w ∨ w ∊ u) ⇒ ord u $ by ax
+k2: $ G , ord u , ∀ z (z ∊ u → ∀ v (ord v → z ∊ v ∨ z = v ∨ v ∊ z)) , ord i , ∀ w (w ∊ i → u ∊ w ∨ u = w ∨ w ∊ u) ⇒ ord i $ by ax
+k3: $ G , ord u , ∀ z (z ∊ u → ∀ v (ord v → z ∊ v ∨ z = v ∨ v ∊ z)) , ord i , ∀ w (w ∊ i → u ∊ w ∨ u = w ∨ w ∊ u) ⇒ ∀ z (z ∊ u → ∀ v (ord v → z ∊ v ∨ z = v ∨ v ∊ z)) $ by ax
+k4: $ G , ord u , ∀ z (z ∊ u → ∀ v (ord v → z ∊ v ∨ z = v ∨ v ∊ z)) , ord i , ∀ w (w ∊ i → u ∊ w ∨ u = w ∨ w ∊ u) ⇒ ∀ w (w ∊ i → u ∊ w ∨ u = w ∨ w ∊ u) $ by ax
+k5: $ G , ord u , ∀ z (z ∊ u → ∀ v (ord v → z ∊ v ∨ z = v ∨ v ∊ z)) , ord i , ∀ w (w ∊ i → u ∊ w ∨ u = w ∨ w ∊ u) ⇒ u ∊ i ∨ u = i ∨ i ∊ u $ by d2_tricho_core [k1, k2, k3, k4]
+k6: $ G , ord u , ∀ z (z ∊ u → ∀ v (ord v → z ∊ v ∨ z = v ∨ v ∊ z)) ⇒ ∀ i (ord i → u ∊ i ∨ u = i ∨ i ∊ u) $ by ord_ind_f [k5]
+k7: $ ∀ i (ord i → u ∊ i ∨ u = i ∨ i ∊ u) ⟺ ∀ v (ord v → u ∊ v ∨ u = v ∨ v ∊ u) $ by all_alpha
+k8: $ G , ord u , ∀ z (z ∊ u → ∀ v (ord v → z ∊ v ∨ z = v ∨ v ∊ z)) ⇒ ∀ i (ord i → u ∊ i ∨ u = i ∨ i ∊ u) ↔ ∀ v (ord v → u ∊ v ∨ u = v ∨ v ∊ u) $ by weaken [k7]
+k9: $ G , ord u , ∀ z (z ∊ u → ∀ v (ord v → z ∊ v ∨ z = v ∨ v ∊ z)) ⇒ ∀ v (ord v → u ∊ v ∨ u = v ∨ v ∊ u) $ by bi_elim_l [k8, k6]
+k10: $ G ⇒ ∀ u (ord u → ∀ v (ord v → u ∊ v ∨ u = v ∨ v ∊ u)) $ by ord_ind_f [k9]
+k11: $ G ⇒ ord a → ∀ v (ord v → a ∊ v ∨ a = v ∨ v ∊ a) $ by all_elim (t := $ a $) [k10]
+k12: $ G ⇒ ∀ v (ord v → a ∊ v ∨ a = v ∨ v ∊ a) $ by imp_elim [k11, #1]
+k13: $ G ⇒ ord b → a ∊ b ∨ a = b ∨ b ∊ a $ by all_elim (t := $ b $) [k12]
+k14: $ G ⇒ a ∊ b ∨ a = b ∨ b ∊ a $ by imp_elim [k13, #2]
+
+ord_subset_or
+-------------
+l1: $ G ⇒ a ∊ b ∨ a = b ∨ b ∊ a $ by ord_tricho [#1, #2]
+l2: $ G , a ∊ b ⇒ ord b $ by weaken [#2]
+l3: $ G , a ∊ b ⇒ a ∊ b $ by ax
+l4: $ G , a ∊ b ⇒ a ⊆ b $ by ord_elem_subset [l2, l3]
+l5: $ G , a ∊ b ⇒ a ⊆ b ∨ b ⊆ a $ by or_intro_l [l4]
+l6: $ G , a = b ∨ b ∊ a ⇒ a = b ∨ b ∊ a $ by ax
+l7: $ G , a = b ∨ b ∊ a , a = b ⇒ a = b $ by ax
+l8: $ G , a = b ∨ b ∊ a , a = b ⇒ a ⊆ b $ by eq_subset [l7]
+l9: $ G , a = b ∨ b ∊ a , a = b ⇒ a ⊆ b ∨ b ⊆ a $ by or_intro_l [l8]
+l10: $ G , a = b ∨ b ∊ a , b ∊ a ⇒ ord a $ by weaken [#1]
+l11: $ G , a = b ∨ b ∊ a , b ∊ a ⇒ b ∊ a $ by ax
+l12: $ G , a = b ∨ b ∊ a , b ∊ a ⇒ b ⊆ a $ by ord_elem_subset [l10, l11]
+l13: $ G , a = b ∨ b ∊ a , b ∊ a ⇒ a ⊆ b ∨ b ⊆ a $ by or_intro_r [l12]
+l14: $ G , a = b ∨ b ∊ a ⇒ a ⊆ b ∨ b ⊆ a $ by or_elim [l6, l9, l13]
+l15: $ G ⇒ a ⊆ b ∨ b ⊆ a $ by or_elim [l1, l5, l14]
+
+ord_elem_or_subset
+------------------
+l1: $ G ⇒ a ∊ b ∨ a = b ∨ b ∊ a $ by ord_tricho [#1, #2]
+l2: $ G , a ∊ b ⇒ a ∊ b $ by ax
+l3: $ G , a ∊ b ⇒ a ∊ b ∨ b ⊆ a $ by or_intro_l [l2]
+l4: $ G , a = b ∨ b ∊ a ⇒ a = b ∨ b ∊ a $ by ax
+l5: $ G , a = b ∨ b ∊ a , a = b ⇒ a = b $ by ax
+l6: $ G , a = b ∨ b ∊ a , a = b ⇒ b = a $ by eq_sym [l5]
+l7: $ G , a = b ∨ b ∊ a , a = b ⇒ b ⊆ a $ by eq_subset [l6]
+l8: $ G , a = b ∨ b ∊ a , a = b ⇒ a ∊ b ∨ b ⊆ a $ by or_intro_r [l7]
+l9: $ G , a = b ∨ b ∊ a , b ∊ a ⇒ ord a $ by weaken [#1]
+l10: $ G , a = b ∨ b ∊ a , b ∊ a ⇒ b ∊ a $ by ax
+l11: $ G , a = b ∨ b ∊ a , b ∊ a ⇒ b ⊆ a $ by ord_elem_subset [l9, l10]
+l12: $ G , a = b ∨ b ∊ a , b ∊ a ⇒ a ∊ b ∨ b ⊆ a $ by or_intro_r [l11]
+l13: $ G , a = b ∨ b ∊ a ⇒ a ∊ b ∨ b ⊆ a $ by or_elim [l4, l8, l12]
+l14: $ G ⇒ a ∊ b ∨ b ⊆ a $ by or_elim [l1, l3, l13]
+
+ord_subset_elem
+---------------
+l1: $ G ⇒ a ∊ b ∨ a = b ∨ b ∊ a $ by ord_tricho [#1, #2]
+l2: $ G , a ∊ b ⇒ a ∊ b $ by ax
+l3: $ G , a = b ∨ b ∊ a ⇒ a = b ∨ b ∊ a $ by ax
+l4: $ G , a = b ∨ b ∊ a , a = b ⇒ a = b $ by ax
+l5: $ G , a = b ∨ b ∊ a , a = b ⇒ ¬ a = b $ by weaken [#4]
+l6: $ G , a = b ∨ b ∊ a , a = b ⇒ ⊥ $ by not_elim [l5, l4]
+l7: $ G , a = b ∨ b ∊ a , a = b ⇒ a ∊ b $ by bot_elim [l6]
+l8: $ G , a = b ∨ b ∊ a , b ∊ a ⇒ b ∊ a $ by ax
+l9: $ G , a = b ∨ b ∊ a , b ∊ a ⇒ a ⊆ b $ by weaken [#3]
+l10: $ G , a = b ∨ b ∊ a , b ∊ a ⇒ b ∊ b $ by subset_elim [l9, l8]
+l11: $ G , a = b ∨ b ∊ a , b ∊ a ⇒ ⊥ $ by notin_self [l10]
+l12: $ G , a = b ∨ b ∊ a , b ∊ a ⇒ a ∊ b $ by bot_elim [l11]
+l13: $ G , a = b ∨ b ∊ a ⇒ a ∊ b $ by or_elim [l3, l7, l12]
+l14: $ G ⇒ a ∊ b $ by or_elim [l1, l2, l13]
+
+ord_not_elem_subset
+-------------------
+l1: $ G ⇒ a ∊ b ∨ b ⊆ a $ by ord_elem_or_subset [#1, #2]
+l2: $ G , a ∊ b ⇒ a ∊ b $ by ax
+l3: $ G , a ∊ b ⇒ ¬ a ∊ b $ by weaken [#3]
+l4: $ G , a ∊ b ⇒ ⊥ $ by not_elim [l3, l2]
+l5: $ G , a ∊ b ⇒ b ⊆ a $ by bot_elim [l4]
+l6: $ G , b ⊆ a ⇒ b ⊆ a $ by ax
+l7: $ G ⇒ b ⊆ a $ by or_elim [l1, l5, l6]
+
+ord_elem_not_subset
+-------------------
+l1: $ G ⇒ a ∊ a $ by subset_elim [#2, #1]
+l2: $ G ⇒ ⊥ $ by notin_self [l1]
+
+ord_elem_suc_subset
+-------------------
+l1: $ G ⇒ a ⊆ b $ by ord_elem_subset [#1, #2]
+l2: $ G ⇒ csn a ⊆ b $ by csn_subset [#2]
+l3: $ G ⇒ a ∪ csn a ⊆ b $ by cun_least [l1, l2]
+
+ord_suc_subset_elem
+-------------------
+l1: $ G ⇒ a ∊ suc a $ by suc_self
+l2: $ G ⇒ a ∊ b $ by subset_elim [#1, l1]
+
+ord_suc_elem_suc
+----------------
+l1: $ G ⇒ isset a $ by isset_var
+l2: $ G ⇒ isset (suc a) $ by suc_set [l1]
+l3: $ G ⇒ ord a $ by ord_elem [#1, #2]
+l4: $ G ⇒ ord (suc a) $ by ord_suc [l3]
+l5: $ G ⇒ suc a ⊆ b $ by ord_elem_suc_subset [#1, #2]
+l6: $ G , z = suc a ⇒ z = suc a $ by ax
+l7: $ G , z = suc a ⇒ suc a = z $ by eq_sym [l6]
+l8: $ G , z = suc a ⇒ ord (suc a) $ by weaken [l4]
+l9: $ G , z = suc a ⇒ ord z $ by ord_eq [l7, l8]
+l10: $ G , z = suc a ⇒ suc a ⊆ b $ by weaken [l5]
+l11: $ G , z = suc a ⇒ z ⊆ b $ by subset_eq_l [l7, l10]
+l12: $ G , z = suc a ⇒ z = b ∨ ¬ z = b $ by excluded_middle
+l13: $ G , z = suc a , z = b ⇒ z = b $ by ax
+l14: $ G , z = suc a , z = b ⇒ z ∊ suc b $ by suc_intro_r [l13]
+l15: $ G , z = suc a , ¬ z = b ⇒ ord z $ by weaken [l9]
+l16: $ G , z = suc a , ¬ z = b ⇒ ord b $ by weaken [#1]
+l17: $ G , z = suc a , ¬ z = b ⇒ z ⊆ b $ by weaken [l11]
+l18: $ G , z = suc a , ¬ z = b ⇒ ¬ z = b $ by ax
+l19: $ G , z = suc a , ¬ z = b ⇒ z ∊ b $ by ord_subset_elem [l15, l16, l17, l18]
+l20: $ G , z = suc a , ¬ z = b ⇒ z ∊ suc b $ by suc_intro_l [l19]
+l21: $ G , z = suc a ⇒ z ∊ suc b $ by or_elim [l12, l14, l20]
+l22: $ G , z = suc a ⇒ suc a ∈ suc b $ by wcel_intro [l6, l21]
+l23: $ G ⇒ suc a ∈ suc b $ by isset_elim [l2, l22]
+
+ord_suc_elem_suc_elim
+---------------------
+l1: $ G , z = suc a , z ∊ suc b ⇒ z ∊ suc b $ by ax
+l2: $ G , z = suc a , z ∊ suc b ⇒ z ∊ b ∨ z = b $ by suc_elim [l1]
+l3: $ G , z = suc a , z ∊ suc b ⇒ z = suc a $ by ax
+l4: $ G , z = suc a , z ∊ suc b ⇒ suc a = z $ by eq_sym [l3]
+l5: $ G , z = suc a , z ∊ suc b ⇒ a ∊ suc a $ by suc_self
+l6: $ G , z = suc a , z ∊ suc b ⇒ a ∊ z $ by welc_eq [l4, l5]
+l7: $ G , z = suc a , z ∊ suc b , z ∊ b ⇒ ord b $ by weaken [#1]
+l8: $ G , z = suc a , z ∊ suc b , z ∊ b ⇒ transitive b $ by ord_trans [l7]
+l9: $ G , z = suc a , z ∊ suc b , z ∊ b ⇒ z ∊ b $ by ax
+l10: $ G , z = suc a , z ∊ suc b , z ∊ b ⇒ a ∊ z $ by weaken [l6]
+l11: $ G , z = suc a , z ∊ suc b , z ∊ b ⇒ a ∊ b $ by transitive_elim [l8, l9, l10]
+l12: $ G , z = suc a , z ∊ suc b , z = b ⇒ z = b $ by ax
+l13: $ G , z = suc a , z ∊ suc b , z = b ⇒ a ∊ z $ by weaken [l6]
+l14: $ G , z = suc a , z ∊ suc b , z = b ⇒ a ∊ b $ by welc_eq [l12, l13]
+l15: $ G , z = suc a , z ∊ suc b ⇒ a ∊ b $ by or_elim [l2, l11, l14]
+l16: $ G ⇒ a ∊ b $ by wcel_elim [#2, l15]
+
+ord_no_between
+--------------
+l1: $ G ⇒ b ∊ a ∨ b = a $ by suc_elim [#2]
+l2: $ G , b ∊ a ⇒ a ∊ b $ by weaken [#1]
+l3: $ G , b ∊ a ⇒ b ∊ a $ by ax
+l4: $ G , b ∊ a ⇒ ⊥ $ by notin_cycle [l2, l3]
+l5: $ G , b = a ⇒ b = a $ by ax
+l6: $ G , b = a ⇒ a ∊ b $ by weaken [#1]
+l7: $ G , b = a ⇒ a ∊ a $ by welc_eq [l5, l6]
+l8: $ G , b = a ⇒ ⊥ $ by notin_self [l7]
+l9: $ G ⇒ ⊥ $ by or_elim [l1, l4, l8]
+
+ord_suc_subset
+--------------
+l1: $ G ⇒ a = b ∨ ¬ a = b $ by excluded_middle
+l2: $ G , a = b ⇒ a = b $ by ax
+l3: $ G , a = b ⇒ suc a = suc b $ by suc_eq [l2]
+l4: $ G , a = b ⇒ suc a ⊆ suc b $ by eq_subset [l3]
+l5: $ G , ¬ a = b ⇒ ord a $ by weaken [#1]
+l6: $ G , ¬ a = b ⇒ ord b $ by weaken [#2]
+l7: $ G , ¬ a = b ⇒ a ⊆ b $ by weaken [#3]
+l8: $ G , ¬ a = b ⇒ ¬ a = b $ by ax
+l9: $ G , ¬ a = b ⇒ a ∊ b $ by ord_subset_elem [l5, l6, l7, l8]
+l10: $ G , ¬ a = b ⇒ suc a ⊆ b $ by ord_elem_suc_subset [l6, l9]
+l11: $ G , ¬ a = b ⇒ b ⊆ suc b $ by suc_subset
+l12: $ G , ¬ a = b ⇒ suc a ⊆ suc b $ by subset_trans [l10, l11]
+l13: $ G ⇒ suc a ⊆ suc b $ by or_elim [l1, l4, l12]
+
+ord_cuni_subset
+---------------
+l1: $ G ⇒ transitive a $ by ord_trans [#1]
+l2: $ G ⇒ ⋃ a ⊆ a $ by transitive_cuni_subset [l1]
+
+ord_cuni_ord
+------------
+l1: $ G , z ∊ a ⇒ ord a $ by weaken [#1]
+l2: $ G , z ∊ a ⇒ z ∊ a $ by ax
+l3: $ G , z ∊ a ⇒ ord z $ by ord_elem [l1, l2]
+l4: $ G ⇒ z ∊ a → ord z $ by imp_intro [l3]
+l5: $ G ⇒ ∀ z (z ∊ a → ord z) $ by all_intro [l4]
+l6: $ G ⇒ ord (⋃ a) $ by ord_cuni [l5]
+
+ord_cuni_bound
+--------------
+l1: $ G , x ∊ A ⇒ ∀ x (x ∊ A → x ∊ b) $ by weaken [#2]
+l2: $ G , x ∊ A ⇒ x ∊ A → x ∊ b $ by all_elim (t := $ x $) [l1]
+l3: $ G , x ∊ A ⇒ x ∊ A $ by ax
+l4: $ G , x ∊ A ⇒ x ∊ b $ by imp_elim [l2, l3]
+l5: $ G , x ∊ A ⇒ ord b $ by weaken [#1]
+l6: $ G , x ∊ A ⇒ x ⊆ b $ by ord_elem_subset [l5, l4]
+l7: $ G ⇒ x ∊ A → x ⊆ b $ by imp_intro [l6]
+l8: $ G ⇒ ∀ x (x ∊ A → x ⊆ b) $ by all_intro [l7]
+l9: $ G ⇒ ⋃ A ⊆ b $ by cuni_least [l8]
+
+ord_cuni_or_suc
+---------------
+l1: $ G ⇒ isset (⋃ a) $ by ax_union
+l2: $ G , z = ⋃ a ⇒ z = ⋃ a $ by ax
+l3: $ G , z = ⋃ a ⇒ ⋃ a = z $ by eq_sym [l2]
+l4a: $ G ⇒ ⋃ a ⊆ a $ by ord_cuni_subset [#1]
+l4: $ G , z = ⋃ a ⇒ ⋃ a ⊆ a $ by weaken [l4a]
+l5: $ G , z = ⋃ a ⇒ z ⊆ a $ by subset_eq_l [l3, l4]
+l6a: $ G ⇒ ord (⋃ a) $ by ord_cuni_ord [#1]
+l6: $ G , z = ⋃ a ⇒ ord (⋃ a) $ by weaken [l6a]
+l7: $ G , z = ⋃ a ⇒ ord z $ by ord_eq [l3, l6]
+l8: $ G , z = ⋃ a ⇒ z = a ∨ ¬ z = a $ by excluded_middle
+l9: $ G , z = ⋃ a , z = a ⇒ z = a $ by ax
+l10: $ G , z = ⋃ a , z = a ⇒ a = z $ by eq_sym [l9]
+l11: $ G , z = ⋃ a , z = a ⇒ z = ⋃ a $ by ax
+l12: $ G , z = ⋃ a , z = a ⇒ a = ⋃ a $ by eq_trans [l10, l11]
+l13: $ G , z = ⋃ a , z = a ⇒ a = ⋃ a ∨ a = suc (⋃ a) $ by or_intro_l [l12]
+l14: $ G , z = ⋃ a , ¬ z = a ⇒ ord z $ by weaken [l7]
+l15: $ G , z = ⋃ a , ¬ z = a ⇒ ord a $ by weaken [#1]
+l16: $ G , z = ⋃ a , ¬ z = a ⇒ z ⊆ a $ by weaken [l5]
+l17: $ G , z = ⋃ a , ¬ z = a ⇒ ¬ z = a $ by ax
+l18: $ G , z = ⋃ a , ¬ z = a ⇒ z ∊ a $ by ord_subset_elem [l14, l15, l16, l17]
+l19: $ G , z = ⋃ a , ¬ z = a ⇒ suc z ⊆ a $ by ord_elem_suc_subset [l15, l18]
+l20: $ G , z = ⋃ a , ¬ z = a , c ∊ a ⇒ c ∊ a $ by ax
+l21: $ G , z = ⋃ a , ¬ z = a , c ∊ a ⇒ c ⊆ ⋃ a $ by cuni_subset [l20]
+l22: $ G , z = ⋃ a , ¬ z = a , c ∊ a ⇒ ⋃ a = z $ by weaken [l3]
+l23: $ G , z = ⋃ a , ¬ z = a , c ∊ a ⇒ c ⊆ z $ by subset_eq_r [l22, l21]
+l24: $ G , z = ⋃ a , ¬ z = a , c ∊ a ⇒ ord a $ by weaken [#1]
+l25: $ G , z = ⋃ a , ¬ z = a , c ∊ a ⇒ ord c $ by ord_elem [l24, l20]
+l26: $ G , z = ⋃ a , ¬ z = a , c ∊ a ⇒ c = z ∨ ¬ c = z $ by excluded_middle
+l27: $ G , z = ⋃ a , ¬ z = a , c ∊ a , c = z ⇒ c = z $ by ax
+l28: $ G , z = ⋃ a , ¬ z = a , c ∊ a , c = z ⇒ c ∊ suc z $ by suc_intro_r [l27]
+l29: $ G , z = ⋃ a , ¬ z = a , c ∊ a , ¬ c = z ⇒ ord c $ by weaken [l25]
+l30: $ G , z = ⋃ a , ¬ z = a , c ∊ a , ¬ c = z ⇒ ord z $ by weaken [l14]
+l31: $ G , z = ⋃ a , ¬ z = a , c ∊ a , ¬ c = z ⇒ c ⊆ z $ by weaken [l23]
+l32: $ G , z = ⋃ a , ¬ z = a , c ∊ a , ¬ c = z ⇒ ¬ c = z $ by ax
+l33: $ G , z = ⋃ a , ¬ z = a , c ∊ a , ¬ c = z ⇒ c ∊ z $ by ord_subset_elem [l29, l30, l31, l32]
+l34: $ G , z = ⋃ a , ¬ z = a , c ∊ a , ¬ c = z ⇒ c ∊ suc z $ by suc_intro_l [l33]
+l35: $ G , z = ⋃ a , ¬ z = a , c ∊ a ⇒ c ∊ suc z $ by or_elim [l26, l28, l34]
+l36: $ G , z = ⋃ a , ¬ z = a ⇒ a ⊆ suc z $ by subset_intro [l35]
+l37: $ G , z = ⋃ a , ¬ z = a ⇒ a = suc z $ by subset_antisym [l36, l19]
+l38: $ G , z = ⋃ a , ¬ z = a ⇒ z = ⋃ a $ by ax
+l39: $ G , z = ⋃ a , ¬ z = a ⇒ suc z = suc (⋃ a) $ by suc_eq [l38]
+l40: $ G , z = ⋃ a , ¬ z = a ⇒ a = suc (⋃ a) $ by eq_trans [l37, l39]
+l41: $ G , z = ⋃ a , ¬ z = a ⇒ a = ⋃ a ∨ a = suc (⋃ a) $ by or_intro_r [l40]
+l42: $ G , z = ⋃ a ⇒ a = ⋃ a ∨ a = suc (⋃ a) $ by or_elim [l8, l13, l41]
+l43: $ G ⇒ a = ⋃ a ∨ a = suc (⋃ a) $ by isset_elim [l1, l42]
+
+ord_not_set
+-----------
+l1: $ G , i ∊ {z | z ∊ a ∧ ord z} , j ∊ i ⇒ i ∊ {z | z ∊ a ∧ ord z} $ by ax
+l2: $ G , i ∊ {z | z ∊ a ∧ ord z} , j ∊ i ⇒ i ∊ a ∧ ord i $ by cab_elim (x := $ z $, t := $ i $, p := $ z ∊ a ∧ ord z $) [l1]
+l3: $ G , i ∊ {z | z ∊ a ∧ ord z} , j ∊ i ⇒ ord i $ by and_elim_r [l2]
+l4: $ G , i ∊ {z | z ∊ a ∧ ord z} , j ∊ i ⇒ j ∊ i $ by ax
+l5: $ G , i ∊ {z | z ∊ a ∧ ord z} , j ∊ i ⇒ ord j $ by ord_elem [l3, l4]
+l6: $ G , i ∊ {z | z ∊ a ∧ ord z} , j ∊ i ⇒ ∀ x (ord x → x ∊ a) $ by weaken [#1]
+l7: $ G , i ∊ {z | z ∊ a ∧ ord z} , j ∊ i ⇒ ord j → j ∊ a $ by all_elim (t := $ j $) [l6]
+l8: $ G , i ∊ {z | z ∊ a ∧ ord z} , j ∊ i ⇒ j ∊ a $ by imp_elim [l7, l5]
+l9: $ G , i ∊ {z | z ∊ a ∧ ord z} , j ∊ i ⇒ j ∊ a ∧ ord j $ by and_intro [l8, l5]
+l10: $ G , i ∊ {z | z ∊ a ∧ ord z} , j ∊ i ⇒ j ∊ {z | z ∊ a ∧ ord z} $ by cab_intro (x := $ z $, t := $ j $, p := $ z ∊ a ∧ ord z $) [l9]
+l11: $ G ⇒ transitive {z | z ∊ a ∧ ord z} $ by transitive_intro [l10]
+l12: $ G , i ∊ {z | z ∊ a ∧ ord z} ⇒ i ∊ {z | z ∊ a ∧ ord z} $ by ax
+l13: $ G , i ∊ {z | z ∊ a ∧ ord z} ⇒ i ∊ a ∧ ord i $ by cab_elim (x := $ z $, t := $ i $, p := $ z ∊ a ∧ ord z $) [l12]
+l14: $ G , i ∊ {z | z ∊ a ∧ ord z} ⇒ ord i $ by and_elim_r [l13]
+l15: $ G , i ∊ {z | z ∊ a ∧ ord z} ⇒ transitive i $ by ord_trans [l14]
+l16: $ G ⇒ i ∊ {z | z ∊ a ∧ ord z} → transitive i $ by imp_intro [l15]
+l17: $ G ⇒ ∀ i (i ∊ {z | z ∊ a ∧ ord z} → transitive i) $ by all_intro [l16]
+l18: $ G ⇒ ord {z | z ∊ a ∧ ord z} $ by ord_intro [l11, l17]
+l19: $ G ⇒ isset {z | z ∊ a ∧ ord z} $ by sep_set
+l20: $ G , w = {z | z ∊ a ∧ ord z} ⇒ w = {z | z ∊ a ∧ ord z} $ by ax
+l21: $ G , w = {z | z ∊ a ∧ ord z} ⇒ {z | z ∊ a ∧ ord z} = w $ by eq_sym [l20]
+l22: $ G , w = {z | z ∊ a ∧ ord z} ⇒ ord {z | z ∊ a ∧ ord z} $ by weaken [l18]
+l23: $ G , w = {z | z ∊ a ∧ ord z} ⇒ ord w $ by ord_eq [l21, l22]
+l24: $ G , w = {z | z ∊ a ∧ ord z} ⇒ ∀ x (ord x → x ∊ a) $ by weaken [#1]
+l25: $ G , w = {z | z ∊ a ∧ ord z} ⇒ ord w → w ∊ a $ by all_elim (t := $ w $) [l24]
+l26: $ G , w = {z | z ∊ a ∧ ord z} ⇒ w ∊ a $ by imp_elim [l25, l23]
+l27: $ G , w = {z | z ∊ a ∧ ord z} ⇒ w ∊ a ∧ ord w $ by and_intro [l26, l23]
+l28: $ G , w = {z | z ∊ a ∧ ord z} ⇒ w ∊ {z | z ∊ a ∧ ord z} $ by cab_intro (x := $ z $, t := $ w $, p := $ z ∊ a ∧ ord z $) [l27]
+l29: $ G , w = {z | z ∊ a ∧ ord z} ⇒ w ∊ w $ by welc_eq [l21, l28]
+l30: $ G , w = {z | z ∊ a ∧ ord z} ⇒ ⊥ $ by notin_self [l29]
+l31: $ G ⇒ ⊥ $ by isset_elim [l19, l30]
+
+cap_var
+-------
+l1: $ z ∊ cap x B a ⇒ z ∊ cap x B a $ by ax
+l2: $ z ∊ cap x B a ⇒ ∃ x (x = a ∧ z ∊ B) $ by cab_elim (x := $ y $, t := $ z $, p := $ ∃ x (x = a ∧ y ∊ B) $) [l1]
+l3: $ (∃ x (x = a ∧ z ∊ B)) ⟺ ∃ u (u = a ∧ z ∊ (⟦ x / u ⟧ B)) $ by ex_alpha
+l4: $ z ∊ cap x B a ⇒ (∃ x (x = a ∧ z ∊ B)) ↔ ∃ u (u = a ∧ z ∊ (⟦ x / u ⟧ B)) $ by weaken [l3]
+l5: $ z ∊ cap x B a ⇒ ∃ u (u = a ∧ z ∊ (⟦ x / u ⟧ B)) $ by bi_elim_l [l4, l2]
+l6: $ u = a ∧ z ∊ (⟦ x / u ⟧ B) ⇒ u = a ∧ z ∊ (⟦ x / u ⟧ B) $ by ax
+l7: $ u = a ∧ z ∊ (⟦ x / u ⟧ B) ⇒ u = a $ by and_elim_l [l6]
+l8: $ u = a ∧ z ∊ (⟦ x / u ⟧ B) ⇒ z ∊ (⟦ x / u ⟧ B) $ by and_elim_r [l6]
+l9: $ u = a ∧ z ∊ (⟦ x / u ⟧ B) ⇒ (⟦ x / u ⟧ B) = (⟦ x / a ⟧ B) $ by sb_c_eq [l7]
+l10: $ u = a ∧ z ∊ (⟦ x / u ⟧ B) ⇒ z ∊ (⟦ x / a ⟧ B) $ by welc_eq [l9, l8]
+l11: $ z ∊ cap x B a ⇒ z ∊ (⟦ x / a ⟧ B) $ by ex_elim [l5, l10]
+l12: $ z ∊ (⟦ x / a ⟧ B) ⇒ z ∊ (⟦ x / a ⟧ B) $ by ax
+l13: $ a ≐ a $ by ceqt_refl
+l14: $ z ∊ (⟦ x / a ⟧ B) ⇒ a = a $ by weaken [l13]
+l15: $ z ∊ (⟦ x / a ⟧ B) ⇒ a = a ∧ z ∊ (⟦ x / a ⟧ B) $ by and_intro [l14, l12]
+l16: $ z ∊ (⟦ x / a ⟧ B) ⇒ ∃ x (x = a ∧ z ∊ B) $ by ex_intro (x := $ x $, t := $ a $, p := $ x = a ∧ z ∊ B $) [l15]
+l17: $ z ∊ (⟦ x / a ⟧ B) ⇒ z ∊ cap x B a $ by cab_intro (x := $ y $, t := $ z $, p := $ ∃ x (x = a ∧ y ∊ B) $) [l16]
+l18: $ _ ⇒ cap x B a = (⟦ x / a ⟧ B) $ by eq_intro [l11, l17]
+
+cap_intro
+---------
+l1: $ G ⇒ a = C ∧ b ∊ (⟦ x / a ⟧ B) $ by and_intro [#1, #2]
+l2: $ G ⇒ ∃ x (x = C ∧ b ∊ B) $ by ex_intro (x := $ x $, t := $ a $, p := $ x = C ∧ b ∊ B $) [l1]
+l3: $ G ⇒ b ∊ {y | ∃ x (x = C ∧ y ∊ B)} $ by cab_intro (x := $ y $, t := $ b $, p := $ ∃ x (x = C ∧ y ∊ B) $) [l2]
+
+cap_elim
+--------
+l1: $ G ⇒ b ∊ {y | ∃ x (x = C ∧ y ∊ B)} $ by weaken [#1]
+l2: $ G ⇒ ∃ x (x = C ∧ b ∊ B) $ by cab_elim (x := $ y $, t := $ b $, p := $ ∃ x (x = C ∧ y ∊ B) $) [l1]
+
+cap_elim_isset
+--------------
+l1: $ G ⇒ ∃ x (x = C ∧ b ∊ B) $ by cap_elim [#1]
+l2: $ x = C ∧ b ∊ B ⇒ x = C ∧ b ∊ B $ by ax
+l3: $ x = C ∧ b ∊ B ⇒ x = C $ by and_elim_l [l2]
+l4: $ x = C ∧ b ∊ B ⇒ isset C $ by isset_intro [l3]
+l5: $ G ⇒ isset C $ by ex_elim [l1, l4]
+
+cap_eq
+------
+l1: $ G , w ∊ cap x B C ⇒ w ∊ cap x B C $ by ax
+l2: $ G , w ∊ cap x B C ⇒ ∃ x (x = C ∧ w ∊ B) $ by cap_elim [l1]
+l3: $ (∃ x (x = C ∧ w ∊ B)) ⟺ ∃ u (u = C ∧ w ∊ (⟦ x / u ⟧ B)) $ by ex_alpha
+l4: $ G , w ∊ cap x B C ⇒ (∃ x (x = C ∧ w ∊ B)) ↔ ∃ u (u = C ∧ w ∊ (⟦ x / u ⟧ B)) $ by weaken [l3]
+l5: $ G , w ∊ cap x B C ⇒ ∃ u (u = C ∧ w ∊ (⟦ x / u ⟧ B)) $ by bi_elim_l [l4, l2]
+l6: $ G , u = C ∧ w ∊ (⟦ x / u ⟧ B) ⇒ u = C ∧ w ∊ (⟦ x / u ⟧ B) $ by ax
+l7: $ G , u = C ∧ w ∊ (⟦ x / u ⟧ B) ⇒ u = C $ by and_elim_l [l6]
+l8: $ G , u = C ∧ w ∊ (⟦ x / u ⟧ B) ⇒ w ∊ (⟦ x / u ⟧ B) $ by and_elim_r [l6]
+l9: $ G , u = C ∧ w ∊ (⟦ x / u ⟧ B) ⇒ a = C $ by weaken [#1]
+l10: $ G , u = C ∧ w ∊ (⟦ x / u ⟧ B) ⇒ C = a $ by eq_sym [l9]
+l11: $ G , u = C ∧ w ∊ (⟦ x / u ⟧ B) ⇒ u = a $ by eq_trans [l7, l10]
+l12: $ G , u = C ∧ w ∊ (⟦ x / u ⟧ B) ⇒ (⟦ x / u ⟧ B) = (⟦ x / a ⟧ B) $ by sb_c_eq [l11]
+l13: $ G , u = C ∧ w ∊ (⟦ x / u ⟧ B) ⇒ w ∊ (⟦ x / a ⟧ B) $ by welc_eq [l12, l8]
+l14: $ G , w ∊ cap x B C ⇒ w ∊ (⟦ x / a ⟧ B) $ by ex_elim [l5, l13]
+l15: $ G , w ∊ (⟦ x / a ⟧ B) ⇒ w ∊ (⟦ x / a ⟧ B) $ by ax
+l16: $ G , w ∊ (⟦ x / a ⟧ B) ⇒ a = C $ by weaken [#1]
+l17: $ G , w ∊ (⟦ x / a ⟧ B) ⇒ w ∊ cap x B C $ by cap_intro [l16, l15]
+l18: $ G ⇒ cap x B C = (⟦ x / a ⟧ B) $ by eq_intro [l14, l17]
+
+cap_empty
+---------
+l1: $ G , w ∊ cap x B C ⇒ w ∊ cap x B C $ by ax
+l2: $ G , w ∊ cap x B C ⇒ isset C $ by cap_elim_isset [l1]
+l3: $ G , w ∊ cap x B C ⇒ ¬ isset C $ by weaken [#1]
+l4: $ G , w ∊ cap x B C ⇒ ⊥ $ by not_elim [l3, l2]
+l5: $ G ⇒ cap x B C = ∅ $ by empty_eq_intro [l4]
+
+cap_congr
+---------
+l0: $ seqt y y $ by seqt_refl
+l1: $ x ≐ x $ by ceqt_refl
+l2: $ (x = C) ⟺ (x = E) $ by ceq_congr [l1, #2]
+l3: $ (y ∊ B) ⟺ (y ∊ D) $ by welc_congr [l0, #1]
+l4: $ (x = C ∧ y ∊ B) ⟺ (x = E ∧ y ∊ D) $ by and_congr [l2, l3]
+l5: $ (∃ x (x = C ∧ y ∊ B)) ⟺ (∃ x (x = E ∧ y ∊ D)) $ by ex_congr [l4]
+l6: $ {y | ∃ x (x = C ∧ y ∊ B)} ≐ {y | ∃ x (x = E ∧ y ∊ D)} $ by cab_congr [l5]
+
+lemma d3_welc_cap_eq {x: set} (G: hyps x) (B: class x) (C E: class) (b: set):
+  $ G ⇒ C = E $ > $ G ⇒ b ∊ cap x B C $ > $ G ⇒ b ∊ cap x B E $
+----
+l1: $ G ⇒ ∃ x (x = C ∧ b ∊ B) $ by cap_elim [#2]
+l2: $ (∃ x (x = C ∧ b ∊ B)) ⟺ ∃ u (u = C ∧ b ∊ (⟦ x / u ⟧ B)) $ by ex_alpha
+l3: $ G ⇒ (∃ x (x = C ∧ b ∊ B)) ↔ ∃ u (u = C ∧ b ∊ (⟦ x / u ⟧ B)) $ by weaken [l2]
+l4: $ G ⇒ ∃ u (u = C ∧ b ∊ (⟦ x / u ⟧ B)) $ by bi_elim_l [l3, l1]
+l5: $ G , u = C ∧ b ∊ (⟦ x / u ⟧ B) ⇒ u = C ∧ b ∊ (⟦ x / u ⟧ B) $ by ax
+l6: $ G , u = C ∧ b ∊ (⟦ x / u ⟧ B) ⇒ u = C $ by and_elim_l [l5]
+l7: $ G , u = C ∧ b ∊ (⟦ x / u ⟧ B) ⇒ b ∊ (⟦ x / u ⟧ B) $ by and_elim_r [l5]
+l8: $ G , u = C ∧ b ∊ (⟦ x / u ⟧ B) ⇒ C = E $ by weaken [#1]
+l9: $ G , u = C ∧ b ∊ (⟦ x / u ⟧ B) ⇒ u = E $ by eq_trans [l6, l8]
+l10: $ G , u = C ∧ b ∊ (⟦ x / u ⟧ B) ⇒ b ∊ cap x B E $ by cap_intro [l9, l7]
+l11: $ G ⇒ b ∊ cap x B E $ by ex_elim [l4, l10]
+
+cap_eq_arg
+----------
+l1: $ G , w ∊ cap x B C ⇒ w ∊ cap x B C $ by ax
+l2: $ G , w ∊ cap x B C ⇒ C = E $ by weaken [#1]
+l3: $ G , w ∊ cap x B C ⇒ w ∊ cap x B E $ by d3_welc_cap_eq [l2, l1]
+l4: $ G ⇒ E = C $ by eq_sym [#1]
+l5: $ G , w ∊ cap x B E ⇒ w ∊ cap x B E $ by ax
+l6: $ G , w ∊ cap x B E ⇒ E = C $ by weaken [l4]
+l7: $ G , w ∊ cap x B E ⇒ w ∊ cap x B C $ by d3_welc_cap_eq [l6, l5]
+l8: $ G ⇒ cap x B C = cap x B E $ by eq_intro [l3, l7]
+
+sb_c_cap
+--------
+l1: $ (⟦ y / t ⟧ {z | ∃ x (x = C ∧ z ∊ B)}) ≐ {z | ∃ x (x = (⟦ y / t ⟧ C) ∧ z ∊ (⟦ y / t ⟧ B))} $ by ceqt_refl
+
+cgr_intro
+---------
+l1: $ G ⇒ isset a $ by isset_var
+l2: $ G ⇒ isset b $ by isset_var
+l3: $ G ⇒ isset ⟨ a , b ⟩ $ by opair_set [l1, l2]
+l4: $ G , k = ⟨ a , b ⟩ ⇒ k = ⟨ a , b ⟩ $ by ax
+l5: $ G , k = ⟨ a , b ⟩ ⇒ b = (⟦ x / a ⟧ B) $ by weaken [#1]
+l6: $ G , k = ⟨ a , b ⟩ ⇒ k = ⟨ a , b ⟩ ∧ b = (⟦ x / a ⟧ B) $ by and_intro [l4, l5]
+l7: $ G , k = ⟨ a , b ⟩ ⇒ ∃ y (k = ⟨ a , y ⟩ ∧ y = (⟦ x / a ⟧ B)) $ by ex_intro (x := $ y $, t := $ b $, p := $ k = ⟨ a , y ⟩ ∧ y = (⟦ x / a ⟧ B) $) [l6]
+l8: $ G , k = ⟨ a , b ⟩ ⇒ ∃ x ∃ y (k = ⟨ x , y ⟩ ∧ y = B) $ by ex_intro (x := $ x $, t := $ a $, p := $ ∃ y (k = ⟨ x , y ⟩ ∧ y = B) $) [l7]
+l9: $ G , k = ⟨ a , b ⟩ ⇒ k ∊ {z | ∃ x ∃ y (z = ⟨ x , y ⟩ ∧ y = B)} $ by cab_intro (x := $ z $, t := $ k $, p := $ ∃ x ∃ y (z = ⟨ x , y ⟩ ∧ y = B) $) [l8]
+l10: $ G , k = ⟨ a , b ⟩ ⇒ ⟨ a , b ⟩ ∈ cgr x B $ by wcel_intro [l4, l9]
+l11: $ G ⇒ ⟨ a , b ⟩ ∈ cgr x B $ by isset_elim [l3, l10]
+
+cgr_elim
+--------
+l1: $ G , k = ⟨ a , b ⟩ , k ∊ cgr x B ⇒ k ∊ {z | ∃ x ∃ y (z = ⟨ x , y ⟩ ∧ y = B)} $ by ax
+l2: $ G , k = ⟨ a , b ⟩ , k ∊ cgr x B ⇒ ∃ x ∃ y (k = ⟨ x , y ⟩ ∧ y = B) $ by cab_elim (x := $ z $, t := $ k $, p := $ ∃ x ∃ y (z = ⟨ x , y ⟩ ∧ y = B) $) [l1]
+l3: $ (∃ x ∃ y (k = ⟨ x , y ⟩ ∧ y = B)) ⟺ ∃ u ∃ y (k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B)) $ by ex_alpha
+l4: $ G , k = ⟨ a , b ⟩ , k ∊ cgr x B ⇒ (∃ x ∃ y (k = ⟨ x , y ⟩ ∧ y = B)) ↔ ∃ u ∃ y (k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B)) $ by weaken [l3]
+l5: $ G , k = ⟨ a , b ⟩ , k ∊ cgr x B ⇒ ∃ u ∃ y (k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B)) $ by bi_elim_l [l4, l2]
+l6: $ G , k = ⟨ a , b ⟩ , k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) $ by ax
+l7: $ G , k = ⟨ a , b ⟩ , k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ k = ⟨ u , y ⟩ $ by and_elim_l [l6]
+l8: $ G , k = ⟨ a , b ⟩ , k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ y = (⟦ x / u ⟧ B) $ by and_elim_r [l6]
+l9: $ G , k = ⟨ a , b ⟩ , k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ k = ⟨ a , b ⟩ $ by ax
+l10: $ G , k = ⟨ a , b ⟩ , k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ ⟨ a , b ⟩ = k $ by eq_sym [l9]
+l11: $ G , k = ⟨ a , b ⟩ , k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ ⟨ a , b ⟩ = ⟨ u , y ⟩ $ by eq_trans [l10, l7]
+l12: $ G , k = ⟨ a , b ⟩ , k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ a = u $ by opair_inj_l [l11]
+l13: $ G , k = ⟨ a , b ⟩ , k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ b = y $ by opair_inj_r [l11]
+l14: $ G , k = ⟨ a , b ⟩ , k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ u = a $ by eq_sym [l12]
+l15: $ G , k = ⟨ a , b ⟩ , k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ (⟦ x / u ⟧ B) = (⟦ x / a ⟧ B) $ by sb_c_eq [l14]
+l16: $ G , k = ⟨ a , b ⟩ , k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ b = (⟦ x / u ⟧ B) $ by eq_trans [l13, l8]
+l17: $ G , k = ⟨ a , b ⟩ , k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ b = (⟦ x / a ⟧ B) $ by eq_trans [l16, l15]
+l18: $ G , k = ⟨ a , b ⟩ , ∃ y (k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B)) ⇒ ∃ y (k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B)) $ by ax
+l19: $ G , k = ⟨ a , b ⟩ , ∃ y (k = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B)) ⇒ b = (⟦ x / a ⟧ B) $ by ex_elim [l18, l17]
+l20: $ G , k = ⟨ a , b ⟩ , k ∊ cgr x B ⇒ b = (⟦ x / a ⟧ B) $ by ex_elim [l5, l19]
+l21: $ G ⇒ b = (⟦ x / a ⟧ B) $ by wcel_elim [#1, l20]
+
+cgr_functional
+--------------
+l1: $ G , ⟨ i , j ⟩ ∈ cgr x B , ⟨ i , c ⟩ ∈ cgr x B ⇒ ⟨ i , j ⟩ ∈ cgr x B $ by ax
+l2: $ G , ⟨ i , j ⟩ ∈ cgr x B , ⟨ i , c ⟩ ∈ cgr x B ⇒ ⟨ i , c ⟩ ∈ cgr x B $ by ax
+l3: $ G , ⟨ i , j ⟩ ∈ cgr x B , ⟨ i , c ⟩ ∈ cgr x B ⇒ j = (⟦ x / i ⟧ B) $ by cgr_elim [l1]
+l4: $ G , ⟨ i , j ⟩ ∈ cgr x B , ⟨ i , c ⟩ ∈ cgr x B ⇒ c = (⟦ x / i ⟧ B) $ by cgr_elim [l2]
+l5: $ G , ⟨ i , j ⟩ ∈ cgr x B , ⟨ i , c ⟩ ∈ cgr x B ⇒ (⟦ x / i ⟧ B) = c $ by eq_sym [l4]
+l6: $ G , ⟨ i , j ⟩ ∈ cgr x B , ⟨ i , c ⟩ ∈ cgr x B ⇒ j = c $ by eq_trans [l3, l5]
+l7: $ G ⇒ functional (cgr x B) $ by functional_intro [l6]
+
+cgr_rel
+-------
+l1: $ z ∊ cgr x B ⇒ z ∊ {w | ∃ x ∃ y (w = ⟨ x , y ⟩ ∧ y = B)} $ by ax
+l2: $ z ∊ cgr x B ⇒ ∃ x ∃ y (z = ⟨ x , y ⟩ ∧ y = B) $ by cab_elim (x := $ w $, t := $ z $, p := $ ∃ x ∃ y (w = ⟨ x , y ⟩ ∧ y = B) $) [l1]
+l3: $ z = ⟨ x , y ⟩ ∧ y = B ⇒ z = ⟨ x , y ⟩ ∧ y = B $ by ax
+l4: $ z = ⟨ x , y ⟩ ∧ y = B ⇒ z = ⟨ x , y ⟩ $ by and_elim_l [l3]
+l5: $ z = ⟨ x , y ⟩ ∧ y = B ⇒ ∃ j (z = ⟨ x , j ⟩) $ by ex_intro (x := $ j $, t := $ y $, p := $ z = ⟨ x , j ⟩ $) [l4]
+l6: $ z = ⟨ x , y ⟩ ∧ y = B ⇒ ∃ i ∃ j (z = ⟨ i , j ⟩) $ by ex_intro (x := $ i $, t := $ x $, p := $ ∃ j (z = ⟨ i , j ⟩) $) [l5]
+l7: $ ∃ y (z = ⟨ x , y ⟩ ∧ y = B) ⇒ ∃ y (z = ⟨ x , y ⟩ ∧ y = B) $ by ax
+l8: $ ∃ y (z = ⟨ x , y ⟩ ∧ y = B) ⇒ ∃ i ∃ j (z = ⟨ i , j ⟩) $ by ex_elim [l7, l6]
+l9: $ z ∊ cgr x B ⇒ ∃ i ∃ j (z = ⟨ i , j ⟩) $ by ex_elim [l2, l8]
+l10: $ G , z ∊ cgr x B ⇒ ∃ i ∃ j (z = ⟨ i , j ⟩) $ by weaken [l9]
+l11: $ G ⇒ rel (cgr x B) $ by rel_intro [l10]
+
+cgr_cdm
+-------
+l1: $ G , j = (⟦ x / a ⟧ B) ⇒ j = (⟦ x / a ⟧ B) $ by ax
+l2: $ G , j = (⟦ x / a ⟧ B) ⇒ ⟨ a , j ⟩ ∈ cgr x B $ by cgr_intro [l1]
+l3: $ G , j = (⟦ x / a ⟧ B) ⇒ a ∊ cdm (cgr x B) $ by cdm_intro [l2]
+l4: $ G ⇒ a ∊ cdm (cgr x B) $ by isset_elim [#1, l3]
+
+cgr_cdm_elim
+------------
+l1: $ G , ⟨ a , j ⟩ ∈ cgr x B ⇒ ⟨ a , j ⟩ ∈ cgr x B $ by ax
+l2: $ G , ⟨ a , j ⟩ ∈ cgr x B ⇒ j = (⟦ x / a ⟧ B) $ by cgr_elim [l1]
+l3: $ G , ⟨ a , j ⟩ ∈ cgr x B ⇒ isset (⟦ x / a ⟧ B) $ by isset_intro [l2]
+l4: $ G ⇒ isset (⟦ x / a ⟧ B) $ by cdm_elim [#1, l3]
+
+fv_cgr
+------
+l1: $ G , j = (⟦ x / a ⟧ B) ⇒ j = (⟦ x / a ⟧ B) $ by ax
+l2: $ G , j = (⟦ x / a ⟧ B) ⇒ ⟨ a , j ⟩ ∈ cgr x B $ by cgr_intro [l1]
+l3: $ G , j = (⟦ x / a ⟧ B) ⇒ functional (cgr x B) $ by cgr_functional
+l4: $ G , j = (⟦ x / a ⟧ B) ⇒ fv (cgr x B) a = j $ by fv_val [l3, l2]
+l5: $ G , j = (⟦ x / a ⟧ B) ⇒ fv (cgr x B) a = (⟦ x / a ⟧ B) $ by eq_trans [l4, l1]
+l6: $ G ⇒ fv (cgr x B) a = (⟦ x / a ⟧ B) $ by isset_elim [#1, l5]
+
+cgr_id_fn_into
+--------------
+l1: $ G ⇒ functional (cgr x x) $ by cgr_functional
+l2: $ G ⇒ functional (cres (cgr x x) A) $ by functional_cres [l1]
+l3: $ G , w ∊ A ⇒ w = w $ by eq_refl
+l4: $ G , w ∊ A ⇒ ⟨ w , w ⟩ ∈ cgr x x $ by cgr_intro (x := $ x $, B := $ x $, a := $ w $, b := $ w $) [l3]
+l5: $ G , w ∊ A ⇒ w ∊ A $ by ax
+l6: $ G , w ∊ A ⇒ ⟨ w , w ⟩ ∈ cres (cgr x x) A $ by cres_intro [l5, l4]
+l7: $ G , w ∊ A ⇒ A ⊆ B $ by weaken [#1]
+l8: $ G , w ∊ A ⇒ w ∊ B $ by subset_elim [l7, l5]
+l9: $ G , w ∊ A ⇒ w ∊ B ∧ ⟨ w , w ⟩ ∈ cres (cgr x x) A $ by and_intro [l8, l6]
+l10: $ G , w ∊ A ⇒ ∃ v (v ∊ B ∧ ⟨ w , v ⟩ ∈ cres (cgr x x) A) $ by ex_intro (x := $ v $, t := $ w $, p := $ v ∊ B ∧ ⟨ w , v ⟩ ∈ cres (cgr x x) A $) [l9]
+l11: $ G ⇒ fn_into (cres (cgr x x) A) A B $ by fn_into_intro [l2, l10]
+
+img_cgr_id
+----------
+l1: $ G , w ∊ img (cgr x x) A ⇒ w ∊ img (cgr x x) A $ by ax
+l2: $ G , w ∊ img (cgr x x) A , i ∊ A , ⟨ i , w ⟩ ∈ cgr x x ⇒ ⟨ i , w ⟩ ∈ cgr x x $ by ax
+l3: $ G , w ∊ img (cgr x x) A , i ∊ A , ⟨ i , w ⟩ ∈ cgr x x ⇒ w = i $ by cgr_elim [l2]
+l4: $ G , w ∊ img (cgr x x) A , i ∊ A , ⟨ i , w ⟩ ∈ cgr x x ⇒ i = w $ by eq_sym [l3]
+l5: $ G , w ∊ img (cgr x x) A , i ∊ A , ⟨ i , w ⟩ ∈ cgr x x ⇒ i ∊ A $ by ax
+l6: $ G , w ∊ img (cgr x x) A , i ∊ A , ⟨ i , w ⟩ ∈ cgr x x ⇒ w ∊ A $ by welc_eq_set [l4, l5]
+l7: $ G , w ∊ img (cgr x x) A ⇒ w ∊ A $ by img_elim [l1, l6]
+l8: $ G , w ∊ A ⇒ w = w $ by eq_refl
+l9: $ G , w ∊ A ⇒ ⟨ w , w ⟩ ∈ cgr x x $ by cgr_intro (x := $ x $, B := $ x $, a := $ w $, b := $ w $) [l8]
+l10: $ G , w ∊ A ⇒ w ∊ A $ by ax
+l11: $ G , w ∊ A ⇒ w ∊ img (cgr x x) A $ by img_intro [l10, l9]
+l12: $ G ⇒ img (cgr x x) A = A $ by eq_intro [l7, l11]
+
+cgr_congr
+---------
+l0: $ y ≐ y $ by ceqt_refl
+l1: $ (y = B) ⟺ (y = D) $ by ceq_congr [l0, #1]
+l2: $ (z = ⟨ x , y ⟩) ⟺ (z = ⟨ x , y ⟩) $ by iff_refl
+l3: $ (z = ⟨ x , y ⟩ ∧ y = B) ⟺ (z = ⟨ x , y ⟩ ∧ y = D) $ by and_congr [l2, l1]
+l4: $ (∃ y (z = ⟨ x , y ⟩ ∧ y = B)) ⟺ (∃ y (z = ⟨ x , y ⟩ ∧ y = D)) $ by ex_congr [l3]
+l5: $ (∃ x ∃ y (z = ⟨ x , y ⟩ ∧ y = B)) ⟺ (∃ x ∃ y (z = ⟨ x , y ⟩ ∧ y = D)) $ by ex_congr [l4]
+l6: $ {z | ∃ x ∃ y (z = ⟨ x , y ⟩ ∧ y = B)} ≐ {z | ∃ x ∃ y (z = ⟨ x , y ⟩ ∧ y = D)} $ by cab_congr [l5]
+
+lemma x1_cgr_sub {x: set} (G: hyps) (B D: class x) (w: set):
+  $ G ⇒ ∀ x (B = D) $ > $ G , w ∊ cgr x B ⇒ w ∊ cgr x D $
+----
+l1: $ G , w ∊ cgr x B ⇒ w ∊ cgr x B $ by ax
+l2: $ G , w ∊ cgr x B ⇒ ∃ x ∃ y (w = ⟨ x , y ⟩ ∧ y = B) $ by cab_elim (x := $ z $, t := $ w $, p := $ ∃ x ∃ y (z = ⟨ x , y ⟩ ∧ y = B) $) [l1]
+l3: $ (∃ x ∃ y (w = ⟨ x , y ⟩ ∧ y = B)) ⟺ ∃ u ∃ y (w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B)) $ by ex_alpha
+l4: $ G , w ∊ cgr x B ⇒ (∃ x ∃ y (w = ⟨ x , y ⟩ ∧ y = B)) ↔ ∃ u ∃ y (w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B)) $ by weaken [l3]
+l5: $ G , w ∊ cgr x B ⇒ ∃ u ∃ y (w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B)) $ by bi_elim_l [l4, l2]
+l6: $ G , w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) $ by ax
+l7: $ G , w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ w = ⟨ u , y ⟩ $ by and_elim_l [l6]
+l8: $ G , w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ y = (⟦ x / u ⟧ B) $ by and_elim_r [l6]
+l9: $ G , w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ ∀ x (B = D) $ by weaken [#1]
+l10: $ G , w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ (⟦ x / u ⟧ B) = (⟦ x / u ⟧ D) $ by all_elim (t := $ u $) [l9]
+l11: $ G , w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ y = (⟦ x / u ⟧ D) $ by eq_trans [l8, l10]
+l12: $ G , w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ D) $ by and_intro [l7, l11]
+l13: $ G , w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ ∃ y (w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ D)) $ by ex_intro (x := $ y $, t := $ y $, p := $ w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ D) $) [l12]
+l14: $ G , w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ ∃ x ∃ y (w = ⟨ x , y ⟩ ∧ y = D) $ by ex_intro (x := $ x $, t := $ u $, p := $ ∃ y (w = ⟨ x , y ⟩ ∧ y = D) $) [l13]
+l15: $ G , w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B) ⇒ w ∊ cgr x D $ by cab_intro (x := $ z $, t := $ w $, p := $ ∃ x ∃ y (z = ⟨ x , y ⟩ ∧ y = D) $) [l14]
+l16: $ G , ∃ y (w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B)) ⇒ ∃ y (w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B)) $ by ax
+l17: $ G , ∃ y (w = ⟨ u , y ⟩ ∧ y = (⟦ x / u ⟧ B)) ⇒ w ∊ cgr x D $ by ex_elim [l16, l15]
+l18: $ G , w ∊ cgr x B ⇒ w ∊ cgr x D $ by ex_elim [l5, l17]
+
+cgr_eq
+------
+l1: $ G , w ∊ cgr x B ⇒ w ∊ cgr x D $ by x1_cgr_sub [#1]
+l2: $ G ⇒ B = D $ by all_elim (t := $ x $) [#1]
+l3: $ G ⇒ D = B $ by eq_sym [l2]
+l4: $ G ⇒ ∀ x (D = B) $ by all_intro [l3]
+l5: $ G , w ∊ cgr x D ⇒ w ∊ cgr x B $ by x1_cgr_sub [l4]
+l6: $ G ⇒ cgr x B = cgr x D $ by eq_intro [l1, l5]
+
+sb_c_cgr
+--------
+l1: $ (⟦ y / t ⟧ {z | ∃ x ∃ w (z = ⟨ x , w ⟩ ∧ w = B)}) ≐ {z | ∃ x ∃ w (z = ⟨ x , w ⟩ ∧ w = (⟦ y / t ⟧ B))} $ by ceqt_refl
+
+cres_cdm_self
+-------------
+l1: $ G ⇒ rel (cres R (cdm R)) $ by cres_rel
+l2: $ G , ⟨ i , j ⟩ ∈ cres R (cdm R) ⇒ ⟨ i , j ⟩ ∈ cres R (cdm R) $ by ax
+l3: $ G , ⟨ i , j ⟩ ∈ cres R (cdm R) ⇒ i ∊ cdm R ∧ ⟨ i , j ⟩ ∈ R $ by cres_elim [l2]
+l4: $ G , ⟨ i , j ⟩ ∈ cres R (cdm R) ⇒ ⟨ i , j ⟩ ∈ R $ by and_elim_r [l3]
+l5: $ G , ⟨ i , j ⟩ ∈ R ⇒ ⟨ i , j ⟩ ∈ R $ by ax
+l6: $ G , ⟨ i , j ⟩ ∈ R ⇒ i ∊ cdm R $ by cdm_intro [l5]
+l7: $ G , ⟨ i , j ⟩ ∈ R ⇒ ⟨ i , j ⟩ ∈ cres R (cdm R) $ by cres_intro [l6, l5]
+l8: $ G ⇒ cres R (cdm R) = R $ by rel_eq_intro [l1, #1, l4, l7]
+
+cres_subset_cdm
+---------------
+l1: $ G ⇒ rel (cres R A) $ by cres_rel
+l2: $ G , ⟨ i , j ⟩ ∈ cres R A ⇒ ⟨ i , j ⟩ ∈ cres R A $ by ax
+l3: $ G , ⟨ i , j ⟩ ∈ cres R A ⇒ i ∊ A ∧ ⟨ i , j ⟩ ∈ R $ by cres_elim [l2]
+l4: $ G , ⟨ i , j ⟩ ∈ cres R A ⇒ ⟨ i , j ⟩ ∈ R $ by and_elim_r [l3]
+l5: $ G , ⟨ i , j ⟩ ∈ R ⇒ ⟨ i , j ⟩ ∈ R $ by ax
+l6: $ G , ⟨ i , j ⟩ ∈ R ⇒ i ∊ cdm R $ by cdm_intro [l5]
+l7: $ G , ⟨ i , j ⟩ ∈ R ⇒ cdm R ⊆ A $ by weaken [#2]
+l8: $ G , ⟨ i , j ⟩ ∈ R ⇒ i ∊ A $ by subset_elim [l7, l6]
+l9: $ G , ⟨ i , j ⟩ ∈ R ⇒ ⟨ i , j ⟩ ∈ cres R A $ by cres_intro [l8, l5]
+l10: $ G ⇒ cres R A = R $ by rel_eq_intro [l1, #1, l4, l9]
+
+cres_cres
+---------
+l1: $ G ⇒ rel (cres (cres R B) A) $ by cres_rel
+l2: $ G ⇒ rel (cres R A) $ by cres_rel
+l3: $ G , ⟨ i , j ⟩ ∈ cres (cres R B) A ⇒ ⟨ i , j ⟩ ∈ cres (cres R B) A $ by ax
+l4: $ G , ⟨ i , j ⟩ ∈ cres (cres R B) A ⇒ i ∊ A ∧ ⟨ i , j ⟩ ∈ cres R B $ by cres_elim [l3]
+l5: $ G , ⟨ i , j ⟩ ∈ cres (cres R B) A ⇒ i ∊ A $ by and_elim_l [l4]
+l6: $ G , ⟨ i , j ⟩ ∈ cres (cres R B) A ⇒ ⟨ i , j ⟩ ∈ cres R B $ by and_elim_r [l4]
+l7: $ G , ⟨ i , j ⟩ ∈ cres (cres R B) A ⇒ i ∊ B ∧ ⟨ i , j ⟩ ∈ R $ by cres_elim [l6]
+l8: $ G , ⟨ i , j ⟩ ∈ cres (cres R B) A ⇒ ⟨ i , j ⟩ ∈ R $ by and_elim_r [l7]
+l9: $ G , ⟨ i , j ⟩ ∈ cres (cres R B) A ⇒ ⟨ i , j ⟩ ∈ cres R A $ by cres_intro [l5, l8]
+l10: $ G , ⟨ i , j ⟩ ∈ cres R A ⇒ ⟨ i , j ⟩ ∈ cres R A $ by ax
+l11: $ G , ⟨ i , j ⟩ ∈ cres R A ⇒ i ∊ A ∧ ⟨ i , j ⟩ ∈ R $ by cres_elim [l10]
+l12: $ G , ⟨ i , j ⟩ ∈ cres R A ⇒ i ∊ A $ by and_elim_l [l11]
+l13: $ G , ⟨ i , j ⟩ ∈ cres R A ⇒ ⟨ i , j ⟩ ∈ R $ by and_elim_r [l11]
+l14: $ G , ⟨ i , j ⟩ ∈ cres R A ⇒ A ⊆ B $ by weaken [#1]
+l15: $ G , ⟨ i , j ⟩ ∈ cres R A ⇒ i ∊ B $ by subset_elim [l14, l12]
+l16: $ G , ⟨ i , j ⟩ ∈ cres R A ⇒ ⟨ i , j ⟩ ∈ cres R B $ by cres_intro [l15, l13]
+l17: $ G , ⟨ i , j ⟩ ∈ cres R A ⇒ ⟨ i , j ⟩ ∈ cres (cres R B) A $ by cres_intro [l12, l16]
+l18: $ G ⇒ cres (cres R B) A = cres R A $ by rel_eq_intro [l1, l2, l9, l17]
+
+cres_mono
+---------
+l1: $ G , w ∊ cres R A ⇒ w ∊ cres R A $ by ax
+l2: $ G , w ∊ cres R A ⇒ rel (cres R A) $ by cres_rel
+l3: $ G , w ∊ cres R A , w = ⟨ i , j ⟩ ⇒ w = ⟨ i , j ⟩ $ by ax
+l4: $ G , w ∊ cres R A , w = ⟨ i , j ⟩ ⇒ w ∊ cres R A $ by ax
+l5: $ G , w ∊ cres R A , w = ⟨ i , j ⟩ ⇒ w ∈ cres R A $ by welc_wcel [l4]
+l6: $ G , w ∊ cres R A , w = ⟨ i , j ⟩ ⇒ ⟨ i , j ⟩ ∈ cres R A $ by wcel_eq_l [l3, l5]
+l7: $ G , w ∊ cres R A , w = ⟨ i , j ⟩ ⇒ i ∊ A ∧ ⟨ i , j ⟩ ∈ R $ by cres_elim [l6]
+l8: $ G , w ∊ cres R A , w = ⟨ i , j ⟩ ⇒ i ∊ A $ by and_elim_l [l7]
+l9: $ G , w ∊ cres R A , w = ⟨ i , j ⟩ ⇒ ⟨ i , j ⟩ ∈ R $ by and_elim_r [l7]
+l10: $ G , w ∊ cres R A , w = ⟨ i , j ⟩ ⇒ R ⊆ S $ by weaken [#1]
+l11: $ G , w ∊ cres R A , w = ⟨ i , j ⟩ ⇒ ⟨ i , j ⟩ ∈ S $ by wcel_subset [l10, l9]
+l12: $ G , w ∊ cres R A , w = ⟨ i , j ⟩ ⇒ ⟨ i , j ⟩ ∈ cres S A $ by cres_intro [l8, l11]
+l13: $ G , w ∊ cres R A , w = ⟨ i , j ⟩ ⇒ ⟨ i , j ⟩ = w $ by eq_sym [l3]
+l14: $ G , w ∊ cres R A , w = ⟨ i , j ⟩ ⇒ w ∈ cres S A $ by wcel_eq_l [l13, l12]
+l15: $ G , w ∊ cres R A , w = ⟨ i , j ⟩ ⇒ w ∊ cres S A $ by wcel_welc [l14]
+l16: $ G , w ∊ cres R A ⇒ w ∊ cres S A $ by rel_elim [l2, l1, l15]
+l17: $ G ⇒ cres R A ⊆ cres S A $ by subset_intro [l16]
+
+cres_cun_csn_self
+-----------------
+l1: $ G ⇒ rel (cres (R ∪ csn ⟨ a , c ⟩) a) $ by cres_rel
+l2: $ G , ⟨ i , j ⟩ ∈ cres (R ∪ csn ⟨ a , c ⟩) a ⇒ ⟨ i , j ⟩ ∈ cres (R ∪ csn ⟨ a , c ⟩) a $ by ax
+l3: $ G , ⟨ i , j ⟩ ∈ cres (R ∪ csn ⟨ a , c ⟩) a ⇒ i ∊ a ∧ ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ $ by cres_elim [l2]
+l4: $ G , ⟨ i , j ⟩ ∈ cres (R ∪ csn ⟨ a , c ⟩) a ⇒ i ∊ a $ by and_elim_l [l3]
+l5: $ G , ⟨ i , j ⟩ ∈ cres (R ∪ csn ⟨ a , c ⟩) a ⇒ ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ $ by and_elim_r [l3]
+l6: $ G , ⟨ i , j ⟩ ∈ cres (R ∪ csn ⟨ a , c ⟩) a ⇒ ⟨ i , j ⟩ ∈ R ∨ (i = a ∧ j = c) $ by cun_csn_opair_elim [l5]
+l7: $ G , ⟨ i , j ⟩ ∈ cres (R ∪ csn ⟨ a , c ⟩) a , ⟨ i , j ⟩ ∈ R ⇒ ⟨ i , j ⟩ ∈ R $ by ax
+l8: $ G , ⟨ i , j ⟩ ∈ cres (R ∪ csn ⟨ a , c ⟩) a , i = a ∧ j = c ⇒ i = a ∧ j = c $ by ax
+l9: $ G , ⟨ i , j ⟩ ∈ cres (R ∪ csn ⟨ a , c ⟩) a , i = a ∧ j = c ⇒ i = a $ by and_elim_l [l8]
+l10: $ G , ⟨ i , j ⟩ ∈ cres (R ∪ csn ⟨ a , c ⟩) a , i = a ∧ j = c ⇒ i ∊ a $ by weaken [l4]
+l11: $ G , ⟨ i , j ⟩ ∈ cres (R ∪ csn ⟨ a , c ⟩) a , i = a ∧ j = c ⇒ a ∊ a $ by welc_eq_set [l9, l10]
+l12: $ G , ⟨ i , j ⟩ ∈ cres (R ∪ csn ⟨ a , c ⟩) a , i = a ∧ j = c ⇒ ⊥ $ by notin_self [l11]
+l13: $ G , ⟨ i , j ⟩ ∈ cres (R ∪ csn ⟨ a , c ⟩) a , i = a ∧ j = c ⇒ ⟨ i , j ⟩ ∈ R $ by bot_elim [l12]
+l14: $ G , ⟨ i , j ⟩ ∈ cres (R ∪ csn ⟨ a , c ⟩) a ⇒ ⟨ i , j ⟩ ∈ R $ by or_elim [l6, l7, l13]
+l15: $ G , ⟨ i , j ⟩ ∈ R ⇒ ⟨ i , j ⟩ ∈ R $ by ax
+l16: $ G , ⟨ i , j ⟩ ∈ R ⇒ i ∊ cdm R $ by cdm_intro [l15]
+l17: $ G , ⟨ i , j ⟩ ∈ R ⇒ cdm R = a $ by weaken [#2]
+l18: $ G , ⟨ i , j ⟩ ∈ R ⇒ i ∊ a $ by welc_eq [l17, l16]
+l19: $ G , ⟨ i , j ⟩ ∈ R ⇒ R ⊆ R ∪ csn ⟨ a , c ⟩ $ by cun_subset_l
+l20: $ G , ⟨ i , j ⟩ ∈ R ⇒ ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ $ by wcel_subset [l19, l15]
+l21: $ G , ⟨ i , j ⟩ ∈ R ⇒ ⟨ i , j ⟩ ∈ cres (R ∪ csn ⟨ a , c ⟩) a $ by cres_intro [l18, l20]
+l22: $ G ⇒ cres (R ∪ csn ⟨ a , c ⟩) a = R $ by rel_eq_intro [l1, #1, l14, l21]
+
+cdm_cun_csn
+-----------
+l1: $ G , w ∊ cdm (R ∪ csn ⟨ a , c ⟩) ⇒ w ∊ cdm (R ∪ csn ⟨ a , c ⟩) $ by ax
+l2: $ G , w ∊ cdm (R ∪ csn ⟨ a , c ⟩) , ⟨ w , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ ⇒ ⟨ w , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ $ by ax
+l3: $ G , w ∊ cdm (R ∪ csn ⟨ a , c ⟩) , ⟨ w , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ ⇒ ⟨ w , j ⟩ ∈ R ∨ (w = a ∧ j = c) $ by cun_csn_opair_elim [l2]
+l4: $ G , w ∊ cdm (R ∪ csn ⟨ a , c ⟩) , ⟨ w , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ w , j ⟩ ∈ R ⇒ ⟨ w , j ⟩ ∈ R $ by ax
+l5: $ G , w ∊ cdm (R ∪ csn ⟨ a , c ⟩) , ⟨ w , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ w , j ⟩ ∈ R ⇒ w ∊ cdm R $ by cdm_intro [l4]
+l6: $ G , w ∊ cdm (R ∪ csn ⟨ a , c ⟩) , ⟨ w , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ w , j ⟩ ∈ R ⇒ w ∊ cdm R ∪ csn a $ by cun_intro_l [l5]
+l7: $ G , w ∊ cdm (R ∪ csn ⟨ a , c ⟩) , ⟨ w , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , w = a ∧ j = c ⇒ w = a ∧ j = c $ by ax
+l8: $ G , w ∊ cdm (R ∪ csn ⟨ a , c ⟩) , ⟨ w , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , w = a ∧ j = c ⇒ w = a $ by and_elim_l [l7]
+l9: $ G , w ∊ cdm (R ∪ csn ⟨ a , c ⟩) , ⟨ w , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , w = a ∧ j = c ⇒ w ∊ csn a $ by csn_intro [l8]
+l10: $ G , w ∊ cdm (R ∪ csn ⟨ a , c ⟩) , ⟨ w , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , w = a ∧ j = c ⇒ w ∊ cdm R ∪ csn a $ by cun_intro_r [l9]
+l11: $ G , w ∊ cdm (R ∪ csn ⟨ a , c ⟩) , ⟨ w , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ ⇒ w ∊ cdm R ∪ csn a $ by or_elim [l3, l6, l10]
+l12: $ G , w ∊ cdm (R ∪ csn ⟨ a , c ⟩) ⇒ w ∊ cdm R ∪ csn a $ by cdm_elim [l1, l11]
+l13: $ G , w ∊ cdm R ∪ csn a ⇒ w ∊ cdm R ∪ csn a $ by ax
+l14: $ G , w ∊ cdm R ∪ csn a ⇒ w ∊ cdm R ∨ w ∊ csn a $ by cun_elim [l13]
+l15: $ G , w ∊ cdm R ∪ csn a , w ∊ cdm R ⇒ w ∊ cdm R $ by ax
+l16: $ G , w ∊ cdm R ∪ csn a , w ∊ cdm R , ⟨ w , j ⟩ ∈ R ⇒ ⟨ w , j ⟩ ∈ R $ by ax
+l17: $ G , w ∊ cdm R ∪ csn a , w ∊ cdm R , ⟨ w , j ⟩ ∈ R ⇒ R ⊆ R ∪ csn ⟨ a , c ⟩ $ by cun_subset_l
+l18: $ G , w ∊ cdm R ∪ csn a , w ∊ cdm R , ⟨ w , j ⟩ ∈ R ⇒ ⟨ w , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ $ by wcel_subset [l17, l16]
+l19: $ G , w ∊ cdm R ∪ csn a , w ∊ cdm R , ⟨ w , j ⟩ ∈ R ⇒ w ∊ cdm (R ∪ csn ⟨ a , c ⟩) $ by cdm_intro [l18]
+l20: $ G , w ∊ cdm R ∪ csn a , w ∊ cdm R ⇒ w ∊ cdm (R ∪ csn ⟨ a , c ⟩) $ by cdm_elim [l15, l19]
+l21: $ G , w ∊ cdm R ∪ csn a , w ∊ csn a ⇒ w ∊ csn a $ by ax
+l22: $ G , w ∊ cdm R ∪ csn a , w ∊ csn a ⇒ w = a $ by csn_elim [l21]
+l23: $ G , w ∊ cdm R ∪ csn a , w ∊ csn a ⇒ a = w $ by eq_sym [l22]
+l24: $ G , w ∊ cdm R ∪ csn a , w ∊ csn a ⇒ ⟨ a , c ⟩ ∈ R ∪ csn ⟨ a , c ⟩ $ by cun_csn_opair_intro
+l25: $ G , w ∊ cdm R ∪ csn a , w ∊ csn a ⇒ a ∊ cdm (R ∪ csn ⟨ a , c ⟩) $ by cdm_intro [l24]
+l26: $ G , w ∊ cdm R ∪ csn a , w ∊ csn a ⇒ w ∊ cdm (R ∪ csn ⟨ a , c ⟩) $ by welc_eq_set [l23, l25]
+l27: $ G , w ∊ cdm R ∪ csn a ⇒ w ∊ cdm (R ∪ csn ⟨ a , c ⟩) $ by or_elim [l14, l20, l26]
+l28: $ G ⇒ cdm (R ∪ csn ⟨ a , c ⟩) = cdm R ∪ csn a $ by eq_intro [l12, l27]
+
+fv_cun_csn_self
+---------------
+l1: $ G , z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) ⇒ z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) $ by ax
+l2: $ G , z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) , w ∊ ap (R ∪ csn ⟨ a , c ⟩) a , z ∊ w ⇒ w ∊ ap (R ∪ csn ⟨ a , c ⟩) a $ by ax
+l3: $ G , z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) , w ∊ ap (R ∪ csn ⟨ a , c ⟩) a , z ∊ w ⇒ ⟨ a , w ⟩ ∈ R ∪ csn ⟨ a , c ⟩ $ by ap_elim [l2]
+l4: $ G , z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) , w ∊ ap (R ∪ csn ⟨ a , c ⟩) a , z ∊ w ⇒ ⟨ a , w ⟩ ∈ R ∨ (a = a ∧ w = c) $ by cun_csn_opair_elim [l3]
+l5: $ G , z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) , w ∊ ap (R ∪ csn ⟨ a , c ⟩) a , z ∊ w , ⟨ a , w ⟩ ∈ R ⇒ ⟨ a , w ⟩ ∈ R $ by ax
+l6: $ G , z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) , w ∊ ap (R ∪ csn ⟨ a , c ⟩) a , z ∊ w , ⟨ a , w ⟩ ∈ R ⇒ a ∊ cdm R $ by cdm_intro [l5]
+l7: $ G , z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) , w ∊ ap (R ∪ csn ⟨ a , c ⟩) a , z ∊ w , ⟨ a , w ⟩ ∈ R ⇒ cdm R = a $ by weaken [#2]
+l8: $ G , z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) , w ∊ ap (R ∪ csn ⟨ a , c ⟩) a , z ∊ w , ⟨ a , w ⟩ ∈ R ⇒ a ∊ a $ by welc_eq [l7, l6]
+l9: $ G , z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) , w ∊ ap (R ∪ csn ⟨ a , c ⟩) a , z ∊ w , ⟨ a , w ⟩ ∈ R ⇒ ⊥ $ by notin_self [l8]
+l10: $ G , z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) , w ∊ ap (R ∪ csn ⟨ a , c ⟩) a , z ∊ w , ⟨ a , w ⟩ ∈ R ⇒ w = c $ by bot_elim [l9]
+l11: $ G , z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) , w ∊ ap (R ∪ csn ⟨ a , c ⟩) a , z ∊ w , a = a ∧ w = c ⇒ a = a ∧ w = c $ by ax
+l12: $ G , z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) , w ∊ ap (R ∪ csn ⟨ a , c ⟩) a , z ∊ w , a = a ∧ w = c ⇒ w = c $ by and_elim_r [l11]
+l13: $ G , z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) , w ∊ ap (R ∪ csn ⟨ a , c ⟩) a , z ∊ w ⇒ w = c $ by or_elim [l4, l10, l12]
+l14: $ G , z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) , w ∊ ap (R ∪ csn ⟨ a , c ⟩) a , z ∊ w ⇒ z ∊ w $ by ax
+l15: $ G , z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) , w ∊ ap (R ∪ csn ⟨ a , c ⟩) a , z ∊ w ⇒ z ∊ c $ by welc_eq [l13, l14]
+l16: $ G , z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) ⇒ z ∊ c $ by cuni_elim [l1, l15]
+l17: $ G , z ∊ c ⇒ z ∊ c $ by ax
+l18: $ G , z ∊ c ⇒ ⟨ a , c ⟩ ∈ R ∪ csn ⟨ a , c ⟩ $ by cun_csn_opair_intro
+l19: $ G , z ∊ c ⇒ c ∊ ap (R ∪ csn ⟨ a , c ⟩) a $ by ap_intro [l18]
+l20: $ G , z ∊ c ⇒ z ∊ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) $ by cuni_intro [l17, l19]
+l21: $ G ⇒ ⋃ (ap (R ∪ csn ⟨ a , c ⟩) a) = c $ by eq_intro [l16, l20]
+
+lemma d3_notin_cdm (G: hyps) (R: class) (a i j: set):
+  $ G ⇒ ¬ a ∊ cdm R $ > $ G ⇒ ⟨ i , j ⟩ ∈ R $ > $ G ⇒ i = a $ > $ G ⇒ ⊥ $
+----
+l1: $ G ⇒ i ∊ cdm R $ by cdm_intro [#2]
+l2: $ G ⇒ a ∊ cdm R $ by welc_eq_set [#3, l1]
+l3: $ G ⇒ ⊥ $ by not_elim [#1, l2]
+
+lemma d3_csn_side (G: hyps) (R: class) (a c i j: set):
+  $ G ⇒ ¬ a ∊ cdm R $ > $ G ⇒ ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ $ > $ G ⇒ i = a $ > $ G ⇒ j = c $
+----
+l1: $ G ⇒ ⟨ i , j ⟩ ∈ R ∨ (i = a ∧ j = c) $ by cun_csn_opair_elim [#2]
+l2: $ G , ⟨ i , j ⟩ ∈ R ⇒ ⟨ i , j ⟩ ∈ R $ by ax
+l3: $ G , ⟨ i , j ⟩ ∈ R ⇒ ¬ a ∊ cdm R $ by weaken [#1]
+l4: $ G , ⟨ i , j ⟩ ∈ R ⇒ i = a $ by weaken [#3]
+l5: $ G , ⟨ i , j ⟩ ∈ R ⇒ ⊥ $ by d3_notin_cdm [l3, l2, l4]
+l6: $ G , ⟨ i , j ⟩ ∈ R ⇒ j = c $ by bot_elim [l5]
+l7: $ G , i = a ∧ j = c ⇒ i = a ∧ j = c $ by ax
+l8: $ G , i = a ∧ j = c ⇒ j = c $ by and_elim_r [l7]
+l9: $ G ⇒ j = c $ by or_elim [l1, l6, l8]
+
+functional_cun_csn
+------------------
+l1: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ ⇒ ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ $ by ax
+l2: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ ⇒ ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ $ by ax
+l3: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ ⇒ ⟨ i , j ⟩ ∈ R ∨ (i = a ∧ j = c) $ by cun_csn_opair_elim [l1]
+l4: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ ⇒ ⟨ i , k ⟩ ∈ R ∨ (i = a ∧ k = c) $ by cun_csn_opair_elim [l2]
+l5: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , j ⟩ ∈ R ⇒ ⟨ i , k ⟩ ∈ R ∨ (i = a ∧ k = c) $ by weaken [l4]
+l6: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , j ⟩ ∈ R , ⟨ i , k ⟩ ∈ R ⇒ ⟨ i , k ⟩ ∈ R $ by ax
+l7: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , j ⟩ ∈ R , ⟨ i , k ⟩ ∈ R ⇒ ⟨ i , j ⟩ ∈ R $ by ax
+l8: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , j ⟩ ∈ R , ⟨ i , k ⟩ ∈ R ⇒ functional R $ by weaken [#1]
+l9: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , j ⟩ ∈ R , ⟨ i , k ⟩ ∈ R ⇒ j = k $ by functional_elim [l8, l7, l6]
+l10: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , j ⟩ ∈ R , i = a ∧ k = c ⇒ i = a ∧ k = c $ by ax
+l11: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , j ⟩ ∈ R , i = a ∧ k = c ⇒ i = a $ by and_elim_l [l10]
+l12: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , j ⟩ ∈ R , i = a ∧ k = c ⇒ ⟨ i , j ⟩ ∈ R $ by ax
+l13: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , j ⟩ ∈ R , i = a ∧ k = c ⇒ ¬ a ∊ cdm R $ by weaken [#2]
+l14: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , j ⟩ ∈ R , i = a ∧ k = c ⇒ ⊥ $ by d3_notin_cdm [l13, l12, l11]
+l15: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , j ⟩ ∈ R , i = a ∧ k = c ⇒ j = k $ by bot_elim [l14]
+l16: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , j ⟩ ∈ R ⇒ j = k $ by or_elim [l5, l9, l15]
+l17: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , i = a ∧ j = c ⇒ i = a ∧ j = c $ by ax
+l18: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , i = a ∧ j = c ⇒ i = a $ by and_elim_l [l17]
+l19: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , i = a ∧ j = c ⇒ j = c $ by and_elim_r [l17]
+l20: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , i = a ∧ j = c ⇒ ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ $ by ax
+l21: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , i = a ∧ j = c ⇒ ¬ a ∊ cdm R $ by weaken [#2]
+l22: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , i = a ∧ j = c ⇒ k = c $ by d3_csn_side [l21, l20, l18]
+l23: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , i = a ∧ j = c ⇒ c = k $ by eq_sym [l22]
+l24: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , i = a ∧ j = c ⇒ j = k $ by eq_trans [l19, l23]
+l25: $ G , ⟨ i , j ⟩ ∈ R ∪ csn ⟨ a , c ⟩ , ⟨ i , k ⟩ ∈ R ∪ csn ⟨ a , c ⟩ ⇒ j = k $ by or_elim [l3, l16, l24]
+l26: $ G ⇒ functional (R ∪ csn ⟨ a , c ⟩) $ by functional_intro [l25]
+
+rel_cun_csn
+-----------
+l1: $ G , z ∊ R ∪ csn ⟨ a , c ⟩ ⇒ z ∊ R ∪ csn ⟨ a , c ⟩ $ by ax
+l2: $ G , z ∊ R ∪ csn ⟨ a , c ⟩ ⇒ z ∊ R ∨ z ∊ csn ⟨ a , c ⟩ $ by cun_elim [l1]
+l3: $ G , z ∊ R ∪ csn ⟨ a , c ⟩ , z ∊ R ⇒ z ∊ R $ by ax
+l4: $ G , z ∊ R ∪ csn ⟨ a , c ⟩ , z ∊ R ⇒ rel R $ by weaken [#1]
+l5: $ G , z ∊ R ∪ csn ⟨ a , c ⟩ , z ∊ R , z = ⟨ u , v ⟩ ⇒ z = ⟨ u , v ⟩ $ by ax
+l6: $ G , z ∊ R ∪ csn ⟨ a , c ⟩ , z ∊ R , z = ⟨ u , v ⟩ ⇒ ∃ j (z = ⟨ u , j ⟩) $ by ex_intro (x := $ j $, t := $ v $, p := $ z = ⟨ u , j ⟩ $) [l5]
+l7: $ G , z ∊ R ∪ csn ⟨ a , c ⟩ , z ∊ R , z = ⟨ u , v ⟩ ⇒ ∃ i ∃ j (z = ⟨ i , j ⟩) $ by ex_intro (x := $ i $, t := $ u $, p := $ ∃ j (z = ⟨ i , j ⟩) $) [l6]
+l8: $ G , z ∊ R ∪ csn ⟨ a , c ⟩ , z ∊ R ⇒ ∃ i ∃ j (z = ⟨ i , j ⟩) $ by rel_elim [l4, l3, l7]
+l9: $ G , z ∊ R ∪ csn ⟨ a , c ⟩ , z ∊ csn ⟨ a , c ⟩ ⇒ z ∊ csn ⟨ a , c ⟩ $ by ax
+l10: $ G , z ∊ R ∪ csn ⟨ a , c ⟩ , z ∊ csn ⟨ a , c ⟩ ⇒ z = ⟨ a , c ⟩ $ by csn_elim [l9]
+l11: $ G , z ∊ R ∪ csn ⟨ a , c ⟩ , z ∊ csn ⟨ a , c ⟩ ⇒ ∃ j (z = ⟨ a , j ⟩) $ by ex_intro (x := $ j $, t := $ c $, p := $ z = ⟨ a , j ⟩ $) [l10]
+l12: $ G , z ∊ R ∪ csn ⟨ a , c ⟩ , z ∊ csn ⟨ a , c ⟩ ⇒ ∃ i ∃ j (z = ⟨ i , j ⟩) $ by ex_intro (x := $ i $, t := $ a $, p := $ ∃ j (z = ⟨ i , j ⟩) $) [l11]
+l13: $ G , z ∊ R ∪ csn ⟨ a , c ⟩ ⇒ ∃ i ∃ j (z = ⟨ i , j ⟩) $ by or_elim [l2, l8, l12]
+l14: $ G ⇒ rel (R ∪ csn ⟨ a , c ⟩) $ by rel_intro [l13]
+
+lemma d3_wcel_cuni_elim {r: set} (G: hyps) (H: hyps) (A C: class) (d: fml):
+  $ G ⇒ C ∈ ⋃ A $ > $ H , r ∊ A , C ∈ r ⇒ d $ > $ G , H ⇒ d $
+----
+l1: $ H , w = C , w ∊ ⋃ A ⇒ w ∊ ⋃ A $ by ax
+l2: $ H , w = C , r ∊ A , w ∊ r ⇒ w = C $ by ax
+l3: $ H , w = C , r ∊ A , w ∊ r ⇒ w ∊ r $ by ax
+l4: $ H , w = C , r ∊ A , w ∊ r ⇒ C ∈ r $ by wcel_intro [l2, l3]
+l5: $ H , w = C , r ∊ A , w ∊ r ⇒ d $ by cut [l4, #2]
+l6: $ H , w = C , w ∊ ⋃ A ⇒ d $ by cuni_elim [l1, l5]
+l7: $ G , H ⇒ d $ by wcel_elim [#1, l6]
+
+functional_cuni_chain
+---------------------
+l1: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g ⇒ ∀ x ∀ y (x ∊ A ∧ y ∊ A → x ⊆ y ∨ y ⊆ x) $ by weaken [#2]
+l2: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g ⇒ ∀ y (f ∊ A ∧ y ∊ A → f ⊆ y ∨ y ⊆ f) $ by all_elim [l1]
+l3: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g ⇒ f ∊ A ∧ g ∊ A → f ⊆ g ∨ g ⊆ f $ by all_elim [l2]
+l4: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g ⇒ f ∊ A $ by ax
+l5: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g ⇒ g ∊ A $ by ax
+l6: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g ⇒ f ∊ A ∧ g ∊ A $ by and_intro [l4, l5]
+l7: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g ⇒ f ⊆ g ∨ g ⊆ f $ by imp_elim [l3, l6]
+l8: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g ⇒ ∀ x (x ∊ A → functional x) $ by weaken [#1]
+l9: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g ⇒ f ∊ A → functional f $ by all_elim [l8]
+l10: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g ⇒ g ∊ A → functional g $ by all_elim [l8]
+l11: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g ⇒ functional f $ by imp_elim [l9, l4]
+l12: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g ⇒ functional g $ by imp_elim [l10, l5]
+l13: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g , f ⊆ g ⇒ f ⊆ g $ by ax
+l14: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g , f ⊆ g ⇒ ⟨ i , j ⟩ ∈ f $ by ax
+l15: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g , f ⊆ g ⇒ ⟨ i , j ⟩ ∈ g $ by wcel_subset [l13, l14]
+l16: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g , f ⊆ g ⇒ ⟨ i , k ⟩ ∈ g $ by ax
+l17: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g , f ⊆ g ⇒ functional g $ by weaken [l12]
+l18: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g , f ⊆ g ⇒ j = k $ by functional_elim [l17, l15, l16]
+l19: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g , g ⊆ f ⇒ g ⊆ f $ by ax
+l20: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g , g ⊆ f ⇒ ⟨ i , k ⟩ ∈ g $ by ax
+l21: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g , g ⊆ f ⇒ ⟨ i , k ⟩ ∈ f $ by wcel_subset [l19, l20]
+l22: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g , g ⊆ f ⇒ ⟨ i , j ⟩ ∈ f $ by ax
+l23: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g , g ⊆ f ⇒ functional f $ by weaken [l11]
+l24: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g , g ⊆ f ⇒ j = k $ by functional_elim [l23, l22, l21]
+l25: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , g ∊ A , ⟨ i , k ⟩ ∈ g ⇒ j = k $ by or_elim [l7, l18, l24]
+l26: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , ⟨ i , k ⟩ ∈ ⋃ A ⇒ ⟨ i , k ⟩ ∈ ⋃ A $ by ax
+l27: $ G , f ∊ A , ⟨ i , j ⟩ ∈ f , ⟨ i , k ⟩ ∈ ⋃ A ⇒ j = k $ by d3_wcel_cuni_elim [l26, l25]
+l28: $ G , ⟨ i , j ⟩ ∈ ⋃ A , ⟨ i , k ⟩ ∈ ⋃ A ⇒ ⟨ i , j ⟩ ∈ ⋃ A $ by ax
+l29: $ G , ⟨ i , j ⟩ ∈ ⋃ A , ⟨ i , k ⟩ ∈ ⋃ A ⇒ j = k $ by d3_wcel_cuni_elim [l28, l27]
+l30: $ G ⇒ functional (⋃ A) $ by functional_intro [l29]
+
+rel_cuni
+--------
+l1: $ G , z ∊ ⋃ A ⇒ z ∊ ⋃ A $ by ax
+l2: $ G , z ∊ ⋃ A , f ∊ A , z ∊ f ⇒ ∀ x (x ∊ A → rel x) $ by weaken [#1]
+l3: $ G , z ∊ ⋃ A , f ∊ A , z ∊ f ⇒ f ∊ A → rel f $ by all_elim [l2]
+l4: $ G , z ∊ ⋃ A , f ∊ A , z ∊ f ⇒ f ∊ A $ by ax
+l5: $ G , z ∊ ⋃ A , f ∊ A , z ∊ f ⇒ rel f $ by imp_elim [l3, l4]
+l6: $ G , z ∊ ⋃ A , f ∊ A , z ∊ f ⇒ z ∊ f $ by ax
+l7: $ G , z ∊ ⋃ A , f ∊ A , z ∊ f , z = ⟨ u , v ⟩ ⇒ z = ⟨ u , v ⟩ $ by ax
+l8: $ G , z ∊ ⋃ A , f ∊ A , z ∊ f , z = ⟨ u , v ⟩ ⇒ ∃ j (z = ⟨ u , j ⟩) $ by ex_intro (x := $ j $, t := $ v $, p := $ z = ⟨ u , j ⟩ $) [l7]
+l9: $ G , z ∊ ⋃ A , f ∊ A , z ∊ f , z = ⟨ u , v ⟩ ⇒ ∃ i ∃ j (z = ⟨ i , j ⟩) $ by ex_intro (x := $ i $, t := $ u $, p := $ ∃ j (z = ⟨ i , j ⟩) $) [l8]
+l10: $ G , z ∊ ⋃ A , f ∊ A , z ∊ f ⇒ ∃ i ∃ j (z = ⟨ i , j ⟩) $ by rel_elim [l5, l6, l9]
+l11: $ G , z ∊ ⋃ A ⇒ ∃ i ∃ j (z = ⟨ i , j ⟩) $ by cuni_elim [l1, l10]
+l12: $ G ⇒ rel (⋃ A) $ by rel_intro [l11]
+
+cdm_cuni
+--------
+l1: $ G , w ∊ cdm (⋃ A) ⇒ w ∊ cdm (⋃ A) $ by ax
+l2: $ G , w ∊ cdm (⋃ A) , ⟨ w , j ⟩ ∈ ⋃ A ⇒ ⟨ w , j ⟩ ∈ ⋃ A $ by ax
+l3: $ G , w ∊ cdm (⋃ A) , ⟨ w , j ⟩ ∈ ⋃ A , f ∊ A , ⟨ w , j ⟩ ∈ f ⇒ ⟨ w , j ⟩ ∈ f $ by ax
+l4: $ G , w ∊ cdm (⋃ A) , ⟨ w , j ⟩ ∈ ⋃ A , f ∊ A , ⟨ w , j ⟩ ∈ f ⇒ w ∊ cdm f $ by cdm_intro [l3]
+l5: $ G , w ∊ cdm (⋃ A) , ⟨ w , j ⟩ ∈ ⋃ A , f ∊ A , ⟨ w , j ⟩ ∈ f ⇒ isset f $ by isset_var
+l6: $ G , w ∊ cdm (⋃ A) , ⟨ w , j ⟩ ∈ ⋃ A , f ∊ A , ⟨ w , j ⟩ ∈ f ⇒ isset (cdm f) $ by cdm_set [l5]
+l7: $ G , w ∊ cdm (⋃ A) , ⟨ w , j ⟩ ∈ ⋃ A , f ∊ A , ⟨ w , j ⟩ ∈ f , g = cdm f ⇒ g = cdm f $ by ax
+l8: $ G , w ∊ cdm (⋃ A) , ⟨ w , j ⟩ ∈ ⋃ A , f ∊ A , ⟨ w , j ⟩ ∈ f , g = cdm f ⇒ ⟨ f , g ⟩ ∈ cgr x (cdm x) $ by cgr_intro (x := $ x $, B := $ cdm x $, a := $ f $, b := $ g $) [l7]
+l9: $ G , w ∊ cdm (⋃ A) , ⟨ w , j ⟩ ∈ ⋃ A , f ∊ A , ⟨ w , j ⟩ ∈ f , g = cdm f ⇒ f ∊ A $ by ax
+l10: $ G , w ∊ cdm (⋃ A) , ⟨ w , j ⟩ ∈ ⋃ A , f ∊ A , ⟨ w , j ⟩ ∈ f , g = cdm f ⇒ g ∊ img (cgr x (cdm x)) A $ by img_intro [l9, l8]
+l11: $ G , w ∊ cdm (⋃ A) , ⟨ w , j ⟩ ∈ ⋃ A , f ∊ A , ⟨ w , j ⟩ ∈ f , g = cdm f ⇒ cdm f = g $ by eq_sym [l7]
+l12: $ G , w ∊ cdm (⋃ A) , ⟨ w , j ⟩ ∈ ⋃ A , f ∊ A , ⟨ w , j ⟩ ∈ f , g = cdm f ⇒ w ∊ cdm f $ by weaken [l4]
+l13: $ G , w ∊ cdm (⋃ A) , ⟨ w , j ⟩ ∈ ⋃ A , f ∊ A , ⟨ w , j ⟩ ∈ f , g = cdm f ⇒ w ∊ g $ by welc_eq [l11, l12]
+l14: $ G , w ∊ cdm (⋃ A) , ⟨ w , j ⟩ ∈ ⋃ A , f ∊ A , ⟨ w , j ⟩ ∈ f , g = cdm f ⇒ w ∊ ⋃ (img (cgr x (cdm x)) A) $ by cuni_intro [l13, l10]
+l15: $ G , w ∊ cdm (⋃ A) , ⟨ w , j ⟩ ∈ ⋃ A , f ∊ A , ⟨ w , j ⟩ ∈ f ⇒ w ∊ ⋃ (img (cgr x (cdm x)) A) $ by isset_elim [l6, l14]
+l16: $ G , w ∊ cdm (⋃ A) , ⟨ w , j ⟩ ∈ ⋃ A ⇒ w ∊ ⋃ (img (cgr x (cdm x)) A) $ by d3_wcel_cuni_elim [l2, l15]
+l17: $ G , w ∊ cdm (⋃ A) ⇒ w ∊ ⋃ (img (cgr x (cdm x)) A) $ by cdm_elim [l1, l16]
+l18: $ G , w ∊ ⋃ (img (cgr x (cdm x)) A) ⇒ w ∊ ⋃ (img (cgr x (cdm x)) A) $ by ax
+l19: $ G , w ∊ ⋃ (img (cgr x (cdm x)) A) , g ∊ img (cgr x (cdm x)) A , w ∊ g ⇒ g ∊ img (cgr x (cdm x)) A $ by ax
+l20: $ G , w ∊ ⋃ (img (cgr x (cdm x)) A) , g ∊ img (cgr x (cdm x)) A , w ∊ g , f ∊ A , ⟨ f , g ⟩ ∈ cgr x (cdm x) ⇒ ⟨ f , g ⟩ ∈ cgr x (cdm x) $ by ax
+l21: $ G , w ∊ ⋃ (img (cgr x (cdm x)) A) , g ∊ img (cgr x (cdm x)) A , w ∊ g , f ∊ A , ⟨ f , g ⟩ ∈ cgr x (cdm x) ⇒ g = cdm f $ by cgr_elim (x := $ x $, B := $ cdm x $, a := $ f $, b := $ g $) [l20]
+l22: $ G , w ∊ ⋃ (img (cgr x (cdm x)) A) , g ∊ img (cgr x (cdm x)) A , w ∊ g , f ∊ A , ⟨ f , g ⟩ ∈ cgr x (cdm x) ⇒ w ∊ g $ by ax
+l23: $ G , w ∊ ⋃ (img (cgr x (cdm x)) A) , g ∊ img (cgr x (cdm x)) A , w ∊ g , f ∊ A , ⟨ f , g ⟩ ∈ cgr x (cdm x) ⇒ w ∊ cdm f $ by welc_eq [l21, l22]
+l24: $ G , w ∊ ⋃ (img (cgr x (cdm x)) A) , g ∊ img (cgr x (cdm x)) A , w ∊ g , f ∊ A , ⟨ f , g ⟩ ∈ cgr x (cdm x) , ⟨ w , j ⟩ ∈ f ⇒ ⟨ w , j ⟩ ∈ f $ by ax
+l25: $ G , w ∊ ⋃ (img (cgr x (cdm x)) A) , g ∊ img (cgr x (cdm x)) A , w ∊ g , f ∊ A , ⟨ f , g ⟩ ∈ cgr x (cdm x) , ⟨ w , j ⟩ ∈ f ⇒ f ∊ A $ by ax
+l26: $ G , w ∊ ⋃ (img (cgr x (cdm x)) A) , g ∊ img (cgr x (cdm x)) A , w ∊ g , f ∊ A , ⟨ f , g ⟩ ∈ cgr x (cdm x) , ⟨ w , j ⟩ ∈ f ⇒ f ⊆ ⋃ A $ by cuni_subset [l25]
+l27: $ G , w ∊ ⋃ (img (cgr x (cdm x)) A) , g ∊ img (cgr x (cdm x)) A , w ∊ g , f ∊ A , ⟨ f , g ⟩ ∈ cgr x (cdm x) , ⟨ w , j ⟩ ∈ f ⇒ ⟨ w , j ⟩ ∈ ⋃ A $ by wcel_subset [l26, l24]
+l28: $ G , w ∊ ⋃ (img (cgr x (cdm x)) A) , g ∊ img (cgr x (cdm x)) A , w ∊ g , f ∊ A , ⟨ f , g ⟩ ∈ cgr x (cdm x) , ⟨ w , j ⟩ ∈ f ⇒ w ∊ cdm (⋃ A) $ by cdm_intro [l27]
+l29: $ G , w ∊ ⋃ (img (cgr x (cdm x)) A) , g ∊ img (cgr x (cdm x)) A , w ∊ g , f ∊ A , ⟨ f , g ⟩ ∈ cgr x (cdm x) ⇒ w ∊ cdm (⋃ A) $ by cdm_elim [l23, l28]
+l30: $ G , w ∊ ⋃ (img (cgr x (cdm x)) A) , g ∊ img (cgr x (cdm x)) A , w ∊ g ⇒ w ∊ cdm (⋃ A) $ by img_elim [l19, l29]
+l31: $ G , w ∊ ⋃ (img (cgr x (cdm x)) A) ⇒ w ∊ cdm (⋃ A) $ by cuni_elim [l18, l30]
+l32: $ G ⇒ cdm (⋃ A) = ⋃ (img (cgr x (cdm x)) A) $ by eq_intro [l17, l31]
+
+fv_subset
+---------
+l1: $ G , ⟨ a , j ⟩ ∈ F ⇒ ⟨ a , j ⟩ ∈ F $ by ax
+l2: $ G , ⟨ a , j ⟩ ∈ F ⇒ functional H $ by weaken [#1]
+l3: $ G , ⟨ a , j ⟩ ∈ F ⇒ F ⊆ H $ by weaken [#2]
+l4: $ G , ⟨ a , j ⟩ ∈ F ⇒ functional F $ by functional_subset [l2, l3]
+l5: $ G , ⟨ a , j ⟩ ∈ F ⇒ fv F a = j $ by fv_val [l4, l1]
+l6: $ G , ⟨ a , j ⟩ ∈ F ⇒ ⟨ a , j ⟩ ∈ H $ by wcel_subset [l3, l1]
+l7: $ G , ⟨ a , j ⟩ ∈ F ⇒ fv H a = j $ by fv_val [l2, l6]
+l8: $ G , ⟨ a , j ⟩ ∈ F ⇒ j = fv H a $ by eq_sym [l7]
+l9: $ G , ⟨ a , j ⟩ ∈ F ⇒ fv F a = fv H a $ by eq_trans [l5, l8]
+l10: $ G ⇒ fv F a = fv H a $ by cdm_elim [#3, l9]
+
+fv_cres
+-------
+l1: $ G ⇒ a ∊ cdm F ∨ ¬ a ∊ cdm F $ by excluded_middle
+l2: $ G , a ∊ cdm F ⇒ a ∊ cdm F $ by ax
+l3: $ G , a ∊ cdm F , ⟨ a , j ⟩ ∈ F ⇒ ⟨ a , j ⟩ ∈ F $ by ax
+l4: $ G , a ∊ cdm F , ⟨ a , j ⟩ ∈ F ⇒ a ∊ A $ by weaken [#2]
+l5: $ G , a ∊ cdm F , ⟨ a , j ⟩ ∈ F ⇒ ⟨ a , j ⟩ ∈ cres F A $ by cres_intro [l4, l3]
+l6: $ G , a ∊ cdm F , ⟨ a , j ⟩ ∈ F ⇒ a ∊ cdm (cres F A) $ by cdm_intro [l5]
+l7: $ G , a ∊ cdm F ⇒ a ∊ cdm (cres F A) $ by cdm_elim [l2, l6]
+l8: $ G , a ∊ cdm F ⇒ functional F $ by weaken [#1]
+l9: $ G , a ∊ cdm F ⇒ cres F A ⊆ F $ by cres_subset
+l10: $ G , a ∊ cdm F ⇒ fv (cres F A) a = fv F a $ by fv_subset [l8, l9, l7]
+l11: $ G , ¬ a ∊ cdm F , a ∊ cdm F ⇒ a ∊ cdm F $ by ax
+l12: $ G , ¬ a ∊ cdm F , a ∊ cdm F ⇒ ¬ a ∊ cdm F $ by ax
+l13: $ G , ¬ a ∊ cdm F , a ∊ cdm F ⇒ ⊥ $ by not_elim [l12, l11]
+l14: $ G , ¬ a ∊ cdm F ⇒ a ∊ cdm F → ⊥ $ by imp_intro [l13]
+l15: $ G , ¬ a ∊ cdm F ⇒ fv F a = ∅ $ by fv_empty [l14]
+l16: $ G , ¬ a ∊ cdm F , a ∊ cdm (cres F A) ⇒ a ∊ cdm (cres F A) $ by ax
+l17: $ G , ¬ a ∊ cdm F , a ∊ cdm (cres F A) ⇒ cres F A ⊆ F $ by cres_subset
+l18: $ G , ¬ a ∊ cdm F , a ∊ cdm (cres F A) ⇒ cdm (cres F A) ⊆ cdm F $ by cdm_mono [l17]
+l19: $ G , ¬ a ∊ cdm F , a ∊ cdm (cres F A) ⇒ a ∊ cdm F $ by subset_elim [l18, l16]
+l20: $ G , ¬ a ∊ cdm F , a ∊ cdm (cres F A) ⇒ ¬ a ∊ cdm F $ by ax
+l21: $ G , ¬ a ∊ cdm F , a ∊ cdm (cres F A) ⇒ ⊥ $ by not_elim [l20, l19]
+l22: $ G , ¬ a ∊ cdm F ⇒ a ∊ cdm (cres F A) → ⊥ $ by imp_intro [l21]
+l23: $ G , ¬ a ∊ cdm F ⇒ fv (cres F A) a = ∅ $ by fv_empty [l22]
+l24: $ G , ¬ a ∊ cdm F ⇒ ∅ = fv F a $ by eq_sym [l15]
+l25: $ G , ¬ a ∊ cdm F ⇒ fv (cres F A) a = fv F a $ by eq_trans [l23, l24]
+l26: $ G ⇒ fv (cres F A) a = fv F a $ by or_elim [l1, l10, l25]
+
+trapx_elim
+----------
+l1: $ G ⇒ ∃ a (ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k))) $ by cab_elim (x := $ u $, t := $ g $, p := $ ∃ a (ord a ∧ functional u ∧ rel u ∧ cdm u = a ∧ ∀ k (k ∊ a → fv u k = fv F (cres u k))) $) [#1]
+l2: $ H , ord a , functional g , rel g , cdm g = a ⇒ (∀ k (k ∊ a → fv g k = fv F (cres g k))) → c $ by imp_intro [#2]
+l3: $ H , ord a , functional g , rel g ⇒ cdm g = a → (∀ k (k ∊ a → fv g k = fv F (cres g k))) → c $ by imp_intro [l2]
+l4: $ H , ord a , functional g ⇒ rel g → cdm g = a → (∀ k (k ∊ a → fv g k = fv F (cres g k))) → c $ by imp_intro [l3]
+l5: $ H , ord a ⇒ functional g → rel g → cdm g = a → (∀ k (k ∊ a → fv g k = fv F (cres g k))) → c $ by imp_intro [l4]
+l6: $ H ⇒ ord a → functional g → rel g → cdm g = a → (∀ k (k ∊ a → fv g k = fv F (cres g k))) → c $ by imp_intro [l5]
+l7: $ H , ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ ord a → functional g → rel g → cdm g = a → (∀ k (k ∊ a → fv g k = fv F (cres g k))) → c $ by weaken [l6]
+l8: $ H , ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) $ by ax
+l9: $ H , ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ ord a $ by and_elim_l [l8]
+l10: $ H , ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) $ by and_elim_r [l8]
+l11: $ H , ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ functional g $ by and_elim_l [l10]
+l12: $ H , ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) $ by and_elim_r [l10]
+l13: $ H , ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ rel g $ by and_elim_l [l12]
+l14: $ H , ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) $ by and_elim_r [l12]
+l15: $ H , ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ cdm g = a $ by and_elim_l [l14]
+l16: $ H , ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ ∀ k (k ∊ a → fv g k = fv F (cres g k)) $ by and_elim_r [l14]
+l17: $ H , ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ functional g → rel g → cdm g = a → (∀ k (k ∊ a → fv g k = fv F (cres g k))) → c $ by imp_elim [l7, l9]
+l18: $ H , ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ rel g → cdm g = a → (∀ k (k ∊ a → fv g k = fv F (cres g k))) → c $ by imp_elim [l17, l11]
+l19: $ H , ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ cdm g = a → (∀ k (k ∊ a → fv g k = fv F (cres g k))) → c $ by imp_elim [l18, l13]
+l20: $ H , ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ (∀ k (k ∊ a → fv g k = fv F (cres g k))) → c $ by imp_elim [l19, l15]
+l21: $ H , ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ c $ by imp_elim [l20, l16]
+l22: $ G , H ⇒ c $ by ex_elim [l1, l21]
+
+trapx_intro
+-----------
+m1: $ G , z = B ⇒ z = B $ by ax
+m2: $ G , z = B ⇒ B = z $ by eq_sym [m1]
+m3a: $ G , z = B ⇒ functional B $ by weaken [#3]
+m3: $ G , z = B ⇒ functional z $ by functional_eq [m2, m3a]
+m4a: $ G , z = B ⇒ rel B $ by weaken [#4]
+m4: $ G , z = B ⇒ rel z $ by rel_eq [m2, m4a]
+m5: $ G , z = B ⇒ cdm z = cdm B $ by cdm_eq [m1]
+m6: $ G , z = B ⇒ cdm B = a $ by weaken [#5]
+m7: $ G , z = B ⇒ cdm z = a $ by eq_trans [m5, m6]
+m8: $ G , z = B , v ∊ a ⇒ ∀ k (k ∊ a → fv B k = fv F (cres B k)) $ by weaken [#6]
+m9: $ G , z = B , v ∊ a ⇒ v ∊ a → fv B v = fv F (cres B v) $ by all_elim [m8]
+m10: $ G , z = B , v ∊ a ⇒ v ∊ a $ by ax
+m11: $ G , z = B , v ∊ a ⇒ fv B v = fv F (cres B v) $ by imp_elim [m9, m10]
+m12: $ G , z = B , v ∊ a ⇒ z = B $ by ax
+m13: $ G , z = B , v ∊ a ⇒ v = v $ by eq_refl
+m14: $ G , z = B , v ∊ a ⇒ fv z v = fv B v $ by fv_eq [m12, m13]
+m15: $ G , z = B , v ∊ a ⇒ B = z $ by eq_sym [m12]
+m16: $ G , z = B , v ∊ a ⇒ cres B v = cres z v $ by cres_eq [m15, m13]
+m17: $ G , z = B , v ∊ a ⇒ F = F $ by eq_refl
+m18: $ G , z = B , v ∊ a ⇒ fv F (cres B v) = fv F (cres z v) $ by fv_eq [m17, m16]
+m19: $ G , z = B , v ∊ a ⇒ fv z v = fv F (cres B v) $ by eq_trans [m14, m11]
+m20: $ G , z = B , v ∊ a ⇒ fv z v = fv F (cres z v) $ by eq_trans [m19, m18]
+m21: $ G , z = B ⇒ v ∊ a → fv z v = fv F (cres z v) $ by imp_intro [m20]
+m22: $ G , z = B ⇒ ∀ v (v ∊ a → fv z v = fv F (cres z v)) $ by all_intro [m21]
+m23: $ G , z = B ⇒ cdm z = a ∧ ∀ v (v ∊ a → fv z v = fv F (cres z v)) $ by and_intro [m7, m22]
+m24: $ G , z = B ⇒ rel z ∧ cdm z = a ∧ ∀ v (v ∊ a → fv z v = fv F (cres z v)) $ by and_intro [m4, m23]
+m25: $ G , z = B ⇒ functional z ∧ rel z ∧ cdm z = a ∧ ∀ v (v ∊ a → fv z v = fv F (cres z v)) $ by and_intro [m3, m24]
+m26a: $ G , z = B ⇒ ord a $ by weaken [#2]
+m26: $ G , z = B ⇒ ord a ∧ functional z ∧ rel z ∧ cdm z = a ∧ ∀ v (v ∊ a → fv z v = fv F (cres z v)) $ by and_intro [m26a, m25]
+m27: $ G , z = B ⇒ ∃ w (ord w ∧ functional z ∧ rel z ∧ cdm z = w ∧ ∀ v (v ∊ w → fv z v = fv F (cres z v))) $ by ex_intro (t := $ a $) [m26]
+m28: $ G , z = B ⇒ z ∊ {u | ∃ w (ord w ∧ functional u ∧ rel u ∧ cdm u = w ∧ ∀ v (v ∊ w → fv u v = fv F (cres u v)))} $ by cab_intro (x := $ u $, t := $ z $, p := $ ∃ w (ord w ∧ functional u ∧ rel u ∧ cdm u = w ∧ ∀ v (v ∊ w → fv u v = fv F (cres u v))) $) [m27]
+m29: $ G , z = B ⇒ z ∊ trapx F $ by weaken [m28]
+m30: $ G , z = B ⇒ B ∈ trapx F $ by wcel_intro [m1, m29]
+m31: $ G ⇒ B ∈ trapx F $ by isset_elim [#1, m30]
+
+trapx_functional
+----------------
+l1: $ G , ord i , functional g , rel g , cdm g = i , ∀ j (j ∊ i → fv g j = fv F (cres g j)) ⇒ functional g $ by ax
+l2: $ G ⇒ functional g $ by trapx_elim [#1, l1]
+
+trapx_rel
+---------
+l1: $ G , ord i , functional g , rel g , cdm g = i , ∀ j (j ∊ i → fv g j = fv F (cres g j)) ⇒ rel g $ by ax
+l2: $ G ⇒ rel g $ by trapx_elim [#1, l1]
+
+trapx_ord
+---------
+l1: $ G , ord i , functional g , rel g , cdm g = i , ∀ j (j ∊ i → fv g j = fv F (cres g j)) ⇒ ord i $ by ax
+l2: $ G , ord i , functional g , rel g , cdm g = i , ∀ j (j ∊ i → fv g j = fv F (cres g j)) ⇒ cdm g = i $ by ax
+l3: $ G , ord i , functional g , rel g , cdm g = i , ∀ j (j ∊ i → fv g j = fv F (cres g j)) ⇒ i = cdm g $ by eq_sym [l2]
+l4: $ G , ord i , functional g , rel g , cdm g = i , ∀ j (j ∊ i → fv g j = fv F (cres g j)) ⇒ ord (cdm g) $ by ord_eq [l3, l1]
+l5: $ G ⇒ ord (cdm g) $ by trapx_elim [#1, l4]
+
+trapx_step
+----------
+l1: $ G , ord i , functional g , rel g , cdm g = i , ∀ j (j ∊ i → fv g j = fv F (cres g j)) ⇒ ∀ j (j ∊ i → fv g j = fv F (cres g j)) $ by ax
+l2: $ G , ord i , functional g , rel g , cdm g = i , ∀ j (j ∊ i → fv g j = fv F (cres g j)) ⇒ a ∊ i → fv g a = fv F (cres g a) $ by all_elim [l1]
+l3: $ G , ord i , functional g , rel g , cdm g = i , ∀ j (j ∊ i → fv g j = fv F (cres g j)) ⇒ a ∊ cdm g $ by weaken [#2]
+l4: $ G , ord i , functional g , rel g , cdm g = i , ∀ j (j ∊ i → fv g j = fv F (cres g j)) ⇒ cdm g = i $ by ax
+l5: $ G , ord i , functional g , rel g , cdm g = i , ∀ j (j ∊ i → fv g j = fv F (cres g j)) ⇒ a ∊ i $ by welc_eq [l4, l3]
+l6: $ G , ord i , functional g , rel g , cdm g = i , ∀ j (j ∊ i → fv g j = fv F (cres g j)) ⇒ fv g a = fv F (cres g a) $ by imp_elim [l2, l5]
+l7: $ G ⇒ fv g a = fv F (cres g a) $ by trapx_elim [#1, l6]
+
+lemma d4_pair_move (G: hyps) (R S: class) (u v: set):
+  $ G ⇒ functional R $ > $ G ⇒ functional S $ > $ G ⇒ ⟨ u , v ⟩ ∈ R $ > $ G ⇒ u ∊ cdm S $ >
+  $ G ⇒ fv R u = fv S u $ > $ G ⇒ ⟨ u , v ⟩ ∈ S $
+----
+l1: $ G ⇒ fv R u = v $ by fv_val [#1, #3]
+l2: $ G ⇒ fv S u = fv R u $ by eq_sym [#5]
+l3: $ G ⇒ fv S u = v $ by eq_trans [l2, l1]
+l4: $ G ⇒ ⟨ u , fv S u ⟩ ∈ S $ by fv_in [#2, #4]
+l5: $ G ⇒ u = u $ by eq_refl
+l6: $ G ⇒ ⟨ u , fv S u ⟩ = ⟨ u , v ⟩ $ by opair_eq [l5, l3]
+l7: $ G ⇒ ⟨ u , v ⟩ ∈ S $ by wcel_eq_l [l6, l4]
+
+trapx_agree
+-----------
+d1: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ g ∊ trapx F $ by weaken [#1]
+d2: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ h ∊ trapx F $ by weaken [#2]
+d3: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ x ∊ cdm g $ by ax
+d4: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ x ∊ cdm h $ by ax
+d5: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ functional g $ by trapx_functional [d1]
+d6: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ functional h $ by trapx_functional [d2]
+d7a: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ ord (cdm g) $ by trapx_ord [d1]
+d7: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ transitive (cdm g) $ by ord_trans [d7a]
+d8a: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ ord (cdm h) $ by trapx_ord [d2]
+d8: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ transitive (cdm h) $ by ord_trans [d8a]
+e1: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres g x ⇒ ⟨ u , v ⟩ ∈ cres g x $ by ax
+e2: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres g x ⇒ u ∊ x ∧ ⟨ u , v ⟩ ∈ g $ by cres_elim [e1]
+e3: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres g x ⇒ u ∊ x $ by and_elim_l [e2]
+e4: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres g x ⇒ ⟨ u , v ⟩ ∈ g $ by and_elim_r [e2]
+e5: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres g x ⇒ u ∊ cdm g $ by cdm_intro [e4]
+e6: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres g x ⇒ transitive (cdm h) $ by weaken [d8]
+e7: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres g x ⇒ x ∊ cdm h $ by ax
+e8: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres g x ⇒ u ∊ cdm h $ by transitive_elim [e6, e7, e3]
+e9: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres g x ⇒ ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) $ by ax
+e10: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres g x ⇒ u ∊ x → u ∊ cdm g → u ∊ cdm h → fv g u = fv h u $ by all_elim [e9]
+e11: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres g x ⇒ u ∊ cdm g → u ∊ cdm h → fv g u = fv h u $ by imp_elim [e10, e3]
+e12: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres g x ⇒ u ∊ cdm h → fv g u = fv h u $ by imp_elim [e11, e5]
+e13: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres g x ⇒ fv g u = fv h u $ by imp_elim [e12, e8]
+e14: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres g x ⇒ functional g $ by weaken [d5]
+e15: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres g x ⇒ functional h $ by weaken [d6]
+e16: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres g x ⇒ ⟨ u , v ⟩ ∈ h $ by d4_pair_move [e14, e15, e4, e8, e13]
+e17: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres g x ⇒ ⟨ u , v ⟩ ∈ cres h x $ by cres_intro [e3, e16]
+f1: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ ⟨ u , v ⟩ ∈ cres h x $ by ax
+f2: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ u ∊ x ∧ ⟨ u , v ⟩ ∈ h $ by cres_elim [f1]
+f3: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ u ∊ x $ by and_elim_l [f2]
+f4: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ ⟨ u , v ⟩ ∈ h $ by and_elim_r [f2]
+f5: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ u ∊ cdm h $ by cdm_intro [f4]
+f6: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ transitive (cdm g) $ by weaken [d7]
+f7: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ x ∊ cdm g $ by ax
+f8: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ u ∊ cdm g $ by transitive_elim [f6, f7, f3]
+f9: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) $ by ax
+f10: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ u ∊ x → u ∊ cdm g → u ∊ cdm h → fv g u = fv h u $ by all_elim [f9]
+f11: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ u ∊ cdm g → u ∊ cdm h → fv g u = fv h u $ by imp_elim [f10, f3]
+f12: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ u ∊ cdm h → fv g u = fv h u $ by imp_elim [f11, f8]
+f13: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ fv g u = fv h u $ by imp_elim [f12, f5]
+f14: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ fv h u = fv g u $ by eq_sym [f13]
+f15: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ functional h $ by weaken [d6]
+f16: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ functional g $ by weaken [d5]
+f17: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ ⟨ u , v ⟩ ∈ g $ by d4_pair_move [f15, f16, f4, f8, f14]
+f18: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h , ⟨ u , v ⟩ ∈ cres h x ⇒ ⟨ u , v ⟩ ∈ cres g x $ by cres_intro [f3, f17]
+r1: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ rel (cres g x) $ by cres_rel
+r2: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ rel (cres h x) $ by cres_rel
+r3: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ cres g x = cres h x $ by rel_eq_intro [r1, r2, e17, f18]
+r4: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ fv g x = fv F (cres g x) $ by trapx_step [d1, d3]
+r5: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ fv h x = fv F (cres h x) $ by trapx_step [d2, d4]
+r6: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ F = F $ by eq_refl
+r7: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ fv F (cres g x) = fv F (cres h x) $ by fv_eq [r6, r3]
+r8: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ fv F (cres h x) = fv h x $ by eq_sym [r5]
+r9: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ fv g x = fv F (cres h x) $ by eq_trans [r4, r7]
+r10: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g , x ∊ cdm h ⇒ fv g x = fv h x $ by eq_trans [r9, r8]
+r11: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) , x ∊ cdm g ⇒ x ∊ cdm h → fv g x = fv h x $ by imp_intro [r10]
+r12: $ G , ord x , ∀ y (y ∊ x → y ∊ cdm g → y ∊ cdm h → fv g y = fv h y) ⇒ x ∊ cdm g → x ∊ cdm h → fv g x = fv h x $ by imp_intro [r11]
+r13: $ G ⇒ ∀ x (ord x → x ∊ cdm g → x ∊ cdm h → fv g x = fv h x) $ by ord_ind_f [r12]
+r14: $ G ⇒ ord a → a ∊ cdm g → a ∊ cdm h → fv g a = fv h a $ by all_elim [r13]
+r15: $ G ⇒ ord (cdm g) $ by trapx_ord [#1]
+r16: $ G ⇒ ord a $ by ord_elem [r15, #3]
+r17: $ G ⇒ a ∊ cdm g → a ∊ cdm h → fv g a = fv h a $ by imp_elim [r14, r16]
+r18: $ G ⇒ a ∊ cdm h → fv g a = fv h a $ by imp_elim [r17, #3]
+r19: $ G ⇒ fv g a = fv h a $ by imp_elim [r18, #4]
+
+lemma d4_cres_sub (G: hyps) (F: class) (g h a u v: set):
+  $ G ⇒ g ∊ trapx F $ > $ G ⇒ h ∊ trapx F $ > $ G ⇒ a ∊ cdm h $ >
+  $ G ⇒ ⟨ u , v ⟩ ∈ cres g a $ > $ G ⇒ ⟨ u , v ⟩ ∈ cres h a $
+----
+l1: $ G ⇒ u ∊ a ∧ ⟨ u , v ⟩ ∈ g $ by cres_elim [#4]
+l2: $ G ⇒ u ∊ a $ by and_elim_l [l1]
+l3: $ G ⇒ ⟨ u , v ⟩ ∈ g $ by and_elim_r [l1]
+l4: $ G ⇒ u ∊ cdm g $ by cdm_intro [l3]
+l5: $ G ⇒ ord (cdm h) $ by trapx_ord [#2]
+l6: $ G ⇒ transitive (cdm h) $ by ord_trans [l5]
+l7: $ G ⇒ u ∊ cdm h $ by transitive_elim [l6, #3, l2]
+l8: $ G ⇒ fv g u = fv h u $ by trapx_agree [#1, #2, l4, l7]
+l9: $ G ⇒ functional g $ by trapx_functional [#1]
+l10: $ G ⇒ functional h $ by trapx_functional [#2]
+l11: $ G ⇒ ⟨ u , v ⟩ ∈ h $ by d4_pair_move [l9, l10, l3, l7, l8]
+l12: $ G ⇒ ⟨ u , v ⟩ ∈ cres h a $ by cres_intro [l2, l11]
+
+trapx_agree_cres
+----------------
+l1: $ G , ⟨ u , v ⟩ ∈ cres g a ⇒ ⟨ u , v ⟩ ∈ cres g a $ by ax
+l2: $ G , ⟨ u , v ⟩ ∈ cres g a ⇒ g ∊ trapx F $ by weaken [#1]
+l3: $ G , ⟨ u , v ⟩ ∈ cres g a ⇒ h ∊ trapx F $ by weaken [#2]
+l4: $ G , ⟨ u , v ⟩ ∈ cres g a ⇒ a ∊ cdm h $ by weaken [#4]
+l5: $ G , ⟨ u , v ⟩ ∈ cres g a ⇒ ⟨ u , v ⟩ ∈ cres h a $ by d4_cres_sub [l2, l3, l4, l1]
+m1: $ G , ⟨ u , v ⟩ ∈ cres h a ⇒ ⟨ u , v ⟩ ∈ cres h a $ by ax
+m2: $ G , ⟨ u , v ⟩ ∈ cres h a ⇒ g ∊ trapx F $ by weaken [#1]
+m3: $ G , ⟨ u , v ⟩ ∈ cres h a ⇒ h ∊ trapx F $ by weaken [#2]
+m4: $ G , ⟨ u , v ⟩ ∈ cres h a ⇒ a ∊ cdm g $ by weaken [#3]
+m5: $ G , ⟨ u , v ⟩ ∈ cres h a ⇒ ⟨ u , v ⟩ ∈ cres g a $ by d4_cres_sub [m3, m2, m4, m1]
+r1: $ G ⇒ rel (cres g a) $ by cres_rel
+r2: $ G ⇒ rel (cres h a) $ by cres_rel
+r3: $ G ⇒ cres g a = cres h a $ by rel_eq_intro [r1, r2, l5, m5]
+
+trapx_subset
+------------
+s0: $ G ⇒ rel g $ by trapx_rel [#1]
+s1: $ G , z ∊ g ⇒ rel g $ by weaken [s0]
+s2: $ G , z ∊ g ⇒ z ∊ g $ by ax
+p1: $ G , z ∊ g , z = ⟨ u , v ⟩ ⇒ z = ⟨ u , v ⟩ $ by ax
+p2: $ G , z ∊ g , z = ⟨ u , v ⟩ ⇒ z ∊ g $ by ax
+p3: $ G , z ∊ g , z = ⟨ u , v ⟩ ⇒ ⟨ u , v ⟩ ∈ g $ by wcel_intro [p1, p2]
+p4: $ G , z ∊ g , z = ⟨ u , v ⟩ ⇒ u ∊ cdm g $ by cdm_intro [p3]
+p5: $ G , z ∊ g , z = ⟨ u , v ⟩ ⇒ cdm g ⊆ cdm h $ by weaken [#3]
+p6: $ G , z ∊ g , z = ⟨ u , v ⟩ ⇒ u ∊ cdm h $ by subset_elim [p5, p4]
+p7: $ G , z ∊ g , z = ⟨ u , v ⟩ ⇒ g ∊ trapx F $ by weaken [#1]
+p8: $ G , z ∊ g , z = ⟨ u , v ⟩ ⇒ h ∊ trapx F $ by weaken [#2]
+p9: $ G , z ∊ g , z = ⟨ u , v ⟩ ⇒ fv g u = fv h u $ by trapx_agree [p7, p8, p4, p6]
+p10: $ G , z ∊ g , z = ⟨ u , v ⟩ ⇒ functional g $ by trapx_functional [p7]
+p11: $ G , z ∊ g , z = ⟨ u , v ⟩ ⇒ functional h $ by trapx_functional [p8]
+p12: $ G , z ∊ g , z = ⟨ u , v ⟩ ⇒ ⟨ u , v ⟩ ∈ h $ by d4_pair_move [p10, p11, p3, p6, p9]
+p13: $ G , z ∊ g , z = ⟨ u , v ⟩ ⇒ ⟨ u , v ⟩ = z $ by eq_sym [p1]
+p14: $ G , z ∊ g , z = ⟨ u , v ⟩ ⇒ z ∈ h $ by wcel_eq_l [p13, p12]
+p15: $ G , z ∊ g , z = ⟨ u , v ⟩ ⇒ z ∊ h $ by wcel_welc [p14]
+s3: $ G , z ∊ g ⇒ z ∊ h $ by rel_elim [s1, s2, p15]
+s4: $ G ⇒ g ⊆ h $ by subset_intro [s3]
+
+trapx_chain
+-----------
+l1: $ G ⇒ ord (cdm g) $ by trapx_ord [#1]
+l2: $ G ⇒ ord (cdm h) $ by trapx_ord [#2]
+k1: $ G , i = cdm g , j = cdm h ⇒ i = cdm g $ by ax
+k2: $ G , i = cdm g , j = cdm h ⇒ j = cdm h $ by ax
+k3: $ G , i = cdm g , j = cdm h ⇒ cdm g = i $ by eq_sym [k1]
+k4: $ G , i = cdm g , j = cdm h ⇒ cdm h = j $ by eq_sym [k2]
+k5: $ G , i = cdm g , j = cdm h ⇒ ord (cdm g) $ by weaken [l1]
+k6: $ G , i = cdm g , j = cdm h ⇒ ord (cdm h) $ by weaken [l2]
+k7: $ G , i = cdm g , j = cdm h ⇒ ord i $ by ord_eq [k3, k5]
+k8: $ G , i = cdm g , j = cdm h ⇒ ord j $ by ord_eq [k4, k6]
+k9: $ G , i = cdm g , j = cdm h ⇒ i ⊆ j ∨ j ⊆ i $ by ord_subset_or [k7, k8]
+a1: $ G , i = cdm g , j = cdm h , i ⊆ j ⇒ i ⊆ j $ by ax
+a2: $ G , i = cdm g , j = cdm h , i ⊆ j ⇒ i = cdm g $ by ax
+a3: $ G , i = cdm g , j = cdm h , i ⊆ j ⇒ j = cdm h $ by ax
+a4: $ G , i = cdm g , j = cdm h , i ⊆ j ⇒ cdm g ⊆ j $ by subset_eq_l [a2, a1]
+a5: $ G , i = cdm g , j = cdm h , i ⊆ j ⇒ cdm g ⊆ cdm h $ by subset_eq_r [a3, a4]
+a6: $ G , i = cdm g , j = cdm h , i ⊆ j ⇒ g ∊ trapx F $ by weaken [#1]
+a7: $ G , i = cdm g , j = cdm h , i ⊆ j ⇒ h ∊ trapx F $ by weaken [#2]
+a8: $ G , i = cdm g , j = cdm h , i ⊆ j ⇒ g ⊆ h $ by trapx_subset [a6, a7, a5]
+a9: $ G , i = cdm g , j = cdm h , i ⊆ j ⇒ g ⊆ h ∨ h ⊆ g $ by or_intro_l [a8]
+b1: $ G , i = cdm g , j = cdm h , j ⊆ i ⇒ j ⊆ i $ by ax
+b2: $ G , i = cdm g , j = cdm h , j ⊆ i ⇒ i = cdm g $ by ax
+b3: $ G , i = cdm g , j = cdm h , j ⊆ i ⇒ j = cdm h $ by ax
+b4: $ G , i = cdm g , j = cdm h , j ⊆ i ⇒ cdm h ⊆ i $ by subset_eq_l [b3, b1]
+b5: $ G , i = cdm g , j = cdm h , j ⊆ i ⇒ cdm h ⊆ cdm g $ by subset_eq_r [b2, b4]
+b6: $ G , i = cdm g , j = cdm h , j ⊆ i ⇒ g ∊ trapx F $ by weaken [#1]
+b7: $ G , i = cdm g , j = cdm h , j ⊆ i ⇒ h ∊ trapx F $ by weaken [#2]
+b8: $ G , i = cdm g , j = cdm h , j ⊆ i ⇒ h ⊆ g $ by trapx_subset [b7, b6, b5]
+b9: $ G , i = cdm g , j = cdm h , j ⊆ i ⇒ g ⊆ h ∨ h ⊆ g $ by or_intro_r [b8]
+k10: $ G , i = cdm g , j = cdm h ⇒ g ⊆ h ∨ h ⊆ g $ by or_elim [k9, a9, b9]
+c1: $ G ⇒ isset g $ by isset_var
+c2: $ G ⇒ isset (cdm g) $ by cdm_set [c1]
+c3: $ G ⇒ isset h $ by isset_var
+c4: $ G ⇒ isset (cdm h) $ by cdm_set [c3]
+c5: $ G , i = cdm g ⇒ g ⊆ h ∨ h ⊆ g $ by isset_elim [c4, k10]
+c6: $ G ⇒ g ⊆ h ∨ h ⊆ g $ by isset_elim [c2, c5]
+
+lemma d4_cdm_cres (G: hyps) (R A: class) (w: set):
+  $ G ⇒ w ∊ A $ > $ G ⇒ w ∊ cdm R $ > $ G ⇒ w ∊ cdm (cres R A) $
+----
+l1: $ G , ⟨ w , v ⟩ ∈ R ⇒ ⟨ w , v ⟩ ∈ R $ by ax
+l2: $ G , ⟨ w , v ⟩ ∈ R ⇒ w ∊ A $ by weaken [#1]
+l3: $ G , ⟨ w , v ⟩ ∈ R ⇒ ⟨ w , v ⟩ ∈ cres R A $ by cres_intro [l2, l1]
+l4: $ G , ⟨ w , v ⟩ ∈ R ⇒ w ∊ cdm (cres R A) $ by cdm_intro [l3]
+l5: $ G ⇒ w ∊ cdm (cres R A) $ by cdm_elim [#2, l4]
+
+trapx_cres
+----------
+t1: $ G ⇒ functional g $ by trapx_functional [#1]
+t2: $ G ⇒ ord (cdm g) $ by trapx_ord [#1]
+t3: $ G ⇒ ord a $ by ord_elem [t2, #2]
+t4: $ G ⇒ isset g $ by isset_var
+t5: $ G ⇒ cres g a ⊆ g $ by cres_subset
+t6: $ G ⇒ isset (cres g a) $ by subset_isset [t4, t5]
+t7: $ G ⇒ functional (cres g a) $ by functional_cres [t1]
+t8: $ G ⇒ rel (cres g a) $ by cres_rel
+t9: $ G ⇒ cdm (cres g a) ⊆ a $ by cres_cdm
+w1: $ G , w ∊ a ⇒ w ∊ a $ by ax
+w2a: $ G , w ∊ a ⇒ ord (cdm g) $ by weaken [t2]
+w2: $ G , w ∊ a ⇒ transitive (cdm g) $ by ord_trans [w2a]
+w3: $ G , w ∊ a ⇒ a ∊ cdm g $ by weaken [#2]
+w4: $ G , w ∊ a ⇒ w ∊ cdm g $ by transitive_elim [w2, w3, w1]
+w5: $ G , w ∊ a ⇒ w ∊ cdm (cres g a) $ by d4_cdm_cres [w1, w4]
+t10: $ G ⇒ a ⊆ cdm (cres g a) $ by subset_intro [w5]
+t11: $ G ⇒ cdm (cres g a) = a $ by subset_antisym [t9, t10]
+w6: $ G , w ∊ a ⇒ functional g $ by weaken [t1]
+w7: $ G , w ∊ a ⇒ fv (cres g a) w = fv g w $ by fv_cres [w6, w1]
+w8: $ G , w ∊ a ⇒ g ∊ trapx F $ by weaken [#1]
+w9: $ G , w ∊ a ⇒ fv g w = fv F (cres g w) $ by trapx_step [w8, w4]
+w10: $ G , w ∊ a ⇒ ord a $ by weaken [t3]
+w11: $ G , w ∊ a ⇒ w ⊆ a $ by ord_elem_subset [w10, w1]
+w12: $ G , w ∊ a ⇒ cres (cres g a) w = cres g w $ by cres_cres [w11]
+w13: $ G , w ∊ a ⇒ cres g w = cres (cres g a) w $ by eq_sym [w12]
+w14: $ G , w ∊ a ⇒ F = F $ by eq_refl
+w15: $ G , w ∊ a ⇒ fv F (cres g w) = fv F (cres (cres g a) w) $ by fv_eq [w14, w13]
+w16: $ G , w ∊ a ⇒ fv (cres g a) w = fv F (cres g w) $ by eq_trans [w7, w9]
+w17: $ G , w ∊ a ⇒ fv (cres g a) w = fv F (cres (cres g a) w) $ by eq_trans [w16, w15]
+t12: $ G ⇒ w ∊ a → fv (cres g a) w = fv F (cres (cres g a) w) $ by imp_intro [w17]
+t13: $ G ⇒ ∀ w (w ∊ a → fv (cres g a) w = fv F (cres (cres g a) w)) $ by all_intro [t12]
+t14: $ G ⇒ cres g a ∈ trapx F $ by trapx_intro [t6, t3, t7, t8, t11, t13]
+
+trapx_extend
+------------
+x1: $ G ⇒ functional g $ by trapx_functional [#2]
+x2: $ G ⇒ rel g $ by trapx_rel [#2]
+x3a: $ G ⇒ ord (cdm g) $ by trapx_ord [#2]
+x3: $ G ⇒ ord a $ by ord_eq [#3, x3a]
+x4: $ G , a ∊ cdm g ⇒ a ∊ cdm g $ by ax
+x5: $ G , a ∊ cdm g ⇒ cdm g = a $ by weaken [#3]
+x6: $ G , a ∊ cdm g ⇒ a ∊ a $ by welc_eq [x5, x4]
+x7: $ G , a ∊ cdm g ⇒ ⊥ $ by notin_self [x6]
+x8: $ G ⇒ ¬ a ∊ cdm g $ by not_intro [x7]
+k1: $ G , z = fv F g , b = suc a ⇒ functional g $ by weaken [x1]
+k2: $ G , z = fv F g , b = suc a ⇒ ¬ a ∊ cdm g $ by weaken [x8]
+k3: $ G , z = fv F g , b = suc a ⇒ functional (g ∪ csn ⟨ a , z ⟩) $ by functional_cun_csn [k1, k2]
+k4: $ G , z = fv F g , b = suc a ⇒ rel g $ by weaken [x2]
+k5: $ G , z = fv F g , b = suc a ⇒ rel (g ∪ csn ⟨ a , z ⟩) $ by rel_cun_csn [k4]
+k6: $ G , z = fv F g , b = suc a ⇒ cdm (g ∪ csn ⟨ a , z ⟩) = cdm g ∪ csn a $ by cdm_cun_csn
+k7: $ G , z = fv F g , b = suc a ⇒ cdm g = a $ by weaken [#3]
+k8: $ G , z = fv F g , b = suc a ⇒ csn a = csn a $ by eq_refl
+k9: $ G , z = fv F g , b = suc a ⇒ cdm g ∪ csn a = a ∪ csn a $ by cun_eq [k7, k8]
+k10: $ G , z = fv F g , b = suc a ⇒ cdm (g ∪ csn ⟨ a , z ⟩) = suc a $ by eq_trans [k6, k9]
+k11a: $ G , z = fv F g , b = suc a ⇒ ord a $ by weaken [x3]
+k11: $ G , z = fv F g , b = suc a ⇒ ord (suc a) $ by ord_suc [k11a]
+k10a: $ G , z = fv F g , b = suc a ⇒ b = suc a $ by ax
+k10c: $ G , z = fv F g , b = suc a ⇒ suc a = b $ by eq_sym [k10a]
+k10b: $ G , z = fv F g , b = suc a ⇒ cdm (g ∪ csn ⟨ a , z ⟩) = b $ by eq_trans [k10, k10c]
+k11b: $ G , z = fv F g , b = suc a ⇒ ord b $ by ord_eq [k10c, k11]
+k12a: $ G , z = fv F g , b = suc a ⇒ isset g $ by isset_var
+k12b: $ G , z = fv F g , b = suc a ⇒ isset a $ by isset_var
+k12c: $ G , z = fv F g , b = suc a ⇒ isset z $ by isset_var
+k12d: $ G , z = fv F g , b = suc a ⇒ isset ⟨ a , z ⟩ $ by opair_set [k12b, k12c]
+k12e: $ G , z = fv F g , b = suc a ⇒ isset (csn ⟨ a , z ⟩) $ by csn_set [k12d]
+k12: $ G , z = fv F g , b = suc a ⇒ isset (g ∪ csn ⟨ a , z ⟩) $ by cun_set [k12a, k12e]
+s0a: $ G , z = fv F g , b = suc a , w ∊ b ⇒ b = suc a $ by ax
+s0b: $ G , z = fv F g , b = suc a , w ∊ b ⇒ w ∊ b $ by ax
+s1: $ G , z = fv F g , b = suc a , w ∊ b ⇒ w ∊ suc a $ by welc_eq [s0a, s0b]
+s2: $ G , z = fv F g , b = suc a , w ∊ b ⇒ w ∊ a ∨ w = a $ by suc_elim [s1]
+a1: $ G , z = fv F g , b = suc a , w ∊ b , w = a ⇒ w = a $ by ax
+a2: $ G , z = fv F g , b = suc a , w ∊ b , w = a ⇒ (g ∪ csn ⟨ a , z ⟩) = (g ∪ csn ⟨ a , z ⟩) $ by eq_refl
+a3: $ G , z = fv F g , b = suc a , w ∊ b , w = a ⇒ fv (g ∪ csn ⟨ a , z ⟩) w = fv (g ∪ csn ⟨ a , z ⟩) a $ by fv_eq [a2, a1]
+a4: $ G , z = fv F g , b = suc a , w ∊ b , w = a ⇒ rel g $ by weaken [x2]
+a5: $ G , z = fv F g , b = suc a , w ∊ b , w = a ⇒ cdm g = a $ by weaken [#3]
+a6: $ G , z = fv F g , b = suc a , w ∊ b , w = a ⇒ fv (g ∪ csn ⟨ a , z ⟩) a = z $ by fv_cun_csn_self [a4, a5]
+a7: $ G , z = fv F g , b = suc a , w ∊ b , w = a ⇒ z = fv F g $ by ax
+a8: $ G , z = fv F g , b = suc a , w ∊ b , w = a ⇒ cres (g ∪ csn ⟨ a , z ⟩) a = g $ by cres_cun_csn_self [a4, a5]
+a9: $ G , z = fv F g , b = suc a , w ∊ b , w = a ⇒ a = w $ by eq_sym [a1]
+a10: $ G , z = fv F g , b = suc a , w ∊ b , w = a ⇒ cres (g ∪ csn ⟨ a , z ⟩) a = cres (g ∪ csn ⟨ a , z ⟩) w $ by cres_eq [a2, a9]
+a11: $ G , z = fv F g , b = suc a , w ∊ b , w = a ⇒ g = cres (g ∪ csn ⟨ a , z ⟩) a $ by eq_sym [a8]
+a12: $ G , z = fv F g , b = suc a , w ∊ b , w = a ⇒ g = cres (g ∪ csn ⟨ a , z ⟩) w $ by eq_trans [a11, a10]
+a13: $ G , z = fv F g , b = suc a , w ∊ b , w = a ⇒ F = F $ by eq_refl
+a14: $ G , z = fv F g , b = suc a , w ∊ b , w = a ⇒ fv F g = fv F (cres (g ∪ csn ⟨ a , z ⟩) w) $ by fv_eq [a13, a12]
+a15: $ G , z = fv F g , b = suc a , w ∊ b , w = a ⇒ fv (g ∪ csn ⟨ a , z ⟩) w = z $ by eq_trans [a3, a6]
+a16: $ G , z = fv F g , b = suc a , w ∊ b , w = a ⇒ fv (g ∪ csn ⟨ a , z ⟩) w = fv F g $ by eq_trans [a15, a7]
+a17: $ G , z = fv F g , b = suc a , w ∊ b , w = a ⇒ fv (g ∪ csn ⟨ a , z ⟩) w = fv F (cres (g ∪ csn ⟨ a , z ⟩) w) $ by eq_trans [a16, a14]
+b1: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ w ∊ a $ by ax
+b2: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a , w = a ⇒ w = a $ by ax
+b3: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a , w = a ⇒ w ∊ a $ by ax
+b4: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a , w = a ⇒ a ∊ a $ by welc_eq_set [b2, b3]
+b5: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a , w = a ⇒ ⊥ $ by notin_self [b4]
+b6: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ w = a → ⊥ $ by imp_intro [b5]
+b7: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ isset w $ by isset_var
+b8: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ fv (g ∪ csn ⟨ a , z ⟩) w = fv g w $ by fv_cun_csn_other [b7, b6]
+b9: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ cdm g = a $ by weaken [#3]
+b10: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ a = cdm g $ by eq_sym [b9]
+b11: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ w ∊ cdm g $ by welc_eq [b10, b1]
+b12: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ g ∊ trapx F $ by weaken [#2]
+b13: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ fv g w = fv F (cres g w) $ by trapx_step [b12, b11]
+b14: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ ord a $ by weaken [x3]
+b15: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ w ⊆ a $ by ord_elem_subset [b14, b1]
+b16: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ cres (cres (g ∪ csn ⟨ a , z ⟩) a) w = cres (g ∪ csn ⟨ a , z ⟩) w $ by cres_cres [b15]
+b17: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ rel g $ by weaken [x2]
+b18: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ cres (g ∪ csn ⟨ a , z ⟩) a = g $ by cres_cun_csn_self [b17, b9]
+b19: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ w = w $ by eq_refl
+b20: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ cres (cres (g ∪ csn ⟨ a , z ⟩) a) w = cres g w $ by cres_eq [b18, b19]
+b21: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ cres (g ∪ csn ⟨ a , z ⟩) w = cres (cres (g ∪ csn ⟨ a , z ⟩) a) w $ by eq_sym [b16]
+b22: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ cres (g ∪ csn ⟨ a , z ⟩) w = cres g w $ by eq_trans [b21, b20]
+b23: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ cres g w = cres (g ∪ csn ⟨ a , z ⟩) w $ by eq_sym [b22]
+b24: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ F = F $ by eq_refl
+b25: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ fv F (cres g w) = fv F (cres (g ∪ csn ⟨ a , z ⟩) w) $ by fv_eq [b24, b23]
+b26: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ fv (g ∪ csn ⟨ a , z ⟩) w = fv F (cres g w) $ by eq_trans [b8, b13]
+b27: $ G , z = fv F g , b = suc a , w ∊ b , w ∊ a ⇒ fv (g ∪ csn ⟨ a , z ⟩) w = fv F (cres (g ∪ csn ⟨ a , z ⟩) w) $ by eq_trans [b26, b25]
+s3: $ G , z = fv F g , b = suc a , w ∊ b ⇒ fv (g ∪ csn ⟨ a , z ⟩) w = fv F (cres (g ∪ csn ⟨ a , z ⟩) w) $ by or_elim [s2, b27, a17]
+s4: $ G , z = fv F g , b = suc a ⇒ w ∊ b → fv (g ∪ csn ⟨ a , z ⟩) w = fv F (cres (g ∪ csn ⟨ a , z ⟩) w) $ by imp_intro [s3]
+s5: $ G , z = fv F g , b = suc a ⇒ ∀ w (w ∊ b → fv (g ∪ csn ⟨ a , z ⟩) w = fv F (cres (g ∪ csn ⟨ a , z ⟩) w)) $ by all_intro [s4]
+s6: $ G , z = fv F g , b = suc a ⇒ (g ∪ csn ⟨ a , z ⟩) ∈ trapx F $ by trapx_intro [k12, k11b, k3, k5, k10b, s5]
+t1: $ G , z = fv F g , b = suc a ⇒ g = g $ by eq_refl
+t2: $ G , z = fv F g , b = suc a ⇒ a = a $ by eq_refl
+t3: $ G , z = fv F g , b = suc a ⇒ z = fv F g $ by ax
+t4: $ G , z = fv F g , b = suc a ⇒ ⟨ a , z ⟩ = ⟨ a , fv F g ⟩ $ by opair_eq [t2, t3]
+t5: $ G , z = fv F g , b = suc a ⇒ csn ⟨ a , z ⟩ = csn ⟨ a , fv F g ⟩ $ by csn_eq [t4]
+t6: $ G , z = fv F g , b = suc a ⇒ (g ∪ csn ⟨ a , z ⟩) = g ∪ csn ⟨ a , fv F g ⟩ $ by cun_eq [t1, t5]
+t7: $ G , z = fv F g , b = suc a ⇒ g ∪ csn ⟨ a , fv F g ⟩ ∈ trapx F $ by wcel_eq_l [t6, s6]
+t7a: $ G , z = fv F g ⇒ isset a $ by isset_var
+t7b: $ G , z = fv F g ⇒ isset (suc a) $ by suc_set [t7a]
+t7c: $ G , z = fv F g ⇒ g ∪ csn ⟨ a , fv F g ⟩ ∈ trapx F $ by isset_elim [t7b, t7]
+t8: $ G ⇒ isset (fv F g) $ by fv_set [#1]
+t9: $ G ⇒ g ∪ csn ⟨ a , fv F g ⟩ ∈ trapx F $ by isset_elim [t8, t7c]
+
+trapxd_intro
+------------
+l1: $ G ⇒ isset a $ by isset_var
+l2: $ G ⇒ isset g $ by isset_var
+l3: $ G ⇒ isset ⟨ a , g ⟩ $ by opair_set [l1, l2]
+z1: $ G , w = ⟨ a , g ⟩ ⇒ w = ⟨ a , g ⟩ $ by ax
+z2: $ G , w = ⟨ a , g ⟩ ⇒ g ∊ trapx F $ by weaken [#1]
+z3: $ G , w = ⟨ a , g ⟩ ⇒ cdm g = a $ by weaken [#2]
+z4: $ G , w = ⟨ a , g ⟩ ⇒ g ∊ trapx F ∧ cdm g = a $ by and_intro [z2, z3]
+z5: $ G , w = ⟨ a , g ⟩ ⇒ w = ⟨ a , g ⟩ ∧ g ∊ trapx F ∧ cdm g = a $ by and_intro [z1, z4]
+z6: $ G , w = ⟨ a , g ⟩ ⇒ ∃ j (w = ⟨ a , j ⟩ ∧ j ∊ trapx F ∧ cdm j = a) $ by ex_intro (t := $ g $) [z5]
+z7: $ G , w = ⟨ a , g ⟩ ⇒ ∃ i ∃ j (w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i) $ by ex_intro (t := $ a $) [z6]
+z8: $ G , w = ⟨ a , g ⟩ ⇒ w ∊ {u | ∃ i ∃ j (u = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i)} $ by cab_intro (x := $ u $, t := $ w $, p := $ ∃ i ∃ j (u = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i) $) [z7]
+z9: $ G , w = ⟨ a , g ⟩ ⇒ w ∊ trapxd F $ by weaken [z8]
+z10: $ G , w = ⟨ a , g ⟩ ⇒ ⟨ a , g ⟩ ∈ trapxd F $ by wcel_intro [z1, z9]
+z11: $ G ⇒ ⟨ a , g ⟩ ∈ trapxd F $ by isset_elim [l3, z10]
+
+trapxd_elim
+-----------
+m1: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F ⇒ w ∊ trapxd F $ by ax
+m2: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F ⇒ ∃ i ∃ j (w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i) $ by cab_elim (x := $ u $, t := $ w $, p := $ ∃ i ∃ j (u = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i) $) [m1]
+n1: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i ⇒ w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i $ by ax
+n2: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i ⇒ w = ⟨ i , j ⟩ $ by and_elim_l [n1]
+n3: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i ⇒ j ∊ trapx F ∧ cdm j = i $ by and_elim_r [n1]
+n4: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i ⇒ j ∊ trapx F $ by and_elim_l [n3]
+n5: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i ⇒ cdm j = i $ by and_elim_r [n3]
+n6: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i ⇒ w = ⟨ a , g ⟩ $ by ax
+n7: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i ⇒ ⟨ a , g ⟩ = w $ by eq_sym [n6]
+n8: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i ⇒ ⟨ a , g ⟩ = ⟨ i , j ⟩ $ by eq_trans [n7, n2]
+n9: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i ⇒ a = i $ by opair_inj_l [n8]
+n10: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i ⇒ g = j $ by opair_inj_r [n8]
+n11: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i ⇒ j = g $ by eq_sym [n10]
+n12: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i ⇒ g ∊ trapx F $ by welc_eq_set [n11, n4]
+n13: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i ⇒ cdm g = cdm j $ by cdm_eq [n10]
+n14: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i ⇒ cdm g = i $ by eq_trans [n13, n5]
+n15: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i ⇒ i = a $ by eq_sym [n9]
+n16: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i ⇒ cdm g = a $ by eq_trans [n14, n15]
+n17: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i ⇒ g ∊ trapx F ∧ cdm g = a $ by and_intro [n12, n16]
+o1: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , ∃ j (w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i) ⇒ ∃ j (w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i) $ by ax
+o2: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F , ∃ j (w = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i) ⇒ g ∊ trapx F ∧ cdm g = a $ by ex_elim [o1, n17]
+o3: $ G , w = ⟨ a , g ⟩ , w ∊ trapxd F ⇒ g ∊ trapx F ∧ cdm g = a $ by ex_elim [m2, o2]
+o4: $ G ⇒ g ∊ trapx F ∧ cdm g = a $ by wcel_elim [#1, o3]
+
+trapxd_functional
+-----------------
+f1: $ G , ⟨ u , v ⟩ ∈ trapxd F , ⟨ u , w ⟩ ∈ trapxd F ⇒ ⟨ u , v ⟩ ∈ trapxd F $ by ax
+f2: $ G , ⟨ u , v ⟩ ∈ trapxd F , ⟨ u , w ⟩ ∈ trapxd F ⇒ ⟨ u , w ⟩ ∈ trapxd F $ by ax
+f3: $ G , ⟨ u , v ⟩ ∈ trapxd F , ⟨ u , w ⟩ ∈ trapxd F ⇒ v ∊ trapx F ∧ cdm v = u $ by trapxd_elim [f1]
+f4: $ G , ⟨ u , v ⟩ ∈ trapxd F , ⟨ u , w ⟩ ∈ trapxd F ⇒ w ∊ trapx F ∧ cdm w = u $ by trapxd_elim [f2]
+f5: $ G , ⟨ u , v ⟩ ∈ trapxd F , ⟨ u , w ⟩ ∈ trapxd F ⇒ v ∊ trapx F $ by and_elim_l [f3]
+f6: $ G , ⟨ u , v ⟩ ∈ trapxd F , ⟨ u , w ⟩ ∈ trapxd F ⇒ cdm v = u $ by and_elim_r [f3]
+f7: $ G , ⟨ u , v ⟩ ∈ trapxd F , ⟨ u , w ⟩ ∈ trapxd F ⇒ w ∊ trapx F $ by and_elim_l [f4]
+f8: $ G , ⟨ u , v ⟩ ∈ trapxd F , ⟨ u , w ⟩ ∈ trapxd F ⇒ cdm w = u $ by and_elim_r [f4]
+f9: $ G , ⟨ u , v ⟩ ∈ trapxd F , ⟨ u , w ⟩ ∈ trapxd F ⇒ u = cdm w $ by eq_sym [f8]
+f10: $ G , ⟨ u , v ⟩ ∈ trapxd F , ⟨ u , w ⟩ ∈ trapxd F ⇒ cdm v = cdm w $ by eq_trans [f6, f9]
+f11: $ G , ⟨ u , v ⟩ ∈ trapxd F , ⟨ u , w ⟩ ∈ trapxd F ⇒ cdm w = cdm v $ by eq_sym [f10]
+f12: $ G , ⟨ u , v ⟩ ∈ trapxd F , ⟨ u , w ⟩ ∈ trapxd F ⇒ cdm v ⊆ cdm w $ by eq_subset [f10]
+f13: $ G , ⟨ u , v ⟩ ∈ trapxd F , ⟨ u , w ⟩ ∈ trapxd F ⇒ cdm w ⊆ cdm v $ by eq_subset [f11]
+f14: $ G , ⟨ u , v ⟩ ∈ trapxd F , ⟨ u , w ⟩ ∈ trapxd F ⇒ v ⊆ w $ by trapx_subset [f5, f7, f12]
+f15: $ G , ⟨ u , v ⟩ ∈ trapxd F , ⟨ u , w ⟩ ∈ trapxd F ⇒ w ⊆ v $ by trapx_subset [f7, f5, f13]
+f16: $ G , ⟨ u , v ⟩ ∈ trapxd F , ⟨ u , w ⟩ ∈ trapxd F ⇒ v = w $ by subset_antisym [f14, f15]
+f17: $ G ⇒ functional (trapxd F) $ by functional_intro [f16]
+
+lemma d4_cres_sub_fun (G: hyps) (R S: class) (t: set):
+  $ G ⇒ functional S $ > $ G ⇒ R ⊆ S $ > $ G ⇒ t ⊆ cdm R $ > $ G ⇒ cres S t = cres R t $
+----
+p1: $ G , ⟨ u , v ⟩ ∈ cres S t ⇒ ⟨ u , v ⟩ ∈ cres S t $ by ax
+p2: $ G , ⟨ u , v ⟩ ∈ cres S t ⇒ u ∊ t ∧ ⟨ u , v ⟩ ∈ S $ by cres_elim [p1]
+p3: $ G , ⟨ u , v ⟩ ∈ cres S t ⇒ u ∊ t $ by and_elim_l [p2]
+p4: $ G , ⟨ u , v ⟩ ∈ cres S t ⇒ ⟨ u , v ⟩ ∈ S $ by and_elim_r [p2]
+p5: $ G , ⟨ u , v ⟩ ∈ cres S t ⇒ t ⊆ cdm R $ by weaken [#3]
+p6: $ G , ⟨ u , v ⟩ ∈ cres S t ⇒ u ∊ cdm R $ by subset_elim [p5, p3]
+p7: $ G , ⟨ u , v ⟩ ∈ cres S t ⇒ functional S $ by weaken [#1]
+p8: $ G , ⟨ u , v ⟩ ∈ cres S t ⇒ R ⊆ S $ by weaken [#2]
+p9: $ G , ⟨ u , v ⟩ ∈ cres S t ⇒ functional R $ by functional_subset [p7, p8]
+p10: $ G , ⟨ u , v ⟩ ∈ cres S t ⇒ fv R u = fv S u $ by fv_subset [p7, p8, p6]
+p11: $ G , ⟨ u , v ⟩ ∈ cres S t ⇒ fv S u = fv R u $ by eq_sym [p10]
+p12: $ G , ⟨ u , v ⟩ ∈ cres S t ⇒ ⟨ u , v ⟩ ∈ R $ by d4_pair_move [p7, p9, p4, p6, p11]
+p13: $ G , ⟨ u , v ⟩ ∈ cres S t ⇒ ⟨ u , v ⟩ ∈ cres R t $ by cres_intro [p3, p12]
+q1: $ G , ⟨ u , v ⟩ ∈ cres R t ⇒ ⟨ u , v ⟩ ∈ cres R t $ by ax
+q2a: $ G , ⟨ u , v ⟩ ∈ cres R t ⇒ R ⊆ S $ by weaken [#2]
+q2: $ G , ⟨ u , v ⟩ ∈ cres R t ⇒ cres R t ⊆ cres S t $ by cres_mono [q2a]
+q3: $ G , ⟨ u , v ⟩ ∈ cres R t ⇒ ⟨ u , v ⟩ ∈ cres S t $ by wcel_subset [q2, q1]
+r1: $ G ⇒ rel (cres S t) $ by cres_rel
+r2: $ G ⇒ rel (cres R t) $ by cres_rel
+r3: $ G ⇒ cres S t = cres R t $ by rel_eq_intro [r1, r2, p13, q3]
+
+lemma d4_img_apx (G: hyps) (F: class) (a y: set):
+  $ G ⇒ y ∊ img (trapxd F) a $ > $ G ⇒ y ∊ trapx F $
+----
+l1: $ G , u ∊ a , ⟨ u , y ⟩ ∈ trapxd F ⇒ ⟨ u , y ⟩ ∈ trapxd F $ by ax
+l2: $ G , u ∊ a , ⟨ u , y ⟩ ∈ trapxd F ⇒ y ∊ trapx F ∧ cdm y = u $ by trapxd_elim [l1]
+l3: $ G , u ∊ a , ⟨ u , y ⟩ ∈ trapxd F ⇒ y ∊ trapx F $ by and_elim_l [l2]
+l4: $ G ⇒ y ∊ trapx F $ by img_elim [#1, l3]
+
+trapx_cuni
+----------
+c1: $ G ⇒ functional (trapxd F) $ by trapxd_functional
+c2: $ G ⇒ isset a $ by isset_var
+c3: $ G ⇒ isset (img (trapxd F) a) $ by img_set [c1, c2]
+c4: $ G ⇒ isset ((⋃ (img (trapxd F) a))) $ by cuni_set [c3]
+c5: $ G , y ∊ img (trapxd F) a ⇒ y ∊ img (trapxd F) a $ by ax
+c6: $ G , y ∊ img (trapxd F) a ⇒ y ∊ trapx F $ by d4_img_apx [c5]
+c7: $ G , y ∊ img (trapxd F) a ⇒ functional y $ by trapx_functional [c6]
+c8: $ G ⇒ y ∊ img (trapxd F) a → functional y $ by imp_intro [c7]
+c9: $ G ⇒ ∀ y (y ∊ img (trapxd F) a → functional y) $ by all_intro [c8]
+c10: $ G , y ∊ img (trapxd F) a ⇒ rel y $ by trapx_rel [c6]
+c11: $ G ⇒ y ∊ img (trapxd F) a → rel y $ by imp_intro [c10]
+c12: $ G ⇒ ∀ y (y ∊ img (trapxd F) a → rel y) $ by all_intro [c11]
+h1: $ G , y ∊ img (trapxd F) a ∧ z ∊ img (trapxd F) a ⇒ y ∊ img (trapxd F) a ∧ z ∊ img (trapxd F) a $ by ax
+h2: $ G , y ∊ img (trapxd F) a ∧ z ∊ img (trapxd F) a ⇒ y ∊ img (trapxd F) a $ by and_elim_l [h1]
+h3: $ G , y ∊ img (trapxd F) a ∧ z ∊ img (trapxd F) a ⇒ z ∊ img (trapxd F) a $ by and_elim_r [h1]
+h4: $ G , y ∊ img (trapxd F) a ∧ z ∊ img (trapxd F) a ⇒ y ∊ trapx F $ by d4_img_apx [h2]
+h5: $ G , y ∊ img (trapxd F) a ∧ z ∊ img (trapxd F) a ⇒ z ∊ trapx F $ by d4_img_apx [h3]
+h6: $ G , y ∊ img (trapxd F) a ∧ z ∊ img (trapxd F) a ⇒ y ⊆ z ∨ z ⊆ y $ by trapx_chain [h4, h5]
+h7: $ G ⇒ y ∊ img (trapxd F) a ∧ z ∊ img (trapxd F) a → y ⊆ z ∨ z ⊆ y $ by imp_intro [h6]
+h8: $ G ⇒ ∀ z (y ∊ img (trapxd F) a ∧ z ∊ img (trapxd F) a → y ⊆ z ∨ z ⊆ y) $ by all_intro [h7]
+h9: $ G ⇒ ∀ y ∀ z (y ∊ img (trapxd F) a ∧ z ∊ img (trapxd F) a → y ⊆ z ∨ z ⊆ y) $ by all_intro [h8]
+c13: $ G ⇒ functional ((⋃ (img (trapxd F) a))) $ by functional_cuni_chain [c9, h9]
+c14: $ G ⇒ rel ((⋃ (img (trapxd F) a))) $ by rel_cuni [c12]
+c15: $ G ⇒ ord (⋃ a) $ by ord_cuni_ord [#1]
+e1: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) , ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) , w = ⟨ k , v ⟩ , w ∊ (⋃ (img (trapxd F) a)) , y ∊ img (trapxd F) a , w ∊ y , u ∊ a , ⟨ u , y ⟩ ∈ trapxd F ⇒ ⟨ u , y ⟩ ∈ trapxd F $ by ax
+e2: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) , ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) , w = ⟨ k , v ⟩ , w ∊ (⋃ (img (trapxd F) a)) , y ∊ img (trapxd F) a , w ∊ y , u ∊ a , ⟨ u , y ⟩ ∈ trapxd F ⇒ y ∊ trapx F ∧ cdm y = u $ by trapxd_elim [e1]
+e3: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) , ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) , w = ⟨ k , v ⟩ , w ∊ (⋃ (img (trapxd F) a)) , y ∊ img (trapxd F) a , w ∊ y , u ∊ a , ⟨ u , y ⟩ ∈ trapxd F ⇒ cdm y = u $ by and_elim_r [e2]
+e4: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) , ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) , w = ⟨ k , v ⟩ , w ∊ (⋃ (img (trapxd F) a)) , y ∊ img (trapxd F) a , w ∊ y , u ∊ a , ⟨ u , y ⟩ ∈ trapxd F ⇒ w = ⟨ k , v ⟩ $ by ax
+e5: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) , ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) , w = ⟨ k , v ⟩ , w ∊ (⋃ (img (trapxd F) a)) , y ∊ img (trapxd F) a , w ∊ y , u ∊ a , ⟨ u , y ⟩ ∈ trapxd F ⇒ w ∊ y $ by ax
+e6: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) , ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) , w = ⟨ k , v ⟩ , w ∊ (⋃ (img (trapxd F) a)) , y ∊ img (trapxd F) a , w ∊ y , u ∊ a , ⟨ u , y ⟩ ∈ trapxd F ⇒ ⟨ k , v ⟩ ∈ y $ by wcel_intro [e4, e5]
+e7: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) , ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) , w = ⟨ k , v ⟩ , w ∊ (⋃ (img (trapxd F) a)) , y ∊ img (trapxd F) a , w ∊ y , u ∊ a , ⟨ u , y ⟩ ∈ trapxd F ⇒ k ∊ cdm y $ by cdm_intro [e6]
+e8: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) , ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) , w = ⟨ k , v ⟩ , w ∊ (⋃ (img (trapxd F) a)) , y ∊ img (trapxd F) a , w ∊ y , u ∊ a , ⟨ u , y ⟩ ∈ trapxd F ⇒ k ∊ u $ by welc_eq [e3, e7]
+e9: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) , ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) , w = ⟨ k , v ⟩ , w ∊ (⋃ (img (trapxd F) a)) , y ∊ img (trapxd F) a , w ∊ y , u ∊ a , ⟨ u , y ⟩ ∈ trapxd F ⇒ u ∊ a $ by ax
+e10: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) , ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) , w = ⟨ k , v ⟩ , w ∊ (⋃ (img (trapxd F) a)) , y ∊ img (trapxd F) a , w ∊ y , u ∊ a , ⟨ u , y ⟩ ∈ trapxd F ⇒ k ∊ ⋃ a $ by cuni_intro [e8, e9]
+d1: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) , ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) , w = ⟨ k , v ⟩ , w ∊ (⋃ (img (trapxd F) a)) , y ∊ img (trapxd F) a , w ∊ y ⇒ y ∊ img (trapxd F) a $ by ax
+d2: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) , ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) , w = ⟨ k , v ⟩ , w ∊ (⋃ (img (trapxd F) a)) , y ∊ img (trapxd F) a , w ∊ y ⇒ k ∊ ⋃ a $ by img_elim [d1, e10]
+d3: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) , ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) , w = ⟨ k , v ⟩ , w ∊ (⋃ (img (trapxd F) a)) ⇒ w ∊ (⋃ (img (trapxd F) a)) $ by ax
+d4: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) , ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) , w = ⟨ k , v ⟩ , w ∊ (⋃ (img (trapxd F) a)) ⇒ k ∊ ⋃ a $ by cuni_elim [d3, d2]
+d5: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) , ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) ⇒ ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) $ by ax
+d6: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) , ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) ⇒ k ∊ ⋃ a $ by wcel_elim [d5, d4]
+d7: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) ⇒ k ∊ cdm (⋃ (img (trapxd F) a)) $ by ax
+d8: $ G , k ∊ cdm (⋃ (img (trapxd F) a)) ⇒ k ∊ ⋃ a $ by cdm_elim [d7, d6]
+g1: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w ⇒ w ∊ a $ by ax
+g2: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w ⇒ ∀ x (x ∊ a → x ∊ cdm (trapxd F)) $ by weaken [#2]
+g3: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w ⇒ w ∊ a → w ∊ cdm (trapxd F) $ by all_elim [g2]
+g4: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w ⇒ w ∊ cdm (trapxd F) $ by imp_elim [g3, g1]
+g5: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ ⟨ w , y ⟩ ∈ trapxd F $ by ax
+g6: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ y ∊ trapx F ∧ cdm y = w $ by trapxd_elim [g5]
+g7: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ cdm y = w $ by and_elim_r [g6]
+g8: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ w = cdm y $ by eq_sym [g7]
+g9: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ k ∊ w $ by ax
+g10: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ k ∊ cdm y $ by welc_eq [g8, g9]
+g11: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ w ∊ a $ by ax
+g12: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ y ∊ img (trapxd F) a $ by img_intro [g11, g5]
+g13: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ y ⊆ (⋃ (img (trapxd F) a)) $ by cuni_subset [g12]
+g14: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F , ⟨ k , v ⟩ ∈ y ⇒ ⟨ k , v ⟩ ∈ y $ by ax
+g15: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F , ⟨ k , v ⟩ ∈ y ⇒ y ⊆ (⋃ (img (trapxd F) a)) $ by weaken [g13]
+g16: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F , ⟨ k , v ⟩ ∈ y ⇒ ⟨ k , v ⟩ ∈ (⋃ (img (trapxd F) a)) $ by wcel_subset [g15, g14]
+g17: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F , ⟨ k , v ⟩ ∈ y ⇒ k ∊ cdm (⋃ (img (trapxd F) a)) $ by cdm_intro [g16]
+g18: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ k ∊ cdm (⋃ (img (trapxd F) a)) $ by cdm_elim [g10, g17]
+g19: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w ⇒ k ∊ cdm (⋃ (img (trapxd F) a)) $ by cdm_elim [g4, g18]
+g20: $ G , k ∊ ⋃ a ⇒ k ∊ ⋃ a $ by ax
+g21: $ G , k ∊ ⋃ a ⇒ k ∊ cdm (⋃ (img (trapxd F) a)) $ by cuni_elim [g20, g19]
+c16: $ G ⇒ cdm (⋃ (img (trapxd F) a)) = ⋃ a $ by eq_intro [d8, g21]
+q1: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ y ∊ trapx F $ by and_elim_l [g6]
+q2: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ functional ((⋃ (img (trapxd F) a))) $ by weaken [c13]
+q3: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ fv y k = fv (⋃ (img (trapxd F) a)) k $ by fv_subset [q2, g13, g10]
+q4: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ fv (⋃ (img (trapxd F) a)) k = fv y k $ by eq_sym [q3]
+q5: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ fv y k = fv F (cres y k) $ by trapx_step [q1, g10]
+q6: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ ord (cdm y) $ by trapx_ord [q1]
+q7: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ k ⊆ cdm y $ by ord_elem_subset [q6, g10]
+q8: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ cres (⋃ (img (trapxd F) a)) k = cres y k $ by d4_cres_sub_fun [q2, g13, q7]
+q9: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ cres y k = cres (⋃ (img (trapxd F) a)) k $ by eq_sym [q8]
+q10: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ F = F $ by eq_refl
+q11: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ fv F (cres y k) = fv F (cres (⋃ (img (trapxd F) a)) k) $ by fv_eq [q10, q9]
+q12: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ fv (⋃ (img (trapxd F) a)) k = fv F (cres y k) $ by eq_trans [q4, q5]
+q13: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w , ⟨ w , y ⟩ ∈ trapxd F ⇒ fv (⋃ (img (trapxd F) a)) k = fv F (cres (⋃ (img (trapxd F) a)) k) $ by eq_trans [q12, q11]
+q14: $ G , k ∊ ⋃ a , w ∊ a , k ∊ w ⇒ fv (⋃ (img (trapxd F) a)) k = fv F (cres (⋃ (img (trapxd F) a)) k) $ by cdm_elim [g4, q13]
+q15: $ G , k ∊ ⋃ a ⇒ fv (⋃ (img (trapxd F) a)) k = fv F (cres (⋃ (img (trapxd F) a)) k) $ by cuni_elim [g20, q14]
+c17: $ G ⇒ k ∊ ⋃ a → fv (⋃ (img (trapxd F) a)) k = fv F (cres (⋃ (img (trapxd F) a)) k) $ by imp_intro [q15]
+c18: $ G ⇒ ∀ k (k ∊ ⋃ a → fv (⋃ (img (trapxd F) a)) k = fv F (cres (⋃ (img (trapxd F) a)) k)) $ by all_intro [c17]
+u1: $ G , b = ⋃ a ⇒ b = ⋃ a $ by ax
+u2: $ G , b = ⋃ a ⇒ ⋃ a = b $ by eq_sym [u1]
+u3a: $ G , b = ⋃ a ⇒ ord (⋃ a) $ by weaken [c15]
+u3: $ G , b = ⋃ a ⇒ ord b $ by ord_eq [u2, u3a]
+u4a: $ G , b = ⋃ a ⇒ cdm (⋃ (img (trapxd F) a)) = ⋃ a $ by weaken [c16]
+u4: $ G , b = ⋃ a ⇒ cdm (⋃ (img (trapxd F) a)) = b $ by eq_trans [u4a, u2]
+u5a: $ G , b = ⋃ a , k ∊ b ⇒ b = ⋃ a $ by ax
+u5b: $ G , b = ⋃ a , k ∊ b ⇒ k ∊ b $ by ax
+u5: $ G , b = ⋃ a , k ∊ b ⇒ k ∊ ⋃ a $ by welc_eq [u5a, u5b]
+u6a: $ G , b = ⋃ a , k ∊ b ⇒ ∀ k (k ∊ ⋃ a → fv (⋃ (img (trapxd F) a)) k = fv F (cres (⋃ (img (trapxd F) a)) k)) $ by weaken [c18]
+u6: $ G , b = ⋃ a , k ∊ b ⇒ k ∊ ⋃ a → fv (⋃ (img (trapxd F) a)) k = fv F (cres (⋃ (img (trapxd F) a)) k) $ by all_elim [u6a]
+u7: $ G , b = ⋃ a , k ∊ b ⇒ fv (⋃ (img (trapxd F) a)) k = fv F (cres (⋃ (img (trapxd F) a)) k) $ by imp_elim [u6, u5]
+u8: $ G , b = ⋃ a ⇒ k ∊ b → fv (⋃ (img (trapxd F) a)) k = fv F (cres (⋃ (img (trapxd F) a)) k) $ by imp_intro [u7]
+u9: $ G , b = ⋃ a ⇒ ∀ k (k ∊ b → fv (⋃ (img (trapxd F) a)) k = fv F (cres (⋃ (img (trapxd F) a)) k)) $ by all_intro [u8]
+u10a: $ G , b = ⋃ a ⇒ isset ((⋃ (img (trapxd F) a))) $ by weaken [c4]
+u10b: $ G , b = ⋃ a ⇒ functional ((⋃ (img (trapxd F) a))) $ by weaken [c13]
+u10c: $ G , b = ⋃ a ⇒ rel ((⋃ (img (trapxd F) a))) $ by weaken [c14]
+u10: $ G , b = ⋃ a ⇒ (⋃ (img (trapxd F) a)) ∈ trapx F $ by trapx_intro [u10a, u3, u10b, u10c, u4, u9]
+c19a: $ G ⇒ isset (⋃ a) $ by ax_union
+c19: $ G ⇒ (⋃ (img (trapxd F) a)) ∈ trapx F $ by isset_elim [c19a, u10]
+c20: $ G ⇒ (⋃ (img (trapxd F) a)) ∈ trapx F ∧ cdm (⋃ (img (trapxd F) a)) = ⋃ a $ by and_intro [c19, c16]
+
+lemma d4_ex_cdm {g: set} (G: hyps g) (F: class) (j: set):
+  $ G ⇒ ∃ g (g ∊ trapx F ∧ cdm g = j) $ > $ G ⇒ j ∊ cdm (trapxd F) $
+----
+l1: $ g ∊ trapx F ∧ cdm g = j ⇒ g ∊ trapx F ∧ cdm g = j $ by ax
+l2: $ g ∊ trapx F ∧ cdm g = j ⇒ g ∊ trapx F $ by and_elim_l [l1]
+l3: $ g ∊ trapx F ∧ cdm g = j ⇒ cdm g = j $ by and_elim_r [l1]
+l4: $ g ∊ trapx F ∧ cdm g = j ⇒ ⟨ j , g ⟩ ∈ trapxd F $ by trapxd_intro [l2, l3]
+l5: $ g ∊ trapx F ∧ cdm g = j ⇒ j ∊ cdm (trapxd F) $ by cdm_intro [l4]
+l6: $ G ⇒ j ∊ cdm (trapxd F) $ by ex_elim [#1, l5]
+
+lemma d4_wcel_ex {g: set} (G: hyps g) (F B A: class):
+  $ G ⇒ B ∈ trapx F $ > $ G ⇒ cdm B = A $ > $ G ⇒ ∃ g (g ∊ trapx F ∧ cdm g = A) $
+----
+l1: $ G , z = B , z ∊ trapx F ⇒ z = B $ by ax
+l2: $ G , z = B , z ∊ trapx F ⇒ cdm z = cdm B $ by cdm_eq [l1]
+l3: $ G , z = B , z ∊ trapx F ⇒ cdm B = A $ by weaken [#2]
+l4: $ G , z = B , z ∊ trapx F ⇒ cdm z = A $ by eq_trans [l2, l3]
+l5: $ G , z = B , z ∊ trapx F ⇒ z ∊ trapx F $ by ax
+l6: $ G , z = B , z ∊ trapx F ⇒ z ∊ trapx F ∧ cdm z = A $ by and_intro [l5, l4]
+l7: $ G , z = B , z ∊ trapx F ⇒ ∃ g (g ∊ trapx F ∧ cdm g = A) $ by ex_intro (t := $ z $) [l6]
+l8: $ G ⇒ ∃ g (g ∊ trapx F ∧ cdm g = A) $ by wcel_elim [#1, l7]
+
+lemma d4_ext_ex {g: set} (G: hyps g) (F B A: class) (b: set):
+  $ G ⇒ functional F $ > $ G ⇒ B ∈ trapx F $ > $ G ⇒ cdm B = b $ > $ G ⇒ suc b = A $ >
+  $ G ⇒ ∃ g (g ∊ trapx F ∧ cdm g = A) $
+----
+w1: $ G , z = B , z ∊ trapx F ⇒ z = B $ by ax
+w2: $ G , z = B , z ∊ trapx F ⇒ cdm z = cdm B $ by cdm_eq [w1]
+w2a: $ G , z = B , z ∊ trapx F ⇒ cdm B = b $ by weaken [#3]
+w3: $ G , z = B , z ∊ trapx F ⇒ cdm z = b $ by eq_trans [w2, w2a]
+w4: $ G , z = B , z ∊ trapx F ⇒ z ∊ trapx F $ by ax
+w5: $ G , z = B , z ∊ trapx F ⇒ functional F $ by weaken [#1]
+w6: $ G , z = B , z ∊ trapx F ⇒ (z ∪ csn ⟨ b , fv F z ⟩) ∈ trapx F $ by trapx_extend [w5, w4, w3]
+v1: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ cdm (z ∪ csn ⟨ b , c ⟩) = cdm z ∪ csn b $ by cdm_cun_csn
+v2: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ c = fv F z $ by ax
+v3: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ b = b $ by eq_refl
+v4: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ ⟨ b , c ⟩ = ⟨ b , fv F z ⟩ $ by opair_eq [v3, v2]
+v5: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ csn ⟨ b , c ⟩ = csn ⟨ b , fv F z ⟩ $ by csn_eq [v4]
+v6: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ z = z $ by eq_refl
+v7: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ (z ∪ csn ⟨ b , c ⟩) = (z ∪ csn ⟨ b , fv F z ⟩) $ by cun_eq [v6, v5]
+v8: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ cdm (z ∪ csn ⟨ b , c ⟩) = cdm (z ∪ csn ⟨ b , fv F z ⟩) $ by cdm_eq [v7]
+v9: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ cdm (z ∪ csn ⟨ b , fv F z ⟩) = cdm (z ∪ csn ⟨ b , c ⟩) $ by eq_sym [v8]
+v10: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ cdm (z ∪ csn ⟨ b , fv F z ⟩) = cdm z ∪ csn b $ by eq_trans [v9, v1]
+v11a: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ cdm z = b $ by weaken [w3]
+v11b: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ csn b = csn b $ by eq_refl
+v11: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ cdm z ∪ csn b = b ∪ csn b $ by cun_eq [v11a, v11b]
+v12: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ cdm (z ∪ csn ⟨ b , fv F z ⟩) = suc b $ by eq_trans [v10, v11]
+v13a: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ suc b = A $ by weaken [#4]
+v13: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ cdm (z ∪ csn ⟨ b , fv F z ⟩) = A $ by eq_trans [v12, v13a]
+v14a: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ (z ∪ csn ⟨ b , fv F z ⟩) ∈ trapx F $ by weaken [w6]
+v14: $ G , z = B , z ∊ trapx F , c = fv F z ⇒ ∃ g (g ∊ trapx F ∧ cdm g = A) $ by d4_wcel_ex [v14a, v13]
+w7: $ G , z = B , z ∊ trapx F ⇒ isset (fv F z) $ by fv_set [w5]
+w8: $ G , z = B , z ∊ trapx F ⇒ ∃ g (g ∊ trapx F ∧ cdm g = A) $ by isset_elim [w7, v14]
+w9: $ G ⇒ ∃ g (g ∊ trapx F ∧ cdm g = A) $ by wcel_elim [#2, w8]
+
+trapx_exists
+------------
+l1: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , k ∊ i ⇒ ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) $ by ax
+l2: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , k ∊ i ⇒ k ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = k) $ by all_elim [l1]
+l3: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , k ∊ i ⇒ k ∊ i $ by ax
+l4: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , k ∊ i ⇒ ∃ g (g ∊ trapx F ∧ cdm g = k) $ by imp_elim [l2, l3]
+l5: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , k ∊ i ⇒ k ∊ cdm (trapxd F) $ by d4_ex_cdm [l4]
+l6: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) ⇒ k ∊ i → k ∊ cdm (trapxd F) $ by imp_intro [l5]
+l7: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) ⇒ ∀ k (k ∊ i → k ∊ cdm (trapxd F)) $ by all_intro [l6]
+l8: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) ⇒ ord i $ by ax
+l9: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) ⇒ (⋃ (img (trapxd F) i)) ∈ trapx F ∧ cdm (⋃ (img (trapxd F) i)) = ⋃ i $ by trapx_cuni [l8, l7]
+l10: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) ⇒ (⋃ (img (trapxd F) i)) ∈ trapx F $ by and_elim_l [l9]
+l11: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) ⇒ cdm (⋃ (img (trapxd F) i)) = ⋃ i $ by and_elim_r [l9]
+l12: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) ⇒ i = ⋃ i ∨ i = suc (⋃ i) $ by ord_cuni_or_suc [l8]
+m1: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = ⋃ i ⇒ i = ⋃ i $ by ax
+m2: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = ⋃ i ⇒ ⋃ i = i $ by eq_sym [m1]
+m3a: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = ⋃ i ⇒ cdm (⋃ (img (trapxd F) i)) = ⋃ i $ by weaken [l11]
+m3: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = ⋃ i ⇒ cdm (⋃ (img (trapxd F) i)) = i $ by eq_trans [m3a, m2]
+m4a: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = ⋃ i ⇒ (⋃ (img (trapxd F) i)) ∈ trapx F $ by weaken [l10]
+m4: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = ⋃ i ⇒ ∃ g (g ∊ trapx F ∧ cdm g = i) $ by d4_wcel_ex [m4a, m3]
+n2: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = suc (⋃ i) , b = ⋃ i ⇒ b = ⋃ i $ by ax
+n3: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = suc (⋃ i) , b = ⋃ i ⇒ ⋃ i = b $ by eq_sym [n2]
+n4a: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = suc (⋃ i) , b = ⋃ i ⇒ cdm (⋃ (img (trapxd F) i)) = ⋃ i $ by weaken [l11]
+n4: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = suc (⋃ i) , b = ⋃ i ⇒ cdm (⋃ (img (trapxd F) i)) = b $ by eq_trans [n4a, n3]
+n6: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = suc (⋃ i) , b = ⋃ i ⇒ suc b = suc (⋃ i) $ by suc_eq [n2]
+n7: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = suc (⋃ i) , b = ⋃ i ⇒ i = suc (⋃ i) $ by ax
+n8: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = suc (⋃ i) , b = ⋃ i ⇒ suc (⋃ i) = i $ by eq_sym [n7]
+n9: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = suc (⋃ i) , b = ⋃ i ⇒ suc b = i $ by eq_trans [n6, n8]
+n5a: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = suc (⋃ i) , b = ⋃ i ⇒ functional F $ by weaken [#1]
+n5b: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = suc (⋃ i) , b = ⋃ i ⇒ (⋃ (img (trapxd F) i)) ∈ trapx F $ by weaken [l10]
+n5: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = suc (⋃ i) , b = ⋃ i ⇒ ∃ g (g ∊ trapx F ∧ cdm g = i) $ by d4_ext_ex [n5a, n5b, n4, n9]
+n10a: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = suc (⋃ i) ⇒ isset (⋃ i) $ by ax_union
+n10: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) , i = suc (⋃ i) ⇒ ∃ g (g ∊ trapx F ∧ cdm g = i) $ by isset_elim [n10a, n5]
+l13: $ G , ord i , ∀ j (j ∊ i → ∃ g (g ∊ trapx F ∧ cdm g = j)) ⇒ ∃ g (g ∊ trapx F ∧ cdm g = i) $ by or_elim [l12, m4, n10]
+l14: $ G ⇒ ∀ i (ord i → ∃ g (g ∊ trapx F ∧ cdm g = i)) $ by ord_ind_f [l13]
+l15: $ G ⇒ ord a → ∃ g (g ∊ trapx F ∧ cdm g = a) $ by all_elim [l14]
+l16: $ G ⇒ ∃ g (g ∊ trapx F ∧ cdm g = a) $ by imp_elim [l15, #2]
+
+trapx_congr
+-----------
+c1: $ cres g k ≐ cres g k $ by ceqt_refl
+c2: $ fv F (cres g k) ≐ fv H (cres g k) $ by fv_congr [#1, c1]
+c3: $ fv g k ≐ fv g k $ by ceqt_refl
+c4: $ (fv g k = fv F (cres g k)) ⟺ (fv g k = fv H (cres g k)) $ by ceq_congr [c3, c2]
+c5: $ (k ∊ a) ⟺ (k ∊ a) $ by iff_refl
+c6: $ (k ∊ a → fv g k = fv F (cres g k)) ⟺ (k ∊ a → fv g k = fv H (cres g k)) $ by im_congr [c5, c4]
+c7: $ ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⟺ ∀ k (k ∊ a → fv g k = fv H (cres g k)) $ by all_congr [c6]
+c8: $ (cdm g = a) ⟺ (cdm g = a) $ by iff_refl
+c9: $ (cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k))) ⟺ (cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv H (cres g k))) $ by and_congr [c8, c7]
+c10: $ rel g ⟺ rel g $ by iff_refl
+c11: $ (rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k))) ⟺ (rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv H (cres g k))) $ by and_congr [c10, c9]
+c12: $ functional g ⟺ functional g $ by iff_refl
+c13: $ (functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k))) ⟺ (functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv H (cres g k))) $ by and_congr [c12, c11]
+c14: $ ord a ⟺ ord a $ by iff_refl
+c15: $ (ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k))) ⟺ (ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv H (cres g k))) $ by and_congr [c14, c13]
+c16: $ ∃ a (ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k))) ⟺ ∃ a (ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv H (cres g k))) $ by ex_congr [c15]
+c17: $ {g | ∃ a (ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)))} ≐ {g | ∃ a (ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv H (cres g k)))} $ by cab_congr [c16]
+
+sb_c_trapx
+----------
+l1: $ (⟦ x / t ⟧ {g | ∃ a (ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv F (cres g k)))}) ≐ {g | ∃ a (ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧ ∀ k (k ∊ a → fv g k = fv (⟦ x / t ⟧ F) (cres g k)))} $ by ceqt_refl
+
+trapxd_congr
+------------
+c0: $ seqt j j $ by seqt_refl
+c1: $ trapx F ≐ trapx H $ by trapx_congr [#1]
+c2: $ (j ∊ trapx F) ⟺ (j ∊ trapx H) $ by welc_congr [c0, c1]
+c3: $ (cdm j = i) ⟺ (cdm j = i) $ by iff_refl
+c4: $ (j ∊ trapx F ∧ cdm j = i) ⟺ (j ∊ trapx H ∧ cdm j = i) $ by and_congr [c2, c3]
+c5: $ (z = ⟨ i , j ⟩) ⟺ (z = ⟨ i , j ⟩) $ by iff_refl
+c6: $ (z = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i) ⟺ (z = ⟨ i , j ⟩ ∧ j ∊ trapx H ∧ cdm j = i) $ by and_congr [c5, c4]
+c7: $ ∃ j (z = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i) ⟺ ∃ j (z = ⟨ i , j ⟩ ∧ j ∊ trapx H ∧ cdm j = i) $ by ex_congr [c6]
+c8: $ ∃ i ∃ j (z = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i) ⟺ ∃ i ∃ j (z = ⟨ i , j ⟩ ∧ j ∊ trapx H ∧ cdm j = i) $ by ex_congr [c7]
+c9: $ {z | ∃ i ∃ j (z = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i)} ≐ {z | ∃ i ∃ j (z = ⟨ i , j ⟩ ∧ j ∊ trapx H ∧ cdm j = i)} $ by cab_congr [c8]
+
+sb_c_trapxd
+-----------
+l1: $ (⟦ x / t ⟧ {z | ∃ i ∃ j (z = ⟨ i , j ⟩ ∧ j ∊ trapx F ∧ cdm j = i)}) ≐ {z | ∃ i ∃ j (z = ⟨ i , j ⟩ ∧ j ∊ trapx (⟦ x / t ⟧ F) ∧ cdm j = i)} $ by ceqt_refl
+
+trec_intro
+----------
+l1: $ G , w = ⟨ a , b ⟩ , w ∊ g ⇒ w ∊ g $ by ax
+l2: $ G , w = ⟨ a , b ⟩ , w ∊ g ⇒ g ∊ trapx F $ by weaken [#1]
+l3: $ G , w = ⟨ a , b ⟩ , w ∊ g ⇒ w ∊ ⋃ (trapx F) $ by cuni_intro [l1, l2]
+l4: $ G , w = ⟨ a , b ⟩ , w ∊ g ⇒ w = ⟨ a , b ⟩ $ by ax
+l5: $ G , w = ⟨ a , b ⟩ , w ∊ g ⇒ ⟨ a , b ⟩ ∈ ⋃ (trapx F) $ by wcel_intro [l4, l3]
+l6: $ G ⇒ ⟨ a , b ⟩ ∈ trec F $ by wcel_elim [#2, l5]
+
+trec_elim
+---------
+l1: $ G , w = ⟨ a , b ⟩ , y ∊ trapx F , w ∊ y ⇒ w = ⟨ a , b ⟩ $ by ax
+l2: $ G , w = ⟨ a , b ⟩ , y ∊ trapx F , w ∊ y ⇒ w ∊ y $ by ax
+l3: $ G , w = ⟨ a , b ⟩ , y ∊ trapx F , w ∊ y ⇒ ⟨ a , b ⟩ ∈ y $ by wcel_intro [l1, l2]
+l4: $ G , w = ⟨ a , b ⟩ , y ∊ trapx F , w ∊ y ⇒ y ∊ trapx F $ by ax
+l5: $ G , w = ⟨ a , b ⟩ , y ∊ trapx F , w ∊ y ⇒ y ∊ trapx F ∧ ⟨ a , b ⟩ ∈ y $ by and_intro [l4, l3]
+l6: $ G , w = ⟨ a , b ⟩ , y ∊ trapx F , w ∊ y ⇒ ∃ g (g ∊ trapx F ∧ ⟨ a , b ⟩ ∈ g) $ by ex_intro [l5]
+l7: $ G , w = ⟨ a , b ⟩ , w ∊ ⋃ (trapx F) ⇒ w ∊ ⋃ (trapx F) $ by ax
+l8: $ G , w = ⟨ a , b ⟩ , w ∊ ⋃ (trapx F) ⇒ ∃ g (g ∊ trapx F ∧ ⟨ a , b ⟩ ∈ g) $ by cuni_elim [l7, l6]
+l9: $ G ⇒ ∃ g (g ∊ trapx F ∧ ⟨ a , b ⟩ ∈ g) $ by wcel_elim [#1, l8]
+
+trec_functional
+---------------
+l1: $ G , u ∊ trapx F ⇒ u ∊ trapx F $ by ax
+l2: $ G , u ∊ trapx F ⇒ functional u $ by trapx_functional [l1]
+l3: $ G ⇒ u ∊ trapx F → functional u $ by imp_intro [l2]
+l4: $ G ⇒ ∀ u (u ∊ trapx F → functional u) $ by all_intro [l3]
+h1: $ G , u ∊ trapx F ∧ v ∊ trapx F ⇒ u ∊ trapx F ∧ v ∊ trapx F $ by ax
+h2: $ G , u ∊ trapx F ∧ v ∊ trapx F ⇒ u ∊ trapx F $ by and_elim_l [h1]
+h3: $ G , u ∊ trapx F ∧ v ∊ trapx F ⇒ v ∊ trapx F $ by and_elim_r [h1]
+h4: $ G , u ∊ trapx F ∧ v ∊ trapx F ⇒ u ⊆ v ∨ v ⊆ u $ by trapx_chain [h2, h3]
+h5: $ G ⇒ u ∊ trapx F ∧ v ∊ trapx F → u ⊆ v ∨ v ⊆ u $ by imp_intro [h4]
+h6: $ G ⇒ ∀ v (u ∊ trapx F ∧ v ∊ trapx F → u ⊆ v ∨ v ⊆ u) $ by all_intro [h5]
+h7: $ G ⇒ ∀ u ∀ v (u ∊ trapx F ∧ v ∊ trapx F → u ⊆ v ∨ v ⊆ u) $ by all_intro [h6]
+l5: $ G ⇒ functional (⋃ (trapx F)) $ by functional_cuni_chain [l4, h7]
+
+trec_rel
+--------
+l1: $ G , u ∊ trapx F ⇒ u ∊ trapx F $ by ax
+l2: $ G , u ∊ trapx F ⇒ rel u $ by trapx_rel [l1]
+l3: $ G ⇒ u ∊ trapx F → rel u $ by imp_intro [l2]
+l4: $ G ⇒ ∀ u (u ∊ trapx F → rel u) $ by all_intro [l3]
+l5: $ G ⇒ rel (⋃ (trapx F)) $ by rel_cuni [l4]
+
+trec_cdm_ord
+------------
+l1: $ G , ⟨ a , y ⟩ ∈ trec F ⇒ ⟨ a , y ⟩ ∈ trec F $ by ax
+l2: $ G , ⟨ a , y ⟩ ∈ trec F ⇒ ∃ u (u ∊ trapx F ∧ ⟨ a , y ⟩ ∈ u) $ by trec_elim [l1]
+l3: $ G , ⟨ a , y ⟩ ∈ trec F , u ∊ trapx F ∧ ⟨ a , y ⟩ ∈ u ⇒ u ∊ trapx F ∧ ⟨ a , y ⟩ ∈ u $ by ax
+l4: $ G , ⟨ a , y ⟩ ∈ trec F , u ∊ trapx F ∧ ⟨ a , y ⟩ ∈ u ⇒ u ∊ trapx F $ by and_elim_l [l3]
+l5: $ G , ⟨ a , y ⟩ ∈ trec F , u ∊ trapx F ∧ ⟨ a , y ⟩ ∈ u ⇒ ⟨ a , y ⟩ ∈ u $ by and_elim_r [l3]
+l6: $ G , ⟨ a , y ⟩ ∈ trec F , u ∊ trapx F ∧ ⟨ a , y ⟩ ∈ u ⇒ a ∊ cdm u $ by cdm_intro [l5]
+l7: $ G , ⟨ a , y ⟩ ∈ trec F , u ∊ trapx F ∧ ⟨ a , y ⟩ ∈ u ⇒ ord (cdm u) $ by trapx_ord [l4]
+l8: $ G , ⟨ a , y ⟩ ∈ trec F , u ∊ trapx F ∧ ⟨ a , y ⟩ ∈ u ⇒ ord a $ by ord_elem [l7, l6]
+l9: $ G , ⟨ a , y ⟩ ∈ trec F ⇒ ord a $ by ex_elim [l2, l8]
+l10: $ G ⇒ ord a $ by cdm_elim [#1, l9]
+
+lemma d4_apx_at {g: set} (G: hyps g) (F: class) (a: set):
+  $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ ∃ g (g ∊ trapx F ∧ a ∊ cdm g) $
+----
+l1: $ G ⇒ ord (suc a) $ by ord_suc [#2]
+l2: $ G ⇒ isset a $ by isset_var
+l3: $ G ⇒ isset (suc a) $ by suc_set [l2]
+l4: $ G , b = suc a ⇒ b = suc a $ by ax
+l5: $ G , b = suc a ⇒ suc a = b $ by eq_sym [l4]
+l6a: $ G , b = suc a ⇒ ord (suc a) $ by weaken [l1]
+l6: $ G , b = suc a ⇒ ord b $ by ord_eq [l5, l6a]
+l7: $ G , b = suc a ⇒ functional F $ by weaken [#1]
+l8: $ G , b = suc a ⇒ ∃ u (u ∊ trapx F ∧ cdm u = b) $ by trapx_exists [l7, l6]
+l9: $ G , b = suc a , u ∊ trapx F ∧ cdm u = b ⇒ u ∊ trapx F ∧ cdm u = b $ by ax
+l10: $ G , b = suc a , u ∊ trapx F ∧ cdm u = b ⇒ u ∊ trapx F $ by and_elim_l [l9]
+l11: $ G , b = suc a , u ∊ trapx F ∧ cdm u = b ⇒ cdm u = b $ by and_elim_r [l9]
+l12: $ G , b = suc a , u ∊ trapx F ∧ cdm u = b ⇒ b = cdm u $ by eq_sym [l11]
+l13: $ G , b = suc a , u ∊ trapx F ∧ cdm u = b ⇒ a ∊ suc a $ by suc_self
+l14a: $ G , b = suc a , u ∊ trapx F ∧ cdm u = b ⇒ suc a = b $ by weaken [l5]
+l14: $ G , b = suc a , u ∊ trapx F ∧ cdm u = b ⇒ a ∊ b $ by welc_eq [l14a, l13]
+l15: $ G , b = suc a , u ∊ trapx F ∧ cdm u = b ⇒ a ∊ cdm u $ by welc_eq [l12, l14]
+l16: $ G , b = suc a , u ∊ trapx F ∧ cdm u = b ⇒ u ∊ trapx F ∧ a ∊ cdm u $ by and_intro [l10, l15]
+l17: $ G , b = suc a , u ∊ trapx F ∧ cdm u = b ⇒ ∃ g (g ∊ trapx F ∧ a ∊ cdm g) $ by ex_intro (t := $ u $) [l16]
+l18: $ G , b = suc a ⇒ ∃ g (g ∊ trapx F ∧ a ∊ cdm g) $ by ex_elim [l8, l17]
+l19: $ G ⇒ ∃ g (g ∊ trapx F ∧ a ∊ cdm g) $ by isset_elim [l3, l18]
+
+trec_cdm
+--------
+l1: $ G ⇒ ∃ u (u ∊ trapx F ∧ a ∊ cdm u) $ by d4_apx_at [#1, #2]
+l2: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ u ∊ trapx F ∧ a ∊ cdm u $ by ax
+l3: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ u ∊ trapx F $ by and_elim_l [l2]
+l4: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ a ∊ cdm u $ by and_elim_r [l2]
+l5: $ G , u ∊ trapx F ∧ a ∊ cdm u , ⟨ a , v ⟩ ∈ u ⇒ ⟨ a , v ⟩ ∈ u $ by ax
+l6: $ G , u ∊ trapx F ∧ a ∊ cdm u , ⟨ a , v ⟩ ∈ u ⇒ u ∊ trapx F $ by weaken [l3]
+l7: $ G , u ∊ trapx F ∧ a ∊ cdm u , ⟨ a , v ⟩ ∈ u ⇒ ⟨ a , v ⟩ ∈ trec F $ by trec_intro [l6, l5]
+l8: $ G , u ∊ trapx F ∧ a ∊ cdm u , ⟨ a , v ⟩ ∈ u ⇒ a ∊ cdm (trec F) $ by cdm_intro [l7]
+l9: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ a ∊ cdm (trec F) $ by cdm_elim [l4, l8]
+l10: $ G ⇒ a ∊ cdm (trec F) $ by ex_elim [l1, l9]
+
+trec_fv
+-------
+l1: $ G ⇒ functional (trec F) $ by trec_functional
+l2: $ G ⇒ g ⊆ trec F $ by cuni_subset [#1]
+l3: $ G ⇒ fv g a = fv (trec F) a $ by fv_subset [l1, l2, #2]
+l4: $ G ⇒ fv (trec F) a = fv g a $ by eq_sym [l3]
+
+trec_cres
+---------
+l1: $ G ⇒ functional (trec F) $ by trec_functional
+l2: $ G ⇒ g ⊆ trec F $ by cuni_subset [#1]
+l3: $ G ⇒ ord (cdm g) $ by trapx_ord [#1]
+l4: $ G ⇒ a ⊆ cdm g $ by ord_elem_subset [l3, #2]
+l5: $ G ⇒ cres (trec F) a = cres g a $ by d4_cres_sub_fun [l1, l2, l4]
+
+trec_cres_apx
+-------------
+l1: $ G ⇒ ∃ u (u ∊ trapx F ∧ a ∊ cdm u) $ by d4_apx_at [#1, #2]
+l2: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ u ∊ trapx F ∧ a ∊ cdm u $ by ax
+l3: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ u ∊ trapx F $ by and_elim_l [l2]
+l4: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ a ∊ cdm u $ by and_elim_r [l2]
+l5: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ cres u a ∈ trapx F $ by trapx_cres [l3, l4]
+l6: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ cres (trec F) a = cres u a $ by trec_cres [l3, l4]
+l7: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ cres u a = cres (trec F) a $ by eq_sym [l6]
+l8: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ cres (trec F) a ∈ trapx F $ by wcel_eq_l [l7, l5]
+l9: $ G ⇒ cres (trec F) a ∈ trapx F $ by ex_elim [l1, l8]
+
+trec_eq
+-------
+l1: $ G ⇒ ∃ u (u ∊ trapx F ∧ a ∊ cdm u) $ by d4_apx_at [#1, #2]
+l2: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ u ∊ trapx F ∧ a ∊ cdm u $ by ax
+l3: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ u ∊ trapx F $ by and_elim_l [l2]
+l4: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ a ∊ cdm u $ by and_elim_r [l2]
+l5: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ fv (trec F) a = fv u a $ by trec_fv [l3, l4]
+l6: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ fv u a = fv F (cres u a) $ by trapx_step [l3, l4]
+l7: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ cres (trec F) a = cres u a $ by trec_cres [l3, l4]
+l8: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ cres u a = cres (trec F) a $ by eq_sym [l7]
+l9: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ F = F $ by eq_refl
+l10: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ fv F (cres u a) = fv F (cres (trec F) a) $ by fv_eq [l9, l8]
+l11: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ fv (trec F) a = fv F (cres u a) $ by eq_trans [l5, l6]
+l12: $ G , u ∊ trapx F ∧ a ∊ cdm u ⇒ fv (trec F) a = fv F (cres (trec F) a) $ by eq_trans [l11, l10]
+l13: $ G ⇒ fv (trec F) a = fv F (cres (trec F) a) $ by ex_elim [l1, l12]
+
+trec_unique
+-----------
+e1: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres H i ⇒ ⟨ u , v ⟩ ∈ cres H i $ by ax
+e2: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres H i ⇒ u ∊ i ∧ ⟨ u , v ⟩ ∈ H $ by cres_elim [e1]
+e3: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres H i ⇒ u ∊ i $ by and_elim_l [e2]
+e4: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres H i ⇒ ⟨ u , v ⟩ ∈ H $ by and_elim_r [e2]
+e5: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres H i ⇒ ord i $ by ax
+e6: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres H i ⇒ ord u $ by ord_elem [e5, e3]
+e7: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres H i ⇒ functional F $ by weaken [#1]
+e8: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres H i ⇒ u ∊ cdm (trec F) $ by trec_cdm [e7, e6]
+e9: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres H i ⇒ ∀ j (j ∊ i → fv H j = fv (trec F) j) $ by ax
+e10: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres H i ⇒ u ∊ i → fv H u = fv (trec F) u $ by all_elim [e9]
+e11: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres H i ⇒ fv H u = fv (trec F) u $ by imp_elim [e10, e3]
+e12: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres H i ⇒ functional H $ by weaken [#2]
+e13: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres H i ⇒ functional (trec F) $ by trec_functional
+e14: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres H i ⇒ ⟨ u , v ⟩ ∈ trec F $ by d4_pair_move [e12, e13, e4, e8, e11]
+e15: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres H i ⇒ ⟨ u , v ⟩ ∈ cres (trec F) i $ by cres_intro [e3, e14]
+f1: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres (trec F) i ⇒ ⟨ u , v ⟩ ∈ cres (trec F) i $ by ax
+f2: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres (trec F) i ⇒ u ∊ i ∧ ⟨ u , v ⟩ ∈ trec F $ by cres_elim [f1]
+f3: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres (trec F) i ⇒ u ∊ i $ by and_elim_l [f2]
+f4: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres (trec F) i ⇒ ⟨ u , v ⟩ ∈ trec F $ by and_elim_r [f2]
+f5: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres (trec F) i ⇒ ord i $ by ax
+f6: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres (trec F) i ⇒ ord u $ by ord_elem [f5, f3]
+f7: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres (trec F) i ⇒ ∀ x (x ∊ cdm H ↔ ord x) $ by weaken [#4]
+f8: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres (trec F) i ⇒ u ∊ cdm H ↔ ord u $ by all_elim [f7]
+f9: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres (trec F) i ⇒ u ∊ cdm H $ by bi_elim_r [f8, f6]
+f10: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres (trec F) i ⇒ ∀ j (j ∊ i → fv H j = fv (trec F) j) $ by ax
+f11: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres (trec F) i ⇒ u ∊ i → fv H u = fv (trec F) u $ by all_elim [f10]
+f12: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres (trec F) i ⇒ fv H u = fv (trec F) u $ by imp_elim [f11, f3]
+f13: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres (trec F) i ⇒ fv (trec F) u = fv H u $ by eq_sym [f12]
+f14: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres (trec F) i ⇒ functional (trec F) $ by trec_functional
+f15: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres (trec F) i ⇒ functional H $ by weaken [#2]
+f16: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres (trec F) i ⇒ ⟨ u , v ⟩ ∈ H $ by d4_pair_move [f14, f15, f4, f9, f13]
+f17: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) , ⟨ u , v ⟩ ∈ cres (trec F) i ⇒ ⟨ u , v ⟩ ∈ cres H i $ by cres_intro [f3, f16]
+r1: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) ⇒ rel (cres H i) $ by cres_rel
+r2: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) ⇒ rel (cres (trec F) i) $ by cres_rel
+r3: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) ⇒ cres H i = cres (trec F) i $ by rel_eq_intro [r1, r2, e15, f17]
+r4: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) ⇒ ∀ x (ord x → fv H x = fv F (cres H x)) $ by weaken [#5]
+r5: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) ⇒ ord i → fv H i = fv F (cres H i) $ by all_elim [r4]
+r6: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) ⇒ ord i $ by ax
+r7: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) ⇒ fv H i = fv F (cres H i) $ by imp_elim [r5, r6]
+r8: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) ⇒ F = F $ by eq_refl
+r9: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) ⇒ fv F (cres H i) = fv F (cres (trec F) i) $ by fv_eq [r8, r3]
+r10: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) ⇒ functional F $ by weaken [#1]
+r11: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) ⇒ fv (trec F) i = fv F (cres (trec F) i) $ by trec_eq [r10, r6]
+r12: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) ⇒ fv F (cres (trec F) i) = fv (trec F) i $ by eq_sym [r11]
+r13: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) ⇒ fv H i = fv F (cres (trec F) i) $ by eq_trans [r7, r9]
+r14: $ G , ord i , ∀ j (j ∊ i → fv H j = fv (trec F) j) ⇒ fv H i = fv (trec F) i $ by eq_trans [r13, r12]
+r15: $ G ⇒ ∀ i (ord i → fv H i = fv (trec F) i) $ by ord_ind_f [r14]
+w1: $ G , w ∊ cdm H ⇒ w ∊ cdm H $ by ax
+w2: $ G , w ∊ cdm H ⇒ ∀ x (x ∊ cdm H ↔ ord x) $ by weaken [#4]
+w3: $ G , w ∊ cdm H ⇒ w ∊ cdm H ↔ ord w $ by all_elim [w2]
+w4: $ G , w ∊ cdm H ⇒ ord w $ by bi_elim_l [w3, w1]
+w5: $ G , w ∊ cdm H ⇒ functional F $ by weaken [#1]
+w6: $ G , w ∊ cdm H ⇒ w ∊ cdm (trec F) $ by trec_cdm [w5, w4]
+w7: $ G , w ∊ cdm (trec F) ⇒ w ∊ cdm (trec F) $ by ax
+w8: $ G , w ∊ cdm (trec F) ⇒ ord w $ by trec_cdm_ord [w7]
+w9: $ G , w ∊ cdm (trec F) ⇒ ∀ x (x ∊ cdm H ↔ ord x) $ by weaken [#4]
+w10: $ G , w ∊ cdm (trec F) ⇒ w ∊ cdm H ↔ ord w $ by all_elim [w9]
+w11: $ G , w ∊ cdm (trec F) ⇒ w ∊ cdm H $ by bi_elim_r [w10, w8]
+w12: $ G ⇒ cdm H = cdm (trec F) $ by eq_intro [w6, w11]
+v1: $ G , w ∊ cdm H ⇒ ∀ i (ord i → fv H i = fv (trec F) i) $ by weaken [r15]
+v2: $ G , w ∊ cdm H ⇒ ord w → fv H w = fv (trec F) w $ by all_elim [v1]
+v3: $ G , w ∊ cdm H ⇒ fv H w = fv (trec F) w $ by imp_elim [v2, w4]
+z1: $ G ⇒ functional (trec F) $ by trec_functional
+z2: $ G ⇒ rel (trec F) $ by trec_rel
+z3: $ G ⇒ H = trec F $ by fv_ext [#2, z1, #3, z2, w12, v3]
+
+trec_congr
+----------
+l1: $ trapx F ≐ trapx H $ by trapx_congr [#1]
+l2: $ ⋃ (trapx F) ≐ ⋃ (trapx H) $ by cuni_congr [l1]
+
+lemma x1_trapx_sub (G: hyps) (F H: class) (g: set):
+  $ G ⇒ F = H $ > $ G ⇒ g ∊ trapx F $ > $ G ⇒ g ∊ trapx H $
+----
+s1: $ G , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) , k ∊ a ⇒ ∀ k (k ∊ a → fv g k = fv F (cres g k)) $ by ax
+s2: $ G , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) , k ∊ a ⇒ k ∊ a → fv g k = fv F (cres g k) $ by all_elim (t := $ k $) [s1]
+s3: $ G , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) , k ∊ a ⇒ k ∊ a $ by ax
+s4: $ G , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) , k ∊ a ⇒ fv g k = fv F (cres g k) $ by imp_elim [s2, s3]
+s5: $ G , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) , k ∊ a ⇒ F = H $ by weaken [#1]
+s6: $ G , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) , k ∊ a ⇒ cres g k = cres g k $ by eq_refl
+s7: $ G , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) , k ∊ a ⇒ fv F (cres g k) = fv H (cres g k) $ by fv_eq [s5, s6]
+s8: $ G , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) , k ∊ a ⇒ fv g k = fv H (cres g k) $ by eq_trans [s4, s7]
+s9: $ G , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ k ∊ a → fv g k = fv H (cres g k) $ by imp_intro [s8]
+s10: $ G , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ ∀ k (k ∊ a → fv g k = fv H (cres g k)) $ by all_intro [s9]
+s11: $ G , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ isset g $ by isset_var
+s12: $ G , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ ord a $ by ax
+s13: $ G , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ functional g $ by ax
+s14: $ G , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ rel g $ by ax
+s15: $ G , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ cdm g = a $ by ax
+s16: $ G , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ g ∈ trapx H $ by trapx_intro [s11, s12, s13, s14, s15, s10]
+s17: $ G , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ g ∊ trapx H $ by wcel_welc [s16]
+s18: $ G ⇒ g ∊ trapx H $ by trapx_elim [#2, s17]
+
+trec_eq_cong
+------------
+r1: $ G , g ∊ trapx F ⇒ g ∊ trapx F $ by ax
+r2: $ G , g ∊ trapx F ⇒ F = H $ by weaken [#1]
+r3: $ G , g ∊ trapx F ⇒ g ∊ trapx H $ by x1_trapx_sub [r2, r1]
+r4: $ G ⇒ H = F $ by eq_sym [#1]
+r5: $ G , g ∊ trapx H ⇒ g ∊ trapx H $ by ax
+r6: $ G , g ∊ trapx H ⇒ H = F $ by weaken [r4]
+r7: $ G , g ∊ trapx H ⇒ g ∊ trapx F $ by x1_trapx_sub [r6, r5]
+r8: $ G ⇒ trapx F = trapx H $ by eq_intro [r3, r7]
+r9: $ G ⇒ ⋃ (trapx F) = ⋃ (trapx H) $ by cuni_eq [r8]
+
+sb_c_trec
+---------
+l1: $ (⟦ x / t ⟧ (⋃ (trapx F))) ≐ ⋃ (trapx (⟦ x / t ⟧ F)) $ by ceqt_refl

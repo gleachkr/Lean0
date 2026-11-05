@@ -1,0 +1,389 @@
+-- Proofs for tg.mm0.
+
+-- The equivalence bundle for formulas. These three proofs precede the
+-- congruence rules of the judgment layer, so they state every context
+-- literally, as the rules produce it.
+iff_refl
+--------
+l1: $ _ , p ⇒ p $ by ax
+l2: $ _ ⇒ p ↔ p $ by bi_intro [l1, l1]
+
+iff_trans
+---------
+l1: $ _ , p ⇒ p $ by ax
+l2: $ _ , p ⇒ p ↔ q $ by weaken [#1]
+l3: $ _ , p ⇒ q $ by bi_elim_l [l2, l1]
+l4: $ _ , p ⇒ q ↔ r $ by weaken [#2]
+l5: $ _ , p ⇒ r $ by bi_elim_l [l4, l3]
+l6: $ _ , r ⇒ r $ by ax
+l7: $ _ , r ⇒ q ↔ r $ by weaken [#2]
+l8: $ _ , r ⇒ q $ by bi_elim_r [l7, l6]
+l9: $ _ , r ⇒ p ↔ q $ by weaken [#1]
+l10: $ _ , r ⇒ p $ by bi_elim_r [l9, l8]
+l11: $ _ ⇒ p ↔ r $ by bi_intro [l5, l10]
+
+iff_sym
+-------
+l1: $ _ , q ⇒ q $ by ax
+l2: $ _ , q ⇒ p ↔ q $ by weaken [#1]
+l3: $ _ , q ⇒ p $ by bi_elim_r [l2, l1]
+l4: $ _ , p ⇒ p $ by ax
+l5: $ _ , p ⇒ p ↔ q $ by weaken [#1]
+l6: $ _ , p ⇒ q $ by bi_elim_l [l5, l4]
+l7: $ _ ⇒ q ↔ p $ by bi_intro [l3, l6]
+
+-- From here on contexts are normalized.
+
+im_congr
+--------
+l1: $ p → r , q ⇒ q $ by ax
+l2: $ p → r , q ⇒ p ↔ q $ by weaken [#1]
+l3: $ p → r , q ⇒ p $ by bi_elim_r [l2, l1]
+l4: $ p → r , q ⇒ p → r $ by ax
+l5: $ p → r , q ⇒ r $ by imp_elim [l4, l3]
+l6: $ p → r , q ⇒ r ↔ s $ by weaken [#2]
+l7: $ p → r , q ⇒ s $ by bi_elim_l [l6, l5]
+l8: $ p → r ⇒ q → s $ by imp_intro [l7]
+l9: $ q → s , p ⇒ p $ by ax
+l10: $ q → s , p ⇒ p ↔ q $ by weaken [#1]
+l11: $ q → s , p ⇒ q $ by bi_elim_l [l10, l9]
+l12: $ q → s , p ⇒ q → s $ by ax
+l13: $ q → s , p ⇒ s $ by imp_elim [l12, l11]
+l14: $ q → s , p ⇒ r ↔ s $ by weaken [#2]
+l15: $ q → s , p ⇒ r $ by bi_elim_r [l14, l13]
+l16: $ q → s ⇒ p → r $ by imp_intro [l15]
+l17: $ _ ⇒ (p → r) ↔ (q → s) $ by bi_intro [l8, l16]
+
+not_congr
+---------
+l1: $ ¬ p , q ⇒ q $ by ax
+l2: $ ¬ p , q ⇒ p ↔ q $ by weaken [#1]
+l3: $ ¬ p , q ⇒ p $ by bi_elim_r [l2, l1]
+l4: $ ¬ p , q ⇒ ¬ p $ by ax
+l5: $ ¬ p , q ⇒ ⊥ $ by not_elim [l4, l3]
+l6: $ ¬ p ⇒ ¬ q $ by not_intro [l5]
+l7: $ ¬ q , p ⇒ p $ by ax
+l8: $ ¬ q , p ⇒ p ↔ q $ by weaken [#1]
+l9: $ ¬ q , p ⇒ q $ by bi_elim_l [l8, l7]
+l10: $ ¬ q , p ⇒ ¬ q $ by ax
+l11: $ ¬ q , p ⇒ ⊥ $ by not_elim [l10, l9]
+l12: $ ¬ q ⇒ ¬ p $ by not_intro [l11]
+l13: $ _ ⇒ ¬ p ↔ ¬ q $ by bi_intro [l6, l12]
+
+and_congr
+---------
+l1: $ p ∧ r ⇒ p ∧ r $ by ax
+l2: $ p ∧ r ⇒ p $ by and_elim_l [l1]
+l3: $ p ∧ r ⇒ r $ by and_elim_r [l1]
+l4: $ p ∧ r ⇒ p ↔ q $ by weaken [#1]
+l5: $ p ∧ r ⇒ q $ by bi_elim_l [l4, l2]
+l6: $ p ∧ r ⇒ r ↔ s $ by weaken [#2]
+l7: $ p ∧ r ⇒ s $ by bi_elim_l [l6, l3]
+l8: $ p ∧ r ⇒ q ∧ s $ by and_intro [l5, l7]
+l9: $ q ∧ s ⇒ q ∧ s $ by ax
+l10: $ q ∧ s ⇒ q $ by and_elim_l [l9]
+l11: $ q ∧ s ⇒ s $ by and_elim_r [l9]
+l12: $ q ∧ s ⇒ p ↔ q $ by weaken [#1]
+l13: $ q ∧ s ⇒ p $ by bi_elim_r [l12, l10]
+l14: $ q ∧ s ⇒ r ↔ s $ by weaken [#2]
+l15: $ q ∧ s ⇒ r $ by bi_elim_r [l14, l11]
+l16: $ q ∧ s ⇒ p ∧ r $ by and_intro [l13, l15]
+l17: $ _ ⇒ (p ∧ r) ↔ (q ∧ s) $ by bi_intro [l8, l16]
+
+or_congr
+--------
+l1: $ p ∨ r ⇒ p ∨ r $ by ax
+l2: $ p ∨ r , p ⇒ p $ by ax
+l3: $ p ∨ r , p ⇒ p ↔ q $ by weaken [#1]
+l4: $ p ∨ r , p ⇒ q $ by bi_elim_l [l3, l2]
+l5: $ p ∨ r , p ⇒ q ∨ s $ by or_intro_l [l4]
+l6: $ p ∨ r , r ⇒ r $ by ax
+l7: $ p ∨ r , r ⇒ r ↔ s $ by weaken [#2]
+l8: $ p ∨ r , r ⇒ s $ by bi_elim_l [l7, l6]
+l9: $ p ∨ r , r ⇒ q ∨ s $ by or_intro_r [l8]
+l10: $ p ∨ r ⇒ q ∨ s $ by or_elim [l1, l5, l9]
+l11: $ q ∨ s ⇒ q ∨ s $ by ax
+l12: $ q ∨ s , q ⇒ q $ by ax
+l13: $ q ∨ s , q ⇒ p ↔ q $ by weaken [#1]
+l14: $ q ∨ s , q ⇒ p $ by bi_elim_r [l13, l12]
+l15: $ q ∨ s , q ⇒ p ∨ r $ by or_intro_l [l14]
+l16: $ q ∨ s , s ⇒ s $ by ax
+l17: $ q ∨ s , s ⇒ r ↔ s $ by weaken [#2]
+l18: $ q ∨ s , s ⇒ r $ by bi_elim_r [l17, l16]
+l19: $ q ∨ s , s ⇒ p ∨ r $ by or_intro_r [l18]
+l20: $ q ∨ s ⇒ p ∨ r $ by or_elim [l11, l15, l19]
+l21: $ _ ⇒ (p ∨ r) ↔ (q ∨ s) $ by bi_intro [l10, l20]
+
+bi_congr
+--------
+l1: $ p ↔ r , q ⇒ q $ by ax
+l2: $ p ↔ r , q ⇒ p ↔ q $ by weaken [#1]
+l3: $ p ↔ r , q ⇒ p $ by bi_elim_r [l2, l1]
+l4: $ p ↔ r , q ⇒ p ↔ r $ by ax
+l5: $ p ↔ r , q ⇒ r $ by bi_elim_l [l4, l3]
+l6: $ p ↔ r , q ⇒ r ↔ s $ by weaken [#2]
+l7: $ p ↔ r , q ⇒ s $ by bi_elim_l [l6, l5]
+l8: $ p ↔ r , s ⇒ s $ by ax
+l9: $ p ↔ r , s ⇒ r ↔ s $ by weaken [#2]
+l10: $ p ↔ r , s ⇒ r $ by bi_elim_r [l9, l8]
+l11: $ p ↔ r , s ⇒ p ↔ r $ by ax
+l12: $ p ↔ r , s ⇒ p $ by bi_elim_r [l11, l10]
+l13: $ p ↔ r , s ⇒ p ↔ q $ by weaken [#1]
+l14: $ p ↔ r , s ⇒ q $ by bi_elim_l [l13, l12]
+l15: $ p ↔ r ⇒ q ↔ s $ by bi_intro [l7, l14]
+l16: $ q ↔ s , p ⇒ p $ by ax
+l17: $ q ↔ s , p ⇒ p ↔ q $ by weaken [#1]
+l18: $ q ↔ s , p ⇒ q $ by bi_elim_l [l17, l16]
+l19: $ q ↔ s , p ⇒ q ↔ s $ by ax
+l20: $ q ↔ s , p ⇒ s $ by bi_elim_l [l19, l18]
+l21: $ q ↔ s , p ⇒ r ↔ s $ by weaken [#2]
+l22: $ q ↔ s , p ⇒ r $ by bi_elim_r [l21, l20]
+l23: $ q ↔ s , r ⇒ r $ by ax
+l24: $ q ↔ s , r ⇒ r ↔ s $ by weaken [#2]
+l25: $ q ↔ s , r ⇒ s $ by bi_elim_l [l24, l23]
+l26: $ q ↔ s , r ⇒ q ↔ s $ by ax
+l27: $ q ↔ s , r ⇒ q $ by bi_elim_r [l26, l25]
+l28: $ q ↔ s , r ⇒ p ↔ q $ by weaken [#1]
+l29: $ q ↔ s , r ⇒ p $ by bi_elim_r [l28, l27]
+l30: $ q ↔ s ⇒ p ↔ r $ by bi_intro [l22, l29]
+l31: $ _ ⇒ (p ↔ r) ↔ (q ↔ s) $ by bi_intro [l15, l30]
+
+iff_congr
+---------
+l1: $ (p ↔ r) ⟺ (q ↔ s) $ by bi_congr [#1, #2]
+l2: $ hyps_eq _ _ $ by hyps_refl
+l3: $ (_ ⇒ p ↔ r) ⟚ (_ ⇒ q ↔ s) $ by nd_congr [l2, l1]
+
+ceqt_refl
+---------
+l1: $ x ∊ A ⇒ x ∊ A $ by ax
+l2: $ _ ⇒ x ∊ A ↔ x ∊ A $ by bi_intro [l1, l1]
+l3: $ _ ⇒ ∀ x (x ∊ A ↔ x ∊ A) $ by all_intro [l2]
+
+ceqt_trans
+----------
+l1: $ _ ⇒ x ∊ A ↔ x ∊ B $ by all_elim [#1]
+l2: $ _ ⇒ x ∊ B ↔ x ∊ C $ by all_elim [#2]
+l3: $ x ∊ A ⇒ x ∊ A $ by ax
+l4: $ x ∊ A ⇒ x ∊ A ↔ x ∊ B $ by weaken [l1]
+l5: $ x ∊ A ⇒ x ∊ B $ by bi_elim_l [l4, l3]
+l6: $ x ∊ A ⇒ x ∊ B ↔ x ∊ C $ by weaken [l2]
+l7: $ x ∊ A ⇒ x ∊ C $ by bi_elim_l [l6, l5]
+l8: $ x ∊ C ⇒ x ∊ C $ by ax
+l9: $ x ∊ C ⇒ x ∊ B ↔ x ∊ C $ by weaken [l2]
+l10: $ x ∊ C ⇒ x ∊ B $ by bi_elim_r [l9, l8]
+l11: $ x ∊ C ⇒ x ∊ A ↔ x ∊ B $ by weaken [l1]
+l12: $ x ∊ C ⇒ x ∊ A $ by bi_elim_r [l11, l10]
+l13: $ _ ⇒ x ∊ A ↔ x ∊ C $ by bi_intro [l7, l12]
+l14: $ _ ⇒ ∀ x (x ∊ A ↔ x ∊ C) $ by all_intro [l13]
+
+ceqt_sym
+--------
+l1: $ _ ⇒ x ∊ A ↔ x ∊ B $ by all_elim [#1]
+l2: $ x ∊ B ⇒ x ∊ B $ by ax
+l3: $ x ∊ B ⇒ x ∊ A ↔ x ∊ B $ by weaken [l1]
+l4: $ x ∊ B ⇒ x ∊ A $ by bi_elim_r [l3, l2]
+l5: $ x ∊ A ⇒ x ∊ A $ by ax
+l6: $ x ∊ A ⇒ x ∊ A ↔ x ∊ B $ by weaken [l1]
+l7: $ x ∊ A ⇒ x ∊ B $ by bi_elim_l [l6, l5]
+l8: $ _ ⇒ x ∊ B ↔ x ∊ A $ by bi_intro [l4, l7]
+l9: $ _ ⇒ ∀ x (x ∊ B ↔ x ∊ A) $ by all_intro [l8]
+
+seqt_refl
+---------
+l1: $ a ≐ a $ by ceqt_refl
+
+seqt_trans
+----------
+l1: $ a ≐ c $ by ceqt_trans [#1, #2]
+
+seqt_sym
+--------
+l1: $ b ≐ a $ by ceqt_sym [#1]
+
+all_congr
+---------
+l1: $ ∀ x p ⇒ ∀ x p $ by ax
+l2: $ ∀ x p ⇒ [x/z] p $ by all_elim [l1]
+l0: $ seqt z z $ by seqt_refl
+l3: $ [x/z] p ⟺ [x/z] q $ by sb_f_congr [l0, #1]
+l4: $ ∀ x p ⇒ [x/z] p ↔ [x/z] q $ by weaken [l3]
+l5: $ ∀ x p ⇒ [x/z] q $ by bi_elim_l [l4, l2]
+l6: $ ∀ x p ⇒ ∀ z [x/z] q $ by all_intro [l5]
+l7: $ ∀ x q ⟺ ∀ z [x/z] q $ by all_alpha
+l8: $ ∀ x p ⇒ ∀ x q ↔ ∀ z [x/z] q $ by weaken [l7]
+l9: $ ∀ x p ⇒ ∀ x q $ by bi_elim_r [l8, l6]
+l10: $ ∀ x q ⇒ ∀ x q $ by ax
+l11: $ ∀ x q ⇒ [x/z] q $ by all_elim [l10]
+l12: $ ∀ x q ⇒ [x/z] p ↔ [x/z] q $ by weaken [l3]
+l13: $ ∀ x q ⇒ [x/z] p $ by bi_elim_r [l12, l11]
+l14: $ ∀ x q ⇒ ∀ z [x/z] p $ by all_intro [l13]
+l15: $ ∀ x p ⟺ ∀ z [x/z] p $ by all_alpha
+l16: $ ∀ x q ⇒ ∀ x p ↔ ∀ z [x/z] p $ by weaken [l15]
+l17: $ ∀ x q ⇒ ∀ x p $ by bi_elim_r [l16, l14]
+l18: $ _ ⇒ ∀ x p ↔ ∀ x q $ by bi_intro [l9, l17]
+
+ex_congr
+--------
+l1: $ ∃ x p ⇒ ∃ x p $ by ax
+l2: $ ∃ x p ⟺ ∃ z [x/z] p $ by ex_alpha
+l3: $ ∃ x p ⇒ ∃ x p ↔ ∃ z [x/z] p $ by weaken [l2]
+l4: $ ∃ x p ⇒ ∃ z [x/z] p $ by bi_elim_l [l3, l1]
+l5: $ [x/z] p ⇒ [x/z] p $ by ax
+l0: $ seqt z z $ by seqt_refl
+l6: $ [x/z] p ⟺ [x/z] q $ by sb_f_congr [l0, #1]
+l7: $ [x/z] p ⇒ [x/z] p ↔ [x/z] q $ by weaken [l6]
+l8: $ [x/z] p ⇒ [x/z] q $ by bi_elim_l [l7, l5]
+l9: $ [x/z] p ⇒ ∃ x q $ by ex_intro [l8]
+l10: $ ∃ x p ⇒ ∃ x q $ by ex_elim [l4, l9]
+l11: $ ∃ x q ⇒ ∃ x q $ by ax
+l12: $ ∃ x q ⟺ ∃ z [x/z] q $ by ex_alpha
+l13: $ ∃ x q ⇒ ∃ x q ↔ ∃ z [x/z] q $ by weaken [l12]
+l14: $ ∃ x q ⇒ ∃ z [x/z] q $ by bi_elim_l [l13, l11]
+l15: $ [x/z] q ⇒ [x/z] q $ by ax
+l16: $ [x/z] q ⇒ [x/z] p ↔ [x/z] q $ by weaken [l6]
+l17: $ [x/z] q ⇒ [x/z] p $ by bi_elim_r [l16, l15]
+l18: $ [x/z] q ⇒ ∃ x p $ by ex_intro [l17]
+l19: $ ∃ x q ⇒ ∃ x p $ by ex_elim [l14, l18]
+l20: $ _ ⇒ ∃ x p ↔ ∃ x q $ by bi_intro [l10, l19]
+
+cv_congr
+--------
+l0: $ cv b ≐ cv b $ by ceqt_refl
+l1: $ cv a ≐ cv b $ by ceqt_trans [#1, l0]
+
+welc_congr
+----------
+l1: $ _ ⇒ a ∊ A ↔ a ∊ B $ by all_elim [#2]
+l2: $ a ∊ A ⇒ a ∊ A $ by ax
+l3: $ a ∊ A ⇒ a ∊ A ↔ a ∊ B $ by weaken [l1]
+l4: $ a ∊ A ⇒ a ∊ B $ by bi_elim_l [l3, l2]
+l5: $ a ∊ A ⇒ b ∊ B $ by eq_replace [#1, l4]
+l6: $ _ ⇒ b ∊ A ↔ b ∊ B $ by all_elim [#2]
+l7: $ b ∊ B ⇒ b ∊ B $ by ax
+l8: $ b ∊ B ⇒ b ∊ A ↔ b ∊ B $ by weaken [l6]
+l9: $ b ∊ B ⇒ b ∊ A $ by bi_elim_r [l8, l7]
+l10: $ b ≐ a $ by seqt_sym [#1]
+l11: $ b ∊ B ⇒ a ∊ A $ by eq_replace [l10, l9]
+l12: $ _ ⇒ a ∊ A ↔ b ∊ B $ by bi_intro [l5, l11]
+
+cab_congr
+---------
+l1: $ y ∊ {x | p} ⇒ y ∊ {x | p} $ by ax
+l2: $ y ∊ {x | p} ⇒ [x/y] p $ by cab_elim [l1]
+l0: $ seqt y y $ by seqt_refl
+l3: $ [x/y] p ⟺ [x/y] q $ by sb_f_congr [l0, #1]
+l4: $ y ∊ {x | p} ⇒ [x/y] p ↔ [x/y] q $ by weaken [l3]
+l5: $ y ∊ {x | p} ⇒ [x/y] q $ by bi_elim_l [l4, l2]
+l6: $ y ∊ {x | p} ⇒ y ∊ {x | q} $ by cab_intro [l5]
+l7: $ y ∊ {x | q} ⇒ y ∊ {x | q} $ by ax
+l8: $ y ∊ {x | q} ⇒ [x/y] q $ by cab_elim [l7]
+l9: $ y ∊ {x | q} ⇒ [x/y] p ↔ [x/y] q $ by weaken [l3]
+l10: $ y ∊ {x | q} ⇒ [x/y] p $ by bi_elim_r [l9, l8]
+l11: $ y ∊ {x | q} ⇒ y ∊ {x | p} $ by cab_intro [l10]
+l12: $ _ ⇒ y ∊ {x | p} ↔ y ∊ {x | q} $ by bi_intro [l6, l11]
+l13: $ _ ⇒ ∀ y (y ∊ {x | p} ↔ y ∊ {x | q}) $ by all_intro [l12]
+
+ceq_subst
+---------
+l1: $ G , A = C ⇒ A = C $ by ax
+l2: $ G , A = C ⇒ u ∊ A ↔ u ∊ C $ by all_elim [l1]
+l3: $ G , A = C ⇒ A = B $ by weaken [#1]
+l4: $ G , A = C ⇒ u ∊ A ↔ u ∊ B $ by all_elim [l3]
+l5: $ G , A = C ⇒ C = D $ by weaken [#2]
+l6: $ G , A = C ⇒ u ∊ C ↔ u ∊ D $ by all_elim [l5]
+l7: $ G , A = C , u ∊ B ⇒ u ∊ B $ by ax
+l8: $ G , A = C , u ∊ B ⇒ u ∊ A ↔ u ∊ B $ by weaken [l4]
+l9: $ G , A = C , u ∊ B ⇒ u ∊ A $ by bi_elim_r [l8, l7]
+l10: $ G , A = C , u ∊ B ⇒ u ∊ A ↔ u ∊ C $ by weaken [l2]
+l11: $ G , A = C , u ∊ B ⇒ u ∊ C $ by bi_elim_l [l10, l9]
+l12: $ G , A = C , u ∊ B ⇒ u ∊ C ↔ u ∊ D $ by weaken [l6]
+l13: $ G , A = C , u ∊ B ⇒ u ∊ D $ by bi_elim_l [l12, l11]
+l14: $ G , A = C , u ∊ D ⇒ u ∊ D $ by ax
+l15: $ G , A = C , u ∊ D ⇒ u ∊ C ↔ u ∊ D $ by weaken [l6]
+l16: $ G , A = C , u ∊ D ⇒ u ∊ C $ by bi_elim_r [l15, l14]
+l17: $ G , A = C , u ∊ D ⇒ u ∊ A ↔ u ∊ C $ by weaken [l2]
+l18: $ G , A = C , u ∊ D ⇒ u ∊ A $ by bi_elim_r [l17, l16]
+l19: $ G , A = C , u ∊ D ⇒ u ∊ A ↔ u ∊ B $ by weaken [l4]
+l20: $ G , A = C , u ∊ D ⇒ u ∊ B $ by bi_elim_l [l19, l18]
+l21: $ G , A = C ⇒ u ∊ B ↔ u ∊ D $ by bi_intro [l13, l20]
+l22: $ G , A = C ⇒ ∀ u (u ∊ B ↔ u ∊ D) $ by all_intro [l21]
+
+ceq_congr
+---------
+l1: $ A = C ⇒ B = D $ by ceq_subst [#1, #2]
+l2: $ B ≐ A $ by ceqt_sym [#1]
+l3: $ D ≐ C $ by ceqt_sym [#2]
+l4: $ B = D ⇒ A = C $ by ceq_subst [l2, l3]
+l5: $ _ ⇒ (A = C) ↔ (B = D) $ by bi_intro [l1, l4]
+
+ceqt_congr
+----------
+l1: $ (A = C) ⟺ (B = D) $ by ceq_congr [#1, #2]
+l2: $ hyps_eq _ _ $ by hyps_refl
+l3: $ (_ ⇒ A = C) ⟚ (_ ⇒ B = D) $ by nd_congr [l2, l1]
+
+sb_f_ceq
+--------
+l1: $ [x/t] (∀ y (y ∊ A ↔ y ∊ B)) ⟺ ∀ y (y ∊ (⟦ x / t ⟧ A) ↔ y ∊ (⟦ x / t ⟧ B)) $ by iff_refl
+
+sb_f_wcel
+---------
+l1: $ [x/t] (∃ y (y = A ∧ y ∊ B)) ⟺ ∃ y (y = (⟦ x / t ⟧ A) ∧ y ∊ (⟦ x / t ⟧ B)) $ by iff_refl
+
+sb_f_isset
+----------
+l1: $ [x/t] (∃ y (y = A)) ⟺ ∃ y (y = (⟦ x / t ⟧ A)) $ by iff_refl
+
+sb_f_subset
+-----------
+l1: $ [x/t] (∀ y (y ∊ A → y ∊ B)) ⟺ ∀ y (y ∊ (⟦ x / t ⟧ A) → y ∊ (⟦ x / t ⟧ B)) $ by iff_refl
+
+sb_c_cpr
+--------
+l1: $ (⟦ x / t ⟧ {y | y = A ∨ y = B}) ≐ {y | y = (⟦ x / t ⟧ A) ∨ y = (⟦ x / t ⟧ B)} $ by ceqt_refl
+
+eq_refl
+-------
+l1: $ A ≐ A $ by ceqt_refl
+l2: $ G ⇒ A = A $ by weaken [l1]
+
+wcel_set
+--------
+l1: $ ∃ x (x = a ∧ x ∊ A) ⇒ ∃ x (x = a ∧ x ∊ A) $ by ax
+l2: $ x = a ∧ x ∊ A ⇒ x = a ∧ x ∊ A $ by ax
+l3: $ x = a ∧ x ∊ A ⇒ x = a $ by and_elim_l [l2]
+l4: $ x = a ∧ x ∊ A ⇒ x ∊ A $ by and_elim_r [l2]
+l5: $ x = a ∧ x ∊ A ⇒ a ∊ A $ by eq_replace [l3, l4]
+l6: $ ∃ x (x = a ∧ x ∊ A) ⇒ a ∊ A $ by ex_elim [l1, l5]
+l7: $ a ∊ A ⇒ a ∊ A $ by ax
+l8: $ a ≐ a $ by ceqt_refl
+l9: $ a ∊ A ⇒ a = a $ by weaken [l8]
+l10: $ a ∊ A ⇒ a = a ∧ a ∊ A $ by and_intro [l9, l7]
+l11: $ a ∊ A ⇒ ∃ x (x = a ∧ x ∊ A) $ by ex_intro [l10]
+l12: $ _ ⇒ (∃ x (x = a ∧ x ∊ A)) ↔ a ∊ A $ by bi_intro [l6, l11]
+
+isset_var
+---------
+l1: $ a ≐ a $ by ceqt_refl
+l2: $ _ ⇒ ∃ x (x = a) $ by ex_intro [l1]
+l3: $ G ⇒ ∃ x (x = a) $ by weaken [l2]
+
+empty_elim
+----------
+l1: $ G ⇒ ⊥ $ by cab_elim [#1]
+
+cpr_intro_l
+-----------
+l1: $ a ≐ a $ by ceqt_refl
+l2: $ _ ⇒ a = a ∨ a = b $ by or_intro_l [l1]
+l3: $ _ ⇒ a ∊ {y | y = a ∨ y = b} $ by cab_intro (x := $ y $, t := $ a $, p := $ y = a ∨ y = b $) [l2]
+l4: $ G ⇒ a ∊ {y | y = a ∨ y = b} $ by weaken [l3]
+
+subset_refl
+-----------
+l1: $ x ∊ A ⇒ x ∊ A $ by ax
+l2: $ _ ⇒ x ∊ A → x ∊ A $ by imp_intro [l1]
+l3: $ _ ⇒ ∀ x (x ∊ A → x ∊ A) $ by all_intro [l2]
+l4: $ G ⇒ ∀ x (x ∊ A → x ∊ A) $ by weaken [l3]
+
