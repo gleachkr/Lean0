@@ -789,6 +789,11 @@ forms and converts, which costs about 0.01% in certificate size. The block betwe
 
 `ℕ` (2026-11-05) is a notation for the definition `nat_ty`, so its terms are unchanged.
 
+Typing premises (2026-11-05): the core rules `bvar`, `beta`, `eta`, `proofIrrel`, `instDF` and
+`inh_i` now state typing with `ty`, the definition of `⟦ G ⊢ e ≡ e : A ⟧`, where they spelled
+out the diagonal as Lean4Lean does. The statements are equivalent by unfolding. The generator
+converts at each use, which costs 0.38% on `Init.Prelude`.
+
 The generated statements keep the prefix form (`deq G e e2 A`), which MM0 allows for every
 term with or without a notation; the statement checker reads only that form. No notation
 token looks like an identifier (`[a-zA-Z_][a-zA-Z0-9_]*`), so none can collide with a

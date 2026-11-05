@@ -1440,7 +1440,7 @@ axiom leqv_inst (S: lvls) (l r l2 r2: lvl):
 -- The judgment (IsDefEq, Typing/Basic.lean:18-56) --------------------------
 
 axiom bvar (G: ctx) (i: nat) (A: expr):
-  $ lookup G i A $ > $ ⟦ G ⊢ #i ≡ #i : A ⟧ $;
+  $ lookup G i A $ > $ ⟨ G ⊢ #i : A ⟩ $;
 axiom symm (G: ctx) (e e2 A: expr):
   $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ ⟦ G ⊢ e2 ≡ e : A ⟧ $;
 axiom trans (G: ctx) (e1 e2 e3 A: expr):
@@ -1459,13 +1459,13 @@ axiom forallEDF (G: ctx) (u v: lvl) (A A2 B B2: expr):
 axiom defeqDF (G: ctx) (u: lvl) (A B e e2: expr):
   $ ⟦ G ⊢ A ≡ B : srt u ⟧ $ > $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ ⟦ G ⊢ e ≡ e2 : B ⟧ $;
 axiom beta (G: ctx) (A e B a r R: expr):
-  $ ⟦ A :: G ⊢ e ≡ e : B ⟧ $ > $ ⟦ G ⊢ a ≡ a : A ⟧ $ > $ inst 0 e a r $ > $ inst 0 B a R $ >
+  $ ⟨ A :: G ⊢ e : B ⟩ $ > $ ⟨ G ⊢ a : A ⟩ $ > $ inst 0 e a r $ > $ inst 0 B a R $ >
   $ ⟦ G ⊢ (λ A. e) @ a ≡ r : R ⟧ $;
 axiom eta (G: ctx) (A B e e1: expr):
-  $ ⟦ G ⊢ e ≡ e : Π A. B ⟧ $ > $ lift 1 0 e e1 $ >
+  $ ⟨ G ⊢ e : Π A. B ⟩ $ > $ lift 1 0 e e1 $ >
   $ ⟦ G ⊢ λ A. e1 @ #0 ≡ e : Π A. B ⟧ $;
 axiom proofIrrel (G: ctx) (p h h2: expr):
-  $ ⟦ G ⊢ p ≡ p : Prop ⟧ $ > $ ⟦ G ⊢ h ≡ h : p ⟧ $ > $ ⟦ G ⊢ h2 ≡ h2 : p ⟧ $ >
+  $ ⟨ G ⊢ p : Prop ⟩ $ > $ ⟨ G ⊢ h : p ⟩ $ > $ ⟨ G ⊢ h2 : p ⟩ $ >
   $ ⟦ G ⊢ h ≡ h2 : p ⟧ $;
 
 -- Admissible rules (theorems of Lean4Lean, here axioms) --------------------
@@ -1473,7 +1473,7 @@ axiom proofIrrel (G: ctx) (p h h2: expr):
 --| Substitution: `IsDefEq.instN`, Typing/Lemmas.lean:634 (see
 --| notes/audit-lean-mm0.md §6).
 axiom instDF (k: nat) (G0 G1 G: ctx) (A0 a e e2 A r r2 R: expr):
-  $ ⟦ G0 ⊢ a ≡ a : A0 ⟧ $ > $ cinst k G0 A0 a G1 G $ > $ ⟦ G1 ⊢ e ≡ e2 : A ⟧ $ >
+  $ ⟨ G0 ⊢ a : A0 ⟩ $ > $ cinst k G0 A0 a G1 G $ > $ ⟦ G1 ⊢ e ≡ e2 : A ⟧ $ >
   $ inst k e a r $ > $ inst k e2 a r2 $ > $ inst k A a R $ >
   $ ⟦ G ⊢ r ≡ r2 : R ⟧ $;
 
@@ -1664,4 +1664,4 @@ axiom nat_xor_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p
 --| `inh G A`: `A` is inhabited in `Γ`. Theorems are stated this way so that
 --| their proof terms stay inside the proof file.
 term inh: ctx > expr > wff;
-axiom inh_i (G: ctx) (e A: expr): $ ⟦ G ⊢ e ≡ e : A ⟧ $ > $ inh G A $;
+axiom inh_i (G: ctx) (e A: expr): $ ⟨ G ⊢ e : A ⟩ $ > $ inh G A $;

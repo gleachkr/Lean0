@@ -559,7 +559,11 @@ impl Lean {
     pub fn bvar_rule(&mut self, env: &mut Env, g: E, i: usize) -> Result<P> {
         let (a, pl) = self.lookup(env, g, i)?;
         let ie = self.nat(env, i);
-        env.thm_n("bvar", &[g, ie, a], &[pl])
+        let p = env.thm_n("bvar", &[g, ie, a], &[pl])?;
+        // the rule concludes `ty`; derivations are `deq`
+        let e = self.bvar(env, i);
+        let target = env.app(self.ids.deq, &[g, e, e, a]);
+        env.convert(p, target)
     }
 
     pub fn symm(&mut self, env: &mut Env, p: P) -> Result<P> {
