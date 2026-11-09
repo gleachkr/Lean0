@@ -109,7 +109,7 @@ where
     r
 }
 
-/// `closed z e`.
+/// `closed nz e`.
 fn closed<'t>(el: &mut El<'_, '_, 't, '_>, e: Ex<'t>) -> R<P> {
     let m = el.tr(e)?;
     let g = &mut *el.g;

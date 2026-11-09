@@ -237,7 +237,7 @@ pub fn check(spec: &str) -> Result<Report> {
         add: env.term_id("add"),
         le: env.term_id("le"),
         s: env.term_id("s"),
-        z: env.term_id("z"),
+        z: env.term_id("nz"),
         lift: env.term_id("lift"),
         inst: env.term_id("inst"),
         bvar: env.term_id("bvar"),

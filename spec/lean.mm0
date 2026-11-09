@@ -57,7 +57,7 @@ delimiter $ ( ) . # $;
 --| Notations: `⟦ Γ ⊢ e ≡ e2 : A ⟧` for the judgment and `⟨ Γ ⊢ e : A ⟩` for typing,
 --| `λ A. e`, `Π A. B`, `f @ a`, `#i` for a bound variable, `A :: Γ` and `[]`
 --| for contexts, `a ⊔ b` for `max`, `≤`, `<` and `≈` (level equivalence), the
---| numerals `0` to `9` (`z` and the definitions `n1` to `n9`), `Prop` for
+--| numerals `0` to `9` (`nz` and the definitions `n1` to `n9`), `Prop` for
 --| `srt lz`, and `ℕ` for `nat_ty`. The Unicode ones have an ASCII form too
 --| (`[[ G |- e == e2 : A ]]`, `<< G |- e : A >>`, `\ A. e`, `\Pi A. B`, `\/`,
 --| `<=`, `~=`), declared first; the Unicode one is declared last, the form
@@ -78,12 +78,12 @@ strict provable sort wff;
 
 --| @hole _n
 strict free sort nat;
-term z: nat;
+term nz: nat;
 term s: nat > nat;
 
--- The numerals `0` to `9`: `0` is `z`, and `n1` to `n9` are the definitions
+-- The numerals `0` to `9`: `0` is `nz`, and `n1` to `n9` are the definitions
 -- `s 0` to `s 8`. Larger numbers are written with `s`.
-prefix z: $0$ prec max;
+prefix nz: $0$ prec max;
 def n1: nat = $ s 0 $; prefix n1: $1$ prec max;
 def n2: nat = $ s 1 $; prefix n2: $2$ prec max;
 def n3: nat = $ s 2 $; prefix n3: $3$ prec max;
@@ -564,11 +564,11 @@ axiom pinst_app (i: nat) (S a A A1 R: expr): $ pinst (s i) S A A1 $ > $ inst i A
 --| The inductive block of `Nat`.
 term nat_blk: blk;
 --| The inductive block of `Nat`: its parameters, types and constructors.
-def nat_D: ind = $ ind_mk nat_blk nil (tcons (srt (ls lz)) (ccons (bvar z) (ccons (pi (bvar z) (bvar (s z))) cnil)) tnil) $;
+def nat_D: ind = $ ind_mk nat_blk nil (tcons (srt (ls lz)) (ccons (bvar nz) (ccons (pi (bvar nz) (bvar (s nz))) cnil)) tnil) $;
 --| The inductive block of `Eq`.
 term eq_blk: blk;
 --| The inductive block of `Eq`: its parameters, types and constructors.
-def eq_D (u: lvl): ind = $ ind_mk eq_blk (cons (bvar z) (cons (srt u) nil)) (tcons (pi (bvar (s z)) (srt lz)) (ccons (app (app (app (bvar (s (s z))) (bvar (s z))) (bvar z)) (bvar z)) cnil) tnil) $;
+def eq_D (u: lvl): ind = $ ind_mk eq_blk (cons (bvar nz) (cons (srt u) nil)) (tcons (pi (bvar (s nz)) (srt lz)) (ccons (app (app (app (bvar (s (s nz))) (bvar (s nz))) (bvar nz)) (bvar nz)) cnil) tnil) $;
 --| Lean quotient primitive `Quot`.
 term quot (u: lvl): expr;
 --| Lean quotient primitive `Quot.mk`.
@@ -1529,7 +1529,7 @@ axiom proj_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (j i np: nat) (e e2
   $ proj_ok G D j i $ > $ clen P np $ > $ field_ty D j i A $ > $ ind_nested D N $ > $ rst D N A A2 $ > $ pinst i S A2 A1 $ >
   $ qinst b e i 0 A1 R $ >
   $ ⟦ G ⊢ proj b i e ≡ proj b i e2 : R ⟧ $;
---| `proj b i (ind_ctor D2 j z qs fs) ≡ fs[i]` when well typed.
+--| `proj b i (ind_ctor D2 j nz qs fs) ≡ fs[i]` when well typed.
 axiom proj_mk (G: ctx) (D2: ind) (b: blk) (j i np n m nf nq ii: nat) (M Y f T: expr):
   $ spine (ind_ctor D2 j 0) M nq $ > $ ind_arity D2 np n m $ > $ nfields D2 j 0 nf $ > $ add np nf nq $ >
   $ add ii (s i) nf $ > $ spine (Y @ f) M ii $ > $ ⟨ G ⊢ proj b i M : T ⟩ $ > $ ⟦ G ⊢ proj b i M ≡ f : T ⟧ $;

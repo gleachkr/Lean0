@@ -390,7 +390,7 @@ impl Levels {
     // ------------------------------------------------------------------ case splits
 
     fn nat(env: &mut Env, n: usize) -> E {
-        let mut e = env.app_n("z", &[]);
+        let mut e = env.app_n("nz", &[]);
         for _ in 0..n {
             e = env.app_n("s", &[e]);
         }

@@ -26,7 +26,7 @@
 //!
 //! The tamper options are for negative tests. They change a statement in both the `.mm0` and
 //! the `.mmb` but keep the proofs, so a verifier must reject the result exactly when some proof
-//! relies on the original statement: `--tamper-axiom` adds the false premise `le (s z) z` to an
+//! relies on the original statement: `--tamper-axiom` adds the false premise `le (s nz) nz` to an
 //! axiom, `--tamper-theorem` replaces a theorem's statement by `ty G (srt lz) (srt lz)`. Since
 //! a tampered axiom may be one of the spec's, a tampered run also writes `NAME.joined.mm0`, the
 //! whole tampered text to verify against.
@@ -168,7 +168,7 @@ pub fn run(args: &[String]) -> Result<(), String> {
         writer.byte_costs = Some(mm0kit::mmb::ByteCosts { spec_thms: gen.spec_thms as u32, ..Default::default() });
     }
     let false_hyp = {
-        let z = gen.env.app_n("z", &[]);
+        let z = gen.env.app_n("nz", &[]);
         let sz = gen.env.app_n("s", &[z]);
         gen.env.app_n("le", &[sz, z])
     };

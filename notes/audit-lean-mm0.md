@@ -26,7 +26,7 @@ system is sound for the intended reading if every axiom is valid in this **stand
 
 | MM0 | interpreted as |
 |---|---|
-| `nat` terms `z`, `s` | `Nat` |
+| `nat` terms `nz`, `s` | `Nat` |
 | `le`, `add`, `lt` | `≤`, graph of `+`, `<` |
 | `lvl` terms | `VLevel` (`lz/ls/lmax/limax` ↦ `zero/succ/max/imax`) |
 | `leqv a b` | `a ≈ b`, i.e. `a.eval = b.eval` (VLevel.lean:58) |
@@ -55,7 +55,7 @@ Consequences:
   `eval`, so they survive substitution of arbitrary `VLevel`s for their metavariables.
 * **Variables that occur only in hypotheses** (`u` in `lamDF`/`defeqDF`, `A B` in `appDF`, `e2`
   in `trans`, `j` in `*_closed`, `B` in `lookup_s`, `B` in `beta`). In MM0 the proof supplies
-  every axiom argument explicitly, and every sort is inhabited (`z`, `lz`, `srt lz`, `nil`). So
+  every axiom argument explicitly, and every sort is inhabited (`nz`, `lz`, `srt lz`, `nil`). So
   this is just ordinary Horn-clause instantiation: no pitfall.
 * `bvar` is both a `term` and an `axiom` name. Terms and theorems live in separate namespaces,
   and both mm0-zig and mm0-c accept the file (checked with `spec/examples/*`).
@@ -127,7 +127,7 @@ means a sound admissible fact (lemma cited, hypotheses checked). **L** means a v
 | axiom | verdict | justification |
 |---|---|---|
 | `inst_bvar_lt` (128) | T | `instVar i e k = bvar i` if `i < k` |
-| `inst_bvar_eq` (129) | T | `i = k` gives `liftN k e` (= `liftN k e 0`), matching `lift k z a a2` |
+| `inst_bvar_eq` (129) | T | `i = k` gives `liftN k e` (= `liftN k e 0`), matching `lift k nz a a2` |
 | `inst_bvar_gt` (130) | T | index `i+1` with `k ≤ i` means `i+1 > k`, so the result is `bvar ((i+1)-1) = bvar i`. The three bvar cases are exhaustive and disjoint |
 | `inst_srt` (132) | T | :242 |
 | `inst_app` (133) | T | :244 |
@@ -152,7 +152,7 @@ means a sound admissible fact (lemma cited, hypotheses checked). **L** means a v
 | `symm` (170) | T | :20 |
 | `trans` (172) | T | :21, same type `A` on both premises |
 | `sortDF` (174) | T, WF dropped | :22-24. The result type is `sort (succ l)` with the **left** `l`, as in Lean4Lean. Dropping WF is sound (§1) |
-| `appDF` (176) | T | :32-35. The result is `B.inst a` with the **left** argument `a`. `inst z B a R` is `R = inst B a 0` ✓ |
+| `appDF` (176) | T | :32-35. The result is `B.inst a` with the **left** argument `a`. `inst nz B a R` is `R = inst B a 0` ✓ |
 | `lamDF` (179) | T | :36-39. The body context is `A::Γ` with the **left** `A`, and the result is `forallE A B` (left `A`) ✓ |
 | `forallEDF` (182) | T | :40-43. Body context `A::Γ` (left), result `sort (imax u v)` ✓ |
 | `defeqDF` (185) | T | :44 |
@@ -213,7 +213,7 @@ Nothing new needs to be trusted, but the work is real. Kernels hit this case whe
 The shortcuts are sound for this file's five constructors. Every later `term` of sort `expr`
 must keep the model valid:
 
-* `closed z (c us)` is valid only for constants without `expr` arguments. `.const` is
+* `closed nz (c us)` is valid only for constants without `expr` arguments. `.const` is
   `ClosedN`-trivially closed, `lit` is fine, and `proj` is not.
 * Any `expr`-argument term (`proj`, §4.5) needs structural `closed_/lift_/inst_` axioms that
   recurse into its arguments. Without them `lift_closed`/`inst_closed` remain sound but useless
@@ -223,7 +223,7 @@ must keep the model valid:
 ### 4. (Info/doc)
 
 * The header (lines 6-10) says each `term` constant gets a generated `constDF` axiom. It should
-  also say that it gets a `closed z` axiom (as in `consts.mm0`), and that this is valid only
+  also say that it gets a `closed nz` axiom (as in `consts.mm0`), and that this is valid only
   because the constant has no `expr` arguments.
 * The `leqv` doc comment (lines 56-60) calls it "semantic equivalence". `leqv` is the derivable
   sub-relation of `≈`, so "sound approximation of `≈`" would be more precise. The comment
@@ -238,7 +238,7 @@ must keep the model valid:
 * **Off-by-one.** `le/lt/add` conventions, `lift_bvar_ge` (`j = i+n`), `inst_bvar_gt`
   (`bvar (s i) ↦ bvar i` when `k ≤ i`) and the `s k` under binders in `closed/lift/inst_{lam,pi}`
   all match Lean4Lean.
-* **Argument order.** Every use matches its definition: `inst z B a R`, `inst z e a r`,
+* **Argument order.** Every use matches its definition: `inst nz B a R`, `inst nz e a r`,
   `lift 1 0 e e1`, `lift k 0 a a2`, `lift 1 0 A A2`, and `lift_closed`/`inst_closed`
   with `(closed j, j ≤ k) ⇒ op at k`.
 * **Annotation side.** Every rule uses the left-hand annotation, exactly as in Lean4Lean.
@@ -332,8 +332,8 @@ are in scope at each point.
 | `ind_rec_ty` | Under `ind_wf` and `elim_ok`, the fold has the type `rec_ty` computes (the thesis's recursor; the argument that `rec_ty` computes the kernel's type is the two rows above, tested on every block). |
 | `ind_iota` | `ind_rec D i v ps ms ns is (ind_ctor D2 i c qs fs) ≡ R ps ms ns fs` where `R` is `rec_rhs`'s term: the fold's computation rule. The constructor's block `D2`, its parameters `qs` and the indices `is` are free (as in nanoda's `reduce_rec`, which compares none of them); the premise `sty G (ind_rec D i v) RT (e4 @ maj) T`, with `RT` the recursor's type (`rec_ty` then `rst`, as in `ind_rec_ty`), types every argument at its binder's type, so the major's type is `ind_ty D i ps is`, and by the tagging in the model this forces `D2` to be `D` at equivalent levels and the arguments to agree. The premise states that every argument is in the recursor's domain, which the fold's computation rule needs; until 2026-11-04 the rule took a typing of the whole left side, which says that only through inversion of its derivation. The application spine is taken apart by `spine` and `rehead`, which fix `D`, `i`, `v`, `c` and the counts before the derived terms are matched. |
 | `struct_like`, `field_ty`, `proj_ok`, `fprops`, `pinst`, `qinst`, `proj_ty` | Typing of `proj b i e` for `e : ind_ty D j ps`, type `j` structure-like (one constructor, no indices; the kernel's `is_structure_like`, which a type of a mutual block may satisfy): the field's type with the parameters and then the earlier projections put in, outermost first (`pinst` recurses to the innermost argument of `S` and substitutes on the way out; `qinst` fields `0 ..` at `#(k-1) ..`), a simultaneous substitution since each term substituted is lifted over the binders below it. `proj_ok`: the type's sort is at least 1, or the fields up to `i` are propositions (`fprops`: each `⟨ Ctx ⊢ A2 : srt lz ⟩`) — the argument of stage A's `_dfp`: such projections are definable by elimination into `Prop`, and nanoda requires less (only the dependent fields), so this is no more permissive. |
-| `proj_mk` | `proj b i (ind_ctor D2 j z qs fs) ≡ fs[i]` when well typed (`spine (Y @ f) M ii` with `ii = nf - 1 - i`: the field counted from the outside); the constructor's block is free as in `ind_iota`. |
-| `nonrec`, `eta_ok`, `projs`, `ind_eta` | Eta for a structure-like type none of whose fields mentions the block (`closed (d + np)` for each domain): `e ≡ ind_ctor D j z ps (proj b 0 e) ... (proj b (nf-1) e)` at `e`'s type, since such a type is a product in the model. (The kernel requires the block not to be recursive at all; this accepts a non-recursive type of a recursive mutual block too, which is still a product.) |
+| `proj_mk` | `proj b i (ind_ctor D2 j nz qs fs) ≡ fs[i]` when well typed (`spine (Y @ f) M ii` with `ii = nf - 1 - i`: the field counted from the outside); the constructor's block is free as in `ind_iota`. |
+| `nonrec`, `eta_ok`, `projs`, `ind_eta` | Eta for a structure-like type none of whose fields mentions the block (`closed (d + np)` for each domain): `e ≡ ind_ctor D j nz ps (proj b 0 e) ... (proj b (nf-1) e)` at `e`'s type, since such a type is a product in the model. (The kernel requires the block not to be recursive at all; this accepts a non-recursive type of a recursive mutual block too, which is still a product.) |
 | `ind_mkn`, `ind_data_n`, `ind_nested`, `ndecl`, `cnth`, `aux_of`, `rst`, `spz`, `nst_hit`, `spz_ctors`, `aux_data`, `nst_ok`, `nst_group`, `rec_rule`, `ind_iota_nst`, `pinst_head_c` (nested blocks, B2; `ElimNestedInductive`) | A nested block `ind_mkn b P T N` is the mutual block the kernel checks in its place: `T` lists the declared types and then one auxiliary type per nested occurrence `I Ds` of an earlier block `I` (in the kernel's order), and `N` the occurrences, each `ind_ty I i @ Ds` written like a constructor type at depth 0 (`Ds` mention the block's types; the kernel requires them to mention no bound variable, and a parameter `Ds` that mentions none makes no occurrence, so the certificate's `N` must be the kernel's list, which the checker's comparison of the recursor types enforces, §8). Every relation of the schema (`ind_wf`, `elim_ok`, `rec_ty`, `rec_rhs`, `struct_like`, `eta_ok`, ...) reads the mutual data, as the kernel runs `AddInductive` on the specialized block; three additions make it the kernel's nested block. (1) `nst_ok` (a premise of `ind_wf`): the occurrences come in groups, one per declared type of a well-formed block `I` in order with the same arguments (`I.all`, which excludes `I`'s own auxiliary types), and each auxiliary type's data is `I`'s type's type at `Ds` (`pinst`) and `I`'s constructors specialized (`spz_ctors`: `I`'s types put in by `sinst`, `I`'s own occurrences restored by `rst` since `I` may be nested, the parameters replaced by `Ds` by `pinst`, then `spz`, which replaces each occurrence `I' Ds' is` of `N` at depth `d` by `#(d + np + j)` applied to the block's parameters and to `is`, from the outside in as `replaceAllNested` does; the lookup `nst_hit` tries the entries by clause alternatives, since the prover does not re-enter a finished premise). So the auxiliary types are exactly the kernel's `_nested.X_k`, and `tys_wf` on the mutual data is the kernel's positivity and universe check on them. (2) `rst D N e e2` (`restoreNested`): `ind_ty D j ps is` for an auxiliary type `j` is read as `I Ds[ps] is` (`sinst` then `pinst`, the parameters applied being the ones substituted) and `ind_ctor D j c ps fs` as `ind_ctor I i c Ds[ps] fs`; nothing else changes, and the identity when `N = []` (`rst_nil`; `rst_refl` is the last clause so that an unknown result is computed by the traversal). `ind_ctor_ty`, `ind_rec_ty`, `proj_ty` (the field's type, before the parameters and projections are put in, so that the substitution hypotheses of the structure lemmas match) and `rec_rule` (the rule's right-hand side, used by both iota axioms) restore what they state. (3) `ind_iota_nst`: the recursor of an auxiliary type `i` (the block's `X.rec_k`, `mkAuxRecNameMap`) reduces on `I`'s constructor `c`, `ind_rec D i v ps ms ns is (ind_ctor I2 ii c qs fs) ≡ R ps ms ns fs`, the fields being the last `nf` arguments of the major premise as in `inductive_reduce_rec` (whose comment notes that the constructor's parameters need not be the recursor's). *Model.* The auxiliary type `j` of a legal nested block is interpreted as the family `I Ds` itself: by (1) its constructors are `I`'s at `Ds` with the occurrences written as the block's own types, so the mutual fixed point's component `j` and the family `I Ds` (the fixed point of `I`'s operator at the parameters `Ds`, which the mutual fixed point already contains) satisfy the same equations, and the least fixed point is unique; this is the kernel's justification for restoring. Under that reading `rst` is the identity on values, so the restored typings are the mutual block's, and `ind_iota_nst` is the mutual block's iota for the constructor `ind_ctor D i c`, whose value is `ind_ctor I ii c Ds[ps]`'s; the `sty` premise (from the recursor's restored type, as in `ind_iota`) makes `I2` an instance of `I` at equivalent levels and `qs` the occurrence's arguments at `ps`. `ind_eqv` compares `N` as well as `P` and `T`, since two blocks with the same atom and mutual data but different occurrences denote different families. The elimination level and `is_rec` (no eta for a structure with a nested field) are the mutual block's, as in the kernel. |
 | `eeqv_*`, `ind_eqv`, `ceqv`, `teqv`, `cseqv`, `lseqv`, `eeqv_df` | `eeqv` is the structural congruence with `leqv` at sorts and recursor levels, `ind_eqv` (same atom, componentwise `eeqv`) at the block constants, and `lseqv` (entrywise `leqv`) at an opaque constant's levels (`eeqv_cst`: the same atom; the atom's interpretation is a function of the levels' values). `eeqv_df`: expressions of the same shape at equivalent levels denote the same value, so they are defeq at any type of one of them (this generalizes `sortDF` and `constDF`). A generated term that is not a public definition (an opaque, an axiom, a theorem, a stage-A constant) has no `eeqv` clause, so a block whose data mentions one at its levels gets `axiom c_eeqv (us us2): leqv u u2 > ... > eeqv (c us) (c us2)`, once per constant (`induct::eeqv_axioms`; the generator's report counts them): the same constant at equivalent levels, which is what `eeqv` means. `lean0 check` checks its shape (§8). A `_df` lemma whose `eeqv` still fails is stated as an axiom and counted. |
 | `nat_D`, `eq_D`; `closed_quot*`, `eeqv_quot*`, `quot_ty`, `quot_mk_ty`, `quot_lift_ty`, `quot_ind_ty`, `quot_lift_mk`, `quot_ind_mk` | Lean's prelude blocks `Nat` and `Eq` are stated as spec data (between the spec's `lean0-check` marks, in prefix form), so that the quotient primitives' types (which mention `Eq`) and the literal ties (§5) can be spec axioms. The generator uses them only when the export's block is exactly this data (else the block is generated as usual, and the quotient primitives fall back to the stage-A axioms); `lean0 check` compares the export's `Nat` and `Eq` with them like any block (§8). The quotient primitives are constants with the types the kernel requires when it adds them (`quot.cpp`, `check_quot_decls`: `Quot`, `Quot.mk`, `Quot.lift`, `Quot.ind` have exactly these types, with `Eq` checked to be the expected inductive), level invariance and closedness as for any constant, and the reduction rules `Quot.lift f h (Quot.mk r a) ≡ f a` and `Quot.ind h (Quot.mk r a) ≡ h a` when every argument has its binder's type in the primitive's type (`sty`; Lean4Lean's quotient `extra` rules; nanoda's `reduce_quot` checks only the spine, and the typing makes the constructor's `α` and `r` the primitive's, `Quot` being injective as a type former in the model). Sound in the model: the quotient of a type by a relation, with `Quot.lift` well defined by its hypothesis and `Quot.ind` by induction on representatives. |
@@ -444,7 +444,7 @@ and `lit` is inert.
 
 | axiom | argument |
 |---|---|
-| `lit_zero`: `deq G (lit b0) (ind_ctor nat_D z z) (ind_ty nat_D z)` | in the model, `Nat.zero ≡ Nat.zero : Nat` (`constDF`); `nat_D` is Lean's `Nat`, with `Nat.zero : Nat` by its data |
+| `lit_zero`: `deq G (lit b0) (ind_ctor nat_D nz nz) (ind_ty nat_D nz)` | in the model, `Nat.zero ≡ Nat.zero : Nat` (`constDF`); `nat_D` is Lean's `Nat`, with `Nat.zero : Nat` by its data |
 | `lit_succ`: `bsucc a b > deq G (lit b) (app (ind_ctor nat_D 0 1) (lit a)) (ind_ty nat_D 0)` | both sides denote the same term `succ^(a+1) zero`, which has type `Nat` because `Nat.succ : Nat → Nat` by the data |
 | generated (stage A, only when the operation's equations below could not be derived; the run reports it): `Nat_add_lit`, `Nat_sub_lit`/`_lit0`, `Nat_mul_lit`, `Nat_beq_lit`/`_lit_lt`/`_lit_gt`, `Nat_ble_lit`/`_lit_gt`, `Nat_pow_lit`, `Nat_shiftLeft_lit`, `Nat_shiftRight_lit`, `Nat_div_lit`/`_lit0`, `Nat_mod_lit`/`_lit0`, `Nat_gcd_lit`/`_lit2`, `Nat_land_lit`, `Nat_lor_lit`, `Nat_xor_lit` | `op (succ^a zero) (succ^b zero) ≡ succ^(f a b) zero : Nat` (or `≡ Bool.true/false : Bool`), where the premises force the value: `sub` from `c+b = a` or `a+c = b`; `div`/`mod` from `q·b = m`, `m+r = a`, `r+x+1 = b` (so `r < b`, Euclidean division, and `b = 0` has its own axiom: `a/0 = 0`, `a%0 = a`); `gcd` from `g·p = a`, `g·q = b` (`g` divides both) and `x·a = y·b + g` or `y·b = x·a + g` (every common divisor divides `g`, so `g = gcd a b`; `a = b = 0` forces `g = 0`); `beq` false from `a+c+1 = b` or `b+c+1 = a`; `ble` from `a+c = b` / `b+c+1 = a`; shifts via `2^b`. |
 
@@ -465,7 +465,7 @@ The spec states, per operation, a relation `*_eqs G f ...` that holds exactly wh
 single rule `*_eqs_i` applies: `f` is closed, `f` has the operation's type, and the defining
 equations Lean4Lean checks of the environment's definition (`Primitive.lean`, `checkNatAdd`
 and so on) hold as `deq` judgments over fresh variables (`#0`, `#1` of type
-`nat_ty = ind_ty nat_D z`, in contexts `nat_ty :: G` and `nat_ty :: nat_ty :: G`). The
+`nat_ty = ind_ty nat_D nz`, in contexts `nat_ty :: G` and `nat_ty :: nat_ty :: G`). The
 rules `nat_*_lit` then give the operation's value on literals. A certificate derives the
 equations of the environment's `Nat.add` (etc.) when it is declared, as ordinary derivations
 (delta, iota, beta), and states `Nat_add_eqs: add_eqs G Nat_add`; its `Nat_add_lit` (the same
@@ -611,7 +611,7 @@ instance with `As` those entries; `Ctx.LiftN.zero` puts no condition on `As`.
 
 ### `weakDF` (`spec/lean.mm0`, "Admissible rules")
 
-`deq G e e2 A > cext n G G2 > lift n z e r > lift n z e2 r2 > lift n z A R > deq G2 r r2 R` is
+`deq G e e2 A > cext n G G2 > lift n nz e r > lift n nz e2 r2 > lift n nz A R > deq G2 r r2 R` is
 `IsDefEq.weakN` (Typing/Lemmas.lean:501) for `W : Ctx.LiftN n 0 Γ Γ'`: from `henv :
 env.Ordered` and `H : env.IsDefEq U Γ e1 e2 A` it concludes `env.IsDefEq U Γ' (e1.liftN n)
 (e2.liftN n) (A.liftN n)`. The `lift` premises pin `r`, `r2`, `R` (functionality, §1). The
@@ -759,10 +759,10 @@ Both checks were run again when `⊔` and `⊩` were added, and a generated stat
 with `⊩` and `⊔` (and in ASCII) verified as the original, while one with two arguments
 swapped was rejected.
 
-Numerals (2026-11-03): `0` is a notation for `z`, and `1` to `9` are notations for the
+Numerals (2026-11-03): `0` is a notation for `nz`, and `1` to `9` are notations for the
 definitions `n1` (`s 0`) to `n9` (`s 8`); `#` became a delimiter, so `#3` is `bvar 3`. Unlike
 the notations above this changes the statements: a formula with `#3` mentions the definition
-`n3` where it mentioned `s (s (s z))`. A definition is an abbreviation, which the verifiers
+`n3` where it mentioned `s (s (s nz))`. A definition is an abbreviation, which the verifiers
 unfold (a `def` is conservative, `mm0.md`), so each statement is equivalent to the old one, and
 the generator proves the old forms and converts. Expanding every numeral back into a chain of
 `s` (and `#3` into `# 3`) gives back the old text character for character. The statements of
@@ -868,3 +868,78 @@ the atom and the `constDF` axiom (and `c_eeqv` when a block's data mentions a co
 not a `cst`), plus the per-structure and per-recursor lemmas or axioms above;
 lemmas made while proving are local to the MMB. §8 says how those statements are tied back
 to the export.
+
+## 11. The syntax encoding in set theory (`spec/tg/lean-tg.mm0`; argued here, to be re-audited)
+
+The reduction of the spec to Tarski–Grothendieck set theory (`spec/tg/`) reads every sort of
+the spec as a set of finite trees. `spec/tg/lean-tg.mm0` is generated by `scripts/tg-lean.py`
+from `spec/lean.mm0` (`--check` fails when it is out of date). It imports the library
+(`all.mm0`, whose only axioms are those of `tg.mm0`) and declares the spec's sorts and
+constructors verbatim, without notations: every `term` of the spec whose sort is not `wff`,
+37 of them (`nat_blk`, `eq_blk` and the quotient primitives included). It also defines a
+natural-number label for each sort (`ks_S`) and each constructor (`kc_c`), each label the
+successor of the one before, and the signature `lsig`, one entry
+`⟨ kc_c , ⟨ ks_S , args ⟩ ⟩` per constructor, with `args` the sequence of its argument
+sorts' labels. The open sorts are `lopen = {ks_blk, ks_atom}`. The definitions `sorted`
+and `ofsort` (library file `sorts.mm0`) make `ofsort lsig lopen ks_S` the least set of
+trees closed under these rules:
+
+- a constructor `c` of sort `S` with argument sorts `S1 … Sn` builds
+  `⟨ kc_c , (t1, …, tn) ⟩` from trees `ti` of sort `Si`;
+- every `⟨ n , ∅ ⟩` with `n ∊ ω` is a tree of an open sort.
+
+The axioms, the file's only ones:
+
+- per sort `S`, a term `enc_S: S > class`, and the axiom
+  `enc_S_sorted (e: S): _ ⇒ enc_S e ∈ ofsort lsig lopen ks_S`;
+- per constructor, its equation, e.g.
+  `enc_app (a1 a2: expr): enc_expr (app a1 a2) ≐ ⟨ kc_app , scons (enc_expr a1) (scons (enc_expr a2) ∅) ⟩`,
+  enrolled as a rewrite rule.
+
+**Soundness (conservativity over the library).** Take any model of the library. Interpret
+each sort `S` of the spec as the set `ofsort lsig lopen ks_S` of that model, each constructor
+as building its node, and each `enc_S` as the identity. MM0 sorts must be nonempty, and
+each of these sets is: `nz`, `lz`, `lnil`, `bvar nz`, a leaf, `nil`, `b0`, `nat_blk`,
+`ind_mk nat_blk nil tnil`, `tnil` and `cnil` give an element of each. Under this
+interpretation:
+
+- a constructor maps trees of its argument sorts to a tree of its sort (the first rule
+  above), so it is a well-defined operation on the interpreted sorts;
+- each equation holds by definition;
+- each sorting axiom holds because every element of the interpreted sort is in the set.
+
+A constant that a later text adds to an open sort (`term X_blk: blk`, `term X_atom: atom`) is
+interpreted as any leaf. The spec states no equation for it, and nothing tells two such
+constants apart, so any choice is sound. A later text that adds a constructor to a sort
+that is not open would break the sorting axiom. `lean0 gen` declares only atoms and blocks,
+but §8's checker does not yet reject a `term` of another sort. The joined text for the set
+theory (layer J) must check this before it relies on the sorting axioms.
+
+**What is deliberately absent.** There is no injectivity or disjointness axiom. MM0 cannot
+state the syntactic equality such an axiom would conclude, and the reduction never needs
+it: the relations of Parts I and II become definitions over the encodings (below), so
+whatever a proof needs about them, such as the determinacy of a computing relation, is a
+theorem about encodings, and equality of encodings is all it uses. Distinct labels make
+distinct constructors' trees distinct inside set theory. There, that is a theorem about
+`lsig` (`ofsort_S_cases`), not an axiom.
+
+**The relations of Part I add no axiom.** The rest of `lean-tg.mm0` is definitions and
+theorems. Each relation `R` of Part I gets a label `kr_R`, and its atoms are
+`ra_R t1 … tn = ⟨ kr_R , (t1, …, tn) ⟩`. Each clause axiom `A` of Part I gets the class
+`cl_A` of its ground instances `⟨ premises , conclusion ⟩` at all sets, with constructors
+written as their trees and the spec's definitions unfolded. All of them, cut down to
+`latoms = ω × fseq (trees ω)`, form one program `lprog`, and `lrel` is its set of derivable
+atoms: the least fixed point of the program's step (library file `horn.mm0`). Each relation
+is then a definition,
+`def lift (a1 a2: nat) (a3 a4: expr): wff = $ _ ⇒ ra_lift (enc_nat a1) … ∈ lrel $`. The
+spec's definitions follow verbatim, in prefix form. Each of the spec's 209 clause axioms of
+Part I is restated as a theorem with the same name and statement. Theorems about the
+program follow, also proved: per relation, that a clause of the program concluding an
+`R`-atom is one of `R`'s (`lprog_R_pr`) and inversion (`lrel_R_cases`: a derivable atom is
+an instance of one of its clauses, with the premises derivable); and the determinacy of the
+computing relations that later proofs need (`lrel_R_det`).
+
+`scripts/tg-lean.py --parse-check` writes every axiom of the spec, as the generator prints
+it in prefix form, as a theorem proved by that axiom, and `scripts/test.sh` verifies this.
+So the restated statements are the spec's. Once the spec is verified against this file
+(layer J), Part I's axioms are trusted only through the encoding axioms above.

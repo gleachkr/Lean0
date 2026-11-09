@@ -4,25 +4,25 @@
 
 lemma add_one (i: nat): $ add i 1 (s i) $
 ----
-l1: $ add i (s z) (s i) $ by add_s [add_z []]
+l1: $ add i (s nz) (s i) $ by add_s [add_z []]
 
 lemma lt_z (n: nat): $ lt 0 (s n) $
 ----
-l1: $ le (s z) (s n) $ by le_s [le_z []]
+l1: $ le (s nz) (s n) $ by le_s [le_z []]
 
 lemma le_refl1 : $ le 1 1 $
 ----
-l1: $ le (s z) (s z) $ by le_s [le_z []]
+l1: $ le (s nz) (s nz) $ by le_s [le_z []]
 
 -- Lifting by one
 
 lemma lift1_ge (k i: nat): $ le k i $ > $ lift 1 k (bvar i) (bvar (s i)) $
 ----
-l1: $ lift (s z) k (bvar i) (bvar (s i)) $ by lift_bvar_ge [#1, add_one []]
+l1: $ lift (s nz) k (bvar i) (bvar (s i)) $ by lift_bvar_ge [#1, add_one []]
 
 lemma lift1_z (i: nat): $ lift 1 0 (bvar i) (bvar (s i)) $
 ----
-l1: $ lift (s z) z (bvar i) (bvar (s i)) $ by lift1_ge [le_z []]
+l1: $ lift (s nz) nz (bvar i) (bvar (s i)) $ by lift1_ge [le_z []]
 
 lemma lift_closed0 (n k: nat) (e: expr): $ closed 0 e $ > $ lift n k e e $
 ----
@@ -36,7 +36,7 @@ l1: $ inst k e a e $ by inst_closed [#1, le_z []]
 
 lemma lookup_srt0 (G: ctx) (l: lvl): $ lookup (cons (srt l) G) 0 (srt l) $
 ----
-l1: $ lookup (cons (srt l) G) z (srt l) $ by lookup_z [lift_srt []]
+l1: $ lookup (cons (srt l) G) nz (srt l) $ by lookup_z [lift_srt []]
 
 lemma lookup_srt_s (G: ctx) (A: expr) (n: nat) (l: lvl):
   $ lookup G n (srt l) $ > $ lookup (cons A G) (s n) (srt l) $
@@ -59,7 +59,7 @@ l1: $ ty G (srt l) (srt (ls l)) $ by sortDF [leqv_refl []]
 
 lemma lookup_closed0 (G: ctx) (A: expr): $ closed 0 A $ > $ lookup (cons A G) 0 A $
 ----
-l1: $ lookup (cons A G) z A $ by lookup_z [lift_closed0 [#1]]
+l1: $ lookup (cons A G) nz A $ by lookup_z [lift_closed0 [#1]]
 
 lemma lookup_closed_s (G: ctx) (A B: expr) (n: nat):
   $ lookup G n B $ > $ closed 0 B $ > $ lookup (cons A G) (s n) B $
@@ -68,4 +68,4 @@ l1: $ lookup (cons A G) (s n) B $ by lookup_s [#1, lift_closed0 [#2]]
 
 lemma lift0 (i: nat): $ lift 0 0 (bvar i) (bvar i) $
 ----
-l1: $ lift z z (bvar i) (bvar i) $ by lift_bvar_ge [le_z [], add_z []]
+l1: $ lift nz nz (bvar i) (bvar i) $ by lift_bvar_ge [le_z [], add_z []]

@@ -1,0 +1,114 @@
+-- horn.mm0: the least model of a program of ground Horn clauses. A program is
+-- a class `H` of clauses `⟨ p , c ⟩`: a finite sequence `p` of premises and a
+-- conclusion `c`, all atoms of a set `V` (`hprog H V`). `horn H` is the set of
+-- atoms derivable in `H`: the least fixed point of `hstep`, which adds the
+-- conclusion of every clause whose premises are all in the set. A clause has
+-- finitely many premises, so the operator is continuous with index set `ω`:
+-- the fixed point exists and is a set, it is closed under the clauses
+-- (`horn_intro`), each of its atoms is the conclusion of a clause whose
+-- premises are in it (`horn_elim`), and rule induction holds (`horn_ind`). The
+-- relations of spec/lean.mm0 are such a program over the encodings
+-- (lean-tg.mm0: each clause axiom of the spec is a schema of ground clauses).
+-- Imports sorts.mm0; proofs in horn.auf.
+
+import "sorts.mm0";
+
+-- --------------------------------------------------------------------------
+-- The definitions
+-- --------------------------------------------------------------------------
+
+--| One step: the conclusions of the clauses whose premises are all in `X`.
+def hstep (H X: class) (.p .c: set): class = $ {c | ∃ p (⟨ p , c ⟩ ∈ H ∧ crn p ⊆ X)} $;
+--| A program over the set of atoms `V`.
+def hprog (H V: class): fml = $ H ⊆ fseq V × V ∧ isset V $;
+--| The derivable atoms.
+def horn (H: class) (.x: set): class = $ lfp x (hstep H x) $;
+
+-- --------------------------------------------------------------------------
+-- Premise lists
+-- --------------------------------------------------------------------------
+
+theorem crn_empty (G: hyps): $ G ⇒ crn ∅ = ∅ $;
+theorem crn_empty_sub (G: hyps) (X: class): $ G ⇒ crn ∅ ⊆ X $;
+theorem crn_scons_sub (G: hyps) (A S X: class):
+  $ G ⇒ A ∈ X $ > $ G ⇒ crn S ⊆ X $ > $ G ⇒ crn (scons A S) ⊆ X $;
+theorem crn_scons_head (G: hyps) (A S X: class):
+  $ G ⇒ isset A $ > $ G ⇒ crn (scons A S) ⊆ X $ > $ G ⇒ A ∈ X $;
+theorem crn_scons_tail (G: hyps) (A S X: class):
+  $ G ⇒ crn (scons A S) ⊆ X $ > $ G ⇒ crn S ⊆ X $;
+
+-- --------------------------------------------------------------------------
+-- Programs
+-- --------------------------------------------------------------------------
+
+--| @congr
+theorem hprog_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ hprog A C ⟺ hprog B D $;
+--| @rewrite
+theorem sb_f_hprog {x: set} (t: set x) (A B: class x):
+  $ [x/t] (hprog A B) ⟺ hprog (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+theorem hprog_intro (G: hyps) (H V: class):
+  $ G ⇒ H ⊆ fseq V × V $ > $ G ⇒ isset V $ > $ G ⇒ hprog H V $;
+theorem hprog_sub (G: hyps) (H V: class): $ G ⇒ hprog H V $ > $ G ⇒ H ⊆ fseq V × V $;
+theorem hprog_set (G: hyps) (H V: class): $ G ⇒ hprog H V $ > $ G ⇒ isset V $;
+--| Any class of clauses, cut down to the atoms of a set, is a program.
+theorem hprog_cin (G: hyps) (H V: class): $ G ⇒ isset V $ > $ G ⇒ hprog (H ∩ (fseq V × V)) V $;
+--| The parts of a clause.
+theorem hprog_clause (G: hyps) (H V: class) (p c: set):
+  $ G ⇒ hprog H V $ > $ G ⇒ ⟨ p , c ⟩ ∈ H $ > $ G ⇒ p ∊ fseq V ∧ c ∊ V $;
+
+-- --------------------------------------------------------------------------
+-- The step
+-- --------------------------------------------------------------------------
+
+--| @congr
+theorem hstep_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ hstep A C ≐ hstep B D $;
+theorem hstep_eq (G: hyps) (A B C D: class):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ hstep A C = hstep B D $;
+--| @rewrite
+theorem sb_c_hstep {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (hstep A B)) ≐ hstep (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+theorem hstep_intro (G: hyps) (H X: class) (p c: set):
+  $ G ⇒ ⟨ p , c ⟩ ∈ H $ > $ G ⇒ crn p ⊆ X $ > $ G ⇒ c ∊ hstep H X $;
+theorem hstep_elim (G: hyps) {p: set} (H X: class) (c: set):
+  $ G ⇒ c ∊ hstep H X $ > $ G ⇒ ∃ p (⟨ p , c ⟩ ∈ H ∧ crn p ⊆ X) $;
+theorem hstep_mono {x: set} (G: hyps x) (H: class): $ G ⇒ mono x (hstep H x) $;
+theorem hstep_sub (G: hyps) (H V X: class): $ G ⇒ hprog H V $ > $ G ⇒ hstep H X ⊆ V $;
+theorem hstep_setop {x: set} (G: hyps x) (H V: class):
+  $ G ⇒ hprog H V $ > $ G ⇒ setop x (hstep H x) $;
+--| A conclusion depends on its premises, indexed by their number, an element of `ω`.
+theorem hstep_cont {x: set} (G: hyps x) (H V: class):
+  $ G ⇒ hprog H V $ > $ G ⇒ cont x (hstep H x) ω $;
+
+-- --------------------------------------------------------------------------
+-- The derivable atoms
+-- --------------------------------------------------------------------------
+
+--| @congr
+theorem horn_congr (A B: class): $ A ≐ B $ > $ horn A ≐ horn B $;
+theorem horn_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ horn A = horn B $;
+--| @rewrite
+theorem sb_c_horn {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (horn A)) ≐ horn (⟦ x / t ⟧ A) $;
+theorem horn_fix (G: hyps) (H V: class): $ G ⇒ hprog H V $ > $ G ⇒ hstep H (horn H) = horn H $;
+theorem horn_set (G: hyps) (H V: class): $ G ⇒ hprog H V $ > $ G ⇒ isset (horn H) $;
+theorem horn_sub (G: hyps) (H V: class): $ G ⇒ hprog H V $ > $ G ⇒ horn H ⊆ V $;
+--| Closure: the conclusion of a clause whose premises are derivable.
+theorem horn_intro (G: hyps) (H V: class) (p c: set):
+  $ G ⇒ hprog H V $ > $ G ⇒ ⟨ p , c ⟩ ∈ H $ > $ G ⇒ crn p ⊆ horn H $ > $ G ⇒ c ∊ horn H $;
+--| The class form, for clauses written with the encodings.
+theorem horn_intro_c (G: hyps) (H V P C: class):
+  $ G ⇒ hprog H V $ > $ G ⇒ ⟨ P , C ⟩ ∈ H $ > $ G ⇒ isset P $ > $ G ⇒ isset C $ >
+  $ G ⇒ crn P ⊆ horn H $ > $ G ⇒ C ∈ horn H $;
+--| Inversion: a derivable atom is the conclusion of a clause whose premises are
+--| derivable.
+theorem horn_elim (G: hyps) {p: set} (H V: class) (c: set):
+  $ G ⇒ hprog H V $ > $ G ⇒ c ∊ horn H $ > $ G ⇒ ∃ p (⟨ p , c ⟩ ∈ H ∧ crn p ⊆ horn H) $;
+--| Rule induction: a class that contains the conclusion of every clause whose
+--| premises are derivable and in it contains every derivable atom.
+theorem horn_ind (G: hyps) {p c: set} (H V P: class):
+  $ G ⇒ hprog H V $ > $ G ⇒ ∀ p ∀ c (⟨ p , c ⟩ ∈ H → crn p ⊆ horn H ∩ P → c ∊ P) $ >
+  $ G ⇒ horn H ⊆ P $;
+--| More clauses derive more atoms.
+theorem horn_mono (G: hyps) (H K V W: class):
+  $ G ⇒ hprog H V $ > $ G ⇒ hprog K W $ > $ G ⇒ H ⊆ K $ > $ G ⇒ horn H ⊆ horn K $;
+theorem horn_universe (G: hyps) (H V U: class):
+  $ G ⇒ hprog H V $ > $ G ⇒ universe U $ > $ G ⇒ V ∈ U $ > $ G ⇒ horn H ∈ U $;

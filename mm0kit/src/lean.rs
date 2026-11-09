@@ -68,7 +68,7 @@ pub struct Lean {
     /// The spec's `proj` term (`proj b i e`), if the spec has it.
     pub proj_id: Option<TId>,
     nats: Vec<E>,
-    /// The spec's numerals `n1`..`n9` (definitions of `s^k z`), by their term.
+    /// The spec's numerals `n1`..`n9` (definitions of `s^k nz`), by their term.
     numerals: HashMap<TId, usize>,
     /// `closed k (c us)` lemma for each constant (by its head term), taking `k` then the levels.
     pub const_closed: HashMap<TId, ThId>,
@@ -91,7 +91,7 @@ impl Lean {
     pub fn new(env: &mut Env) -> Self {
         let t = |n: &str| env.term_id(n);
         let ids = Ids {
-            z: t("z"),
+            z: t("nz"),
             s: t("s"),
             bvar: t("bvar"),
             srt: t("srt"),

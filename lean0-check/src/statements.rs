@@ -669,7 +669,7 @@ fn ctx_list(m: &M) -> Option<Vec<&M>> {
 
 /// A numeral.
 fn nat_m(n: usize) -> M {
-    let mut m = M { head: "z".into(), args: vec![] };
+    let mut m = M { head: "nz".into(), args: vec![] };
     for _ in 0..n {
         m = M { head: "s".into(), args: vec![m] };
     }
@@ -923,10 +923,10 @@ impl<'t, 'p> Cmp<'_, 't, 'p> {
     }
 }
 
-/// A unary numeral `z`, `s (s z)`, ...
+/// A unary numeral `nz`, `s (s nz)`, ...
 fn unary(m: &M) -> Option<usize> {
     match (m.head.as_str(), m.args.as_slice()) {
-        ("z", []) => Some(0),
+        ("nz", []) => Some(0),
         ("s", [a]) => Some(unary(a)? + 1),
         _ => None,
     }

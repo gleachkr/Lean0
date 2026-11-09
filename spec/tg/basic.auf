@@ -126,20 +126,20 @@ l1: $ G ⇒ b ∊ A $ by eq_replace [#1, #2]
 
 eq_subst
 --------
-l1: $ G ⇒ [z/b] p $ by eq_replace (z := $ z $, a := $ a $, b := $ b $, p := $ p $) [#1, #2]
+l1: $ G ⇒ [z/b] p $ by eq_replace [#1, #2]
 
 sb_f_eq
 -------
-l1: $ G ⇒ [x/a] p $ by eq_subst (z := $ y $, a := $ u $, b := $ a $, p := $ [x/y] p $) [#1, #2]
+l1: $ G ⇒ [x/a] p $ by eq_subst [#1, #2]
 
 sb_c_eq
 -------
 l1: $ G ⇒ (⟦ x / u ⟧ B) = (⟦ x / u ⟧ B) $ by eq_refl
-l2: $ G ⇒ (⟦ x / u ⟧ B) = (⟦ x / a ⟧ B) $ by eq_subst (z := $ y $, a := $ u $, b := $ a $, p := $ (⟦ x / u ⟧ B) = (⟦ x / y ⟧ B) $) [#1, l1]
+l2: $ G ⇒ (⟦ x / u ⟧ B) = (⟦ x / a ⟧ B) $ by eq_subst [#1, l1]
 
 isset_intro
 -----------
-l1: $ G ⇒ ∃ x (x = A) $ by ex_intro (t := $ a $) [#1]
+l1: $ G ⇒ ∃ x (x = A) $ by ex_intro [#1]
 
 isset_elim
 ----------
@@ -156,7 +156,7 @@ l5: $ G ⇒ isset B $ by isset_elim [#2, l4]
 wcel_intro
 ----------
 l1: $ G ⇒ a = A ∧ a ∊ B $ by and_intro [#1, #2]
-l2: $ G ⇒ ∃ x (x = A ∧ x ∊ B) $ by ex_intro (t := $ a $) [l1]
+l2: $ G ⇒ ∃ x (x = A ∧ x ∊ B) $ by ex_intro [l1]
 
 wcel_elim
 ---------
@@ -208,7 +208,7 @@ l6: $ G ⇒ A ∈ C $ by wcel_elim [#2, l5]
 
 wcel_cab_intro
 --------------
-l1: $ G , z = A ⇒ z ∊ {x | p} $ by cab_intro (x := $ x $, t := $ z $, p := $ p $) [#2]
+l1: $ G , z = A ⇒ z ∊ {x | p} $ by cab_intro [#2]
 l2: $ G , z = A ⇒ z = A $ by ax
 l3: $ G , z = A ⇒ A ∈ {x | p} $ by wcel_intro [l2, l1]
 l4: $ G ⇒ A ∈ {x | p} $ by isset_elim [#1, l3]
@@ -534,7 +534,7 @@ l1: $ [x/t] (transitive A ∧ ∀ u ∀ v (u ∊ A ∧ v ∊ A → cpr u v ∈ A
 
 welc_cpr_eq
 -----------
-l1: $ G ⇒ a = A ∨ a = C $ by cab_elim (x := $ y $, t := $ a $, p := $ y = A ∨ y = C $) [#3]
+l1: $ G ⇒ a = A ∨ a = C $ by cab_elim [#3]
 l2: $ G , a = A ⇒ a = A $ by ax
 l3: $ G , a = A ⇒ A = B $ by weaken [#1]
 l4: $ G , a = A ⇒ a = B $ by eq_trans [l2, l3]
@@ -544,7 +544,7 @@ l7: $ G , a = C ⇒ C = D $ by weaken [#2]
 l8: $ G , a = C ⇒ a = D $ by eq_trans [l6, l7]
 l9: $ G , a = C ⇒ a = B ∨ a = D $ by or_intro_r [l8]
 l10: $ G ⇒ a = B ∨ a = D $ by or_elim [l1, l5, l9]
-l11: $ G ⇒ a ∊ {y | y = B ∨ y = D} $ by cab_intro (x := $ y $, t := $ a $, p := $ y = B ∨ y = D $) [l10]
+l11: $ G ⇒ a ∊ {y | y = B ∨ y = D} $ by cab_intro [l10]
 
 cpr_eq
 ------
@@ -572,7 +572,7 @@ l3: $ G ⇒ cpr (csn A) (cpr A C) = cpr (csn B) (cpr B D) $ by cpr_eq [l1, l2]
 
 welc_cuni_eq
 ------------
-l1: $ G ⇒ ∃ z (z ∊ A ∧ a ∊ z) $ by cab_elim (x := $ y $, t := $ a $, p := $ ∃ z (z ∊ A ∧ y ∊ z) $) [#2]
+l1: $ G ⇒ ∃ z (z ∊ A ∧ a ∊ z) $ by cab_elim [#2]
 l2: $ G , z ∊ A ∧ a ∊ z ⇒ z ∊ A ∧ a ∊ z $ by ax
 l3: $ G , z ∊ A ∧ a ∊ z ⇒ z ∊ A $ by and_elim_l [l2]
 l4: $ G , z ∊ A ∧ a ∊ z ⇒ a ∊ z $ by and_elim_r [l2]
@@ -580,7 +580,7 @@ l5: $ G , z ∊ A ∧ a ∊ z ⇒ A = B $ by weaken [#1]
 l6: $ G , z ∊ A ∧ a ∊ z ⇒ z ∊ B $ by welc_eq [l5, l3]
 l7: $ G , z ∊ A ∧ a ∊ z ⇒ z ∊ B ∧ a ∊ z $ by and_intro [l6, l4]
 l8: $ G , z ∊ A ∧ a ∊ z ⇒ ∃ z (z ∊ B ∧ a ∊ z) $ by ex_intro [l7]
-l9: $ G , z ∊ A ∧ a ∊ z ⇒ a ∊ {y | ∃ z (z ∊ B ∧ y ∊ z)} $ by cab_intro (x := $ y $, t := $ a $, p := $ ∃ z (z ∊ B ∧ y ∊ z) $) [l8]
+l9: $ G , z ∊ A ∧ a ∊ z ⇒ a ∊ {y | ∃ z (z ∊ B ∧ y ∊ z)} $ by cab_intro [l8]
 l10: $ G ⇒ a ∊ ⋃ B $ by ex_elim [l1, l9]
 
 cuni_eq
@@ -596,9 +596,9 @@ l8: $ G ⇒ ⋃ A = ⋃ B $ by eq_intro [l3, l7]
 
 welc_cpw_eq
 -----------
-l1: $ G ⇒ a ⊆ A $ by cab_elim (x := $ y $, t := $ a $, p := $ y ⊆ A $) [#2]
+l1: $ G ⇒ a ⊆ A $ by cab_elim [#2]
 l2: $ G ⇒ a ⊆ B $ by subset_eq_r [#1, l1]
-l3: $ G ⇒ a ∊ {y | y ⊆ B} $ by cab_intro (x := $ y $, t := $ a $, p := $ y ⊆ B $) [l2]
+l3: $ G ⇒ a ∊ {y | y ⊆ B} $ by cab_intro [l2]
 
 cpw_eq
 ------
@@ -613,7 +613,7 @@ l8: $ G ⇒ 𝒫 A = 𝒫 B $ by eq_intro [l3, l7]
 
 welc_cun_eq
 -----------
-l1: $ G ⇒ a ∊ A ∨ a ∊ C $ by cab_elim (x := $ y $, t := $ a $, p := $ y ∊ A ∨ y ∊ C $) [#3]
+l1: $ G ⇒ a ∊ A ∨ a ∊ C $ by cab_elim [#3]
 l2: $ G , a ∊ A ⇒ a ∊ A $ by ax
 l3: $ G , a ∊ A ⇒ A = B $ by weaken [#1]
 l4: $ G , a ∊ A ⇒ a ∊ B $ by welc_eq [l3, l2]
@@ -623,7 +623,7 @@ l7: $ G , a ∊ C ⇒ C = D $ by weaken [#2]
 l8: $ G , a ∊ C ⇒ a ∊ D $ by welc_eq [l7, l6]
 l9: $ G , a ∊ C ⇒ a ∊ B ∨ a ∊ D $ by or_intro_r [l8]
 l10: $ G ⇒ a ∊ B ∨ a ∊ D $ by or_elim [l1, l5, l9]
-l11: $ G ⇒ a ∊ {y | y ∊ B ∨ y ∊ D} $ by cab_intro (x := $ y $, t := $ a $, p := $ y ∊ B ∨ y ∊ D $) [l10]
+l11: $ G ⇒ a ∊ {y | y ∊ B ∨ y ∊ D} $ by cab_intro [l10]
 
 cun_eq
 ------
@@ -646,7 +646,7 @@ l2: $ G ⇒ A ∪ csn A = B ∪ csn B $ by cun_eq [#1, l1]
 
 welc_img_eq
 -----------
-l1: $ G ⇒ ∃ u (u ∊ C ∧ cpr (cpr u u) (cpr u a) ∈ A) $ by cab_elim (x := $ v $, t := $ a $, p := $ ∃ u (u ∊ C ∧ cpr (cpr u u) (cpr u v) ∈ A) $) [#3]
+l1: $ G ⇒ ∃ u (u ∊ C ∧ cpr (cpr u u) (cpr u a) ∈ A) $ by cab_elim [#3]
 l2: $ G , u ∊ C ∧ ⟨ u , a ⟩ ∈ A ⇒ u ∊ C ∧ ⟨ u , a ⟩ ∈ A $ by ax
 l3: $ G , u ∊ C ∧ ⟨ u , a ⟩ ∈ A ⇒ u ∊ C $ by and_elim_l [l2]
 l4: $ G , u ∊ C ∧ ⟨ u , a ⟩ ∈ A ⇒ ⟨ u , a ⟩ ∈ A $ by and_elim_r [l2]
@@ -656,7 +656,7 @@ l7: $ G , u ∊ C ∧ ⟨ u , a ⟩ ∈ A ⇒ A = B $ by weaken [#1]
 l8: $ G , u ∊ C ∧ ⟨ u , a ⟩ ∈ A ⇒ ⟨ u , a ⟩ ∈ B $ by wcel_eq_r [l7, l4]
 l9: $ G , u ∊ C ∧ ⟨ u , a ⟩ ∈ A ⇒ u ∊ D ∧ ⟨ u , a ⟩ ∈ B $ by and_intro [l6, l8]
 l10: $ G , u ∊ C ∧ ⟨ u , a ⟩ ∈ A ⇒ ∃ u (u ∊ D ∧ ⟨ u , a ⟩ ∈ B) $ by ex_intro [l9]
-l11: $ G , u ∊ C ∧ ⟨ u , a ⟩ ∈ A ⇒ a ∊ {v | ∃ u (u ∊ D ∧ ⟨ u , v ⟩ ∈ B)} $ by cab_intro (x := $ v $, t := $ a $, p := $ ∃ u (u ∊ D ∧ cpr (cpr u u) (cpr u v) ∈ B) $) [l10]
+l11: $ G , u ∊ C ∧ ⟨ u , a ⟩ ∈ A ⇒ a ∊ {v | ∃ u (u ∊ D ∧ ⟨ u , v ⟩ ∈ B)} $ by cab_intro [l10]
 l12: $ G ⇒ a ∊ img B D $ by ex_elim [l1, l11]
 
 img_eq
@@ -675,7 +675,7 @@ l11: $ G ⇒ img A C = img B D $ by eq_intro [l4, l10]
 
 functional_eq
 -------------
-l1: $ G ⇒ ∀ v ∀ w (⟨ u , v ⟩ ∈ A ∧ ⟨ u , w ⟩ ∈ A → v = w) $ by all_elim (x := $ u $, t := $ u $, p := $ ∀ v ∀ w (⟨ u , v ⟩ ∈ A ∧ ⟨ u , w ⟩ ∈ A → v = w) $) [#2]
+l1: $ G ⇒ ∀ v ∀ w (⟨ u , v ⟩ ∈ A ∧ ⟨ u , w ⟩ ∈ A → v = w) $ by all_elim [#2]
 l2: $ G ⇒ ∀ w (⟨ u , v ⟩ ∈ A ∧ ⟨ u , w ⟩ ∈ A → v = w) $ by all_elim [l1]
 l3: $ G ⇒ ⟨ u , v ⟩ ∈ A ∧ ⟨ u , w ⟩ ∈ A → v = w $ by all_elim [l2]
 l4: $ G ⇒ B = A $ by eq_sym [#1]
@@ -857,7 +857,7 @@ l5: $ [x/t] (a ∊ A) ⟺ a ∊ (⟦ x / t ⟧ A) $ by iff_trans [l3, l4]
 
 cab_eq
 ------
-l1: $ G ⇒ [x/y] p ↔ [x/y] q $ by all_elim (t := $ y $) [#1]
+l1: $ G ⇒ [x/y] p ↔ [x/y] q $ by all_elim [#1]
 l2: $ G , y ∊ {x | p} ⇒ y ∊ {x | p} $ by ax
 l3: $ G , y ∊ {x | p} ⇒ [x/y] p $ by cab_elim [l2]
 l4: $ G , y ∊ {x | p} ⇒ [x/y] p ↔ [x/y] q $ by weaken [l1]
@@ -873,7 +873,7 @@ l12: $ G ⇒ {x | p} = {x | q} $ by eq_intro [l6, l11]
 cab_welc
 --------
 l1: $ G , z ∊ A ⇒ z ∊ A $ by ax
-l2: $ G , z ∊ A ⇒ z ∊ {x | x ∊ A} $ by cab_intro (x := $ x $, t := $ z $, p := $ x ∊ A $) [l1]
+l2: $ G , z ∊ A ⇒ z ∊ {x | x ∊ A} $ by cab_intro [l1]
 l3: $ G , z ∊ {x | x ∊ A} ⇒ z ∊ {x | x ∊ A} $ by ax
-l4: $ G , z ∊ {x | x ∊ A} ⇒ z ∊ A $ by cab_elim (x := $ x $, t := $ z $, p := $ x ∊ A $) [l3]
+l4: $ G , z ∊ {x | x ∊ A} ⇒ z ∊ A $ by cab_elim [l3]
 l5: $ G ⇒ A = {x | x ∊ A} $ by eq_intro [l2, l4]

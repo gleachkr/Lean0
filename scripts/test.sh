@@ -37,6 +37,17 @@ for mm0 in spec/examples/*.mm0; do
   scripts/check.sh "$mm0" "${mm0%.mm0}.auf" || fail=1
 done
 
+# The TG library with the encoding of the spec's syntax (spec/tg/lean-tg.mm0, generated from
+# the spec): in sync with the spec, and every theorem proved.
+echo "== spec/tg (the set-theory library and the syntax encoding)"
+if scripts/tg-lean.py --check && tg=$(scripts/tg-check.sh spec/tg/lean-tg.mm0) && echo "$tg" && [[ "$tg" == *"; 0 admitted"* ]]; then :; else echo "FAIL: spec/tg"; fail=1; fi
+# The generator's notation parser: every axiom of the spec in prefix form, proved by the axiom.
+pc=build/tg/parsecheck
+if scripts/tg-lean.py --parse-check $pc && "${ABC:-abc}" compile $pc/check.mm0 $pc/check.auf $pc/check.mmb \
+    && "${ABC:-abc}" join $pc/check.mm0 > $pc/check.joined.mm0 && "$MM0_C" $pc/check.mmb < $pc/check.joined.mm0; then
+  echo "spec/tg: the notation parser restates the spec's $(grep -c '^theorem' $pc/check.mm0) axioms"
+else echo "FAIL: the notation parser (scripts/mm0math.py)"; fail=1; fi
+
 echo "== mm0kit self-test"
 cargo run -q --release -p mm0kit --example selftest -- spec/lean.mm0 build/out/selftest.mm0 build/out/selftest.mmb > /dev/null
 [ "$(accepted_by build/out/selftest.mmb build/out/selftest.mm0)" = 2 ] && echo "selftest: ok" || { echo "FAIL: selftest"; fail=1; }
@@ -83,13 +94,13 @@ stmt_neg() {
     echo "FAIL (accepted): $edit"; fail=1
   else echo "rejected as expected: $edit"; fi
 }
-stmt_neg '0,/^theorem rfl_ty/s/(srt u) (pi (bvar z)/(srt u) (pi (bvar (s z))/'
-stmt_neg 's/^def rfl (u: lvl): expr = \$ lam (srt u) (lam (bvar z)/def rfl (u: lvl): expr = $ lam (srt u) (lam (bvar (s z))/'
+stmt_neg '0,/^theorem rfl_ty/s/(srt u) (pi (bvar nz)/(srt u) (pi (bvar (s nz))/'
+stmt_neg 's/^def rfl (u: lvl): expr = \$ lam (srt u) (lam (bvar nz)/def rfl (u: lvl): expr = $ lam (srt u) (lam (bvar (s nz))/'
 stmt_neg '/^theorem Eq_symm_ty/s/^theorem/axiom/'
 stmt_neg 's/Lean definition `rfl`/Lean definition `rfl2`/'
 # A nested block's occurrences restore its constructors' types: `S.node : Array S → S`
 # stated with the occurrence `List S` is caught.
-stmt_neg '/^def S_D/s/(cons (app (ind_ty (Array_D lz) z) (bvar z))/(cons (app (ind_ty (List_D lz) z) (bvar z))/' nested
+stmt_neg '/^def S_D/s/(cons (app (ind_ty (Array_D lz) nz) (bvar nz))/(cons (app (ind_ty (List_D lz) nz) (bvar nz))/' nested
 # An opaque constant is its own atom at its own levels: two constants sharing an atom would
 # be definitionally equal (`eeqv_cst`), and a permuted level list another constant.
 stmt_neg 's/cst Inh_atom/cst Pt_atom/' core
@@ -163,7 +174,7 @@ tamper() {
 
 echo "== negative tests: statement mismatch (hand-written certificates)"
 mismatch build/out/church 's/(app (csucc u) (czero u)) (cone u) (cnat u)/(app (csucc u) (czero u)) (czero u) (cnat u)/'
-mismatch build/out/core 's/theorem id_inh (u: lvl): \$ inh nil (pi (srt u) (pi (bvar z) (bvar (s z))))/theorem id_inh (u: lvl): $ inh nil (pi (srt u) (pi (bvar z) (bvar z)))/'
+mismatch build/out/core 's/theorem id_inh (u: lvl): \$ inh nil (pi (srt u) (pi (bvar nz) (bvar (s nz))))/theorem id_inh (u: lvl): $ inh nil (pi (srt u) (pi (bvar nz) (bvar nz)))/'
 mismatch build/out/church 's/def cone (u: lvl): expr = \$ lam (srt u) (lam (pi v0 v1) (lam v1 (app v1 v0))) \$;/def cone (u: lvl): expr = $ lam (srt u) (lam (pi v0 v1) (lam v1 v0)) $;/'
 
 echo "== negative tests: tampered statements, original proofs (generated certificates)"

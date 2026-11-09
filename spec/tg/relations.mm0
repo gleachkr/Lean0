@@ -1,6 +1,6 @@
 -- relations.mm0: relations and functions as traces: products, relations,
 -- domain, range, converse, composition, restriction, function classes, and
--- the trace encoding of functions (`ap`, `lam`, `pi`) with its laws: β, η,
+-- the trace encoding of functions (`ap`, `clam`, `cpi`) with its laws: β, η,
 -- typing, extensionality and impredicativity over `two`. Imports pairs.mm0;
 -- proofs in relations.auf.
 --
@@ -224,20 +224,20 @@ theorem fn_into_subset_cod (G: hyps) (F A B C: class):
   $ G ⇒ fn_into F A B $ > $ G ⇒ B ⊆ C $ > $ G ⇒ fn_into F A C $;
 
 -- --------------------------------------------------------------------------
--- Functions as traces: `ap`, `lam`, `pi`
+-- Functions as traces: `ap`, `clam`, `cpi`
 -- --------------------------------------------------------------------------
 
 --| The set of values of `F` at `A`: `{y | ⟨ A , y ⟩ ∈ F}`.
 def ap (F A: class) (.y: set): class = $ {y | ⟨ A , y ⟩ ∈ F} $;
 --| The trace of the operation `x ↦ B` on `A`.
-def lam {x: set} (A: class) (B: class x) (.y .z: set): class =
+def clam {x: set} (A: class) (B: class x) (.y .z: set): class =
   $ {z | ∃ x ∃ y (z = ⟨ x , y ⟩ ∧ x ∊ A ∧ y ∊ B)} $;
 --| The dependent function space: the traces of functions on `A` with values
 --| in `B` at each `x`. A trace's pairs have their second components in the
 --| value `ap f x ∈ B`, hence in `⋃ B`; the first conjunct says `f` has no
 --| other pairs.
-def pi {x: set} (A: class) (B: class x) (.f: set): class =
-  $ {f | f ⊆ lam x A (⋃ B) ∧ ∀ x (x ∊ A → ap f x ∈ B)} $;
+def cpi {x: set} (A: class) (B: class x) (.f: set): class =
+  $ {f | f ⊆ clam x A (⋃ B) ∧ ∀ x (x ∊ A → ap f x ∈ B)} $;
 --| The truth values: `∅` is false and `csn ∅` is true.
 def two: class = $ cpr ∅ (csn ∅) $;
 
@@ -263,60 +263,61 @@ theorem ap_eq (G: hyps) (F H A B: class):
 theorem sb_c_ap {x: set} (t: set x) (F A: class x):
   $ (⟦ x / t ⟧ (ap F A)) ≐ ap (⟦ x / t ⟧ F) (⟦ x / t ⟧ A) $;
 
-theorem lam_intro {x: set} (G: hyps x) (A: class) (B: class x) (a b: set):
-  $ G ⇒ a ∊ A $ > $ G ⇒ b ∊ (⟦ x / a ⟧ B) $ > $ G ⇒ ⟨ a , b ⟩ ∈ lam x A B $;
-theorem lam_elim {x: set} (G: hyps x) (A: class) (B: class x) (a b: set):
-  $ G ⇒ ⟨ a , b ⟩ ∈ lam x A B $ > $ G ⇒ a ∊ A ∧ b ∊ (⟦ x / a ⟧ B) $;
+--| @view {x: set} (G: hyps x) (A: class) (B: class x) (a b: set) (q: fml): $ G ⇒ a ∊ A $ > $ G ⇒ q $ > $ G ⇒ ⟨ a , b ⟩ ∈ clam x A B $
+theorem clam_intro {x: set} (G: hyps x) (A: class) (B: class x) (a b: set):
+  $ G ⇒ a ∊ A $ > $ G ⇒ b ∊ (⟦ x / a ⟧ B) $ > $ G ⇒ ⟨ a , b ⟩ ∈ clam x A B $;
+theorem clam_elim {x: set} (G: hyps x) (A: class) (B: class x) (a b: set):
+  $ G ⇒ ⟨ a , b ⟩ ∈ clam x A B $ > $ G ⇒ a ∊ A ∧ b ∊ (⟦ x / a ⟧ B) $;
 --| Elimination of membership in a trace: a member is a pair `⟨ u , v ⟩` with
 --| `u ∊ A` and `v ∊ ⟦ x / u ⟧ B`.
-theorem lam_elim_mem {x u v: set} (G: hyps x) (H: hyps x) (A: class) (B: class x) (c: set) (d: fml x): $ G ⇒ c ∊ lam x A B $ > $ H , c = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ d $ > $ G , H ⇒ d $;
-theorem lam_rel {x: set} (G: hyps x) (A: class) (B: class x): $ G ⇒ rel (lam x A B) $;
-theorem lam_cdm {x: set} (G: hyps x) (A: class) (B: class x):
-  $ G ⇒ cdm (lam x A B) ⊆ A $;
+theorem clam_elim_mem {x u v: set} (G: hyps x) (H: hyps x) (A: class) (B: class x) (c: set) (d: fml x): $ G ⇒ c ∊ clam x A B $ > $ H , c = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ d $ > $ G , H ⇒ d $;
+theorem clam_rel {x: set} (G: hyps x) (A: class) (B: class x): $ G ⇒ rel (clam x A B) $;
+theorem clam_cdm {x: set} (G: hyps x) (A: class) (B: class x):
+  $ G ⇒ cdm (clam x A B) ⊆ A $;
 --| β: the values of the trace at `a ∊ A` are `B` at `a`.
-theorem lam_ap {x: set} (G: hyps x) (A: class) (B: class x) (a: set):
-  $ G ⇒ a ∊ A $ > $ G ⇒ ap (lam x A B) a = (⟦ x / a ⟧ B) $;
---| `lam x A B ⊆ A × ⋃ (img of A under x ↦ B)`: a set when `A` and each `B` are.
-theorem lam_set {x: set} (G: hyps x) (A: class) (B: class x):
-  $ G ⇒ isset A $ > $ G ⇒ ∀ x (x ∊ A → isset B) $ > $ G ⇒ isset (lam x A B) $;
+theorem clam_ap {x: set} (G: hyps x) (A: class) (B: class x) (a: set):
+  $ G ⇒ a ∊ A $ > $ G ⇒ ap (clam x A B) a = (⟦ x / a ⟧ B) $;
+--| `clam x A B ⊆ A × ⋃ (img of A under x ↦ B)`: a set when `A` and each `B` are.
+theorem clam_set {x: set} (G: hyps x) (A: class) (B: class x):
+  $ G ⇒ isset A $ > $ G ⇒ ∀ x (x ∊ A → isset B) $ > $ G ⇒ isset (clam x A B) $;
 --| @congr
-theorem lam_congr {x: set} (A C: class) (B D: class x):
-  $ A ≐ C $ > $ B ≐ D $ > $ lam x A B ≐ lam x C D $;
-theorem lam_eq_dom {x: set} (G: hyps x) (A C: class) (B: class x):
-  $ G ⇒ A = C $ > $ G ⇒ lam x A B = lam x C B $;
+theorem clam_congr {x: set} (A C: class) (B D: class x):
+  $ A ≐ C $ > $ B ≐ D $ > $ clam x A B ≐ clam x C D $;
+theorem clam_eq_dom {x: set} (G: hyps x) (A C: class) (B: class x):
+  $ G ⇒ A = C $ > $ G ⇒ clam x A B = clam x C B $;
 --| @rewrite
-theorem sb_c_lam {x y: set} (t: set y) (A: class y) (B: class x y):
-  $ (⟦ y / t ⟧ (lam x A B)) ≐ lam x (⟦ y / t ⟧ A) (⟦ y / t ⟧ B) $;
+theorem sb_c_clam {x y: set} (t: set y) (A: class y) (B: class x y):
+  $ (⟦ y / t ⟧ (clam x A B)) ≐ clam x (⟦ y / t ⟧ A) (⟦ y / t ⟧ B) $;
 
-theorem pi_intro {x: set} (G: hyps x) (A: class) (B: class x) (f: set):
-  $ G ⇒ f ⊆ lam x A (⋃ B) $ > $ G ⇒ ∀ x (x ∊ A → ap f x ∈ B) $ > $ G ⇒ f ∊ pi x A B $;
-theorem pi_elim_sub {x: set} (G: hyps x) (A: class) (B: class x) (f: set):
-  $ G ⇒ f ∊ pi x A B $ > $ G ⇒ f ⊆ lam x A (⋃ B) $;
+theorem cpi_intro {x: set} (G: hyps x) (A: class) (B: class x) (f: set):
+  $ G ⇒ f ⊆ clam x A (⋃ B) $ > $ G ⇒ ∀ x (x ∊ A → ap f x ∈ B) $ > $ G ⇒ f ∊ cpi x A B $;
+theorem cpi_elim_sub {x: set} (G: hyps x) (A: class) (B: class x) (f: set):
+  $ G ⇒ f ∊ cpi x A B $ > $ G ⇒ f ⊆ clam x A (⋃ B) $;
 --| Typing of application.
-theorem pi_elim_ap {x: set} (G: hyps x) (A: class) (B: class x) (f a: set):
-  $ G ⇒ f ∊ pi x A B $ > $ G ⇒ a ∊ A $ > $ G ⇒ ap f a ∈ (⟦ x / a ⟧ B) $;
+theorem cpi_elim_ap {x: set} (G: hyps x) (A: class) (B: class x) (f a: set):
+  $ G ⇒ f ∊ cpi x A B $ > $ G ⇒ a ∊ A $ > $ G ⇒ ap f a ∈ (⟦ x / a ⟧ B) $;
 --| Typing of abstraction, both directions.
-theorem lam_pi_intro {x: set} (G: hyps x) (A: class) (B C: class x):
-  $ G ⇒ isset (lam x A C) $ > $ G ⇒ ∀ x (x ∊ A → C ∈ B) $ >
-  $ G ⇒ lam x A C ∈ pi x A B $;
-theorem lam_pi_elim {x: set} (G: hyps x) (A: class) (B C: class x):
-  $ G ⇒ lam x A C ∈ pi x A B $ > $ G ⇒ ∀ x (x ∊ A → C ∈ B) $;
+theorem clam_cpi_intro {x: set} (G: hyps x) (A: class) (B C: class x):
+  $ G ⇒ isset (clam x A C) $ > $ G ⇒ ∀ x (x ∊ A → C ∈ B) $ >
+  $ G ⇒ clam x A C ∈ cpi x A B $;
+theorem clam_cpi_elim {x: set} (G: hyps x) (A: class) (B C: class x):
+  $ G ⇒ clam x A C ∈ cpi x A B $ > $ G ⇒ ∀ x (x ∊ A → C ∈ B) $;
 --| η.
-theorem pi_eta {x: set} (G: hyps x) (A: class) (B: class x) (f: set):
-  $ G ⇒ f ∊ pi x A B $ > $ G ⇒ lam x A (ap f x) = f $;
+theorem cpi_eta {x: set} (G: hyps x) (A: class) (B: class x) (f: set):
+  $ G ⇒ f ∊ cpi x A B $ > $ G ⇒ clam x A (ap f x) = f $;
 --| Extensionality.
-theorem pi_ext {x: set} (G: hyps x) (A: class) (B: class x) (f g: set):
-  $ G ⇒ f ∊ pi x A B $ > $ G ⇒ g ∊ pi x A B $ >
+theorem cpi_ext {x: set} (G: hyps x) (A: class) (B: class x) (f g: set):
+  $ G ⇒ f ∊ cpi x A B $ > $ G ⇒ g ∊ cpi x A B $ >
   $ G ⇒ ∀ x (x ∊ A → ap f x = ap g x) $ > $ G ⇒ f = g $;
---| `pi x A B ⊆ 𝒫 (lam x A (⋃ B))`.
-theorem pi_set {x: set} (G: hyps x) (A: class) (B: class x):
-  $ G ⇒ isset (lam x A (⋃ B)) $ > $ G ⇒ isset (pi x A B) $;
+--| `cpi x A B ⊆ 𝒫 (clam x A (⋃ B))`.
+theorem cpi_set {x: set} (G: hyps x) (A: class) (B: class x):
+  $ G ⇒ isset (clam x A (⋃ B)) $ > $ G ⇒ isset (cpi x A B) $;
 --| @congr
-theorem pi_congr {x: set} (A C: class) (B D: class x):
-  $ A ≐ C $ > $ B ≐ D $ > $ pi x A B ≐ pi x C D $;
+theorem cpi_congr {x: set} (A C: class) (B D: class x):
+  $ A ≐ C $ > $ B ≐ D $ > $ cpi x A B ≐ cpi x C D $;
 --| @rewrite
-theorem sb_c_pi {x y: set} (t: set y) (A: class y) (B: class x y):
-  $ (⟦ y / t ⟧ (pi x A B)) ≐ pi x (⟦ y / t ⟧ A) (⟦ y / t ⟧ B) $;
+theorem sb_c_cpi {x y: set} (t: set y) (A: class y) (B: class x y):
+  $ (⟦ y / t ⟧ (cpi x A B)) ≐ cpi x (⟦ y / t ⟧ A) (⟦ y / t ⟧ B) $;
 
 theorem two_intro_l (G: hyps): $ G ⇒ ∅ ∈ two $;
 theorem two_intro_r (G: hyps): $ G ⇒ csn ∅ ∈ two $;
@@ -324,9 +325,9 @@ theorem two_elim (G: hyps) (a: set): $ G ⇒ a ∊ two $ > $ G ⇒ a = ∅ ∨ a
 theorem two_set (G: hyps): $ G ⇒ isset two $;
 --| Impredicativity: a function space of truth values is a truth value, and
 --| it is true exactly when every value is.
-theorem pi_two {x: set} (G: hyps x) (A: class) (B: class x):
-  $ G ⇒ ∀ x (x ∊ A → B ∈ two) $ > $ G ⇒ pi x A B ∈ two $;
-theorem pi_two_true {x: set} (G: hyps x) (A: class) (B: class x):
-  $ G ⇒ ∀ x (x ∊ A → B = csn ∅) $ > $ G ⇒ pi x A B = csn ∅ $;
-theorem pi_two_false {x: set} (G: hyps x) (A: class) (B: class x) (a: set):
-  $ G ⇒ a ∊ A $ > $ G ⇒ (⟦ x / a ⟧ B) = ∅ $ > $ G ⇒ pi x A B = ∅ $;
+theorem cpi_two {x: set} (G: hyps x) (A: class) (B: class x):
+  $ G ⇒ ∀ x (x ∊ A → B ∈ two) $ > $ G ⇒ cpi x A B ∈ two $;
+theorem cpi_two_true {x: set} (G: hyps x) (A: class) (B: class x):
+  $ G ⇒ ∀ x (x ∊ A → B = csn ∅) $ > $ G ⇒ cpi x A B = csn ∅ $;
+theorem cpi_two_false {x: set} (G: hyps x) (A: class) (B: class x) (a: set):
+  $ G ⇒ a ∊ A $ > $ G ⇒ (⟦ x / a ⟧ B) = ∅ $ > $ G ⇒ cpi x A B = ∅ $;

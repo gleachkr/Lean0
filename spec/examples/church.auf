@@ -8,17 +8,17 @@ def q3 (G: ctx) (u: lvl): ctx = $ cons v1 (q2 G u) $
 -- The body of `succ`, under `n`, `α`, `s`, `z`.
 def sbody: expr = $ app v1 (app (app (app v3 v2) v1) v0) $
 
-lemma cl_cnat (u: lvl): $ closed z (cnat u) $
+lemma cl_cnat (u: lvl): $ closed nz (cnat u) $
 ----
-l1: $ closed z (cnat u) $
+l1: $ closed nz (cnat u) $
   by closed_pi [closed_srt [],
        closed_pi [closed_pi [closed_bvar [le_s [le_z []]], closed_bvar [le_s [le_s [le_z []]]]],
                   closed_pi [closed_bvar [le_s [le_s [le_z []]]],
                              closed_bvar [le_s [le_s [le_s [le_z []]]]]]]]
 
-lemma cl_czero (u: lvl): $ closed z (czero u) $
+lemma cl_czero (u: lvl): $ closed nz (czero u) $
 ----
-l1: $ closed z (czero u) $
+l1: $ closed nz (czero u) $
   by closed_lam [closed_srt [],
        closed_lam [closed_pi [closed_bvar [le_s [le_z []]], closed_bvar [le_s [le_s [le_z []]]]],
                    closed_lam [closed_bvar [le_s [le_s [le_z []]]], closed_bvar [le_s [le_z []]]]]]
@@ -40,8 +40,8 @@ l1: $ ty (q3 G u) v2 (srt u) $ by bvar [lookup_srt_s [lookup_srt_s [lookup_srt0 
 
 lemma s_ty (G: ctx) (u: lvl): $ ty (q3 G u) v1 (pi v2 v3) $
 ----
-l1: $ lift (s z) z (pi v0 v1) (pi v1 v2) $ by lift_pi [lift1_z [], lift1_ge [le_s [le_z []]]]
-l2: $ lift (s z) z (pi v1 v2) (pi v2 v3) $ by lift_pi [lift1_z [], lift1_ge [le_s [le_z []]]]
+l1: $ lift (s nz) nz (pi v0 v1) (pi v1 v2) $ by lift_pi [lift1_z [], lift1_ge [le_s [le_z []]]]
+l2: $ lift (s nz) nz (pi v1 v2) (pi v2 v3) $ by lift_pi [lift1_z [], lift1_ge [le_s [le_z []]]]
 l3: $ ty (q3 G u) v1 (pi v2 v3) $ by bvar [lookup_s [lookup_z [l1], l2]]
 
 lemma z_ty (G: ctx) (u: lvl): $ ty (q3 G u) v0 v2 $
@@ -104,16 +104,16 @@ l6: $ ty G (srt u) (srt (ls u)) $ by ty_srt []
 l7: $ ty G (cone u) (cnat u) $ by lamDF [l6, l5]
 
 -- `inst` of the body of `cnat` at `α := v2`, shared by `succ` and the β-steps.
-lemma i_cb : $ inst z (pi (pi v0 v1) (pi v1 v2)) v2 (pi (pi v2 v3) (pi v3 v4)) $
+lemma i_cb : $ inst nz (pi (pi v0 v1) (pi v1 v2)) v2 (pi (pi v2 v3) (pi v3 v4)) $
 ----
-l1: $ inst z (pi (pi v0 v1) (pi v1 v2)) v2 (pi (pi v2 v3) (pi v3 v4)) $
+l1: $ inst nz (pi (pi v0 v1) (pi v1 v2)) v2 (pi (pi v2 v3) (pi v3 v4)) $
   by inst_pi [inst_pi [inst_bvar_eq [lift0 []], inst_bvar_eq [lift1_z []]],
               inst_pi [inst_bvar_eq [lift1_z []],
                        inst_bvar_eq [lift_bvar_ge [le_z [], add_s [add_s [add_z []]]]]]]
 
-lemma i_s : $ inst z (pi v3 v4) v1 (pi v2 v3) $
+lemma i_s : $ inst nz (pi v3 v4) v1 (pi v2 v3) $
 ----
-l1: $ inst z (pi v3 v4) v1 (pi v2 v3) $
+l1: $ inst nz (pi v3 v4) v1 (pi v2 v3) $
   by inst_pi [inst_bvar_gt [le_z []], inst_bvar_gt [le_s [le_z []]]]
 
 lemma csucc_body (G: ctx) (u: lvl):
@@ -155,7 +155,7 @@ csucc_zero
 s1: $ ty (cons (cnat u) G) (lam (srt u) (lam (pi v0 v1) (lam v1 sbody))) (cnat u) $
   by csucc_body []
 s2: $ ty G (czero u) (cnat u) $ by czero_ty []
-s3: $ inst z (lam (srt u) (lam (pi v0 v1) (lam v1 sbody))) (czero u)
+s3: $ inst nz (lam (srt u) (lam (pi v0 v1) (lam v1 sbody))) (czero u)
       (lam (srt u) (lam (pi v0 v1) (lam v1
         (app v1 (app (app (app (czero u) v2) v1) v0))))) $
   by inst_lam [inst_srt [],
@@ -166,7 +166,7 @@ s3: $ inst z (lam (srt u) (lam (pi v0 v1) (lam v1 sbody))) (czero u)
                                            inst_bvar_lt [le_s [le_s [le_s [le_z []]]]]],
                                  inst_bvar_lt [le_s [le_s [le_z []]]]],
                        inst_bvar_lt [le_s [le_z []]]]]]]]
-s4: $ inst z (cnat u) (czero u) (cnat u) $ by inst_closed0 [cl_cnat []]
+s4: $ inst nz (cnat u) (czero u) (cnat u) $ by inst_closed0 [cl_cnat []]
 s5: $ deq G (app (csucc u) (czero u))
       (lam (srt u) (lam (pi v0 v1) (lam v1
         (app v1 (app (app (app (czero u) v2) v1) v0))))) (cnat u) $
@@ -177,7 +177,7 @@ z3: $ ty (q3 G u) v1 (pi v2 v3) $ by s_ty []
 z4: $ ty (q3 G u) v0 v2 $ by z_ty []
 b1a: $ ty (q1 (q3 G u) u) (lam (pi v0 v1) (lam v1 v0)) (pi (pi v0 v1) (pi v1 v2)) $
   by czero_body []
-b1b: $ inst z (lam (pi v0 v1) (lam v1 v0)) v2 (lam (pi v2 v3) (lam v3 v0)) $
+b1b: $ inst nz (lam (pi v0 v1) (lam v1 v0)) v2 (lam (pi v2 v3) (lam v3 v0)) $
   by inst_lam [inst_pi [inst_bvar_eq [lift0 []], inst_bvar_eq [lift1_z []]],
                inst_lam [inst_bvar_eq [lift1_z []], inst_bvar_lt [le_s [le_z []]]]]
 b1: $ deq (q3 G u) (app (czero u) v2) (lam (pi v2 v3) (lam v3 v0))
@@ -186,7 +186,7 @@ b2a: $ ty (cons v3 (cons (pi v2 v3) (q3 G u))) v0 v4 $ by bvar [lookup_z [lift1_
 b2b: $ ty (cons (pi v2 v3) (q3 G u)) v3 (srt u) $
   by bvar [lookup_srt_s [lookup_srt_s [lookup_srt_s [lookup_srt0 []]]]]
 b2c: $ ty (cons (pi v2 v3) (q3 G u)) (lam v3 v0) (pi v3 v4) $ by lamDF [b2b, b2a]
-b2d: $ inst z (lam v3 v0) v1 (lam v2 v0) $
+b2d: $ inst nz (lam v3 v0) v1 (lam v2 v0) $
   by inst_lam [inst_bvar_gt [le_z []], inst_bvar_lt [le_s [le_z []]]]
 b2: $ deq (q3 G u) (app (lam (pi v2 v3) (lam v3 v0)) v1) (lam v2 v0) (pi v2 v3) $
   by beta [b2c, z3, b2d, i_s []]

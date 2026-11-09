@@ -5,17 +5,17 @@ cpr_intro_r
 -----------
 l1: $ b ≐ b $ by ceqt_refl
 l2: $ _ ⇒ b = a ∨ b = b $ by or_intro_r [l1]
-l3: $ _ ⇒ b ∊ {y | y = a ∨ y = b} $ by cab_intro (x := $ y $, t := $ b $, p := $ y = a ∨ y = b $) [l2]
+l3: $ _ ⇒ b ∊ {y | y = a ∨ y = b} $ by cab_intro [l2]
 l4: $ G ⇒ b ∊ cpr a b $ by weaken [l3]
 
 cpr_intro
 ---------
-l1: $ G ⇒ c ∊ {y | y = A ∨ y = B} $ by cab_intro (x := $ y $, t := $ c $, p := $ y = A ∨ y = B $) [#1]
+l1: $ G ⇒ c ∊ {y | y = A ∨ y = B} $ by cab_intro [#1]
 
 cpr_elim
 --------
 l1: $ G ⇒ c ∊ {y | y = A ∨ y = B} $ by weaken [#1]
-l2: $ G ⇒ c = A ∨ c = B $ by cab_elim (x := $ y $, t := $ c $, p := $ y = A ∨ y = B $) [l1]
+l2: $ G ⇒ c = A ∨ c = B $ by cab_elim [l1]
 
 cpr_intro_l_c
 -------------
@@ -320,7 +320,7 @@ lemma sep_diag_elim (G: hyps) (A: class) (a b: set):
 ----
 l1: $ G , k = ⟨ a , b ⟩ , k ∊ sep_diag A ⇒ k ∊ sep_diag A $ by ax
 l2: $ G , k = ⟨ a , b ⟩ , k ∊ sep_diag A ⇒ k ∊ {w | ∃ y (y ∊ A ∧ w = ⟨ y , y ⟩)} $ by weaken [l1]
-l3: $ G , k = ⟨ a , b ⟩ , k ∊ sep_diag A ⇒ ∃ y (y ∊ A ∧ k = ⟨ y , y ⟩) $ by cab_elim (x := $ w $, t := $ k $, p := $ ∃ y (y ∊ A ∧ w = ⟨ y , y ⟩) $) [l2]
+l3: $ G , k = ⟨ a , b ⟩ , k ∊ sep_diag A ⇒ ∃ y (y ∊ A ∧ k = ⟨ y , y ⟩) $ by cab_elim [l2]
 l4: $ G , k = ⟨ a , b ⟩ , y ∊ A ∧ k = ⟨ y , y ⟩ ⇒ y ∊ A ∧ k = ⟨ y , y ⟩ $ by ax
 l5: $ G , k = ⟨ a , b ⟩ , y ∊ A ∧ k = ⟨ y , y ⟩ ⇒ k = ⟨ y , y ⟩ $ by and_elim_r [l4]
 l6: $ G , k = ⟨ a , b ⟩ , y ∊ A ∧ k = ⟨ y , y ⟩ ⇒ y ∊ A $ by and_elim_l [l4]
@@ -345,8 +345,8 @@ l2: $ G ⇒ isset ⟨ a , a ⟩ $ by opair_set [l1, l1]
 l3: $ G , k = ⟨ a , a ⟩ ⇒ k = ⟨ a , a ⟩ $ by ax
 l4: $ G , k = ⟨ a , a ⟩ ⇒ a ∊ A $ by weaken [#1]
 l5: $ G , k = ⟨ a , a ⟩ ⇒ a ∊ A ∧ k = ⟨ a , a ⟩ $ by and_intro [l4, l3]
-l6: $ G , k = ⟨ a , a ⟩ ⇒ ∃ y (y ∊ A ∧ k = ⟨ y , y ⟩) $ by ex_intro (t := $ a $) [l5]
-l7: $ G , k = ⟨ a , a ⟩ ⇒ k ∊ {w | ∃ y (y ∊ A ∧ w = ⟨ y , y ⟩)} $ by cab_intro (x := $ w $, t := $ k $, p := $ ∃ y (y ∊ A ∧ w = ⟨ y , y ⟩) $) [l6]
+l6: $ G , k = ⟨ a , a ⟩ ⇒ ∃ y (y ∊ A ∧ k = ⟨ y , y ⟩) $ by ex_intro [l5]
+l7: $ G , k = ⟨ a , a ⟩ ⇒ k ∊ {w | ∃ y (y ∊ A ∧ w = ⟨ y , y ⟩)} $ by cab_intro [l6]
 l8: $ G , k = ⟨ a , a ⟩ ⇒ k ∊ sep_diag A $ by weaken [l7]
 l9: $ G , k = ⟨ a , a ⟩ ⇒ ⟨ a , a ⟩ ∈ sep_diag A $ by wcel_intro [l3, l8]
 l10: $ G ⇒ ⟨ a , a ⟩ ∈ sep_diag A $ by isset_elim [l2, l9]
@@ -372,7 +372,7 @@ subset_set
 ----------
 l1: $ G , v ∊ img (sep_diag A) a ⇒ v ∊ img (sep_diag A) a $ by ax
 l2: $ G , v ∊ img (sep_diag A) a ⇒ v ∊ {z | ∃ u (u ∊ a ∧ ⟨ u , z ⟩ ∈ sep_diag A)} $ by weaken [l1]
-l3: $ G , v ∊ img (sep_diag A) a ⇒ ∃ u (u ∊ a ∧ ⟨ u , v ⟩ ∈ sep_diag A) $ by cab_elim (x := $ z $, t := $ v $, p := $ ∃ u (u ∊ a ∧ ⟨ u , z ⟩ ∈ sep_diag A) $) [l2]
+l3: $ G , v ∊ img (sep_diag A) a ⇒ ∃ u (u ∊ a ∧ ⟨ u , v ⟩ ∈ sep_diag A) $ by cab_elim [l2]
 l4: $ G , u ∊ a ∧ ⟨ u , v ⟩ ∈ sep_diag A ⇒ u ∊ a ∧ ⟨ u , v ⟩ ∈ sep_diag A $ by ax
 l5: $ G , u ∊ a ∧ ⟨ u , v ⟩ ∈ sep_diag A ⇒ ⟨ u , v ⟩ ∈ sep_diag A $ by and_elim_r [l4]
 l6: $ G , u ∊ a ∧ ⟨ u , v ⟩ ∈ sep_diag A ⇒ u = v ∧ u ∊ A $ by sep_diag_elim [l5]
@@ -385,8 +385,8 @@ l12: $ G , v ∊ A ⇒ A ⊆ a $ by weaken [#1]
 l13: $ G , v ∊ A ⇒ v ∊ a $ by subset_elim [l12, l11]
 l14: $ G , v ∊ A ⇒ ⟨ v , v ⟩ ∈ sep_diag A $ by sep_diag_intro [l11]
 l15: $ G , v ∊ A ⇒ v ∊ a ∧ ⟨ v , v ⟩ ∈ sep_diag A $ by and_intro [l13, l14]
-l16: $ G , v ∊ A ⇒ ∃ u (u ∊ a ∧ ⟨ u , v ⟩ ∈ sep_diag A) $ by ex_intro (t := $ v $) [l15]
-l17: $ G , v ∊ A ⇒ v ∊ {z | ∃ u (u ∊ a ∧ ⟨ u , z ⟩ ∈ sep_diag A)} $ by cab_intro (x := $ z $, t := $ v $, p := $ ∃ u (u ∊ a ∧ ⟨ u , z ⟩ ∈ sep_diag A) $) [l16]
+l16: $ G , v ∊ A ⇒ ∃ u (u ∊ a ∧ ⟨ u , v ⟩ ∈ sep_diag A) $ by ex_intro [l15]
+l17: $ G , v ∊ A ⇒ v ∊ {z | ∃ u (u ∊ a ∧ ⟨ u , z ⟩ ∈ sep_diag A)} $ by cab_intro [l16]
 l18: $ G , v ∊ A ⇒ v ∊ img (sep_diag A) a $ by weaken [l17]
 l19: $ G ⇒ img (sep_diag A) a = A $ by eq_intro [l10, l18]
 l20: $ G ⇒ functional (sep_diag A) $ by sep_diag_fun
@@ -415,15 +415,15 @@ lemma p0_pick (G: hyps) {u: set} (A: class): $ G ⇒ ∃ u (isset A → u = A) $
 l1: $ G ⇒ isset A ∨ ¬ isset A $ by excluded_middle
 l2: $ G , isset A ⇒ isset A $ by ax
 l3: $ G , isset A , v = A ⇒ v = A $ by ax
-l4: $ G , isset A , v = A ⇒ isset A → v = A $ by imp_intro (p := $ isset A $) [l3]
-l5: $ G , isset A , v = A ⇒ ∃ u (isset A → u = A) $ by ex_intro (x := $ u $, t := $ v $, p := $ isset A → u = A $) [l4]
+l4: $ G , isset A , v = A ⇒ isset A → v = A $ by imp_intro [l3]
+l5: $ G , isset A , v = A ⇒ ∃ u (isset A → u = A) $ by ex_intro [l4]
 l6: $ G , isset A ⇒ ∃ u (isset A → u = A) $ by isset_elim [l2, l5]
 n1: $ G , ¬ isset A , isset A ⇒ ¬ isset A $ by ax
 n2: $ G , ¬ isset A , isset A ⇒ isset A $ by ax
 n3: $ G , ¬ isset A , isset A ⇒ ⊥ $ by not_elim [n1, n2]
 n4: $ G , ¬ isset A , isset A ⇒ v = A $ by bot_elim [n3]
 n5: $ G , ¬ isset A ⇒ isset A → v = A $ by imp_intro [n4]
-n6: $ G , ¬ isset A ⇒ ∃ u (isset A → u = A) $ by ex_intro (x := $ u $, t := $ v $, p := $ isset A → u = A $) [n5]
+n6: $ G , ¬ isset A ⇒ ∃ u (isset A → u = A) $ by ex_intro [n5]
 l7: $ G ⇒ ∃ u (isset A → u = A) $ by or_elim [l1, l6, n6]
 
 lemma p0_cpr_sub (G: hyps) (A B: class) (u v: set): $ G ⇒ isset A → u = A $ > $ G ⇒ isset B → v = B $ > $ G ⇒ cpr A B ⊆ cpr u v $
@@ -468,8 +468,8 @@ l1: $ G ⇒ isset (cpr (csn A) (cpr A B)) $ by cpr_isset
 cuni_intro
 ----------
 l1: $ G ⇒ b ∊ A ∧ a ∊ b $ by and_intro [#2, #1]
-l2: $ G ⇒ ∃ y (y ∊ A ∧ a ∊ y) $ by ex_intro (x := $ y $, t := $ b $, p := $ y ∊ A ∧ a ∊ y $) [l1]
-l3: $ G ⇒ a ∊ {z | ∃ y (y ∊ A ∧ z ∊ y)} $ by cab_intro (x := $ z $, t := $ a $, p := $ ∃ y (y ∊ A ∧ z ∊ y) $) [l2]
+l2: $ G ⇒ ∃ y (y ∊ A ∧ a ∊ y) $ by ex_intro [l1]
+l3: $ G ⇒ a ∊ {z | ∃ y (y ∊ A ∧ z ∊ y)} $ by cab_intro [l2]
 
 cuni_elim
 ---------
@@ -530,27 +530,27 @@ l15: $ G ⇒ ⋃ (csn A) = A $ by eq_intro [l6, l14]
 cun_intro_l
 -----------
 l1: $ G ⇒ a ∊ A ∨ a ∊ B $ by or_intro_l [#1]
-l2: $ G ⇒ a ∊ {z | z ∊ A ∨ z ∊ B} $ by cab_intro (x := $ z $, t := $ a $, p := $ z ∊ A ∨ z ∊ B $) [l1]
+l2: $ G ⇒ a ∊ {z | z ∊ A ∨ z ∊ B} $ by cab_intro [l1]
 
 cun_intro_r
 -----------
 l1: $ G ⇒ a ∊ A ∨ a ∊ B $ by or_intro_r [#1]
-l2: $ G ⇒ a ∊ {z | z ∊ A ∨ z ∊ B} $ by cab_intro (x := $ z $, t := $ a $, p := $ z ∊ A ∨ z ∊ B $) [l1]
+l2: $ G ⇒ a ∊ {z | z ∊ A ∨ z ∊ B} $ by cab_intro [l1]
 
 cun_elim
 --------
-l2: $ G ⇒ a ∊ A ∨ a ∊ B $ by cab_elim (x := $ z $, t := $ a $, p := $ z ∊ A ∨ z ∊ B $) [#1]
+l2: $ G ⇒ a ∊ A ∨ a ∊ B $ by cab_elim [#1]
 
 cun_comm
 --------
 l1: $ G , z ∊ A ∪ B ⇒ z ∊ A ∪ B $ by ax
 l2: $ G , z ∊ A ∪ B ⇒ z ∊ A ∨ z ∊ B $ by cun_elim [l1]
 l3: $ G , z ∊ A ∪ B ⇒ z ∊ B ∨ z ∊ A $ by or_comm [l2]
-l4: $ G , z ∊ A ∪ B ⇒ z ∊ {w | w ∊ B ∨ w ∊ A} $ by cab_intro (x := $ w $, t := $ z $, p := $ w ∊ B ∨ w ∊ A $) [l3]
+l4: $ G , z ∊ A ∪ B ⇒ z ∊ {w | w ∊ B ∨ w ∊ A} $ by cab_intro [l3]
 l5: $ G , z ∊ B ∪ A ⇒ z ∊ B ∪ A $ by ax
 l6: $ G , z ∊ B ∪ A ⇒ z ∊ B ∨ z ∊ A $ by cun_elim [l5]
 l7: $ G , z ∊ B ∪ A ⇒ z ∊ A ∨ z ∊ B $ by or_comm [l6]
-l8: $ G , z ∊ B ∪ A ⇒ z ∊ {w | w ∊ A ∨ w ∊ B} $ by cab_intro (x := $ w $, t := $ z $, p := $ w ∊ A ∨ w ∊ B $) [l7]
+l8: $ G , z ∊ B ∪ A ⇒ z ∊ {w | w ∊ A ∨ w ∊ B} $ by cab_intro [l7]
 l9: $ G ⇒ A ∪ B = B ∪ A $ by eq_intro [l4, l8]
 
 cun_subset_l
@@ -624,11 +624,11 @@ l5: $ G ⇒ isset (A ∪ B) $ by isset_eq [l2, l4]
 
 cpw_intro
 ---------
-l1: $ G ⇒ a ∊ {z | z ⊆ A} $ by cab_intro (x := $ z $, t := $ a $, p := $ z ⊆ A $) [#1]
+l1: $ G ⇒ a ∊ {z | z ⊆ A} $ by cab_intro [#1]
 
 cpw_elim
 --------
-l1: $ G ⇒ a ⊆ A $ by cab_elim (x := $ z $, t := $ a $, p := $ z ⊆ A $) [#1]
+l1: $ G ⇒ a ⊆ A $ by cab_elim [#1]
 
 wcel_cpw
 --------
@@ -705,8 +705,8 @@ l2: $ G ⇒ a ∊ suc a $ by suc_intro_r [l1]
 img_intro
 ---------
 l1: $ G ⇒ a ∊ A ∧ ⟨ a , b ⟩ ∈ F $ by and_intro [#1, #2]
-l2: $ G ⇒ ∃ w (w ∊ A ∧ ⟨ w , b ⟩ ∈ F) $ by ex_intro (x := $ w $, t := $ a $, p := $ w ∊ A ∧ ⟨ w , b ⟩ ∈ F $) [l1]
-l3: $ G ⇒ b ∊ {z | ∃ w (w ∊ A ∧ ⟨ w , z ⟩ ∈ F)} $ by cab_intro (x := $ z $, t := $ b $, p := $ ∃ w (w ∊ A ∧ ⟨ w , z ⟩ ∈ F) $) [l2]
+l2: $ G ⇒ ∃ w (w ∊ A ∧ ⟨ w , b ⟩ ∈ F) $ by ex_intro [l1]
+l3: $ G ⇒ b ∊ {z | ∃ w (w ∊ A ∧ ⟨ w , z ⟩ ∈ F)} $ by cab_intro [l2]
 
 img_elim
 --------
@@ -768,16 +768,16 @@ l5: $ G ⇒ b = c $ by imp_elim [l3, l4]
 cin_intro
 ---------
 l1: $ G ⇒ a ∊ A ∧ a ∊ B $ by and_intro [#1, #2]
-l2: $ G ⇒ a ∊ {z | z ∊ A ∧ z ∊ B} $ by cab_intro (x := $ z $, t := $ a $, p := $ z ∊ A ∧ z ∊ B $) [l1]
+l2: $ G ⇒ a ∊ {z | z ∊ A ∧ z ∊ B} $ by cab_intro [l1]
 
 cin_elim_l
 ----------
-l1: $ G ⇒ a ∊ A ∧ a ∊ B $ by cab_elim (x := $ z $, t := $ a $, p := $ z ∊ A ∧ z ∊ B $) [#1]
+l1: $ G ⇒ a ∊ A ∧ a ∊ B $ by cab_elim [#1]
 l2: $ G ⇒ a ∊ A $ by and_elim_l [l1]
 
 cin_elim_r
 ----------
-l1: $ G ⇒ a ∊ A ∧ a ∊ B $ by cab_elim (x := $ z $, t := $ a $, p := $ z ∊ A ∧ z ∊ B $) [#1]
+l1: $ G ⇒ a ∊ A ∧ a ∊ B $ by cab_elim [#1]
 l2: $ G ⇒ a ∊ B $ by and_elim_r [l1]
 
 wcel_cin

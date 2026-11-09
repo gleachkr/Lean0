@@ -374,7 +374,7 @@ impl Horn {
                 }
             }
             // a fact may determine the goal's metavariables (`deq G e e2 ?S`), or match a
-            // ground goal only up to unfolding (a numeral `n1` against `s z`)
+            // ground goal only up to unfolding (a numeral `n1` against `s nz`)
             let facts: Vec<(E, P)> = self.facts.iter().filter(|(f, _)| env.head(**f).is_some_and(|(t, _)| t == head)).map(|(&f, &p)| (f, p)).collect();
             for (f, p) in facts {
                 let mark = self.trail.len();
