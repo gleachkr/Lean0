@@ -11,10 +11,12 @@ mod cmd {
     pub const UTERM: u8 = 0x30;
     pub const UTERM_SAVE: u8 = 0x31;
     pub const UREF: u8 = 0x32;
+    pub const UDUMMY: u8 = 0x33;
     pub const UHYP: u8 = 0x36;
     pub const TERM: u8 = 0x10;
     pub const TERM_SAVE: u8 = 0x11;
     pub const REF: u8 = 0x12;
+    pub const DUMMY: u8 = 0x13;
     pub const THM: u8 = 0x14;
     pub const THM_SAVE: u8 = 0x15;
     pub const HYP: u8 = 0x16;
@@ -872,6 +874,11 @@ fn bad(msg: String) -> std::io::Error { std::io::Error::other(msg) }
 /// Copy a command stream (a unify stream or a proof stream, ending in a zero byte) from `src`,
 /// renumbering the terms and theorems it names.
 fn remap_stream(src: &[u8], terms: &[u32], thms: &[u32], out: &mut Vec<u8>) -> std::io::Result<usize> {
+    remap_stream_sorts(src, None, terms, thms, out)
+}
+
+/// `remap_stream`, renumbering the sorts of dummy variables by `sorts` too.
+fn remap_stream_sorts(src: &[u8], sorts: Option<&[u8]>, terms: &[u32], thms: &[u32], out: &mut Vec<u8>) -> std::io::Result<usize> {
     let mut i = 0;
     loop {
         let Some(&c) = src.get(i) else { return Err(bad("unterminated command stream".into())) };
@@ -892,7 +899,12 @@ fn remap_stream(src: &[u8], terms: &[u32], thms: &[u32], out: &mut Vec<u8>) -> s
         };
         let data = match map {
             Some(m) => *m.get(data as usize).ok_or_else(|| bad(format!("statement {data} out of range")))?,
-            None => data,
+            None => match sorts {
+                Some(m) if op == cmd::DUMMY || op == cmd::UDUMMY => {
+                    u32::from(*m.get(data as usize).ok_or_else(|| bad(format!("sort {data} out of range")))?)
+                }
+                _ => data,
+            },
         };
         push_cmd(out, op, data);
     }
@@ -1026,4 +1038,287 @@ pub fn merge(shards: &[std::path::PathBuf], starts: &[u32], out: &std::path::Pat
         std::fs::remove_file(path)?;
     }
     Ok(w.finish_file(Some(out))?.0)
+}
+
+// ---------------------------------------------------------------------------- linking (TG mode)
+
+/// An MMB file read back: its statements in stream order (each with its table data and name,
+/// numbered by kind) and each term's argument count.
+struct Read {
+    stmts: Vec<Raw>,
+    term_args: Vec<u16>,
+}
+
+fn le_at(b: &[u8], at: usize, n: usize) -> std::io::Result<u64> {
+    let s = b.get(at..at + n).ok_or_else(|| bad(format!("truncated at {at}")))?;
+    Ok(s.iter().rev().fold(0u64, |a, &x| (a << 8) | u64::from(x)))
+}
+
+/// The length of the command stream at the start of `src`, its closing zero byte included.
+fn stream_len(src: &[u8]) -> std::io::Result<usize> {
+    let mut i = 0;
+    loop {
+        let &c = src.get(i).ok_or_else(|| bad("unterminated command stream".into()))?;
+        i += 1;
+        if c == 0 {
+            return Ok(i)
+        }
+        i += [0, 1, 2, 4][(c >> 6) as usize];
+    }
+}
+
+/// Read an MMB file's statements (it must have a `Name` index).
+fn read(b: &[u8]) -> std::io::Result<Read> {
+    let at = |a: usize, n: usize| le_at(b, a, n).map(|x| x as usize);
+    if b.get(0..5) != Some(b"MM0B\x01") {
+        return Err(bad("not an MMB file (version 1)".into()))
+    }
+    let (nsorts, nterms, nthms) = (at(5, 1)?, at(8, 4)?, at(12, 4)?);
+    let (p_terms, p_thms, p_proof, p_index) = (at(16, 4)?, at(20, 4)?, at(24, 4)?, at(32, 8)?);
+    let mut p_names = None;
+    if p_index != 0 {
+        for k in 0..at(p_index, 8)? {
+            let e = p_index + 8 + 16 * k;
+            if b.get(e..e + 4) == Some(b"Name") {
+                p_names = Some(at(e + 8, 8)?);
+            }
+        }
+    }
+    let Some(p_names) = p_names else { return Err(bad("the file has no name index".into())) };
+    let name = |i: usize| -> std::io::Result<String> {
+        let p = at(p_names + 16 * i + 8, 8)?;
+        let s = b.get(p..).and_then(|s| s.split(|&c| c == 0).next()).ok_or_else(|| bad(format!("bad name pointer {p}")))?;
+        String::from_utf8(s.to_vec()).map_err(|_| bad("a name is not UTF-8".into()))
+    };
+    let mut term_args = Vec::with_capacity(nterms);
+    for i in 0..nterms {
+        term_args.push(at(p_terms + 8 * i, 2)? as u16);
+    }
+    let mut stmts = Vec::new();
+    let (mut ns, mut nt, mut nh) = (0, 0, 0);
+    let mut pos = p_proof;
+    loop {
+        let c = at(pos, 1)? as u8;
+        if c == 0 {
+            break
+        }
+        let n = [0, 1, 2, 4][(c >> 6) as usize];
+        let total = at(pos + 1, n)?;
+        let body = b.get(pos + 1 + n..pos + total).ok_or_else(|| bad(format!("bad statement at {pos}")))?.to_vec();
+        pos += total;
+        let op = c & 0x3F;
+        let raw = match op {
+            cmd::ST_SORT if ns < nsorts => {
+                ns += 1;
+                Raw { kind: Stmt::Sort((ns - 1) as u8), cmd: op, name: name(ns - 1)?, nargs: 0, flags: at(40 + ns - 1, 1)? as u8, table: Vec::new(), body }
+            }
+            cmd::ST_TERM | cmd::ST_LOCAL_DEF if nt < nterms => {
+                let e = p_terms + 8 * nt;
+                let (nargs, flags, p) = (at(e, 2)?, at(e + 2, 1)? as u8, at(e + 4, 4)?);
+                let mut len = 8 * (nargs + 1);
+                if flags & 0x80 != 0 {
+                    len += stream_len(b.get(p + len..).unwrap_or_default())?;
+                }
+                let table = b.get(p..p + len).ok_or_else(|| bad("bad term entry".into()))?.to_vec();
+                nt += 1;
+                Raw { kind: Stmt::Term(TId((nt - 1) as u32)), cmd: op, name: name(nsorts + nt - 1)?, nargs: nargs as u16, flags, table, body }
+            }
+            cmd::ST_AXIOM | cmd::ST_THM | cmd::ST_LOCAL_THM if nh < nthms => {
+                let e = p_thms + 8 * nh;
+                let (nargs, p) = (at(e, 2)?, at(e + 4, 4)?);
+                let len = 8 * nargs + stream_len(b.get(p + 8 * nargs..).unwrap_or_default())?;
+                let table = b.get(p..p + len).ok_or_else(|| bad("bad theorem entry".into()))?.to_vec();
+                nh += 1;
+                Raw { kind: Stmt::Thm(ThId((nh - 1) as u32)), cmd: op, name: name(nsorts + nterms + nh - 1)?, nargs: nargs as u16, flags: 0, table, body }
+            }
+            _ => return Err(bad(format!("unexpected statement {c:#x} at {}", pos - total))),
+        };
+        stmts.push(raw);
+    }
+    if (ns, nt, nh) != (nsorts, nterms, nthms) {
+        return Err(bad("the proof stream does not declare every statement of the tables".into()))
+    }
+    Ok(Read { stmts, term_args })
+}
+
+/// An expression read from a unify stream, its terms renumbered.
+#[derive(PartialEq, Debug)]
+enum Tree {
+    Var(u32),
+    App(u32, Vec<std::rc::Rc<Tree>>),
+}
+
+/// The expressions of a statement's unify stream (a def's value; a theorem's conclusion, then
+/// its hypotheses in reverse), terms renumbered by `terms` (`u32::MAX` for none) and read with
+/// the arities `args` (in the stream's own numbering).
+fn trees(src: &[u8], nargs: usize, args: &[u16], terms: &[u32]) -> std::io::Result<Vec<std::rc::Rc<Tree>>> {
+    use std::rc::Rc;
+    let mut cmds = Vec::new();
+    let mut i = 0;
+    loop {
+        let &c = src.get(i).ok_or_else(|| bad("unterminated unify stream".into()))?;
+        i += 1;
+        if c == 0 {
+            break
+        }
+        let n = [0, 1, 2, 4][(c >> 6) as usize];
+        cmds.push((c & 0x3F, le_at(src, i, n)? as u32));
+        i += n;
+    }
+    fn expr(cmds: &[(u8, u32)], k: &mut usize, heap: &mut Vec<Option<Rc<Tree>>>, args: &[u16], terms: &[u32]) -> std::io::Result<Rc<Tree>> {
+        let &(op, d) = cmds.get(*k).ok_or_else(|| bad("short unify stream".into()))?;
+        *k += 1;
+        match op {
+            cmd::UREF => heap.get(d as usize).cloned().flatten().ok_or_else(|| bad(format!("bad reference {d}"))),
+            cmd::UTERM | cmd::UTERM_SAVE => {
+                let slot = heap.len();
+                if op == cmd::UTERM_SAVE {
+                    heap.push(None);
+                }
+                let n = *args.get(d as usize).ok_or_else(|| bad(format!("term {d} out of range")))?;
+                let xs = (0..n).map(|_| expr(cmds, k, heap, args, terms)).collect::<std::io::Result<Vec<_>>>()?;
+                let t = Rc::new(Tree::App(terms.get(d as usize).copied().unwrap_or(u32::MAX), xs));
+                if op == cmd::UTERM_SAVE {
+                    heap[slot] = Some(t.clone());
+                }
+                Ok(t)
+            }
+            _ => Err(bad(format!("unexpected unify command {op:#x} in a spec statement"))),
+        }
+    }
+    let mut heap: Vec<Option<Rc<Tree>>> = (0..nargs as u32).map(|v| Some(Rc::new(Tree::Var(v)))).collect();
+    let mut out = Vec::new();
+    let mut k = 0;
+    while k < cmds.len() {
+        if !out.is_empty() {
+            if cmds[k].0 != cmd::UHYP {
+                return Err(bad("expected a hypothesis".into()))
+            }
+            k += 1;
+        }
+        out.push(expr(&cmds, &mut k, &mut heap, args, terms)?);
+    }
+    Ok(out)
+}
+
+/// Renumber the sorts of an argument array (`n` entries of 8 bytes at the start of `table`).
+fn remap_args(table: &mut [u8], n: usize, sorts: &[u8]) -> std::io::Result<()> {
+    for a in 0..n {
+        let x = u64::from_le_bytes(table[8 * a..8 * a + 8].try_into().unwrap());
+        let s = ((x >> 56) & 0x7F) as usize;
+        let to = u64::from(*sorts.get(s).ok_or_else(|| bad(format!("sort {s} out of range")))?);
+        table[8 * a..8 * a + 8].copy_from_slice(&((x & !(0x7F << 56)) | (to << 56)).to_le_bytes());
+    }
+    Ok(())
+}
+
+/// What `link` did.
+pub struct Linked {
+    /// the spec's statements, each found in the library with the same statement
+    pub spec: usize,
+    /// the library's statements, and the certificate's own after them
+    pub library: usize,
+    pub own: usize,
+    pub size: u64,
+}
+
+/// Write `out`: the library's MMB file `lib` (with its proofs), then the statements of the
+/// certificate `cert` after its first `spec` ones, which are the spec's (TG mode, audit §11).
+/// Each of the spec's statements must be in the library under its name, with the same
+/// statement: the same argument sorts and, for a theorem or axiom, the same hypotheses and
+/// conclusion; for a definition of the spec, the same value (a term of the spec may be a
+/// definition in the library). The certificate's own statements are renumbered to follow the
+/// library's. The verifier then checks the library and the certificate together against the
+/// library's text followed by the certificate's statements (`lean0 joined --tg`).
+pub fn link(cert: &std::path::Path, lib: &std::path::Path, out: &std::path::Path, spec: usize) -> std::io::Result<Linked> {
+    let named = |p: &std::path::Path, e: std::io::Error| bad(format!("{}: {e}", p.display()));
+    let l = read(&std::fs::read(lib).map_err(|e| named(lib, e))?).map_err(|e| named(lib, e))?;
+    let c = read(&std::fs::read(cert).map_err(|e| named(cert, e))?).map_err(|e| named(cert, e))?;
+    if c.stmts.len() < spec {
+        return Err(bad(format!("{}: fewer statements than the spec has", cert.display())))
+    }
+    let key = |r: &Raw| (kind_code(r.kind), r.name.clone());
+    let index: HashMap<(u8, String), usize> = l.stmts.iter().enumerate().map(|(i, r)| (key(r), i)).collect();
+    let id = |st: Stmt| match st {
+        Stmt::Sort(s) => s as u32,
+        Stmt::Term(t) => t.0,
+        Stmt::Thm(t) => t.0,
+    };
+    // the spec's statements: their numbers in the library
+    let (mut sorts, mut terms, mut thms) = (Vec::new(), Vec::new(), Vec::new());
+    let mut pairs = Vec::new();
+    for r in &c.stmts[..spec] {
+        let Some(&i) = index.get(&key(r)) else { return Err(bad(format!("the library has no statement `{}`", r.name))) };
+        let lr = &l.stmts[i];
+        match r.kind {
+            Stmt::Sort(_) => sorts.push(id(lr.kind) as u8),
+            Stmt::Term(_) => terms.push(id(lr.kind)),
+            Stmt::Thm(_) => thms.push(id(lr.kind)),
+        }
+        pairs.push((r, lr));
+    }
+    let lterms = l.stmts.iter().filter(|r| matches!(r.kind, Stmt::Term(_))).count() as u32;
+    let lthms = l.stmts.iter().filter(|r| matches!(r.kind, Stmt::Thm(_))).count() as u32;
+    let identity: Vec<u32> = (0..lterms).collect();
+    // the same statements
+    for (r, lr) in pairs {
+        let differ = |what: &str| bad(format!("`{}` differs from the library's: {what}", r.name));
+        if r.nargs != lr.nargs {
+            return Err(differ("argument count"))
+        }
+        let n = r.nargs as usize + usize::from(matches!(r.kind, Stmt::Term(_)));
+        let mut table = r.table.clone();
+        remap_args(&mut table, n, &sorts)?;
+        if table[..8 * n] != lr.table[..8 * n] {
+            return Err(differ("argument sorts"))
+        }
+        match r.kind {
+            Stmt::Sort(_) if r.flags != lr.flags => return Err(differ("sort modifiers")),
+            Stmt::Sort(_) => {}
+            Stmt::Term(_) if r.flags & 0x80 == 0 => {}
+            Stmt::Term(_) | Stmt::Thm(_) => {
+                if matches!(r.kind, Stmt::Term(_)) && lr.flags & 0x80 == 0 {
+                    return Err(differ("a definition in the spec, not in the library"))
+                }
+                let mine = trees(&r.table[8 * n..], r.nargs as usize, &c.term_args, &terms)?;
+                if mine != trees(&lr.table[8 * n..], r.nargs as usize, &l.term_args, &identity)? {
+                    return Err(differ(if matches!(r.kind, Stmt::Term(_)) { "value" } else { "statement" }))
+                }
+            }
+        }
+    }
+    // the certificate's own statements follow the library's
+    let (ct, ch) = (terms.len(), thms.len());
+    for r in &c.stmts[spec..] {
+        match r.kind {
+            Stmt::Sort(_) => return Err(bad(format!("the certificate declares a sort `{}`", r.name))),
+            Stmt::Term(t) => terms.push(lterms + t.0 - ct as u32),
+            Stmt::Thm(t) => thms.push(lthms + t.0 - ch as u32),
+        }
+    }
+    let mut tmp = out.as_os_str().to_owned();
+    tmp.push(".part");
+    let mut w = Writer::to_file(std::path::Path::new(&tmp))?;
+    for r in &l.stmts {
+        w.push_raw(r)?;
+    }
+    for r in &c.stmts[spec..] {
+        let n = r.nargs as usize + usize::from(matches!(r.kind, Stmt::Term(_)));
+        let mut table = r.table[..8 * n].to_vec();
+        remap_args(&mut table, n, &sorts)?;
+        if r.table.len() > 8 * n {
+            remap_stream_sorts(&r.table[8 * n..], Some(&sorts), &terms, &thms, &mut table)?;
+        }
+        let mut body = Vec::new();
+        if !r.body.is_empty() {
+            remap_stream_sorts(&r.body, Some(&sorts), &terms, &thms, &mut body)?;
+        }
+        let flags = match r.kind {
+            Stmt::Term(_) => (r.flags & 0x80) | sorts[(r.flags & 0x7F) as usize],
+            _ => r.flags,
+        };
+        w.push_raw(&Raw { kind: r.kind, cmd: r.cmd, name: r.name.clone(), nargs: r.nargs, flags, table, body })?;
+    }
+    let size = w.finish_file(Some(out))?.0;
+    Ok(Linked { spec, library: l.stmts.len(), own: c.stmts.len() - spec, size })
 }

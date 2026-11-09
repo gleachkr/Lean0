@@ -172,6 +172,14 @@ impl Gen {
         for t in &env.thms {
             thms.reserve(&t.name);
         }
+        // and the TG library's, so the statements also read the same after it (audit §11)
+        let (tg_terms, tg_thms) = lean0_check::tg::names()?;
+        for t in &tg_terms {
+            terms.reserve(t);
+        }
+        for t in &tg_thms {
+            thms.reserve(t);
+        }
         let mut var_names = Names::default();
         var_names.reserve("G");
         terms.reserve("G");

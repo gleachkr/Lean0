@@ -5,6 +5,8 @@
 //! - [`joined`]: the text a verifier checks a certificate (or one part of a multi-part
 //!   certificate) against: the spec, the earlier parts' statements restated, and the
 //!   certificate's own statements (audit §7).
+//! - [`tg`]: the TG library, embedded: in TG mode the text a certificate is checked against
+//!   in place of the spec (audit §11).
 //! - [`statements`]: the statement checker (audit §8), and [`summary`]: the export's
 //!   top-level declarations in Lean syntax, for the person reading the result.
 //!
@@ -15,6 +17,7 @@
 pub mod joined;
 pub mod statements;
 pub mod summary;
+pub mod tg;
 
 /// The trusted spec of LeanTT that every certificate is checked against.
 pub const SPEC: &str = include_str!("../../spec/lean.mm0");

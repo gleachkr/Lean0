@@ -38,9 +38,11 @@ for mm0 in spec/examples/*.mm0; do
 done
 
 # The TG library with the encoding of the spec's syntax (spec/tg/lean-tg.mm0, generated from
-# the spec): in sync with the spec, and every theorem proved.
+# the spec) and the rest of the spec over it (lean-tg-rest.mm0, axioms for now): in sync with
+# the spec, and every theorem proved. Its MMB file is the start of every certificate in TG mode
+# (`certify.sh --tg` below).
 echo "== spec/tg (the set-theory library and the syntax encoding)"
-if scripts/tg-lean.py --check && tg=$(scripts/tg-check.sh spec/tg/lean-tg.mm0) && echo "$tg" && [[ "$tg" == *"; 0 admitted"* ]]; then :; else echo "FAIL: spec/tg"; fail=1; fi
+if scripts/tg-lean.py --check && tg=$(scripts/tg-check.sh spec/tg/lean-tg-rest.mm0) && echo "$tg" && [[ "$tg" == *"; 0 admitted"* ]]; then :; else echo "FAIL: spec/tg"; fail=1; fi
 # The generator's notation parser: every axiom of the spec in prefix form, proved by the axiom.
 pc=build/tg/parsecheck
 if scripts/tg-lean.py --parse-check $pc && "${ABC:-abc}" compile $pc/check.mm0 $pc/check.auf $pc/check.mmb \
@@ -61,9 +63,11 @@ target/release/lean0 modes > build/out/modes.txt && echo "modes: $(tail -1 build
 { cat spec/lean.mm0; echo 'axiom lift_dup (n k: nat) (e: expr): $ lift n k e e $;'; } > build/out/modes-bad.mm0
 if target/release/lean0 modes build/out/modes-bad.mm0 > build/out/modes-bad.txt; then echo "FAIL: lean0 modes accepted an overlapping clause"; fail=1; else echo "modes: an overlapping clause is rejected"; fi
 
+# Each module's certificate is verified against the spec, and in TG mode against the library
+# (the same proofs after the library's, audit §11).
 for lean in tests/lean/*.lean; do
   echo "== ${lean#tests/lean/}"
-  scripts/certify.sh "$lean" > /dev/null || { echo "FAIL: $lean"; fail=1; }
+  scripts/certify.sh --tg "$lean" > /dev/null || { echo "FAIL: $lean"; fail=1; }
 done
 
 # A Lake project, the way the README's "Theorems from a Lake project" does it: export a slice
@@ -105,6 +109,8 @@ stmt_neg '/^def S_D/s/(cons (app (ind_ty (Array_D lz) nz) (bvar nz))/(cons (app 
 # be definitionally equal (`eeqv_cst`), and a permuted level list another constant.
 stmt_neg 's/cst Inh_atom/cst Pt_atom/' core
 stmt_neg 's/cst Pt_atom (lcons a (lcons b lnil))/cst Pt_atom (lcons b (lcons a lnil))/' core
+# A certificate's new terms are atoms and blocks, the sorts the TG encoding leaves open.
+stmt_neg 's/^term Pt_atom: atom;/term Pt_atom: atom;\nterm extra: nat;/' core
 rm -f build/gen/initsample/neg.mm0 build/gen/nested/neg.mm0
 
 # Sharded generation (`--jobs`) must give the same statements, and a certificate both accept.
@@ -124,6 +130,15 @@ if target/release/lean0 gen build/lean/initsample.ndjson "$sh_out" initsample --
   && scripts/check-parts.sh --export build/lean/initsample.ndjson "$sh_out" initsample > /dev/null 2>&1; then
   echo "parts: ok (3 certificates)"
 else echo "FAIL: multi-part certificate"; fail=1; fi
+# The same parts in TG mode, each after the library, against the library's text and the parts'
+# statements (the earlier parts' abstract definitions restated as terms).
+tg_parts=0
+for k in 0 1 2; do
+  target/release/lean0 tg-link "$sh_out/initsample.part$k.mmb" build/tg/lean-tg-rest.mmb "$sh_out/tg$k.mmb" 2> /dev/null \
+    && target/release/lean0 joined --tg $(for j in $(seq 0 $k); do echo "$sh_out/initsample.part$j.mm0"; done) > "$sh_out/tg$k.joined.mm0" \
+    && [ "$(accepted_by "$sh_out/tg$k.mmb" "$sh_out/tg$k.joined.mm0")" = 2 ] && tg_parts=$((tg_parts + 1))
+done
+[ "$tg_parts" = 3 ] && echo "parts: ok in TG mode (3 certificates)" || { echo "FAIL: multi-part certificate in TG mode"; fail=1; }
 # A part's statements are restated by the later parts from its own .mm0, so changing one there
 # (a theorem stated as an axiom) must be rejected.
 sed -i '0,/^theorem /s//axiom /' "$sh_out/initsample.part1.mm0"
@@ -223,6 +238,32 @@ tamper lit accepted --tamper-axiom quot_lift_mk
 tamper lit accepted --tamper-axiom ind_iota_nst
 # Substitution (typing handles).
 for ax in instDF cinst_z cinst_s; do tamper lit rejected --tamper-axiom "$ax"; done
+
+# In TG mode: a tampered theorem of the certificate is rejected by the verifiers against the
+# library's text, and a tampered axiom of the spec cannot be linked, since the library states
+# the spec's own (the verifiers would reject the proofs that use it).
+tamper_tg() {
+  local mod="$1" opt="$2" what="$3" out="build/gen/tamper"
+  rm -rf "$out"; mkdir -p "$out"
+  target/release/lean0 gen "build/lean/$mod.ndjson" "$out" t "$opt" "$what" > /dev/null 2>&1 \
+    || { echo "FAIL: lean0 $opt $what"; fail=1; return 0; }
+  if ! target/release/lean0 tg-link "$out/t.mmb" build/tg/lean-tg-rest.mmb "$out/t.tg.mmb" > "$out/link.log" 2>&1; then
+    if [ "$opt" = --tamper-axiom ] && grep -q "\`$what\` differs from the library's" "$out/link.log"; then
+      echo "rejected as expected (tg-link): $mod $opt $what in TG mode"
+    else echo "FAIL: tg-link: $mod $opt $what: $(cat "$out/link.log")"; fail=1; fi
+    return 0
+  fi
+  target/release/lean0 joined --tg "$out/t.mm0" > "$out/t.tg.joined.mm0"
+  if [ "$opt" = --tamper-theorem ] && [ "$(accepted_by "$out/t.tg.mmb" "$out/t.tg.joined.mm0")" = 0 ]; then
+    echo "rejected as expected: $mod $opt $what in TG mode"
+  else echo "FAIL (accepted): $mod $opt $what in TG mode"; fail=1; fi
+}
+tamper_tg core --tamper-theorem two_add_two_ty
+tamper_tg induct --tamper-theorem MyNat_rec_succ_iota
+tamper_tg lit --tamper-theorem Nat_div_lit
+tamper_tg core --tamper-axiom beta
+tamper_tg induct --tamper-axiom lift_app
+rm -rf build/gen/tamper
 
 echo "== negative tests: a corrupted export"
 # two_add_two given the statement of and_comm': nanoda must reject it, so no certificate.

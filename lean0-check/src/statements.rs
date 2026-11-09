@@ -18,6 +18,9 @@
 //! and recursors are the terms `ind_ty (X_D us) i`, `ind_ctor (X_D us) i c` and
 //! `ind_rec (X_D us) i v`, named by the export's `all` and constructor lists and `X.rec`.
 //!
+//! The certificate's `term`s must be constants of sort `atom` (an opaque constant's) or `blk`
+//! (a block's): the TG encoding's open sorts (audit §11).
+//!
 //! Like the rest of this crate it is independent of the generator: it parses the `.mm0` text
 //! itself, for exactly the forms lean0 writes. What it does not check: the generated axioms
 //! of blocks left to stage A, quotients and literals (audit §4, §5), and that the certificate
@@ -324,6 +327,13 @@ pub fn check(export: &ExportFile<'_>, stmts: &[Stmt]) -> Report {
         (by_name, types, ctors, large)
     });
     names.rec_large = rec_large;
+    // a certificate's new terms are constants of the open sorts, atoms and blocks: the encoding
+    // of the spec in set theory reads each other sort as its closed terms (audit §11)
+    for s in stmts.iter().filter(|s| !s.spec && s.kind == "term") {
+        if !s.binders.is_empty() || !matches!(s.ret.as_str(), "atom" | "blk") {
+            problems.push(format!("`{}`: a generated `term` must be a constant of sort `atom` or `blk`", s.name));
+        }
+    }
     for s in stmts {
         if s.kind != "term" && s.kind != "def" {
             continue

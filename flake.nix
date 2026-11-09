@@ -58,6 +58,8 @@
           root = ./.;
           fileset = pkgs.lib.fileset.unions [
             ./Cargo.toml ./Cargo.lock ./lean0 ./lean0-check ./mm0kit ./spec/lean.mm0
+            # the TG library's statements, embedded by lean0-check (TG mode)
+            (pkgs.lib.fileset.fileFilter (f: f.hasExt "mm0") ./spec/tg)
           ];
         };
         # the crates' path dependency on build/nanoda

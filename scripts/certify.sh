@@ -2,12 +2,17 @@
 # Certify a Lean module end to end: compile it, export it with lean4export, generate the
 # certificate with `lean0 gen`, verify it with mm0-zig and mm0-c against the text `lean0 joined`
 # builds, and check its statements against the export with `lean0 check`.
-# Usage: scripts/certify.sh MODULE.lean [OUT_DIR]   (default OUT_DIR: build/gen/<module>)
+# Usage: scripts/certify.sh [--tg] MODULE.lean [OUT_DIR]   (default OUT_DIR: build/gen/<module>)
+# With --tg it also verifies the certificate in TG mode (audit §11): `lean0 tg-link` puts it
+# after the TG library's MMB file (TG_LIB, by default build/tg/lean-tg-rest.mmb, which
+# scripts/tg-check.sh spec/tg/lean-tg-rest.mm0 makes), and both verifiers check the result
+# against `lean0 joined --tg`.
 # The module is compiled with Lean v4.35.0 (lean4export's toolchain) in build/lean/. Tools:
 # LEAN4EXPORT, MM0_ZIG, MM0_C env vars, by default lean4export, mm0-zig and mm0-c from PATH
 # (lean4export at the revision lean0 uses; scripts/test.sh builds one in tests/lake).
 set -euo pipefail
 root="$(cd "$(dirname "$0")/.." && pwd)"
+tg=; if [ "${1:-}" = --tg ]; then tg=1; shift; fi
 src="$(realpath "$1")"
 mod="$(basename "${src%.lean}")"
 name="$(echo "$mod" | tr '[:upper:]' '[:lower:]')"
@@ -34,5 +39,11 @@ lean0="$root/target/release/lean0"
 "$lean0" joined "$out/$name.mm0" > "$out/$name.joined.mm0"
 "$MM0_ZIG" "$out/$name.mmb" < "$out/$name.joined.mm0" > /dev/null && echo "mm0-zig: ok ($out/$name.mmb)"
 "$MM0_C" "$out/$name.mmb" < "$out/$name.joined.mm0" && echo "mm0-c:   ok"
+if [ -n "$tg" ]; then
+  "$lean0" tg-link "$out/$name.mmb" "${TG_LIB:-$root/build/tg/lean-tg-rest.mmb}" "$out/$name.tg.mmb"
+  "$lean0" joined --tg "$out/$name.mm0" > "$out/$name.tg.joined.mm0"
+  "$MM0_ZIG" "$out/$name.tg.mmb" < "$out/$name.tg.joined.mm0" > /dev/null && echo "mm0-zig: ok in TG mode ($out/$name.tg.mmb)"
+  "$MM0_C" "$out/$name.tg.mmb" < "$out/$name.tg.joined.mm0" && echo "mm0-c:   ok in TG mode"
+fi
 # the statements say what the export's declarations say
 "$lean0" check "$work/$name.ndjson" "$out/$name.mm0" | tail -1

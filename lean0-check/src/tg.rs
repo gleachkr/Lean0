@@ -1,0 +1,84 @@
+//! The TG library (`spec/tg`), embedded: in TG mode a certificate is verified against this
+//! text instead of the spec (audit §11). Its top file, `lean-tg-rest.mm0`, states Parts II and
+//! III of the spec as axioms over `lean-tg.mm0`, which encodes the spec's syntax and proves
+//! Part I's clauses in Tarski–Grothendieck set theory (`tg.mm0`); the library's proofs are in
+//! the MMB file `abc` compiles, which a TG-mode certificate starts with (`lean0 tg-link`).
+
+/// The library's statement files, by name.
+const FILES: &[(&str, &str)] = &[
+    ("tg.mm0", include_str!("../../spec/tg/tg.mm0")),
+    ("basic.mm0", include_str!("../../spec/tg/basic.mm0")),
+    ("pairs.mm0", include_str!("../../spec/tg/pairs.mm0")),
+    ("relations.mm0", include_str!("../../spec/tg/relations.mm0")),
+    ("omega.mm0", include_str!("../../spec/tg/omega.mm0")),
+    ("ordinals.mm0", include_str!("../../spec/tg/ordinals.mm0")),
+    ("lfp.mm0", include_str!("../../spec/tg/lfp.mm0")),
+    ("universe.mm0", include_str!("../../spec/tg/universe.mm0")),
+    ("hartogs.mm0", include_str!("../../spec/tg/hartogs.mm0")),
+    ("arith.mm0", include_str!("../../spec/tg/arith.mm0")),
+    ("arith2.mm0", include_str!("../../spec/tg/arith2.mm0")),
+    ("seq.mm0", include_str!("../../spec/tg/seq.mm0")),
+    ("cont.mm0", include_str!("../../spec/tg/cont.mm0")),
+    ("trees.mm0", include_str!("../../spec/tg/trees.mm0")),
+    ("sorts.mm0", include_str!("../../spec/tg/sorts.mm0")),
+    ("horn.mm0", include_str!("../../spec/tg/horn.mm0")),
+    ("all.mm0", include_str!("../../spec/tg/all.mm0")),
+    ("lean-tg.mm0", include_str!("../../spec/tg/lean-tg.mm0")),
+    ("lean-tg-rest.mm0", include_str!("../../spec/tg/lean-tg-rest.mm0")),
+];
+
+/// The file certificates are verified against, with everything it imports.
+pub const TOP: &str = "lean-tg-rest.mm0";
+
+/// The text of `TOP` with each `import "F";` line replaced by the text of `F` (itself
+/// flattened, and only the first time: as `abc join` does, so the declarations come in the
+/// order the library's MMB file has them).
+pub fn text() -> Result<String, String> {
+    fn flatten(name: &str, seen: &mut Vec<String>, out: &mut String) -> Result<(), String> {
+        if seen.iter().any(|s| s == name) {
+            return Ok(())
+        }
+        seen.push(name.to_string());
+        let Some(&(_, src)) = FILES.iter().find(|f| f.0 == name) else { return Err(format!("the TG library has no file {name}")) };
+        for line in src.split_inclusive('\n') {
+            if line.starts_with("import") {
+                let Some(file) = line.trim_end().strip_prefix("import \"").and_then(|l| l.strip_suffix("\";")) else {
+                    return Err(format!("{name}: unexpected import line {line:?}"))
+                };
+                flatten(file, seen, out)?;
+            } else {
+                out.push_str(line);
+            }
+        }
+        if !out.ends_with('\n') {
+            out.push('\n');
+        }
+        Ok(())
+    }
+    let mut out = String::new();
+    flatten(TOP, &mut Vec::new(), &mut out)?;
+    Ok(out)
+}
+
+/// The names the library declares, for the generator to leave alone so that a certificate's
+/// statements read the same after the library as after the spec: its terms and definitions
+/// with the notation tokens that look like identifiers, and its theorems and axioms (two
+/// namespaces).
+pub fn names() -> Result<(Vec<String>, Vec<String>), String> {
+    let ident = |s: &str| s.starts_with(|c: char| c.is_ascii_alphabetic() || c == '_') && s.chars().all(|c| c.is_ascii_alphanumeric() || c == '_');
+    let (mut terms, mut thms) = (Vec::new(), Vec::new());
+    for line in text()?.lines() {
+        let mut words = line.split_whitespace().skip_while(|w| ["pure", "strict", "provable", "free", "local", "abstract", "pub"].contains(w));
+        let (Some(kw), Some(rest)) = (words.next(), words.next()) else { continue };
+        let name: String = rest.chars().take_while(|&c| c.is_ascii_alphanumeric() || c == '_').collect();
+        match kw {
+            "term" | "def" => terms.push(name),
+            "axiom" | "theorem" => thms.push(name),
+            "prefix" | "infixl" | "infixr" | "notation" => {
+                terms.extend(line.split('$').skip(1).step_by(2).map(str::trim).filter(|t| ident(t)).map(String::from))
+            }
+            _ => {}
+        }
+    }
+    Ok((terms, thms))
+}
