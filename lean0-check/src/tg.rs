@@ -1,8 +1,10 @@
 //! The TG library (`spec/tg`), embedded: in TG mode a certificate is verified against this
-//! text instead of the spec (audit §11). Its top file, `lean-tg-rest.mm0`, states Parts II and
-//! III of the spec as axioms over `lean-tg.mm0`, which encodes the spec's syntax and proves
-//! Part I's clauses in Tarski–Grothendieck set theory (`tg.mm0`); the library's proofs are in
-//! the MMB file `abc` compiles, which a TG-mode certificate starts with (`lean0 tg-link`).
+//! text instead of the spec (audit §11). Its top file, `lean-tg-rest.mm0`, states what remains
+//! of Parts II and III of the spec as axioms over the model (`model.mm0`: the levels, the
+//! denotation and the judgments), which is built over `lean-tg.mm0`, the encoding of the
+//! spec's syntax with Part I's clauses proved in Tarski–Grothendieck set theory (`tg.mm0`).
+//! The library's proofs are in the MMB file `abc` compiles, which a TG-mode certificate starts
+//! with (`lean0 tg-link`).
 
 /// The library's statement files, by name.
 const FILES: &[(&str, &str)] = &[
@@ -24,6 +26,9 @@ const FILES: &[(&str, &str)] = &[
     ("horn.mm0", include_str!("../../spec/tg/horn.mm0")),
     ("all.mm0", include_str!("../../spec/tg/all.mm0")),
     ("lean-tg.mm0", include_str!("../../spec/tg/lean-tg.mm0")),
+    ("model-levels.mm0", include_str!("../../spec/tg/model-levels.mm0")),
+    ("model-den.mm0", include_str!("../../spec/tg/model-den.mm0")),
+    ("model.mm0", include_str!("../../spec/tg/model.mm0")),
     ("lean-tg-rest.mm0", include_str!("../../spec/tg/lean-tg-rest.mm0")),
 ];
 

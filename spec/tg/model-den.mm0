@@ -1,0 +1,288 @@
+-- model-den.mm0: the model's denotation and judgments (layers C1, C3 and C4
+-- of the reduction, audit §11). The semantics is relative to an admissible
+-- universe `u` (`uadm`: a universe containing every `U_n`): a valuation of the
+-- de Bruijn variables is a finite sequence `r ∈ fseq u` (`#0` first), so the
+-- valuations form a set and the denotation is defined by structural recursion
+-- (`trc`) on the trees of lean-tg.mm0. Its value at an expression tree is a
+-- curried trace over the level valuations `w ∈ lvals` (model-levels.mm0) and
+-- the valuations `r`, read by `dt u M T w r`:
+--   `bvar i`     the `i`-th entry of `r` (`∅` past its end);
+--   `srt l`      `U_n` with `n` the value of `l`;
+--   `app f a`    `ap` of the values;
+--   `lam A b`    the trace of `x ↦ b` at `x :: r` on the value of `A`;
+--   `pi A B`     the dependent function space (`cpi`) likewise;
+--   `proj b i e` the component `i + 1` of the value of `e` (a tuple: a
+--                constructor tag, then the fields);
+-- and at the other expression constructors (`kexa`: opaque constants,
+-- literals, the inductive constants, the quotient primitives) the value the
+-- hook `M` gives at `w`, the same at every `r` and cut to `u` (`mclip`); every
+-- other node gets `M`'s value (a set or `∅`, `sclip`). `M` is a parameter
+-- here; the later layers define the inductive types, quotients, numerals and
+-- the environment `Env` as one hook. Every expression denotes an element of
+-- `u` (`den_in_u`), so extending a valuation by the value of a typed term stays
+-- in `fseq u`. A context's tree denotes, at `w`, the set of valuations that
+-- satisfy it (`sat`). The judgments (`mdeq`, `minh`) quantify over every
+-- admissible universe, every level valuation and every satisfying valuation;
+-- with them the rules that need no metatheory of the syntax (symmetry,
+-- transitivity, conversion, sorts, `λ`, `Π`, proof irrelevance, inhabitation)
+-- are theorems for every hook. Imports model-levels.mm0; proofs in
+-- model-den.auf.
+
+import "model-levels.mm0";
+
+-- --------------------------------------------------------------------------
+-- Admissible universes, and the universe of a `Π` (C1)
+-- --------------------------------------------------------------------------
+
+--| A universe containing every `U_n`.
+def uadm (U: class) (.n: set): fml = $ universe U ∧ ∀ n (n ∊ ω → fv uni n ∈ U) $;
+
+--| @congr
+theorem uadm_congr (A B: class): $ A ≐ B $ > $ uadm A ⟺ uadm B $;
+--| @rewrite
+theorem sb_f_uadm {x: set} (t: set x) (A: class x): $ [x/t] (uadm A) ⟺ uadm (⟦ x / t ⟧ A) $;
+theorem uadm_intro (G: hyps) {n: set} (U: class):
+  $ G ⇒ universe U $ > $ G ⇒ ∀ n (n ∊ ω → fv uni n ∈ U) $ > $ G ⇒ uadm U $;
+theorem uadm_universe (G: hyps) (U: class): $ G ⇒ uadm U $ > $ G ⇒ universe U $;
+theorem uadm_uni (G: hyps) (U: class) (n: set): $ G ⇒ uadm U $ > $ G ⇒ n ∊ ω $ > $ G ⇒ fv uni n ∈ U $;
+theorem uadm_omega (G: hyps) (U: class): $ G ⇒ uadm U $ > $ G ⇒ ω ∈ U $;
+theorem uadm_empty (G: hyps) (U: class): $ G ⇒ uadm U $ > $ G ⇒ ∅ ∈ U $;
+--| There is one: the least universe containing the set of the `U_n`.
+theorem uadm_exists (G: hyps) {u: set}: $ G ⇒ ∃ u (uadm u) $;
+
+--| The sort of a `Π`: in `U_(imax m n)` when the domain is in `U_m` and the
+--| codomain in `U_n` (impredicative at `n = 0`).
+theorem cpi_uni_imax {x: set} (G: hyps) (A: class) (B: class x) (m n: set):
+  $ G ⇒ m ∊ ω $ > $ G ⇒ n ∊ ω $ > $ G ⇒ A ∈ fv uni m $ > $ G ⇒ ∀ x (x ∊ A → B ∈ fv uni n) $ >
+  $ G ⇒ cpi x A B ∈ fv uni (nimax m n) $;
+--| Proofs are irrelevant: an element of `two` has at most one element.
+theorem two_irrel (G: hyps) (a b c: set): $ G ⇒ a ∊ two $ > $ G ⇒ b ∊ a $ > $ G ⇒ c ∊ a $ > $ G ⇒ b = c $;
+--| Traces and function spaces are equal when their domains are and their
+--| bodies agree on them.
+theorem clam_eq_pt {x: set} (G: hyps) (A C: class) (B D: class x):
+  $ G ⇒ A = C $ > $ G ⇒ ∀ x (x ∊ A → B = D) $ > $ G ⇒ clam x A B = clam x C D $;
+theorem cpi_eq_pt {x: set} (G: hyps) (A C: class) (B D: class x):
+  $ G ⇒ A = C $ > $ G ⇒ ∀ x (x ∊ A → B = D) $ > $ G ⇒ cpi x A B = cpi x C D $;
+
+-- --------------------------------------------------------------------------
+-- The denotation (C3)
+-- --------------------------------------------------------------------------
+
+--| A curried trace `D` at the level valuation `W` and the valuation `R`.
+def da (D W R: class): class = $ ap (ap D W) R $;
+--| `A` if it is an element of `U`, else `∅`.
+def mclip (U A: class) (.y: set): class = $ {y | y ∊ A ∧ A ∈ U} $;
+--| `A` if it is a set, else `∅`.
+def sclip (A: class) (.y: set): class = $ {y | y ∊ A ∧ isset A} $;
+--| The labels of the expression constructors the hook interprets.
+def kexa: class =
+  $ csn kc_cst ∪ (csn kc_lit ∪ (csn kc_ind_ty ∪ (csn kc_ind_ctor ∪ (csn kc_ind_rec ∪
+    (csn kc_quot ∪ (csn kc_quot_mk ∪ (csn kc_quot_lift ∪ csn kc_quot_ind))))))) $;
+--| The labels of the expression constructors.
+def kstr: class =
+  $ csn kc_bvar ∪ (csn kc_srt ∪ (csn kc_app ∪ (csn kc_lam ∪ (csn kc_pi ∪ (csn kc_proj ∪ kexa))))) $;
+--| One step of the denotation at the label `K` with the children `S` and their
+--| values `V`, in the universe `U` with the hook `M`.
+def dnb (U M K S V: class) (.w .r .x .z: set): class =
+  $ {z | (K = kc_bvar ∧ z ∊ clam w lvals (clam r (fseq U) (fv r (fv nvf (fv S ∅))))) ∨
+         (K = kc_srt ∧ z ∊ clam w lvals (clam r (fseq U) (fv uni (lv (fv S ∅) w)))) ∨
+         (K = kc_app ∧ z ∊ clam w lvals (clam r (fseq U)
+            (ap (da (fv V ∅) w r) (da (fv V (suc ∅)) w r)))) ∨
+         (K = kc_lam ∧ z ∊ clam w lvals (clam r (fseq U)
+            (clam x (da (fv V ∅) w r) (da (fv V (suc ∅)) w (scons x r))))) ∨
+         (K = kc_pi ∧ z ∊ clam w lvals (clam r (fseq U)
+            (cpi x (da (fv V ∅) w r) (da (fv V (suc ∅)) w (scons x r))))) ∨
+         (K = kc_proj ∧ z ∊ clam w lvals (clam r (fseq U)
+            (fv (da (fv V (suc (suc ∅))) w r) (suc (fv nvf (fv S (suc ∅))))))) ∨
+         (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U)
+            (mclip U (ap (fv M ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩) w)))) ∨
+         (¬ K ∈ kstr ∧ z ∊ sclip (fv M ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩))} $;
+--| The denotation of every tree, in the universe `U` with the hook `M`.
+def dnf (U M: class) (.k .s .v: set): class = $ trc ω (cgr3 k s v (dnb U M k s v)) $;
+--| The value of the tree `T` at the level valuation `W` and the valuation `R`.
+def dt (U M T W R: class): class = $ da (fv (dnf U M) T) W R $;
+
+--| @congr
+theorem da_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ da A C E ≐ da B D F $;
+--| @rewrite
+theorem sb_c_da {x: set} (t: set x) (A B C: class x):
+  $ (⟦ x / t ⟧ (da A B C)) ≐ da (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+--| @congr
+theorem mclip_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ mclip A C ≐ mclip B D $;
+--| @rewrite
+theorem sb_c_mclip {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (mclip A B)) ≐ mclip (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+--| @congr
+theorem sclip_congr (A B: class): $ A ≐ B $ > $ sclip A ≐ sclip B $;
+--| @rewrite
+theorem sb_c_sclip {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (sclip A)) ≐ sclip (⟦ x / t ⟧ A) $;
+--| @congr
+theorem dnb_congr (A B C D E F H I J K: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ dnb A C E H J ≐ dnb B D F I K $;
+--| @rewrite
+theorem sb_c_dnb {x: set} (t: set x) (A B C D E: class x):
+  $ (⟦ x / t ⟧ (dnb A B C D E)) ≐ dnb (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
+--| @congr
+theorem dnf_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ dnf A C ≐ dnf B D $;
+--| @rewrite
+theorem sb_c_dnf {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (dnf A B)) ≐ dnf (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+--| @congr
+theorem dt_congr (A B C D E F H I J K: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ dt A C E H J ≐ dt B D F I K $;
+theorem dt_eq (G: hyps) (A B C D E F H I J K: class):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ E = F $ > $ G ⇒ H = I $ > $ G ⇒ J = K $ >
+  $ G ⇒ dt A C E H J = dt B D F I K $;
+--| @rewrite
+theorem sb_c_dt {x: set} (t: set x) (A B C D E: class x):
+  $ (⟦ x / t ⟧ (dt A B C D E)) ≐ dt (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
+
+theorem mclip_in (G: hyps) (U A: class): $ G ⇒ A ∈ U $ > $ G ⇒ mclip U A = A $;
+theorem mclip_u (G: hyps) (U A: class): $ G ⇒ ∅ ∈ U $ > $ G ⇒ mclip U A ∈ U $;
+theorem sclip_set (G: hyps) (A: class): $ G ⇒ isset (sclip A) $;
+theorem kexa_omega (G: hyps): $ G ⇒ kexa ⊆ ω $;
+theorem kexa_cst (G: hyps): $ G ⇒ kc_cst ∈ kexa $;
+theorem kexa_lit (G: hyps): $ G ⇒ kc_lit ∈ kexa $;
+theorem kexa_ind_ty (G: hyps): $ G ⇒ kc_ind_ty ∈ kexa $;
+theorem kexa_ind_ctor (G: hyps): $ G ⇒ kc_ind_ctor ∈ kexa $;
+theorem kexa_ind_rec (G: hyps): $ G ⇒ kc_ind_rec ∈ kexa $;
+theorem kexa_quot (G: hyps): $ G ⇒ kc_quot ∈ kexa $;
+theorem kexa_quot_mk (G: hyps): $ G ⇒ kc_quot_mk ∈ kexa $;
+theorem kexa_quot_lift (G: hyps): $ G ⇒ kc_quot_lift ∈ kexa $;
+theorem kexa_quot_ind (G: hyps): $ G ⇒ kc_quot_ind ∈ kexa $;
+
+theorem dnb_set (G: hyps) (M K S: class) (u v: set): $ G ⇒ isset (dnb u M K S v) $;
+theorem dnf_functional (G: hyps) (M: class) (u: set): $ G ⇒ functional (dnf u M) $;
+--| The recursion equation, at any node.
+theorem dnf_node (G: hyps) (M: class) (u k s: set):
+  $ G ⇒ k ∊ ω $ > $ G ⇒ s ∊ fseq (trees ω) $ >
+  $ G ⇒ fv (dnf u M) ⟨ k , s ⟩ = dnb u M k s (ccom (dnf u M) s) $;
+theorem dt_set (G: hyps) (M T W R: class) (u: set): $ G ⇒ isset (dt u M T W R) $;
+
+theorem dt_bvar (G: hyps) (M T: class) (u w r: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ dt u M ⟨ kc_bvar , scons T ∅ ⟩ w r = fv r (fv nvf T) $;
+theorem dt_srt (G: hyps) (M T: class) (u w r: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ dt u M ⟨ kc_srt , scons T ∅ ⟩ w r = fv uni (lv T w) $;
+theorem dt_app (G: hyps) (M T T2: class) (u w r: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ dt u M ⟨ kc_app , scons T (scons T2 ∅) ⟩ w r = ap (dt u M T w r) (dt u M T2 w r) $;
+theorem dt_lam {x: set} (G: hyps) (M T T2: class) (u w r: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ dt u M ⟨ kc_lam , scons T (scons T2 ∅) ⟩ w r = clam x (dt u M T w r) (dt u M T2 w (scons x r)) $;
+theorem dt_pi {x: set} (G: hyps) (M T T2: class) (u w r: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ dt u M ⟨ kc_pi , scons T (scons T2 ∅) ⟩ w r = cpi x (dt u M T w r) (dt u M T2 w (scons x r)) $;
+theorem dt_proj (G: hyps) (M T T2 T3: class) (u w r: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ T3 ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ dt u M ⟨ kc_proj , scons T (scons T2 (scons T3 ∅)) ⟩ w r = fv (dt u M T3 w r) (suc (fv nvf T2)) $;
+--| The hook's constructors: the same value at every valuation `r`.
+theorem dt_atom (G: hyps) (M K S: class) (u w r: set):
+  $ G ⇒ K ∈ kexa $ > $ G ⇒ S ∈ fseq (trees ω) $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ dt u M ⟨ K , S ⟩ w r = mclip u (ap (fv M ⟨ u , ⟨ K , ⟨ S , ccom (dnf u M) S ⟩ ⟩ ⟩) w) $;
+--| Every expression denotes an element of the universe (by induction on the
+--| trees of sort `expr`).
+theorem dt_in_u (G: hyps) (M: class) (u t w r: set):
+  $ G ⇒ uadm u $ > $ G ⇒ t ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ dt u M t w r ∈ u $;
+theorem den_in_u (G: hyps) (M: class) (e: expr) (u w r: set):
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ dt u M (enc_expr e) w r ∈ u $;
+
+-- --------------------------------------------------------------------------
+-- Satisfaction (C4)
+-- --------------------------------------------------------------------------
+
+--| One step of satisfaction: at `nil` the empty valuation; at `cons A G` the
+--| valuations `x :: q` with `q` satisfying `G` and `x` in the value of `A` at `q`.
+def stb (U M K S V: class) (.w .r .x .q .z: set): class =
+  $ {z | (K = kc_nil ∧ z ∊ clam w lvals (csn ∅)) ∨
+         (K = kc_cons ∧ z ∊ clam w lvals {r | r ∊ fseq U ∧
+            ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) w ∧ x ∊ dt U M (fv S ∅) w q ∧ r = scons x q)})} $;
+def stf (U M: class) (.k .s .v: set): class = $ trc ω (cgr3 k s v (stb U M k s v)) $;
+--| The valuations satisfying the context tree `T` at the level valuation `W`.
+def sat (U M T W: class): class = $ ap (fv (stf U M) T) W $;
+
+--| @congr
+theorem stb_congr (A B C D E F H I J K: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ stb A C E H J ≐ stb B D F I K $;
+--| @rewrite
+theorem sb_c_stb {x: set} (t: set x) (A B C D E: class x):
+  $ (⟦ x / t ⟧ (stb A B C D E)) ≐ stb (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
+--| @congr
+theorem stf_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ stf A C ≐ stf B D $;
+--| @rewrite
+theorem sb_c_stf {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (stf A B)) ≐ stf (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+--| @congr
+theorem sat_congr (A B C D E F H I: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ sat A C E H ≐ sat B D F I $;
+--| @rewrite
+theorem sb_c_sat {x: set} (t: set x) (A B C D: class x):
+  $ (⟦ x / t ⟧ (sat A B C D)) ≐ sat (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) $;
+theorem stb_set (G: hyps) (M K S: class) (u v: set): $ G ⇒ isset (stb u M K S v) $;
+theorem stf_functional (G: hyps) (M: class) (u: set): $ G ⇒ functional (stf u M) $;
+theorem stf_node (G: hyps) (M: class) (u k s: set):
+  $ G ⇒ k ∊ ω $ > $ G ⇒ s ∊ fseq (trees ω) $ >
+  $ G ⇒ fv (stf u M) ⟨ k , s ⟩ = stb u M k s (ccom (stf u M) s) $;
+theorem sat_fseq (G: hyps) (M T W: class) (u: set): $ G ⇒ sat u M T W ⊆ fseq u $;
+theorem sat_nil (G: hyps) (M: class) (u w: set): $ G ⇒ w ∊ lvals $ > $ G ⇒ sat u M ⟨ kc_nil , ∅ ⟩ w = csn ∅ $;
+theorem sat_cons_intro (G: hyps) (M T T2: class) (u w x q: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ q ∊ sat u M T2 w $ > $ G ⇒ x ∊ dt u M T w q $ > $ G ⇒ x ∊ u $ >
+  $ G ⇒ scons x q ∈ sat u M ⟨ kc_cons , scons T (scons T2 ∅) ⟩ w $;
+theorem sat_cons_elim (G: hyps) {x q: set} (M T T2: class) (u w r: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ r ∊ sat u M ⟨ kc_cons , scons T (scons T2 ∅) ⟩ w $ >
+  $ G ⇒ ∃ x ∃ q (q ∊ sat u M T2 w ∧ x ∊ dt u M T w q ∧ r = scons x q) $;
+
+-- --------------------------------------------------------------------------
+-- The judgments, for a hook `M` (C4), and the rules that follow directly
+-- --------------------------------------------------------------------------
+
+--| The spec's `deq` for the hook `M`: in every admissible universe, at every
+--| level valuation and every valuation satisfying the context, the two sides
+--| have the same value, an element of the type's.
+def mdeq (M: class) (G: ctx) (e e2 A: expr) (.u .w .r: set): wff =
+  $ _ ⇒ ∀ u (uadm u → ∀ w (w ∊ lvals → ∀ r (r ∊ sat u M (enc_ctx G) w →
+      dt u M (enc_expr e) w r = dt u M (enc_expr e2) w r ∧
+      dt u M (enc_expr e) w r ∈ dt u M (enc_expr A) w r))) $;
+--| The spec's `inh` for the hook `M`: the type's value is never empty.
+def minh (M: class) (G: ctx) (A: expr) (.u .w .r .x: set): wff =
+  $ _ ⇒ ∀ u (uadm u → ∀ w (w ∊ lvals → ∀ r (r ∊ sat u M (enc_ctx G) w →
+      ∃ x (x ∊ dt u M (enc_expr A) w r)))) $;
+
+theorem mdeq_i {u w r: set} (M: class) (G: ctx) (e e2 A: expr):
+  $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w ⇒ dt u M (enc_expr e) w r = dt u M (enc_expr e2) w r $ >
+  $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w ⇒ dt u M (enc_expr e) w r ∈ dt u M (enc_expr A) w r $ >
+  $ mdeq M G e e2 A $;
+theorem mdeq_e (H: hyps) (M: class) (G: ctx) (e e2 A: expr) (u w r: set):
+  $ mdeq M G e e2 A $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ r ∊ sat u M (enc_ctx G) w $ >
+  $ H ⇒ dt u M (enc_expr e) w r = dt u M (enc_expr e2) w r $;
+theorem mdeq_mem (H: hyps) (M: class) (G: ctx) (e e2 A: expr) (u w r: set):
+  $ mdeq M G e e2 A $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ r ∊ sat u M (enc_ctx G) w $ >
+  $ H ⇒ dt u M (enc_expr e) w r ∈ dt u M (enc_expr A) w r $;
+theorem minh_i {u w r x: set} (M: class) (G: ctx) (A: expr):
+  $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w ⇒ ∃ x (x ∊ dt u M (enc_expr A) w r) $ >
+  $ minh M G A $;
+theorem minh_e (H: hyps) {x: set} (M: class) (G: ctx) (A: expr) (u w r: set):
+  $ minh M G A $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ r ∊ sat u M (enc_ctx G) w $ >
+  $ H ⇒ ∃ x (x ∊ dt u M (enc_expr A) w r) $;
+
+--| The spec's `symm`, `trans`, `defeqDF`, `sortDF`, `lamDF`, `forallEDF`,
+--| `proofIrrel` and `inh_i`, for every hook.
+theorem msymm (M: class) (G: ctx) (e e2 A: expr): $ mdeq M G e e2 A $ > $ mdeq M G e2 e A $;
+theorem mtrans (M: class) (G: ctx) (e1 e2 e3 A: expr):
+  $ mdeq M G e1 e2 A $ > $ mdeq M G e2 e3 A $ > $ mdeq M G e1 e3 A $;
+theorem mdefeq (M: class) (G: ctx) (u: lvl) (A B e e2: expr):
+  $ mdeq M G A B (srt u) $ > $ mdeq M G e e2 A $ > $ mdeq M G e e2 B $;
+theorem msort (M: class) (G: ctx) (l l2: lvl):
+  $ leqv l l2 $ > $ mdeq M G (srt l) (srt l2) (srt (ls l)) $;
+theorem mlam (M: class) (G: ctx) (u: lvl) (A A2 b b2 B: expr):
+  $ mdeq M G A A2 (srt u) $ > $ mdeq M (cons A G) b b2 B $ > $ mdeq M G (lam A b) (lam A2 b2) (pi A B) $;
+theorem mpi (M: class) (G: ctx) (u v: lvl) (A A2 B B2: expr):
+  $ mdeq M G A A2 (srt u) $ > $ mdeq M (cons A G) B B2 (srt v) $ >
+  $ mdeq M G (pi A B) (pi A2 B2) (srt (limax u v)) $;
+theorem mpirr (M: class) (G: ctx) (p h h2: expr):
+  $ mdeq M G p p Prop $ > $ mdeq M G h h p $ > $ mdeq M G h2 h2 p $ > $ mdeq M G h h2 p $;
+theorem minh_ty (M: class) (G: ctx) (e A: expr): $ mdeq M G e e A $ > $ minh M G A $;
