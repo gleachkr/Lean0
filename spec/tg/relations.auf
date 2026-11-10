@@ -71,6 +71,23 @@ l14: $ G , k = ⟨ a , b ⟩ , k ∊ A × B , k = ⟨ u , v ⟩ , u ∊ A , v �
 l15: $ G , k = ⟨ a , b ⟩ , k ∊ A × B ⇒ a ∊ A ∧ b ∊ B $ by cxp_elim [l1, l14]
 l16: $ G ⇒ a ∊ A ∧ b ∊ B $ by wcel_elim [#1, l15]
 
+cxp_elim_pair_c
+---------------
+l1: $ G , k = C , v = D ⇒ k = C $ by ax
+l2: $ G , k = C , v = D ⇒ v = D $ by ax
+l3: $ G , k = C , v = D ⇒ ⟨ k , v ⟩ = ⟨ C , D ⟩ $ by opair_eq [l1, l2]
+l4: $ G , k = C , v = D ⇒ ⟨ C , D ⟩ = ⟨ k , v ⟩ $ by eq_sym [l3]
+l5: $ G , k = C , v = D ⇒ ⟨ C , D ⟩ ∈ A × B $ by weaken [#1]
+l6: $ G , k = C , v = D ⇒ ⟨ k , v ⟩ ∈ A × B $ by wcel_eq_l [l4, l5]
+l7: $ G , k = C , v = D ⇒ k ∊ A ∧ v ∊ B $ by cxp_elim_pair [l6]
+l8: $ G , k = C , v = D ⇒ k ∊ A $ by and_elim_l [l7]
+l9: $ G , k = C , v = D ⇒ v ∊ B $ by and_elim_r [l7]
+l10: $ G , k = C , v = D ⇒ C ∈ A $ by wcel_intro [l1, l8]
+l11: $ G , k = C , v = D ⇒ D ∈ B $ by wcel_intro [l2, l9]
+l12: $ G , k = C , v = D ⇒ C ∈ A ∧ D ∈ B $ by and_intro [l10, l11]
+l13: $ G , k = C ⇒ C ∈ A ∧ D ∈ B $ by isset_elim [#3, l12]
+l14: $ G ⇒ C ∈ A ∧ D ∈ B $ by isset_elim [#2, l13]
+
 cxp_mono
 --------
 l1: $ G , z ∊ A × C ⇒ z ∊ A × C $ by ax
@@ -604,6 +621,32 @@ b3: $ G , ⟨ x , y ⟩ ∈ ccom F R , ⟨ x , z ⟩ ∈ ccom F R ⇒ ⟨ x , y 
 b4: $ G , ⟨ x , y ⟩ ∈ ccom F R , ⟨ x , z ⟩ ∈ ccom F R ⇒ y = z $ by ccom_elim [b3, b2]
 b5: $ G ⇒ functional (ccom F R) $ by functional_intro [b4]
 
+ccom_set
+--------
+c1: $ G , w ∊ ccom F S ⇒ w ∊ ccom F S $ by ax
+c2: $ G , w ∊ ccom F S ⇒ ∃ a ∃ b (w = ⟨ a , b ⟩ ∧ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F)) $ by cab_elim [c1]
+c3: $ G , w = ⟨ a , b ⟩ ∧ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F) ⇒ w = ⟨ a , b ⟩ ∧ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F) $ by ax
+c4: $ G , w = ⟨ a , b ⟩ ∧ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F) ⇒ w = ⟨ a , b ⟩ $ by and_elim_l [c3]
+c5: $ G , w = ⟨ a , b ⟩ ∧ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F) ⇒ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F) $ by and_elim_r [c3]
+c6: $ G , w = ⟨ a , b ⟩ ∧ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F) , ⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F ⇒ ⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F $ by ax
+c7: $ G , w = ⟨ a , b ⟩ ∧ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F) , ⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F ⇒ ⟨ a , c ⟩ ∈ S $ by and_elim_l [c6]
+c8: $ G , w = ⟨ a , b ⟩ ∧ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F) , ⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F ⇒ ⟨ c , b ⟩ ∈ F $ by and_elim_r [c6]
+c9: $ G , w = ⟨ a , b ⟩ ∧ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F) , ⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F ⇒ a ∊ cdm S $ by cdm_intro [c7]
+c10: $ G , w = ⟨ a , b ⟩ ∧ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F) , ⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F ⇒ c ∊ crn S $ by crn_intro [c7]
+c11: $ G , w = ⟨ a , b ⟩ ∧ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F) , ⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F ⇒ b ∊ img F (crn S) $ by img_intro [c10, c8]
+c12: $ G , w = ⟨ a , b ⟩ ∧ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F) , ⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F ⇒ w = ⟨ a , b ⟩ $ by weaken [c4]
+c13: $ G , w = ⟨ a , b ⟩ ∧ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F) , ⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F ⇒ w ∊ cdm S × img F (crn S) $ by cxp_intro_eq [c12, c9, c11]
+c14: $ G , w = ⟨ a , b ⟩ ∧ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F) ⇒ w ∊ cdm S × img F (crn S) $ by ex_elim [c5, c13]
+c15: $ G , ∃ b (w = ⟨ a , b ⟩ ∧ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F)) ⇒ ∃ b (w = ⟨ a , b ⟩ ∧ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F)) $ by ax
+c16: $ G , ∃ b (w = ⟨ a , b ⟩ ∧ ∃ c (⟨ a , c ⟩ ∈ S ∧ ⟨ c , b ⟩ ∈ F)) ⇒ w ∊ cdm S × img F (crn S) $ by ex_elim [c15, c14]
+c17: $ G , w ∊ ccom F S ⇒ w ∊ cdm S × img F (crn S) $ by ex_elim [c2, c16]
+c18: $ G ⇒ ccom F S ⊆ cdm S × img F (crn S) $ by subset_intro [c17]
+c19: $ G ⇒ isset (cdm S) $ by cdm_set [#2]
+c20: $ G ⇒ isset (crn S) $ by crn_set [#2]
+c21: $ G ⇒ isset (img F (crn S)) $ by img_set [#1, c20]
+c22: $ G ⇒ isset (cdm S × img F (crn S)) $ by cxp_set [c19, c21]
+c23: $ G ⇒ isset (ccom F S) $ by subset_isset [c22, c18]
+
 ccom_congr
 ----------
 l0: $ ⟨ x , y ⟩ ≐ ⟨ x , y ⟩ $ by ceqt_refl
@@ -972,6 +1015,42 @@ l22: $ G , ¬ (∃ y (⟨ a , y ⟩ ∈ F)) ⇒ isset ∅ $ by ax_empty
 l23: $ G , ¬ (∃ y (⟨ a , y ⟩ ∈ F)) ⇒ isset (ap F a) $ by isset_eq [l21, l22]
 l24: $ G ⇒ isset (ap F a) $ by or_elim [l1, l14, l23]
 
+ap_set_c
+--------
+l1: $ G , y ∊ ap F A ⇒ y ∊ ap F A $ by ax
+l2: $ G , y ∊ ap F A ⇒ ⟨ A , y ⟩ ∈ F $ by ap_elim [l1]
+l3: $ G , y ∊ ap F A ⇒ isset (cpr A y) $ by cpr_isset
+l4: $ G , y ∊ ap F A ⇒ cpr A y ∈ ⟨ A , y ⟩ $ by cpr_intro_r_c [l3]
+l5: $ G , y ∊ ap F A , x = ⟨ A , y ⟩ , x ∊ F ⇒ x = ⟨ A , y ⟩ $ by ax
+l6: $ G , y ∊ ap F A , x = ⟨ A , y ⟩ , x ∊ F ⇒ ⟨ A , y ⟩ = x $ by eq_sym [l5]
+l7: $ G , y ∊ ap F A , x = ⟨ A , y ⟩ , x ∊ F ⇒ cpr A y ∈ ⟨ A , y ⟩ $ by weaken [l4]
+l8: $ G , y ∊ ap F A , x = ⟨ A , y ⟩ , x ∊ F ⇒ cpr A y ∈ x $ by wcel_eq_r [l6, l7]
+l9: $ G , y ∊ ap F A , x = ⟨ A , y ⟩ , x ∊ F , c = cpr A y , c ∊ x ⇒ c ∊ x $ by ax
+l10: $ G , y ∊ ap F A , x = ⟨ A , y ⟩ , x ∊ F , c = cpr A y , c ∊ x ⇒ x ∊ F $ by ax
+l11: $ G , y ∊ ap F A , x = ⟨ A , y ⟩ , x ∊ F , c = cpr A y , c ∊ x ⇒ c ∊ ⋃ F $ by cuni_intro [l9, l10]
+l12: $ G , y ∊ ap F A , x = ⟨ A , y ⟩ , x ∊ F , c = cpr A y , c ∊ x ⇒ y = y $ by eq_refl
+l13: $ G , y ∊ ap F A , x = ⟨ A , y ⟩ , x ∊ F , c = cpr A y , c ∊ x ⇒ y = A ∨ y = y $ by or_intro_r [l12]
+l14: $ G , y ∊ ap F A , x = ⟨ A , y ⟩ , x ∊ F , c = cpr A y , c ∊ x ⇒ y ∊ cpr A y $ by cpr_intro [l13]
+l15: $ G , y ∊ ap F A , x = ⟨ A , y ⟩ , x ∊ F , c = cpr A y , c ∊ x ⇒ c = cpr A y $ by ax
+l16: $ G , y ∊ ap F A , x = ⟨ A , y ⟩ , x ∊ F , c = cpr A y , c ∊ x ⇒ cpr A y = c $ by eq_sym [l15]
+l17: $ G , y ∊ ap F A , x = ⟨ A , y ⟩ , x ∊ F , c = cpr A y , c ∊ x ⇒ y ∊ c $ by welc_eq [l16, l14]
+l18: $ G , y ∊ ap F A , x = ⟨ A , y ⟩ , x ∊ F , c = cpr A y , c ∊ x ⇒ y ∊ ⋃ ⋃ F $ by cuni_intro [l17, l11]
+l19: $ G , y ∊ ap F A , x = ⟨ A , y ⟩ , x ∊ F ⇒ y ∊ ⋃ ⋃ F $ by wcel_elim [l8, l18]
+l20: $ G , y ∊ ap F A ⇒ y ∊ ⋃ ⋃ F $ by wcel_elim [l2, l19]
+l21: $ G ⇒ ap F A ⊆ ⋃ ⋃ F $ by subset_intro [l20]
+l22: $ G ⇒ isset (⋃ F) $ by cuni_set [#1]
+l23: $ G ⇒ isset (⋃ ⋃ F) $ by cuni_set [l22]
+l24: $ G ⇒ isset (ap F A) $ by subset_isset [l23, l21]
+
+ap_empty
+--------
+l1: $ G , y ∊ ap ∅ A ⇒ y ∊ ap ∅ A $ by ax
+l2: $ G , y ∊ ap ∅ A ⇒ ⟨ A , y ⟩ ∈ ∅ $ by ap_elim [l1]
+l3: $ G , y ∊ ap ∅ A , c = ⟨ A , y ⟩ , c ∊ ∅ ⇒ c ∊ ∅ $ by ax
+l4: $ G , y ∊ ap ∅ A , c = ⟨ A , y ⟩ , c ∊ ∅ ⇒ ⊥ $ by empty_elim [l3]
+l5: $ G , y ∊ ap ∅ A ⇒ ⊥ $ by wcel_elim [l2, l4]
+l6: $ G ⇒ ap ∅ A = ∅ $ by empty_eq_intro [l5]
+
 ap_mono
 -------
 l1: $ G , z ∊ ap F A ⇒ z ∊ ap F A $ by ax
@@ -1239,6 +1318,37 @@ l22: $ G , w ∊ clam x C B ⇒ w ∊ clam x C B $ by ax
 l23: $ G , w ∊ clam x C B ⇒ w ∊ clam x A B $ by clam_elim_mem [l22, l21]
 l24: $ G ⇒ clam x A B = clam x C B $ by eq_intro [l11, l23]
 
+clam_eq_body
+------------
+l1: $ G , w ∊ clam x A B ⇒ w ∊ clam x A B $ by ax
+l2: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ ∀ x (x ∊ A → B = C) $ by weaken [#1]
+l3: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ u ∊ A → (⟦ x / u ⟧ B) = (⟦ x / u ⟧ C) $ by all_elim [l2]
+l4: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ u ∊ A $ by ax
+l5: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ (⟦ x / u ⟧ B) = (⟦ x / u ⟧ C) $ by imp_elim [l3, l4]
+l6: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ v ∊ (⟦ x / u ⟧ B) $ by ax
+l7: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ v ∊ (⟦ x / u ⟧ C) $ by welc_eq [l5, l6]
+l8: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ ⟨ u , v ⟩ ∈ clam x A C $ by clam_intro [l4, l7]
+l9: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ w = ⟨ u , v ⟩ $ by ax
+l10: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ ⟨ u , v ⟩ = w $ by eq_sym [l9]
+l11: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ w ∈ clam x A C $ by wcel_eq_l [l10, l8]
+l12: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ w ∊ clam x A C $ by wcel_welc [l11]
+l13: $ G , w ∊ clam x A B ⇒ w ∊ clam x A C $ by clam_elim_mem [l1, l12]
+m1: $ G , w ∊ clam x A C ⇒ w ∊ clam x A C $ by ax
+m2: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ C) ⇒ ∀ x (x ∊ A → B = C) $ by weaken [#1]
+m3: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ C) ⇒ u ∊ A → (⟦ x / u ⟧ B) = (⟦ x / u ⟧ C) $ by all_elim [m2]
+m4: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ C) ⇒ u ∊ A $ by ax
+m5: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ C) ⇒ (⟦ x / u ⟧ B) = (⟦ x / u ⟧ C) $ by imp_elim [m3, m4]
+m5b: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ C) ⇒ (⟦ x / u ⟧ C) = (⟦ x / u ⟧ B) $ by eq_sym [m5]
+m6: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ C) ⇒ v ∊ (⟦ x / u ⟧ C) $ by ax
+m7: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ C) ⇒ v ∊ (⟦ x / u ⟧ B) $ by welc_eq [m5b, m6]
+m8: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ C) ⇒ ⟨ u , v ⟩ ∈ clam x A B $ by clam_intro [m4, m7]
+m9: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ C) ⇒ w = ⟨ u , v ⟩ $ by ax
+m10: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ C) ⇒ ⟨ u , v ⟩ = w $ by eq_sym [m9]
+m11: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ C) ⇒ w ∈ clam x A B $ by wcel_eq_l [m10, m8]
+m12: $ G , w = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ C) ⇒ w ∊ clam x A B $ by wcel_welc [m11]
+m13: $ G , w ∊ clam x A C ⇒ w ∊ clam x A B $ by clam_elim_mem [m1, m12]
+m14: $ G ⇒ clam x A B = clam x A C $ by eq_intro [l13, m13]
+
 sb_c_clam
 --------
 l1: $ (⟦ y / t ⟧ {z | ∃ x ∃ w (z = ⟨ x , w ⟩ ∧ x ∊ A ∧ w ∊ B)}) ≐ {z | ∃ x ∃ w (z = ⟨ x , w ⟩ ∧ x ∊ (⟦ y / t ⟧ A) ∧ w ∊ (⟦ y / t ⟧ B))} $ by ceqt_refl
@@ -1414,6 +1524,36 @@ l8: $ (x ∊ A → ap g x ∈ B) ⟺ (x ∊ C → ap g x ∈ D) $ by im_congr [l
 l9: $ (∀ x (x ∊ A → ap g x ∈ B)) ⟺ (∀ x (x ∊ C → ap g x ∈ D)) $ by all_congr [l8]
 l10: $ (g ⊆ clam x A (⋃ B) ∧ ∀ x (x ∊ A → ap g x ∈ B)) ⟺ (g ⊆ clam x C (⋃ D) ∧ ∀ x (x ∊ C → ap g x ∈ D)) $ by and_congr [l3, l9]
 l11: $ {g | g ⊆ clam x A (⋃ B) ∧ ∀ x (x ∊ A → ap g x ∈ B)} ≐ {g | g ⊆ clam x C (⋃ D) ∧ ∀ x (x ∊ C → ap g x ∈ D)} $ by cab_congr [l10]
+
+lemma q0_cpi_dom_sub {x: set} (G: hyps x) (A C: class) (B: class x) (f: set):
+  $ G ⇒ A = C $ > $ G ⇒ f ∊ cpi x A B $ > $ G ⇒ f ∊ cpi x C B $
+----
+l1: $ G , u ∊ C ⇒ u ∊ C $ by ax
+l2: $ G , u ∊ C ⇒ A = C $ by weaken [#1]
+l3: $ G , u ∊ C ⇒ C = A $ by eq_sym [l2]
+l4: $ G , u ∊ C ⇒ u ∊ A $ by welc_eq [l3, l1]
+l5: $ G , u ∊ C ⇒ f ∊ cpi x A B $ by weaken [#2]
+l6: $ G , u ∊ C ⇒ ap f u ∈ (⟦ x / u ⟧ B) $ by cpi_elim_ap [l5, l4]
+l7: $ G ⇒ u ∊ C → ap f u ∈ (⟦ x / u ⟧ B) $ by imp_intro [l6]
+l8: $ G ⇒ ∀ u (u ∊ C → ap f u ∈ (⟦ x / u ⟧ B)) $ by all_intro [l7]
+l9: $ ∀ x (x ∊ C → ap f x ∈ B) ⟺ ∀ u (u ∊ C → ap f u ∈ (⟦ x / u ⟧ B)) $ by all_alpha
+l10: $ G ⇒ ∀ x (x ∊ C → ap f x ∈ B) ↔ ∀ u (u ∊ C → ap f u ∈ (⟦ x / u ⟧ B)) $ by weaken [l9]
+l11: $ G ⇒ ∀ x (x ∊ C → ap f x ∈ B) $ by bi_elim_r [l10, l8]
+l12: $ G ⇒ f ⊆ clam x A (⋃ B) $ by cpi_elim_sub [#2]
+l13: $ G ⇒ clam x A (⋃ B) = clam x C (⋃ B) $ by clam_eq_dom [#1]
+l14: $ G ⇒ f ⊆ clam x C (⋃ B) $ by subset_eq_r [l13, l12]
+l15: $ G ⇒ f ∊ cpi x C B $ by cpi_intro [l14, l11]
+
+cpi_eq_dom
+----------
+l1: $ G , f ∊ cpi x A B ⇒ A = C $ by weaken [#1]
+l2: $ G , f ∊ cpi x A B ⇒ f ∊ cpi x A B $ by ax
+l3: $ G , f ∊ cpi x A B ⇒ f ∊ cpi x C B $ by q0_cpi_dom_sub [l1, l2]
+l4: $ G ⇒ C = A $ by eq_sym [#1]
+l5: $ G , f ∊ cpi x C B ⇒ C = A $ by weaken [l4]
+l6: $ G , f ∊ cpi x C B ⇒ f ∊ cpi x C B $ by ax
+l7: $ G , f ∊ cpi x C B ⇒ f ∊ cpi x A B $ by q0_cpi_dom_sub [l5, l6]
+l8: $ G ⇒ cpi x A B = cpi x C B $ by eq_intro [l3, l7]
 
 sb_c_cpi
 -------

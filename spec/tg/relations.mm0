@@ -38,6 +38,9 @@ theorem cxp_elim {x y: set} (G: hyps x y) (H: hyps) (A B: class) (c: set) (d: fm
   $ G ⇒ c ∊ A × B $ > $ H , c = ⟨ x , y ⟩ , x ∊ A , y ∊ B ⇒ d $ > $ G , H ⇒ d $;
 theorem cxp_elim_pair (G: hyps) (A B: class) (a b: set):
   $ G ⇒ ⟨ a , b ⟩ ∈ A × B $ > $ G ⇒ a ∊ A ∧ b ∊ B $;
+--| Class form of `cxp_elim_pair`.
+theorem cxp_elim_pair_c (G: hyps) (A B C D: class):
+  $ G ⇒ ⟨ C , D ⟩ ∈ A × B $ > $ G ⇒ isset C $ > $ G ⇒ isset D $ > $ G ⇒ C ∈ A ∧ D ∈ B $;
 theorem cxp_mono (G: hyps) (A B C D: class):
   $ G ⇒ A ⊆ B $ > $ G ⇒ C ⊆ D $ > $ G ⇒ A × C ⊆ B × D $;
 --| `A × B ⊆ 𝒫 𝒫 (A ∪ B)`.
@@ -160,6 +163,8 @@ theorem ccom_rel (G: hyps) (S R: class): $ G ⇒ rel (ccom S R) $;
 --| The composite of two functional classes is functional.
 theorem ccom_functional (G: hyps) (F R: class):
   $ G ⇒ functional F $ > $ G ⇒ functional R $ > $ G ⇒ functional (ccom F R) $;
+--| A functional class after a set is a set.
+theorem ccom_set (G: hyps) (F S: class): $ G ⇒ functional F $ > $ G ⇒ isset S $ > $ G ⇒ isset (ccom F S) $;
 --| @congr
 theorem ccom_congr (R S T U: class):
   $ R ≐ S $ > $ T ≐ U $ > $ ccom R T ≐ ccom S U $;
@@ -251,6 +256,10 @@ theorem ap_set (G: hyps) (F: class) (a: set):
 --| For a functional class the values at a set form a set (empty or a singleton).
 theorem ap_functional_set (G: hyps) (F: class) (a: set):
   $ G ⇒ functional F $ > $ G ⇒ isset (ap F a) $;
+--| Class form of `ap_set`.
+theorem ap_set_c (G: hyps) (F A: class): $ G ⇒ isset F $ > $ G ⇒ isset (ap F A) $;
+--| The empty set has no values.
+theorem ap_empty (G: hyps) (A: class): $ G ⇒ ap ∅ A = ∅ $;
 theorem ap_mono (G: hyps) (F H A: class):
   $ G ⇒ F ⊆ H $ > $ G ⇒ ap F A ⊆ ap H A $;
 --| @congr
@@ -285,6 +294,9 @@ theorem clam_congr {x: set} (A C: class) (B D: class x):
   $ A ≐ C $ > $ B ≐ D $ > $ clam x A B ≐ clam x C D $;
 theorem clam_eq_dom {x: set} (G: hyps x) (A C: class) (B: class x):
   $ G ⇒ A = C $ > $ G ⇒ clam x A B = clam x C B $;
+--| Traces with equal values at every argument are equal.
+theorem clam_eq_body {x: set} (G: hyps x) (A: class) (B C: class x):
+  $ G ⇒ ∀ x (x ∊ A → B = C) $ > $ G ⇒ clam x A B = clam x A C $;
 --| @rewrite
 theorem sb_c_clam {x y: set} (t: set y) (A: class y) (B: class x y):
   $ (⟦ y / t ⟧ (clam x A B)) ≐ clam x (⟦ y / t ⟧ A) (⟦ y / t ⟧ B) $;
@@ -315,6 +327,8 @@ theorem cpi_set {x: set} (G: hyps x) (A: class) (B: class x):
 --| @congr
 theorem cpi_congr {x: set} (A C: class) (B D: class x):
   $ A ≐ C $ > $ B ≐ D $ > $ cpi x A B ≐ cpi x C D $;
+theorem cpi_eq_dom {x: set} (G: hyps x) (A C: class) (B: class x):
+  $ G ⇒ A = C $ > $ G ⇒ cpi x A B = cpi x C B $;
 --| @rewrite
 theorem sb_c_cpi {x y: set} (t: set y) (A: class y) (B: class x y):
   $ (⟦ y / t ⟧ (cpi x A B)) ≐ cpi x (⟦ y / t ⟧ A) (⟦ y / t ⟧ B) $;

@@ -292,6 +292,15 @@ l9: $ G , ⟨ v , u ⟩ ∈ s ⇒ u ∊ A $ by wcel_welc [l8]
 l10: $ G , u ∊ crn s ⇒ u ∊ A $ by crn_elim [l1, l9]
 l11: $ G ⇒ crn s ⊆ A $ by subset_intro [l10]
 
+fseq_crn_c
+----------
+l1: $ G , j = S , j ∊ fseq A ⇒ j ∊ fseq A $ by ax
+l2: $ G , j = S , j ∊ fseq A ⇒ crn j ⊆ A $ by fseq_crn [l1]
+l3: $ G , j = S , j ∊ fseq A ⇒ j = S $ by ax
+l4: $ G , j = S , j ∊ fseq A ⇒ crn j = crn S $ by crn_eq [l3]
+l5: $ G , j = S , j ∊ fseq A ⇒ crn S ⊆ A $ by subset_eq_l [l4, l2]
+l6: $ G ⇒ crn S ⊆ A $ by wcel_elim [#1, l5]
+
 fseq_mono
 ---------
 l1: $ G , u ∊ fseq A ⇒ u ∊ fseq A $ by ax
@@ -746,6 +755,68 @@ n7: $ G , y ∊ crn (scons a s) ⇒ y ∊ A $ by crn_elim [n6, n5]
 n8: $ G ⇒ crn (scons a s) ⊆ A $ by subset_intro [n7]
 n9: $ G ⇒ scons a s ∈ fseq A $ by s2_fseq_c [l3, l4, l6, n8]
 
+scons_fseq_c
+------------
+l1: $ G , x = B , x ∊ A , y = C , y ∊ fseq A ⇒ x ∊ A $ by ax
+l2: $ G , x = B , x ∊ A , y = C , y ∊ fseq A ⇒ y ∊ fseq A $ by ax
+l3: $ G , x = B , x ∊ A , y = C , y ∊ fseq A ⇒ scons x y ∈ fseq A $ by scons_fseq [l1, l2]
+l4: $ G , x = B , x ∊ A , y = C , y ∊ fseq A ⇒ x = B $ by ax
+l5: $ G , x = B , x ∊ A , y = C , y ∊ fseq A ⇒ y = C $ by ax
+l6: $ G , x = B , x ∊ A , y = C , y ∊ fseq A ⇒ scons x y = scons B C $ by scons_eq [l4, l5]
+l7: $ G , x = B , x ∊ A , y = C , y ∊ fseq A ⇒ scons B C ∈ fseq A $ by wcel_eq_l [l6, l3]
+l8: $ G , x = B , x ∊ A ⇒ scons B C ∈ fseq A $ by wcel_elim [#2, l7]
+l9: $ G ⇒ scons B C ∈ fseq A $ by wcel_elim [#1, l8]
+
+scons_set
+---------
+a1: $ G , w ∊ scons A S ⇒ w ∊ scons A S $ by ax
+a2: $ G , w ∊ scons A S ⇒ w ∊ csn ⟨ ∅ , A ⟩ ∨ w ∊ {z | ∃ i ∃ y (z = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S)} $ by cun_elim [a1]
+a3: $ G , w ∊ scons A S , w ∊ csn ⟨ ∅ , A ⟩ ⇒ w ∊ csn ⟨ ∅ , A ⟩ $ by ax
+a4: $ G , w ∊ scons A S , w ∊ csn ⟨ ∅ , A ⟩ ⇒ w ∊ csn ⟨ ∅ , A ⟩ ∪ (𝒫 (⋃ (cdm S) ∪ cdm S) × crn S) $ by cun_intro_l [a3]
+b1: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S ⇒ w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S $ by ax
+b2: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S ⇒ w = ⟨ suc i , y ⟩ $ by and_elim_l [b1]
+b3: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S ⇒ ⟨ i , y ⟩ ∈ S $ by and_elim_r [b1]
+b4: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S ⇒ i ∊ cdm S $ by cdm_intro [b3]
+b5: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S ⇒ y ∊ crn S $ by crn_intro [b3]
+c1: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S , c ∊ suc i ⇒ c ∊ suc i $ by ax
+c2: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S , c ∊ suc i ⇒ c ∊ i ∨ c = i $ by suc_elim [c1]
+c3: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S , c ∊ suc i , c ∊ i ⇒ c ∊ i $ by ax
+c4: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S , c ∊ suc i , c ∊ i ⇒ i ∊ cdm S $ by weaken [b4]
+c5: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S , c ∊ suc i , c ∊ i ⇒ c ∊ ⋃ (cdm S) $ by cuni_intro [c3, c4]
+c6: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S , c ∊ suc i , c ∊ i ⇒ c ∊ ⋃ (cdm S) ∪ cdm S $ by cun_intro_l [c5]
+c7: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S , c ∊ suc i , c = i ⇒ c = i $ by ax
+c8: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S , c ∊ suc i , c = i ⇒ i = c $ by eq_sym [c7]
+c9: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S , c ∊ suc i , c = i ⇒ i ∊ cdm S $ by weaken [b4]
+c10: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S , c ∊ suc i , c = i ⇒ c ∊ cdm S $ by welc_eq_set [c8, c9]
+c11: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S , c ∊ suc i , c = i ⇒ c ∊ ⋃ (cdm S) ∪ cdm S $ by cun_intro_r [c10]
+c12: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S , c ∊ suc i ⇒ c ∊ ⋃ (cdm S) ∪ cdm S $ by or_elim [c2, c6, c11]
+c13: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S ⇒ suc i ⊆ ⋃ (cdm S) ∪ cdm S $ by subset_intro [c12]
+c14: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S ⇒ isset i $ by isset_var
+c15: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S ⇒ isset (suc i) $ by suc_set [c14]
+c16: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S ⇒ suc i ∈ 𝒫 (⋃ (cdm S) ∪ cdm S) $ by wcel_cpw [c15, c13]
+c17: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S ⇒ y ∈ crn S $ by welc_wcel [b5]
+c18: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S ⇒ ⟨ suc i , y ⟩ ∈ 𝒫 (⋃ (cdm S) ∪ cdm S) × crn S $ by cxp_intro_c [c16, c17]
+c19: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S ⇒ ⟨ suc i , y ⟩ = w $ by eq_sym [b2]
+c20: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S ⇒ w ∈ 𝒫 (⋃ (cdm S) ∪ cdm S) × crn S $ by wcel_eq_l [c19, c18]
+c21: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S ⇒ w ∊ 𝒫 (⋃ (cdm S) ∪ cdm S) × crn S $ by wcel_welc [c20]
+c22: $ G , w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S ⇒ w ∊ csn ⟨ ∅ , A ⟩ ∪ (𝒫 (⋃ (cdm S) ∪ cdm S) × crn S) $ by cun_intro_r [c21]
+d1: $ G , ∃ y (w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S) ⇒ ∃ y (w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S) $ by ax
+d2: $ G , ∃ y (w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S) ⇒ w ∊ csn ⟨ ∅ , A ⟩ ∪ (𝒫 (⋃ (cdm S) ∪ cdm S) × crn S) $ by ex_elim [d1, c22]
+d3: $ G , w ∊ scons A S , w ∊ {z | ∃ i ∃ y (z = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S)} ⇒ w ∊ {z | ∃ i ∃ y (z = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S)} $ by ax
+d4: $ G , w ∊ scons A S , w ∊ {z | ∃ i ∃ y (z = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S)} ⇒ ∃ i ∃ y (w = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S) $ by cab_elim [d3]
+d5: $ G , w ∊ scons A S , w ∊ {z | ∃ i ∃ y (z = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S)} ⇒ w ∊ csn ⟨ ∅ , A ⟩ ∪ (𝒫 (⋃ (cdm S) ∪ cdm S) × crn S) $ by ex_elim [d4, d2]
+d6: $ G , w ∊ scons A S ⇒ w ∊ csn ⟨ ∅ , A ⟩ ∪ (𝒫 (⋃ (cdm S) ∪ cdm S) × crn S) $ by or_elim [a2, a4, d5]
+d7: $ G ⇒ scons A S ⊆ csn ⟨ ∅ , A ⟩ ∪ (𝒫 (⋃ (cdm S) ∪ cdm S) × crn S) $ by subset_intro [d6]
+e1: $ G ⇒ isset (csn ⟨ ∅ , A ⟩) $ by cpr_isset
+e2: $ G ⇒ isset (cdm S) $ by cdm_set [#1]
+e3: $ G ⇒ isset (⋃ (cdm S)) $ by cuni_set [e2]
+e4: $ G ⇒ isset (⋃ (cdm S) ∪ cdm S) $ by cun_set [e3, e2]
+e5: $ G ⇒ isset (𝒫 (⋃ (cdm S) ∪ cdm S)) $ by cpw_set [e4]
+e6: $ G ⇒ isset (crn S) $ by crn_set [#1]
+e7: $ G ⇒ isset (𝒫 (⋃ (cdm S) ∪ cdm S) × crn S) $ by cxp_set [e5, e6]
+e8: $ G ⇒ isset (csn ⟨ ∅ , A ⟩ ∪ (𝒫 (⋃ (cdm S) ∪ cdm S) × crn S)) $ by cun_set [e1, e7]
+e9: $ G ⇒ isset (scons A S) $ by subset_isset [e8, d7]
+
 scons_len
 ---------
 l1: $ G ⇒ cdm s ∈ ω $ by fseq_len [#1]
@@ -795,6 +866,20 @@ l3: $ G ⇒ ⋃ (ap (scons a s) ∅) = ⋃ (csn a) $ by cuni_eq [l2]
 l4: $ G ⇒ ⋃ (csn a) = a $ by cuni_csn [l1]
 l5: $ G ⇒ fv (scons a s) ∅ = a $ by eq_trans [l3, l4]
 
+scons_fv_zero_c
+---------------
+l1: $ G , a = A , q = S ⇒ fv (scons a q) ∅ = a $ by scons_fv_zero
+l2: $ G , a = A , q = S ⇒ a = A $ by ax
+l3: $ G , a = A , q = S ⇒ q = S $ by ax
+l4: $ G , a = A , q = S ⇒ scons a q = scons A S $ by scons_eq [l2, l3]
+l5: $ G , a = A , q = S ⇒ ∅ = ∅ $ by eq_refl
+l6: $ G , a = A , q = S ⇒ fv (scons a q) ∅ = fv (scons A S) ∅ $ by fv_eq [l4, l5]
+l7: $ G , a = A , q = S ⇒ fv (scons A S) ∅ = fv (scons a q) ∅ $ by eq_sym [l6]
+l8: $ G , a = A , q = S ⇒ fv (scons A S) ∅ = a $ by eq_trans [l7, l1]
+l9: $ G , a = A , q = S ⇒ fv (scons A S) ∅ = A $ by eq_trans [l8, l2]
+l10: $ G , a = A ⇒ fv (scons A S) ∅ = A $ by isset_elim [#2, l9]
+l11: $ G ⇒ fv (scons A S) ∅ = A $ by isset_elim [#1, l10]
+
 scons_fv_suc
 ------------
 m1: $ G , y ∊ ap (scons a s) (suc i) ⇒ y ∊ ap (scons a s) (suc i) $ by ax
@@ -825,6 +910,24 @@ q3: $ G , y ∊ ap s i ⇒ ⟨ suc i , y ⟩ ∈ scons a s $ by s2_scons_suc [q2
 q4: $ G , y ∊ ap s i ⇒ y ∊ ap (scons a s) (suc i) $ by ap_intro [q3]
 r1: $ G ⇒ ap (scons a s) (suc i) = ap s i $ by eq_intro [m7, q4]
 r2: $ G ⇒ fv (scons a s) (suc i) = fv s i $ by cuni_eq [r1]
+
+scons_fv_suc_c
+--------------
+l1: $ G , a = A , v = S , i = I ⇒ fv (scons a v) (suc i) = fv v i $ by scons_fv_suc
+l2: $ G , a = A , v = S , i = I ⇒ a = A $ by ax
+l3: $ G , a = A , v = S , i = I ⇒ v = S $ by ax
+l4: $ G , a = A , v = S , i = I ⇒ i = I $ by ax
+l5: $ G , a = A , v = S , i = I ⇒ scons a v = scons A S $ by scons_eq [l2, l3]
+l6: $ G , a = A , v = S , i = I ⇒ scons A S = scons a v $ by eq_sym [l5]
+l7: $ G , a = A , v = S , i = I ⇒ suc i = suc I $ by suc_eq [l4]
+l8: $ G , a = A , v = S , i = I ⇒ suc I = suc i $ by eq_sym [l7]
+l9: $ G , a = A , v = S , i = I ⇒ fv (scons A S) (suc I) = fv (scons a v) (suc i) $ by fv_eq [l6, l8]
+l10: $ G , a = A , v = S , i = I ⇒ fv v i = fv S I $ by fv_eq [l3, l4]
+l11: $ G , a = A , v = S , i = I ⇒ fv (scons A S) (suc I) = fv v i $ by eq_trans [l9, l1]
+l12: $ G , a = A , v = S , i = I ⇒ fv (scons A S) (suc I) = fv S I $ by eq_trans [l11, l10]
+l13: $ G , a = A , v = S ⇒ fv (scons A S) (suc I) = fv S I $ by isset_elim [#3, l12]
+l14: $ G , a = A ⇒ fv (scons A S) (suc I) = fv S I $ by isset_elim [#2, l13]
+l15: $ G ⇒ fv (scons A S) (suc I) = fv S I $ by isset_elim [#1, l14]
 
 lemma s2_scons_inj_half (G: hyps) (a b s t x y: set):
   $ G ⇒ scons a s = scons b t $ > $ G ⇒ ⟨ x , y ⟩ ∈ s $ > $ G ⇒ ⟨ x , y ⟩ ∈ t $
@@ -2443,6 +2546,25 @@ g4: $ G , ⟨ x , y ⟩ ∈ scons (fv F a) (ccom F s) , ∃ j (x = suc j ∧ ⟨
 g5: $ G , ⟨ x , y ⟩ ∈ scons (fv F a) (ccom F s) , ∃ j (x = suc j ∧ ⟨ j , y ⟩ ∈ ccom F s) ⇒ ⟨ x , y ⟩ ∈ ccom F (scons a s) $ by ex_elim [g4, g3]
 d3: $ G , ⟨ x , y ⟩ ∈ scons (fv F a) (ccom F s) ⇒ ⟨ x , y ⟩ ∈ ccom F (scons a s) $ by or_elim [d2, e12, g5]
 w1: $ G ⇒ ccom F (scons a s) = scons (fv F a) (ccom F s) $ by rel_eq_intro [l2, l3, a5, d3]
+
+ccom_scons_c
+------------
+l1: $ G , a = A , a ∊ cdm F , q = S ⇒ functional F $ by weaken [#1]
+l2: $ G , a = A , a ∊ cdm F , q = S ⇒ a ∊ cdm F $ by ax
+l3: $ G , a = A , a ∊ cdm F , q = S ⇒ ccom F (scons a q) = scons (fv F a) (ccom F q) $ by ccom_scons [l1, l2]
+l4: $ G , a = A , a ∊ cdm F , q = S ⇒ a = A $ by ax
+l5: $ G , a = A , a ∊ cdm F , q = S ⇒ q = S $ by ax
+l6: $ G , a = A , a ∊ cdm F , q = S ⇒ F = F $ by eq_refl
+l7: $ G , a = A , a ∊ cdm F , q = S ⇒ scons a q = scons A S $ by scons_eq [l4, l5]
+l8: $ G , a = A , a ∊ cdm F , q = S ⇒ ccom F (scons a q) = ccom F (scons A S) $ by ccom_eq [l6, l7]
+l9: $ G , a = A , a ∊ cdm F , q = S ⇒ fv F a = fv F A $ by fv_eq [l6, l4]
+l10: $ G , a = A , a ∊ cdm F , q = S ⇒ ccom F q = ccom F S $ by ccom_eq [l6, l5]
+l11: $ G , a = A , a ∊ cdm F , q = S ⇒ scons (fv F a) (ccom F q) = scons (fv F A) (ccom F S) $ by scons_eq [l9, l10]
+l12: $ G , a = A , a ∊ cdm F , q = S ⇒ ccom F (scons A S) = ccom F (scons a q) $ by eq_sym [l8]
+l13: $ G , a = A , a ∊ cdm F , q = S ⇒ ccom F (scons A S) = scons (fv F a) (ccom F q) $ by eq_trans [l12, l3]
+l14: $ G , a = A , a ∊ cdm F , q = S ⇒ ccom F (scons A S) = scons (fv F A) (ccom F S) $ by eq_trans [l13, l11]
+l15: $ G , a = A , a ∊ cdm F ⇒ ccom F (scons A S) = scons (fv F A) (ccom F S) $ by isset_elim [#3, l14]
+l16: $ G ⇒ ccom F (scons A S) = scons (fv F A) (ccom F S) $ by wcel_elim [#2, l15]
 
 ccom_subset_eq
 --------------

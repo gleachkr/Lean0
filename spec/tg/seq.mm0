@@ -76,6 +76,8 @@ theorem fseq_fn_into (G: hyps) (A: class) (s: set):
 theorem fseq_fv (G: hyps) (A: class) (s i: set):
   $ G ⇒ s ∊ fseq A $ > $ G ⇒ i ∊ cdm s $ > $ G ⇒ fv s i ∈ A $;
 theorem fseq_crn (G: hyps) (A: class) (s: set): $ G ⇒ s ∊ fseq A $ > $ G ⇒ crn s ⊆ A $;
+--| Class form of `fseq_crn`.
+theorem fseq_crn_c (G: hyps) (A S: class): $ G ⇒ S ∈ fseq A $ > $ G ⇒ crn S ⊆ A $;
 theorem fseq_mono (G: hyps) (A B: class): $ G ⇒ A ⊆ B $ > $ G ⇒ fseq A ⊆ fseq B $;
 --| `fseq A ⊆ 𝒫 (ω × A)`.
 theorem fseq_set (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ isset (fseq A) $;
@@ -94,10 +96,19 @@ theorem fseq_len_zero (G: hyps) (A: class) (s: set):
 theorem scons_pair (G: hyps) {i: set} (U A S: class) (v: set): $ G ⇒ ⟨ U , v ⟩ ∈ scons A S $ > $ G ⇒ isset U $ > $ G ⇒ isset A $ > $ G ⇒ (U = ∅ ∧ v = A) ∨ ∃ i (U = suc i ∧ ⟨ i , v ⟩ ∈ S) $;
 theorem scons_fseq (G: hyps) (A: class) (a s: set):
   $ G ⇒ a ∊ A $ > $ G ⇒ s ∊ fseq A $ > $ G ⇒ scons a s ∈ fseq A $;
+--| Class form of `scons_fseq`.
+theorem scons_fseq_c (G: hyps) (A B C: class): $ G ⇒ B ∈ A $ > $ G ⇒ C ∈ fseq A $ > $ G ⇒ scons B C ∈ fseq A $;
+--| `scons A S` is a set when `S` is (the head's pair is a set in any case).
+theorem scons_set (G: hyps) (A S: class): $ G ⇒ isset S $ > $ G ⇒ isset (scons A S) $;
 theorem scons_len (G: hyps) (A: class) (a s: set):
   $ G ⇒ s ∊ fseq A $ > $ G ⇒ cdm (scons a s) = suc (cdm s) $;
 theorem scons_fv_zero (G: hyps) (a s: set): $ G ⇒ fv (scons a s) ∅ = a $;
+--| Class form of `scons_fv_zero`.
+theorem scons_fv_zero_c (G: hyps) (A S: class): $ G ⇒ isset A $ > $ G ⇒ isset S $ > $ G ⇒ fv (scons A S) ∅ = A $;
 theorem scons_fv_suc (G: hyps) (a s i: set): $ G ⇒ fv (scons a s) (suc i) = fv s i $;
+--| Class form of `scons_fv_suc`.
+theorem scons_fv_suc_c (G: hyps) (A S I: class):
+  $ G ⇒ isset A $ > $ G ⇒ isset S $ > $ G ⇒ isset I $ > $ G ⇒ fv (scons A S) (suc I) = fv S I $;
 theorem scons_inj (G: hyps) (a b s t: set):
   $ G ⇒ rel s $ > $ G ⇒ rel t $ > $ G ⇒ scons a s = scons b t $ > $ G ⇒ a = b ∧ s = t $;
 theorem scons_ne_empty (G: hyps) (a s: set): $ G ⇒ scons a s = ∅ $ > $ G ⇒ ⊥ $;
@@ -153,6 +164,9 @@ theorem ccom_len (G: hyps) (F A B: class) (s: set):
 theorem ccom_empty (G: hyps) (F: class): $ G ⇒ ccom F ∅ = ∅ $;
 theorem ccom_scons (G: hyps) (F: class) (a s: set):
   $ G ⇒ functional F $ > $ G ⇒ a ∊ cdm F $ > $ G ⇒ ccom F (scons a s) = scons (fv F a) (ccom F s) $;
+--| Class form of `ccom_scons`.
+theorem ccom_scons_c (G: hyps) (F A S: class):
+  $ G ⇒ functional F $ > $ G ⇒ A ∈ cdm F $ > $ G ⇒ isset S $ > $ G ⇒ ccom F (scons A S) = scons (fv F A) (ccom F S) $;
 --| Mapping by a function or by an extension of it gives the same sequence.
 theorem ccom_subset_eq (G: hyps) (H K: class) (s: set):
   $ G ⇒ functional K $ > $ G ⇒ H ⊆ K $ > $ G ⇒ crn s ⊆ cdm H $ > $ G ⇒ ccom H s = ccom K s $;

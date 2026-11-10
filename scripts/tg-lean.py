@@ -19,7 +19,9 @@ Reads the sorts and constructors of spec/lean.mm0 (every `term` whose sort is no
     definitions follow, and each clause axiom is stated as a theorem, in prefix
     form; then, per relation, that the program's clauses concluding its atoms
     are its own (`lprog_R_pr`) and inversion (`lrel_R_cases`); then the
-    determinacy of the computing relations later layers need (`DET`); all proved
+    determinacy of the computing relations later layers need (`DET`);
+  - the label facts: every label is a natural number (`k*_X_omega`), and
+    constructor labels differ (`kc_a_ne_b`, the earlier first); all proved
     in lean-tg.auf.
 
 It also writes spec/tg/lean-tg-rest.mm0, which imports the model (model.mm0, the
@@ -461,6 +463,20 @@ def proof_variables():
     return set(m.group(1).split())
 
 
+def render_labels(text):
+    """The label facts, for the labels declared in `text` (lean-tg.mm0 so far)."""
+    labels = re.findall(r"^def (k[scr]_\w+): class = \$ (?:∅|suc \w+) \$;", text, re.M)
+    ctors = [n for n in labels if n.startswith("kc_")]
+    o = ["", "-- " + "-" * 74, "-- Label facts", "-- " + "-" * 74, "",
+         "--| Every label is a natural number."]
+    o += [f"theorem {n}_omega (G: hyps): $ G ⇒ {n} ∈ ω $;" for n in labels]
+    o += ["--| Constructor labels differ (each pair once, the earlier label first; `ne_sym`",
+          "--| turns one around)."]
+    o += [f"theorem {a}_ne_{b[3:]} (G: hyps): $ G ⇒ ¬ {a} = {b} $;"
+          for i, a in enumerate(ctors) for b in ctors[i + 1:]]
+    return "\n".join(o) + "\n"
+
+
 def render_rest(text):
     """Parts II and III of the spec, as they are, in prefix form (see the module's doc)."""
     part1 = mm0math.Spec(text[:text.index(PART2)])
@@ -551,6 +567,7 @@ def main():
         return
     sorts, ctors = parse(spec)
     text = render(sorts, ctors) + "\n".join(render_relations(spec, ctors)) + "\n"
+    text += render_labels(text)
     files = [(OUT, text), (REST, render_rest(spec))]
     if sys.argv[1:] == ["--check"]:
         for path, t in files:

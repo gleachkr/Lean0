@@ -204,6 +204,37 @@ l6: $ (∃ s ∃ v ∃ y (w = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B)) 
 l7: $ (∃ k ∃ s ∃ v ∃ y (w = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B)) ⟺ (∃ k ∃ s ∃ v ∃ y (w = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = D)) $ by ex_congr [l6]
 l8: $ {w | ∃ k ∃ s ∃ v ∃ y (w = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B)} ≐ {w | ∃ k ∃ s ∃ v ∃ y (w = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = D)} $ by cab_congr [l7]
 
+lemma q0_cgr3_sub {k s v: set} (G: hyps) (B D: class k s v):
+  $ G ⇒ ∀ v ∀ s ∀ k (B = D) $ > $ G ⇒ cgr3 k s v B ⊆ cgr3 k s v D $
+----
+c1: $ G , z ∊ cgr3 k s v B ⇒ z ∊ cgr3 k s v B $ by ax
+d1: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ , d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ⇒ ∀ v ∀ s ∀ k (B = D) $ by weaken [#1]
+d2: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ , d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ⇒ ∀ s ∀ k ((⟦ v / c ⟧ B) = (⟦ v / c ⟧ D)) $ by all_elim [d1]
+d3: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ , d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ⇒ ∀ k ((⟦ s / b ⟧ (⟦ v / c ⟧ B)) = (⟦ s / b ⟧ (⟦ v / c ⟧ D))) $ by all_elim [d2]
+d4: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ , d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ⇒ (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ D))) $ by all_elim [d3]
+d5: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ , d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ⇒ d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ by ax
+d6: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ , d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ⇒ d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ D))) $ by eq_trans [d5, d4]
+d7: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ , d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ⇒ ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ ∈ cgr3 k s v D $ by cgr3_intro [d6]
+d8: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ , d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ⇒ z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ $ by ax
+d9: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ , d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ⇒ ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ = z $ by eq_sym [d8]
+d10: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ , d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ⇒ z ∈ cgr3 k s v D $ by wcel_eq_l [d9, d7]
+d11: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ , d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ⇒ z ∊ cgr3 k s v D $ by wcel_welc [d10]
+c2: $ G , z ∊ cgr3 k s v B ⇒ z ∊ cgr3 k s v D $ by cgr3_elim_mem [c1, d11]
+c3: $ G ⇒ cgr3 k s v B ⊆ cgr3 k s v D $ by subset_intro [c2]
+
+cgr3_eq
+-------
+l1: $ G ⇒ ∀ s ∀ k (B = D) $ by all_elim [#1]
+l2: $ G ⇒ ∀ k (B = D) $ by all_elim [l1]
+l3: $ G ⇒ B = D $ by all_elim [l2]
+l4: $ G ⇒ D = B $ by eq_sym [l3]
+l5: $ G ⇒ ∀ k (D = B) $ by all_intro [l4]
+l6: $ G ⇒ ∀ s ∀ k (D = B) $ by all_intro [l5]
+l7: $ G ⇒ ∀ v ∀ s ∀ k (D = B) $ by all_intro [l6]
+l8: $ G ⇒ cgr3 k s v B ⊆ cgr3 k s v D $ by q0_cgr3_sub [#1]
+l9: $ G ⇒ cgr3 k s v D ⊆ cgr3 k s v B $ by q0_cgr3_sub [l7]
+l10: $ G ⇒ cgr3 k s v B = cgr3 k s v D $ by subset_antisym [l8, l9]
+
 sb_c_cgr3
 ---------
 l1: $ (⟦ y / t ⟧ {w | ∃ k ∃ s ∃ v ∃ x (w = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , x ⟩ ∧ x = B)}) ≐ {w | ∃ k ∃ s ∃ v ∃ x (w = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , x ⟩ ∧ x = (⟦ y / t ⟧ B))} $ by ceqt_refl
@@ -346,6 +377,18 @@ g10: $ G , w = ω , a = trees l ⇒ l × fseq (trees l) = trees l $ by eq_trans 
 g11: $ G , w = ω ⇒ l × fseq (trees l) = trees l $ by isset_elim [f10, g10]
 g12: $ G ⇒ l × fseq (trees l) = trees l $ by isset_elim [f4, g11]
 
+trees_fix_c
+-----------
+a1: $ G , o = L ⇒ o × fseq (trees o) = trees o $ by trees_fix
+a2: $ G , o = L ⇒ o = L $ by ax
+a3: $ G , o = L ⇒ trees o = trees L $ by trees_eq [a2]
+a4: $ G , o = L ⇒ fseq (trees o) = fseq (trees L) $ by fseq_eq [a3]
+a5: $ G , o = L ⇒ o × fseq (trees o) = L × fseq (trees L) $ by cxp_eq [a2, a4]
+a6: $ G , o = L ⇒ L × fseq (trees L) = o × fseq (trees o) $ by eq_sym [a5]
+a7: $ G , o = L ⇒ L × fseq (trees L) = trees o $ by eq_trans [a6, a1]
+a8: $ G , o = L ⇒ L × fseq (trees L) = trees L $ by eq_trans [a7, a3]
+a10: $ G ⇒ L × fseq (trees L) = trees L $ by isset_elim [#1, a8]
+
 trees_intro
 -----------
 l1: $ G ⇒ ⟨ k , s ⟩ ∈ l × fseq (trees l) $ by cxp_intro [#1, #2]
@@ -372,6 +415,32 @@ l1: $ G ⇒ l × fseq (trees l) = trees l $ by trees_fix
 l2: $ G ⇒ trees l = l × fseq (trees l) $ by eq_sym [l1]
 l3: $ G ⇒ ⟨ k , s ⟩ ∈ l × fseq (trees l) $ by wcel_eq_r [l2, #1]
 l4: $ G ⇒ k ∊ l ∧ s ∊ fseq (trees l) $ by cxp_elim_pair [l3]
+
+trees_node_c
+------------
+l1: $ G , b = L , k = K , v = S ⇒ k = K $ by ax
+l2: $ G , b = L , k = K , v = S ⇒ v = S $ by ax
+l3: $ G , b = L , k = K , v = S ⇒ ⟨ k , v ⟩ = ⟨ K , S ⟩ $ by opair_eq [l1, l2]
+l4: $ G , b = L , k = K , v = S ⇒ ⟨ K , S ⟩ = ⟨ k , v ⟩ $ by eq_sym [l3]
+l5: $ G , b = L , k = K , v = S ⇒ ⟨ K , S ⟩ ∈ trees L $ by weaken [#2]
+l6: $ G , b = L , k = K , v = S ⇒ ⟨ k , v ⟩ ∈ trees L $ by wcel_eq_l [l4, l5]
+l7: $ G , b = L , k = K , v = S ⇒ b = L $ by ax
+l8: $ G , b = L , k = K , v = S ⇒ L = b $ by eq_sym [l7]
+l9: $ G , b = L , k = K , v = S ⇒ trees L = trees b $ by trees_eq [l8]
+l10: $ G , b = L , k = K , v = S ⇒ ⟨ k , v ⟩ ∈ trees b $ by wcel_eq_r [l9, l6]
+l11: $ G , b = L , k = K , v = S ⇒ k ∊ b ∧ v ∊ fseq (trees b) $ by trees_node [l10]
+l12: $ G , b = L , k = K , v = S ⇒ k ∊ b $ by and_elim_l [l11]
+l13: $ G , b = L , k = K , v = S ⇒ v ∊ fseq (trees b) $ by and_elim_r [l11]
+l14: $ G , b = L , k = K , v = S ⇒ k ∊ L $ by welc_eq [l7, l12]
+l15: $ G , b = L , k = K , v = S ⇒ trees b = trees L $ by trees_eq [l7]
+l16: $ G , b = L , k = K , v = S ⇒ fseq (trees b) = fseq (trees L) $ by fseq_eq [l15]
+l17: $ G , b = L , k = K , v = S ⇒ v ∊ fseq (trees L) $ by welc_eq [l16, l13]
+l18: $ G , b = L , k = K , v = S ⇒ K ∈ L $ by wcel_intro [l1, l14]
+l19: $ G , b = L , k = K , v = S ⇒ S ∈ fseq (trees L) $ by wcel_intro [l2, l17]
+l20: $ G , b = L , k = K , v = S ⇒ K ∈ L ∧ S ∈ fseq (trees L) $ by and_intro [l18, l19]
+l21: $ G , b = L , k = K ⇒ K ∈ L ∧ S ∈ fseq (trees L) $ by isset_elim [#4, l20]
+l22: $ G , b = L ⇒ K ∈ L ∧ S ∈ fseq (trees L) $ by isset_elim [#3, l21]
+l23: $ G ⇒ K ∈ L ∧ S ∈ fseq (trees L) $ by isset_elim [#1, l22]
 
 --| The abstraction of membership in a class is included in it.
 lemma t1_cab_welc_subset {y: set} (G: hyps y) (P: class): $ G ⇒ {y | y ∊ P} ⊆ P $
@@ -422,6 +491,32 @@ r9: $ G , w = ω ⇒ trees l ⊆ P $ by subset_trans [r7, r8]
 f4: $ G ⇒ isset ω $ by omega_set
 r10: $ G ⇒ trees l ⊆ P $ by isset_elim [f4, r9]
 
+trees_ind_c
+-----------
+l1: $ G , x = L , k ∊ x , s ∊ fseq (trees x) , crn s ⊆ P ⇒ x = L $ by ax
+l2: $ G , x = L , k ∊ x , s ∊ fseq (trees x) , crn s ⊆ P ⇒ k ∊ x $ by ax
+l3: $ G , x = L , k ∊ x , s ∊ fseq (trees x) , crn s ⊆ P ⇒ k ∊ L $ by welc_eq [l1, l2]
+l4: $ G , x = L , k ∊ x , s ∊ fseq (trees x) , crn s ⊆ P ⇒ trees x = trees L $ by trees_eq [l1]
+l5: $ G , x = L , k ∊ x , s ∊ fseq (trees x) , crn s ⊆ P ⇒ s ∊ fseq (trees x) $ by ax
+l6: $ G , x = L , k ∊ x , s ∊ fseq (trees x) , crn s ⊆ P ⇒ s ∊ fseq (trees L) $ by welc_fseq_eq [l4, l5]
+l7: $ G , x = L , k ∊ x , s ∊ fseq (trees x) , crn s ⊆ P ⇒ ∀ k ∀ s (k ∊ L → s ∊ fseq (trees L) → crn s ⊆ P → ⟨ k , s ⟩ ∈ P) $ by weaken [#2]
+l8: $ G , x = L , k ∊ x , s ∊ fseq (trees x) , crn s ⊆ P ⇒ ∀ s (k ∊ L → s ∊ fseq (trees L) → crn s ⊆ P → ⟨ k , s ⟩ ∈ P) $ by all_elim [l7]
+l9: $ G , x = L , k ∊ x , s ∊ fseq (trees x) , crn s ⊆ P ⇒ k ∊ L → s ∊ fseq (trees L) → crn s ⊆ P → ⟨ k , s ⟩ ∈ P $ by all_elim [l8]
+l10: $ G , x = L , k ∊ x , s ∊ fseq (trees x) , crn s ⊆ P ⇒ s ∊ fseq (trees L) → crn s ⊆ P → ⟨ k , s ⟩ ∈ P $ by imp_elim [l9, l3]
+l11: $ G , x = L , k ∊ x , s ∊ fseq (trees x) , crn s ⊆ P ⇒ crn s ⊆ P → ⟨ k , s ⟩ ∈ P $ by imp_elim [l10, l6]
+l12: $ G , x = L , k ∊ x , s ∊ fseq (trees x) , crn s ⊆ P ⇒ crn s ⊆ P $ by ax
+l13: $ G , x = L , k ∊ x , s ∊ fseq (trees x) , crn s ⊆ P ⇒ ⟨ k , s ⟩ ∈ P $ by imp_elim [l11, l12]
+l14: $ G , x = L , k ∊ x , s ∊ fseq (trees x) ⇒ crn s ⊆ P → ⟨ k , s ⟩ ∈ P $ by imp_intro [l13]
+l15: $ G , x = L , k ∊ x ⇒ s ∊ fseq (trees x) → crn s ⊆ P → ⟨ k , s ⟩ ∈ P $ by imp_intro [l14]
+l16: $ G , x = L ⇒ k ∊ x → s ∊ fseq (trees x) → crn s ⊆ P → ⟨ k , s ⟩ ∈ P $ by imp_intro [l15]
+l17: $ G , x = L ⇒ ∀ s (k ∊ x → s ∊ fseq (trees x) → crn s ⊆ P → ⟨ k , s ⟩ ∈ P) $ by all_intro [l16]
+l18: $ G , x = L ⇒ ∀ k ∀ s (k ∊ x → s ∊ fseq (trees x) → crn s ⊆ P → ⟨ k , s ⟩ ∈ P) $ by all_intro [l17]
+l19: $ G , x = L ⇒ trees x ⊆ P $ by trees_ind [l18]
+l20: $ G , x = L ⇒ x = L $ by ax
+l21: $ G , x = L ⇒ trees x = trees L $ by trees_eq [l20]
+l22: $ G , x = L ⇒ trees L ⊆ P $ by subset_eq_l [l21, l19]
+l24: $ G ⇒ trees L ⊆ P $ by isset_elim [#1, l22]
+
 trees_set
 ---------
 f1: $ G , w = ω ⇒ mono x (l × fseq x) $ by trees_op_mono
@@ -434,6 +529,14 @@ f8: $ G , w = ω ⇒ cont x (l × fseq x) w $ by cont_mono_index [f3, f7]
 f9: $ G , w = ω ⇒ isset (trees l) $ by lfp_cont_set [f1, f2, f8]
 f4: $ G ⇒ isset ω $ by omega_set
 f10: $ G ⇒ isset (trees l) $ by isset_elim [f4, f9]
+
+trees_set_c
+-----------
+l2: $ G , x = L ⇒ isset (trees x) $ by trees_set
+l3: $ G , x = L ⇒ x = L $ by ax
+l4: $ G , x = L ⇒ trees x = trees L $ by trees_eq [l3]
+l5: $ G , x = L ⇒ isset (trees L) $ by isset_eq [l4, l2]
+l6: $ G ⇒ isset (trees L) $ by isset_elim [#1, l5]
 
 trees_mono
 ----------
@@ -1342,6 +1445,16 @@ l20: $ G , ⟨ i , j ⟩ ∈ trc l F , ⟨ i , k ⟩ ∈ trc l F ⇒ ⟨ i , j �
 l21: $ G , ⟨ i , j ⟩ ∈ trc l F , ⟨ i , k ⟩ ∈ trc l F ⇒ j = k $ by t3_trc_pair_elim [l20, l19]
 l22: $ G ⇒ functional (trc l F) $ by functional_intro [l21]
 
+trc_functional_c
+----------------
+l2: $ G , x = L ⇒ functional F $ by weaken [#2]
+l3: $ G , x = L ⇒ functional (trc x F) $ by trc_functional [l2]
+l4: $ G , x = L ⇒ x = L $ by ax
+l5: $ G , x = L ⇒ F = F $ by eq_refl
+l6: $ G , x = L ⇒ trc x F = trc L F $ by trc_eq [l4, l5]
+l7: $ G , x = L ⇒ functional (trc L F) $ by functional_eq [l6, l3]
+l8: $ G ⇒ functional (trc L F) $ by isset_elim [#1, l7]
+
 trc_rel
 -------
 l1: $ G , z ∊ trc l F ⇒ z ∊ trc l F $ by ax
@@ -1360,6 +1473,16 @@ l13: $ G , ord w ∧ z ∊ fv (tstg l F) w , z = ⟨ i , j ⟩ ⇒ ∃ f ∃ g (
 l14: $ G , ord w ∧ z ∊ fv (tstg l F) w ⇒ ∃ f ∃ g (z = ⟨ f , g ⟩) $ by rel_elim [l10, l5, l13]
 l15: $ G , z ∊ trc l F ⇒ ∃ f ∃ g (z = ⟨ f , g ⟩) $ by ex_elim [l2, l14]
 l16: $ G ⇒ rel (trc l F) $ by rel_intro [l15]
+
+trc_rel_c
+---------
+l2: $ G , x = L ⇒ functional F $ by weaken [#2]
+l3: $ G , x = L ⇒ rel (trc x F) $ by trc_rel [l2]
+l4: $ G , x = L ⇒ x = L $ by ax
+l5: $ G , x = L ⇒ F = F $ by eq_refl
+l6: $ G , x = L ⇒ trc x F = trc L F $ by trc_eq [l4, l5]
+l7: $ G , x = L ⇒ rel (trc L F) $ by rel_eq [l6, l3]
+l8: $ G ⇒ rel (trc L F) $ by isset_elim [#1, l7]
 
 trc_cdm
 -------
@@ -1397,6 +1520,20 @@ b14: $ G , ord a ∧ c ∊ fv (stg x (l × fseq x)) a , ⟨ c , y ⟩ ∈ fv (ts
 b15: $ G , ord a ∧ c ∊ fv (stg x (l × fseq x)) a ⇒ c ∊ cdm (trc l F) $ by cdm_elim [b9, b14]
 b16: $ G , c ∊ trees l ⇒ c ∊ cdm (trc l F) $ by ex_elim [b2, b15]
 b17: $ G ⇒ cdm (trc l F) = trees l $ by eq_intro [a12, b16]
+
+trc_cdm_c
+---------
+l2: $ G , x = L ⇒ functional F $ by weaken [#2]
+l3: $ G , x = L ⇒ cdm (trc x F) = trees x $ by trc_cdm [l2]
+l4: $ G , x = L ⇒ x = L $ by ax
+l5: $ G , x = L ⇒ F = F $ by eq_refl
+l6: $ G , x = L ⇒ trc x F = trc L F $ by trc_eq [l4, l5]
+l7: $ G , x = L ⇒ cdm (trc x F) = cdm (trc L F) $ by cdm_eq [l6]
+l8: $ G , x = L ⇒ trees x = trees L $ by trees_eq [l4]
+l9: $ G , x = L ⇒ cdm (trc L F) = cdm (trc x F) $ by eq_sym [l7]
+l10: $ G , x = L ⇒ cdm (trc L F) = trees x $ by eq_trans [l9, l3]
+l11: $ G , x = L ⇒ cdm (trc L F) = trees L $ by eq_trans [l10, l8]
+l12: $ G ⇒ cdm (trc L F) = trees L $ by isset_elim [#1, l11]
 
 trc_fv
 ------
@@ -1497,6 +1634,32 @@ z5: $ G , w = ω ⇒ isset (clord w) $ by clord_set
 z6: $ G , w = ω ⇒ fv (trc l F) ⟨ k , s ⟩ = fv F ⟨ k , ⟨ s , ccom (trc l F) s ⟩ ⟩ $ by isset_elim [z5, z4]
 z7: $ G ⇒ isset ω $ by omega_set
 z8: $ G ⇒ fv (trc l F) ⟨ k , s ⟩ = fv F ⟨ k , ⟨ s , ccom (trc l F) s ⟩ ⟩ $ by isset_elim [z7, z6]
+
+trc_node_c
+----------
+l2: $ G , x = L ⇒ x = L $ by ax
+l3: $ G , x = L ⇒ L = x $ by eq_sym [l2]
+l4: $ G , x = L ⇒ k ∊ L $ by weaken [#3]
+l5: $ G , x = L ⇒ k ∊ x $ by welc_eq [l3, l4]
+l6: $ G , x = L ⇒ trees L = trees x $ by trees_eq [l3]
+l7: $ G , x = L ⇒ s ∊ fseq (trees L) $ by weaken [#4]
+l8: $ G , x = L ⇒ s ∊ fseq (trees x) $ by welc_fseq_eq [l6, l7]
+l9: $ G , x = L ⇒ functional F $ by weaken [#2]
+l10: $ G , x = L ⇒ fv (trc x F) ⟨ k , s ⟩ = fv F ⟨ k , ⟨ s , ccom (trc x F) s ⟩ ⟩ $ by trc_node [l9, l5, l8]
+l11: $ G , x = L ⇒ F = F $ by eq_refl
+l12: $ G , x = L ⇒ trc x F = trc L F $ by trc_eq [l2, l11]
+l13: $ G , x = L ⇒ ⟨ k , s ⟩ = ⟨ k , s ⟩ $ by eq_refl
+l14: $ G , x = L ⇒ fv (trc x F) ⟨ k , s ⟩ = fv (trc L F) ⟨ k , s ⟩ $ by fv_eq [l12, l13]
+l15: $ G , x = L ⇒ s = s $ by eq_refl
+l16: $ G , x = L ⇒ ccom (trc x F) s = ccom (trc L F) s $ by ccom_eq [l12, l15]
+l17: $ G , x = L ⇒ ⟨ s , ccom (trc x F) s ⟩ = ⟨ s , ccom (trc L F) s ⟩ $ by opair_eq [l15, l16]
+l18: $ G , x = L ⇒ k = k $ by eq_refl
+l19: $ G , x = L ⇒ ⟨ k , ⟨ s , ccom (trc x F) s ⟩ ⟩ = ⟨ k , ⟨ s , ccom (trc L F) s ⟩ ⟩ $ by opair_eq [l18, l17]
+l20: $ G , x = L ⇒ fv F ⟨ k , ⟨ s , ccom (trc x F) s ⟩ ⟩ = fv F ⟨ k , ⟨ s , ccom (trc L F) s ⟩ ⟩ $ by fv_eq [l11, l19]
+l21: $ G , x = L ⇒ fv (trc L F) ⟨ k , s ⟩ = fv (trc x F) ⟨ k , s ⟩ $ by eq_sym [l14]
+l22: $ G , x = L ⇒ fv (trc L F) ⟨ k , s ⟩ = fv F ⟨ k , ⟨ s , ccom (trc x F) s ⟩ ⟩ $ by eq_trans [l21, l10]
+l23: $ G , x = L ⇒ fv (trc L F) ⟨ k , s ⟩ = fv F ⟨ k , ⟨ s , ccom (trc L F) s ⟩ ⟩ $ by eq_trans [l22, l20]
+l24: $ G ⇒ fv (trc L F) ⟨ k , s ⟩ = fv F ⟨ k , ⟨ s , ccom (trc L F) s ⟩ ⟩ $ by isset_elim [#1, l23]
 
 lemma t3_ccom_sub (G: hyps) {y: set} (H K: class) (f a c: set):
   $ G ⇒ functional H $ > $ G ⇒ functional K $ > $ G ⇒ crn f ⊆ cdm K $ >

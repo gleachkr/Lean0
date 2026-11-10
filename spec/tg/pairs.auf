@@ -120,6 +120,16 @@ csn_subset
 ----------
 l1: $ G ⇒ cpr a a ⊆ A $ by cpr_subset [#1, #1]
 
+csn_subset_c
+------------
+l1: $ G , y ∊ csn A ⇒ y ∊ csn A $ by ax
+l2: $ G , y ∊ csn A ⇒ y = A $ by csn_elim [l1]
+l3: $ G , y ∊ csn A ⇒ A = y $ by eq_sym [l2]
+l4: $ G , y ∊ csn A ⇒ A ∈ B $ by weaken [#1]
+l5: $ G , y ∊ csn A ⇒ y ∈ B $ by wcel_eq_l [l3, l4]
+l6: $ G , y ∊ csn A ⇒ y ∊ B $ by wcel_welc [l5]
+l7: $ G ⇒ csn A ⊆ B $ by subset_intro [l6]
+
 csn_set
 -------
 l1: $ G ⇒ isset (cpr A A) $ by cpr_set [#1, #1]
@@ -289,6 +299,45 @@ l21: $ G , x = A , y = B , z = C ⇒ A = C ∧ B = D $ by isset_elim [#5, l20]
 l22: $ G , x = A , y = B ⇒ A = C ∧ B = D $ by isset_elim [#4, l21]
 l23: $ G , x = A ⇒ A = C ∧ B = D $ by isset_elim [#3, l22]
 l24: $ G ⇒ A = C ∧ B = D $ by isset_elim [#2, l23]
+
+opair_eq_isset
+--------------
+n1: $ G , ¬ isset A , x ∊ csn A ⇒ x ∊ csn A $ by ax
+n2: $ G , ¬ isset A , x ∊ csn A ⇒ x = A $ by csn_elim [n1]
+n3: $ G , ¬ isset A , x ∊ csn A ⇒ isset A $ by isset_intro [n2]
+n4: $ G , ¬ isset A , x ∊ csn A ⇒ ¬ isset A $ by ax
+n5: $ G , ¬ isset A , x ∊ csn A ⇒ ⊥ $ by not_elim [n4, n3]
+n6: $ G , ¬ isset A ⇒ csn A = ∅ $ by empty_eq_intro [n5]
+n7: $ G , ¬ isset A , c = ∅ ⇒ c = ∅ $ by ax
+n7a: $ G , ¬ isset A , c = ∅ ⇒ csn A = ∅ $ by weaken [n6]
+n8: $ G , ¬ isset A , c = ∅ ⇒ ∅ = csn A $ by eq_sym [n7a]
+n9: $ G , ¬ isset A , c = ∅ ⇒ c = csn A $ by eq_trans [n7, n8]
+n10: $ G , ¬ isset A , c = ∅ ⇒ c = csn A ∨ c = cpr A B $ by or_intro_l [n9]
+n11: $ G , ¬ isset A , c = ∅ ⇒ c ∊ cpr (csn A) (cpr A B) $ by cpr_intro [n10]
+n12: $ G , ¬ isset A , c = ∅ ⇒ ⟨ A , B ⟩ = ⟨ a , b ⟩ $ by weaken [#1]
+n13: $ G , ¬ isset A , c = ∅ ⇒ c ∊ ⟨ a , b ⟩ $ by welc_eq [n12, n11]
+n14: $ G , ¬ isset A , c = ∅ ⇒ c = csn a ∨ c = cpr a b $ by cpr_elim [n13]
+n15: $ G , ¬ isset A , c = ∅ , c = csn a ⇒ a ∊ csn a $ by csn_intro_var
+n16a: $ G , ¬ isset A , c = ∅ , c = csn a ⇒ c = csn a $ by ax
+n16: $ G , ¬ isset A , c = ∅ , c = csn a ⇒ csn a = c $ by eq_sym [n16a]
+n17: $ G , ¬ isset A , c = ∅ , c = csn a ⇒ a ∊ c $ by welc_eq [n16, n15]
+n18a: $ G , ¬ isset A , c = ∅ , c = csn a ⇒ c = ∅ $ by ax
+n18: $ G , ¬ isset A , c = ∅ , c = csn a ⇒ a ∊ ∅ $ by welc_eq [n18a, n17]
+n19: $ G , ¬ isset A , c = ∅ , c = csn a ⇒ ⊥ $ by empty_elim [n18]
+n20: $ G , ¬ isset A , c = ∅ , c = cpr a b ⇒ a ∊ cpr a b $ by cpr_intro_l
+n21a: $ G , ¬ isset A , c = ∅ , c = cpr a b ⇒ c = cpr a b $ by ax
+n21: $ G , ¬ isset A , c = ∅ , c = cpr a b ⇒ cpr a b = c $ by eq_sym [n21a]
+n22: $ G , ¬ isset A , c = ∅ , c = cpr a b ⇒ a ∊ c $ by welc_eq [n21, n20]
+n23a: $ G , ¬ isset A , c = ∅ , c = cpr a b ⇒ c = ∅ $ by ax
+n23: $ G , ¬ isset A , c = ∅ , c = cpr a b ⇒ a ∊ ∅ $ by welc_eq [n23a, n22]
+n24: $ G , ¬ isset A , c = ∅ , c = cpr a b ⇒ ⊥ $ by empty_elim [n23]
+n25: $ G , ¬ isset A , c = ∅ ⇒ ⊥ $ by or_elim [n14, n19, n24]
+n26: $ G , ¬ isset A ⇒ isset ∅ $ by ax_empty
+n27: $ G , ¬ isset A ⇒ ⊥ $ by isset_elim [n26, n25]
+n28: $ G , ¬ isset A ⇒ isset A $ by bot_elim [n27]
+n29: $ G , isset A ⇒ isset A $ by ax
+n30: $ G ⇒ isset A ∨ ¬ isset A $ by excluded_middle
+n31: $ G ⇒ isset A $ by or_elim [n30, n29, n28]
 
 csn_opair_elim
 --------------
@@ -564,6 +613,16 @@ cun_subset_r
 l1: $ G , z ∊ B ⇒ z ∊ B $ by ax
 l2: $ G , z ∊ B ⇒ z ∊ A ∪ B $ by cun_intro_r [l1]
 l3: $ G ⇒ B ⊆ A ∪ B $ by subset_intro [l2]
+
+cun_intro_l_c
+-------------
+l1: $ G ⇒ B ⊆ B ∪ C $ by cun_subset_l
+l2: $ G ⇒ A ∈ B ∪ C $ by wcel_subset [l1, #1]
+
+cun_intro_r_c
+-------------
+l1: $ G ⇒ C ⊆ B ∪ C $ by cun_subset_r
+l2: $ G ⇒ A ∈ B ∪ C $ by wcel_subset [l1, #1]
 
 cun_least
 ---------

@@ -45,8 +45,11 @@ theorem uadm_intro (G: hyps) {n: set} (U: class):
   $ G ⇒ universe U $ > $ G ⇒ ∀ n (n ∊ ω → fv uni n ∈ U) $ > $ G ⇒ uadm U $;
 theorem uadm_universe (G: hyps) (U: class): $ G ⇒ uadm U $ > $ G ⇒ universe U $;
 theorem uadm_uni (G: hyps) (U: class) (n: set): $ G ⇒ uadm U $ > $ G ⇒ n ∊ ω $ > $ G ⇒ fv uni n ∈ U $;
+--| Class form of `uadm_uni`.
+theorem uadm_uni_c (G: hyps) (U A: class): $ G ⇒ uadm U $ > $ G ⇒ A ∈ ω $ > $ G ⇒ fv uni A ∈ U $;
 theorem uadm_omega (G: hyps) (U: class): $ G ⇒ uadm U $ > $ G ⇒ ω ∈ U $;
 theorem uadm_empty (G: hyps) (U: class): $ G ⇒ uadm U $ > $ G ⇒ ∅ ∈ U $;
+theorem uadm_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ uadm A $ > $ G ⇒ uadm B $;
 --| There is one: the least universe containing the set of the `U_n`.
 theorem uadm_exists (G: hyps) {u: set}: $ G ⇒ ∃ u (uadm u) $;
 
@@ -55,8 +58,14 @@ theorem uadm_exists (G: hyps) {u: set}: $ G ⇒ ∃ u (uadm u) $;
 theorem cpi_uni_imax {x: set} (G: hyps) (A: class) (B: class x) (m n: set):
   $ G ⇒ m ∊ ω $ > $ G ⇒ n ∊ ω $ > $ G ⇒ A ∈ fv uni m $ > $ G ⇒ ∀ x (x ∊ A → B ∈ fv uni n) $ >
   $ G ⇒ cpi x A B ∈ fv uni (nimax m n) $;
+--| Class form of `cpi_uni_imax`.
+theorem cpi_uni_imax_c {x: set} (G: hyps) (A: class) (B: class x) (M N: class):
+  $ G ⇒ M ∈ ω $ > $ G ⇒ N ∈ ω $ > $ G ⇒ A ∈ fv uni M $ > $ G ⇒ ∀ x (x ∊ A → B ∈ fv uni N) $ >
+  $ G ⇒ cpi x A B ∈ fv uni (nimax M N) $;
 --| Proofs are irrelevant: an element of `two` has at most one element.
 theorem two_irrel (G: hyps) (a b c: set): $ G ⇒ a ∊ two $ > $ G ⇒ b ∊ a $ > $ G ⇒ c ∊ a $ > $ G ⇒ b = c $;
+--| Class form of `two_irrel`.
+theorem two_irrel_c (G: hyps) (A B C: class): $ G ⇒ A ∈ two $ > $ G ⇒ B ∈ A $ > $ G ⇒ C ∈ A $ > $ G ⇒ B = C $;
 --| Traces and function spaces are equal when their domains are and their
 --| bodies agree on them.
 theorem clam_eq_pt {x: set} (G: hyps) (A C: class) (B D: class x):
@@ -107,21 +116,30 @@ theorem da_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ >
 --| @rewrite
 theorem sb_c_da {x: set} (t: set x) (A B C: class x):
   $ (⟦ x / t ⟧ (da A B C)) ≐ da (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+theorem da_eq (G: hyps) (A B C D E F: class):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ E = F $ > $ G ⇒ da A C E = da B D F $;
+theorem da_set (G: hyps) (D W R: class): $ G ⇒ isset D $ > $ G ⇒ isset (da D W R) $;
 --| @congr
 theorem mclip_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ mclip A C ≐ mclip B D $;
 --| @rewrite
 theorem sb_c_mclip {x: set} (t: set x) (A B: class x):
   $ (⟦ x / t ⟧ (mclip A B)) ≐ mclip (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+theorem mclip_eq (G: hyps) (A B C D: class):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ mclip A C = mclip B D $;
 --| @congr
 theorem sclip_congr (A B: class): $ A ≐ B $ > $ sclip A ≐ sclip B $;
 --| @rewrite
 theorem sb_c_sclip {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (sclip A)) ≐ sclip (⟦ x / t ⟧ A) $;
+theorem sclip_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ sclip A = sclip B $;
 --| @congr
 theorem dnb_congr (A B C D E F H I J K: class):
   $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ dnb A C E H J ≐ dnb B D F I K $;
 --| @rewrite
 theorem sb_c_dnb {x: set} (t: set x) (A B C D E: class x):
   $ (⟦ x / t ⟧ (dnb A B C D E)) ≐ dnb (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
+theorem dnb_eq (G: hyps) (A B C D E F H I J K: class):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ E = F $ > $ G ⇒ H = I $ > $ G ⇒ J = K $ >
+  $ G ⇒ dnb A C E H J = dnb B D F I K $;
 --| @congr
 theorem dnf_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ dnf A C ≐ dnf B D $;
 --| @rewrite
@@ -130,6 +148,8 @@ theorem sb_c_dnf {x: set} (t: set x) (A B: class x):
 --| @congr
 theorem dt_congr (A B C D E F H I J K: class):
   $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ dt A C E H J ≐ dt B D F I K $;
+theorem dnf_eq (G: hyps) (A B C D: class):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ dnf A C = dnf B D $;
 theorem dt_eq (G: hyps) (A B C D E F H I J K: class):
   $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ E = F $ > $ G ⇒ H = I $ > $ G ⇒ J = K $ >
   $ G ⇒ dt A C E H J = dt B D F I K $;
@@ -138,7 +158,10 @@ theorem sb_c_dt {x: set} (t: set x) (A B C D E: class x):
   $ (⟦ x / t ⟧ (dt A B C D E)) ≐ dt (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
 
 theorem mclip_in (G: hyps) (U A: class): $ G ⇒ A ∈ U $ > $ G ⇒ mclip U A = A $;
+theorem mclip_out (G: hyps) (U A: class): $ G ⇒ ¬ A ∈ U $ > $ G ⇒ mclip U A = ∅ $;
 theorem mclip_u (G: hyps) (U A: class): $ G ⇒ ∅ ∈ U $ > $ G ⇒ mclip U A ∈ U $;
+theorem sclip_in (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ sclip A = A $;
+theorem sclip_out (G: hyps) (A: class): $ G ⇒ ¬ isset A $ > $ G ⇒ sclip A = ∅ $;
 theorem sclip_set (G: hyps) (A: class): $ G ⇒ isset (sclip A) $;
 theorem kexa_omega (G: hyps): $ G ⇒ kexa ⊆ ω $;
 theorem kexa_cst (G: hyps): $ G ⇒ kc_cst ∈ kexa $;
@@ -150,6 +173,17 @@ theorem kexa_quot (G: hyps): $ G ⇒ kc_quot ∈ kexa $;
 theorem kexa_quot_mk (G: hyps): $ G ⇒ kc_quot_mk ∈ kexa $;
 theorem kexa_quot_lift (G: hyps): $ G ⇒ kc_quot_lift ∈ kexa $;
 theorem kexa_quot_ind (G: hyps): $ G ⇒ kc_quot_ind ∈ kexa $;
+--| The labels of the expression constructors are in `kstr`, those of `kexa`
+--| with them; the labels below `kc_cst` and `kc_proj` are not in `kexa`.
+theorem kstr_bvar (G: hyps): $ G ⇒ kc_bvar ∈ kstr $;
+theorem kstr_srt (G: hyps): $ G ⇒ kc_srt ∈ kstr $;
+theorem kstr_app (G: hyps): $ G ⇒ kc_app ∈ kstr $;
+theorem kstr_lam (G: hyps): $ G ⇒ kc_lam ∈ kstr $;
+theorem kstr_pi (G: hyps): $ G ⇒ kc_pi ∈ kstr $;
+theorem kstr_proj (G: hyps): $ G ⇒ kc_proj ∈ kstr $;
+theorem kexa_kstr (G: hyps): $ G ⇒ kexa ⊆ kstr $;
+theorem kexa_notin_lt (G: hyps) (A: class): $ G ⇒ A ∈ kc_cst $ > $ G ⇒ ¬ A ∈ kexa $;
+theorem kexa_notin_proj (G: hyps): $ G ⇒ ¬ kc_proj ∈ kexa $;
 
 theorem dnb_set (G: hyps) (M K S: class) (u v: set): $ G ⇒ isset (dnb u M K S v) $;
 theorem dnf_functional (G: hyps) (M: class) (u: set): $ G ⇒ functional (dnf u M) $;
@@ -157,6 +191,8 @@ theorem dnf_functional (G: hyps) (M: class) (u: set): $ G ⇒ functional (dnf u 
 theorem dnf_node (G: hyps) (M: class) (u k s: set):
   $ G ⇒ k ∊ ω $ > $ G ⇒ s ∊ fseq (trees ω) $ >
   $ G ⇒ fv (dnf u M) ⟨ k , s ⟩ = dnb u M k s (ccom (dnf u M) s) $;
+--| The denotation is defined at every tree.
+theorem dnf_cdm (G: hyps) (M: class) (u: set): $ G ⇒ cdm (dnf u M) = trees ω $;
 theorem dt_set (G: hyps) (M T W R: class) (u: set): $ G ⇒ isset (dt u M T W R) $;
 
 theorem dt_bvar (G: hyps) (M T: class) (u w r: set):
@@ -209,6 +245,9 @@ theorem stb_congr (A B C D E F H I J K: class):
 --| @rewrite
 theorem sb_c_stb {x: set} (t: set x) (A B C D E: class x):
   $ (⟦ x / t ⟧ (stb A B C D E)) ≐ stb (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
+theorem stb_eq (G: hyps) (A B C D E F H I J K: class):
+  $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ E = F $ > $ G ⇒ H = I $ > $ G ⇒ J = K $ >
+  $ G ⇒ stb A C E H J = stb B D F I K $;
 --| @congr
 theorem stf_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ stf A C ≐ stf B D $;
 --| @rewrite
@@ -227,6 +266,11 @@ theorem stf_node (G: hyps) (M: class) (u k s: set):
   $ G ⇒ fv (stf u M) ⟨ k , s ⟩ = stb u M k s (ccom (stf u M) s) $;
 theorem sat_fseq (G: hyps) (M T W: class) (u: set): $ G ⇒ sat u M T W ⊆ fseq u $;
 theorem sat_nil (G: hyps) (M: class) (u w: set): $ G ⇒ w ∊ lvals $ > $ G ⇒ sat u M ⟨ kc_nil , ∅ ⟩ w = csn ∅ $;
+--| The valuations satisfying a `cons` node.
+theorem sat_cons {r x q: set} (G: hyps) (M T T2: class) (u w: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ sat u M ⟨ kc_cons , scons T (scons T2 ∅) ⟩ w =
+      {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ sat u M T2 w ∧ x ∊ dt u M T w q ∧ r = scons x q)} $;
 theorem sat_cons_intro (G: hyps) (M T T2: class) (u w x q: set):
   $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ q ∊ sat u M T2 w $ > $ G ⇒ x ∊ dt u M T w q $ > $ G ⇒ x ∊ u $ >
@@ -262,6 +306,13 @@ theorem mdeq_e (H: hyps) (M: class) (G: ctx) (e e2 A: expr) (u w r: set):
 theorem mdeq_mem (H: hyps) (M: class) (G: ctx) (e e2 A: expr) (u w r: set):
   $ mdeq M G e e2 A $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ r ∊ sat u M (enc_ctx G) w $ >
   $ H ⇒ dt u M (enc_expr e) w r ∈ dt u M (enc_expr A) w r $;
+--| `mdeq_e` and `mdeq_mem` at a class valuation `R`.
+theorem mdeq_e_c (H: hyps) (M: class) (G: ctx) (e e2 A: expr) (u w: set) (R: class):
+  $ mdeq M G e e2 A $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ R ∈ sat u M (enc_ctx G) w $ >
+  $ H ⇒ dt u M (enc_expr e) w R = dt u M (enc_expr e2) w R $;
+theorem mdeq_mem_c (H: hyps) (M: class) (G: ctx) (e e2 A: expr) (u w: set) (R: class):
+  $ mdeq M G e e2 A $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ R ∈ sat u M (enc_ctx G) w $ >
+  $ H ⇒ dt u M (enc_expr e) w R ∈ dt u M (enc_expr A) w R $;
 theorem minh_i {u w r x: set} (M: class) (G: ctx) (A: expr):
   $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w ⇒ ∃ x (x ∊ dt u M (enc_expr A) w r) $ >
   $ minh M G A $;

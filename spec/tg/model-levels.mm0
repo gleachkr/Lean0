@@ -16,13 +16,22 @@
 import "lean-tg.mm0";
 
 -- --------------------------------------------------------------------------
--- Labels: the steps below choose their case by the label, a natural number
+-- Sorted trees and derivable atoms
 -- --------------------------------------------------------------------------
 
-theorem suc_mem (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ A ∈ suc A $;
-theorem suc_mem_r (G: hyps) (A B: class): $ G ⇒ A ∈ B $ > $ G ⇒ A ∈ suc B $;
---| Labels in `∈` order differ.
-theorem mem_ne (G: hyps) (A B: class): $ G ⇒ A ∈ B $ > $ G ⇒ A = B $ > $ G ⇒ ⊥ $;
+--| A tree of a sort is a tree.
+theorem lsig_ofsort_trees (G: hyps) (K: class) (t: set): $ G ⇒ t ∊ ofsort lsig lopen K $ > $ G ⇒ t ∈ trees ω $;
+--| A derivable atom is an atom: a label in `ω` with a sequence of trees.
+theorem lrel_latoms (G: hyps) (X: class): $ G ⇒ X ∈ lrel $ > $ G ⇒ X ∈ latoms $;
+--| The arguments of a derivable atom are trees (by arity).
+theorem lrel_args2 (G: hyps) (K: class) (a b: set):
+  $ G ⇒ ⟨ K , scons a (scons b ∅) ⟩ ∈ lrel $ > $ G ⇒ isset K $ > $ G ⇒ a ∊ trees ω ∧ b ∊ trees ω $;
+theorem lrel_args3 (G: hyps) (K: class) (a b c: set):
+  $ G ⇒ ⟨ K , scons a (scons b (scons c ∅)) ⟩ ∈ lrel $ > $ G ⇒ isset K $ >
+  $ G ⇒ a ∊ trees ω ∧ b ∊ trees ω ∧ c ∊ trees ω $;
+theorem lrel_args4 (G: hyps) (K: class) (a b c d: set):
+  $ G ⇒ ⟨ K , scons a (scons b (scons c (scons d ∅))) ⟩ ∈ lrel $ > $ G ⇒ isset K $ >
+  $ G ⇒ a ∊ trees ω ∧ b ∊ trees ω ∧ c ∊ trees ω ∧ d ∊ trees ω $;
 
 -- --------------------------------------------------------------------------
 -- Arithmetic: `nimax`, and the laws of `nmax` the level rules need
@@ -38,27 +47,62 @@ theorem nimax_eq (G: hyps) (A B C D: class):
 --| @rewrite
 theorem sb_c_nimax {x: set} (t: set x) (A B: class x):
   $ (⟦ x / t ⟧ (nimax A B)) ≐ nimax (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+--| Class form of `nimax_pos`.
+theorem nimax_pos_c (G: hyps) (A B: class) (c: set): $ G ⇒ c ∊ B $ > $ G ⇒ nimax A B = nmax A B $;
+--| Class form of `nimax_zero`, at a class equal to `∅`.
+theorem nimax_zero_c (G: hyps) (A B: class): $ G ⇒ B = ∅ $ > $ G ⇒ nimax A B = ∅ $;
 theorem nimax_zero (G: hyps) (a: set): $ G ⇒ nimax a ∅ = ∅ $;
 theorem nimax_pos (G: hyps) (a b c: set): $ G ⇒ c ∊ b $ > $ G ⇒ nimax a b = nmax a b $;
 theorem nimax_omega (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nimax a b ∈ ω $;
+--| Class form of `nimax_omega`.
+theorem nimax_omega_c (G: hyps) (A B: class):
+  $ G ⇒ A ∈ ω $ > $ G ⇒ B ∈ ω $ > $ G ⇒ nimax A B ∈ ω $;
 
 theorem nmax_assoc (G: hyps) (a b c: set): $ G ⇒ nmax (nmax a b) c = nmax a (nmax b c) $;
+--| Class form of `nmax_assoc`.
+theorem nmax_assoc_c (G: hyps) (A B C: class): $ G ⇒ nmax (nmax A B) C = nmax A (nmax B C) $;
 theorem nmax_idem (G: hyps) (a: set): $ G ⇒ nmax a a = a $;
+--| Class form of `nmax_idem`.
+theorem nmax_idem_c (G: hyps) (A: class): $ G ⇒ nmax A A = A $;
 theorem nmax_zero_l (G: hyps) (a: set): $ G ⇒ nmax ∅ a = a $;
+--| Class form of `nmax_zero_l`.
+theorem nmax_zero_l_c (G: hyps) (A: class): $ G ⇒ nmax ∅ A = A $;
 theorem nmax_suc (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nmax (suc a) (suc b) = suc (nmax a b) $;
+--| Class form of `nmax_suc`.
+theorem nmax_suc_c (G: hyps) (A B: class):
+  $ G ⇒ A ∈ ω $ > $ G ⇒ B ∈ ω $ > $ G ⇒ nmax (suc A) (suc B) = suc (nmax A B) $;
 theorem nmax_suc_self (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ nmax a (suc a) = suc a $;
+--| Class form of `nmax_suc_self`.
+theorem nmax_suc_self_c (G: hyps) (A: class): $ G ⇒ A ∈ ω $ > $ G ⇒ nmax A (suc A) = suc A $;
 theorem nimax_zero_l (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ nimax ∅ a = a $;
+--| Class form of `nimax_zero_l`.
+theorem nimax_zero_l_c (G: hyps) (A: class): $ G ⇒ A ∈ ω $ > $ G ⇒ nimax ∅ A = A $;
 theorem nimax_one (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ nimax (suc ∅) a = a $;
+--| Class form of `nimax_one`.
+theorem nimax_one_c (G: hyps) (A: class): $ G ⇒ A ∈ ω $ > $ G ⇒ nimax (suc ∅) A = A $;
 theorem nimax_suc (G: hyps) (a b: set): $ G ⇒ b ∊ ω $ > $ G ⇒ nimax a (suc b) = nmax a (suc b) $;
+--| Class form of `nimax_suc`.
+theorem nimax_suc_c (G: hyps) (A B: class):
+  $ G ⇒ isset A $ > $ G ⇒ B ∈ ω $ > $ G ⇒ nimax A (suc B) = nmax A (suc B) $;
 theorem nimax_self (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ nimax a a = a $;
+--| Class form of `nimax_self`.
+theorem nimax_self_c (G: hyps) (A: class): $ G ⇒ A ∈ ω $ > $ G ⇒ nimax A A = A $;
 theorem nimax_nmax (G: hyps) (a b c: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ c ∊ ω $ >
   $ G ⇒ nimax a (nmax b c) = nmax (nimax a b) (nimax a c) $;
+--| Class form of `nimax_nmax`.
+theorem nimax_nmax_c (G: hyps) (A B C: class):
+  $ G ⇒ A ∈ ω $ > $ G ⇒ B ∈ ω $ > $ G ⇒ C ∈ ω $ >
+  $ G ⇒ nimax A (nmax B C) = nmax (nimax A B) (nimax A C) $;
 theorem nimax_nimax (G: hyps) (a b c: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ c ∊ ω $ >
   $ G ⇒ nimax a (nimax b c) = nmax (nimax a c) (nimax b c) $;
+--| Class form of `nimax_nimax`.
+theorem nimax_nimax_c (G: hyps) (A B C: class):
+  $ G ⇒ A ∈ ω $ > $ G ⇒ B ∈ ω $ > $ G ⇒ C ∈ ω $ >
+  $ G ⇒ nimax A (nimax B C) = nmax (nimax A C) (nimax B C) $;
 
 -- --------------------------------------------------------------------------
 -- Level valuations
@@ -74,6 +118,8 @@ def lsub (A: class) (.i: set): class = $ clam i ω (fv A i) $;
 
 theorem lvals_set (G: hyps): $ G ⇒ isset lvals $;
 theorem lvals_ap (G: hyps) (w n: set): $ G ⇒ w ∊ lvals $ > $ G ⇒ n ∊ ω $ > $ G ⇒ ap w n ∈ ω $;
+--| Class form of `lvals_ap`.
+theorem lvals_ap_c (G: hyps) (w: set) (N: class): $ G ⇒ w ∊ lvals $ > $ G ⇒ N ∈ ω $ > $ G ⇒ ap w N ∈ ω $;
 --| Valuations are equal when they agree on `ω`.
 theorem lvals_ext (G: hyps) {i: set} (w x: set):
   $ G ⇒ w ∊ lvals $ > $ G ⇒ x ∊ lvals $ > $ G ⇒ ∀ i (i ∊ ω → ap w i = ap x i) $ > $ G ⇒ w = x $;
@@ -91,6 +137,9 @@ theorem lupd_lvals (G: hyps) (w n x: set):
 theorem lupd_ap_eq (G: hyps) (w n x: set): $ G ⇒ n ∊ ω $ > $ G ⇒ ap (lupd w n x) n = x $;
 theorem lupd_ap_ne (G: hyps) (w n x i: set):
   $ G ⇒ i ∊ ω $ > $ G ⇒ ¬ i = n $ > $ G ⇒ ap (lupd w n x) i = ap w i $;
+--| Class form of `lupd_ap_ne`.
+theorem lupd_ap_ne_c (G: hyps) (I: class) (w n x: set):
+  $ G ⇒ I ∈ ω $ > $ G ⇒ ¬ I = n $ > $ G ⇒ ap (lupd w n x) I = ap w I $;
 theorem lupd_self (G: hyps) (w n: set):
   $ G ⇒ w ∊ lvals $ > $ G ⇒ n ∊ ω $ > $ G ⇒ lupd w n (ap w n) = w $;
 theorem lupd_twice (G: hyps) (w n x y: set): $ G ⇒ lupd (lupd w n x) n y = lupd w n y $;
@@ -102,6 +151,8 @@ theorem lsub_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ lsub A = lsub 
 theorem sb_c_lsub {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (lsub A)) ≐ lsub (⟦ x / t ⟧ A) $;
 theorem lsub_lvals (G: hyps) (s: set): $ G ⇒ s ∊ fseq ω $ > $ G ⇒ lsub s ∈ lvals $;
 theorem lsub_ap (G: hyps) (s i: set): $ G ⇒ i ∊ ω $ > $ G ⇒ ap (lsub s) i = fv s i $;
+--| Class form of `lsub_ap`.
+theorem lsub_ap_c (G: hyps) (I: class) (e: set): $ G ⇒ I ∈ ω $ > $ G ⇒ ap (lsub e) I = fv e I $;
 
 -- --------------------------------------------------------------------------
 -- Numbers: `nvf`
@@ -119,11 +170,17 @@ theorem nvb_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ nvb A C ≐ nv
 --| @rewrite
 theorem sb_c_nvb {x: set} (t: set x) (A B: class x):
   $ (⟦ x / t ⟧ (nvb A B)) ≐ nvb (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+theorem nvb_eq (G: hyps) (A B C D: class): $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ nvb A C = nvb B D $;
 theorem nvb_set (G: hyps) (K: class) (v: set): $ G ⇒ isset (nvb K v) $;
 theorem nvf_functional (G: hyps): $ G ⇒ functional nvf $;
 --| The recursion equation, at any node.
 theorem nvf_node (G: hyps) (k s: set):
   $ G ⇒ k ∊ ω $ > $ G ⇒ s ∊ fseq (trees ω) $ > $ G ⇒ fv nvf ⟨ k , s ⟩ = nvb k (ccom nvf s) $;
+--| `nvf` is defined at every tree.
+theorem nvf_cdm (G: hyps): $ G ⇒ cdm nvf = trees ω $;
+--| Class form of `nvf_node`.
+theorem nvf_node_c (G: hyps) (K S: class):
+  $ G ⇒ K ∈ ω $ > $ G ⇒ S ∈ fseq (trees ω) $ > $ G ⇒ fv nvf ⟨ K , S ⟩ = nvb K (ccom nvf S) $;
 theorem nvf_nz (G: hyps): $ G ⇒ fv nvf ⟨ kc_nz , ∅ ⟩ = ∅ $;
 theorem nvf_s (G: hyps) (T: class):
   $ G ⇒ T ∈ trees ω $ > $ G ⇒ fv nvf ⟨ kc_s , scons T ∅ ⟩ = suc (fv nvf T) $;
@@ -176,9 +233,16 @@ theorem lv_eq (G: hyps) (A B C D: class): $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ 
 theorem sb_c_lv {x: set} (t: set x) (A B: class x):
   $ (⟦ x / t ⟧ (lv A B)) ≐ lv (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
 theorem lvb_set (G: hyps) (K S: class) (v: set): $ G ⇒ isset (lvb K S v) $;
+theorem lvb_eq (G: hyps) (K K2 S S2 A B: class):
+  $ G ⇒ K = K2 $ > $ G ⇒ S = S2 $ > $ G ⇒ A = B $ > $ G ⇒ lvb K S A = lvb K2 S2 B $;
 theorem lvf_functional (G: hyps): $ G ⇒ functional lvf $;
 theorem lvf_node (G: hyps) (k s: set):
   $ G ⇒ k ∊ ω $ > $ G ⇒ s ∊ fseq (trees ω) $ > $ G ⇒ fv lvf ⟨ k , s ⟩ = lvb k s (ccom lvf s) $;
+--| Class form of `lvf_node`.
+theorem lvf_node_c (G: hyps) (K S: class):
+  $ G ⇒ K ∈ ω $ > $ G ⇒ S ∈ fseq (trees ω) $ > $ G ⇒ fv lvf ⟨ K , S ⟩ = lvb K S (ccom lvf S) $;
+--| `lvf` is defined at every tree.
+theorem lvf_cdm (G: hyps): $ G ⇒ cdm lvf = trees ω $;
 theorem lv_lz (G: hyps) (A: class): $ G ⇒ lv ⟨ kc_lz , ∅ ⟩ A = ∅ $;
 theorem lv_ls (G: hyps) (T: class) (w: set):
   $ G ⇒ T ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ lv ⟨ kc_ls , scons T ∅ ⟩ w = suc (lv T w) $;
@@ -216,8 +280,19 @@ theorem lsv_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ lsv A C ≐ ls
 --| @rewrite
 theorem sb_c_lsv {x: set} (t: set x) (A B: class x):
   $ (⟦ x / t ⟧ (lsv A B)) ≐ lsv (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+theorem lsv_eq (G: hyps) (A B C D: class): $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ lsv A C = lsv B D $;
 theorem lsb_set (G: hyps) (K S: class) (v: set): $ G ⇒ isset (lsb K S v) $;
+theorem lsb_eq (G: hyps) (K K2 S S2 A B: class):
+  $ G ⇒ K = K2 $ > $ G ⇒ S = S2 $ > $ G ⇒ A = B $ > $ G ⇒ lsb K S A = lsb K2 S2 B $;
 theorem lsf_functional (G: hyps): $ G ⇒ functional lsf $;
+--| `lsf` is defined at every tree.
+theorem lsf_cdm (G: hyps): $ G ⇒ cdm lsf = trees ω $;
+--| The recursion equation of `lsf`, at any node.
+theorem lsf_node (G: hyps) (k q: set):
+  $ G ⇒ k ∊ ω $ > $ G ⇒ q ∊ fseq (trees ω) $ > $ G ⇒ fv lsf ⟨ k , q ⟩ = lsb k q (ccom lsf q) $;
+--| Class form of `lsf_node`.
+theorem lsf_node_c (G: hyps) (K S: class):
+  $ G ⇒ K ∈ ω $ > $ G ⇒ S ∈ fseq (trees ω) $ > $ G ⇒ fv lsf ⟨ K , S ⟩ = lsb K S (ccom lsf S) $;
 theorem lsv_lnil (G: hyps) (A: class): $ G ⇒ lsv ⟨ kc_lnil , ∅ ⟩ A = ∅ $;
 theorem lsv_lcons (G: hyps) (T T2: class) (w: set):
   $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ w ∊ lvals $ >
