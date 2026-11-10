@@ -955,8 +955,8 @@ and theorems. Until then, the trusted base in TG mode (below) is `tg.mm0`'s 76 a
 encoding axioms above and these 130, in place of the spec's 360: Part I's 209 clauses and the
 21 level rules are theorems.
 
-**The model** (`spec/tg/model-levels.mm0`, `spec/tg/model-den.mm0`, 2026-11-09; layer C of
-the reduction). Definitions and theorems only: no axiom, so nothing here is trusted beyond
+**The model** (`spec/tg/model-levels.mm0`, `spec/tg/model-den.mm0`, 2026-11-09, layer C of
+the reduction; `spec/tg/model-meta.mm0`, 2026-11-10, layer D). Definitions and theorems only: no axiom, so nothing here is trusted beyond
 `tg.mm0` and the encoding. What it changes in TG mode is the reading of the spec's `leqv`,
 which is now a definition: a level valuation is a function from `ω` to `ω` (`lvals`), each
 level's value is computed by structural recursion on its tree (`lv`: `lz` is 0, `ls` adds
@@ -984,6 +984,13 @@ The rest of the model is not yet the spec's `deq`, so it changes nothing that is
   valuation and satisfying valuation. Symmetry, transitivity, conversion, `sortDF`, `lamDF`,
   `forallEDF`, `proofIrrel` and `inh_i` are theorems for every hook (`msymm` .. `minh_ty`).
   The spec's `deq` becomes `mdeq` at the hook the later layers define.
+- **The metatheory of the syntax** (`model-meta.mm0`) relates the spec's `closed`, `lift`
+  and `inst` to the denotation, for every derivable atom (the admissible clauses
+  `lift_closed` and `inst_closed` included) and every hook. A closed term's value depends on
+  the valuation only below `k`. `lift n k e e2` makes `e2` at `p ++ q ++ s` equal `e` at
+  `p ++ s` (`p` of length `k`, `q` of length `n`). `inst k e a e2` makes `e2` at `p ++ s`
+  equal `e` at `p ++ (x :: s)`, with `x` the value of `a` at `s`. These are what the proofs
+  of `beta`, `appDF`, `instDF`, `weakDF` and the context lemmas will use.
 
 **TG mode: a certificate verified against the library** (2026-11-09). The same certificate
 can be checked against the library instead of the spec:

@@ -1,0 +1,99 @@
+-- model-meta.mm0: the metatheory of the denotation (layer D of the reduction,
+-- audit §11): what closedness, lifting and substitution do to the value of an
+-- expression, for every derivable atom of `closed`, `lift` and `inst` (every
+-- clause, the admissible `lift_closed` and `inst_closed` included) and every
+-- hook `M`. A valuation `r ∈ fseq u` lists the values of `#0`, `#1`, ...; the
+-- statements cut it with `scat`:
+--   closed (D3)  the value depends on `r` only below `k`;
+--   lift (D1)    `lift n k e e2`: `e2` at `p ++ q ++ s` is `e` at `p ++ s`, for
+--                `p` of length `k` and `q` of length `n`;
+--   inst (D2)    `inst k e a e2`: `e2` at `p ++ s` is `e` at
+--                `p ++ (x :: s)`, for `p` of length `k` and `x` the value of
+--                `a` at `s`;
+-- first for the atoms over trees (`lrel_*_sem`, which the inductions need),
+-- then for the spec's relations (`*_den`). Off the valuations (`r ∉ fseq u`)
+-- an expression node's value is `∅`, which settles the binders' bodies at
+-- arguments outside `u` (`dt_out`, and the trees of derivable atoms are such
+-- nodes: `lrel_*_out`). Imports model-den.mm0; proofs in model-meta.auf.
+
+import "model-den.mm0";
+
+-- --------------------------------------------------------------------------
+-- Expression nodes off the valuations
+-- --------------------------------------------------------------------------
+
+--| An expression node's value at a class that is not a valuation is `∅`.
+theorem dt_out (G: hyps) (M K S W R: class) (u: set):
+  $ G ⇒ K ∈ kstr $ > $ G ⇒ S ∈ fseq (trees ω) $ > $ G ⇒ ¬ R ∈ fseq u $ >
+  $ G ⇒ dt u M ⟨ K , S ⟩ W R = ∅ $;
+--| The expressions of derivable `closed`, `lift` and `inst` atoms are
+--| expression nodes, so the same holds of them.
+theorem lrel_closed_out (G: hyps) (M W R: class) (u t1 t2: set):
+  $ G ⇒ ra_closed t1 t2 ∈ lrel $ > $ G ⇒ ¬ R ∈ fseq u $ > $ G ⇒ dt u M t2 W R = ∅ $;
+theorem lrel_lift_out_l (G: hyps) (M W R: class) (u t1 t2 t3 t4: set):
+  $ G ⇒ ra_lift t1 t2 t3 t4 ∈ lrel $ > $ G ⇒ ¬ R ∈ fseq u $ > $ G ⇒ dt u M t3 W R = ∅ $;
+theorem lrel_lift_out_r (G: hyps) (M W R: class) (u t1 t2 t3 t4: set):
+  $ G ⇒ ra_lift t1 t2 t3 t4 ∈ lrel $ > $ G ⇒ ¬ R ∈ fseq u $ > $ G ⇒ dt u M t4 W R = ∅ $;
+theorem lrel_inst_out_l (G: hyps) (M W R: class) (u t1 t2 t3 t4: set):
+  $ G ⇒ ra_inst t1 t2 t3 t4 ∈ lrel $ > $ G ⇒ ¬ R ∈ fseq u $ > $ G ⇒ dt u M t2 W R = ∅ $;
+theorem lrel_inst_out_r (G: hyps) (M W R: class) (u t1 t2 t3 t4: set):
+  $ G ⇒ ra_inst t1 t2 t3 t4 ∈ lrel $ > $ G ⇒ ¬ R ∈ fseq u $ > $ G ⇒ dt u M t4 W R = ∅ $;
+
+-- --------------------------------------------------------------------------
+-- Closedness (D3)
+-- --------------------------------------------------------------------------
+
+--| An expression closed below `k` has the same value at valuations that agree
+--| below `k`.
+theorem lrel_closed_sem (G: hyps) {i: set} (M: class) (u w t1 t2 r r2: set):
+  $ G ⇒ ra_closed t1 t2 ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ r2 ∊ fseq u $ >
+  $ G ⇒ ∀ i (i ∊ fv nvf t1 → fv r i = fv r2 i) $ >
+  $ G ⇒ dt u M t2 w r = dt u M t2 w r2 $;
+theorem closed_den (G: hyps) {i: set} (M: class) (k: nat) (e: expr) (u w r r2: set):
+  $ closed k e $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ r2 ∊ fseq u $ >
+  $ G ⇒ ∀ i (i ∊ fv nvf (enc_nat k) → fv r i = fv r2 i) $ >
+  $ G ⇒ dt u M (enc_expr e) w r = dt u M (enc_expr e) w r2 $;
+
+-- --------------------------------------------------------------------------
+-- Lifting (D1)
+-- --------------------------------------------------------------------------
+
+--| `lift n k e e2`: `e2` at `p ++ q ++ s` is `e` at `p ++ s` when `p` has
+--| length `k` and `q` length `n`.
+theorem lrel_lift_sem (G: hyps) (M: class) (u w t1 t2 t3 t4 p q s: set):
+  $ G ⇒ ra_lift t1 t2 t3 t4 ∈ lrel $ > $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ p ∊ fseq u $ > $ G ⇒ cdm p = fv nvf t2 $ > $ G ⇒ q ∊ fseq u $ > $ G ⇒ cdm q = fv nvf t1 $ >
+  $ G ⇒ s ∊ fseq u $ >
+  $ G ⇒ dt u M t4 w (scat p (scat q s)) = dt u M t3 w (scat p s) $;
+theorem lift_den (G: hyps) (M: class) (n k: nat) (e e2: expr) (u w p q s: set):
+  $ lift n k e e2 $ > $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ p ∊ fseq u $ > $ G ⇒ cdm p = fv nvf (enc_nat k) $ >
+  $ G ⇒ q ∊ fseq u $ > $ G ⇒ cdm q = fv nvf (enc_nat n) $ > $ G ⇒ s ∊ fseq u $ >
+  $ G ⇒ dt u M (enc_expr e2) w (scat p (scat q s)) = dt u M (enc_expr e) w (scat p s) $;
+--| At `k = 0`: weakening by `n` values in front.
+theorem lift0_den (G: hyps) (M: class) (n: nat) (e e2: expr) (u w q s: set):
+  $ lift n nz e e2 $ > $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ q ∊ fseq u $ > $ G ⇒ cdm q = fv nvf (enc_nat n) $ > $ G ⇒ s ∊ fseq u $ >
+  $ G ⇒ dt u M (enc_expr e2) w (scat q s) = dt u M (enc_expr e) w s $;
+
+-- --------------------------------------------------------------------------
+-- Substitution (D2)
+-- --------------------------------------------------------------------------
+
+--| `inst k e a e2`: `e2` at `p ++ s` is `e` at `p ++ (x :: s)`, with `x` the
+--| value of `a` at `s` (an element of `u`), when `p` has length `k`.
+theorem lrel_inst_sem (G: hyps) (M: class) (u w t1 t2 t3 t4 p s: set):
+  $ G ⇒ ra_inst t1 t2 t3 t4 ∈ lrel $ > $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ p ∊ fseq u $ > $ G ⇒ cdm p = fv nvf t1 $ > $ G ⇒ s ∊ fseq u $ >
+  $ G ⇒ dt u M t3 w s ∈ u $ >
+  $ G ⇒ dt u M t4 w (scat p s) = dt u M t2 w (scat p (scons (dt u M t3 w s) s)) $;
+theorem inst_den (G: hyps) (M: class) (k: nat) (e a e2: expr) (u w p s: set):
+  $ inst k e a e2 $ > $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ p ∊ fseq u $ > $ G ⇒ cdm p = fv nvf (enc_nat k) $ > $ G ⇒ s ∊ fseq u $ >
+  $ G ⇒ dt u M (enc_expr e2) w (scat p s) =
+      dt u M (enc_expr e) w (scat p (scons (dt u M (enc_expr a) w s) s)) $;
+--| At `k = 0`: the value of `e[a]` is that of `e` at the value of `a` in front
+--| (the heart of `beta`).
+theorem inst0_den (G: hyps) (M: class) (e a e2: expr) (u w s: set):
+  $ inst nz e a e2 $ > $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ s ∊ fseq u $ >
+  $ G ⇒ dt u M (enc_expr e2) w s = dt u M (enc_expr e) w (scons (dt u M (enc_expr a) w s) s) $;
