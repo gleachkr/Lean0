@@ -182,6 +182,7 @@ theorem kstr_lam (G: hyps): $ G ⇒ kc_lam ∈ kstr $;
 theorem kstr_pi (G: hyps): $ G ⇒ kc_pi ∈ kstr $;
 theorem kstr_proj (G: hyps): $ G ⇒ kc_proj ∈ kstr $;
 theorem kexa_kstr (G: hyps): $ G ⇒ kexa ⊆ kstr $;
+theorem kstr_omega (G: hyps): $ G ⇒ kstr ⊆ ω $;
 theorem kexa_notin_lt (G: hyps) (A: class): $ G ⇒ A ∈ kc_cst $ > $ G ⇒ ¬ A ∈ kexa $;
 theorem kexa_notin_proj (G: hyps): $ G ⇒ ¬ kc_proj ∈ kexa $;
 
@@ -217,6 +218,28 @@ theorem dt_proj (G: hyps) (M T T2 T3: class) (u w r: set):
 theorem dt_atom (G: hyps) (M K S: class) (u w r: set):
   $ G ⇒ K ∈ kexa $ > $ G ⇒ S ∈ fseq (trees ω) $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ dt u M ⟨ K , S ⟩ w r = mclip u (ap (fv M ⟨ u , ⟨ K , ⟨ S , ccom (dnf u M) S ⟩ ⟩ ⟩) w) $;
+--| Class forms of the equations: the level valuation and the valuation as classes.
+theorem dt_bvar_c (G: hyps) (M T W R: class) (u: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ dt u M ⟨ kc_bvar , scons T ∅ ⟩ W R = fv R (fv nvf T) $;
+theorem dt_srt_c (G: hyps) (M T W R: class) (u: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ dt u M ⟨ kc_srt , scons T ∅ ⟩ W R = fv uni (lv T W) $;
+theorem dt_app_c (G: hyps) (M T T2 W R: class) (u: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ dt u M ⟨ kc_app , scons T (scons T2 ∅) ⟩ W R = ap (dt u M T W R) (dt u M T2 W R) $;
+theorem dt_lam_c {x: set} (G: hyps) (M T T2 W R: class) (u: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ dt u M ⟨ kc_lam , scons T (scons T2 ∅) ⟩ W R = clam x (dt u M T W R) (dt u M T2 W (scons x R)) $;
+theorem dt_pi_c {x: set} (G: hyps) (M T T2 W R: class) (u: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ dt u M ⟨ kc_pi , scons T (scons T2 ∅) ⟩ W R = cpi x (dt u M T W R) (dt u M T2 W (scons x R)) $;
+theorem dt_proj_c (G: hyps) (M T T2 T3 W R: class) (u: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ T3 ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ dt u M ⟨ kc_proj , scons T (scons T2 (scons T3 ∅)) ⟩ W R = fv (dt u M T3 W R) (suc (fv nvf T2)) $;
+theorem dt_atom_c (G: hyps) (M K S W R: class) (u: set):
+  $ G ⇒ K ∈ kexa $ > $ G ⇒ S ∈ fseq (trees ω) $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ dt u M ⟨ K , S ⟩ W R = mclip u (ap (fv M ⟨ u , ⟨ K , ⟨ S , ccom (dnf u M) S ⟩ ⟩ ⟩) W) $;
 --| Every expression denotes an element of the universe (by induction on the
 --| trees of sort `expr`).
 theorem dt_in_u (G: hyps) (M: class) (u t w r: set):
@@ -224,6 +247,11 @@ theorem dt_in_u (G: hyps) (M: class) (u t w r: set):
   $ G ⇒ dt u M t w r ∈ u $;
 theorem den_in_u (G: hyps) (M: class) (e: expr) (u w r: set):
   $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ dt u M (enc_expr e) w r ∈ u $;
+theorem dt_in_u_c (G: hyps) (M W R: class) (u t: set):
+  $ G ⇒ uadm u $ > $ G ⇒ t ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ dt u M t W R ∈ u $;
+theorem den_in_u_c (G: hyps) (M W R: class) (e: expr) (u: set):
+  $ G ⇒ uadm u $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ dt u M (enc_expr e) W R ∈ u $;
 
 -- --------------------------------------------------------------------------
 -- Satisfaction (C4)

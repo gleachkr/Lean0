@@ -1092,6 +1092,28 @@ l11: $ G ⇒ kexa ⊆ kstr $ by subset_trans [l9, l10]
 
 -- m4: propositional tools for the case analysis of a step.
 
+kstr_omega
+----------
+k1: $ G ⇒ kexa ⊆ ω $ by kexa_omega
+m5: $ G ⇒ kc_proj ∈ ω $ by kc_proj_omega
+s5: $ G ⇒ csn kc_proj ⊆ ω $ by csn_subset_c [m5]
+u5: $ G ⇒ csn kc_proj ∪ kexa ⊆ ω $ by cun_least [s5, k1]
+m4: $ G ⇒ kc_pi ∈ ω $ by kc_pi_omega
+s4: $ G ⇒ csn kc_pi ⊆ ω $ by csn_subset_c [m4]
+u4: $ G ⇒ csn kc_pi ∪ (csn kc_proj ∪ kexa) ⊆ ω $ by cun_least [s4, u5]
+m3: $ G ⇒ kc_lam ∈ ω $ by kc_lam_omega
+s3: $ G ⇒ csn kc_lam ⊆ ω $ by csn_subset_c [m3]
+u3: $ G ⇒ csn kc_lam ∪ (csn kc_pi ∪ (csn kc_proj ∪ kexa)) ⊆ ω $ by cun_least [s3, u4]
+m2: $ G ⇒ kc_app ∈ ω $ by kc_app_omega
+s2: $ G ⇒ csn kc_app ⊆ ω $ by csn_subset_c [m2]
+u2: $ G ⇒ csn kc_app ∪ (csn kc_lam ∪ (csn kc_pi ∪ (csn kc_proj ∪ kexa))) ⊆ ω $ by cun_least [s2, u3]
+m1: $ G ⇒ kc_srt ∈ ω $ by kc_srt_omega
+s1: $ G ⇒ csn kc_srt ⊆ ω $ by csn_subset_c [m1]
+u1: $ G ⇒ csn kc_srt ∪ (csn kc_app ∪ (csn kc_lam ∪ (csn kc_pi ∪ (csn kc_proj ∪ kexa)))) ⊆ ω $ by cun_least [s1, u2]
+m0: $ G ⇒ kc_bvar ∈ ω $ by kc_bvar_omega
+s0: $ G ⇒ csn kc_bvar ⊆ ω $ by csn_subset_c [m0]
+u0: $ G ⇒ kstr ⊆ ω $ by cun_least [s0, u1]
+
 lemma m4_lt_ne (G: hyps) (A B: class): $ G ⇒ A ∈ B $ > $ G ⇒ ¬ A = B $
 ----
 l1: $ G , A = B ⇒ A ∈ B $ by weaken [#1]
@@ -2483,6 +2505,183 @@ l39: $ G , k = K , k ∊ ω , h = S , h ∊ fseq (trees ω) ⇒ dt u M ⟨ K , S
 l40: $ G , k = K , k ∊ ω ⇒ dt u M ⟨ K , S ⟩ w r = mclip u (ap (fv M ⟨ u , ⟨ K , ⟨ S , ccom (dnf u M) S ⟩ ⟩ ⟩) w) $ by wcel_elim [#2, l39]
 l41: $ G ⇒ dt u M ⟨ K , S ⟩ w r = mclip u (ap (fv M ⟨ u , ⟨ K , ⟨ S , ccom (dnf u M) S ⟩ ⟩ ⟩) w) $ by wcel_elim [l2, l40]
 
+dt_bvar_c
+---------
+e1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w = W $ by ax
+e2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ W = w $ by eq_sym [e1]
+e3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r = R $ by ax
+e4: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ R = r $ by eq_sym [e3]
+e5: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ u = u $ by eq_refl
+e6: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ M = M $ by eq_refl
+e7: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ ⟨ kc_bvar , scons T ∅ ⟩ = ⟨ kc_bvar , scons T ∅ ⟩ $ by eq_refl
+h0: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T ∈ trees ω $ by weaken [#1]
+hw: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w ∊ lvals $ by ax
+hr: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+s1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_bvar , scons T ∅ ⟩ w r = fv r (fv nvf T) $ by dt_bvar [h0, hw, hr]
+q1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_bvar , scons T ∅ ⟩ W R = dt u M ⟨ kc_bvar , scons T ∅ ⟩ w r $ by dt_eq [e5, e6, e7, e2, e4]
+q2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_bvar , scons T ∅ ⟩ W R = fv r (fv nvf T) $ by eq_trans [q1, s1]
+g1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ fv nvf T = fv nvf T $ by eq_refl
+q3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ fv r (fv nvf T) = fv R (fv nvf T) $ by fv_eq [e3, g1]
+q4: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_bvar , scons T ∅ ⟩ W R = fv R (fv nvf T) $ by eq_trans [q2, q3]
+f1: $ G , w = W , w ∊ lvals ⇒ dt u M ⟨ kc_bvar , scons T ∅ ⟩ W R = fv R (fv nvf T) $ by wcel_elim [#3, q4]
+f2: $ G ⇒ dt u M ⟨ kc_bvar , scons T ∅ ⟩ W R = fv R (fv nvf T) $ by wcel_elim [#2, f1]
+
+dt_srt_c
+--------
+e1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w = W $ by ax
+e2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ W = w $ by eq_sym [e1]
+e3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r = R $ by ax
+e4: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ R = r $ by eq_sym [e3]
+e5: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ u = u $ by eq_refl
+e6: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ M = M $ by eq_refl
+e7: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ ⟨ kc_srt , scons T ∅ ⟩ = ⟨ kc_srt , scons T ∅ ⟩ $ by eq_refl
+h0: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T ∈ trees ω $ by weaken [#1]
+hw: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w ∊ lvals $ by ax
+hr: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+s1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_srt , scons T ∅ ⟩ w r = fv uni (lv T w) $ by dt_srt [h0, hw, hr]
+q1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_srt , scons T ∅ ⟩ W R = dt u M ⟨ kc_srt , scons T ∅ ⟩ w r $ by dt_eq [e5, e6, e7, e2, e4]
+q2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_srt , scons T ∅ ⟩ W R = fv uni (lv T w) $ by eq_trans [q1, s1]
+g1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T = T $ by eq_refl
+g2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ lv T w = lv T W $ by lv_eq [g1, e1]
+g3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ uni = uni $ by eq_refl
+q3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ fv uni (lv T w) = fv uni (lv T W) $ by fv_eq [g3, g2]
+q4: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_srt , scons T ∅ ⟩ W R = fv uni (lv T W) $ by eq_trans [q2, q3]
+f1: $ G , w = W , w ∊ lvals ⇒ dt u M ⟨ kc_srt , scons T ∅ ⟩ W R = fv uni (lv T W) $ by wcel_elim [#3, q4]
+f2: $ G ⇒ dt u M ⟨ kc_srt , scons T ∅ ⟩ W R = fv uni (lv T W) $ by wcel_elim [#2, f1]
+
+dt_app_c
+--------
+e1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w = W $ by ax
+e2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ W = w $ by eq_sym [e1]
+e3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r = R $ by ax
+e4: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ R = r $ by eq_sym [e3]
+e5: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ u = u $ by eq_refl
+e6: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ M = M $ by eq_refl
+e7: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ ⟨ kc_app , scons T (scons T2 ∅) ⟩ = ⟨ kc_app , scons T (scons T2 ∅) ⟩ $ by eq_refl
+h0: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T ∈ trees ω $ by weaken [#1]
+h1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T2 ∈ trees ω $ by weaken [#2]
+hw: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w ∊ lvals $ by ax
+hr: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+s1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_app , scons T (scons T2 ∅) ⟩ w r = ap (dt u M T w r) (dt u M T2 w r) $ by dt_app [h0, h1, hw, hr]
+q1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_app , scons T (scons T2 ∅) ⟩ W R = dt u M ⟨ kc_app , scons T (scons T2 ∅) ⟩ w r $ by dt_eq [e5, e6, e7, e2, e4]
+q2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_app , scons T (scons T2 ∅) ⟩ W R = ap (dt u M T w r) (dt u M T2 w r) $ by eq_trans [q1, s1]
+g1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T = T $ by eq_refl
+g2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T2 = T2 $ by eq_refl
+g3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M T w r = dt u M T W R $ by dt_eq [e5, e6, g1, e1, e3]
+g4: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M T2 w r = dt u M T2 W R $ by dt_eq [e5, e6, g2, e1, e3]
+q3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ ap (dt u M T w r) (dt u M T2 w r) = ap (dt u M T W R) (dt u M T2 W R) $ by ap_eq [g3, g4]
+q4: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_app , scons T (scons T2 ∅) ⟩ W R = ap (dt u M T W R) (dt u M T2 W R) $ by eq_trans [q2, q3]
+f1: $ G , w = W , w ∊ lvals ⇒ dt u M ⟨ kc_app , scons T (scons T2 ∅) ⟩ W R = ap (dt u M T W R) (dt u M T2 W R) $ by wcel_elim [#4, q4]
+f2: $ G ⇒ dt u M ⟨ kc_app , scons T (scons T2 ∅) ⟩ W R = ap (dt u M T W R) (dt u M T2 W R) $ by wcel_elim [#3, f1]
+
+dt_lam_c
+--------
+e1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w = W $ by ax
+e2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ W = w $ by eq_sym [e1]
+e3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r = R $ by ax
+e4: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ R = r $ by eq_sym [e3]
+e5: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ u = u $ by eq_refl
+e6: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ M = M $ by eq_refl
+e7: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ ⟨ kc_lam , scons T (scons T2 ∅) ⟩ = ⟨ kc_lam , scons T (scons T2 ∅) ⟩ $ by eq_refl
+h0: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T ∈ trees ω $ by weaken [#1]
+h1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T2 ∈ trees ω $ by weaken [#2]
+hw: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w ∊ lvals $ by ax
+hr: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+s1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_lam , scons T (scons T2 ∅) ⟩ w r = clam x (dt u M T w r) (dt u M T2 w (scons x r)) $ by dt_lam [h0, h1, hw, hr]
+q1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_lam , scons T (scons T2 ∅) ⟩ W R = dt u M ⟨ kc_lam , scons T (scons T2 ∅) ⟩ w r $ by dt_eq [e5, e6, e7, e2, e4]
+q2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_lam , scons T (scons T2 ∅) ⟩ W R = clam x (dt u M T w r) (dt u M T2 w (scons x r)) $ by eq_trans [q1, s1]
+g1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T = T $ by eq_refl
+g2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T2 = T2 $ by eq_refl
+g3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M T w r = dt u M T W R $ by dt_eq [e5, e6, g1, e1, e3]
+g4: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ x = x $ by eq_refl
+g5: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ scons x r = scons x R $ by scons_eq [g4, e3]
+g6: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M T2 w (scons x r) = dt u M T2 W (scons x R) $ by dt_eq [e5, e6, g2, e1, g5]
+g7: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u , x ∊ dt u M T w r ⇒ dt u M T2 w (scons x r) = dt u M T2 W (scons x R) $ by weaken [g6]
+g8: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ x ∊ dt u M T w r → dt u M T2 w (scons x r) = dt u M T2 W (scons x R) $ by imp_intro [g7]
+g9: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ ∀ x (x ∊ dt u M T w r → dt u M T2 w (scons x r) = dt u M T2 W (scons x R)) $ by all_intro [g8]
+q3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ clam x (dt u M T w r) (dt u M T2 w (scons x r)) = clam x (dt u M T W R) (dt u M T2 W (scons x R)) $ by clam_eq_pt [g3, g9]
+q4: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_lam , scons T (scons T2 ∅) ⟩ W R = clam x (dt u M T W R) (dt u M T2 W (scons x R)) $ by eq_trans [q2, q3]
+f1: $ G , w = W , w ∊ lvals ⇒ dt u M ⟨ kc_lam , scons T (scons T2 ∅) ⟩ W R = clam x (dt u M T W R) (dt u M T2 W (scons x R)) $ by wcel_elim [#4, q4]
+f2: $ G ⇒ dt u M ⟨ kc_lam , scons T (scons T2 ∅) ⟩ W R = clam x (dt u M T W R) (dt u M T2 W (scons x R)) $ by wcel_elim [#3, f1]
+
+dt_pi_c
+-------
+e1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w = W $ by ax
+e2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ W = w $ by eq_sym [e1]
+e3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r = R $ by ax
+e4: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ R = r $ by eq_sym [e3]
+e5: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ u = u $ by eq_refl
+e6: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ M = M $ by eq_refl
+e7: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ ⟨ kc_pi , scons T (scons T2 ∅) ⟩ = ⟨ kc_pi , scons T (scons T2 ∅) ⟩ $ by eq_refl
+h0: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T ∈ trees ω $ by weaken [#1]
+h1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T2 ∈ trees ω $ by weaken [#2]
+hw: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w ∊ lvals $ by ax
+hr: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+s1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_pi , scons T (scons T2 ∅) ⟩ w r = cpi x (dt u M T w r) (dt u M T2 w (scons x r)) $ by dt_pi [h0, h1, hw, hr]
+q1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_pi , scons T (scons T2 ∅) ⟩ W R = dt u M ⟨ kc_pi , scons T (scons T2 ∅) ⟩ w r $ by dt_eq [e5, e6, e7, e2, e4]
+q2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_pi , scons T (scons T2 ∅) ⟩ W R = cpi x (dt u M T w r) (dt u M T2 w (scons x r)) $ by eq_trans [q1, s1]
+g1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T = T $ by eq_refl
+g2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T2 = T2 $ by eq_refl
+g3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M T w r = dt u M T W R $ by dt_eq [e5, e6, g1, e1, e3]
+g4: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ x = x $ by eq_refl
+g5: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ scons x r = scons x R $ by scons_eq [g4, e3]
+g6: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M T2 w (scons x r) = dt u M T2 W (scons x R) $ by dt_eq [e5, e6, g2, e1, g5]
+g7: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u , x ∊ dt u M T w r ⇒ dt u M T2 w (scons x r) = dt u M T2 W (scons x R) $ by weaken [g6]
+g8: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ x ∊ dt u M T w r → dt u M T2 w (scons x r) = dt u M T2 W (scons x R) $ by imp_intro [g7]
+g9: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ ∀ x (x ∊ dt u M T w r → dt u M T2 w (scons x r) = dt u M T2 W (scons x R)) $ by all_intro [g8]
+q3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ cpi x (dt u M T w r) (dt u M T2 w (scons x r)) = cpi x (dt u M T W R) (dt u M T2 W (scons x R)) $ by cpi_eq_pt [g3, g9]
+q4: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_pi , scons T (scons T2 ∅) ⟩ W R = cpi x (dt u M T W R) (dt u M T2 W (scons x R)) $ by eq_trans [q2, q3]
+f1: $ G , w = W , w ∊ lvals ⇒ dt u M ⟨ kc_pi , scons T (scons T2 ∅) ⟩ W R = cpi x (dt u M T W R) (dt u M T2 W (scons x R)) $ by wcel_elim [#4, q4]
+f2: $ G ⇒ dt u M ⟨ kc_pi , scons T (scons T2 ∅) ⟩ W R = cpi x (dt u M T W R) (dt u M T2 W (scons x R)) $ by wcel_elim [#3, f1]
+
+dt_proj_c
+---------
+e1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w = W $ by ax
+e2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ W = w $ by eq_sym [e1]
+e3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r = R $ by ax
+e4: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ R = r $ by eq_sym [e3]
+e5: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ u = u $ by eq_refl
+e6: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ M = M $ by eq_refl
+e7: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ ⟨ kc_proj , scons T (scons T2 (scons T3 ∅)) ⟩ = ⟨ kc_proj , scons T (scons T2 (scons T3 ∅)) ⟩ $ by eq_refl
+h0: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T ∈ trees ω $ by weaken [#1]
+h1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T2 ∈ trees ω $ by weaken [#2]
+h2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T3 ∈ trees ω $ by weaken [#3]
+hw: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w ∊ lvals $ by ax
+hr: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+s1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_proj , scons T (scons T2 (scons T3 ∅)) ⟩ w r = fv (dt u M T3 w r) (suc (fv nvf T2)) $ by dt_proj [h0, h1, h2, hw, hr]
+q1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_proj , scons T (scons T2 (scons T3 ∅)) ⟩ W R = dt u M ⟨ kc_proj , scons T (scons T2 (scons T3 ∅)) ⟩ w r $ by dt_eq [e5, e6, e7, e2, e4]
+q2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_proj , scons T (scons T2 (scons T3 ∅)) ⟩ W R = fv (dt u M T3 w r) (suc (fv nvf T2)) $ by eq_trans [q1, s1]
+g1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ T3 = T3 $ by eq_refl
+g2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M T3 w r = dt u M T3 W R $ by dt_eq [e5, e6, g1, e1, e3]
+g3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ suc (fv nvf T2) = suc (fv nvf T2) $ by eq_refl
+q3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ fv (dt u M T3 w r) (suc (fv nvf T2)) = fv (dt u M T3 W R) (suc (fv nvf T2)) $ by fv_eq [g2, g3]
+q4: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ kc_proj , scons T (scons T2 (scons T3 ∅)) ⟩ W R = fv (dt u M T3 W R) (suc (fv nvf T2)) $ by eq_trans [q2, q3]
+f1: $ G , w = W , w ∊ lvals ⇒ dt u M ⟨ kc_proj , scons T (scons T2 (scons T3 ∅)) ⟩ W R = fv (dt u M T3 W R) (suc (fv nvf T2)) $ by wcel_elim [#5, q4]
+f2: $ G ⇒ dt u M ⟨ kc_proj , scons T (scons T2 (scons T3 ∅)) ⟩ W R = fv (dt u M T3 W R) (suc (fv nvf T2)) $ by wcel_elim [#4, f1]
+
+dt_atom_c
+---------
+e1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w = W $ by ax
+e2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ W = w $ by eq_sym [e1]
+e3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r = R $ by ax
+e4: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ R = r $ by eq_sym [e3]
+e5: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ u = u $ by eq_refl
+e6: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ M = M $ by eq_refl
+e7: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ ⟨ K , S ⟩ = ⟨ K , S ⟩ $ by eq_refl
+h0: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ K ∈ kexa $ by weaken [#1]
+h1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ S ∈ fseq (trees ω) $ by weaken [#2]
+hw: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w ∊ lvals $ by ax
+hr: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+s1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ K , S ⟩ w r = mclip u (ap (fv M ⟨ u , ⟨ K , ⟨ S , ccom (dnf u M) S ⟩ ⟩ ⟩) w) $ by dt_atom [h0, h1, hw, hr]
+q1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ K , S ⟩ W R = dt u M ⟨ K , S ⟩ w r $ by dt_eq [e5, e6, e7, e2, e4]
+q2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ K , S ⟩ W R = mclip u (ap (fv M ⟨ u , ⟨ K , ⟨ S , ccom (dnf u M) S ⟩ ⟩ ⟩) w) $ by eq_trans [q1, s1]
+g1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ fv M ⟨ u , ⟨ K , ⟨ S , ccom (dnf u M) S ⟩ ⟩ ⟩ = fv M ⟨ u , ⟨ K , ⟨ S , ccom (dnf u M) S ⟩ ⟩ ⟩ $ by eq_refl
+g2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ ap (fv M ⟨ u , ⟨ K , ⟨ S , ccom (dnf u M) S ⟩ ⟩ ⟩) w = ap (fv M ⟨ u , ⟨ K , ⟨ S , ccom (dnf u M) S ⟩ ⟩ ⟩) W $ by ap_eq [g1, e1]
+q3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ mclip u (ap (fv M ⟨ u , ⟨ K , ⟨ S , ccom (dnf u M) S ⟩ ⟩ ⟩) w) = mclip u (ap (fv M ⟨ u , ⟨ K , ⟨ S , ccom (dnf u M) S ⟩ ⟩ ⟩) W) $ by mclip_eq [e5, g2]
+q4: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M ⟨ K , S ⟩ W R = mclip u (ap (fv M ⟨ u , ⟨ K , ⟨ S , ccom (dnf u M) S ⟩ ⟩ ⟩) W) $ by eq_trans [q2, q3]
+f1: $ G , w = W , w ∊ lvals ⇒ dt u M ⟨ K , S ⟩ W R = mclip u (ap (fv M ⟨ u , ⟨ K , ⟨ S , ccom (dnf u M) S ⟩ ⟩ ⟩) W) $ by wcel_elim [#4, q4]
+f2: $ G ⇒ dt u M ⟨ K , S ⟩ W R = mclip u (ap (fv M ⟨ u , ⟨ K , ⟨ S , ccom (dnf u M) S ⟩ ⟩ ⟩) W) $ by wcel_elim [#3, f1]
+
 lemma m5_s1 (G: hyps) (x: set):
   $ G ⇒ x ∈ trees ω $ > $ G ⇒ scons x ∅ ∈ fseq (trees ω) $
 ----
@@ -3076,6 +3275,39 @@ l12: $ G , t = enc_expr e , t ∊ ofsort lsig lopen ks_expr ⇒ r = r $ by eq_re
 l13: $ G , t = enc_expr e , t ∊ ofsort lsig lopen ks_expr ⇒ dt u M t w r = dt u M (enc_expr e) w r $ by dt_eq [l9, l10, l8, l11, l12]
 l14: $ G , t = enc_expr e , t ∊ ofsort lsig lopen ks_expr ⇒ dt u M (enc_expr e) w r ∈ u $ by wcel_eq_l [l13, l7]
 l15: $ G ⇒ dt u M (enc_expr e) w r ∈ u $ by wcel_elim [l2, l14]
+
+dt_in_u_c
+---------
+e1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w = W $ by ax
+e3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r = R $ by ax
+e5: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ u = u $ by eq_refl
+e6: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ M = M $ by eq_refl
+e7: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ t = t $ by eq_refl
+h0: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ uadm u $ by weaken [#1]
+h1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ t ∊ ofsort lsig lopen ks_expr $ by weaken [#2]
+hw: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w ∊ lvals $ by ax
+hr: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+s1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M t w r ∈ u $ by dt_in_u [h0, h1, hw, hr]
+q1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M t w r = dt u M t W R $ by dt_eq [e5, e6, e7, e1, e3]
+q2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M t W R ∈ u $ by wcel_eq_l [q1, s1]
+f1: $ G , w = W , w ∊ lvals ⇒ dt u M t W R ∈ u $ by wcel_elim [#4, q2]
+f2: $ G ⇒ dt u M t W R ∈ u $ by wcel_elim [#3, f1]
+
+den_in_u_c
+----------
+e1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w = W $ by ax
+e3: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r = R $ by ax
+e5: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ u = u $ by eq_refl
+e6: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ M = M $ by eq_refl
+e7: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ (enc_expr e) = (enc_expr e) $ by eq_refl
+h0: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ uadm u $ by weaken [#1]
+hw: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ w ∊ lvals $ by ax
+hr: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+s1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M (enc_expr e) w r ∈ u $ by den_in_u [h0, hw, hr]
+q1: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M (enc_expr e) w r = dt u M (enc_expr e) W R $ by dt_eq [e5, e6, e7, e1, e3]
+q2: $ G , w = W , w ∊ lvals , r = R , r ∊ fseq u ⇒ dt u M (enc_expr e) W R ∈ u $ by wcel_eq_l [q1, s1]
+f1: $ G , w = W , w ∊ lvals ⇒ dt u M (enc_expr e) W R ∈ u $ by wcel_elim [#3, q2]
+f2: $ G ⇒ dt u M (enc_expr e) W R ∈ u $ by wcel_elim [#2, f1]
 
 stb_congr
 ---------

@@ -53,6 +53,15 @@ theorem closed_den (G: hyps) {i: set} (M: class) (k: nat) (e: expr) (u w r r2: s
   $ closed k e $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ r2 ∊ fseq u $ >
   $ G ⇒ ∀ i (i ∊ fv nvf (enc_nat k) → fv r i = fv r2 i) $ >
   $ G ⇒ dt u M (enc_expr e) w r = dt u M (enc_expr e) w r2 $;
+--| Class forms: the level valuation and the valuations as classes.
+theorem lrel_closed_sem_c (G: hyps) {i: set} (M W R R2: class) (u t1 t2: set):
+  $ G ⇒ ra_closed t1 t2 ∈ lrel $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ R2 ∈ fseq u $ >
+  $ G ⇒ ∀ i (i ∊ fv nvf t1 → fv R i = fv R2 i) $ >
+  $ G ⇒ dt u M t2 W R = dt u M t2 W R2 $;
+theorem closed_den_c (G: hyps) {i: set} (M W R R2: class) (k: nat) (e: expr) (u: set):
+  $ closed k e $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ R2 ∈ fseq u $ >
+  $ G ⇒ ∀ i (i ∊ fv nvf (enc_nat k) → fv R i = fv R2 i) $ >
+  $ G ⇒ dt u M (enc_expr e) W R = dt u M (enc_expr e) W R2 $;
 
 -- --------------------------------------------------------------------------
 -- Lifting (D1)
@@ -75,6 +84,21 @@ theorem lift0_den (G: hyps) (M: class) (n: nat) (e e2: expr) (u w q s: set):
   $ lift n nz e e2 $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ q ∊ fseq u $ > $ G ⇒ cdm q = fv nvf (enc_nat n) $ > $ G ⇒ s ∊ fseq u $ >
   $ G ⇒ dt u M (enc_expr e2) w (scat q s) = dt u M (enc_expr e) w s $;
+--| Class forms.
+theorem lrel_lift_sem_c (G: hyps) (M W P Q S: class) (u t1 t2 t3 t4: set):
+  $ G ⇒ ra_lift t1 t2 t3 t4 ∈ lrel $ > $ G ⇒ W ∈ lvals $ >
+  $ G ⇒ P ∈ fseq u $ > $ G ⇒ cdm P = fv nvf t2 $ > $ G ⇒ Q ∈ fseq u $ > $ G ⇒ cdm Q = fv nvf t1 $ >
+  $ G ⇒ S ∈ fseq u $ >
+  $ G ⇒ dt u M t4 W (scat P (scat Q S)) = dt u M t3 W (scat P S) $;
+theorem lift_den_c (G: hyps) (M W P Q S: class) (n k: nat) (e e2: expr) (u: set):
+  $ lift n k e e2 $ > $ G ⇒ W ∈ lvals $ >
+  $ G ⇒ P ∈ fseq u $ > $ G ⇒ cdm P = fv nvf (enc_nat k) $ >
+  $ G ⇒ Q ∈ fseq u $ > $ G ⇒ cdm Q = fv nvf (enc_nat n) $ > $ G ⇒ S ∈ fseq u $ >
+  $ G ⇒ dt u M (enc_expr e2) W (scat P (scat Q S)) = dt u M (enc_expr e) W (scat P S) $;
+theorem lift0_den_c (G: hyps) (M W Q S: class) (n: nat) (e e2: expr) (u: set):
+  $ lift n nz e e2 $ > $ G ⇒ W ∈ lvals $ >
+  $ G ⇒ Q ∈ fseq u $ > $ G ⇒ cdm Q = fv nvf (enc_nat n) $ > $ G ⇒ S ∈ fseq u $ >
+  $ G ⇒ dt u M (enc_expr e2) W (scat Q S) = dt u M (enc_expr e) W S $;
 
 -- --------------------------------------------------------------------------
 -- Substitution (D2)
@@ -97,3 +121,17 @@ theorem inst_den (G: hyps) (M: class) (k: nat) (e a e2: expr) (u w p s: set):
 theorem inst0_den (G: hyps) (M: class) (e a e2: expr) (u w s: set):
   $ inst nz e a e2 $ > $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ s ∊ fseq u $ >
   $ G ⇒ dt u M (enc_expr e2) w s = dt u M (enc_expr e) w (scons (dt u M (enc_expr a) w s) s) $;
+--| Class forms.
+theorem lrel_inst_sem_c (G: hyps) (M W P S: class) (u t1 t2 t3 t4: set):
+  $ G ⇒ ra_inst t1 t2 t3 t4 ∈ lrel $ > $ G ⇒ W ∈ lvals $ >
+  $ G ⇒ P ∈ fseq u $ > $ G ⇒ cdm P = fv nvf t1 $ > $ G ⇒ S ∈ fseq u $ >
+  $ G ⇒ dt u M t3 W S ∈ u $ >
+  $ G ⇒ dt u M t4 W (scat P S) = dt u M t2 W (scat P (scons (dt u M t3 W S) S)) $;
+theorem inst_den_c (G: hyps) (M W P S: class) (k: nat) (e a e2: expr) (u: set):
+  $ inst k e a e2 $ > $ G ⇒ uadm u $ > $ G ⇒ W ∈ lvals $ >
+  $ G ⇒ P ∈ fseq u $ > $ G ⇒ cdm P = fv nvf (enc_nat k) $ > $ G ⇒ S ∈ fseq u $ >
+  $ G ⇒ dt u M (enc_expr e2) W (scat P S) =
+      dt u M (enc_expr e) W (scat P (scons (dt u M (enc_expr a) W S) S)) $;
+theorem inst0_den_c (G: hyps) (M W S: class) (e a e2: expr) (u: set):
+  $ inst nz e a e2 $ > $ G ⇒ uadm u $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ S ∈ fseq u $ >
+  $ G ⇒ dt u M (enc_expr e2) W S = dt u M (enc_expr e) W (scons (dt u M (enc_expr a) W S) S) $;

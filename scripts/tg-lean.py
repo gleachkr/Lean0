@@ -22,7 +22,9 @@ Reads the sorts and constructors of spec/lean.mm0 (every `term` whose sort is no
     determinacy of the computing relations later layers need (`DET`);
   - the label facts: every label is a natural number (`k*_X_omega`), and
     constructor labels differ (`kc_a_ne_b`, the earlier first); all proved
-    in lean-tg.auf.
+    in lean-tg.auf;
+  - congruence of each relation's atoms (`ra_R_congr`, `ra_R_eq`), proved there
+    too.
 
 It also writes spec/tg/lean-tg-rest.mm0, which imports the model (model.mm0, the
 chain of `model-*.mm0` files over lean-tg.mm0) and states the rest of the spec,
@@ -477,6 +479,24 @@ def render_labels(text):
     return "\n".join(o) + "\n"
 
 
+def render_congr(text):
+    """Congruence of the atoms `ra_R` declared in `text`: `≐` (for rewriting) and `=`."""
+    o = ["", "-- " + "-" * 74, "-- Congruence of the atoms", "-- " + "-" * 74, ""]
+    for r, args in re.findall(r"^def (ra_\w+) \(([^:]*): class\)", text, re.M):
+        n = len(args.split())
+        a = [f"A{i}" for i in range(1, n + 1)]
+        b = [f"B{i}" for i in range(1, n + 1)]
+        vs = " ".join(v for xy in zip(a, b) for v in xy)  # @congr: old₀ new₀ old₁ ...
+        lhs, rhs = f"{r} {' '.join(a)}", f"{r} {' '.join(b)}"
+        o.append("--| @congr")
+        o.append(f"theorem {r}_congr ({vs}: class): "
+                 + " > ".join(f"$ {x} ≐ {y} $" for x, y in zip(a, b)) + f" > $ {lhs} ≐ {rhs} $;")
+        o.append(f"theorem {r}_eq (G: hyps) ({vs}: class): "
+                 + " > ".join(f"$ G ⇒ {x} = {y} $" for x, y in zip(a, b))
+                 + f" > $ G ⇒ {lhs} = {rhs} $;")
+    return "\n".join(o) + "\n"
+
+
 def render_rest(text):
     """Parts II and III of the spec, as they are, in prefix form (see the module's doc)."""
     part1 = mm0math.Spec(text[:text.index(PART2)])
@@ -568,6 +588,7 @@ def main():
     sorts, ctors = parse(spec)
     text = render(sorts, ctors) + "\n".join(render_relations(spec, ctors)) + "\n"
     text += render_labels(text)
+    text += render_congr(text)
     files = [(OUT, text), (REST, render_rest(spec))]
     if sys.argv[1:] == ["--check"]:
         for path, t in files:

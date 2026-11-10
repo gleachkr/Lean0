@@ -112,6 +112,17 @@ theorem scons_fv_suc_c (G: hyps) (A S I: class):
 theorem scons_inj (G: hyps) (a b s t: set):
   $ G ⇒ rel s $ > $ G ⇒ rel t $ > $ G ⇒ scons a s = scons b t $ > $ G ⇒ a = b ∧ s = t $;
 theorem scons_ne_empty (G: hyps) (a s: set): $ G ⇒ scons a s = ∅ $ > $ G ⇒ ⊥ $;
+--| The head of a sequence over `A` is in `A`.
+theorem scons_fseq_hd (G: hyps) (A S: class) (x: set): $ G ⇒ scons x S ∈ fseq A $ > $ G ⇒ x ∊ A $;
+--| The range of a sequence (Horn premise lists are sequences).
+theorem crn_empty (G: hyps): $ G ⇒ crn ∅ = ∅ $;
+theorem crn_empty_sub (G: hyps) (X: class): $ G ⇒ crn ∅ ⊆ X $;
+theorem crn_scons_sub (G: hyps) (A S X: class):
+  $ G ⇒ A ∈ X $ > $ G ⇒ crn S ⊆ X $ > $ G ⇒ crn (scons A S) ⊆ X $;
+theorem crn_scons_head (G: hyps) (A S X: class):
+  $ G ⇒ isset A $ > $ G ⇒ crn (scons A S) ⊆ X $ > $ G ⇒ A ∈ X $;
+theorem crn_scons_tail (G: hyps) (A S X: class):
+  $ G ⇒ crn (scons A S) ⊆ X $ > $ G ⇒ crn S ⊆ X $;
 --| A sequence is empty or a `scons`.
 theorem fseq_cases (G: hyps) {x y: set} (A: class) (s: set):
   $ G ⇒ s ∊ fseq A $ > $ G ⇒ s = ∅ ∨ ∃ x ∃ y (x ∊ A ∧ y ∊ fseq A ∧ s = scons x y) $;
@@ -140,6 +151,22 @@ theorem scat_fv_r (G: hyps) (A: class) (s t i: set):
   $ G ⇒ fv (scat s t) (nadd (cdm s) i) = fv t i $;
 theorem scat_empty_l (G: hyps) (A: class) (t: set): $ G ⇒ t ∊ fseq A $ > $ G ⇒ scat ∅ t = t $;
 theorem scat_empty_r (G: hyps) (s: set): $ G ⇒ scat s ∅ = s $;
+--| Class forms of `scat_fv_l`, `scat_fv_r` (at every index of `ω`: past `cdm t` both
+--| sides are `∅`) and `scat_empty_l`.
+theorem scat_fv_l_c (G: hyps) (A: class) (s t: set) (I: class):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq A $ > $ G ⇒ I ∈ cdm s $ > $ G ⇒ fv (scat s t) I = fv s I $;
+theorem scat_fv_r_c (G: hyps) (A: class) (s t: set) (I: class):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq A $ > $ G ⇒ I ∈ ω $ >
+  $ G ⇒ fv (scat s t) (nadd (cdm s) I) = fv t I $;
+theorem scat_empty_l_c (G: hyps) (A T: class): $ G ⇒ T ∈ fseq A $ > $ G ⇒ scat ∅ T = T $;
+--| Sequences that agree below `cdm p` after a common prefix `p`, and below `suc K`
+--| after a common head.
+theorem scat_agree {i: set} (G: hyps) (A: class) (p s s2: set):
+  $ G ⇒ p ∊ fseq A $ > $ G ⇒ s ∊ fseq A $ > $ G ⇒ s2 ∊ fseq A $ >
+  $ G ⇒ ∀ i (i ∊ cdm p → fv (scat p s) i = fv (scat p s2) i) $;
+theorem scons_agree {i: set} (G: hyps) (K: class) (x s s2: set):
+  $ G ⇒ K ∈ ω $ > $ G ⇒ ∀ i (i ∊ K → fv s i = fv s2 i) $ >
+  $ G ⇒ ∀ i (i ∊ suc K → fv (scons x s) i = fv (scons x s2) i) $;
 theorem scat_scons (G: hyps) (A: class) (a s t: set):
   $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq A $ > $ G ⇒ scat (scons a s) t = scons a (scat s t) $;
 theorem scat_ssnoc (G: hyps) (A: class) (s t a: set):

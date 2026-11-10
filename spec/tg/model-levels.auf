@@ -1581,6 +1581,34 @@ z4: $ G ⇒ ∀ y (⟨ kr_le , scons t1 (scons y ∅) ⟩ ∈ lrel → fv nvf t1
 z5: $ G ⇒ ⟨ kr_le , scons t1 (scons t2 ∅) ⟩ ∈ lrel → fv nvf t1 ⊆ fv nvf t2 $ by all_elim (t := $ t2 $) [z4]
 z6: $ G ⇒ fv nvf t1 ⊆ fv nvf t2 $ by imp_elim [z5, #1]
 
+lrel_le_sem_c
+-------------
+l1: $ G , y = A ⇒ y = A $ by ax
+l2: $ G , y = A ⇒ scons t2 ∅ = scons t2 ∅ $ by eq_refl
+l3: $ G , y = A ⇒ scons y (scons t2 ∅) = scons A (scons t2 ∅) $ by scons_eq [l1, l2]
+l4: $ G , y = A ⇒ kr_le = kr_le $ by eq_refl
+l5: $ G , y = A ⇒ ⟨ kr_le , scons y (scons t2 ∅) ⟩ = ⟨ kr_le , scons A (scons t2 ∅) ⟩ $ by opair_eq [l4, l3]
+l6: $ G , y = A ⇒ ⟨ kr_le , scons A (scons t2 ∅) ⟩ = ⟨ kr_le , scons y (scons t2 ∅) ⟩ $ by eq_sym [l5]
+l7: $ G , y = A ⇒ ⟨ kr_le , scons A (scons t2 ∅) ⟩ ∈ lrel $ by weaken [#1]
+l8: $ G , y = A ⇒ ⟨ kr_le , scons y (scons t2 ∅) ⟩ ∈ lrel $ by wcel_eq_l [l6, l7]
+l9: $ G , y = A ⇒ fv nvf y ⊆ fv nvf t2 $ by lrel_le_sem [l8]
+l10: $ G , y = A ⇒ nvf = nvf $ by eq_refl
+l11: $ G , y = A ⇒ fv nvf y = fv nvf A $ by fv_eq [l10, l1]
+l12: $ G , y = A ⇒ fv nvf A ⊆ fv nvf t2 $ by subset_eq_l [l11, l9]
+l13: $ G ⇒ fv nvf A ⊆ fv nvf t2 $ by isset_elim [#2, l12]
+
+lrel_le_suc_sem
+---------------
+l0: $ G ⇒ isset ⟨ kc_s , scons t1 ∅ ⟩ $ by opair_isset
+l1: $ G ⇒ fv nvf ⟨ kc_s , scons t1 ∅ ⟩ ⊆ fv nvf t2 $ by lrel_le_sem_c [#1, l0]
+l2: $ G ⇒ t1 ∈ trees ω $ by welc_wcel [#2]
+l3: $ G ⇒ fv nvf ⟨ kc_s , scons t1 ∅ ⟩ = suc (fv nvf t1) $ by nvf_s [l2]
+l4: $ G ⇒ suc (fv nvf t1) ⊆ fv nvf t2 $ by subset_eq_l [l3, l1]
+l5: $ G ⇒ functional nvf $ by nvf_functional
+l6: $ G ⇒ isset (fv nvf t1) $ by fv_set [l5]
+l7: $ G ⇒ fv nvf t1 ∈ suc (fv nvf t1) $ by suc_mem [l6]
+l8: $ G ⇒ fv nvf t1 ∈ fv nvf t2 $ by wcel_subset [l4, l7]
+
 --| The trees `x` whose numbers add up in every derivable `add y x w`.
 def k3_addp (.x .y .w: set): class = $ {x | ∀ y ∀ w (⟨ kr_add , scons y (scons x (scons w ∅)) ⟩ ∈ lrel → fv nvf w = nadd (fv nvf y) (fv nvf x))} $
 

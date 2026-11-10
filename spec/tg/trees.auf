@@ -442,6 +442,66 @@ l21: $ G , b = L , k = K ⇒ K ∈ L ∧ S ∈ fseq (trees L) $ by isset_elim [#
 l22: $ G , b = L ⇒ K ∈ L ∧ S ∈ fseq (trees L) $ by isset_elim [#3, l21]
 l23: $ G ⇒ K ∈ L ∧ S ∈ fseq (trees L) $ by isset_elim [#1, l22]
 
+--| The head of a sequence whose range lies in X is in X.
+lemma z1_crn_hd (G: hyps) (X S: class) (x: set): $ G ⇒ crn (scons x S) ⊆ X $ > $ G ⇒ x ∊ X $
+----
+l1: $ G ⇒ isset ⟨ ∅ , x ⟩ $ by opair_isset
+l2: $ G , w = ⟨ ∅ , x ⟩ ⇒ w = ⟨ ∅ , x ⟩ $ by ax
+l3: $ G , w = ⟨ ∅ , x ⟩ ⇒ w ∊ csn ⟨ ∅ , x ⟩ $ by csn_intro [l2]
+l4: $ G , w = ⟨ ∅ , x ⟩ ⇒ w ∊ scons x S $ by cun_intro_l [l3]
+l5: $ G , w = ⟨ ∅ , x ⟩ ⇒ ⟨ ∅ , x ⟩ ∈ scons x S $ by wcel_intro [l2, l4]
+l6: $ G ⇒ ⟨ ∅ , x ⟩ ∈ scons x S $ by isset_elim [l1, l5]
+l7: $ G ⇒ isset ∅ $ by ax_empty
+m1: $ G , b = ∅ ⇒ b = ∅ $ by ax
+m2: $ G , b = ∅ ⇒ ∅ = b $ by eq_sym [m1]
+m3: $ G , b = ∅ ⇒ x = x $ by eq_refl
+m4: $ G , b = ∅ ⇒ ⟨ ∅ , x ⟩ = ⟨ b , x ⟩ $ by opair_eq [m2, m3]
+m5: $ G , b = ∅ ⇒ ⟨ ∅ , x ⟩ ∈ scons x S $ by weaken [l6]
+m6: $ G , b = ∅ ⇒ ⟨ b , x ⟩ ∈ scons x S $ by wcel_eq_l [m4, m5]
+m7: $ G , b = ∅ ⇒ x ∊ crn (scons x S) $ by crn_intro [m6]
+m8: $ G , b = ∅ ⇒ crn (scons x S) ⊆ X $ by weaken [#1]
+m9: $ G , b = ∅ ⇒ x ∊ X $ by subset_elim [m8, m7]
+m10: $ G ⇒ x ∊ X $ by isset_elim [l7, m9]
+
+--| The tail of a sequence whose range lies in X has its range in X.
+trees_kids1
+-----------
+l1: $ G ⇒ isset ∅ $ by ax_empty
+l2: $ G ⇒ isset (scons a ∅) $ by scons_set [l1]
+l3: $ G ⇒ K ∈ L ∧ scons a ∅ ∈ fseq (trees L) $ by trees_node_c [#1, #2, #3, l2]
+l4: $ G ⇒ scons a ∅ ∈ fseq (trees L) $ by and_elim_r [l3]
+l5: $ G ⇒ a ∊ trees L $ by scons_fseq_hd [l4]
+
+trees_kids2
+-----------
+l1: $ G ⇒ isset ∅ $ by ax_empty
+l2: $ G ⇒ isset (scons b ∅) $ by scons_set [l1]
+l2a: $ G ⇒ isset (scons a (scons b ∅)) $ by scons_set [l2]
+l3: $ G ⇒ K ∈ L ∧ scons a (scons b ∅) ∈ fseq (trees L) $ by trees_node_c [#1, #2, #3, l2a]
+l4: $ G ⇒ scons a (scons b ∅) ∈ fseq (trees L) $ by and_elim_r [l3]
+l5: $ G ⇒ a ∊ trees L $ by scons_fseq_hd [l4]
+l6: $ G ⇒ crn (scons a (scons b ∅)) ⊆ trees L $ by fseq_crn_c [l4]
+l7: $ G ⇒ crn (scons b ∅) ⊆ trees L $ by crn_scons_tail [l6]
+l8: $ G ⇒ b ∊ trees L $ by z1_crn_hd [l7]
+l9: $ G ⇒ a ∊ trees L ∧ b ∊ trees L $ by and_intro [l5, l8]
+
+trees_kids3
+-----------
+l1: $ G ⇒ isset ∅ $ by ax_empty
+l2: $ G ⇒ isset (scons c ∅) $ by scons_set [l1]
+l2a: $ G ⇒ isset (scons b (scons c ∅)) $ by scons_set [l2]
+l2b: $ G ⇒ isset (scons a (scons b (scons c ∅))) $ by scons_set [l2a]
+l3: $ G ⇒ K ∈ L ∧ scons a (scons b (scons c ∅)) ∈ fseq (trees L) $ by trees_node_c [#1, #2, #3, l2b]
+l4: $ G ⇒ scons a (scons b (scons c ∅)) ∈ fseq (trees L) $ by and_elim_r [l3]
+l5: $ G ⇒ a ∊ trees L $ by scons_fseq_hd [l4]
+l6: $ G ⇒ crn (scons a (scons b (scons c ∅))) ⊆ trees L $ by fseq_crn_c [l4]
+l7: $ G ⇒ crn (scons b (scons c ∅)) ⊆ trees L $ by crn_scons_tail [l6]
+l8: $ G ⇒ b ∊ trees L $ by z1_crn_hd [l7]
+l9: $ G ⇒ crn (scons c ∅) ⊆ trees L $ by crn_scons_tail [l7]
+l10: $ G ⇒ c ∊ trees L $ by z1_crn_hd [l9]
+l11: $ G ⇒ b ∊ trees L ∧ c ∊ trees L $ by and_intro [l8, l10]
+l12: $ G ⇒ a ∊ trees L ∧ b ∊ trees L ∧ c ∊ trees L $ by and_intro [l5, l11]
+
 --| The abstraction of membership in a class is included in it.
 lemma t1_cab_welc_subset {y: set} (G: hyps y) (P: class): $ G ⇒ {y | y ∊ P} ⊆ P $
 ----

@@ -991,6 +991,116 @@ l4: $ G , z = ⟨ ∅ , a ⟩ , z ∊ ∅ ⇒ z ∊ ∅ $ by ax
 l5: $ G , z = ⟨ ∅ , a ⟩ , z ∊ ∅ ⇒ ⊥ $ by empty_elim [l4]
 l6: $ G ⇒ ⊥ $ by wcel_elim [l3, l5]
 
+scons_fseq_hd
+-------------
+l1: $ G ⇒ crn (scons x S) ⊆ A $ by fseq_crn_c [#1]
+l2: $ G ⇒ isset x $ by isset_var
+l3: $ G ⇒ ⟨ ∅ , x ⟩ ∈ scons x S $ by s2_scons_zero [l2]
+l4: $ G ⇒ isset ∅ $ by ax_empty
+m1: $ G , b = ∅ ⇒ b = ∅ $ by ax
+m2: $ G , b = ∅ ⇒ ∅ = b $ by eq_sym [m1]
+m3: $ G , b = ∅ ⇒ x = x $ by eq_refl
+m4: $ G , b = ∅ ⇒ ⟨ ∅ , x ⟩ = ⟨ b , x ⟩ $ by opair_eq [m2, m3]
+m5: $ G , b = ∅ ⇒ ⟨ ∅ , x ⟩ ∈ scons x S $ by weaken [l3]
+m6: $ G , b = ∅ ⇒ ⟨ b , x ⟩ ∈ scons x S $ by wcel_eq_l [m4, m5]
+m7: $ G , b = ∅ ⇒ x ∊ crn (scons x S) $ by crn_intro [m6]
+m8: $ G , b = ∅ ⇒ crn (scons x S) ⊆ A $ by weaken [l1]
+m9: $ G , b = ∅ ⇒ x ∊ A $ by subset_elim [m8, m7]
+m10: $ G ⇒ x ∊ A $ by isset_elim [l4, m9]
+
+crn_empty
+---------
+l1: $ G , y ∊ crn ∅ ⇒ y ∊ crn ∅ $ by ax
+l2: $ G , ⟨ x , y ⟩ ∈ ∅ ⇒ ⟨ x , y ⟩ ∈ ∅ $ by ax
+l3: $ G , ⟨ x , y ⟩ ∈ ∅ , w = ⟨ x , y ⟩ , w ∊ ∅ ⇒ w ∊ ∅ $ by ax
+l4: $ G , ⟨ x , y ⟩ ∈ ∅ , w = ⟨ x , y ⟩ , w ∊ ∅ ⇒ ⊥ $ by empty_elim [l3]
+l5: $ G , ⟨ x , y ⟩ ∈ ∅ ⇒ ⊥ $ by wcel_elim [l2, l4]
+l6: $ G , y ∊ crn ∅ ⇒ ⊥ $ by crn_elim [l1, l5]
+l7: $ G ⇒ crn ∅ = ∅ $ by empty_eq_intro [l6]
+
+crn_empty_sub
+-------------
+l1: $ G ⇒ crn ∅ = ∅ $ by crn_empty
+l2: $ G ⇒ ∅ = crn ∅ $ by eq_sym [l1]
+l3: $ G ⇒ ∅ ⊆ X $ by empty_subset
+l4: $ G ⇒ crn ∅ ⊆ X $ by subset_eq_l [l2, l3]
+
+crn_scons_sub
+-------------
+l1: $ G , y ∊ crn (scons A S) ⇒ y ∊ crn (scons A S) $ by ax
+m1: $ G , ⟨ x , y ⟩ ∈ scons A S ⇒ ⟨ x , y ⟩ ∈ scons A S $ by ax
+m2: $ G , ⟨ x , y ⟩ ∈ scons A S ⇒ isset x $ by isset_var
+m3a: $ G , ⟨ x , y ⟩ ∈ scons A S ⇒ A ∈ X $ by weaken [#1]
+m3: $ G , ⟨ x , y ⟩ ∈ scons A S ⇒ isset A $ by wcel_isset [m3a]
+m4: $ G , ⟨ x , y ⟩ ∈ scons A S ⇒ (x = ∅ ∧ y = A) ∨ ∃ i (x = suc i ∧ ⟨ i , y ⟩ ∈ S) $ by scons_pair [m1, m2, m3]
+a1: $ G , ⟨ x , y ⟩ ∈ scons A S , x = ∅ ∧ y = A ⇒ x = ∅ ∧ y = A $ by ax
+a2: $ G , ⟨ x , y ⟩ ∈ scons A S , x = ∅ ∧ y = A ⇒ y = A $ by and_elim_r [a1]
+a3: $ G , ⟨ x , y ⟩ ∈ scons A S , x = ∅ ∧ y = A ⇒ A = y $ by eq_sym [a2]
+a4: $ G , ⟨ x , y ⟩ ∈ scons A S , x = ∅ ∧ y = A ⇒ A ∈ X $ by weaken [#1]
+a5: $ G , ⟨ x , y ⟩ ∈ scons A S , x = ∅ ∧ y = A ⇒ y ∈ X $ by wcel_eq_l [a3, a4]
+a6: $ G , ⟨ x , y ⟩ ∈ scons A S , x = ∅ ∧ y = A ⇒ y ∊ X $ by wcel_welc [a5]
+b1: $ G , ⟨ x , y ⟩ ∈ scons A S , x = suc i ∧ ⟨ i , y ⟩ ∈ S ⇒ x = suc i ∧ ⟨ i , y ⟩ ∈ S $ by ax
+b2: $ G , ⟨ x , y ⟩ ∈ scons A S , x = suc i ∧ ⟨ i , y ⟩ ∈ S ⇒ ⟨ i , y ⟩ ∈ S $ by and_elim_r [b1]
+b3: $ G , ⟨ x , y ⟩ ∈ scons A S , x = suc i ∧ ⟨ i , y ⟩ ∈ S ⇒ y ∊ crn S $ by crn_intro [b2]
+b4: $ G , ⟨ x , y ⟩ ∈ scons A S , x = suc i ∧ ⟨ i , y ⟩ ∈ S ⇒ crn S ⊆ X $ by weaken [#2]
+b5: $ G , ⟨ x , y ⟩ ∈ scons A S , x = suc i ∧ ⟨ i , y ⟩ ∈ S ⇒ y ∊ X $ by subset_elim [b4, b3]
+b6: $ G , ⟨ x , y ⟩ ∈ scons A S , ∃ i (x = suc i ∧ ⟨ i , y ⟩ ∈ S) ⇒ ∃ i (x = suc i ∧ ⟨ i , y ⟩ ∈ S) $ by ax
+b7: $ G , ⟨ x , y ⟩ ∈ scons A S , ∃ i (x = suc i ∧ ⟨ i , y ⟩ ∈ S) ⇒ y ∊ X $ by ex_elim [b6, b5]
+m5: $ G , ⟨ x , y ⟩ ∈ scons A S ⇒ y ∊ X $ by or_elim [m4, a6, b7]
+l2: $ G , y ∊ crn (scons A S) ⇒ y ∊ X $ by crn_elim [l1, m5]
+l3: $ G ⇒ crn (scons A S) ⊆ X $ by subset_intro [l2]
+
+crn_scons_head
+--------------
+l1: $ G ⇒ isset ⟨ ∅ , A ⟩ $ by opair_isset
+l2: $ G , w = ⟨ ∅ , A ⟩ ⇒ w = ⟨ ∅ , A ⟩ $ by ax
+l3: $ G , w = ⟨ ∅ , A ⟩ ⇒ w ∊ csn ⟨ ∅ , A ⟩ $ by csn_intro [l2]
+l4: $ G , w = ⟨ ∅ , A ⟩ ⇒ w ∊ scons A S $ by cun_intro_l [l3]
+l5: $ G , w = ⟨ ∅ , A ⟩ ⇒ ⟨ ∅ , A ⟩ ∈ scons A S $ by wcel_intro [l2, l4]
+l6: $ G ⇒ ⟨ ∅ , A ⟩ ∈ scons A S $ by isset_elim [l1, l5]
+l7: $ G ⇒ isset ∅ $ by ax_empty
+m1: $ G , b = ∅ , a = A ⇒ b = ∅ $ by ax
+m2: $ G , b = ∅ , a = A ⇒ a = A $ by ax
+m3: $ G , b = ∅ , a = A ⇒ ∅ = b $ by eq_sym [m1]
+m4: $ G , b = ∅ , a = A ⇒ A = a $ by eq_sym [m2]
+m5: $ G , b = ∅ , a = A ⇒ ⟨ ∅ , A ⟩ = ⟨ b , a ⟩ $ by opair_eq [m3, m4]
+m6: $ G , b = ∅ , a = A ⇒ ⟨ ∅ , A ⟩ ∈ scons A S $ by weaken [l6]
+m7: $ G , b = ∅ , a = A ⇒ ⟨ b , a ⟩ ∈ scons A S $ by wcel_eq_l [m5, m6]
+m8: $ G , b = ∅ , a = A ⇒ a ∊ crn (scons A S) $ by crn_intro [m7]
+m9: $ G , b = ∅ , a = A ⇒ crn (scons A S) ⊆ X $ by weaken [#2]
+m10: $ G , b = ∅ , a = A ⇒ a ∊ X $ by subset_elim [m9, m8]
+m11: $ G , b = ∅ , a = A ⇒ A ∈ X $ by wcel_intro [m2, m10]
+m12: $ G , b = ∅ ⇒ A ∈ X $ by isset_elim [#1, m11]
+m13: $ G ⇒ A ∈ X $ by isset_elim [l7, m12]
+
+crn_scons_tail
+--------------
+l1: $ G , y ∊ crn S ⇒ y ∊ crn S $ by ax
+m1: $ G , ⟨ x , y ⟩ ∈ S ⇒ isset ⟨ suc x , y ⟩ $ by opair_isset
+w1: $ G , ⟨ x , y ⟩ ∈ S , w = ⟨ suc x , y ⟩ ⇒ w = ⟨ suc x , y ⟩ $ by ax
+w2: $ G , ⟨ x , y ⟩ ∈ S , w = ⟨ suc x , y ⟩ ⇒ ⟨ x , y ⟩ ∈ S $ by ax
+w3: $ G , ⟨ x , y ⟩ ∈ S , w = ⟨ suc x , y ⟩ ⇒ w = ⟨ suc x , y ⟩ ∧ ⟨ x , y ⟩ ∈ S $ by and_intro [w1, w2]
+w4: $ G , ⟨ x , y ⟩ ∈ S , w = ⟨ suc x , y ⟩ ⇒ ∃ v (w = ⟨ suc x , v ⟩ ∧ ⟨ x , v ⟩ ∈ S) $ by ex_intro [w3]
+w5: $ G , ⟨ x , y ⟩ ∈ S , w = ⟨ suc x , y ⟩ ⇒ ∃ i ∃ v (w = ⟨ suc i , v ⟩ ∧ ⟨ i , v ⟩ ∈ S) $ by ex_intro [w4]
+w6: $ G , ⟨ x , y ⟩ ∈ S , w = ⟨ suc x , y ⟩ ⇒ w ∊ {z | ∃ i ∃ v (z = ⟨ suc i , v ⟩ ∧ ⟨ i , v ⟩ ∈ S)} $ by cab_intro [w5]
+w7: $ G , ⟨ x , y ⟩ ∈ S , w = ⟨ suc x , y ⟩ ⇒ w ∊ scons A S $ by cun_intro_r [w6]
+w8: $ G , ⟨ x , y ⟩ ∈ S , w = ⟨ suc x , y ⟩ ⇒ ⟨ suc x , y ⟩ ∈ scons A S $ by wcel_intro [w1, w7]
+m2: $ G , ⟨ x , y ⟩ ∈ S ⇒ ⟨ suc x , y ⟩ ∈ scons A S $ by isset_elim [m1, w8]
+m3a: $ G , ⟨ x , y ⟩ ∈ S ⇒ isset x $ by isset_var
+m3: $ G , ⟨ x , y ⟩ ∈ S ⇒ isset (suc x) $ by suc_set [m3a]
+j1: $ G , ⟨ x , y ⟩ ∈ S , j = suc x ⇒ j = suc x $ by ax
+j2: $ G , ⟨ x , y ⟩ ∈ S , j = suc x ⇒ suc x = j $ by eq_sym [j1]
+j3: $ G , ⟨ x , y ⟩ ∈ S , j = suc x ⇒ cv y = cv y $ by eq_refl
+j4: $ G , ⟨ x , y ⟩ ∈ S , j = suc x ⇒ ⟨ suc x , y ⟩ = ⟨ j , y ⟩ $ by opair_eq [j2, j3]
+j5: $ G , ⟨ x , y ⟩ ∈ S , j = suc x ⇒ ⟨ suc x , y ⟩ ∈ scons A S $ by weaken [m2]
+j6: $ G , ⟨ x , y ⟩ ∈ S , j = suc x ⇒ ⟨ j , y ⟩ ∈ scons A S $ by wcel_eq_l [j4, j5]
+j7: $ G , ⟨ x , y ⟩ ∈ S , j = suc x ⇒ y ∊ crn (scons A S) $ by crn_intro [j6]
+j8: $ G , ⟨ x , y ⟩ ∈ S , j = suc x ⇒ crn (scons A S) ⊆ X $ by weaken [#1]
+j9: $ G , ⟨ x , y ⟩ ∈ S , j = suc x ⇒ y ∊ X $ by subset_elim [j8, j7]
+m4: $ G , ⟨ x , y ⟩ ∈ S ⇒ y ∊ X $ by isset_elim [m3, j9]
+l2: $ G , y ∊ crn S ⇒ y ∊ X $ by crn_elim [l1, m4]
+l3: $ G ⇒ crn S ⊆ X $ by subset_intro [l2]
+
 def s2_shd (S: class) (.i .y .z: set): class = $ {z | ∃ i ∃ y (z = ⟨ i , y ⟩ ∧ ⟨ suc i , y ⟩ ∈ S)} $
 
 lemma s2_functional_elim_c (G: hyps) (F A: class) (b c: set):
@@ -1997,6 +2107,181 @@ e3: $ G ⇒ s ∪ s2_sh ∅ (cdm s) = s $ by eq_intro [d4, e2]
 e4: $ G ⇒ cdm s = cdm s $ by eq_refl
 e5: $ G ⇒ scat s ∅ = s ∪ s2_sh ∅ (cdm s) $ by s2_scat_eq [e4]
 e6: $ G ⇒ scat s ∅ = s $ by eq_trans [e5, e3]
+
+scat_fv_l_c
+-----------
+l1: $ G , i = I , i ∊ cdm s ⇒ i ∊ cdm s $ by ax
+l2: $ G , i = I , i ∊ cdm s ⇒ s ∊ fseq A $ by weaken [#1]
+l3: $ G , i = I , i ∊ cdm s ⇒ t ∊ fseq A $ by weaken [#2]
+l4: $ G , i = I , i ∊ cdm s ⇒ fv (scat s t) i = fv s i $ by scat_fv_l [l2, l3, l1]
+l5: $ G , i = I , i ∊ cdm s ⇒ i = I $ by ax
+l6: $ G , i = I , i ∊ cdm s ⇒ scat s t = scat s t $ by eq_refl
+l7: $ G , i = I , i ∊ cdm s ⇒ fv (scat s t) i = fv (scat s t) I $ by fv_eq [l6, l5]
+l8: $ G , i = I , i ∊ cdm s ⇒ s = s $ by eq_refl
+l9: $ G , i = I , i ∊ cdm s ⇒ fv s i = fv s I $ by fv_eq [l8, l5]
+l10: $ G , i = I , i ∊ cdm s ⇒ fv (scat s t) I = fv (scat s t) i $ by eq_sym [l7]
+l11: $ G , i = I , i ∊ cdm s ⇒ fv (scat s t) I = fv s i $ by eq_trans [l10, l4]
+l12: $ G , i = I , i ∊ cdm s ⇒ fv (scat s t) I = fv s I $ by eq_trans [l11, l9]
+l13: $ G ⇒ fv (scat s t) I = fv s I $ by wcel_elim [#3, l12]
+
+scat_fv_r_c
+-----------
+c1: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ i ∊ ω $ by ax
+c2: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ h ∊ ω $ by ax
+c3: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ i ∊ h ∨ h ⊆ i $ by nlt_or_le [c1, c2]
+c4: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ s ∊ fseq A $ by weaken [#1]
+c5: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ t ∊ fseq A $ by weaken [#2]
+c6: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ h = cdm t $ by ax
+c7: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ cdm t = h $ by eq_sym [c6]
+a1: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , i ∊ h ⇒ i ∊ h $ by ax
+a2: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , i ∊ h ⇒ h = cdm t $ by ax
+a3: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , i ∊ h ⇒ i ∊ cdm t $ by welc_eq [a2, a1]
+a4: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , i ∊ h ⇒ s ∊ fseq A $ by weaken [#1]
+a5: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , i ∊ h ⇒ t ∊ fseq A $ by weaken [#2]
+a6: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , i ∊ h ⇒ fv (scat s t) (nadd (cdm s) i) = fv t i $ by scat_fv_r [a4, a5, a3]
+b1: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ h ⊆ i $ by ax
+b2: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , i ∊ cdm t ⇒ i ∊ cdm t $ by ax
+b3: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , i ∊ cdm t ⇒ cdm t = h $ by weaken [c7]
+b4: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , i ∊ cdm t ⇒ i ∊ h $ by welc_eq [b3, b2]
+b5: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , i ∊ cdm t ⇒ h ⊆ i $ by ax
+b6: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , i ∊ cdm t ⇒ ⊥ $ by nlt_not_le [b4, b5]
+b7: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ i ∊ cdm t → ⊥ $ by imp_intro [b6]
+b8: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ fv t i = ∅ $ by fv_empty [b7]
+b9: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ s ∊ fseq A $ by weaken [#1]
+b9b: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ t ∊ fseq A $ by weaken [#2]
+b10: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ cdm s ∈ ω $ by fseq_len [b9]
+b11a: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ h ∊ ω $ by ax
+b11: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ h ∈ ω $ by welc_wcel [b11a]
+b12a: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ i ∊ ω $ by ax
+b12: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ i ∈ ω $ by welc_wcel [b12a]
+b13: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ nadd h (cdm s) ⊆ nadd i (cdm s) $ by nadd_mono_le_c [b11, b12, b10, b1]
+b14: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ nadd h (cdm s) = nadd (cdm s) h $ by nadd_comm_c [b11, b10]
+b15: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ nadd i (cdm s) = nadd (cdm s) i $ by nadd_comm_c [b12, b10]
+b16: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ nadd (cdm s) h ⊆ nadd i (cdm s) $ by subset_eq_l [b14, b13]
+b17: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ nadd (cdm s) h ⊆ nadd (cdm s) i $ by subset_eq_r [b15, b16]
+b18: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ cdm (scat s t) = nadd (cdm s) (cdm t) $ by scat_len [b9, b9b]
+b19: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ cdm s = cdm s $ by eq_refl
+b20: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ cdm t = h $ by weaken [c7]
+b21: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ nadd (cdm s) (cdm t) = nadd (cdm s) h $ by nadd_eq [b19, b20]
+b22: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ cdm (scat s t) = nadd (cdm s) h $ by eq_trans [b18, b21]
+b23: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ nadd (cdm s) h = cdm (scat s t) $ by eq_sym [b22]
+b24: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ cdm (scat s t) ⊆ nadd (cdm s) i $ by subset_eq_l [b23, b17]
+b25: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ nadd (cdm s) i ∈ ω $ by nadd_omega_c [b10, b12]
+e1: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , g = nadd (cdm s) i , g ∊ ω , g ∊ cdm (scat s t) ⇒ g ∊ cdm (scat s t) $ by ax
+e2: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , g = nadd (cdm s) i , g ∊ ω , g ∊ cdm (scat s t) ⇒ cdm (scat s t) ⊆ nadd (cdm s) i $ by weaken [b24]
+e3: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , g = nadd (cdm s) i , g ∊ ω , g ∊ cdm (scat s t) ⇒ g ∊ nadd (cdm s) i $ by subset_elim [e2, e1]
+e4: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , g = nadd (cdm s) i , g ∊ ω , g ∊ cdm (scat s t) ⇒ g = nadd (cdm s) i $ by ax
+e5: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , g = nadd (cdm s) i , g ∊ ω , g ∊ cdm (scat s t) ⇒ nadd (cdm s) i = g $ by eq_sym [e4]
+e6: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , g = nadd (cdm s) i , g ∊ ω , g ∊ cdm (scat s t) ⇒ g ∊ g $ by welc_eq [e5, e3]
+e7: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , g = nadd (cdm s) i , g ∊ ω , g ∊ cdm (scat s t) ⇒ ⊥ $ by notin_self [e6]
+e8: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , g = nadd (cdm s) i , g ∊ ω ⇒ g ∊ cdm (scat s t) → ⊥ $ by imp_intro [e7]
+e9: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , g = nadd (cdm s) i , g ∊ ω ⇒ fv (scat s t) g = ∅ $ by fv_empty [e8]
+e10: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , g = nadd (cdm s) i , g ∊ ω ⇒ scat s t = scat s t $ by eq_refl
+e11: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , g = nadd (cdm s) i , g ∊ ω ⇒ g = nadd (cdm s) i $ by ax
+e12: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , g = nadd (cdm s) i , g ∊ ω ⇒ fv (scat s t) g = fv (scat s t) (nadd (cdm s) i) $ by fv_eq [e10, e11]
+e13: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , g = nadd (cdm s) i , g ∊ ω ⇒ fv (scat s t) (nadd (cdm s) i) = fv (scat s t) g $ by eq_sym [e12]
+e14: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , g = nadd (cdm s) i , g ∊ ω ⇒ fv (scat s t) (nadd (cdm s) i) = ∅ $ by eq_trans [e13, e9]
+e15: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , g = nadd (cdm s) i , g ∊ ω ⇒ fv t i = ∅ $ by weaken [b8]
+e16: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , g = nadd (cdm s) i , g ∊ ω ⇒ ∅ = fv t i $ by eq_sym [e15]
+e17: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i , g = nadd (cdm s) i , g ∊ ω ⇒ fv (scat s t) (nadd (cdm s) i) = fv t i $ by eq_trans [e14, e16]
+b26: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω , h ⊆ i ⇒ fv (scat s t) (nadd (cdm s) i) = fv t i $ by wcel_elim [b25, e17]
+c8: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ fv (scat s t) (nadd (cdm s) i) = fv t i $ by or_elim [c3, a6, b26]
+c9: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ i = I $ by ax
+c10: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ cdm s = cdm s $ by eq_refl
+c11: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ nadd (cdm s) i = nadd (cdm s) I $ by nadd_eq [c10, c9]
+c12: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ scat s t = scat s t $ by eq_refl
+c13: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ fv (scat s t) (nadd (cdm s) i) = fv (scat s t) (nadd (cdm s) I) $ by fv_eq [c12, c11]
+c14: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ t = t $ by eq_refl
+c15: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ fv t i = fv t I $ by fv_eq [c14, c9]
+c16: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ fv (scat s t) (nadd (cdm s) I) = fv (scat s t) (nadd (cdm s) i) $ by eq_sym [c13]
+c17: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ fv (scat s t) (nadd (cdm s) I) = fv t i $ by eq_trans [c16, c8]
+c18: $ G , i = I , i ∊ ω , h = cdm t , h ∊ ω ⇒ fv (scat s t) (nadd (cdm s) I) = fv t I $ by eq_trans [c17, c15]
+c19: $ G , i = I , i ∊ ω ⇒ t ∊ fseq A $ by weaken [#2]
+c20: $ G , i = I , i ∊ ω ⇒ cdm t ∈ ω $ by fseq_len [c19]
+c21: $ G , i = I , i ∊ ω ⇒ fv (scat s t) (nadd (cdm s) I) = fv t I $ by wcel_elim [c20, c18]
+c22: $ G ⇒ fv (scat s t) (nadd (cdm s) I) = fv t I $ by wcel_elim [#3, c21]
+
+scat_empty_l_c
+--------------
+l1a: $ G , t = T , t ∊ fseq A ⇒ t ∊ fseq A $ by ax
+l1: $ G , t = T , t ∊ fseq A ⇒ scat ∅ t = t $ by scat_empty_l [l1a]
+l2: $ G , t = T , t ∊ fseq A ⇒ t = T $ by ax
+l3: $ G , t = T , t ∊ fseq A ⇒ ∅ = ∅ $ by eq_refl
+l4: $ G , t = T , t ∊ fseq A ⇒ scat ∅ t = scat ∅ T $ by scat_eq [l3, l2]
+l5: $ G , t = T , t ∊ fseq A ⇒ scat ∅ T = scat ∅ t $ by eq_sym [l4]
+l6: $ G , t = T , t ∊ fseq A ⇒ scat ∅ T = t $ by eq_trans [l5, l1]
+l7: $ G , t = T , t ∊ fseq A ⇒ scat ∅ T = T $ by eq_trans [l6, l2]
+l8: $ G ⇒ scat ∅ T = T $ by wcel_elim [#1, l7]
+
+scat_agree
+----------
+a1: $ G , i ∊ cdm p ⇒ p ∊ fseq A $ by weaken [#1]
+a2: $ G , i ∊ cdm p ⇒ s ∊ fseq A $ by weaken [#2]
+a3: $ G , i ∊ cdm p ⇒ s2 ∊ fseq A $ by weaken [#3]
+a4: $ G , i ∊ cdm p ⇒ i ∊ cdm p $ by ax
+a5: $ G , i ∊ cdm p ⇒ fv (scat p s) i = fv p i $ by scat_fv_l [a1, a2, a4]
+a6: $ G , i ∊ cdm p ⇒ fv (scat p s2) i = fv p i $ by scat_fv_l [a1, a3, a4]
+a7: $ G , i ∊ cdm p ⇒ fv p i = fv (scat p s2) i $ by eq_sym [a6]
+a8: $ G , i ∊ cdm p ⇒ fv (scat p s) i = fv (scat p s2) i $ by eq_trans [a5, a7]
+a9: $ G ⇒ i ∊ cdm p → fv (scat p s) i = fv (scat p s2) i $ by imp_intro [a8]
+a10: $ G ⇒ ∀ i (i ∊ cdm p → fv (scat p s) i = fv (scat p s2) i) $ by all_intro [a9]
+
+scons_agree
+-----------
+g1: $ G , m = K , m ∊ ω ⇒ m = K $ by ax
+g2: $ G , m = K , m ∊ ω ⇒ K = m $ by eq_sym [g1]
+g3: $ G , m = K , m ∊ ω ⇒ suc K = suc m $ by suc_eq [g2]
+g6: $ G , m = K , m ∊ ω ⇒ m ∊ ω $ by ax
+c1: $ G , m = K , m ∊ ω , j ∊ suc K ⇒ j ∊ suc K $ by ax
+c2: $ G , m = K , m ∊ ω , j ∊ suc K ⇒ suc K = suc m $ by weaken [g3]
+c3: $ G , m = K , m ∊ ω , j ∊ suc K ⇒ j ∊ suc m $ by welc_eq [c2, c1]
+c4: $ G , m = K , m ∊ ω , j ∊ suc K ⇒ m ∊ ω $ by weaken [g6]
+c5: $ G , m = K , m ∊ ω , j ∊ suc K ⇒ j ∊ ω $ by omega_suc_elem_omega [c4, c3]
+c6: $ G , m = K , m ∊ ω , j ∊ suc K ⇒ j = ∅ ∨ ∃ t (t ∊ ω ∧ j = suc t) $ by omega_cases [c5]
+a1: $ G , m = K , m ∊ ω , j ∊ suc K , j = ∅ ⇒ j = ∅ $ by ax
+a2: $ G , m = K , m ∊ ω , j ∊ suc K , j = ∅ ⇒ scons x s = scons x s $ by eq_refl
+a3: $ G , m = K , m ∊ ω , j ∊ suc K , j = ∅ ⇒ fv (scons x s) j = fv (scons x s) ∅ $ by fv_eq [a2, a1]
+a4: $ G , m = K , m ∊ ω , j ∊ suc K , j = ∅ ⇒ fv (scons x s) ∅ = x $ by scons_fv_zero
+a5: $ G , m = K , m ∊ ω , j ∊ suc K , j = ∅ ⇒ scons x s2 = scons x s2 $ by eq_refl
+a6: $ G , m = K , m ∊ ω , j ∊ suc K , j = ∅ ⇒ fv (scons x s2) j = fv (scons x s2) ∅ $ by fv_eq [a5, a1]
+a7: $ G , m = K , m ∊ ω , j ∊ suc K , j = ∅ ⇒ fv (scons x s2) ∅ = x $ by scons_fv_zero
+a8: $ G , m = K , m ∊ ω , j ∊ suc K , j = ∅ ⇒ fv (scons x s) j = x $ by eq_trans [a3, a4]
+a9: $ G , m = K , m ∊ ω , j ∊ suc K , j = ∅ ⇒ fv (scons x s2) j = x $ by eq_trans [a6, a7]
+a10: $ G , m = K , m ∊ ω , j ∊ suc K , j = ∅ ⇒ x = fv (scons x s2) j $ by eq_sym [a9]
+a11: $ G , m = K , m ∊ ω , j ∊ suc K , j = ∅ ⇒ fv (scons x s) j = fv (scons x s2) j $ by eq_trans [a8, a10]
+b1: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ t ∊ ω ∧ j = suc t $ by ax
+b2: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ j = suc t $ by and_elim_r [b1]
+b3a: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ j ∊ suc m $ by weaken [c3]
+b3: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ j ∈ suc m $ by welc_wcel [b3a]
+b4: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ suc t ∈ suc m $ by wcel_eq_l [b2, b3]
+b5a: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ m ∊ ω $ by weaken [g6]
+b5: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ ord m $ by ord_omega_elem [b5a]
+b6: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ t ∊ m $ by ord_suc_elem_suc_elim [b5, b4]
+b6a: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ m = K $ by weaken [g1]
+b6b: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ t ∊ K $ by welc_eq [b6a, b6]
+b7: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ ∀ i (i ∊ K → fv s i = fv s2 i) $ by weaken [#2]
+b8: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ t ∊ K → fv s t = fv s2 t $ by all_elim (t := $ t $) [b7]
+b9: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ fv s t = fv s2 t $ by imp_elim [b8, b6b]
+b10a: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ scons x s = scons x s $ by eq_refl
+b10: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ fv (scons x s) j = fv (scons x s) (suc t) $ by fv_eq [b10a, b2]
+b11: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ fv (scons x s) (suc t) = fv s t $ by scons_fv_suc
+b12a: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ scons x s2 = scons x s2 $ by eq_refl
+b12: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ fv (scons x s2) j = fv (scons x s2) (suc t) $ by fv_eq [b12a, b2]
+b13: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ fv (scons x s2) (suc t) = fv s2 t $ by scons_fv_suc
+b14: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ fv (scons x s) j = fv s t $ by eq_trans [b10, b11]
+b15: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ fv (scons x s) j = fv s2 t $ by eq_trans [b14, b9]
+b16: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ fv (scons x s2) j = fv s2 t $ by eq_trans [b12, b13]
+b17: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ fv s2 t = fv (scons x s2) j $ by eq_sym [b16]
+b18: $ G , m = K , m ∊ ω , j ∊ suc K , t ∊ ω ∧ j = suc t ⇒ fv (scons x s) j = fv (scons x s2) j $ by eq_trans [b15, b17]
+b19: $ G , m = K , m ∊ ω , j ∊ suc K , ∃ t (t ∊ ω ∧ j = suc t) ⇒ ∃ t (t ∊ ω ∧ j = suc t) $ by ax
+b20: $ G , m = K , m ∊ ω , j ∊ suc K , ∃ t (t ∊ ω ∧ j = suc t) ⇒ fv (scons x s) j = fv (scons x s2) j $ by ex_elim [b19, b18]
+c8: $ G , m = K , m ∊ ω , j ∊ suc K ⇒ fv (scons x s) j = fv (scons x s2) j $ by or_elim [c6, a11, b20]
+c9: $ G , m = K , m ∊ ω ⇒ j ∊ suc K → fv (scons x s) j = fv (scons x s2) j $ by imp_intro [c8]
+c10: $ G , m = K , m ∊ ω ⇒ ∀ j (j ∊ suc K → fv (scons x s) j = fv (scons x s2) j) $ by all_intro [c9]
+c11: $ _ ⇒ ∀ j (j ∊ suc K → fv (scons x s) j = fv (scons x s2) j) ↔ ∀ i (i ∊ suc K → fv (scons x s) i = fv (scons x s2) i) $ by all_alpha
+c12: $ G , m = K , m ∊ ω ⇒ ∀ j (j ∊ suc K → fv (scons x s) j = fv (scons x s2) j) ↔ ∀ i (i ∊ suc K → fv (scons x s) i = fv (scons x s2) i) $ by weaken [c11]
+c13: $ G , m = K , m ∊ ω ⇒ ∀ i (i ∊ suc K → fv (scons x s) i = fv (scons x s2) i) $ by bi_elim_l [c12, c10]
+c14: $ G ⇒ ∀ i (i ∊ suc K → fv (scons x s) i = fv (scons x s2) i) $ by wcel_elim [#1, c13]
 
 scat_scons
 ----------
