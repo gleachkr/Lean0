@@ -1,0 +1,541 @@
+-- model-ind.mm0: the model's inductive types (layer C5 of the reduction, audit
+-- §11), first part: the families and the constructors.
+--
+-- The hook. model-den.mm0's hook `M` sees a node's label, its children and
+-- their values; the inductive constants need the values of every subterm of
+-- the block's data (the parameters' types, the fields' types, the arguments of
+-- a constructor's result), which are deeper. So the hook here is `mcv H`, built
+-- from `H` by a course-of-values recursion (`cvf`: at every tree the table of
+-- its subtrees' values): `H` sees, at a node, the table of the node's proper
+-- subtrees, and `dt` at a node `H` interprets is `H`'s value there with that
+-- table (`dt_mcv`), which agrees with `dt` itself on those subtrees.
+--
+-- The block. Everything below is relative to a universe `U`, a table `E` (the
+-- values of the trees, `da (fv E T) w r` as for `dt`), the block's tree `D`
+-- and a level valuation `W`; the data is read with Part I's relations (`lrel`).
+-- A curried trace is a set of points `nest a y` (`a` a valuation, `#0` first,
+-- so `a(0)` is the last argument; `apn` reads the value back). The parameters'
+-- valuations are `esat` (as `sat`), a constructor type's paths `etel`: for each
+-- path the fields as a valuation `f`, the fields in order `g`, each field's
+-- own telescope `t`, and the arguments `a` of the result (a valuation). A
+-- candidate is a set of `⟨ j , ⟨ a , x ⟩ ⟩`: `x` an element of type `j` at the
+-- arguments `a` (parameters and indices). The block's types valued by a
+-- candidate (`ixs`) follow the parameters, so a constructor's type is read at
+-- `scat p (ixs ..)`; a type that is a proposition at `W` is valued by its
+-- collapse (`∅` for every element). One step (`iop0`) gives, for every
+-- constructor `c` of type `j` and every path, the tuple `c :: g` at `a`; the
+-- operator `iop` takes the union of `iop0` over the candidates below that are
+-- elements of `U`, so it is monotone whatever the data, and its least fixed
+-- point `ifam` is a fixed point (`ifam_fix`). For legal data, `iop0` is
+-- monotone at candidates of `U` (positivity, layer E1) and `ifam` is in `U`
+-- (layer E2), and then `ifam` is closed under `iop0` itself (`ifam_closed`).
+-- `ity` (the value of `ind_ty D j`) is type `j`'s entry; `ictor` (of
+-- `ind_ctor D j c`) the trace of `c :: g` over the parameters and the fields,
+-- `∅` for a proposition. The hook's parts `hty`, `hctor` give them at the
+-- trees `ind_ty D J`, `ind_ctor D J C` (`dt_ind_ty`, `dt_ind_ctor`); the
+-- recursors follow in a second part. Imports model-core.mm0; proofs in
+-- model-ind.auf.
+
+import "model-core.mm0";
+
+-- --------------------------------------------------------------------------
+-- Subtrees, and the course-of-values hook
+-- --------------------------------------------------------------------------
+
+--| One step of `tsub`: the node itself and its children's subtrees.
+def tsb (K S V: class): class = $ csn ⟨ K , S ⟩ ∪ ⋃ (crn V) $;
+--| The subtrees of a tree, itself included.
+def tsub (.k .s .v: set): class = $ trc ω (cgr3 k s v (tsb k s v)) $;
+--| The proper subtrees of a node with the children `S`.
+def psub (S: class): class = $ ⋃ (crn (ccom tsub S)) $;
+--| The children's values, read off their tables `V`.
+def cvv (S V: class) (.i .y .z: set): class =
+  $ {z | ∃ i ∃ y (z = ⟨ i , y ⟩ ∧ i ∊ cdm S ∧ y = fv (fv V i) (fv S i))} $;
+--| One step of the course-of-values recursion: the table of the node's
+--| subtrees, the node's own value as `dnb` gives it with `H` as the hook, `H`
+--| seeing the union of the children's tables.
+def cvb (U H K S V: class): class =
+  $ ⋃ (crn V) ∪ csn ⟨ ⟨ K , S ⟩ ,
+      dnb U (csn ⟨ ⟨ U , ⟨ K , ⟨ S , cvv S V ⟩ ⟩ ⟩ , fv H ⟨ U , ⟨ K , ⟨ S , ⋃ (crn V) ⟩ ⟩ ⟩ ⟩)
+        K S (cvv S V) ⟩ $;
+def cvf (U H: class) (.k .s .v: set): class = $ trc ω (cgr3 k s v (cvb U H k s v)) $;
+--| The hook of `H`: at a node, `H` given the table of the node's proper subtrees.
+def mcv (H: class) (.u .k .s .v .z: set): class =
+  $ {z | ∃ u ∃ k ∃ s ∃ v (z = ⟨ ⟨ u , ⟨ k , ⟨ s , v ⟩ ⟩ ⟩ ,
+      fv H ⟨ u , ⟨ k , ⟨ s , ⋃ (crn (ccom (cvf u H) s)) ⟩ ⟩ ⟩ ⟩)} $;
+--| `E` and `E2` agree on the subtrees of `T`, and at `∅` (what a node reads
+--| at a child it does not have).
+def eagr (E E2 T: class) (.t: set): fml =
+  $ fv E ∅ = fv E2 ∅ ∧ ∀ t (t ∊ fv tsub T → fv E t = fv E2 t) $;
+
+--| @congr
+theorem tsb_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ tsb A C E ≐ tsb B D F $;
+--| @rewrite
+theorem sb_c_tsb {x: set} (t: set x) (A B C: class x):
+  $ (⟦ x / t ⟧ (tsb A B C)) ≐ tsb (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+--| @congr
+theorem psub_congr (A B: class): $ A ≐ B $ > $ psub A ≐ psub B $;
+--| @rewrite
+theorem sb_c_psub {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (psub A)) ≐ psub (⟦ x / t ⟧ A) $;
+--| @congr
+theorem cvv_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ cvv A C ≐ cvv B D $;
+--| @rewrite
+theorem sb_c_cvv {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (cvv A B)) ≐ cvv (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+--| @congr
+theorem cvb_congr (A B C D E F H I J K: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ cvb A C E H J ≐ cvb B D F I K $;
+--| @rewrite
+theorem sb_c_cvb {x: set} (t: set x) (A B C D E: class x):
+  $ (⟦ x / t ⟧ (cvb A B C D E)) ≐ cvb (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
+--| @congr
+theorem cvf_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ cvf A C ≐ cvf B D $;
+--| @rewrite
+theorem sb_c_cvf {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (cvf A B)) ≐ cvf (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+--| @congr
+theorem mcv_congr (A B: class): $ A ≐ B $ > $ mcv A ≐ mcv B $;
+--| @rewrite
+theorem sb_c_mcv {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (mcv A)) ≐ mcv (⟦ x / t ⟧ A) $;
+--| @congr
+theorem eagr_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ eagr A C E ⟺ eagr B D F $;
+--| @rewrite
+theorem sb_f_eagr {x: set} (t: set x) (A B C: class x):
+  $ [x/t] (eagr A B C) ⟺ eagr (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+
+theorem tsub_functional (G: hyps): $ G ⇒ functional tsub $;
+theorem tsub_cdm (G: hyps): $ G ⇒ cdm tsub = trees ω $;
+theorem tsub_node (G: hyps) (k s: set):
+  $ G ⇒ k ∊ ω $ > $ G ⇒ s ∊ fseq (trees ω) $ >
+  $ G ⇒ fv tsub ⟨ k , s ⟩ = csn ⟨ k , s ⟩ ∪ psub s $;
+--| Class form of `tsub_node`.
+theorem tsub_node_c (G: hyps) (K S: class):
+  $ G ⇒ K ∈ ω $ > $ G ⇒ S ∈ fseq (trees ω) $ >
+  $ G ⇒ fv tsub ⟨ K , S ⟩ = csn ⟨ K , S ⟩ ∪ psub S $;
+theorem tsub_self (G: hyps) (T: class): $ G ⇒ T ∈ trees ω $ > $ G ⇒ T ∈ fv tsub T $;
+theorem tsub_trees (G: hyps) (T: class): $ G ⇒ fv tsub T ⊆ trees ω $;
+--| A subtree's subtrees are subtrees.
+theorem tsub_trans (G: hyps) (T T2: class): $ G ⇒ T2 ∈ fv tsub T $ > $ G ⇒ fv tsub T2 ⊆ fv tsub T $;
+--| A child's subtrees are proper subtrees of the node.
+theorem psub_child (G: hyps) (S: class) (i: set):
+  $ G ⇒ S ∈ fseq (trees ω) $ > $ G ⇒ i ∊ cdm S $ > $ G ⇒ fv tsub (fv S i) ⊆ psub S $;
+--| The children of nodes with one, two, three or four children.
+theorem tsub_kid0 (G: hyps) (K A S: class):
+  $ G ⇒ K ∈ ω $ > $ G ⇒ A ∈ trees ω $ > $ G ⇒ S ∈ fseq (trees ω) $ > $ G ⇒ A ∈ fv tsub ⟨ K , scons A S ⟩ $;
+theorem tsub_kid1 (G: hyps) (K A B S: class):
+  $ G ⇒ K ∈ ω $ > $ G ⇒ A ∈ trees ω $ > $ G ⇒ B ∈ trees ω $ > $ G ⇒ S ∈ fseq (trees ω) $ >
+  $ G ⇒ B ∈ fv tsub ⟨ K , scons A (scons B S) ⟩ $;
+theorem tsub_kid2 (G: hyps) (K A B C S: class):
+  $ G ⇒ K ∈ ω $ > $ G ⇒ A ∈ trees ω $ > $ G ⇒ B ∈ trees ω $ > $ G ⇒ C ∈ trees ω $ > $ G ⇒ S ∈ fseq (trees ω) $ >
+  $ G ⇒ C ∈ fv tsub ⟨ K , scons A (scons B (scons C S)) ⟩ $;
+
+theorem cvf_functional (G: hyps) (H: class) (u: set): $ G ⇒ functional (cvf u H) $;
+theorem cvf_node (G: hyps) (H: class) (u k s: set):
+  $ G ⇒ k ∊ ω $ > $ G ⇒ s ∊ fseq (trees ω) $ >
+  $ G ⇒ fv (cvf u H) ⟨ k , s ⟩ = cvb u H k s (ccom (cvf u H) s) $;
+--| The table at a tree is the denotation with the hook `mcv H` on its subtrees
+--| (by induction on the trees).
+theorem cvf_tab (G: hyps) (H: class) (u t: set):
+  $ G ⇒ t ∊ trees ω $ > $ G ⇒ fv (cvf u H) t = cres (dnf u (mcv H)) (fv tsub t) $;
+--| What `mcv H` gives at a node: `H` with the table of the proper subtrees.
+theorem mcv_fv (G: hyps) (H K S V: class) (u: set):
+  $ G ⇒ functional H $ > $ G ⇒ K ∈ ω $ > $ G ⇒ S ∈ fseq (trees ω) $ >
+  $ G ⇒ fv (mcv H) ⟨ u , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩ = fv H ⟨ u , ⟨ K , ⟨ S , cres (dnf u (mcv H)) (psub S) ⟩ ⟩ ⟩ $;
+--| The denotation at a node the hook interprets.
+theorem dt_mcv (G: hyps) (H K S: class) (u w r: set):
+  $ G ⇒ functional H $ > $ G ⇒ K ∈ kexa $ > $ G ⇒ S ∈ fseq (trees ω) $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ dt u (mcv H) ⟨ K , S ⟩ w r =
+      mclip u (ap (fv H ⟨ u , ⟨ K , ⟨ S , cres (dnf u (mcv H)) (psub S) ⟩ ⟩ ⟩) w) $;
+--| The table agrees with the denotation on the subtrees of a child.
+theorem eagr_psub (G: hyps) (M S: class) (u i: set):
+  $ G ⇒ S ∈ fseq (trees ω) $ > $ G ⇒ i ∊ cdm S $ >
+  $ G ⇒ eagr (cres (dnf u M) (psub S)) (dnf u M) (fv S i) $;
+theorem eagr_sub (G: hyps) (E E2 T T2: class):
+  $ G ⇒ eagr E E2 T $ > $ G ⇒ T2 ∈ fv tsub T $ > $ G ⇒ eagr E E2 T2 $;
+
+-- --------------------------------------------------------------------------
+-- Curried traces as sets of points
+-- --------------------------------------------------------------------------
+
+--| One step of `nest`: `⟨ i , a ⟩ ↦ ⟨ suc i , ⟨ S(i) , a ⟩ ⟩`.
+def nstep (S: class) (.i .a .z: set): class =
+  $ {z | ∃ i ∃ a (z = ⟨ ⟨ i , a ⟩ , ⟨ suc i , ⟨ fv S i , a ⟩ ⟩ ⟩)} $;
+--| `⟨ S(n-1) , ⟨ .. , ⟨ S(0) , Y ⟩ ⟩ ⟩` for a sequence `S` of length `n`: the
+--| point of a curried trace with the value `Y` at the valuation `S` (`S(0)`,
+--| the innermost variable, is the last argument).
+def nest (S Y: class): class = $ ⋃ (crn (csn (fv (omrec ⟨ ∅ , Y ⟩ (nstep S)) (cdm S)))) $;
+--| A curried trace's value at the valuation `S`.
+def apn (F S: class) (.y: set): class = $ {y | nest S y ∈ F} $;
+
+--| @congr
+theorem nstep_congr (A B: class): $ A ≐ B $ > $ nstep A ≐ nstep B $;
+--| @rewrite
+theorem sb_c_nstep {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (nstep A)) ≐ nstep (⟦ x / t ⟧ A) $;
+--| @congr
+theorem nest_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ nest A C ≐ nest B D $;
+--| @rewrite
+theorem sb_c_nest {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (nest A B)) ≐ nest (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+theorem nest_eq (G: hyps) (A B C D: class): $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ nest A C = nest B D $;
+--| @congr
+theorem apn_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ apn A C ≐ apn B D $;
+--| @rewrite
+theorem sb_c_apn {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (apn A B)) ≐ apn (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+theorem apn_eq (G: hyps) (A B C D: class): $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ apn A C = apn B D $;
+
+theorem nest_set (G: hyps) (S Y: class): $ G ⇒ isset (nest S Y) $;
+theorem nest_empty (G: hyps) (Y: class): $ G ⇒ isset Y $ > $ G ⇒ nest ∅ Y = Y $;
+theorem nest_ssnoc (G: hyps) (A Y: class) (s a: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ isset Y $ > $ G ⇒ nest (ssnoc s a) Y = ⟨ a , nest s Y ⟩ $;
+theorem nest_scons (G: hyps) (A Y: class) (s a: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ isset Y $ > $ G ⇒ nest (scons a s) Y = nest s ⟨ a , Y ⟩ $;
+theorem nest_scat (G: hyps) (A Y: class) (s t: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq A $ > $ G ⇒ isset Y $ >
+  $ G ⇒ nest (scat s t) Y = nest t (nest s Y) $;
+--| Points of the same length are equal only at equal valuations and values.
+theorem nest_inj (G: hyps) (A: class) (s t y z: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq A $ > $ G ⇒ cdm s = cdm t $ > $ G ⇒ nest s y = nest t z $ >
+  $ G ⇒ s = t ∧ y = z $;
+theorem nest_universe (G: hyps) (U: class) (s y: set):
+  $ G ⇒ universe U $ > $ G ⇒ s ∊ fseq U $ > $ G ⇒ y ∊ U $ > $ G ⇒ nest s y ∈ U $;
+theorem apn_empty (G: hyps) (F: class): $ G ⇒ apn F ∅ = F $;
+theorem apn_ssnoc (G: hyps) (A F: class) (s a: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ apn F (ssnoc s a) = apn (ap F a) s $;
+theorem apn_scons (G: hyps) (A F: class) (s a: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ apn F (scons a s) = ap (apn F s) a $;
+theorem apn_scat (G: hyps) (A F: class) (s t: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq A $ > $ G ⇒ apn F (scat s t) = apn (apn F t) s $;
+
+-- --------------------------------------------------------------------------
+-- Telescopes, relative to a table `E`
+-- --------------------------------------------------------------------------
+
+--| One step of `esat`: `stb` with the values read off `E`.
+def esb (U E K S V: class) (.w .r .x .q .z: set): class =
+  $ {z | (K = kc_nil ∧ z ∊ clam w lvals (csn ∅)) ∨
+         (K = kc_cons ∧ z ∊ clam w lvals {r | r ∊ fseq U ∧
+            ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) w ∧ x ∊ da (fv E (fv S ∅)) w q ∧ r = scons x q)})} $;
+def esf (U E: class) (.k .s .v: set): class = $ trc ω (cgr3 k s v (esb U E k s v)) $;
+--| The valuations satisfying the context tree `T` at `W`, the values read off `E`.
+def esat (U E T W: class): class = $ ap (fv (esf U E) T) W $;
+--| One step of `etel`. At `pi A B` the paths of `B` at `x :: r` for each `x`
+--| in the value of `A`, with `x` added: to the fields as a valuation (last), to
+--| the fields in order (first), and `A`'s own paths at `r` to the telescopes;
+--| at `app F A` the paths of `F` with no fields, the value of `A` added to
+--| the arguments (first: the last argument is `#0`); elsewhere one path with
+--| nothing.
+def etb (U E K S V: class) (.w .r .x .f .g .t .a .y .z: set): class =
+  $ {z | (K = kc_pi ∧ z ∊ clam w lvals (clam r (fseq U) {y | ∃ x ∃ f ∃ g ∃ t ∃ a (
+            x ∊ da (fv E (fv S ∅)) w r ∧ x ∊ U ∧
+            ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ da (fv V (suc ∅)) w (scons x r) ∧
+            y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (da (fv V ∅) w r) t , a ⟩ ⟩ ⟩)})) ∨
+         (K = kc_app ∧ z ∊ clam w lvals (clam r (fseq U) {y | ∃ a (
+            ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ da (fv V ∅) w r ∧
+            y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E (fv S (suc ∅))) w r) a ⟩ ⟩ ⟩)})) ∨
+         (¬ K = kc_pi ∧ ¬ K = kc_app ∧
+            z ∊ clam w lvals (clam r (fseq U) (csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩)))} $;
+def etf (U E: class) (.k .s .v: set): class = $ trc ω (cgr3 k s v (etb U E k s v)) $;
+--| The paths of the telescope `T` at `W` and the valuation `R`.
+def etel (U E T W R: class): class = $ da (fv (etf U E) T) W R $;
+
+--| @congr
+theorem esb_congr (A B C D E F H I J K: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ esb A C E H J ≐ esb B D F I K $;
+--| @rewrite
+theorem sb_c_esb {x: set} (t: set x) (A B C D E: class x):
+  $ (⟦ x / t ⟧ (esb A B C D E)) ≐ esb (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
+--| @congr
+theorem esf_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ esf A C ≐ esf B D $;
+--| @rewrite
+theorem sb_c_esf {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (esf A B)) ≐ esf (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+--| @congr
+theorem esat_congr (A B C D E F H I: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ esat A C E H ≐ esat B D F I $;
+--| @rewrite
+theorem sb_c_esat {x: set} (t: set x) (A B C D: class x):
+  $ (⟦ x / t ⟧ (esat A B C D)) ≐ esat (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) $;
+--| @congr
+theorem etb_congr (A B C D E F H I J K: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ etb A C E H J ≐ etb B D F I K $;
+--| @rewrite
+theorem sb_c_etb {x: set} (t: set x) (A B C D E: class x):
+  $ (⟦ x / t ⟧ (etb A B C D E)) ≐ etb (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
+--| @congr
+theorem etf_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ etf A C ≐ etf B D $;
+--| @rewrite
+theorem sb_c_etf {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (etf A B)) ≐ etf (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+--| @congr
+theorem etel_congr (A B C D E F H I J K: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ etel A C E H J ≐ etel B D F I K $;
+--| @rewrite
+theorem sb_c_etel {x: set} (t: set x) (A B C D E: class x):
+  $ (⟦ x / t ⟧ (etel A B C D E)) ≐ etel (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
+
+--| With the denotation for the table, `esat` is `sat`.
+theorem esat_dnf (M T W: class) (u: set): $ esat u (dnf u M) T W ≐ sat u M T W $;
+theorem esat_fseq (G: hyps) (E T W: class) (u: set): $ G ⇒ esat u E T W ⊆ fseq u $;
+theorem esat_nil (G: hyps) (E: class) (u w: set): $ G ⇒ w ∊ lvals $ > $ G ⇒ esat u E ⟨ kc_nil , ∅ ⟩ w = csn ∅ $;
+theorem esat_cons {r x q: set} (G: hyps) (E A T: class) (u w: set):
+  $ G ⇒ A ∈ trees ω $ > $ G ⇒ T ∈ trees ω $ > $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ esat u E ⟨ kc_cons , scons A (scons T ∅) ⟩ w =
+      {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ esat u E T w ∧ x ∊ da (fv E A) w q ∧ r = scons x q)} $;
+--| Two valuations satisfying the same context tree have the same length.
+theorem esat_len (G: hyps) (E T: class) (u w p q: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ p ∊ esat u E T w $ > $ G ⇒ q ∊ esat u E T w $ > $ G ⇒ cdm p = cdm q $;
+theorem esat_local (G: hyps) (E E2 T W: class) (u: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ eagr E E2 T $ > $ G ⇒ esat u E T W = esat u E2 T W $;
+
+theorem etel_pi {y x f g t a: set} (G: hyps) (E A B: class) (u w r: set):
+  $ G ⇒ A ∈ trees ω $ > $ G ⇒ B ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ etel u E ⟨ kc_pi , scons A (scons B ∅) ⟩ w r =
+      {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ da (fv E A) w r ∧ x ∊ u ∧
+         ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E B w (scons x r) ∧
+         y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u E A w r) t , a ⟩ ⟩ ⟩)} $;
+theorem etel_app {y a: set} (G: hyps) (E F A: class) (u w r: set):
+  $ G ⇒ F ∈ trees ω $ > $ G ⇒ A ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ etel u E ⟨ kc_app , scons F (scons A ∅) ⟩ w r =
+      {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧
+         y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A) w r) a ⟩ ⟩ ⟩)} $;
+theorem etel_other (G: hyps) (E K S: class) (u w r: set):
+  $ G ⇒ K ∈ ω $ > $ G ⇒ S ∈ fseq (trees ω) $ > $ G ⇒ ¬ K = kc_pi $ > $ G ⇒ ¬ K = kc_app $ >
+  $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ etel u E ⟨ K , S ⟩ w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩ $;
+--| A path's fields are sequences over `u` (the arguments are values of `E`).
+theorem etel_fseq (G: hyps) (E T: class) (u w r f g t a: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E T w r $ >
+  $ G ⇒ f ∊ fseq u ∧ g ∊ fseq u ∧ cdm g = cdm f ∧ cdm t = cdm f $;
+--| The paths of a telescope at any two valuations have the same number of fields.
+theorem etel_len (G: hyps) (E T: class) (u w r r2 f g t a f2 g2 t2 a2: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E T w r $ >
+  $ G ⇒ ⟨ f2 , ⟨ g2 , ⟨ t2 , a2 ⟩ ⟩ ⟩ ∈ etel u E T w r2 $ > $ G ⇒ cdm f = cdm f2 $;
+--| A path is determined by its fields as a valuation.
+theorem etel_det (G: hyps) (E T: class) (u w r f g t a g2 t2 a2: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E T w r $ >
+  $ G ⇒ ⟨ f , ⟨ g2 , ⟨ t2 , a2 ⟩ ⟩ ⟩ ∈ etel u E T w r $ > $ G ⇒ g = g2 ∧ t = t2 ∧ a = a2 $;
+theorem etel_local (G: hyps) (E E2 T W R: class) (u: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ eagr E E2 T $ > $ G ⇒ etel u E T W R = etel u E2 T W R $;
+
+-- --------------------------------------------------------------------------
+-- Reading the block
+-- --------------------------------------------------------------------------
+
+--| Block `D` has the parameters `P` and the types `T`.
+def iprt (D P T: class) (.b: set): fml = $ ∃ b (ra_ind_data D b P T ∈ lrel) $;
+--| Type `j` (a number) of block `D` has the type `F`.
+def ityf (D j F: class) (.p .t .n .c: set): fml =
+  $ ∃ p ∃ t ∃ n ∃ c (iprt D p t ∧ fv nvf n = j ∧ ra_nth_ty t n F c ∈ lrel) $;
+--| Constructor `c` of type `j` of block `D` has the type `K`.
+def ictk (D j c K: class) (.p .t .n .f .e .m: set): fml =
+  $ ∃ p ∃ t ∃ n ∃ f ∃ e ∃ m (iprt D p t ∧ fv nvf n = j ∧ ra_nth_ty t n f e ∈ lrel ∧
+      fv nvf m = c ∧ ra_nth_ctor e m K ∈ lrel) $;
+--| Type `j` of `D` is a proposition at `W`: its sort's level is zero there.
+def iprop (D j W: class) (.f .k .l: set): fml =
+  $ ∃ f ∃ k ∃ l (ityf D j f ∧ ra_isort f k l ∈ lrel ∧ lv l W = ∅) $;
+--| The number of types of `D` (as the set of the types' numbers).
+def intys (D: class) (.p .t .n .m .y: set): class =
+  $ {y | ∃ p ∃ t ∃ n ∃ m (iprt D p t ∧ ra_ntys t n m ∈ lrel ∧ y ∊ fv nvf n)} $;
+
+--| @congr
+theorem iprt_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ iprt A C E ⟺ iprt B D F $;
+--| @rewrite
+theorem sb_f_iprt {x: set} (t: set x) (A B C: class x):
+  $ [x/t] (iprt A B C) ⟺ iprt (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+--| @congr
+theorem ityf_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ ityf A C E ⟺ ityf B D F $;
+--| @rewrite
+theorem sb_f_ityf {x: set} (t: set x) (A B C: class x):
+  $ [x/t] (ityf A B C) ⟺ ityf (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+--| @congr
+theorem ictk_congr (A B C D E F H I: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ ictk A C E H ⟺ ictk B D F I $;
+--| @rewrite
+theorem sb_f_ictk {x: set} (t: set x) (A B C D: class x):
+  $ [x/t] (ictk A B C D) ⟺ ictk (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) $;
+--| @congr
+theorem iprop_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ iprop A C E ⟺ iprop B D F $;
+--| @rewrite
+theorem sb_f_iprop {x: set} (t: set x) (A B C: class x):
+  $ [x/t] (iprop A B C) ⟺ iprop (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+--| @congr
+theorem intys_congr (A B: class): $ A ≐ B $ > $ intys A ≐ intys B $;
+--| @rewrite
+theorem sb_c_intys {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (intys A)) ≐ intys (⟦ x / t ⟧ A) $;
+
+--| The parts are subtrees of the block, the types' types and constructor lists
+--| of the list of types, a constructor's type of the list of constructors.
+theorem iprt_tsub (G: hyps) (D P T: class):
+  $ G ⇒ D ∈ trees ω $ > $ G ⇒ iprt D P T $ > $ G ⇒ P ∈ fv tsub D ∧ T ∈ fv tsub D $;
+theorem nth_ty_tsub (G: hyps) (T J F C: class):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ ra_nth_ty T J F C ∈ lrel $ > $ G ⇒ F ∈ fv tsub T ∧ C ∈ fv tsub T $;
+theorem nth_ctor_tsub (G: hyps) (C J K: class):
+  $ G ⇒ C ∈ trees ω $ > $ G ⇒ ra_nth_ctor C J K ∈ lrel $ > $ G ⇒ K ∈ fv tsub C $;
+theorem ityf_tsub (G: hyps) (D j F: class): $ G ⇒ D ∈ trees ω $ > $ G ⇒ ityf D j F $ > $ G ⇒ F ∈ fv tsub D $;
+theorem ictk_tsub (G: hyps) (D j c K: class):
+  $ G ⇒ D ∈ trees ω $ > $ G ⇒ ictk D j c K $ > $ G ⇒ K ∈ fv tsub D $;
+--| The parts are determined by the numbers (`nth_ty`, `nth_ctor` at numerals
+--| with the same value).
+theorem nth_ty_nvf (G: hyps) (T J J2 F F2 C C2: class):
+  $ G ⇒ ra_nth_ty T J F C ∈ lrel $ > $ G ⇒ ra_nth_ty T J2 F2 C2 ∈ lrel $ > $ G ⇒ fv nvf J = fv nvf J2 $ >
+  $ G ⇒ F = F2 ∧ C = C2 $;
+theorem nth_ctor_nvf (G: hyps) (C J J2 K K2: class):
+  $ G ⇒ ra_nth_ctor C J K ∈ lrel $ > $ G ⇒ ra_nth_ctor C J2 K2 ∈ lrel $ > $ G ⇒ fv nvf J = fv nvf J2 $ >
+  $ G ⇒ K = K2 $;
+theorem ityf_det (G: hyps) (D j F F2: class): $ G ⇒ ityf D j F $ > $ G ⇒ ityf D j F2 $ > $ G ⇒ F = F2 $;
+theorem ictk_det (G: hyps) (D j c K K2: class):
+  $ G ⇒ ictk D j c K $ > $ G ⇒ ictk D j c K2 $ > $ G ⇒ K = K2 $;
+theorem ictk_omega (G: hyps) (D j c K: class): $ G ⇒ ictk D j c K $ > $ G ⇒ j ∈ ω ∧ c ∈ ω $;
+
+-- --------------------------------------------------------------------------
+-- The block's types (C5)
+-- --------------------------------------------------------------------------
+
+--| The entry of type `j` for a candidate `Z` (a set of `⟨ j , ⟨ a , x ⟩ ⟩`):
+--| the curried trace with the value `x` at `a`, or `∅` if the type is a
+--| proposition at `W`.
+def ient (D W Z j: class) (.a .x .y: set): class =
+  $ {y | ∃ a ∃ x (⟨ j , ⟨ a , x ⟩ ⟩ ∈ Z ∧
+      ((iprop D j W ∧ y = nest a ∅) ∨ (¬ iprop D j W ∧ y = nest a x)))} $;
+--| The block's types valued by the candidate `Z`: type `j` at `j`.
+def ixs (D W Z: class) (.j .z: set): class = $ {z | ∃ j (j ∊ intys D ∧ z = ⟨ j , ient D W Z j ⟩)} $;
+--| One step of the block's types: for every valuation `p` of the parameters
+--| and every constructor `c` of type `j` with the type `K`, the tuple `c :: g`
+--| at the arguments `a` of `K`'s result, for every path of `K` at `p`, the
+--| types valued by `Z`.
+def iop0 (U E D W Z: class) (.p .q .e .j .c .k .f .g .t .a .z: set): class =
+  $ {z | ∃ p ∃ q ∃ e ∃ j ∃ c ∃ k ∃ f ∃ g ∃ t ∃ a (iprt D q e ∧ p ∊ esat U E q W ∧ ictk D j c k ∧
+       ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E k W (scat p (ixs D W Z)) ∧ a ∊ fseq U ∧
+       z = ⟨ j , ⟨ a , scons c g ⟩ ⟩)} $;
+--| The operator: `iop0` at every candidate below `Y` that is an element of `U`.
+def iop (U E D W Y: class) (.x .z: set): class = $ {z | ∃ x (x ⊆ Y ∧ x ∊ U ∧ z ∊ iop0 U E D W x)} $;
+--| The block's types: the least fixed point of the operator.
+def ifam (U E D W: class) (.y: set): class = $ lfp y (iop U E D W y) $;
+--| The value of `ind_ty D j` at `W` (`IndTy`).
+def ity (U E D j W: class): class = $ ient D W (ifam U E D W) j $;
+--| The value of `ind_ctor D j c` at `W` (`IndCtor`): the trace of `c :: g` over
+--| the parameters and the fields, `∅` if the type is a proposition.
+def ictor (U E D j c W: class) (.p .q .e .k .f .g .t .a .y .z: set): class =
+  $ {z | ¬ iprop D j W ∧ ∃ p ∃ q ∃ e ∃ k ∃ f ∃ g ∃ t ∃ a ∃ y (iprt D q e ∧ p ∊ esat U E q W ∧
+       ictk D j c k ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E k W (scat p (ixs D W (ifam U E D W))) ∧
+       y ∊ scons c g ∧ z = nest (scat f p) y)} $;
+
+--| @congr
+theorem ient_congr (A B C D E F H I: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ ient A C E H ≐ ient B D F I $;
+--| @rewrite
+theorem sb_c_ient {x: set} (t: set x) (A B C D: class x):
+  $ (⟦ x / t ⟧ (ient A B C D)) ≐ ient (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) $;
+--| @congr
+theorem ixs_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ ixs A C E ≐ ixs B D F $;
+--| @rewrite
+theorem sb_c_ixs {x: set} (t: set x) (A B C: class x):
+  $ (⟦ x / t ⟧ (ixs A B C)) ≐ ixs (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+--| @congr
+theorem iop0_congr (A B C D E F H I J K: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ iop0 A C E H J ≐ iop0 B D F I K $;
+--| @rewrite
+theorem sb_c_iop0 {x: set} (t: set x) (A B C D E: class x):
+  $ (⟦ x / t ⟧ (iop0 A B C D E)) ≐ iop0 (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
+--| @congr
+theorem iop_congr (A B C D E F H I J K: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ iop A C E H J ≐ iop B D F I K $;
+--| @rewrite
+theorem sb_c_iop {x: set} (t: set x) (A B C D E: class x):
+  $ (⟦ x / t ⟧ (iop A B C D E)) ≐ iop (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
+--| @congr
+theorem ifam_congr (A B C D E F H I: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ ifam A C E H ≐ ifam B D F I $;
+--| @rewrite
+theorem sb_c_ifam {x: set} (t: set x) (A B C D: class x):
+  $ (⟦ x / t ⟧ (ifam A B C D)) ≐ ifam (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) $;
+--| @congr
+theorem ity_congr (A B C D E F H I J K: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ ity A C E H J ≐ ity B D F I K $;
+--| @rewrite
+theorem sb_c_ity {x: set} (t: set x) (A B C D E: class x):
+  $ (⟦ x / t ⟧ (ity A B C D E)) ≐ ity (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
+--| @congr
+theorem ictor_congr (A B C D E F H I J K L N: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ L ≐ N $ >
+  $ ictor A C E H J L ≐ ictor B D F I K N $;
+--| @rewrite
+theorem sb_c_ictor {x: set} (t: set x) (A B C D E F: class x):
+  $ (⟦ x / t ⟧ (ictor A B C D E F)) ≐
+      ictor (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) (⟦ x / t ⟧ F) $;
+
+theorem ient_intro (G: hyps) (D W Z j: class) (a x: set):
+  $ G ⇒ ⟨ j , ⟨ a , x ⟩ ⟩ ∈ Z $ > $ G ⇒ ¬ iprop D j W $ > $ G ⇒ nest a x ∈ ient D W Z j $;
+theorem ient_intro_prop (G: hyps) (D W Z j: class) (a x: set):
+  $ G ⇒ ⟨ j , ⟨ a , x ⟩ ⟩ ∈ Z $ > $ G ⇒ iprop D j W $ > $ G ⇒ nest a ∅ ∈ ient D W Z j $;
+theorem ient_mono (G: hyps) (D W Z Z2 j: class): $ G ⇒ Z ⊆ Z2 $ > $ G ⇒ ient D W Z j ⊆ ient D W Z2 j $;
+theorem ixs_fseq {j: set} (G: hyps) (D W Z: class) (u: set):
+  $ G ⇒ ∀ j (j ∊ intys D → ient D W Z j ∈ u) $ > $ G ⇒ intys D ∈ ω $ > $ G ⇒ ixs D W Z ∈ fseq u $;
+--| A candidate of a universe gives entries of it.
+theorem ient_universe (G: hyps) (D W Z j: class) (u: set):
+  $ G ⇒ universe u $ > $ G ⇒ Z ∈ u $ > $ G ⇒ Z ⊆ ω × (fseq u × fseq (ω ∪ u)) $ > $ G ⇒ ient D W Z j ∈ u $;
+
+theorem iop0_sub (G: hyps) (E D W Z: class) (u: set):
+  $ G ⇒ iop0 u E D W Z ⊆ ω × (fseq u × fseq (ω ∪ u)) $;
+theorem iop_mono {y: set} (G: hyps y) (E D W: class) (u: set): $ G ⇒ mono y (iop u E D W y) $;
+theorem iop_setop {y: set} (G: hyps y) (E D W: class) (u: set): $ G ⇒ setop y (iop u E D W y) $;
+theorem iop_bounded {y: set} (G: hyps y) (E D W: class) (u: set):
+  $ G ⇒ bounded y (iop u E D W y) (ω × (fseq u × fseq (ω ∪ u))) $;
+--| The family is a fixed point, whatever the data.
+theorem ifam_fix {y: set} (G: hyps) (E D W: class) (u: set):
+  $ G ⇒ cap y (iop u E D W y) (ifam u E D W) = ifam u E D W $;
+theorem ifam_sub (G: hyps) (E D W: class) (u: set): $ G ⇒ ifam u E D W ⊆ ω × (fseq u × fseq (ω ∪ u)) $;
+theorem ifam_set (G: hyps) (E D W: class) (u: set): $ G ⇒ isset (ifam u E D W) $;
+theorem ifam_intro (G: hyps) (E D W: class) (u x z: set):
+  $ G ⇒ x ⊆ ifam u E D W $ > $ G ⇒ x ∊ u $ > $ G ⇒ z ∊ iop0 u E D W x $ > $ G ⇒ z ∊ ifam u E D W $;
+theorem ifam_elim {x: set} (G: hyps) (E D W: class) (u z: set):
+  $ G ⇒ z ∊ ifam u E D W $ > $ G ⇒ ∃ x (x ⊆ ifam u E D W ∧ x ∊ u ∧ z ∊ iop0 u E D W x) $;
+--| Induction over the family.
+theorem ifam_ind {x y: set} (G: hyps) (E D W: class) (p: fml y) (u: set):
+  $ G ⇒ ∀ x (x ⊆ ifam u E D W → x ∊ u → x ⊆ {y | p} → iop0 u E D W x ⊆ {y | p}) $ >
+  $ G ⇒ ifam u E D W ⊆ {y | p} $;
+--| A family that is an element of `u` is closed under one step.
+theorem ifam_closed (G: hyps) (E D W: class) (u: set):
+  $ G ⇒ ifam u E D W ∈ u $ > $ G ⇒ iop0 u E D W (ifam u E D W) ⊆ ifam u E D W $;
+theorem ifam_local (G: hyps) (E E2 D W: class) (u: set):
+  $ G ⇒ D ∈ trees ω $ > $ G ⇒ eagr E E2 D $ > $ G ⇒ ifam u E D W = ifam u E2 D W $;
+theorem ity_local (G: hyps) (E E2 D j W: class) (u: set):
+  $ G ⇒ D ∈ trees ω $ > $ G ⇒ eagr E E2 D $ > $ G ⇒ ity u E D j W = ity u E2 D j W $;
+theorem ictor_local (G: hyps) (E E2 D j c W: class) (u: set):
+  $ G ⇒ D ∈ trees ω $ > $ G ⇒ eagr E E2 D $ > $ G ⇒ ictor u E D j c W = ictor u E2 D j c W $;
+--| The constructor's value at a path of its type: the tuple of the fields.
+theorem ictor_apn (G: hyps) (E D P T K: class) (u w j c p f g t a: set):
+  $ G ⇒ D ∈ trees ω $ > $ G ⇒ ¬ iprop D j w $ > $ G ⇒ iprt D P T $ > $ G ⇒ p ∊ esat u E P w $ >
+  $ G ⇒ ictk D j c K $ > $ G ⇒ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E K w (scat p (ixs D w (ifam u E D w))) $ >
+  $ G ⇒ apn (ictor u E D j c w) (scat f p) = scons c g $;
+theorem ictor_prop (G: hyps) (E D j c W: class) (u: set):
+  $ G ⇒ iprop D j W $ > $ G ⇒ ictor u E D j c W = ∅ $;
+
+-- --------------------------------------------------------------------------
+-- The hook's parts for the types and the constructors
+-- --------------------------------------------------------------------------
+
+--| At `ind_ty D J`, with the table `e`: `ity` over the level valuations.
+def hty (.u .d .j .e .w .z: set): class =
+  $ {z | ∃ u ∃ d ∃ j ∃ e (z = ⟨ ⟨ u , ⟨ kc_ind_ty , ⟨ scons d (scons j ∅) , e ⟩ ⟩ ⟩ ,
+      clam w lvals (ity u e d (fv nvf j) w) ⟩)} $;
+--| At `ind_ctor D J C`: `ictor` over the level valuations.
+def hctor (.u .d .j .c .e .w .z: set): class =
+  $ {z | ∃ u ∃ d ∃ j ∃ c ∃ e (z = ⟨ ⟨ u , ⟨ kc_ind_ctor , ⟨ scons d (scons j (scons c ∅)) , e ⟩ ⟩ ⟩ ,
+      clam w lvals (ictor u e d (fv nvf j) (fv nvf c) w) ⟩)} $;
+
+theorem hty_functional (G: hyps): $ G ⇒ functional hty $;
+theorem hctor_functional (G: hyps): $ G ⇒ functional hctor $;
+--| The denotations of `ind_ty D J` and `ind_ctor D J C`, for a hook `mcv H`
+--| with `H` extending `hty` and `hctor`.
+theorem dt_ind_ty (G: hyps) (H: class) (u d j w r: set):
+  $ G ⇒ hty ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ d ∊ trees ω $ > $ G ⇒ j ∊ trees ω $ >
+  $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons d (scons j ∅) ⟩ w r =
+      mclip u (ity u (dnf u (mcv H)) d (fv nvf j) w) $;
+theorem dt_ind_ctor (G: hyps) (H: class) (u d j c w r: set):
+  $ G ⇒ hctor ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ d ∊ trees ω $ > $ G ⇒ j ∊ trees ω $ >
+  $ G ⇒ c ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ctor , scons d (scons j (scons c ∅)) ⟩ w r =
+      mclip u (ictor u (dnf u (mcv H)) d (fv nvf j) (fv nvf c) w) $;

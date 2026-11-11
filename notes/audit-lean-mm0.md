@@ -1030,6 +1030,20 @@ The rest of the model is not yet the spec's `deq`, so it changes nothing that is
   denotes the same as every tree it is `eeqv` to), since `eeqv` trees then denote the same
   (`lrel2_eeqv_dt`, by induction on the trees). The hook's definition will have to satisfy
   `minv`.
+- **The inductive types** (`model-ind.mm0`, `model-rec.mm0`, 2026-11-11, layer C5): the values
+  of `ind_ty`, `ind_ctor` and `ind_rec`, as parts of a hook, all definitions and theorems (no
+  axiom). The hook `mcv H` is built from `H` by a course-of-values recursion, so `H` sees the
+  values of a node's proper subtrees, not only of its children (`dt_mcv`); a curried trace is
+  a set of points `nest a y`. A block's types are the least fixed point `ifam` of an operator
+  that is monotone by construction (one step at every candidate below that is an element of
+  the universe), so it is a fixed point whatever the data; a type that is a proposition at the
+  level valuation is valued by its collapse inside the operator. `ind_ty` is a type's entry,
+  `ind_ctor` the trace of the constructor's tuple `c :: fields` (`∅` for a proposition), and
+  `ind_rec` the trace, over the parameters, motives, minors, indices and major, of the fold, the
+  least relation that relates a constructor's tuple to its minor at the fields and inductive
+  hypotheses (`dt_ind_ty`, `dt_ind_ctor`, `dt_ind_rec`). That the typing and reduction rules of
+  the schema hold of these values (positivity, the universe bound, the recursor's type, iota)
+  is layer E, still to come.
 
 **TG mode: a certificate verified against the library** (2026-11-09). The same certificate
 can be checked against the library instead of the spec:
