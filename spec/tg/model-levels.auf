@@ -4381,6 +4381,37 @@ lveq_leqv
 l1: $ _ ⇒ x ∊ lvals → lv (enc_lvl a) x = lv (enc_lvl b) x $ by all_elim [#1]
 l2: $ leqv a b $ by all_intro [l1]
 
+lveq_congr
+----------
+l1: $ (y ∊ lvals) ⟺ (y ∊ lvals) $ by iff_refl
+l2: $ y ≐ y $ by ceqt_refl
+l3: $ lv A y ≐ lv B y $ by lv_congr [#1, l2]
+l4: $ lv C y ≐ lv D y $ by lv_congr [#2, l2]
+l5: $ (lv A y = lv C y) ⟺ (lv B y = lv D y) $ by ceq_congr [l3, l4]
+l6: $ (y ∊ lvals → lv A y = lv C y) ⟺ (y ∊ lvals → lv B y = lv D y) $ by im_congr [l1, l5]
+l7: $ ∀ y (y ∊ lvals → lv A y = lv C y) ⟺ ∀ y (y ∊ lvals → lv B y = lv D y) $ by all_congr [l6]
+
+lveq_eq
+-------
+l1: $ G ⇒ x ∊ lvals → lv A x = lv C x $ by all_elim [#3]
+l2: $ G , x ∊ lvals ⇒ x ∊ lvals → lv A x = lv C x $ by weaken [l1]
+l3: $ G , x ∊ lvals ⇒ x ∊ lvals $ by ax
+l4: $ G , x ∊ lvals ⇒ lv A x = lv C x $ by imp_elim [l2, l3]
+l5: $ G , x ∊ lvals ⇒ A = B $ by weaken [#1]
+l6: $ G , x ∊ lvals ⇒ C = D $ by weaken [#2]
+l7: $ G , x ∊ lvals ⇒ x = x $ by eq_refl
+l8: $ G , x ∊ lvals ⇒ lv A x = lv B x $ by lv_eq [l5, l7]
+l9: $ G , x ∊ lvals ⇒ lv C x = lv D x $ by lv_eq [l6, l7]
+l10: $ G , x ∊ lvals ⇒ lv B x = lv A x $ by eq_sym [l8]
+l11: $ G , x ∊ lvals ⇒ lv B x = lv C x $ by eq_trans [l10, l4]
+l12: $ G , x ∊ lvals ⇒ lv B x = lv D x $ by eq_trans [l11, l9]
+l13: $ G ⇒ x ∊ lvals → lv B x = lv D x $ by imp_intro [l12]
+l14: $ G ⇒ lveq B D $ by all_intro [l13]
+
+sb_f_lveq
+---------
+l1: $ [x/t] (∀ y (y ∊ lvals → lv A y = lv B y)) ⟺ ∀ y (y ∊ lvals → lv (⟦ x / t ⟧ A) y = lv (⟦ x / t ⟧ B) y) $ by iff_refl
+
 leqv_refl
 ---------
 l1: $ x ∊ lvals ⇒ lv (enc_lvl a) x = lv (enc_lvl a) x $ by eq_refl

@@ -85,6 +85,9 @@ OUT3 = ROOT / "spec/tg/lean-tg3.mm0"
 # A clause with more variables than this binds them as one sequence (the base's
 # pool of proof variables, 35, must name a clause's variables and a few more).
 WIDE = 30
+# A closed definition of the spec whose tree has more constructors than this is a
+# def `tr_D` in the third stratum's trees.
+FOLD = 16
 
 
 def parse(text):
@@ -296,6 +299,7 @@ class Syntax:
 
     def __init__(self, sp, ctor_names, lib):
         self.sp, self.ctor_names, self.lib = sp, ctor_names, lib
+        self.fold = set()  # closed definitions whose trees are the defs `tr_D`
 
     def var(self, n):
         # a variable of the spec named like a term of the library
@@ -308,17 +312,20 @@ class Syntax:
             e = mm0math.subst(body, dict(zip([n for n, _ in bs], e[2])))
         return e
 
-    def tree(self, e):
-        """A term of the spec as a class: its tree, over set variables."""
+    def tree(self, e, env=None):
+        """A term of the spec as a class: its tree, over set variables (or the classes
+        `env` gives them)."""
         if e[0] == "v":
-            return self.var(e[1])
+            return env[e[1]] if env else self.var(e[1])
         _, name, args = e
+        if name in self.fold:
+            return f"tr_{name}"
         if name in self.sp.defs:
             bs, body = self.sp.defs[name]
-            return self.tree(mm0math.subst(body, dict(zip([n for n, _ in bs], args))))
+            return self.tree(mm0math.subst(body, dict(zip([n for n, _ in bs], args))), env)
         if name not in self.ctor_names:
             sys.exit(f"tg-lean: {name} is not a constructor")
-        return node(f"kc_{name}", [self.tree(a) for a in args])
+        return node(f"kc_{name}", [self.tree(a, env) for a in args])
 
     def atom(self, e):
         """A relation's formula as an atom, the spec's wff definitions unfolded."""
@@ -686,6 +693,13 @@ def render_stratum3(text, ctors, enc, enc2):
     ctor_names = {c for c, _, _, _ in ctors}
     syn = Syntax(sp, ctor_names, lib)
     tree, atom = syn.tree, syn.atom
+    # the spec's definitions of terms: a closed one whose tree is big is the def `tr_D`
+    # in the trees below (so a clause's tree stays small), and each has a rewrite `enc_D`
+    tdefs = [d for d in sp.decls if d[0] == "def" and d[3] != "wff"]
+    syn.fold = {d[1] for d in [d for d in tdefs if not d[2]] if tree(d[4]).count("kc_") > FOLD}
+    taken = ({f"tr_{n}" for n in syn.fold} | {f"enc_{d[1]}" for d in tdefs}) & (lib | ours)
+    if taken:
+        sys.exit(f"tg-lean: names taken by the library: {sorted(taken)}")
 
     def premise(h):
         """A premise: an atom of the stratum (a premise of the clause), or a side
@@ -773,6 +787,25 @@ def render_stratum3(text, ctors, enc, enc2):
     w("--| Part II's definitions of expressions (the spec's, in prefix form).")
     for _, name, bs, result, body in edefs:
         w(f"def {name} {group([(syn.var(n), s) for n, s in bs])}: {result} = $ {syn.stmt(body)} $;")
+    w("")
+    w("--| The spec's definitions of terms, encoded. The normalizer keeps a definition")
+    w("--| folded, so each has a rewrite `enc_D` from its encoding; a closed one with a")
+    w(f"--| big tree (more than {FOLD} constructors) is a def `tr_D`, which the trees")
+    w("--| of the clauses below use.")
+    for _, name, bs, result, body in tdefs:
+        if name in syn.fold:
+            syn.fold.discard(name)
+            w(f"def tr_{name}: class = $ {tree(body)} $;")
+            syn.fold.add(name)
+    for _, name, bs, result, body in tdefs:
+        vs = [(syn.var(n), srt) for n, srt in bs]
+        lhs = f"{name} {' '.join(v for v, _ in vs)}" if bs else name
+        if name in syn.fold:
+            rhs = f"tr_{name}"
+        else:
+            rhs = tree(body, {n: f"(enc_{srt} {syn.var(n)})" for n, srt in bs})
+        w("--| @rewrite")
+        w(f"theorem enc_{name}{' ' + group(vs) if bs else ''}: $ enc_{result} {paren(lhs)} ≐ {rhs} $;")
     w("")
     if wide:
         w("--| The indices of a wide clause's variables.")
@@ -971,8 +1004,10 @@ def render_labels(text):
 
 
 def render_congr(text):
-    """Congruence of the atoms `ra_R` declared in `text`: `≐` (for rewriting) and `=`."""
-    o = ["", "-- " + "-" * 74, "-- Congruence of the atoms", "-- " + "-" * 74, ""]
+    """Congruence of the atoms `ra_R` declared in `text`, `≐` (for rewriting) and `=`,
+    and substitution through them (for the normalizer)."""
+    o = ["", "-- " + "-" * 74, "-- Congruence of the atoms, substitution through them",
+         "-- " + "-" * 74, ""]
     for r, args in re.findall(r"^def (ra_\w+) \(([^:]*): class\)", text, re.M):
         n = len(args.split())
         a = [f"A{i}" for i in range(1, n + 1)]
@@ -985,6 +1020,9 @@ def render_congr(text):
         o.append(f"theorem {r}_eq (G: hyps) ({vs}: class): "
                  + " > ".join(f"$ G ⇒ {x} = {y} $" for x, y in zip(a, b))
                  + f" > $ G ⇒ {lhs} = {rhs} $;")
+        o.append("--| @rewrite")
+        o.append(f"theorem sb_c_{r} {{x: set}} (t: set x) ({' '.join(a)}: class x): "
+                 f"$ (⟦ x / t ⟧ ({lhs})) ≐ {r} {' '.join(f'(⟦ x / t ⟧ {v})' for v in a)} $;")
     return "\n".join(o) + "\n"
 
 
