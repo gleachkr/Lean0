@@ -3,7 +3,8 @@
 //! of Parts II and III of the spec as axioms over the model (`model.mm0`: the levels, the
 //! denotation and the judgments), which is built over `lean-tg.mm0`, the encoding of the
 //! spec's syntax with Part I's clauses proved in Tarski–Grothendieck set theory (`tg.mm0`),
-//! and `lean-tg2.mm0`, Part II's relations over level equivalence with their clauses proved.
+//! `lean-tg2.mm0`, Part II's relations over level equivalence with their clauses proved, and
+//! `lean-tg3.mm0`, the rest of Part II's relations over a judgment parameter, likewise.
 //! The library's proofs are in the MMB file `abc` compiles, which a TG-mode certificate starts
 //! with (`lean0 tg-link`).
 
@@ -29,6 +30,7 @@ const FILES: &[(&str, &str)] = &[
     ("lean-tg.mm0", include_str!("../../spec/tg/lean-tg.mm0")),
     ("model-levels.mm0", include_str!("../../spec/tg/model-levels.mm0")),
     ("lean-tg2.mm0", include_str!("../../spec/tg/lean-tg2.mm0")),
+    ("lean-tg3.mm0", include_str!("../../spec/tg/lean-tg3.mm0")),
     ("model-den.mm0", include_str!("../../spec/tg/model-den.mm0")),
     ("model-meta.mm0", include_str!("../../spec/tg/model-meta.mm0")),
     ("model-core.mm0", include_str!("../../spec/tg/model-core.mm0")),
