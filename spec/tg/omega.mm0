@@ -69,6 +69,8 @@ theorem omega_elem_subset (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ a ⊆
 theorem omega_elem_trans (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ transitive a $;
 theorem omega_elem_omega (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ a $ > $ G ⇒ b ∊ ω $;
+--| Class form of `omega_elem_omega`.
+theorem omega_elem_omega_c (G: hyps) (A B: class): $ G ⇒ A ∈ B $ > $ G ⇒ B ∈ ω $ > $ G ⇒ A ∈ ω $;
 theorem omega_cases (G: hyps) {y: set} (a: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ a = ∅ ∨ ∃ y (y ∊ ω ∧ a = suc y) $;
 theorem omega_suc_mono (G: hyps) (a b: set):
@@ -118,10 +120,14 @@ theorem sb_c_fv {x: set} (t: set x) (F A: class x):
 --| Class form of `fv_val`.
 theorem fv_val_c (G: hyps) (F A B: class):
   $ G ⇒ functional F $ > $ G ⇒ ⟨ A , B ⟩ ∈ F $ > $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ fv F A = B $;
+--| The value of a singleton function.
+theorem fv_csn_c (G: hyps) (A B: class): $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ fv (csn ⟨ A , B ⟩) A = B $;
 --| Class form of `fv_set`.
 theorem fv_set_c (G: hyps) (F A: class): $ G ⇒ functional F $ > $ G ⇒ isset A $ > $ G ⇒ isset (fv F A) $;
 --| The values of a set at any class form a set.
 theorem fv_set_l (G: hyps) (F A: class): $ G ⇒ isset F $ > $ G ⇒ isset (fv F A) $;
+--| `fv_set` for a relation, at any class.
+theorem fv_set_rel (G: hyps) (F A: class): $ G ⇒ functional F $ > $ G ⇒ rel F $ > $ G ⇒ isset (fv F A) $;
 
 -- --------------------------------------------------------------------------
 -- Recursion on ω
@@ -166,6 +172,8 @@ theorem omrec_functional (G: hyps) (A F: class): $ G ⇒ functional (omrec A F) 
 theorem omrec_rel (G: hyps) (A F: class): $ G ⇒ rel (omrec A F) $;
 theorem omrec_cdm (G: hyps) (A F: class):
   $ G ⇒ isset A $ > $ G ⇒ functional F $ > $ G ⇒ cdm (omrec A F) = ω $;
+--| The arguments of `omrec` are numbers.
+theorem omrec_cdm_elim (G: hyps) (A F: class) (n: set): $ G ⇒ n ∊ cdm (omrec A F) $ > $ G ⇒ n ∊ ω $;
 theorem omrec_fv (G: hyps) (A F: class) (g a: set): $ G ⇒ functional (omrec A F) $ > $ G ⇒ g ∊ omapx A F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ fv (omrec A F) a = fv g a $;
 theorem omrec_zero (G: hyps) (A F: class):
   $ G ⇒ isset A $ > $ G ⇒ functional F $ > $ G ⇒ fv (omrec A F) ∅ = A $;

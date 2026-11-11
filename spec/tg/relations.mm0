@@ -77,6 +77,8 @@ theorem rel_eq_intro (G: hyps) {x y: set} (R S: class):
 --| @congr
 theorem rel_congr (R S: class): $ R ≐ S $ > $ rel R ⟺ rel S $;
 theorem rel_eq (G: hyps) (R S: class): $ G ⇒ R = S $ > $ G ⇒ rel R $ > $ G ⇒ rel S $;
+--| The first component of a pair in a relation is a set.
+theorem rel_pair_isset (G: hyps) (R A B: class): $ G ⇒ rel R $ > $ G ⇒ ⟨ A , B ⟩ ∈ R $ > $ G ⇒ isset A $;
 --| @rewrite
 theorem sb_f_rel {x: set} (t: set x) (R: class x):
   $ [x/t] (rel R) ⟺ rel (⟦ x / t ⟧ R) $;
@@ -119,6 +121,11 @@ theorem cdm_congr (R S: class): $ R ≐ S $ > $ cdm R ≐ cdm S $;
 theorem crn_congr (R S: class): $ R ≐ S $ > $ crn R ≐ crn S $;
 theorem cdm_eq (G: hyps) (R S: class): $ G ⇒ R = S $ > $ G ⇒ cdm R = cdm S $;
 theorem crn_eq (G: hyps) (R S: class): $ G ⇒ R = S $ > $ G ⇒ crn R = crn S $;
+--| The second component of a pair, as the union of the range of its singleton.
+theorem cuni_crn_csn (G: hyps) (a b: set): $ G ⇒ ⋃ (crn (csn ⟨ a , b ⟩)) = b $;
+--| Class form of `cuni_crn_csn`.
+theorem cuni_crn_csn_c (G: hyps) (A B: class):
+  $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ ⋃ (crn (csn ⟨ A , B ⟩)) = B $;
 --| @rewrite
 theorem sb_c_cdm {x: set} (t: set x) (R: class x):
   $ (⟦ x / t ⟧ (cdm R)) ≐ cdm (⟦ x / t ⟧ R) $;
@@ -260,6 +267,8 @@ theorem ap_functional_set (G: hyps) (F: class) (a: set):
 theorem ap_set_c (G: hyps) (F A: class): $ G ⇒ isset F $ > $ G ⇒ isset (ap F A) $;
 --| The empty set has no values.
 theorem ap_empty (G: hyps) (A: class): $ G ⇒ ap ∅ A = ∅ $;
+--| A pair with a set value is in `F` when the value is in `ap F a`.
+theorem ap_wcel (G: hyps) (F A: class) (a: set): $ G ⇒ isset A $ > $ G ⇒ ⟨ a , A ⟩ ∈ F ↔ A ∈ ap F a $;
 theorem ap_mono (G: hyps) (F H A: class):
   $ G ⇒ F ⊆ H $ > $ G ⇒ ap F A ⊆ ap H A $;
 --| @congr

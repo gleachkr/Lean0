@@ -151,6 +151,39 @@ l1: $ G ⇒ csn a ∈ U $ by universe_csn [#1, #2]
 l2: $ G ⇒ cpr a b ∈ U $ by universe_cpr [#1, #2, #3]
 l3: $ G ⇒ cpr (csn a) (cpr a b) ∈ U $ by universe_cpr_c [#1, l1, l2]
 
+universe_opair_r
+----------------
+t1: $ G ⇒ isset (cpr a b) $ by cpr_isset
+t2: $ G ⇒ cpr a b ∈ cpr (csn a) (cpr a b) $ by cpr_intro_r_c [t1]
+t3: $ G ⇒ cpr a b ∈ U $ by universe_elem_elem_c [#1, #2, t2]
+t4: $ G ⇒ b ∊ cpr a b $ by cpr_intro_r
+t5: $ G ⇒ b ∈ cpr a b $ by welc_wcel [t4]
+t6: $ G ⇒ b ∈ U $ by universe_elem_elem_c [#1, t3, t5]
+t7: $ G ⇒ b ∊ U $ by wcel_welc [t6]
+
+universe_common
+---------------
+w1: $ G , m = cpr a b , m ∊ o ∧ universe o ⇒ m ∊ o ∧ universe o $ by ax
+w2: $ G , m = cpr a b , m ∊ o ∧ universe o ⇒ m ∊ o $ by and_elim_l [w1]
+w3: $ G , m = cpr a b , m ∊ o ∧ universe o ⇒ universe o $ by and_elim_r [w1]
+w4: $ G , m = cpr a b , m ∊ o ∧ universe o ⇒ m = cpr a b $ by ax
+w5: $ G , m = cpr a b , m ∊ o ∧ universe o ⇒ cpr a b = m $ by eq_sym [w4]
+w6: $ G , m = cpr a b , m ∊ o ∧ universe o ⇒ a ∊ cpr a b $ by cpr_intro_l
+w7: $ G , m = cpr a b , m ∊ o ∧ universe o ⇒ a ∊ m $ by welc_eq [w5, w6]
+w8: $ G , m = cpr a b , m ∊ o ∧ universe o ⇒ b ∊ cpr a b $ by cpr_intro_r
+w9: $ G , m = cpr a b , m ∊ o ∧ universe o ⇒ b ∊ m $ by welc_eq [w5, w8]
+w10: $ G , m = cpr a b , m ∊ o ∧ universe o ⇒ a ∊ o $ by universe_elem_elem [w3, w2, w7]
+w11: $ G , m = cpr a b , m ∊ o ∧ universe o ⇒ b ∊ o $ by universe_elem_elem [w3, w2, w9]
+w12: $ G , m = cpr a b , m ∊ o ∧ universe o ⇒ b ∊ o ∧ universe o $ by and_intro [w11, w3]
+w13: $ G , m = cpr a b , m ∊ o ∧ universe o ⇒ a ∊ o ∧ b ∊ o ∧ universe o $ by and_intro [w10, w12]
+w14: $ G , m = cpr a b , m ∊ o ∧ universe o ⇒ ∃ v (a ∊ v ∧ b ∊ v ∧ universe v) $ by ex_intro [w13]
+w15: $ G , m = cpr a b ⇒ ∃ o (m ∊ o ∧ universe o) $ by ax_universe
+w16: $ G , m = cpr a b , ∃ o (m ∊ o ∧ universe o) ⇒ ∃ o (m ∊ o ∧ universe o) $ by ax
+w17: $ G , m = cpr a b , ∃ o (m ∊ o ∧ universe o) ⇒ ∃ v (a ∊ v ∧ b ∊ v ∧ universe v) $ by ex_elim [w16, w14]
+w18: $ G , m = cpr a b ⇒ ∃ v (a ∊ v ∧ b ∊ v ∧ universe v) $ by cut [w15, w17]
+w19: $ G ⇒ isset (cpr a b) $ by ax_pair
+w20: $ G ⇒ ∃ v (a ∊ v ∧ b ∊ v ∧ universe v) $ by isset_elim [w19, w18]
+
 universe_empty
 --------------
 l1: $ G ⇒ ∅ ⊆ a $ by empty_subset

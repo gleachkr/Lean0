@@ -339,6 +339,47 @@ n29: $ G , isset A ⇒ isset A $ by ax
 n30: $ G ⇒ isset A ∨ ¬ isset A $ by excluded_middle
 n31: $ G ⇒ isset A $ by or_elim [n30, n29, n28]
 
+cpr_proper
+----------
+a1: $ G , x ∊ cpr A B ⇒ x ∊ cpr A B $ by ax
+a2: $ G , x ∊ cpr A B ⇒ x = A ∨ x = B $ by cpr_elim [a1]
+a3: $ G , x ∊ cpr A B , x = A ⇒ x = A $ by ax
+a4: $ G , x ∊ cpr A B , x = B ⇒ x = B $ by ax
+a5: $ G , x ∊ cpr A B , x = B ⇒ isset B $ by isset_intro [a4]
+a6: $ G , x ∊ cpr A B , x = B ⇒ ¬ isset B $ by weaken [#1]
+a7: $ G , x ∊ cpr A B , x = B ⇒ ⊥ $ by not_elim [a6, a5]
+a8: $ G , x ∊ cpr A B , x = B ⇒ x = A $ by bot_elim [a7]
+a9: $ G , x ∊ cpr A B ⇒ x = A $ by or_elim [a2, a3, a8]
+a10: $ G , x ∊ cpr A B ⇒ x ∊ csn A $ by csn_intro [a9]
+b1: $ G , x ∊ csn A ⇒ x ∊ csn A $ by ax
+b2: $ G , x ∊ csn A ⇒ x = A $ by csn_elim [b1]
+b3: $ G , x ∊ csn A ⇒ x = A ∨ x = B $ by or_intro_l [b2]
+b4: $ G , x ∊ csn A ⇒ x ∊ cpr A B $ by cpr_intro [b3]
+c1: $ G ⇒ cpr A B = csn A $ by eq_intro [a10, b4]
+
+opair_proper
+------------
+l1: $ G ⇒ cpr A B = csn A $ by cpr_proper [#1]
+l2: $ G ⇒ csn A = csn A $ by eq_refl
+l3: $ G ⇒ cpr (csn A) (cpr A B) = cpr (csn A) (csn A) $ by cpr_eq [l2, l1]
+l4: $ G ⇒ ⟨ A , B ⟩ = ⟨ A , A ⟩ $ by weaken [l3]
+
+opair_inj_l_c
+-------------
+l0: $ G ⇒ isset (csn A) $ by csn_set [#2]
+l1: $ G ⇒ csn A = csn C ∨ csn A = cpr C D $ by cpr_eq_elim_l [#1, l0]
+a1: $ G , csn A = csn C ⇒ csn A = csn C $ by ax
+a2: $ G , csn A = csn C ⇒ isset A $ by weaken [#2]
+a5: $ G , csn A = csn C ⇒ A = C $ by csn_inj_c [a2, a1]
+b1: $ G , csn A = cpr C D ⇒ csn A = cpr C D $ by ax
+b2: $ G , csn A = cpr C D ⇒ cpr C D = csn A $ by eq_sym [b1]
+b3: $ G , csn A = cpr C D ⇒ isset C $ by weaken [#3]
+b4: $ G , csn A = cpr C D ⇒ C = A ∨ C = A $ by cpr_eq_elim_l [b2, b3]
+b5: $ G , csn A = cpr C D , C = A ⇒ C = A $ by ax
+b6: $ G , csn A = cpr C D ⇒ C = A $ by or_elim [b4, b5, b5]
+b7: $ G , csn A = cpr C D ⇒ A = C $ by eq_sym [b6]
+c1: $ G ⇒ A = C $ by or_elim [l1, a5, b7]
+
 csn_opair_elim
 --------------
 l1: $ G , z = ⟨ a , b ⟩ , z ∊ csn ⟨ s , c ⟩ ⇒ z ∊ csn ⟨ s , c ⟩ $ by ax
@@ -513,6 +554,15 @@ l10: $ G ⇒ isset (cpr A B) $ by ex_elim [l1, l9]
 opair_isset
 -----------
 l1: $ G ⇒ isset (cpr (csn A) (cpr A B)) $ by cpr_isset
+
+opair_ne_empty
+--------------
+l2: $ G ⇒ isset (csn A) $ by cpr_isset
+l3: $ G ⇒ csn A ∈ cpr (csn A) (cpr A B) $ by cpr_intro_l_c [l2]
+l4: $ G ⇒ csn A ∈ ∅ $ by wcel_eq_r [#1, l3]
+l5: $ G , b = csn A , b ∊ ∅ ⇒ b ∊ ∅ $ by ax
+l6: $ G , b = csn A , b ∊ ∅ ⇒ ⊥ $ by empty_elim [l5]
+l7: $ G ⇒ ⊥ $ by wcel_elim [l4, l6]
 
 cuni_intro
 ----------

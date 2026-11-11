@@ -387,6 +387,36 @@ l26: $ G , u = ∅ ⇒ ∅ ∈ fseq A $ by wcel_intro [l25, l24]
 l27: $ G ⇒ isset ∅ $ by ax_empty
 l28: $ G ⇒ ∅ ∈ fseq A $ by isset_elim [l27, l26]
 
+cres_fseq
+---------
+a1: $ G ⇒ functional F $ by fn_into_functional [#2]
+a2: $ G ⇒ isset N $ by wcel_isset [#1]
+a3: $ G ⇒ isset (cres F N) $ by cres_set [a1, a2]
+a4: $ G ⇒ fn_into (cres F N) N A $ by fn_into_cres [#2]
+a5: $ G ⇒ N ⊆ cdm (cres F N) $ by fn_into_cdm [a4]
+a6: $ G ⇒ cdm (cres F N) ⊆ N $ by cres_cdm
+a7: $ G ⇒ cdm (cres F N) = N $ by subset_antisym [a6, a5]
+a8: $ G ⇒ rel (cres F N) $ by cres_rel
+b1: $ G , n = N , n ∊ ω , q = cres F N ⇒ q = cres F N $ by ax
+b2: $ G , n = N , n ∊ ω , q = cres F N ⇒ cres F N = q $ by eq_sym [b1]
+b3: $ G , n = N , n ∊ ω , q = cres F N ⇒ rel (cres F N) $ by weaken [a8]
+b4: $ G , n = N , n ∊ ω , q = cres F N ⇒ rel q $ by rel_eq [b2, b3]
+b5: $ G , n = N , n ∊ ω , q = cres F N ⇒ n = N $ by ax
+b6: $ G , n = N , n ∊ ω , q = cres F N ⇒ cdm q = cdm (cres F N) $ by cdm_eq [b1]
+b7: $ G , n = N , n ∊ ω , q = cres F N ⇒ cdm (cres F N) = N $ by weaken [a7]
+b8: $ G , n = N , n ∊ ω , q = cres F N ⇒ N = n $ by eq_sym [b5]
+b9: $ G , n = N , n ∊ ω , q = cres F N ⇒ cdm q = N $ by eq_trans [b6, b7]
+b10: $ G , n = N , n ∊ ω , q = cres F N ⇒ cdm q = n $ by eq_trans [b9, b8]
+b11: $ G , n = N , n ∊ ω , q = cres F N ⇒ fn_into (cres F N) N A $ by weaken [a4]
+b12: $ G , n = N , n ∊ ω , q = cres F N ⇒ A = A $ by eq_refl
+b13: $ G , n = N , n ∊ ω , q = cres F N ⇒ fn_into q n A $ by fn_into_eq [b2, b8, b12, b11]
+b14: $ G , n = N , n ∊ ω , q = cres F N ⇒ n ∊ ω $ by ax
+b15: $ G , n = N , n ∊ ω , q = cres F N ⇒ q ∊ fseq A $ by fseq_intro [b14, b4, b10, b13]
+b16: $ G , n = N , n ∊ ω , q = cres F N ⇒ cres F N ∈ fseq A $ by wcel_intro [b1, b15]
+c0: $ G , n = N , n ∊ ω ⇒ isset (cres F N) $ by weaken [a3]
+c1: $ G , n = N , n ∊ ω ⇒ cres F N ∈ fseq A $ by isset_elim [c0, b16]
+c2: $ G ⇒ cres F N ∈ fseq A $ by wcel_elim [#1, c1]
+
 fseq_len_zero
 -------------
 l1: $ G , u ∊ s ⇒ u ∊ s $ by ax
@@ -816,6 +846,15 @@ e6: $ G ⇒ isset (crn S) $ by crn_set [#1]
 e7: $ G ⇒ isset (𝒫 (⋃ (cdm S) ∪ cdm S) × crn S) $ by cxp_set [e5, e6]
 e8: $ G ⇒ isset (csn ⟨ ∅ , A ⟩ ∪ (𝒫 (⋃ (cdm S) ∪ cdm S) × crn S)) $ by cun_set [e1, e7]
 e9: $ G ⇒ isset (scons A S) $ by subset_isset [e8, d7]
+
+scons_proper
+------------
+l1: $ G ⇒ cpr ∅ A = csn ∅ $ by cpr_proper [#1]
+l2: $ G ⇒ csn ∅ = csn ∅ $ by eq_refl
+l3: $ G ⇒ ⟨ ∅ , A ⟩ = ⟨ ∅ , ∅ ⟩ $ by cpr_eq [l2, l1]
+l4: $ G ⇒ csn ⟨ ∅ , A ⟩ = csn ⟨ ∅ , ∅ ⟩ $ by csn_eq [l3]
+l5: $ G ⇒ {z | ∃ i ∃ y (z = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S)} = {z | ∃ i ∃ y (z = ⟨ suc i , y ⟩ ∧ ⟨ i , y ⟩ ∈ S)} $ by eq_refl
+l6: $ G ⇒ scons A S = scons ∅ S $ by cun_eq [l4, l5]
 
 scons_len
 ---------
@@ -1384,6 +1423,42 @@ r18: $ G , k = cdm s , k ∊ ω , ∃ j (j ∊ ω ∧ k = suc j) ⇒ ∃ j (j �
 r19: $ G , k = cdm s , k ∊ ω , ∃ j (j ∊ ω ∧ k = suc j) ⇒ s = ∅ ∨ ∃ x ∃ y (x ∊ A ∧ y ∊ fseq A ∧ s = scons x y) $ by ex_elim [r18, r17]
 r20: $ G , k = cdm s , k ∊ ω ⇒ s = ∅ ∨ ∃ x ∃ y (x ∊ A ∧ y ∊ fseq A ∧ s = scons x y) $ by or_elim [m3, n7, r19]
 r21: $ G ⇒ s = ∅ ∨ ∃ x ∃ y (x ∊ A ∧ y ∊ fseq A ∧ s = scons x y) $ by wcel_elim [l1, r20]
+
+fseq_suc
+--------
+a1: $ G ⇒ s = ∅ ∨ ∃ a ∃ b (a ∊ A ∧ b ∊ fseq A ∧ s = scons a b) $ by fseq_cases [#1]
+a2: $ G , s = ∅ ⇒ s = ∅ $ by ax
+a3: $ G , s = ∅ ⇒ cdm s = cdm ∅ $ by cdm_eq [a2]
+a4: $ G , s = ∅ ⇒ cdm ∅ = ∅ $ by cdm_empty
+a5: $ G , s = ∅ ⇒ cdm s = ∅ $ by eq_trans [a3, a4]
+a6a: $ G , s = ∅ ⇒ cdm s = suc k $ by weaken [#2]
+a6: $ G , s = ∅ ⇒ suc k = cdm s $ by eq_sym [a6a]
+a7: $ G , s = ∅ ⇒ suc k = ∅ $ by eq_trans [a6, a5]
+a8: $ G , s = ∅ ⇒ ⊥ $ by suc_ne_empty [a7]
+a9: $ G , s = ∅ ⇒ ∃ e ∃ f (f ∊ fseq A ∧ cdm f = k ∧ s = scons e f) $ by bot_elim [a8]
+p1: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ a ∊ A ∧ b ∊ fseq A ∧ s = scons a b $ by ax
+p1a: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ b ∊ fseq A ∧ s = scons a b $ by and_elim_r [p1]
+p2: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ b ∊ fseq A $ by and_elim_l [p1a]
+p3: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ s = scons a b $ by and_elim_r [p1a]
+p4: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ cdm s = cdm (scons a b) $ by cdm_eq [p3]
+p5: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ cdm (scons a b) = suc (cdm b) $ by scons_len [p2]
+p6: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ cdm s = suc (cdm b) $ by eq_trans [p4, p5]
+p7: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ suc (cdm b) = cdm s $ by eq_sym [p6]
+p7a: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ cdm s = suc k $ by weaken [#2]
+p8: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ suc (cdm b) = suc k $ by eq_trans [p7, p7a]
+p9a: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ isset b $ by isset_var
+p9: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ isset (cdm b) $ by cdm_set [p9a]
+p10: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ isset k $ by isset_var
+p11: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ cdm b = k $ by suc_inj_c [p9, p10, p8]
+p12a: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ cdm b = k ∧ s = scons a b $ by and_intro [p11, p3]
+p12: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ b ∊ fseq A ∧ cdm b = k ∧ s = scons a b $ by and_intro [p2, p12a]
+p13: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ ∃ f (f ∊ fseq A ∧ cdm f = k ∧ s = scons a f) $ by ex_intro [p12]
+p14: $ G , a ∊ A ∧ b ∊ fseq A ∧ s = scons a b ⇒ ∃ e ∃ f (f ∊ fseq A ∧ cdm f = k ∧ s = scons e f) $ by ex_intro [p13]
+q0: $ G , ∃ b (a ∊ A ∧ b ∊ fseq A ∧ s = scons a b) ⇒ ∃ b (a ∊ A ∧ b ∊ fseq A ∧ s = scons a b) $ by ax
+q1: $ G , ∃ b (a ∊ A ∧ b ∊ fseq A ∧ s = scons a b) ⇒ ∃ e ∃ f (f ∊ fseq A ∧ cdm f = k ∧ s = scons e f) $ by ex_elim [q0, p14]
+q2a: $ G , ∃ a ∃ b (a ∊ A ∧ b ∊ fseq A ∧ s = scons a b) ⇒ ∃ a ∃ b (a ∊ A ∧ b ∊ fseq A ∧ s = scons a b) $ by ax
+q2: $ G , ∃ a ∃ b (a ∊ A ∧ b ∊ fseq A ∧ s = scons a b) ⇒ ∃ e ∃ f (f ∊ fseq A ∧ cdm f = k ∧ s = scons e f) $ by ex_elim [q2a, q1]
+q3: $ G ⇒ ∃ e ∃ f (f ∊ fseq A ∧ cdm f = k ∧ s = scons e f) $ by or_elim [a1, a9, q2]
 
 fseq_ind
 --------
@@ -2012,6 +2087,72 @@ c12: $ G , k = cdm s , k ∊ ω , c = cdm t , c ∊ ω ⇒ cdm (scat s t) = nadd
 c13: $ G , k = cdm s , k ∊ ω ⇒ cdm (scat s t) = nadd (cdm s) (cdm t) $ by wcel_elim [l2, c12]
 c14: $ G ⇒ cdm (scat s t) = nadd (cdm s) (cdm t) $ by wcel_elim [l1, c13]
 
+scat_set
+--------
+u1: $ G , x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X ⇒ x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X $ by ax
+u2: $ G , x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X ⇒ ⟨ i , y ⟩ ∈ X $ by and_elim_r [u1]
+u3: $ G , x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X ⇒ i ∊ cdm X $ by cdm_intro [u2]
+u4: $ G , x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X ⇒ cdm X ⊆ ω $ by weaken [#3]
+u5: $ G , x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X ⇒ i ∊ ω $ by subset_elim [u4, u3]
+u6: $ G , x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X ⇒ i ∈ ω $ by welc_wcel [u5]
+u7: $ G , x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X ⇒ p ∊ fseq A $ by weaken [#1]
+u8: $ G , x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X ⇒ cdm p ∈ ω $ by fseq_len [u7]
+u9: $ G , x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X ⇒ nadd (cdm p) i ∈ ω $ by nadd_omega_c [u8, u6]
+u10: $ G , x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X ⇒ y ∊ crn X $ by crn_intro [u2]
+u11: $ G , x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X ⇒ y ∈ crn X $ by welc_wcel [u10]
+u12: $ G , x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X ⇒ ⟨ nadd (cdm p) i , y ⟩ ∈ ω × crn X $ by cxp_intro_c [u9, u11]
+u13: $ G , x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X ⇒ x = ⟨ nadd (cdm p) i , y ⟩ $ by and_elim_l [u1]
+u14: $ G , x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X ⇒ ⟨ nadd (cdm p) i , y ⟩ = x $ by eq_sym [u13]
+u15: $ G , x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X ⇒ x ∈ ω × crn X $ by wcel_eq_l [u14, u12]
+u16: $ G , x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X ⇒ x ∊ ω × crn X $ by wcel_welc [u15]
+u17: $ G , ∃ y (x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X) ⇒ ∃ y (x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X) $ by ax
+u18: $ G , ∃ y (x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X) ⇒ x ∊ ω × crn X $ by ex_elim [u17, u16]
+u19: $ G , ∃ i ∃ y (x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X) ⇒ ∃ i ∃ y (x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X) $ by ax
+u20: $ G , ∃ i ∃ y (x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X) ⇒ x ∊ ω × crn X $ by ex_elim [u19, u18]
+u21: $ G , x ∊ {z | ∃ i ∃ y (z = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X)} ⇒ x ∊ {z | ∃ i ∃ y (z = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X)} $ by ax
+u22: $ G , x ∊ {z | ∃ i ∃ y (z = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X)} ⇒ ∃ i ∃ y (x = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X) $ by cab_elim [u21]
+u23: $ G , x ∊ {z | ∃ i ∃ y (z = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X)} ⇒ x ∊ ω × crn X $ by cut [u22, u20]
+u24: $ G ⇒ {z | ∃ i ∃ y (z = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X)} ⊆ ω × crn X $ by subset_intro [u23]
+u25: $ G ⇒ isset ω $ by omega_set
+u26: $ G ⇒ isset (crn X) $ by crn_set [#2]
+u27: $ G ⇒ isset (ω × crn X) $ by cxp_set [u25, u26]
+u28: $ G ⇒ isset ({z | ∃ i ∃ y (z = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X)}) $ by subset_isset [u27, u24]
+u29: $ G ⇒ isset p $ by isset_var
+u30: $ G ⇒ isset (p ∪ {z | ∃ i ∃ y (z = ⟨ nadd (cdm p) i , y ⟩ ∧ ⟨ i , y ⟩ ∈ X)}) $ by cun_set [u29, u28]
+
+scat_fseq_c
+-----------
+k1: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ l ∊ fseq A $ by ax
+k2: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ t ∊ fseq A $ by ax
+k3: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ scat l t ∈ fseq A $ by scat_fseq [k1, k2]
+k4: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ l = S $ by ax
+k5: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ t = T $ by ax
+k6: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ scat l t = scat S T $ by scat_eq [k4, k5]
+k7: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ scat S T ∈ fseq A $ by wcel_eq_l [k6, k3]
+m1: $ G , l = S , l ∊ fseq A ⇒ T ∈ fseq A $ by weaken [#2]
+m2: $ G , l = S , l ∊ fseq A ⇒ scat S T ∈ fseq A $ by wcel_elim [m1, k7]
+m3: $ G ⇒ scat S T ∈ fseq A $ by wcel_elim [#1, m2]
+
+scat_len_c
+----------
+k1: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ l ∊ fseq A $ by ax
+k2: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ t ∊ fseq A $ by ax
+k3: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ cdm (scat l t) = nadd (cdm l) (cdm t) $ by scat_len [k1, k2]
+k4: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ l = S $ by ax
+k5: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ t = T $ by ax
+k6: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ S = l $ by eq_sym [k4]
+k7: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ T = t $ by eq_sym [k5]
+k8: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ scat S T = scat l t $ by scat_eq [k6, k7]
+k9: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ cdm (scat S T) = cdm (scat l t) $ by cdm_eq [k8]
+k10: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ cdm l = cdm S $ by cdm_eq [k4]
+k11: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ cdm t = cdm T $ by cdm_eq [k5]
+k12: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ nadd (cdm l) (cdm t) = nadd (cdm S) (cdm T) $ by nadd_eq [k10, k11]
+k13: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ cdm (scat S T) = nadd (cdm l) (cdm t) $ by eq_trans [k9, k3]
+k14: $ G , l = S , l ∊ fseq A , t = T , t ∊ fseq A ⇒ cdm (scat S T) = nadd (cdm S) (cdm T) $ by eq_trans [k13, k12]
+m1: $ G , l = S , l ∊ fseq A ⇒ T ∈ fseq A $ by weaken [#2]
+m2: $ G , l = S , l ∊ fseq A ⇒ cdm (scat S T) = nadd (cdm S) (cdm T) $ by wcel_elim [m1, k14]
+m3: $ G ⇒ cdm (scat S T) = nadd (cdm S) (cdm T) $ by wcel_elim [#1, m2]
+
 scat_fv_l
 ---------
 l1: $ G ⇒ cdm s ∈ ω $ by fseq_len [#1]
@@ -2232,6 +2373,93 @@ l5: $ G , t = T , t ∊ fseq A ⇒ scat ∅ T = scat ∅ t $ by eq_sym [l4]
 l6: $ G , t = T , t ∊ fseq A ⇒ scat ∅ T = t $ by eq_trans [l5, l1]
 l7: $ G , t = T , t ∊ fseq A ⇒ scat ∅ T = T $ by eq_trans [l6, l2]
 l8: $ G ⇒ scat ∅ T = T $ by wcel_elim [#1, l7]
+
+scat_inj
+--------
+a0: $ G , i ∊ cdm s ⇒ i ∊ cdm s $ by ax
+a1: $ G , i ∊ cdm s ⇒ s ∊ fseq A $ by weaken [#1]
+a2: $ G , i ∊ cdm s ⇒ s2 ∊ fseq A $ by weaken [#2]
+a3: $ G , i ∊ cdm s ⇒ t ∊ fseq A $ by weaken [#3]
+a4: $ G , i ∊ cdm s ⇒ t2 ∊ fseq A $ by weaken [#4]
+a5: $ G , i ∊ cdm s ⇒ cdm s = cdm s2 $ by weaken [#5]
+a6: $ G , i ∊ cdm s ⇒ scat s t = scat s2 t2 $ by weaken [#7]
+a7: $ G , i ∊ cdm s ⇒ i ∊ cdm s2 $ by welc_eq [a5, a0]
+a8: $ G , i ∊ cdm s ⇒ fv (scat s t) i = fv s i $ by scat_fv_l [a1, a3, a0]
+a9: $ G , i ∊ cdm s ⇒ fv (scat s2 t2) i = fv s2 i $ by scat_fv_l [a2, a4, a7]
+a10: $ G , i ∊ cdm s ⇒ i = i $ by eq_refl
+a11: $ G , i ∊ cdm s ⇒ fv (scat s t) i = fv (scat s2 t2) i $ by fv_eq [a6, a10]
+a12: $ G , i ∊ cdm s ⇒ fv s i = fv (scat s t) i $ by eq_sym [a8]
+a13: $ G , i ∊ cdm s ⇒ fv s i = fv (scat s2 t2) i $ by eq_trans [a12, a11]
+a14: $ G , i ∊ cdm s ⇒ fv s i = fv s2 i $ by eq_trans [a13, a9]
+a15: $ G ⇒ i ∊ cdm s → fv s i = fv s2 i $ by imp_intro [a14]
+a16: $ G ⇒ ∀ i (i ∊ cdm s → fv s i = fv s2 i) $ by all_intro [a15]
+a17: $ G ⇒ s = s2 $ by fseq_ext [#1, #2, #5, a16]
+b0: $ G , i ∊ cdm t ⇒ i ∊ cdm t $ by ax
+b1: $ G , i ∊ cdm t ⇒ s ∊ fseq A $ by weaken [#1]
+b2: $ G , i ∊ cdm t ⇒ s2 ∊ fseq A $ by weaken [#2]
+b3: $ G , i ∊ cdm t ⇒ t ∊ fseq A $ by weaken [#3]
+b4: $ G , i ∊ cdm t ⇒ t2 ∊ fseq A $ by weaken [#4]
+b5: $ G , i ∊ cdm t ⇒ cdm s = cdm s2 $ by weaken [#5]
+b6: $ G , i ∊ cdm t ⇒ cdm t = cdm t2 $ by weaken [#6]
+b7: $ G , i ∊ cdm t ⇒ scat s t = scat s2 t2 $ by weaken [#7]
+b8: $ G , i ∊ cdm t ⇒ i ∊ cdm t2 $ by welc_eq [b6, b0]
+b9: $ G , i ∊ cdm t ⇒ fv (scat s t) (nadd (cdm s) i) = fv t i $ by scat_fv_r [b1, b3, b0]
+b10: $ G , i ∊ cdm t ⇒ fv (scat s2 t2) (nadd (cdm s2) i) = fv t2 i $ by scat_fv_r [b2, b4, b8]
+b11: $ G , i ∊ cdm t ⇒ i = i $ by eq_refl
+b12: $ G , i ∊ cdm t ⇒ nadd (cdm s) i = nadd (cdm s2) i $ by nadd_eq [b5, b11]
+b13: $ G , i ∊ cdm t ⇒ fv (scat s t) (nadd (cdm s) i) = fv (scat s2 t2) (nadd (cdm s2) i) $ by fv_eq [b7, b12]
+b14: $ G , i ∊ cdm t ⇒ fv t i = fv (scat s t) (nadd (cdm s) i) $ by eq_sym [b9]
+b15: $ G , i ∊ cdm t ⇒ fv t i = fv (scat s2 t2) (nadd (cdm s2) i) $ by eq_trans [b14, b13]
+b16: $ G , i ∊ cdm t ⇒ fv t i = fv t2 i $ by eq_trans [b15, b10]
+b17: $ G ⇒ i ∊ cdm t → fv t i = fv t2 i $ by imp_intro [b16]
+b18: $ G ⇒ ∀ i (i ∊ cdm t → fv t i = fv t2 i) $ by all_intro [b17]
+b19: $ G ⇒ t = t2 $ by fseq_ext [#3, #4, #6, b18]
+c1: $ G ⇒ s = s2 ∧ t = t2 $ by and_intro [a17, b19]
+
+scat_inj_c
+----------
+k1: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ l = S $ by ax
+k2: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ d = S2 $ by ax
+k3: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ t = T $ by ax
+k4: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ e = T2 $ by ax
+k5: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ S = l $ by eq_sym [k1]
+k6: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ S2 = d $ by eq_sym [k2]
+k7: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ T = t $ by eq_sym [k3]
+k8: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ T2 = e $ by eq_sym [k4]
+k9: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ l ∊ fseq A $ by ax
+k10: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ d ∊ fseq A $ by ax
+k11: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ t ∊ fseq A $ by ax
+k12: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ e ∊ fseq A $ by ax
+k13: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ cdm l = cdm S $ by cdm_eq [k1]
+k14: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ cdm S = cdm S2 $ by weaken [#5]
+k15: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ cdm S2 = cdm d $ by cdm_eq [k6]
+k16: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ cdm l = cdm S2 $ by eq_trans [k13, k14]
+k17: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ cdm l = cdm d $ by eq_trans [k16, k15]
+k18: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ cdm t = cdm T $ by cdm_eq [k3]
+k19: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ cdm T = cdm T2 $ by weaken [#6]
+k20: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ cdm T2 = cdm e $ by cdm_eq [k8]
+k21: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ cdm t = cdm T2 $ by eq_trans [k18, k19]
+k22: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ cdm t = cdm e $ by eq_trans [k21, k20]
+k23: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ scat l t = scat S T $ by scat_eq [k1, k3]
+k24: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ scat S T = scat S2 T2 $ by weaken [#7]
+k25: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ scat S2 T2 = scat d e $ by scat_eq [k6, k8]
+k26: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ scat l t = scat S2 T2 $ by eq_trans [k23, k24]
+k27: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ scat l t = scat d e $ by eq_trans [k26, k25]
+k28: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ l = d ∧ t = e $ by scat_inj [k9, k10, k11, k12, k17, k22, k27]
+k29: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ l = d $ by and_elim_l [k28]
+k30: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ t = e $ by and_elim_r [k28]
+k31: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ S = d $ by eq_trans [k5, k29]
+k32: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ S = S2 $ by eq_trans [k31, k2]
+k33: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ T = e $ by eq_trans [k7, k30]
+k34: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ T = T2 $ by eq_trans [k33, k4]
+k35: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A , e = T2 , e ∊ fseq A ⇒ S = S2 ∧ T = T2 $ by and_intro [k32, k34]
+m1: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A ⇒ T2 ∈ fseq A $ by weaken [#4]
+m2: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A , t = T , t ∊ fseq A ⇒ S = S2 ∧ T = T2 $ by wcel_elim [m1, k35]
+m3: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A ⇒ T ∈ fseq A $ by weaken [#3]
+m4: $ G , l = S , l ∊ fseq A , d = S2 , d ∊ fseq A ⇒ S = S2 ∧ T = T2 $ by wcel_elim [m3, m2]
+m5: $ G , l = S , l ∊ fseq A ⇒ S2 ∈ fseq A $ by weaken [#2]
+m6: $ G , l = S , l ∊ fseq A ⇒ S = S2 ∧ T = T2 $ by wcel_elim [m5, m4]
+m7: $ G ⇒ S = S2 ∧ T = T2 $ by wcel_elim [#1, m6]
 
 scat_agree
 ----------

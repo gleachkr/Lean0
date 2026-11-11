@@ -90,6 +90,22 @@ theorem trees_kids2 (G: hyps) (L K: class) (a b: set):
 theorem trees_kids3 (G: hyps) (L K: class) (a b c: set):
   $ G ⇒ isset L $ > $ G ⇒ ⟨ K , scons a (scons b (scons c ∅)) ⟩ ∈ trees L $ > $ G ⇒ isset K $ >
   $ G ⇒ a ∊ trees L ∧ b ∊ trees L ∧ c ∊ trees L $;
+--| Class form of `trees_intro`.
+theorem trees_intro_c (G: hyps) (L K S: class):
+  $ G ⇒ isset L $ > $ G ⇒ K ∈ L $ > $ G ⇒ S ∈ fseq (trees L) $ > $ G ⇒ ⟨ K , S ⟩ ∈ trees L $;
+--| `∅` is not a tree.
+theorem empty_notin_trees_c (G: hyps) (L: class): $ G ⇒ isset L $ > $ G ⇒ ∅ ∈ trees L $ > $ G ⇒ ⊥ $;
+--| The head of a sequence of trees is a tree, whether or not it is a set.
+theorem crn_scons_head_trees (G: hyps) (L A S: class):
+  $ G ⇒ isset L $ > $ G ⇒ crn (scons A S) ⊆ trees L $ > $ G ⇒ A ∈ trees L $;
+--| Nodes with one, two or three children are equal only for equal children.
+theorem node1_inj (G: hyps) (K: class) (f o: set):
+  $ G ⇒ isset K $ > $ G ⇒ ⟨ K , scons f ∅ ⟩ = ⟨ K , scons o ∅ ⟩ $ > $ G ⇒ f = o $;
+theorem node2_inj (G: hyps) (K: class) (f g o p: set):
+  $ G ⇒ isset K $ > $ G ⇒ ⟨ K , scons f (scons g ∅) ⟩ = ⟨ K , scons o (scons p ∅) ⟩ $ > $ G ⇒ f = o ∧ g = p $;
+theorem node3_inj (G: hyps) (K: class) (f g h o p q: set):
+  $ G ⇒ isset K $ > $ G ⇒ ⟨ K , scons f (scons g (scons h ∅)) ⟩ = ⟨ K , scons o (scons p (scons q ∅)) ⟩ $ >
+  $ G ⇒ f = o ∧ g = p ∧ h = q $;
 --| Induction over the children.
 theorem trees_ind (G: hyps) {k s: set} (l: set) (P: class):
   $ G ⇒ ∀ k ∀ s (k ∊ l → s ∊ fseq (trees l) → crn s ⊆ P → ⟨ k , s ⟩ ∈ P) $ >

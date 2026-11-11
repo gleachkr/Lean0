@@ -388,6 +388,20 @@ omega_elem_omega
 l1: $ G ⇒ a ⊆ ω $ by omega_elem_subset [#1]
 l2: $ G ⇒ b ∊ ω $ by subset_elim [l1, #2]
 
+omega_elem_omega_c
+------------------
+k1: $ G , b = B , b ∊ ω ⇒ A ∈ B $ by weaken [#1]
+k2a: $ G , b = B , b ∊ ω ⇒ b = B $ by ax
+k2: $ G , b = B , b ∊ ω ⇒ B = b $ by eq_sym [k2a]
+k3: $ G , b = B , b ∊ ω ⇒ A ∈ b $ by wcel_eq_r [k2, k1]
+m0: $ G , b = B , b ∊ ω , a = A , a ∊ b ⇒ b ∊ ω $ by ax
+m0b: $ G , b = B , b ∊ ω , a = A , a ∊ b ⇒ a ∊ b $ by ax
+m1: $ G , b = B , b ∊ ω , a = A , a ∊ b ⇒ a ∊ ω $ by omega_elem_omega [m0, m0b]
+m1b: $ G , b = B , b ∊ ω , a = A , a ∊ b ⇒ a = A $ by ax
+m2: $ G , b = B , b ∊ ω , a = A , a ∊ b ⇒ A ∈ ω $ by wcel_intro [m1b, m1]
+m3: $ G , b = B , b ∊ ω ⇒ A ∈ ω $ by wcel_elim [k3, m2]
+m4: $ G ⇒ A ∈ ω $ by wcel_elim [#2, m3]
+
 omega_cases
 -----------
 l1: $ G ⇒ isset ∅ $ by ax_empty
@@ -728,6 +742,40 @@ l13: $ G , x = A , y = B ⇒ fv F A = B $ by eq_trans [l12, l2]
 l14: $ G , x = A ⇒ fv F A = B $ by isset_elim [#4, l13]
 l15: $ G ⇒ fv F A = B $ by isset_elim [#3, l14]
 
+lemma t0_csn_pair (G: hyps) (A B C D: class): $ G ⇒ isset C $ > $ G ⇒ isset D $ > $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ ⟨ C , D ⟩ ∈ csn ⟨ A , B ⟩ $ > $ G ⇒ D = B $
+----
+c1: $ G , e = ⟨ C , D ⟩ , e ∊ csn ⟨ A , B ⟩ ⇒ e ∊ csn ⟨ A , B ⟩ $ by ax
+c2: $ G , e = ⟨ C , D ⟩ , e ∊ csn ⟨ A , B ⟩ ⇒ e = ⟨ A , B ⟩ $ by csn_elim [c1]
+c3: $ G , e = ⟨ C , D ⟩ , e ∊ csn ⟨ A , B ⟩ ⇒ e = ⟨ C , D ⟩ $ by ax
+c4: $ G , e = ⟨ C , D ⟩ , e ∊ csn ⟨ A , B ⟩ ⇒ ⟨ C , D ⟩ = e $ by eq_sym [c3]
+c5: $ G , e = ⟨ C , D ⟩ , e ∊ csn ⟨ A , B ⟩ ⇒ ⟨ C , D ⟩ = ⟨ A , B ⟩ $ by eq_trans [c4, c2]
+c6a: $ G , e = ⟨ C , D ⟩ , e ∊ csn ⟨ A , B ⟩ ⇒ isset C $ by weaken [#1]
+c6b: $ G , e = ⟨ C , D ⟩ , e ∊ csn ⟨ A , B ⟩ ⇒ isset D $ by weaken [#2]
+c6c: $ G , e = ⟨ C , D ⟩ , e ∊ csn ⟨ A , B ⟩ ⇒ isset A $ by weaken [#3]
+c6d: $ G , e = ⟨ C , D ⟩ , e ∊ csn ⟨ A , B ⟩ ⇒ isset B $ by weaken [#4]
+c6: $ G , e = ⟨ C , D ⟩ , e ∊ csn ⟨ A , B ⟩ ⇒ C = A ∧ D = B $ by opair_inj_c [c5, c6a, c6b, c6c, c6d]
+c7: $ G , e = ⟨ C , D ⟩ , e ∊ csn ⟨ A , B ⟩ ⇒ D = B $ by and_elim_r [c6]
+c8: $ G ⇒ D = B $ by wcel_elim [#5, c7]
+
+fv_csn_c
+--------
+a1: $ G , ⟨ x , y ⟩ ∈ csn ⟨ A , B ⟩ , ⟨ x , z ⟩ ∈ csn ⟨ A , B ⟩ ⇒ isset x $ by isset_var
+a2: $ G , ⟨ x , y ⟩ ∈ csn ⟨ A , B ⟩ , ⟨ x , z ⟩ ∈ csn ⟨ A , B ⟩ ⇒ isset y $ by isset_var
+a3: $ G , ⟨ x , y ⟩ ∈ csn ⟨ A , B ⟩ , ⟨ x , z ⟩ ∈ csn ⟨ A , B ⟩ ⇒ isset z $ by isset_var
+a4: $ G , ⟨ x , y ⟩ ∈ csn ⟨ A , B ⟩ , ⟨ x , z ⟩ ∈ csn ⟨ A , B ⟩ ⇒ isset A $ by weaken [#1]
+a5: $ G , ⟨ x , y ⟩ ∈ csn ⟨ A , B ⟩ , ⟨ x , z ⟩ ∈ csn ⟨ A , B ⟩ ⇒ isset B $ by weaken [#2]
+a6: $ G , ⟨ x , y ⟩ ∈ csn ⟨ A , B ⟩ , ⟨ x , z ⟩ ∈ csn ⟨ A , B ⟩ ⇒ ⟨ x , y ⟩ ∈ csn ⟨ A , B ⟩ $ by ax
+a7: $ G , ⟨ x , y ⟩ ∈ csn ⟨ A , B ⟩ , ⟨ x , z ⟩ ∈ csn ⟨ A , B ⟩ ⇒ ⟨ x , z ⟩ ∈ csn ⟨ A , B ⟩ $ by ax
+a8: $ G , ⟨ x , y ⟩ ∈ csn ⟨ A , B ⟩ , ⟨ x , z ⟩ ∈ csn ⟨ A , B ⟩ ⇒ y = B $ by t0_csn_pair [a1, a2, a4, a5, a6]
+a9: $ G , ⟨ x , y ⟩ ∈ csn ⟨ A , B ⟩ , ⟨ x , z ⟩ ∈ csn ⟨ A , B ⟩ ⇒ z = B $ by t0_csn_pair [a1, a3, a4, a5, a7]
+a10: $ G , ⟨ x , y ⟩ ∈ csn ⟨ A , B ⟩ , ⟨ x , z ⟩ ∈ csn ⟨ A , B ⟩ ⇒ B = z $ by eq_sym [a9]
+a11: $ G , ⟨ x , y ⟩ ∈ csn ⟨ A , B ⟩ , ⟨ x , z ⟩ ∈ csn ⟨ A , B ⟩ ⇒ y = z $ by eq_trans [a8, a10]
+b1: $ G ⇒ functional (csn ⟨ A , B ⟩) $ by functional_intro [a11]
+b2: $ G ⇒ isset ⟨ A , B ⟩ $ by opair_isset
+b3: $ G ⇒ ⟨ A , B ⟩ ∈ cpr ⟨ A , B ⟩ ⟨ A , B ⟩ $ by cpr_intro_l_c [b2]
+b4: $ G ⇒ ⟨ A , B ⟩ ∈ csn ⟨ A , B ⟩ $ by weaken [b3]
+b5: $ G ⇒ fv (csn ⟨ A , B ⟩) A = B $ by fv_val_c [b1, b4, #1, #2]
+
 fv_set_c
 --------
 a1: $ G , w = A ⇒ functional F $ by weaken [#1]
@@ -742,6 +790,32 @@ fv_set_l
 --------
 l1: $ G ⇒ isset (ap F A) $ by ap_set_c [#1]
 l2: $ G ⇒ isset (fv F A) $ by cuni_set [l1]
+
+fv_set_rel
+----------
+e1: $ G ⇒ isset A ∨ ¬ isset A $ by excluded_middle
+e2a: $ G , isset A ⇒ functional F $ by weaken [#1]
+e2b: $ G , isset A ⇒ isset A $ by ax
+e2: $ G , isset A ⇒ isset (fv F A) $ by fv_set_c [e2a, e2b]
+e3a: $ G , ¬ isset A , e ∊ ap F A ⇒ e ∊ ap F A $ by ax
+e3: $ G , ¬ isset A , e ∊ ap F A ⇒ ⟨ A , e ⟩ ∈ F $ by ap_elim [e3a]
+e4a: $ G , ¬ isset A , e ∊ ap F A , w = ⟨ A , e ⟩ , w ∊ F , w = ⟨ u , v ⟩ ⇒ w = ⟨ A , e ⟩ $ by ax
+e4b: $ G , ¬ isset A , e ∊ ap F A , w = ⟨ A , e ⟩ , w ∊ F , w = ⟨ u , v ⟩ ⇒ w = ⟨ u , v ⟩ $ by ax
+e4c: $ G , ¬ isset A , e ∊ ap F A , w = ⟨ A , e ⟩ , w ∊ F , w = ⟨ u , v ⟩ ⇒ ⟨ A , e ⟩ = w $ by eq_sym [e4a]
+e4: $ G , ¬ isset A , e ∊ ap F A , w = ⟨ A , e ⟩ , w ∊ F , w = ⟨ u , v ⟩ ⇒ ⟨ A , e ⟩ = ⟨ u , v ⟩ $ by eq_trans [e4c, e4b]
+e5: $ G , ¬ isset A , e ∊ ap F A , w = ⟨ A , e ⟩ , w ∊ F , w = ⟨ u , v ⟩ ⇒ isset A $ by opair_eq_isset [e4]
+e6: $ G , ¬ isset A , e ∊ ap F A , w = ⟨ A , e ⟩ , w ∊ F , w = ⟨ u , v ⟩ ⇒ ¬ isset A $ by ax
+e7: $ G , ¬ isset A , e ∊ ap F A , w = ⟨ A , e ⟩ , w ∊ F , w = ⟨ u , v ⟩ ⇒ ⊥ $ by not_elim [e6, e5]
+e8: $ G , ¬ isset A , e ∊ ap F A , w = ⟨ A , e ⟩ , w ∊ F ⇒ rel F $ by weaken [#2]
+e9: $ G , ¬ isset A , e ∊ ap F A , w = ⟨ A , e ⟩ , w ∊ F ⇒ w ∊ F $ by ax
+e10: $ G , ¬ isset A , e ∊ ap F A , w = ⟨ A , e ⟩ , w ∊ F ⇒ ⊥ $ by rel_elim [e8, e9, e7]
+e11: $ G , ¬ isset A , e ∊ ap F A ⇒ ⊥ $ by wcel_elim [e3, e10]
+e12: $ G , ¬ isset A , e ∊ ap F A ⇒ e ∊ ∅ $ by bot_elim [e11]
+e13: $ G , ¬ isset A ⇒ ap F A ⊆ ∅ $ by subset_intro [e12]
+e14: $ G , ¬ isset A ⇒ isset ∅ $ by ax_empty
+e15: $ G , ¬ isset A ⇒ isset (ap F A) $ by subset_isset [e14, e13]
+e16: $ G , ¬ isset A ⇒ isset (fv F A) $ by cuni_set [e15]
+e17: $ G ⇒ isset (fv F A) $ by or_elim [e1, e2, e16]
 
 omapx_congr
 -----------
@@ -1579,6 +1653,18 @@ m11: $ G , x ∊ ω , u ∊ omapx A F ∧ x ∊ cdm u , ⟨ x , y ⟩ ∈ u ⇒ 
 m12: $ G , x ∊ ω , u ∊ omapx A F ∧ x ∊ cdm u ⇒ x ∊ cdm (omrec A F) $ by cdm_elim [m7, m11]
 m13: $ G , x ∊ ω ⇒ x ∊ cdm (omrec A F) $ by ex_elim [m4, m12]
 m14: $ G ⇒ cdm (omrec A F) = ω $ by eq_intro [l10, m13]
+
+omrec_cdm_elim
+--------------
+l1: $ G , ⟨ n , y ⟩ ∈ omrec A F ⇒ ⟨ n , y ⟩ ∈ omrec A F $ by ax
+l2: $ G , ⟨ n , y ⟩ ∈ omrec A F ⇒ ∃ g (g ∊ omapx A F ∧ ⟨ n , y ⟩ ∈ g) $ by omrec_elim [l1]
+l3: $ G , g ∊ omapx A F ∧ ⟨ n , y ⟩ ∈ g ⇒ g ∊ omapx A F ∧ ⟨ n , y ⟩ ∈ g $ by ax
+l4: $ G , g ∊ omapx A F ∧ ⟨ n , y ⟩ ∈ g ⇒ g ∊ omapx A F $ by and_elim_l [l3]
+l5: $ G , g ∊ omapx A F ∧ ⟨ n , y ⟩ ∈ g ⇒ ⟨ n , y ⟩ ∈ g $ by and_elim_r [l3]
+l6: $ G , g ∊ omapx A F ∧ ⟨ n , y ⟩ ∈ g ⇒ n ∊ cdm g $ by cdm_intro [l5]
+l7: $ G , g ∊ omapx A F ∧ ⟨ n , y ⟩ ∈ g ⇒ n ∊ ω $ by omapx_cdm [l4, l6]
+l8: $ G , ⟨ n , y ⟩ ∈ omrec A F ⇒ n ∊ ω $ by ex_elim [l2, l7]
+l9: $ G ⇒ n ∊ ω $ by cdm_elim [#1, l8]
 
 omrec_fv
 --------

@@ -480,6 +480,29 @@ l3: $ G ⇒ nadd a c = nadd c b $ by eq_trans [l1, #4]
 l4: $ G ⇒ nadd a c = nadd b c $ by eq_trans [l3, l2]
 l5: $ G ⇒ a = b $ by nadd_cancel_r [#1, #2, #3, l4]
 
+nadd_cancel_l_c
+---------------
+k0: $ G , a = A , a ∊ ω , b = B , b ∊ ω , c = C , c ∊ ω ⇒ a = A $ by ax
+k0b: $ G , a = A , a ∊ ω , b = B , b ∊ ω , c = C , c ∊ ω ⇒ b = B $ by ax
+k0c: $ G , a = A , a ∊ ω , b = B , b ∊ ω , c = C , c ∊ ω ⇒ c = C $ by ax
+k1: $ G , a = A , a ∊ ω , b = B , b ∊ ω , c = C , c ∊ ω ⇒ nadd c a = nadd C A $ by nadd_eq [k0c, k0]
+k2a: $ G , a = A , a ∊ ω , b = B , b ∊ ω , c = C , c ∊ ω ⇒ C = c $ by eq_sym [k0c]
+k2b: $ G , a = A , a ∊ ω , b = B , b ∊ ω , c = C , c ∊ ω ⇒ B = b $ by eq_sym [k0b]
+k2: $ G , a = A , a ∊ ω , b = B , b ∊ ω , c = C , c ∊ ω ⇒ nadd C B = nadd c b $ by nadd_eq [k2a, k2b]
+k3a: $ G , a = A , a ∊ ω , b = B , b ∊ ω , c = C , c ∊ ω ⇒ nadd C A = nadd C B $ by weaken [#4]
+k3b: $ G , a = A , a ∊ ω , b = B , b ∊ ω , c = C , c ∊ ω ⇒ nadd c a = nadd C B $ by eq_trans [k1, k3a]
+k3: $ G , a = A , a ∊ ω , b = B , b ∊ ω , c = C , c ∊ ω ⇒ nadd c a = nadd c b $ by eq_trans [k3b, k2]
+k4a: $ G , a = A , a ∊ ω , b = B , b ∊ ω , c = C , c ∊ ω ⇒ a ∊ ω $ by ax
+k4b: $ G , a = A , a ∊ ω , b = B , b ∊ ω , c = C , c ∊ ω ⇒ b ∊ ω $ by ax
+k4c: $ G , a = A , a ∊ ω , b = B , b ∊ ω , c = C , c ∊ ω ⇒ c ∊ ω $ by ax
+k4: $ G , a = A , a ∊ ω , b = B , b ∊ ω , c = C , c ∊ ω ⇒ a = b $ by nadd_cancel_l [k4a, k4b, k4c, k3]
+k5a: $ G , a = A , a ∊ ω , b = B , b ∊ ω , c = C , c ∊ ω ⇒ A = a $ by eq_sym [k0]
+k5b: $ G , a = A , a ∊ ω , b = B , b ∊ ω , c = C , c ∊ ω ⇒ A = b $ by eq_trans [k5a, k4]
+k5: $ G , a = A , a ∊ ω , b = B , b ∊ ω , c = C , c ∊ ω ⇒ A = B $ by eq_trans [k5b, k0b]
+k6: $ G , a = A , a ∊ ω , b = B , b ∊ ω ⇒ A = B $ by wcel_elim [#3, k5]
+k7: $ G , a = A , a ∊ ω ⇒ A = B $ by wcel_elim [#2, k6]
+k8: $ G ⇒ A = B $ by wcel_elim [#1, k7]
+
 nadd_eq_zero
 ------------
 l1: $ G ⇒ b = ∅ ∨ ∃ y (y ∊ ω ∧ b = suc y) $ by omega_cases [#2]
@@ -530,6 +553,19 @@ s9: $ G , y ∊ ω , a ⊆ nadd a y , z = suc y ⇒ nadd a y ⊆ suc (nadd a y) 
 s10: $ G , y ∊ ω , a ⊆ nadd a y , z = suc y ⇒ a ⊆ suc (nadd a y) $ by subset_trans [s8, s9]
 s11: $ G , y ∊ ω , a ⊆ nadd a y , z = suc y ⇒ a ⊆ nadd a z $ by subset_eq_r [s7, s10]
 i1: $ G ⇒ a ⊆ nadd a b $ by omega_ind_named [b8, s11, #2]
+
+nadd_le_l_c
+-----------
+l1: $ G , a = A , a ∊ ω , b = B , b ∊ ω ⇒ a ∊ ω $ by ax
+l2: $ G , a = A , a ∊ ω , b = B , b ∊ ω ⇒ b ∊ ω $ by ax
+l3: $ G , a = A , a ∊ ω , b = B , b ∊ ω ⇒ a ⊆ nadd a b $ by nadd_le_l [l1, l2]
+l4: $ G , a = A , a ∊ ω , b = B , b ∊ ω ⇒ a = A $ by ax
+l5: $ G , a = A , a ∊ ω , b = B , b ∊ ω ⇒ b = B $ by ax
+l6: $ G , a = A , a ∊ ω , b = B , b ∊ ω ⇒ A ⊆ nadd a b $ by subset_eq_l [l4, l3]
+l7: $ G , a = A , a ∊ ω , b = B , b ∊ ω ⇒ nadd a b = nadd A B $ by nadd_eq [l4, l5]
+l8: $ G , a = A , a ∊ ω , b = B , b ∊ ω ⇒ A ⊆ nadd A B $ by subset_eq_r [l7, l6]
+l9: $ G , a = A , a ∊ ω ⇒ A ⊆ nadd A B $ by wcel_elim [#2, l8]
+l10: $ G ⇒ A ⊆ nadd A B $ by wcel_elim [#1, l9]
 
 nadd_le_r
 ---------
@@ -2523,6 +2559,15 @@ d3: $ G , ∅ = a ⇒ a ∊ suc a $ by suc_self
 d4: $ G , ∅ = a ⇒ a ∈ suc a $ by welc_wcel [d3]
 d5: $ G , ∅ = a ⇒ ∅ ∈ suc a $ by wcel_eq_l [d2, d4]
 l2: $ G ⇒ ∅ ∈ suc a $ by or_elim [l1, c3, d5]
+
+nzero_lt_suc_c
+--------------
+l1: $ G , a = A , a ∊ ω ⇒ a ∊ ω $ by ax
+l2: $ G , a = A , a ∊ ω ⇒ ∅ ∈ suc a $ by nzero_lt_suc [l1]
+l3: $ G , a = A , a ∊ ω ⇒ a = A $ by ax
+l4: $ G , a = A , a ∊ ω ⇒ suc a = suc A $ by suc_eq [l3]
+l5: $ G , a = A , a ∊ ω ⇒ ∅ ∈ suc A $ by wcel_eq_r [l4, l2]
+l6: $ G ⇒ ∅ ∈ suc A $ by wcel_elim [#1, l5]
 
 nzero_lt
 --------

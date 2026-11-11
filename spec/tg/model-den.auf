@@ -737,6 +737,74 @@ l6: $ G ⇒ K = J $ by eq_sym [#5]
 l7: $ G ⇒ dnb B D F I K ⊆ dnb A C E H J $ by q0_dnb_sub [l2, l3, l4, l5, l6]
 l8: $ G ⇒ dnb A C E H J = dnb B D F I K $ by subset_antisym [l1, l7]
 
+lemma t0_or1 (G: hyps) (fp fq fr: fml): $ G , fq ⇒ fr $ > $ G , fp ∨ fq ⇒ fp ∨ fr $
+----
+l1: $ G , fp ∨ fq ⇒ fp ∨ fq $ by ax
+l2: $ G , fp ∨ fq , fp ⇒ fp $ by ax
+l3: $ G , fp ∨ fq , fp ⇒ fp ∨ fr $ by or_intro_l [l2]
+l4: $ G , fp ∨ fq , fq ⇒ fr $ by weaken [#1]
+l5: $ G , fp ∨ fq , fq ⇒ fp ∨ fr $ by or_intro_r [l4]
+l6: $ G , fp ∨ fq ⇒ fp ∨ fr $ by or_elim [l1, l3, l5]
+
+lemma t0_or6 (G: hyps) (fa fb fc fd fe ff fq fr: fml): $ G , fq ⇒ fr $ > $ G , fa ∨ fb ∨ fc ∨ fd ∨ fe ∨ ff ∨ fq ⇒ fa ∨ fb ∨ fc ∨ fd ∨ fe ∨ ff ∨ fr $
+----
+l1: $ G , ff ∨ fq ⇒ ff ∨ fr $ by t0_or1 [#1]
+l2: $ G , fe ∨ ff ∨ fq ⇒ fe ∨ ff ∨ fr $ by t0_or1 [l1]
+l3: $ G , fd ∨ fe ∨ ff ∨ fq ⇒ fd ∨ fe ∨ ff ∨ fr $ by t0_or1 [l2]
+l4: $ G , fc ∨ fd ∨ fe ∨ ff ∨ fq ⇒ fc ∨ fd ∨ fe ∨ ff ∨ fr $ by t0_or1 [l3]
+l5: $ G , fb ∨ fc ∨ fd ∨ fe ∨ ff ∨ fq ⇒ fb ∨ fc ∨ fd ∨ fe ∨ ff ∨ fr $ by t0_or1 [l4]
+l6: $ G , fa ∨ fb ∨ fc ∨ fd ∨ fe ∨ ff ∨ fq ⇒ fa ∨ fb ∨ fc ∨ fd ∨ fe ∨ ff ∨ fr $ by t0_or1 [l5]
+
+lemma t0_dnb_tail {w r: set} (G: hyps) (U K X Y: class) (z: set): $ G ⇒ X = Y $ > $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) ⇒ (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap Y w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip Y) $
+----
+e0: $ G ⇒ w = w $ by eq_refl
+e1: $ G ⇒ ap X w = ap Y w $ by ap_eq [#1, e0]
+e1b: $ G ⇒ U = U $ by eq_refl
+e2: $ G ⇒ mclip U (ap X w) = mclip U (ap Y w) $ by mclip_eq [e1b, e1]
+e3: $ G , r ∊ fseq U ⇒ mclip U (ap X w) = mclip U (ap Y w) $ by weaken [e2]
+e4: $ G ⇒ r ∊ fseq U → mclip U (ap X w) = mclip U (ap Y w) $ by imp_intro [e3]
+e5: $ G ⇒ ∀ r (r ∊ fseq U → mclip U (ap X w) = mclip U (ap Y w)) $ by all_intro [e4]
+e6: $ G ⇒ clam r (fseq U) (mclip U (ap X w)) = clam r (fseq U) (mclip U (ap Y w)) $ by clam_eq_body [e5]
+e7: $ G , w ∊ lvals ⇒ clam r (fseq U) (mclip U (ap X w)) = clam r (fseq U) (mclip U (ap Y w)) $ by weaken [e6]
+e8: $ G ⇒ w ∊ lvals → clam r (fseq U) (mclip U (ap X w)) = clam r (fseq U) (mclip U (ap Y w)) $ by imp_intro [e7]
+e9: $ G ⇒ ∀ w (w ∊ lvals → clam r (fseq U) (mclip U (ap X w)) = clam r (fseq U) (mclip U (ap Y w))) $ by all_intro [e8]
+e10: $ G ⇒ clam w lvals (clam r (fseq U) (mclip U (ap X w))) = clam w lvals (clam r (fseq U) (mclip U (ap Y w))) $ by clam_eq_body [e9]
+e11: $ G ⇒ sclip X = sclip Y $ by sclip_eq [#1]
+a1: $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) , K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w))) ⇒ K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w))) $ by ax
+a2: $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) , K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w))) ⇒ K ∈ kexa $ by and_elim_l [a1]
+a3: $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) , K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w))) ⇒ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w))) $ by and_elim_r [a1]
+a3b: $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) , K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w))) ⇒ clam w lvals (clam r (fseq U) (mclip U (ap X w))) = clam w lvals (clam r (fseq U) (mclip U (ap Y w))) $ by weaken [e10]
+a4: $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) , K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w))) ⇒ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap Y w))) $ by welc_eq [a3b, a3]
+a5: $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) , K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w))) ⇒ K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap Y w))) $ by and_intro [a2, a4]
+a6: $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) , K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w))) ⇒ (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap Y w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip Y) $ by or_intro_l [a5]
+b1: $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) , ¬ K ∈ kstr ∧ z ∊ sclip X ⇒ ¬ K ∈ kstr ∧ z ∊ sclip X $ by ax
+b2: $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) , ¬ K ∈ kstr ∧ z ∊ sclip X ⇒ ¬ K ∈ kstr $ by and_elim_l [b1]
+b3: $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) , ¬ K ∈ kstr ∧ z ∊ sclip X ⇒ z ∊ sclip X $ by and_elim_r [b1]
+b3b: $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) , ¬ K ∈ kstr ∧ z ∊ sclip X ⇒ sclip X = sclip Y $ by weaken [e11]
+b4: $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) , ¬ K ∈ kstr ∧ z ∊ sclip X ⇒ z ∊ sclip Y $ by welc_eq [b3b, b3]
+b5: $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) , ¬ K ∈ kstr ∧ z ∊ sclip X ⇒ ¬ K ∈ kstr ∧ z ∊ sclip Y $ by and_intro [b2, b4]
+b6: $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) , ¬ K ∈ kstr ∧ z ∊ sclip X ⇒ (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap Y w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip Y) $ by or_intro_r [b5]
+c0: $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) ⇒ (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) $ by ax
+c1: $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap X w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip X) ⇒ (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap Y w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip Y) $ by or_elim [c0, a6, b6]
+
+lemma t0_dnb_hook_sub (G: hyps) (U M N K S V: class): $ G ⇒ fv M ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩ = fv N ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩ $ > $ G ⇒ dnb U M K S V ⊆ dnb U N K S V $
+----
+q1: $ G , z ∊ dnb U M K S V ⇒ z ∊ {z | (K = kc_bvar ∧ z ∊ clam w lvals (clam r (fseq U) (fv r (fv nvf (fv S ∅))))) ∨ (K = kc_srt ∧ z ∊ clam w lvals (clam r (fseq U) (fv uni (lv (fv S ∅) w)))) ∨ (K = kc_app ∧ z ∊ clam w lvals (clam r (fseq U) (ap (da (fv V ∅) w r) (da (fv V (suc ∅)) w r)))) ∨ (K = kc_lam ∧ z ∊ clam w lvals (clam r (fseq U) (clam x (da (fv V ∅) w r) (da (fv V (suc ∅)) w (scons x r))))) ∨ (K = kc_pi ∧ z ∊ clam w lvals (clam r (fseq U) (cpi x (da (fv V ∅) w r) (da (fv V (suc ∅)) w (scons x r))))) ∨ (K = kc_proj ∧ z ∊ clam w lvals (clam r (fseq U) (fv (da (fv V (suc (suc ∅))) w r) (suc (fv nvf (fv S (suc ∅))))))) ∨ (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap (fv M ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩) w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip (fv M ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩))} $ by ax
+q2: $ G , z ∊ dnb U M K S V ⇒ (K = kc_bvar ∧ z ∊ clam w lvals (clam r (fseq U) (fv r (fv nvf (fv S ∅))))) ∨ (K = kc_srt ∧ z ∊ clam w lvals (clam r (fseq U) (fv uni (lv (fv S ∅) w)))) ∨ (K = kc_app ∧ z ∊ clam w lvals (clam r (fseq U) (ap (da (fv V ∅) w r) (da (fv V (suc ∅)) w r)))) ∨ (K = kc_lam ∧ z ∊ clam w lvals (clam r (fseq U) (clam x (da (fv V ∅) w r) (da (fv V (suc ∅)) w (scons x r))))) ∨ (K = kc_pi ∧ z ∊ clam w lvals (clam r (fseq U) (cpi x (da (fv V ∅) w r) (da (fv V (suc ∅)) w (scons x r))))) ∨ (K = kc_proj ∧ z ∊ clam w lvals (clam r (fseq U) (fv (da (fv V (suc (suc ∅))) w r) (suc (fv nvf (fv S (suc ∅))))))) ∨ (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap (fv M ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩) w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip (fv M ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩)) $ by cab_elim [q1]
+q3: $ G , (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap (fv M ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩) w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip (fv M ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩)) ⇒ (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap (fv N ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩) w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip (fv N ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩)) $ by t0_dnb_tail [#1]
+q4: $ G , (K = kc_bvar ∧ z ∊ clam w lvals (clam r (fseq U) (fv r (fv nvf (fv S ∅))))) ∨ (K = kc_srt ∧ z ∊ clam w lvals (clam r (fseq U) (fv uni (lv (fv S ∅) w)))) ∨ (K = kc_app ∧ z ∊ clam w lvals (clam r (fseq U) (ap (da (fv V ∅) w r) (da (fv V (suc ∅)) w r)))) ∨ (K = kc_lam ∧ z ∊ clam w lvals (clam r (fseq U) (clam x (da (fv V ∅) w r) (da (fv V (suc ∅)) w (scons x r))))) ∨ (K = kc_pi ∧ z ∊ clam w lvals (clam r (fseq U) (cpi x (da (fv V ∅) w r) (da (fv V (suc ∅)) w (scons x r))))) ∨ (K = kc_proj ∧ z ∊ clam w lvals (clam r (fseq U) (fv (da (fv V (suc (suc ∅))) w r) (suc (fv nvf (fv S (suc ∅))))))) ∨ (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap (fv M ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩) w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip (fv M ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩)) ⇒ (K = kc_bvar ∧ z ∊ clam w lvals (clam r (fseq U) (fv r (fv nvf (fv S ∅))))) ∨ (K = kc_srt ∧ z ∊ clam w lvals (clam r (fseq U) (fv uni (lv (fv S ∅) w)))) ∨ (K = kc_app ∧ z ∊ clam w lvals (clam r (fseq U) (ap (da (fv V ∅) w r) (da (fv V (suc ∅)) w r)))) ∨ (K = kc_lam ∧ z ∊ clam w lvals (clam r (fseq U) (clam x (da (fv V ∅) w r) (da (fv V (suc ∅)) w (scons x r))))) ∨ (K = kc_pi ∧ z ∊ clam w lvals (clam r (fseq U) (cpi x (da (fv V ∅) w r) (da (fv V (suc ∅)) w (scons x r))))) ∨ (K = kc_proj ∧ z ∊ clam w lvals (clam r (fseq U) (fv (da (fv V (suc (suc ∅))) w r) (suc (fv nvf (fv S (suc ∅))))))) ∨ (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap (fv N ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩) w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip (fv N ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩)) $ by t0_or6 [q3]
+q5: $ G , z ∊ dnb U M K S V ⇒ (K = kc_bvar ∧ z ∊ clam w lvals (clam r (fseq U) (fv r (fv nvf (fv S ∅))))) ∨ (K = kc_srt ∧ z ∊ clam w lvals (clam r (fseq U) (fv uni (lv (fv S ∅) w)))) ∨ (K = kc_app ∧ z ∊ clam w lvals (clam r (fseq U) (ap (da (fv V ∅) w r) (da (fv V (suc ∅)) w r)))) ∨ (K = kc_lam ∧ z ∊ clam w lvals (clam r (fseq U) (clam x (da (fv V ∅) w r) (da (fv V (suc ∅)) w (scons x r))))) ∨ (K = kc_pi ∧ z ∊ clam w lvals (clam r (fseq U) (cpi x (da (fv V ∅) w r) (da (fv V (suc ∅)) w (scons x r))))) ∨ (K = kc_proj ∧ z ∊ clam w lvals (clam r (fseq U) (fv (da (fv V (suc (suc ∅))) w r) (suc (fv nvf (fv S (suc ∅))))))) ∨ (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap (fv N ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩) w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip (fv N ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩)) $ by cut [q2, q4]
+q6: $ G , z ∊ dnb U M K S V ⇒ z ∊ {z | (K = kc_bvar ∧ z ∊ clam w lvals (clam r (fseq U) (fv r (fv nvf (fv S ∅))))) ∨ (K = kc_srt ∧ z ∊ clam w lvals (clam r (fseq U) (fv uni (lv (fv S ∅) w)))) ∨ (K = kc_app ∧ z ∊ clam w lvals (clam r (fseq U) (ap (da (fv V ∅) w r) (da (fv V (suc ∅)) w r)))) ∨ (K = kc_lam ∧ z ∊ clam w lvals (clam r (fseq U) (clam x (da (fv V ∅) w r) (da (fv V (suc ∅)) w (scons x r))))) ∨ (K = kc_pi ∧ z ∊ clam w lvals (clam r (fseq U) (cpi x (da (fv V ∅) w r) (da (fv V (suc ∅)) w (scons x r))))) ∨ (K = kc_proj ∧ z ∊ clam w lvals (clam r (fseq U) (fv (da (fv V (suc (suc ∅))) w r) (suc (fv nvf (fv S (suc ∅))))))) ∨ (K ∈ kexa ∧ z ∊ clam w lvals (clam r (fseq U) (mclip U (ap (fv N ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩) w)))) ∨ (¬ K ∈ kstr ∧ z ∊ sclip (fv N ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩))} $ by cab_intro [q5]
+q7: $ G , z ∊ dnb U M K S V ⇒ z ∊ dnb U N K S V $ by weaken [q6]
+q8: $ G ⇒ dnb U M K S V ⊆ dnb U N K S V $ by subset_intro [q7]
+
+dnb_hook
+--------
+l1: $ G ⇒ dnb U M K S V ⊆ dnb U N K S V $ by t0_dnb_hook_sub [#1]
+l2: $ G ⇒ fv N ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩ = fv M ⟨ U , ⟨ K , ⟨ S , V ⟩ ⟩ ⟩ $ by eq_sym [#1]
+l3: $ G ⇒ dnb U N K S V ⊆ dnb U M K S V $ by t0_dnb_hook_sub [l2]
+l4: $ G ⇒ dnb U M K S V = dnb U N K S V $ by subset_antisym [l1, l3]
+
 dnf_congr
 ---------
 g1: $ ω ≐ ω $ by ceqt_refl

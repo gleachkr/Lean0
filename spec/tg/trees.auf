@@ -502,6 +502,150 @@ l10: $ G ⇒ c ∊ trees L $ by z1_crn_hd [l9]
 l11: $ G ⇒ b ∊ trees L ∧ c ∊ trees L $ by and_intro [l8, l10]
 l12: $ G ⇒ a ∊ trees L ∧ b ∊ trees L ∧ c ∊ trees L $ by and_intro [l5, l11]
 
+trees_intro_c
+-------------
+l1: $ G ⇒ ⟨ K , S ⟩ ∈ L × fseq (trees L) $ by cxp_intro_c [#2, #3]
+l2: $ G ⇒ L × fseq (trees L) = trees L $ by trees_fix_c [#1]
+l3: $ G ⇒ ⟨ K , S ⟩ ∈ trees L $ by wcel_eq_r [l2, l1]
+
+empty_notin_trees_c
+-------------------
+l1: $ G ⇒ L × fseq (trees L) = trees L $ by trees_fix_c [#1]
+l2: $ G ⇒ trees L = L × fseq (trees L) $ by eq_sym [l1]
+l3: $ G ⇒ ∅ ∈ L × fseq (trees L) $ by wcel_eq_r [l2, #2]
+m1: $ G , e = ∅ , e ∊ L × fseq (trees L) ⇒ e ∊ L × fseq (trees L) $ by ax
+n3: $ G , e = ∅ , e ∊ L × fseq (trees L) , e = ⟨ a , b ⟩ , a ∊ L , b ∊ fseq (trees L) ⇒ e = ⟨ a , b ⟩ $ by ax
+n4: $ G , e = ∅ , e ∊ L × fseq (trees L) , e = ⟨ a , b ⟩ , a ∊ L , b ∊ fseq (trees L) ⇒ e = ∅ $ by ax
+n5: $ G , e = ∅ , e ∊ L × fseq (trees L) , e = ⟨ a , b ⟩ , a ∊ L , b ∊ fseq (trees L) ⇒ ⟨ a , b ⟩ = e $ by eq_sym [n3]
+n6: $ G , e = ∅ , e ∊ L × fseq (trees L) , e = ⟨ a , b ⟩ , a ∊ L , b ∊ fseq (trees L) ⇒ ⟨ a , b ⟩ = ∅ $ by eq_trans [n5, n4]
+n7: $ G , e = ∅ , e ∊ L × fseq (trees L) , e = ⟨ a , b ⟩ , a ∊ L , b ∊ fseq (trees L) ⇒ ⊥ $ by opair_ne_empty [n6]
+m2: $ G , e = ∅ , e ∊ L × fseq (trees L) ⇒ ⊥ $ by cxp_elim [m1, n7]
+m3: $ G ⇒ ⊥ $ by wcel_elim [l3, m2]
+
+crn_scons_head_trees
+--------------------
+l1: $ G ⇒ isset A ∨ ¬ isset A $ by excluded_middle
+l2: $ G , isset A ⇒ isset A $ by ax
+l3: $ G , isset A ⇒ crn (scons A S) ⊆ trees L $ by weaken [#2]
+l4: $ G , isset A ⇒ A ∈ trees L $ by crn_scons_head [l2, l3]
+l5: $ G , ¬ isset A ⇒ ¬ isset A $ by ax
+l6: $ G , ¬ isset A ⇒ scons A S = scons ∅ S $ by scons_proper [l5]
+l7: $ G , ¬ isset A ⇒ crn (scons A S) = crn (scons ∅ S) $ by crn_eq [l6]
+l8: $ G , ¬ isset A ⇒ crn (scons A S) ⊆ trees L $ by weaken [#2]
+l9: $ G , ¬ isset A ⇒ crn (scons ∅ S) ⊆ trees L $ by subset_eq_l [l7, l8]
+l10: $ G , ¬ isset A ⇒ isset ∅ $ by ax_empty
+l11: $ G , ¬ isset A ⇒ ∅ ∈ trees L $ by crn_scons_head [l10, l9]
+l11a: $ G , ¬ isset A ⇒ isset L $ by weaken [#1]
+l12: $ G , ¬ isset A ⇒ ⊥ $ by empty_notin_trees_c [l11a, l11]
+l13: $ G , ¬ isset A ⇒ A ∈ trees L $ by bot_elim [l12]
+l14: $ G ⇒ A ∈ trees L $ by or_elim [l1, l4, l13]
+
+node1_inj
+---------
+l1: $ G ⇒ isset ∅ $ by ax_empty
+l2: $ G ⇒ isset (scons f ∅) $ by scons_set [l1]
+l3: $ G ⇒ isset (scons o ∅) $ by scons_set [l1]
+l4: $ G ⇒ K = K ∧ scons f ∅ = scons o ∅ $ by opair_inj_c [#2, #1, l2, #1, l3]
+l5: $ G ⇒ scons f ∅ = scons o ∅ $ by and_elim_r [l4]
+l6: $ G ⇒ isset f $ by isset_var
+l7: $ G ⇒ isset o $ by isset_var
+l8: $ G ⇒ ∅ = ∅ $ by eq_refl
+l9: $ G ⇒ fv (scons f ∅) ∅ = fv (scons o ∅) ∅ $ by fv_eq [l5, l8]
+l10: $ G ⇒ fv (scons f ∅) ∅ = f $ by scons_fv_zero_c [l6, l1]
+l11: $ G ⇒ fv (scons o ∅) ∅ = o $ by scons_fv_zero_c [l7, l1]
+l12: $ G ⇒ f = fv (scons f ∅) ∅ $ by eq_sym [l10]
+l13: $ G ⇒ f = fv (scons o ∅) ∅ $ by eq_trans [l12, l9]
+l14: $ G ⇒ f = o $ by eq_trans [l13, l11]
+
+node2_inj
+---------
+l1: $ G ⇒ isset ∅ $ by ax_empty
+l2: $ G ⇒ isset (scons g ∅) $ by scons_set [l1]
+l3: $ G ⇒ isset (scons f (scons g ∅)) $ by scons_set [l2]
+l4: $ G ⇒ isset (scons p ∅) $ by scons_set [l1]
+l5: $ G ⇒ isset (scons o (scons p ∅)) $ by scons_set [l4]
+l6: $ G ⇒ K = K ∧ scons f (scons g ∅) = scons o (scons p ∅) $ by opair_inj_c [#2, #1, l3, #1, l5]
+l7: $ G ⇒ scons f (scons g ∅) = scons o (scons p ∅) $ by and_elim_r [l6]
+l8: $ G ⇒ isset f $ by isset_var
+l9: $ G ⇒ isset g $ by isset_var
+l10: $ G ⇒ isset o $ by isset_var
+l11: $ G ⇒ isset p $ by isset_var
+l12: $ G ⇒ ∅ = ∅ $ by eq_refl
+l13: $ G ⇒ fv (scons f (scons g ∅)) ∅ = fv (scons o (scons p ∅)) ∅ $ by fv_eq [l7, l12]
+l14: $ G ⇒ fv (scons f (scons g ∅)) ∅ = f $ by scons_fv_zero_c [l8, l2]
+l15: $ G ⇒ fv (scons o (scons p ∅)) ∅ = o $ by scons_fv_zero_c [l10, l4]
+l16: $ G ⇒ f = fv (scons f (scons g ∅)) ∅ $ by eq_sym [l14]
+l17: $ G ⇒ f = fv (scons o (scons p ∅)) ∅ $ by eq_trans [l16, l13]
+l18: $ G ⇒ f = o $ by eq_trans [l17, l15]
+l19: $ G ⇒ suc ∅ = suc ∅ $ by eq_refl
+l20: $ G ⇒ fv (scons f (scons g ∅)) (suc ∅) = fv (scons o (scons p ∅)) (suc ∅) $ by fv_eq [l7, l19]
+l21: $ G ⇒ fv (scons f (scons g ∅)) (suc ∅) = fv (scons g ∅) ∅ $ by scons_fv_suc_c [l8, l2, l1]
+l22: $ G ⇒ fv (scons g ∅) ∅ = g $ by scons_fv_zero_c [l9, l1]
+l23: $ G ⇒ fv (scons o (scons p ∅)) (suc ∅) = fv (scons p ∅) ∅ $ by scons_fv_suc_c [l10, l4, l1]
+l24: $ G ⇒ fv (scons p ∅) ∅ = p $ by scons_fv_zero_c [l11, l1]
+l25: $ G ⇒ fv (scons f (scons g ∅)) (suc ∅) = g $ by eq_trans [l21, l22]
+l26: $ G ⇒ fv (scons o (scons p ∅)) (suc ∅) = p $ by eq_trans [l23, l24]
+l27: $ G ⇒ g = fv (scons f (scons g ∅)) (suc ∅) $ by eq_sym [l25]
+l28: $ G ⇒ g = fv (scons o (scons p ∅)) (suc ∅) $ by eq_trans [l27, l20]
+l29: $ G ⇒ g = p $ by eq_trans [l28, l26]
+l30: $ G ⇒ f = o ∧ g = p $ by and_intro [l18, l29]
+
+node3_inj
+---------
+l1: $ G ⇒ isset ∅ $ by ax_empty
+l2: $ G ⇒ isset (scons h ∅) $ by scons_set [l1]
+l3: $ G ⇒ isset (scons g (scons h ∅)) $ by scons_set [l2]
+l4: $ G ⇒ isset (scons f (scons g (scons h ∅))) $ by scons_set [l3]
+l5: $ G ⇒ isset (scons q ∅) $ by scons_set [l1]
+l6: $ G ⇒ isset (scons p (scons q ∅)) $ by scons_set [l5]
+l7: $ G ⇒ isset (scons o (scons p (scons q ∅))) $ by scons_set [l6]
+l8: $ G ⇒ K = K ∧ scons f (scons g (scons h ∅)) = scons o (scons p (scons q ∅)) $ by opair_inj_c [#2, #1, l4, #1, l7]
+l9: $ G ⇒ scons f (scons g (scons h ∅)) = scons o (scons p (scons q ∅)) $ by and_elim_r [l8]
+l10: $ G ⇒ isset f $ by isset_var
+l11: $ G ⇒ isset g $ by isset_var
+l12: $ G ⇒ isset h $ by isset_var
+l13: $ G ⇒ isset o $ by isset_var
+l14: $ G ⇒ isset p $ by isset_var
+l15: $ G ⇒ isset q $ by isset_var
+l16: $ G ⇒ ∅ = ∅ $ by eq_refl
+l17: $ G ⇒ ∅ ∈ ω $ by omega_zero
+l18: $ G ⇒ suc ∅ ∈ ω $ by omega_suc_c [l17]
+l19: $ G ⇒ isset (suc ∅) $ by wcel_isset [l18]
+l20: $ G ⇒ suc ∅ = suc ∅ $ by eq_refl
+l21: $ G ⇒ suc (suc ∅) = suc (suc ∅) $ by eq_refl
+l22: $ G ⇒ fv (scons f (scons g (scons h ∅))) ∅ = fv (scons o (scons p (scons q ∅))) ∅ $ by fv_eq [l9, l16]
+l23: $ G ⇒ fv (scons f (scons g (scons h ∅))) ∅ = f $ by scons_fv_zero_c [l10, l3]
+l24: $ G ⇒ fv (scons o (scons p (scons q ∅))) ∅ = o $ by scons_fv_zero_c [l13, l6]
+l25: $ G ⇒ f = fv (scons f (scons g (scons h ∅))) ∅ $ by eq_sym [l23]
+l26: $ G ⇒ f = fv (scons o (scons p (scons q ∅))) ∅ $ by eq_trans [l25, l22]
+l27: $ G ⇒ f = o $ by eq_trans [l26, l24]
+l28: $ G ⇒ fv (scons f (scons g (scons h ∅))) (suc ∅) = fv (scons o (scons p (scons q ∅))) (suc ∅) $ by fv_eq [l9, l20]
+l29: $ G ⇒ fv (scons f (scons g (scons h ∅))) (suc ∅) = fv (scons g (scons h ∅)) ∅ $ by scons_fv_suc_c [l10, l3, l1]
+l30: $ G ⇒ fv (scons g (scons h ∅)) ∅ = g $ by scons_fv_zero_c [l11, l2]
+l31: $ G ⇒ fv (scons o (scons p (scons q ∅))) (suc ∅) = fv (scons p (scons q ∅)) ∅ $ by scons_fv_suc_c [l13, l6, l1]
+l32: $ G ⇒ fv (scons p (scons q ∅)) ∅ = p $ by scons_fv_zero_c [l14, l5]
+l33: $ G ⇒ fv (scons f (scons g (scons h ∅))) (suc ∅) = g $ by eq_trans [l29, l30]
+l34: $ G ⇒ fv (scons o (scons p (scons q ∅))) (suc ∅) = p $ by eq_trans [l31, l32]
+l35: $ G ⇒ g = fv (scons f (scons g (scons h ∅))) (suc ∅) $ by eq_sym [l33]
+l36: $ G ⇒ g = fv (scons o (scons p (scons q ∅))) (suc ∅) $ by eq_trans [l35, l28]
+l37: $ G ⇒ g = p $ by eq_trans [l36, l34]
+l38: $ G ⇒ fv (scons f (scons g (scons h ∅))) (suc (suc ∅)) = fv (scons o (scons p (scons q ∅))) (suc (suc ∅)) $ by fv_eq [l9, l21]
+l39: $ G ⇒ fv (scons f (scons g (scons h ∅))) (suc (suc ∅)) = fv (scons g (scons h ∅)) (suc ∅) $ by scons_fv_suc_c [l10, l3, l19]
+l40: $ G ⇒ fv (scons g (scons h ∅)) (suc ∅) = fv (scons h ∅) ∅ $ by scons_fv_suc_c [l11, l2, l1]
+l41: $ G ⇒ fv (scons h ∅) ∅ = h $ by scons_fv_zero_c [l12, l1]
+l42: $ G ⇒ fv (scons o (scons p (scons q ∅))) (suc (suc ∅)) = fv (scons p (scons q ∅)) (suc ∅) $ by scons_fv_suc_c [l13, l6, l19]
+l43: $ G ⇒ fv (scons p (scons q ∅)) (suc ∅) = fv (scons q ∅) ∅ $ by scons_fv_suc_c [l14, l5, l1]
+l44: $ G ⇒ fv (scons q ∅) ∅ = q $ by scons_fv_zero_c [l15, l1]
+l45: $ G ⇒ fv (scons f (scons g (scons h ∅))) (suc (suc ∅)) = fv (scons h ∅) ∅ $ by eq_trans [l39, l40]
+l46: $ G ⇒ fv (scons f (scons g (scons h ∅))) (suc (suc ∅)) = h $ by eq_trans [l45, l41]
+l47: $ G ⇒ fv (scons o (scons p (scons q ∅))) (suc (suc ∅)) = fv (scons q ∅) ∅ $ by eq_trans [l42, l43]
+l48: $ G ⇒ fv (scons o (scons p (scons q ∅))) (suc (suc ∅)) = q $ by eq_trans [l47, l44]
+l49: $ G ⇒ h = fv (scons f (scons g (scons h ∅))) (suc (suc ∅)) $ by eq_sym [l46]
+l50: $ G ⇒ h = fv (scons o (scons p (scons q ∅))) (suc (suc ∅)) $ by eq_trans [l49, l38]
+l51: $ G ⇒ h = q $ by eq_trans [l50, l48]
+l52: $ G ⇒ g = p ∧ h = q $ by and_intro [l37, l51]
+l53: $ G ⇒ f = o ∧ g = p ∧ h = q $ by and_intro [l27, l52]
+
 --| The abstraction of membership in a class is included in it.
 lemma t1_cab_welc_subset {y: set} (G: hyps y) (P: class): $ G ⇒ {y | y ∊ P} ⊆ P $
 ----

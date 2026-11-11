@@ -238,6 +238,18 @@ l1: $ G ⇒ S = R $ by eq_sym [#1]
 l2: $ G ⇒ S ⊆ R $ by eq_subset [l1]
 l3: $ G ⇒ rel S $ by rel_subset [#2, l2]
 
+rel_pair_isset
+--------------
+r1: $ G , c = ⟨ A , B ⟩ , c ∊ R ⇒ rel R $ by weaken [#1]
+r2: $ G , c = ⟨ A , B ⟩ , c ∊ R ⇒ c ∊ R $ by ax
+r3a: $ G , c = ⟨ A , B ⟩ , c ∊ R , c = ⟨ x , y ⟩ ⇒ c = ⟨ A , B ⟩ $ by ax
+r3b: $ G , c = ⟨ A , B ⟩ , c ∊ R , c = ⟨ x , y ⟩ ⇒ ⟨ A , B ⟩ = c $ by eq_sym [r3a]
+r3c: $ G , c = ⟨ A , B ⟩ , c ∊ R , c = ⟨ x , y ⟩ ⇒ c = ⟨ x , y ⟩ $ by ax
+r3: $ G , c = ⟨ A , B ⟩ , c ∊ R , c = ⟨ x , y ⟩ ⇒ ⟨ A , B ⟩ = ⟨ x , y ⟩ $ by eq_trans [r3b, r3c]
+r4: $ G , c = ⟨ A , B ⟩ , c ∊ R , c = ⟨ x , y ⟩ ⇒ isset A $ by opair_eq_isset [r3]
+r5: $ G , c = ⟨ A , B ⟩ , c ∊ R ⇒ isset A $ by rel_elim [r1, r2, r4]
+r6: $ G ⇒ isset A $ by wcel_elim [#2, r5]
+
 sb_f_rel
 --------
 l1: $ [x/t] (∀ w (w ∊ R → ∃ u ∃ v (w = ⟨ u , v ⟩))) ⟺ ∀ w (w ∊ (⟦ x / t ⟧ R) → ∃ u ∃ v (w = ⟨ u , v ⟩)) $ by iff_refl
@@ -428,6 +440,40 @@ l3: $ G ⇒ S ⊆ R $ by eq_subset [l2]
 l4: $ G ⇒ crn R ⊆ crn S $ by crn_mono [l1]
 l5: $ G ⇒ crn S ⊆ crn R $ by crn_mono [l3]
 l6: $ G ⇒ crn R = crn S $ by subset_antisym [l4, l5]
+
+cuni_crn_csn
+------------
+r1: $ G , x ∊ crn (csn ⟨ a , b ⟩) ⇒ x ∊ crn (csn ⟨ a , b ⟩) $ by ax
+r2: $ G , ⟨ e , x ⟩ ∈ csn ⟨ a , b ⟩ ⇒ ⟨ e , x ⟩ ∈ csn ⟨ a , b ⟩ $ by ax
+r3: $ G , ⟨ e , x ⟩ ∈ csn ⟨ a , b ⟩ ⇒ e = a ∧ x = b $ by csn_opair_elim [r2]
+r4: $ G , ⟨ e , x ⟩ ∈ csn ⟨ a , b ⟩ ⇒ x = b $ by and_elim_r [r3]
+r5: $ G , ⟨ e , x ⟩ ∈ csn ⟨ a , b ⟩ ⇒ x ∊ csn b $ by csn_intro [r4]
+r6: $ G , x ∊ crn (csn ⟨ a , b ⟩) ⇒ x ∊ csn b $ by crn_elim [r1, r5]
+r7: $ G ⇒ crn (csn ⟨ a , b ⟩) ⊆ csn b $ by subset_intro [r6]
+r8: $ G ⇒ ⟨ a , b ⟩ ∈ csn ⟨ a , b ⟩ $ by csn_opair_intro
+r9: $ G ⇒ b ∊ crn (csn ⟨ a , b ⟩) $ by crn_intro [r8]
+r10: $ G ⇒ csn b ⊆ crn (csn ⟨ a , b ⟩) $ by csn_subset [r9]
+r11: $ G ⇒ crn (csn ⟨ a , b ⟩) = csn b $ by subset_antisym [r7, r10]
+r12: $ G ⇒ ⋃ (crn (csn ⟨ a , b ⟩)) = ⋃ (csn b) $ by cuni_eq [r11]
+r13: $ G ⇒ isset b $ by isset_var
+r14: $ G ⇒ ⋃ (csn b) = b $ by cuni_csn [r13]
+r15: $ G ⇒ ⋃ (crn (csn ⟨ a , b ⟩)) = b $ by eq_trans [r12, r14]
+
+cuni_crn_csn_c
+--------------
+r1: $ G , a = A , b = B ⇒ a = A $ by ax
+r2: $ G , a = A , b = B ⇒ b = B $ by ax
+r3: $ G , a = A , b = B ⇒ A = a $ by eq_sym [r1]
+r4: $ G , a = A , b = B ⇒ B = b $ by eq_sym [r2]
+r5: $ G , a = A , b = B ⇒ ⟨ A , B ⟩ = ⟨ a , b ⟩ $ by opair_eq [r3, r4]
+r6: $ G , a = A , b = B ⇒ csn ⟨ A , B ⟩ = csn ⟨ a , b ⟩ $ by csn_eq [r5]
+r7: $ G , a = A , b = B ⇒ crn (csn ⟨ A , B ⟩) = crn (csn ⟨ a , b ⟩) $ by crn_eq [r6]
+r8: $ G , a = A , b = B ⇒ ⋃ (crn (csn ⟨ A , B ⟩)) = ⋃ (crn (csn ⟨ a , b ⟩)) $ by cuni_eq [r7]
+r9: $ G , a = A , b = B ⇒ ⋃ (crn (csn ⟨ a , b ⟩)) = b $ by cuni_crn_csn
+r10: $ G , a = A , b = B ⇒ ⋃ (crn (csn ⟨ A , B ⟩)) = b $ by eq_trans [r8, r9]
+r11: $ G , a = A , b = B ⇒ ⋃ (crn (csn ⟨ A , B ⟩)) = B $ by eq_trans [r10, r2]
+r12: $ G , a = A ⇒ ⋃ (crn (csn ⟨ A , B ⟩)) = B $ by isset_elim [#2, r11]
+r13: $ G ⇒ ⋃ (crn (csn ⟨ A , B ⟩)) = B $ by isset_elim [#1, r12]
 
 sb_c_cdm
 --------
@@ -1050,6 +1096,29 @@ l3: $ G , y ∊ ap ∅ A , c = ⟨ A , y ⟩ , c ∊ ∅ ⇒ c ∊ ∅ $ by ax
 l4: $ G , y ∊ ap ∅ A , c = ⟨ A , y ⟩ , c ∊ ∅ ⇒ ⊥ $ by empty_elim [l3]
 l5: $ G , y ∊ ap ∅ A ⇒ ⊥ $ by wcel_elim [l2, l4]
 l6: $ G ⇒ ap ∅ A = ∅ $ by empty_eq_intro [l5]
+
+ap_wcel
+-------
+a1: $ G , v = A , ⟨ a , A ⟩ ∈ F ⇒ ⟨ a , A ⟩ ∈ F $ by ax
+a2: $ G , v = A , ⟨ a , A ⟩ ∈ F ⇒ v = A $ by ax
+a3: $ G , v = A , ⟨ a , A ⟩ ∈ F ⇒ A = v $ by eq_sym [a2]
+a4: $ G , v = A , ⟨ a , A ⟩ ∈ F ⇒ a = a $ by eq_refl
+a5: $ G , v = A , ⟨ a , A ⟩ ∈ F ⇒ ⟨ a , A ⟩ = ⟨ a , v ⟩ $ by opair_eq [a4, a3]
+a6: $ G , v = A , ⟨ a , A ⟩ ∈ F ⇒ ⟨ a , v ⟩ ∈ F $ by wcel_eq_l [a5, a1]
+a7: $ G , v = A , ⟨ a , A ⟩ ∈ F ⇒ v ∊ ap F a $ by ap_intro [a6]
+a8: $ G , v = A , ⟨ a , A ⟩ ∈ F ⇒ v ∈ ap F a $ by welc_wcel [a7]
+a9: $ G , v = A , ⟨ a , A ⟩ ∈ F ⇒ A ∈ ap F a $ by wcel_eq_l [a2, a8]
+c1: $ G , v = A , A ∈ ap F a ⇒ A ∈ ap F a $ by ax
+c2: $ G , v = A , A ∈ ap F a ⇒ v = A $ by ax
+c3: $ G , v = A , A ∈ ap F a ⇒ A = v $ by eq_sym [c2]
+c4: $ G , v = A , A ∈ ap F a ⇒ v ∈ ap F a $ by wcel_eq_l [c3, c1]
+c5: $ G , v = A , A ∈ ap F a ⇒ v ∊ ap F a $ by wcel_welc [c4]
+c6: $ G , v = A , A ∈ ap F a ⇒ ⟨ a , v ⟩ ∈ F $ by ap_elim [c5]
+c7: $ G , v = A , A ∈ ap F a ⇒ a = a $ by eq_refl
+c8: $ G , v = A , A ∈ ap F a ⇒ ⟨ a , v ⟩ = ⟨ a , A ⟩ $ by opair_eq [c7, c2]
+c9: $ G , v = A , A ∈ ap F a ⇒ ⟨ a , A ⟩ ∈ F $ by wcel_eq_l [c8, c6]
+d1: $ G , v = A ⇒ ⟨ a , A ⟩ ∈ F ↔ A ∈ ap F a $ by bi_intro [a9, c9]
+d2: $ G ⇒ ⟨ a , A ⟩ ∈ F ↔ A ∈ ap F a $ by isset_elim [#1, d1]
 
 ap_mono
 -------
