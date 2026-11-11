@@ -829,6 +829,26 @@ l7: $ G , k = cdm s , k ∊ ω ⇒ suc k = suc (cdm s) $ by suc_eq [l2]
 l8: $ G , k = cdm s , k ∊ ω ⇒ cdm (scons a s) = suc (cdm s) $ by eq_trans [l6, l7]
 l9: $ G ⇒ cdm (scons a s) = suc (cdm s) $ by wcel_elim [l1, l8]
 
+scons_empty_len
+---------------
+l0: $ G ⇒ isset ∅ $ by ax_empty
+l1: $ G , o = ∅ ⇒ o = ∅ $ by ax
+l2: $ G , o = ∅ ⇒ ∅ ∈ fseq ω $ by fseq_empty
+l3: $ G , o = ∅ ⇒ ∅ = o $ by eq_sym [l1]
+l4: $ G , o = ∅ ⇒ o ∈ fseq ω $ by wcel_eq_l [l3, l2]
+l5: $ G , o = ∅ ⇒ o ∊ fseq ω $ by wcel_welc [l4]
+l6: $ G , o = ∅ ⇒ cdm (scons x o) = suc (cdm o) $ by scons_len [l5]
+l7: $ G , o = ∅ ⇒ cdm o = cdm ∅ $ by cdm_eq [l1]
+l8: $ G , o = ∅ ⇒ cdm ∅ = ∅ $ by cdm_empty
+l9: $ G , o = ∅ ⇒ cdm o = ∅ $ by eq_trans [l7, l8]
+l10: $ G , o = ∅ ⇒ suc (cdm o) = suc ∅ $ by suc_eq [l9]
+l11: $ G , o = ∅ ⇒ x = x $ by eq_refl
+l12: $ G , o = ∅ ⇒ scons x ∅ = scons x o $ by scons_eq [l11, l3]
+l13: $ G , o = ∅ ⇒ cdm (scons x ∅) = cdm (scons x o) $ by cdm_eq [l12]
+l14: $ G , o = ∅ ⇒ cdm (scons x ∅) = suc (cdm o) $ by eq_trans [l13, l6]
+l15: $ G , o = ∅ ⇒ cdm (scons x ∅) = suc ∅ $ by eq_trans [l14, l10]
+l16: $ G ⇒ cdm (scons x ∅) = suc ∅ $ by isset_elim [l0, l15]
+
 lemma s2_scons_ap_zero (G: hyps) (A S: class): $ G ⇒ isset A $ > $ G ⇒ ap (scons A S) ∅ = csn A $
 ----
 f1: $ G , y ∊ ap (scons A S) ∅ ⇒ y ∊ ap (scons A S) ∅ $ by ax
@@ -2417,6 +2437,28 @@ w2: $ G , k = cdm s , k ∊ ω ⇒ scat (scons a s) t = scons a (s ∪ s2_sh t k
 w3: $ G , k = cdm s , k ∊ ω ⇒ scons a (s ∪ s2_sh t k) = scons a (scat s t) $ by eq_sym [c9]
 w4: $ G , k = cdm s , k ∊ ω ⇒ scat (scons a s) t = scons a (scat s t) $ by eq_trans [w2, w3]
 w5: $ G ⇒ scat (scons a s) t = scons a (scat s t) $ by wcel_elim [l1, w4]
+
+scat_scons_empty
+----------------
+l0: $ G ⇒ isset ∅ $ by ax_empty
+l1: $ G , o = ∅ ⇒ o = ∅ $ by ax
+l2: $ G , o = ∅ ⇒ ∅ ∈ fseq A $ by fseq_empty
+l3: $ G , o = ∅ ⇒ ∅ = o $ by eq_sym [l1]
+l4: $ G , o = ∅ ⇒ o ∈ fseq A $ by wcel_eq_l [l3, l2]
+l5: $ G , o = ∅ ⇒ o ∊ fseq A $ by wcel_welc [l4]
+l6: $ G , o = ∅ ⇒ q ∊ fseq A $ by weaken [#1]
+l7: $ G , o = ∅ ⇒ scat (scons x o) q = scons x (scat o q) $ by scat_scons [l5, l6]
+l8: $ G , o = ∅ ⇒ q = q $ by eq_refl
+l9: $ G , o = ∅ ⇒ scat o q = scat ∅ q $ by scat_eq [l1, l8]
+l10: $ G , o = ∅ ⇒ scat ∅ q = q $ by scat_empty_l [l6]
+l11: $ G , o = ∅ ⇒ scat o q = q $ by eq_trans [l9, l10]
+l12: $ G , o = ∅ ⇒ x = x $ by eq_refl
+l13: $ G , o = ∅ ⇒ scons x (scat o q) = scons x q $ by scons_eq [l12, l11]
+l14: $ G , o = ∅ ⇒ scons x ∅ = scons x o $ by scons_eq [l12, l3]
+l15: $ G , o = ∅ ⇒ scat (scons x ∅) q = scat (scons x o) q $ by scat_eq [l14, l8]
+l16: $ G , o = ∅ ⇒ scat (scons x ∅) q = scons x (scat o q) $ by eq_trans [l15, l7]
+l17: $ G , o = ∅ ⇒ scat (scons x ∅) q = scons x q $ by eq_trans [l16, l13]
+l18: $ G ⇒ scat (scons x ∅) q = scons x q $ by isset_elim [l0, l17]
 
 scat_ssnoc
 ----------

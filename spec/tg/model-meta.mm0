@@ -11,7 +11,9 @@
 --                `p ++ (x :: s)`, for `p` of length `k` and `x` the value of
 --                `a` at `s`;
 -- first for the atoms over trees (`lrel_*_sem`, which the inductions need),
--- then for the spec's relations (`*_den`). Off the valuations (`r ∉ fseq u`)
+-- then for the spec's relations (`*_den`); and for contexts (D5), what
+-- `lookup` says of a valuation satisfying a context and what valuations satisfy
+-- the contexts `cext` and `cinst` make. Off the valuations (`r ∉ fseq u`)
 -- an expression node's value is `∅`, which settles the binders' bodies at
 -- arguments outside `u` (`dt_out`, and the trees of derivable atoms are such
 -- nodes: `lrel_*_out`). Imports model-den.mm0; proofs in model-meta.auf.
@@ -135,3 +137,40 @@ theorem inst_den_c (G: hyps) (M W P S: class) (k: nat) (e a e2: expr) (u: set):
 theorem inst0_den_c (G: hyps) (M W S: class) (e a e2: expr) (u: set):
   $ inst nz e a e2 $ > $ G ⇒ uadm u $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ S ∈ fseq u $ >
   $ G ⇒ dt u M (enc_expr e2) W S = dt u M (enc_expr e) W (scons (dt u M (enc_expr a) W S) S) $;
+
+-- --------------------------------------------------------------------------
+-- Contexts (D5)
+-- --------------------------------------------------------------------------
+
+--| A variable's type: for a derivable `lookup G i A`, the `i`-th entry of a
+--| valuation satisfying `G` is in the value of `A` there.
+theorem lrel_lookup_sem (G: hyps) (M: class) (u w t1 t2 t3 r: set):
+  $ G ⇒ ra_lookup t1 t2 t3 ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ sat u M t1 w $ >
+  $ G ⇒ fv r (fv nvf t2) ∈ dt u M t3 w r $;
+theorem lookup_den (H: hyps) (M: class) (G: ctx) (i: nat) (A: expr) (u w r: set):
+  $ lookup G i A $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ r ∊ sat u M (enc_ctx G) w $ >
+  $ H ⇒ fv r (fv nvf (enc_nat i)) ∈ dt u M (enc_expr A) w r $;
+--| Extension: for a derivable `cext n G G2`, a valuation satisfying `G2` is
+--| `q ++ t` with `q` of length `n` and `t` satisfying `G`.
+theorem lrel_cext_sem (G: hyps) {q t: set} (M: class) (u w t1 t2 t3 r: set):
+  $ G ⇒ ra_cext t1 t2 t3 ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ sat u M t3 w $ >
+  $ G ⇒ ∃ q ∃ t (q ∊ fseq u ∧ cdm q = fv nvf t1 ∧ t ∊ sat u M t2 w ∧ r = scat q t) $;
+theorem cext_den (H: hyps) {q t: set} (M: class) (n: nat) (G G2: ctx) (u w r: set):
+  $ cext n G G2 $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ r ∊ sat u M (enc_ctx G2) w $ >
+  $ H ⇒ ∃ q ∃ t (q ∊ fseq u ∧ cdm q = fv nvf (enc_nat n) ∧ t ∊ sat u M (enc_ctx G) w ∧
+      r = scat q t) $;
+--| Substitution in a context: for a derivable `cinst k G0 A0 a G1 G`, with `a`
+--| of type `A0` in `G0`, a valuation satisfying `G` is `p ++ t` with `p` of
+--| length `k` and `t` satisfying `G0`, and `p ++ (x :: t)` satisfies `G1` for
+--| `x` the value of `a` at `t`.
+theorem lrel_cinst_sem (G: hyps) {p t v: set} (M: class) (u w t1 t2 t3 t4 t5 t6 r: set):
+  $ G ⇒ ra_cinst t1 t2 t3 t4 t5 t6 ∈ lrel $ > $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ ∀ v (v ∊ sat u M t2 w → dt u M t4 w v ∈ dt u M t3 w v ∧ dt u M t4 w v ∈ u) $ >
+  $ G ⇒ r ∊ sat u M t6 w $ >
+  $ G ⇒ ∃ p ∃ t (p ∊ fseq u ∧ cdm p = fv nvf t1 ∧ t ∊ sat u M t2 w ∧ r = scat p t ∧
+      scat p (scons (dt u M t4 w t) t) ∈ sat u M t5 w) $;
+theorem cinst_den (H: hyps) {p t: set} (M: class) (k: nat) (G0 G1 G: ctx) (A0 a: expr) (u w r: set):
+  $ mdeq M G0 a a A0 $ > $ cinst k G0 A0 a G1 G $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ >
+  $ H ⇒ r ∊ sat u M (enc_ctx G) w $ >
+  $ H ⇒ ∃ p ∃ t (p ∊ fseq u ∧ cdm p = fv nvf (enc_nat k) ∧ t ∊ sat u M (enc_ctx G0) w ∧
+      r = scat p t ∧ scat p (scons (dt u M (enc_expr a) w t) t) ∈ sat u M (enc_ctx G1) w) $;

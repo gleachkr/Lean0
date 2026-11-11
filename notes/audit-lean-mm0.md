@@ -956,7 +956,7 @@ encoding axioms above and these 130, in place of the spec's 360: Part I's 209 cl
 21 level rules are theorems.
 
 **The model** (`spec/tg/model-levels.mm0`, `spec/tg/model-den.mm0`, 2026-11-09, layer C of
-the reduction; `spec/tg/model-meta.mm0`, 2026-11-10, layer D). Definitions and theorems only: no axiom, so nothing here is trusted beyond
+the reduction; `spec/tg/model-meta.mm0` and `spec/tg/model-core.mm0`, 2026-11-10, layers D and I). Definitions and theorems only: no axiom, so nothing here is trusted beyond
 `tg.mm0` and the encoding. What it changes in TG mode is the reading of the spec's `leqv`,
 which is now a definition: a level valuation is a function from `ω` to `ω` (`lvals`), each
 level's value is computed by structural recursion on its tree (`lv`: `lz` is 0, `ls` adds
@@ -989,8 +989,16 @@ The rest of the model is not yet the spec's `deq`, so it changes nothing that is
   `lift_closed` and `inst_closed` included) and every hook. A closed term's value depends on
   the valuation only below `k`. `lift n k e e2` makes `e2` at `p ++ q ++ s` equal `e` at
   `p ++ s` (`p` of length `k`, `q` of length `n`). `inst k e a e2` makes `e2` at `p ++ s`
-  equal `e` at `p ++ (x :: s)`, with `x` the value of `a` at `s`. These are what the proofs
-  of `beta`, `appDF`, `instDF`, `weakDF` and the context lemmas will use.
+  equal `e` at `p ++ (x :: s)`, with `x` the value of `a` at `s`. For contexts: a variable's
+  entry in a valuation satisfying the context is in the value of the type `lookup` gives it; a
+  valuation of `G2` with `cext n G G2` is `q ++ t` with `q` of length `n` and `t` satisfying
+  `G`; and with `cinst k G0 A0 a G1 G` and `a` of type `A0` in `G0`, a valuation of `G` is
+  `p ++ t` with `t` satisfying `G0` and `p ++ (x :: t)` satisfying `G1`, `x` the value of `a`.
+- **The remaining core rules** (`model-core.mm0`): `bvar`, `appDF`, `beta`, `eta`, `instDF`
+  and `weakDF` are theorems for every hook too (`mbvar` .. `mweakDF`), from the above and the
+  function-space laws (`cpi_elim_ap`, `clam_ap`, `cpi_eta`). With the eight before, 14 of the
+  15 core rules hold in the model for every hook; `eeqv_df` needs the hook's values to be
+  invariant under `eeqv`, which the hook's definition will have to supply.
 
 **TG mode: a certificate verified against the library** (2026-11-09). The same certificate
 can be checked against the library instead of the spec:
