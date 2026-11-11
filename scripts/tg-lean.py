@@ -26,14 +26,22 @@ Reads the sorts and constructors of spec/lean.mm0 (every `term` whose sort is no
   - congruence of each relation's atoms (`ra_R_congr`, `ra_R_eq`), proved there
     too.
 
-It also writes spec/tg/lean-tg-rest.mm0, which imports the model (model.mm0, the
-chain of `model-*.mm0` files over lean-tg.mm0) and states the rest of the spec,
-Parts II and III, as it is (in prefix form): their terms, definitions and axioms,
-except those the model declares (a spec `term` as a `def`, an axiom as a theorem
-with the same statement, which `lean0 tg-link` checks). Certificates are verified
-against this file's chain (`lean0 joined --tg`).
+It also writes spec/tg/lean-tg2.mm0, the second stratum: the relations of Part II
+whose clauses need only Part I's relations and level equivalence (`eeqv` and its
+kind, found by `stratum2`), as a second program over Part I's least model in the
+same form, its labels continuing Part I's: the clauses' Part I premises and
+`≈` premises are side conditions of their ground instances (`.. ∈ lrel`, `lveq`).
+It imports model-levels.mm0 (for `lveq`), and model-den.mm0 imports it.
 
-  scripts/tg-lean.py            write spec/tg/lean-tg.mm0 and spec/tg/lean-tg-rest.mm0
+And it writes spec/tg/lean-tg-rest.mm0, which imports the model (model.mm0, the
+chain of `model-*.mm0` files and lean-tg2.mm0 over lean-tg.mm0) and states the
+rest of the spec, Parts II and III, as it is (in prefix form): their terms,
+definitions and axioms, except those the model declares (a spec `term` as a `def`,
+an axiom as a theorem with the same statement, which `lean0 tg-link` checks).
+Certificates are verified against this file's chain (`lean0 joined --tg`).
+
+  scripts/tg-lean.py            write spec/tg/lean-tg.mm0, spec/tg/lean-tg2.mm0 and
+                                spec/tg/lean-tg-rest.mm0
   scripts/tg-lean.py --check    fail if the files are not what the spec gives
   scripts/tg-lean.py --parse-check DIR
                                 write DIR/check.mm0 and DIR/check.auf: every axiom of
@@ -57,8 +65,13 @@ MODEL = "model.mm0"
 # The sorts a certificate declares new constants of (`term X_blk: blk`,
 # `term X_atom: atom`): their trees are also any leaves `⟨ n , ∅ ⟩`.
 OPEN = ["blk", "atom"]
-# Where Part II of the spec starts.
+# Where Parts II and III of the spec start.
 PART2 = "-- PART II"
+PART3 = "-- PART III"
+# The second stratum (Part II's relations over level equivalence), between the
+# model's levels, which it imports, and the rest of the model.
+OUT2 = ROOT / "spec/tg/lean-tg2.mm0"
+LEVELS = "model-levels.mm0"
 
 
 def parse(text):
@@ -215,13 +228,14 @@ def library_names():
     return names
 
 
-def model_decls():
-    """The model's declarations (the `model*.mm0` files): (is a theorem, kind, name)."""
+def model_decls(stratum2):
+    """The model's declarations (the `model*.mm0` files, and `stratum2`, the text of
+    lean-tg2.mm0): (is a theorem, kind, name)."""
     out = []
-    for f in sorted((ROOT / "spec/tg").glob("model*.mm0")):
+    texts = [f.read_text(encoding="utf-8") for f in sorted((ROOT / "spec/tg").glob("model*.mm0"))]
+    for t in texts + [stratum2]:
         for kind, name in re.findall(r"^(?:(?:pure|strict|provable|free|local|abstract|pub)\s+)*"
-                                     r"(theorem|axiom|def|term)\s+(\w+)",
-                                     f.read_text(encoding="utf-8"), re.M):
+                                     r"(theorem|axiom|def|term)\s+(\w+)", t, re.M):
             out.append((kind in ("axiom", "theorem"), kind, name))
     return out
 
@@ -263,6 +277,51 @@ def right_nested(xs):
     return out
 
 
+class Syntax:
+    """The spec's terms over set variables: trees and atoms, and statements in prefix
+    form; variables named like a name in `lib` get a suffix `_v`."""
+
+    def __init__(self, sp, ctor_names, lib):
+        self.sp, self.ctor_names, self.lib = sp, ctor_names, lib
+
+    def var(self, n):
+        # a variable of the spec named like a term of the library
+        return f"{n}_v" if n in self.lib else n
+
+    def unfold(self, e):
+        """A formula with the spec's wff definitions unfolded at the top."""
+        while e[0] == "a" and e[1] in self.sp.defs:
+            bs, body = self.sp.defs[e[1]]
+            e = mm0math.subst(body, dict(zip([n for n, _ in bs], e[2])))
+        return e
+
+    def tree(self, e):
+        """A term of the spec as a class: its tree, over set variables."""
+        if e[0] == "v":
+            return self.var(e[1])
+        _, name, args = e
+        if name in self.sp.defs:
+            bs, body = self.sp.defs[name]
+            return self.tree(mm0math.subst(body, dict(zip([n for n, _ in bs], args))))
+        if name not in self.ctor_names:
+            sys.exit(f"tg-lean: {name} is not a constructor")
+        return node(f"kc_{name}", [self.tree(a) for a in args])
+
+    def atom(self, e):
+        """A relation's formula as an atom, the spec's wff definitions unfolded."""
+        _, name, args = self.unfold(e)
+        return f"ra_{name} " + " ".join(paren(self.tree(a)) for a in args)
+
+    def stmt(self, e):
+        """A term in prefix form, its variables renamed as `var` does."""
+        return mm0math.show(self.rename(e))
+
+    def rename(self, e):
+        if e[0] == "v":
+            return ("v", self.var(e[1]))
+        return ("a", e[1], [self.rename(a) for a in e[2]])
+
+
 def render_relations(text, ctors):
     """The relations of Part I (see the module's doc)."""
     sp = mm0math.Spec(text[:text.index(PART2)])
@@ -283,39 +342,8 @@ def render_relations(text, ctors):
     if ours & lib:
         sys.exit(f"tg-lean: names taken by the library: {sorted(ours & lib)}")
 
-    def var(n):
-        # a variable of the spec named like a term of the library
-        return f"{n}_v" if n in lib else n
-
-    def tree(e):
-        """A term of the spec as a class: its tree, over set variables."""
-        if e[0] == "v":
-            return var(e[1])
-        _, name, args = e
-        if name in sp.defs:
-            bs, body = sp.defs[name]
-            return tree(mm0math.subst(body, dict(zip([n for n, _ in bs], args))))
-        if name not in ctor_names:
-            sys.exit(f"tg-lean: {name} is not a constructor")
-        return node(f"kc_{name}", [tree(a) for a in args])
-
-    def atom(e):
-        """A relation's formula as an atom, the spec's wff definitions unfolded."""
-        _, name, args = e
-        if name in sp.defs:
-            bs, body = sp.defs[name]
-            return atom(mm0math.subst(body, dict(zip([n for n, _ in bs], args))))
-        return f"ra_{name} " + " ".join(paren(tree(a)) for a in args)
-
-    def stmt(e):
-        """A term in prefix form, its variables renamed as `var` does."""
-        return mm0math.show(rename(e))
-
-    def rename(e):
-        if e[0] == "v":
-            return ("v", var(e[1]))
-        return ("a", e[1], [rename(a) for a in e[2]])
-
+    syn = Syntax(sp, ctor_names, lib)
+    var, tree, atom, stmt = syn.var, syn.tree, syn.atom, syn.stmt
     last = f"kc_{ctors[-1][0]}"
     o = []
     w = o.append
@@ -420,6 +448,178 @@ def render_relations(text, ctors):
     return o
 
 
+def decl_names(text):
+    """The names an MM0 text declares."""
+    return set(re.findall(r"^(?:(?:pure|strict|provable|free|local|abstract|pub)\s+)*"
+                          r"(?:theorem|axiom|lemma|def|term)\s+(\w+)", text, re.M))
+
+
+def stratum2(sp, part1):
+    """The relations of Part II that need only Part I and level equivalence, in spec
+    order: the largest set whose clauses' premises are atoms of Part I, `leqv` or
+    the set's own."""
+    rels = [d[1] for d in sp.decls[len(part1.decls):] if d[0] == "term" and d[3] == "wff"
+            and d[1] not in ("leqv", "deq")]
+    lower = {d[1] for d in part1.decls if d[0] == "term" and d[3] == "wff"} | {"leqv"}
+    syn = Syntax(sp, set(), set())
+    clauses = {r: [] for r in rels}
+    for d in sp.decls[len(part1.decls):]:
+        if d[0] in ("axiom", "theorem") and d[4][0] == "a" and d[4][1] in clauses:
+            clauses[d[4][1]].append(d)
+    ok = set(rels)
+    while True:
+        bad = {r for r in ok for d in clauses[r]
+               for h in d[3] if syn.unfold(h)[1] not in lower | ok}
+        if not bad:
+            return [r for r in rels if r in ok], clauses
+        ok -= bad
+
+
+def render_stratum2(text, ctors, enc):
+    """lean-tg2.mm0 (see the module's doc); `enc` is lean-tg.mm0's text."""
+    part1 = mm0math.Spec(text[:text.index(PART2)])
+    sp = mm0math.Spec(text[:text.index(PART3)])
+    names, clauses = stratum2(sp, part1)
+    sorts = {d[1]: d[2] for d in sp.decls if d[0] == "term"}
+    rels = [(r, sorts[r]) for r in names]
+    axioms = [d for r in names for d in clauses[r]]
+    part1_rels = {d[1] for d in part1.decls if d[0] == "term" and d[3] == "wff"}
+    lib = (library_names() | decl_names(enc) | {d[1] for d in part1.decls} |
+           decl_names((ROOT / f"spec/tg/{LEVELS}").read_text(encoding="utf-8")))
+    ours = ({f"kr_{r}" for r in names} | {f"ra_{r}" for r in names} | set(names) |
+            {f"cl_{d[1]}" for d in axioms} | {f"pr_{r}" for r in names} |
+            {d[1] for d in axioms} | {"lprog2", "lrel2"})
+    if ours & lib:
+        sys.exit(f"tg-lean: names taken by the library: {sorted(ours & lib)}")
+    ctor_names = {c for c, _, _, _ in ctors}
+    syn = Syntax(sp, ctor_names, lib)
+    tree, atom, stmt = syn.tree, syn.atom, syn.stmt
+
+    def premise(h):
+        """A premise: an atom of the stratum (a premise of the clause), or a side
+        condition (an atom of Part I derivable, or levels equivalent)."""
+        e = syn.unfold(h)
+        if e[1] in names:
+            return "atom", atom(e)
+        if e[1] in part1_rels:
+            return "side", f"{atom(e)} ∈ lrel"
+        assert e[1] == "leqv"
+        return "side", f"lveq {paren(tree(e[2][0]))} {paren(tree(e[2][1]))}"
+
+    last = re.findall(r"^def (kr_\w+):", enc, re.M)[-1]
+    o = ["-- lean-tg2.mm0: the relations of Part II of spec/lean.mm0 over level",
+         "-- equivalence, encoded in the TG library (the second stratum).",
+         "-- GENERATED by scripts/tg-lean.py from spec/lean.mm0; do not edit.",
+         "--",
+         "-- The relations of Part II whose clauses need only Part I's relations and",
+         "-- level equivalence (`eeqv` and its kind, `ulevel`, `nst_group`) are one",
+         "-- program of Horn clauses over Part I's least model, as in lean-tg.mm0: a",
+         "-- clause's premises are its atoms of this stratum, and its other premises are",
+         "-- side conditions of the clause's ground instances (an atom of Part I is",
+         "-- derivable, in `lrel`; two level trees are equivalent, `lveq`). Each",
+         "-- relation is a `def`, and each clause axiom of the spec is a theorem, with",
+         "-- the spec's statement; then the exclusion lemmas `lprog2_R_pr` and inversion",
+         "-- `lrel2_R_cases`. No axioms.",
+         "-- Imports model-levels.mm0 (`lveq`); proofs in lean-tg2.auf.",
+         "",
+         f'import "{LEVELS}";',
+         ""]
+    w = o.append
+    w("-- " + "-" * 74)
+    w("-- Labels and atoms")
+    w("-- " + "-" * 74)
+    w("")
+    prev = last
+    for r, _ in rels:
+        w(f"def kr_{r}: class = $ suc {prev} $;")
+        prev = f"kr_{r}"
+    w("")
+    w("--| The atoms: a label and the trees of the arguments.")
+    for r, args in rels:
+        vs = [f"a{i + 1}" for i in range(len(args))]
+        w(f"def ra_{r} ({' '.join(vs)}: class): class = $ ⟨ kr_{r} , {sseq(vs)} ⟩ $;")
+    w("")
+    w("--| Every label is a natural number.")
+    o += [f"theorem kr_{r}_omega (G: hyps): $ G ⇒ kr_{r} ∈ ω $;" for r, _ in rels]
+    o += render_congr("\n".join(o)).split("\n")[:-1]
+    w("")
+    w("-- " + "-" * 74)
+    w("-- The program")
+    w("-- " + "-" * 74)
+    w("")
+    w("--| The ground instances of each clause axiom: ⟨ premises , conclusion ⟩, with")
+    w("--| its side conditions.")
+    for d in axioms:
+        _, name, bs, hyps, concl = d
+        vs = [syn.var(n) for n, _ in bs]
+        wv = next(x for x in ["w", "w0", "w1", "w2"] if x not in vs)
+        ps = [premise(h) for h in hyps]
+        body = f"{wv} = ⟨ {sseq([a for k, a in ps if k == 'atom'])} , {atom(concl)} ⟩"
+        body = " ∧ ".join([body] + [a for k, a in ps if k == "side"])
+        ex = "".join(f"∃ {v} " for v in vs)
+        dummies = " ".join(f".{v}" for v in vs + [wv])
+        w(f"def cl_{name} ({dummies}: set): class =")
+        w(f"  $ {{{wv} | {ex}({body})}} $;")
+    w("")
+    w("--| The clauses of each relation.")
+    for r, _ in rels:
+        w(f"def pr_{r}: class = $ {right_nested([f'cl_{d[1]}' for d in clauses[r]])} $;")
+    w("")
+    w("--| The program, at the atoms.")
+    w(f"def lprog2: class =\n  $ ({balanced([f'pr_{r}' for r, _ in rels])}) ∩\n    (fseq latoms × latoms) $;")
+    w("--| The derivable atoms.")
+    w("def lrel2: class = $ horn lprog2 $;")
+    w("")
+    w("--| The relations: an atom is derivable.")
+    for r, args in rels:
+        vs = [f"a{i + 1}" for i in range(len(args))]
+        bs = " ".join(f"({v}: {a})" for v, a in zip(vs, args))
+        e = " ".join(f"(enc_{a} {v})" for v, a in zip(vs, args))
+        w(f"def {r} {bs}: wff = $ _ ⇒ ra_{r} {e} ∈ lrel2 $;")
+    w("")
+    w("theorem lprog2_hprog (G: hyps): $ G ⇒ hprog lprog2 latoms $;")
+    w("")
+    w("--| The clause axioms, in prefix form.")
+    for _, name, bs, hyps, concl in axioms:
+        b = group([(syn.var(n), srt) for n, srt in bs])
+        st = " > ".join([f"$ {stmt(h)} $" for h in hyps] + [f"$ {stmt(concl)} $"])
+        w(f"theorem {name}{' ' + b if b else ''}: {st};")
+    w("")
+    w("--| The program's clauses that conclude an atom of a relation are that relation's.")
+    for r, args in rels:
+        vs = [f"A{i + 1}" for i in range(len(args))]
+        at = f"ra_{r} {' '.join(vs)}"
+        w(f"theorem lprog2_{r}_pr (G: hyps) (P {' '.join(vs)}: class):")
+        w(f"  $ G ⇒ ⟨ P , {at} ⟩ ∈ lprog2 $ > $ G ⇒ ⟨ P , {at} ⟩ ∈ pr_{r} $;")
+    w("")
+    w("--| Inversion: a derivable atom of a relation is the conclusion of one of its")
+    w("--| clauses, at sets, with the clause's premises derivable and its side")
+    w("--| conditions true (as in lean-tg.mm0).")
+    pool = proof_variables()
+    for r, args in rels:
+        ts = [f"t{i + 1}" for i in range(len(args))]
+        bound, cases = [], []
+        for _, name, bs, hyps, concl in clauses[r]:
+            env = {}
+            for n, _ in bs:
+                m = f"{n}_v" if n in lib or n in pool or n == "G" else n
+                if m in ts or m in pool or m in lib:
+                    sys.exit(f"tg-lean: no name for the variable {n} of {name}")
+                env[n] = ("v", m)
+                if m not in bound:
+                    bound.append(m)
+            conj = [f"{t} = {tree(a)}" for t, a in zip(ts, mm0math.subst(concl, env)[2])]
+            for h in hyps:
+                k, a = premise(mm0math.subst(h, env))
+                conj.append(f"{a} ∈ lrel2" if k == "atom" else a)
+            ex = "".join(f"∃ {env[n][1]} " for n, _ in bs)
+            cases.append(f"{ex}({' ∧ '.join(conj)})")
+        w(f"theorem lrel2_{r}_cases (G: hyps) {{{' '.join(bound)}: set}} ({' '.join(ts)}: set):")
+        w(f"  $ G ⇒ ra_{r} {' '.join(ts)} ∈ lrel2 $ >")
+        w("  $ G ⇒ " + " ∨\n      ".join(cases) + " $;")
+    return "\n".join(o) + "\n"
+
+
 # The computing relations whose determinacy later layers need, with the mode (as
 # `lean0 modes` declares it: `+` input, `-` output, `*` an output given up to its
 # head, which is not `app`): those that the checking relations the rules invert
@@ -497,7 +697,7 @@ def render_congr(text):
     return "\n".join(o) + "\n"
 
 
-def render_rest(text):
+def render_rest(text, stratum2):
     """Parts II and III of the spec, as they are, in prefix form (see the module's doc)."""
     part1 = mm0math.Spec(text[:text.index(PART2)])
     sp = mm0math.Spec(text)
@@ -511,7 +711,7 @@ def render_rest(text):
     if taken:
         sys.exit(f"tg-lean: names of Parts II and III taken by the library: {taken}")
     # what the model declares: a spec term as a term or def, an axiom as a theorem
-    model = {(t, n): k for t, k, n in model_decls()}
+    model = {(t, n): k for t, k, n in model_decls(stratum2)}
     lib |= {n for _, n in model}
     proved = set()
     for d in decls:
@@ -589,7 +789,8 @@ def main():
     text = render(sorts, ctors) + "\n".join(render_relations(spec, ctors)) + "\n"
     text += render_labels(text)
     text += render_congr(text)
-    files = [(OUT, text), (REST, render_rest(spec))]
+    text2 = render_stratum2(spec, ctors, text)
+    files = [(OUT, text), (OUT2, text2), (REST, render_rest(spec, text2))]
     if sys.argv[1:] == ["--check"]:
         for path, t in files:
             if not path.exists() or path.read_text(encoding="utf-8") != t:

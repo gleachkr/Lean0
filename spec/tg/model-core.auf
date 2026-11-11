@@ -309,3 +309,1119 @@ x1c: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w ⇒ dt x0 M (enc_ex
 f1: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w ⇒ dt x0 M (enc_expr r) w v = dt x0 M (enc_expr r2) w v $ by and_elim_l [x1c]
 f2: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w ⇒ dt x0 M (enc_expr r) w v ∈ dt x0 M (enc_expr R) w v $ by and_elim_r [x1c]
 f3: $ mdeq M G2 r r2 R $ by mdeq_i [f1, f2]
+
+--| An implication out of an existential.
+lemma g3_exi {x: set} (G: hyps) (p: fml x) (c: fml): $ G ⇒ ∀ x (p → c) $ > $ G ⇒ (∃ x p) → c $
+----
+l1: $ G , ∃ x p ⇒ ∃ x p $ by ax
+l2: $ G , p ⇒ ∀ x (p → c) $ by weaken [#1]
+l3: $ G , p ⇒ p → c $ by all_elim [l2]
+l4: $ G , p ⇒ p $ by ax
+l5: $ G , p ⇒ c $ by imp_elim [l3, l4]
+l6: $ G , ∃ x p ⇒ c $ by ex_elim [l1, l5]
+l7: $ G ⇒ (∃ x p) → c $ by imp_intro [l6]
+
+--| An implication out of a disjunction.
+lemma g3_ori (G: hyps) (p q c: fml): $ G ⇒ p → c $ > $ G ⇒ q → c $ > $ G ⇒ (p ∨ q) → c $
+----
+a1: $ G , p ⇒ c $ by imp_use [#1]
+a2: $ G , q ⇒ c $ by imp_use [#2]
+b1: $ G , p ∨ q ⇒ p ∨ q $ by ax
+b2: $ G , p ∨ q , p ⇒ c $ by weaken [a1]
+b3: $ G , p ∨ q , q ⇒ c $ by weaken [a2]
+b4: $ G , p ∨ q ⇒ c $ by or_elim [b1, b2, b3]
+b5: $ G ⇒ (p ∨ q) → c $ by imp_intro [b4]
+
+--| An expression node off the valuations has the value `∅`.
+lemma g3_out (G: hyps) (M W R K S: class) (u t: set): $ G ⇒ t ∊ trees ω $ > $ G ⇒ t = ⟨ K , S ⟩ $ > $ G ⇒ K ∈ kstr $ > $ G ⇒ isset S $ > $ G ⇒ ¬ R ∈ fseq u $ > $ G ⇒ dt u M t W R = ∅ $
+----
+l1: $ G ⇒ isset K $ by wcel_isset [#3]
+l2y1: $ G ⇒ ⟨ K , S ⟩ ∈ trees ω $ by wcel_intro [#2, #1]
+l2y2: $ G ⇒ isset ω $ by omega_set
+l2y3: $ G ⇒ K ∈ ω ∧ S ∈ fseq (trees ω) $ by trees_node_c [l2y2, l2y1, l1, #4]
+l2: $ G ⇒ S ∈ fseq (trees ω) $ by and_elim_r [l2y3]
+l3: $ G ⇒ dt u M ⟨ K , S ⟩ W R = ∅ $ by dt_out [#3, l2, #5]
+l4: $ G ⇒ u = u $ by eq_refl
+l5: $ G ⇒ M = M $ by eq_refl
+l6: $ G ⇒ W = W $ by eq_refl
+l7: $ G ⇒ R = R $ by eq_refl
+l8: $ G ⇒ dt u M t W R = dt u M ⟨ K , S ⟩ W R $ by dt_eq [l4, l5, #2, l6, l7]
+l9: $ G ⇒ dt u M t W R = ∅ $ by eq_trans [l8, l3]
+
+--| Two expression nodes have the same value at `r` if they have at the
+--| valuations `r ∊ fseq u` (off them both are `∅`).
+lemma g3_split (H: hyps) (M K K2 S S2: class) (u w r z t: set): $ H ⇒ z ∊ trees ω $ > $ H ⇒ z = ⟨ K , S ⟩ $ > $ H ⇒ K ∈ kstr $ > $ H ⇒ isset S $ > $ H ⇒ t ∊ trees ω $ > $ H ⇒ t = ⟨ K2 , S2 ⟩ $ > $ H ⇒ K2 ∈ kstr $ > $ H ⇒ isset S2 $ > $ H , r ∊ fseq u ⇒ dt u M z w r = dt u M t w r $ > $ H ⇒ dt u M z w r = dt u M t w r $
+----
+l1: $ H ⇒ r ∊ fseq u ∨ ¬ r ∊ fseq u $ by excluded_middle
+n1: $ H , ¬ r ∊ fseq u , r ∈ fseq u ⇒ r ∈ fseq u $ by ax
+n2: $ H , ¬ r ∊ fseq u , r ∈ fseq u ⇒ r ∊ fseq u $ by wcel_welc [n1]
+n3: $ H , ¬ r ∊ fseq u , r ∈ fseq u ⇒ ¬ r ∊ fseq u $ by ax
+n4: $ H , ¬ r ∊ fseq u , r ∈ fseq u ⇒ ⊥ $ by not_elim [n3, n2]
+n5: $ H , ¬ r ∊ fseq u ⇒ ¬ r ∈ fseq u $ by not_intro [n4]
+w1: $ H , ¬ r ∊ fseq u ⇒ z ∊ trees ω $ by weaken [#1]
+w2: $ H , ¬ r ∊ fseq u ⇒ z = ⟨ K , S ⟩ $ by weaken [#2]
+w3: $ H , ¬ r ∊ fseq u ⇒ K ∈ kstr $ by weaken [#3]
+w4: $ H , ¬ r ∊ fseq u ⇒ isset S $ by weaken [#4]
+w5: $ H , ¬ r ∊ fseq u ⇒ t ∊ trees ω $ by weaken [#5]
+w6: $ H , ¬ r ∊ fseq u ⇒ t = ⟨ K2 , S2 ⟩ $ by weaken [#6]
+w7: $ H , ¬ r ∊ fseq u ⇒ K2 ∈ kstr $ by weaken [#7]
+w8: $ H , ¬ r ∊ fseq u ⇒ isset S2 $ by weaken [#8]
+n6: $ H , ¬ r ∊ fseq u ⇒ dt u M z w r = ∅ $ by g3_out [w1, w2, w3, w4, n5]
+n7: $ H , ¬ r ∊ fseq u ⇒ dt u M t w r = ∅ $ by g3_out [w5, w6, w7, w8, n5]
+n8: $ H , ¬ r ∊ fseq u ⇒ ∅ = dt u M t w r $ by eq_sym [n7]
+n9: $ H , ¬ r ∊ fseq u ⇒ dt u M z w r = dt u M t w r $ by eq_trans [n6, n8]
+l2: $ H ⇒ dt u M z w r = dt u M t w r $ by or_elim [l1, #9, n9]
+
+--| The arguments of a derivable `eeqv` atom are trees.
+lemma g3_atoms (G: hyps) (a b: set): $ G ⇒ ra_eeqv a b ∈ lrel2 $ > $ G ⇒ a ∊ trees ω ∧ b ∊ trees ω $
+----
+l1: $ G ⇒ hprog lprog2 latoms $ by lprog2_hprog
+l2: $ G ⇒ lrel2 ⊆ latoms $ by horn_sub [l1]
+l3: $ G ⇒ ra_eeqv a b ∈ latoms $ by wcel_subset [l2, #1]
+l4: $ G ⇒ isset ω $ by omega_set
+l5: $ G ⇒ ω × fseq (trees ω) = trees ω $ by trees_fix_c [l4]
+l6: $ G ⇒ ⟨ kr_eeqv , scons a (scons b ∅) ⟩ ∈ trees ω $ by wcel_eq_r [l5, l3]
+l7: $ G ⇒ kr_eeqv ∈ ω $ by kr_eeqv_omega
+l8: $ G ⇒ isset kr_eeqv $ by wcel_isset [l7]
+l9: $ G ⇒ a ∊ trees ω ∧ b ∊ trees ω $ by trees_kids2 [l4, l6, l8]
+
+--| `lveq` at a level valuation.
+lemma g3_lveq (G: hyps) (a b w: set): $ G ⇒ lveq a b $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ lv a w = lv b w $
+----
+l1: $ G ⇒ w ∊ lvals → lv a w = lv b w $ by all_elim [#1]
+l2: $ G ⇒ lv a w = lv b w $ by imp_elim [l1, #2]
+
+lemma g3_rw (G: hyps) (M X Y R: class) (u w z t: set): $ G ⇒ z = X $ > $ G ⇒ t = Y $ > $ G ⇒ dt u M X w R = dt u M Y w R $ > $ G ⇒ dt u M z w R = dt u M t w R $
+----
+l1: $ G ⇒ u = u $ by eq_refl
+l2: $ G ⇒ M = M $ by eq_refl
+l3: $ G ⇒ w = w $ by eq_refl
+l4: $ G ⇒ R = R $ by eq_refl
+l5: $ G ⇒ dt u M z w R = dt u M X w R $ by dt_eq [l1, l2, #1, l3, l4]
+l6: $ G ⇒ dt u M t w R = dt u M Y w R $ by dt_eq [l1, l2, #2, l3, l4]
+l7: $ G ⇒ dt u M Y w R = dt u M t w R $ by eq_sym [l6]
+l8: $ G ⇒ dt u M z w R = dt u M Y w R $ by eq_trans [l5, #3]
+l9: $ G ⇒ dt u M z w R = dt u M t w R $ by eq_trans [l8, l7]
+
+lemma g3_crn (G: hyps) (X K S: class) (z k s: set): $ G ⇒ crn s ⊆ X $ > $ G ⇒ z = ⟨ k , s ⟩ $ > $ G ⇒ z = ⟨ K , S ⟩ $ > $ G ⇒ isset K $ > $ G ⇒ isset S $ > $ G ⇒ crn S ⊆ X $
+----
+l1: $ G ⇒ ⟨ k , s ⟩ = z $ by eq_sym [#2]
+l2: $ G ⇒ ⟨ k , s ⟩ = ⟨ K , S ⟩ $ by eq_trans [l1, #3]
+l3: $ G ⇒ isset k $ by isset_var
+l4: $ G ⇒ isset s $ by isset_var
+l5: $ G ⇒ k = K ∧ s = S $ by opair_inj_c [l2, l3, l4, #4, #5]
+l6: $ G ⇒ s = S $ by and_elim_r [l5]
+l7: $ G ⇒ crn s = crn S $ by crn_eq [l6]
+l8: $ G ⇒ crn S ⊆ X $ by subset_eq_l [l7, #1]
+
+lemma g3_ztree (G: hyps) (k j z: set): $ G ⇒ k ∊ ω $ > $ G ⇒ j ∊ fseq (trees ω) $ > $ G ⇒ z = ⟨ k , j ⟩ $ > $ G ⇒ z ∊ trees ω $
+----
+l1: $ G ⇒ ⟨ k , j ⟩ ∈ ω × fseq (trees ω) $ by cxp_intro [#1, #2]
+l2: $ G ⇒ isset ω $ by omega_set
+l3: $ G ⇒ ω × fseq (trees ω) = trees ω $ by trees_fix_c [l2]
+l4: $ G ⇒ ⟨ k , j ⟩ ∈ trees ω $ by wcel_eq_r [l3, l1]
+l5: $ G ⇒ ⟨ k , j ⟩ = z $ by eq_sym [#3]
+l6: $ G ⇒ z ∈ trees ω $ by wcel_eq_l [l5, l4]
+l7: $ G ⇒ z ∊ trees ω $ by wcel_welc [l6]
+
+--| The trees whose value is the value of every tree they are `eeqv` to, at
+--| every valuation.
+def g3_P (U M W: class) (.y .t .r: set): class = $ {y | ∀ t ∀ r (⟨ kr_eeqv , scons y (scons t ∅) ⟩ ∈ lrel2 → dt U M y W r = dt U M t W r)} $
+
+lemma g3_P_e (G: hyps) (M R: class) (u w x c: set): $ G ⇒ x ∊ g3_P u M w $ > $ G ⇒ ra_eeqv x c ∈ lrel2 $ > $ G ⇒ isset R $ > $ G ⇒ dt u M x w R = dt u M c w R $
+----
+l1: $ G ⇒ ∀ t ∀ r (⟨ kr_eeqv , scons x (scons t ∅) ⟩ ∈ lrel2 → dt u M x w r = dt u M t w r) $ by cab_elim [#1]
+l2: $ G ⇒ ∀ r (⟨ kr_eeqv , scons x (scons c ∅) ⟩ ∈ lrel2 → dt u M x w r = dt u M c w r) $ by all_elim (t := $ c $) [l1]
+l3: $ G , v = R ⇒ ∀ r (⟨ kr_eeqv , scons x (scons c ∅) ⟩ ∈ lrel2 → dt u M x w r = dt u M c w r) $ by weaken [l2]
+l4: $ G , v = R ⇒ ⟨ kr_eeqv , scons x (scons c ∅) ⟩ ∈ lrel2 → dt u M x w v = dt u M c w v $ by all_elim (t := $ v $) [l3]
+l5: $ G , v = R ⇒ ra_eeqv x c ∈ lrel2 $ by weaken [#2]
+l6: $ G , v = R ⇒ dt u M x w v = dt u M c w v $ by imp_elim [l4, l5]
+l7: $ G , v = R ⇒ u = u $ by eq_refl
+l8: $ G , v = R ⇒ M = M $ by eq_refl
+l9: $ G , v = R ⇒ x = x $ by eq_refl
+l10: $ G , v = R ⇒ c = c $ by eq_refl
+l11: $ G , v = R ⇒ w = w $ by eq_refl
+l12: $ G , v = R ⇒ v = R $ by ax
+l13: $ G , v = R ⇒ R = v $ by eq_sym [l12]
+l14: $ G , v = R ⇒ dt u M x w R = dt u M x w v $ by dt_eq [l7, l8, l9, l11, l13]
+l15: $ G , v = R ⇒ dt u M c w v = dt u M c w R $ by dt_eq [l7, l8, l10, l11, l12]
+l16: $ G , v = R ⇒ dt u M x w R = dt u M c w v $ by eq_trans [l14, l6]
+l17: $ G , v = R ⇒ dt u M x w R = dt u M c w R $ by eq_trans [l16, l15]
+l18: $ G ⇒ dt u M x w R = dt u M c w R $ by isset_elim [#3, l17]
+
+lemma g3_P_i {t r: set} (G: hyps) (M: class) (u w x: set): $ G , ra_eeqv x t ∈ lrel2 ⇒ dt u M x w r = dt u M t w r $ > $ G ⇒ x ∊ g3_P u M w $
+----
+l1: $ G ⇒ ⟨ kr_eeqv , scons x (scons t ∅) ⟩ ∈ lrel2 → dt u M x w r = dt u M t w r $ by imp_intro [#1]
+l2: $ G ⇒ ∀ r (⟨ kr_eeqv , scons x (scons t ∅) ⟩ ∈ lrel2 → dt u M x w r = dt u M t w r) $ by all_intro [l1]
+l3: $ G ⇒ ∀ t ∀ r (⟨ kr_eeqv , scons x (scons t ∅) ⟩ ∈ lrel2 → dt u M x w r = dt u M t w r) $ by all_intro [l2]
+l4: $ G ⇒ x ∊ g3_P u M w $ by cab_intro [l3]
+
+--| The invariance of the hook at a node of `kexa`.
+lemma g3_minv_e (H: hyps) (M K S: class) (a b c d e: set): $ H ⇒ minv M $ > $ H ⇒ uadm a $ > $ H ⇒ d = ⟨ K , S ⟩ $ > $ H ⇒ K ∈ kexa $ > $ H ⇒ isset S $ > $ H ⇒ ra_eeqv d e ∈ lrel2 $ > $ H ⇒ b ∊ lvals $ > $ H ⇒ c ∊ fseq a $ > $ H ⇒ dt a M d b c = dt a M e b c $
+----
+l1: $ H ⇒ ∀ k ∀ q ∀ t ∀ w ∀ r (uadm a → k ∈ kexa → ⟨ kr_eeqv , scons ⟨ k , q ⟩ (scons t ∅) ⟩ ∈ lrel2 → w ∊ lvals → r ∊ fseq a → dt a M ⟨ k , q ⟩ w r = dt a M t w r) $ by all_elim (t := $ a $) [#1]
+l1a: $ H , x = K , y = S ⇒ ∀ k ∀ q ∀ t ∀ w ∀ r (uadm a → k ∈ kexa → ⟨ kr_eeqv , scons ⟨ k , q ⟩ (scons t ∅) ⟩ ∈ lrel2 → w ∊ lvals → r ∊ fseq a → dt a M ⟨ k , q ⟩ w r = dt a M t w r) $ by weaken [l1]
+l2: $ H , x = K , y = S ⇒ ∀ q ∀ t ∀ w ∀ r (uadm a → x ∈ kexa → ⟨ kr_eeqv , scons ⟨ x , q ⟩ (scons t ∅) ⟩ ∈ lrel2 → w ∊ lvals → r ∊ fseq a → dt a M ⟨ x , q ⟩ w r = dt a M t w r) $ by all_elim (t := $ x $) [l1a]
+l3: $ H , x = K , y = S ⇒ ∀ t ∀ w ∀ r (uadm a → x ∈ kexa → ⟨ kr_eeqv , scons ⟨ x , y ⟩ (scons t ∅) ⟩ ∈ lrel2 → w ∊ lvals → r ∊ fseq a → dt a M ⟨ x , y ⟩ w r = dt a M t w r) $ by all_elim (t := $ y $) [l2]
+l4: $ H , x = K , y = S ⇒ ∀ w ∀ r (uadm a → x ∈ kexa → ra_eeqv ⟨ x , y ⟩ e ∈ lrel2 → w ∊ lvals → r ∊ fseq a → dt a M ⟨ x , y ⟩ w r = dt a M e w r) $ by all_elim (t := $ e $) [l3]
+l5: $ H , x = K , y = S ⇒ ∀ r (uadm a → x ∈ kexa → ra_eeqv ⟨ x , y ⟩ e ∈ lrel2 → b ∊ lvals → r ∊ fseq a → dt a M ⟨ x , y ⟩ b r = dt a M e b r) $ by all_elim (t := $ b $) [l4]
+l6: $ H , x = K , y = S ⇒ uadm a → x ∈ kexa → ra_eeqv ⟨ x , y ⟩ e ∈ lrel2 → b ∊ lvals → c ∊ fseq a → dt a M ⟨ x , y ⟩ b c = dt a M e b c $ by all_elim (t := $ c $) [l5]
+h1: $ H , x = K , y = S ⇒ uadm a $ by weaken [#2]
+h2: $ H , x = K , y = S ⇒ K ∈ kexa $ by weaken [#4]
+h3: $ H , x = K , y = S ⇒ x = K $ by ax
+h4: $ H , x = K , y = S ⇒ K = x $ by eq_sym [h3]
+h5: $ H , x = K , y = S ⇒ x ∈ kexa $ by wcel_eq_l [h4, h2]
+h6: $ H , x = K , y = S ⇒ y = S $ by ax
+h7: $ H , x = K , y = S ⇒ S = y $ by eq_sym [h6]
+h8: $ H , x = K , y = S ⇒ d = ⟨ K , S ⟩ $ by weaken [#3]
+h9: $ H , x = K , y = S ⇒ ⟨ K , S ⟩ = ⟨ x , y ⟩ $ by opair_eq [h4, h7]
+h10: $ H , x = K , y = S ⇒ d = ⟨ x , y ⟩ $ by eq_trans [h8, h9]
+h11: $ H , x = K , y = S ⇒ e = e $ by eq_refl
+h12: $ H , x = K , y = S ⇒ ra_eeqv d e = ra_eeqv ⟨ x , y ⟩ e $ by ra_eeqv_eq [h10, h11]
+h13: $ H , x = K , y = S ⇒ ra_eeqv d e ∈ lrel2 $ by weaken [#6]
+h14: $ H , x = K , y = S ⇒ ra_eeqv ⟨ x , y ⟩ e ∈ lrel2 $ by wcel_eq_l [h12, h13]
+h15: $ H , x = K , y = S ⇒ b ∊ lvals $ by weaken [#7]
+h16: $ H , x = K , y = S ⇒ c ∊ fseq a $ by weaken [#8]
+m1: $ H , x = K , y = S ⇒ x ∈ kexa → ra_eeqv ⟨ x , y ⟩ e ∈ lrel2 → b ∊ lvals → c ∊ fseq a → dt a M ⟨ x , y ⟩ b c = dt a M e b c $ by imp_elim [l6, h1]
+m2: $ H , x = K , y = S ⇒ ra_eeqv ⟨ x , y ⟩ e ∈ lrel2 → b ∊ lvals → c ∊ fseq a → dt a M ⟨ x , y ⟩ b c = dt a M e b c $ by imp_elim [m1, h5]
+m3: $ H , x = K , y = S ⇒ b ∊ lvals → c ∊ fseq a → dt a M ⟨ x , y ⟩ b c = dt a M e b c $ by imp_elim [m2, h14]
+m4: $ H , x = K , y = S ⇒ c ∊ fseq a → dt a M ⟨ x , y ⟩ b c = dt a M e b c $ by imp_elim [m3, h15]
+m5: $ H , x = K , y = S ⇒ dt a M ⟨ x , y ⟩ b c = dt a M e b c $ by imp_elim [m4, h16]
+m7: $ H , x = K , y = S ⇒ dt a M d b c = dt a M e b c $ by g3_rw [h10, h11, m5]
+k1: $ H ⇒ isset K $ by wcel_isset [#4]
+k2: $ H , x = K ⇒ dt a M d b c = dt a M e b c $ by isset_elim [#5, m7]
+k3: $ H ⇒ dt a M d b c = dt a M e b c $ by isset_elim [k1, k2]
+
+--| The cases of `lrel2_eeqv_cases`, one lemma each: the two trees have the
+--| same value at `r` when the children are in the induction's class.
+lemma g3_k_refl (H: hyps) (M: class) (u w r z k j t e: set): $ H ⇒ minv M $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ crn j ⊆ g3_P u M w $ > $ H ⇒ z = ⟨ k , j ⟩ $ > $ H ⇒ z ∊ trees ω $ > $ H ⇒ ra_eeqv z t ∈ lrel2 $ > $ H ⇒ z = e ∧ t = e → dt u M z w r = dt u M t w r $
+----
+c0: $ H , z = e ∧ t = e ⇒ z = e ∧ t = e $ by ax
+e0: $ H , z = e ∧ t = e ⇒ z = e $ by and_elim_l [c0]
+r0: $ H , z = e ∧ t = e ⇒ t = e $ by and_elim_r [c0]
+s1: $ H , z = e ∧ t = e ⇒ e = t $ by eq_sym [r0]
+s2: $ H , z = e ∧ t = e ⇒ z = t $ by eq_trans [e0, s1]
+q1: $ H , z = e ∧ t = e ⇒ u = u $ by eq_refl
+q2: $ H , z = e ∧ t = e ⇒ M = M $ by eq_refl
+q3: $ H , z = e ∧ t = e ⇒ w = w $ by eq_refl
+q4: $ H , z = e ∧ t = e ⇒ r = r $ by eq_refl
+s3: $ H , z = e ∧ t = e ⇒ dt u M z w r = dt u M t w r $ by dt_eq [q1, q2, s2, q3, q4]
+fin: $ H ⇒ z = e ∧ t = e → dt u M z w r = dt u M t w r $ by imp_intro [s3]
+
+lemma g3_k_bvar (H: hyps) (M: class) (u w r z k j t i: set): $ H ⇒ minv M $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ crn j ⊆ g3_P u M w $ > $ H ⇒ z = ⟨ k , j ⟩ $ > $ H ⇒ z ∊ trees ω $ > $ H ⇒ ra_eeqv z t ∈ lrel2 $ > $ H ⇒ z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩ → dt u M z w r = dt u M t w r $
+----
+c0: $ H , z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩ ⇒ z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩ $ by ax
+e0: $ H , z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩ ⇒ z = ⟨ kc_bvar , scons i ∅ ⟩ $ by and_elim_l [c0]
+r0: $ H , z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩ ⇒ t = ⟨ kc_bvar , scons i ∅ ⟩ $ by and_elim_r [c0]
+s1: $ H , z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩ ⇒ ⟨ kc_bvar , scons i ∅ ⟩ = t $ by eq_sym [r0]
+s2: $ H , z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩ ⇒ z = t $ by eq_trans [e0, s1]
+q1: $ H , z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩ ⇒ u = u $ by eq_refl
+q2: $ H , z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩ ⇒ M = M $ by eq_refl
+q3: $ H , z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩ ⇒ w = w $ by eq_refl
+q4: $ H , z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩ ⇒ r = r $ by eq_refl
+s3: $ H , z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩ ⇒ dt u M z w r = dt u M t w r $ by dt_eq [q1, q2, s2, q3, q4]
+fin: $ H ⇒ z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩ → dt u M z w r = dt u M t w r $ by imp_intro [s3]
+
+lemma g3_k_srt (H: hyps) (M: class) (u w r z k j t l m: set): $ H ⇒ minv M $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ crn j ⊆ g3_P u M w $ > $ H ⇒ z = ⟨ k , j ⟩ $ > $ H ⇒ z ∊ trees ω $ > $ H ⇒ ra_eeqv z t ∈ lrel2 $ > $ H ⇒ z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m → dt u M z w r = dt u M t w r $
+----
+c0: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m $ by ax
+e0: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ z = ⟨ kc_srt , scons l ∅ ⟩ $ by and_elim_l [c0]
+r0: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m $ by and_elim_r [c0]
+e1: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ t = ⟨ kc_srt , scons m ∅ ⟩ $ by and_elim_l [r0]
+r1: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ lveq l m $ by and_elim_r [r0]
+p1: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ minv M $ by weaken [#1]
+p2: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ uadm u $ by weaken [#2]
+p3: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ w ∊ lvals $ by weaken [#3]
+p4: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ crn j ⊆ g3_P u M w $ by weaken [#4]
+p5: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ z = ⟨ k , j ⟩ $ by weaken [#5]
+p6: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ z ∊ trees ω $ by weaken [#6]
+p7: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [#7]
+kz: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ kc_srt ∈ kstr $ by kstr_srt
+ize: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ isset ∅ $ by ax_empty
+iz0: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ isset (scons l ∅) $ by scons_set [ize]
+ite: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ isset ∅ $ by ax_empty
+it0: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ isset (scons m ∅) $ by scons_set [ite]
+ta: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ z ∊ trees ω ∧ t ∊ trees ω $ by g3_atoms [p7]
+tt: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ t ∊ trees ω $ by and_elim_r [ta]
+b1: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ z = ⟨ kc_srt , scons l ∅ ⟩ $ by weaken [e0]
+b1t: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ t = ⟨ kc_srt , scons m ∅ ⟩ $ by weaken [e1]
+b2: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ z ∊ trees ω $ by weaken [p6]
+b2t: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ t ∊ trees ω $ by weaken [tt]
+b8: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ w ∊ lvals $ by weaken [p3]
+b9: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+b4: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ isset ω $ by omega_set
+b3: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ ⟨ kc_srt , scons l ∅ ⟩ ∈ trees ω $ by wcel_intro [b1, b2]
+b3t: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ ⟨ kc_srt , scons m ∅ ⟩ ∈ trees ω $ by wcel_intro [b1t, b2t]
+b5k: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ kc_srt ∈ kstr $ by kstr_srt
+b5: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ isset kc_srt $ by wcel_isset [b5k]
+ir: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ isset r $ by isset_var
+k1: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ l ∊ trees ω $ by trees_kids1 [b4, b3, b5]
+k1c: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ l ∈ trees ω $ by welc_wcel [k1]
+k2: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ m ∊ trees ω $ by trees_kids1 [b4, b3t, b5]
+k2c: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ m ∈ trees ω $ by welc_wcel [k2]
+v0: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ lveq l m $ by weaken [r1]
+d1: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ dt u M ⟨ kc_srt , scons l ∅ ⟩ w r = fv uni (lv l w) $ by dt_srt [k1c, b8, b9]
+d2: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ dt u M ⟨ kc_srt , scons m ∅ ⟩ w r = fv uni (lv m w) $ by dt_srt [k2c, b8, b9]
+v1: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ lv l w = lv m w $ by g3_lveq [v0, b8]
+v2: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ uni = uni $ by eq_refl
+h3: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ fv uni (lv l w) = fv uni (lv m w) $ by fv_eq [v2, v1]
+v4: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ dt u M ⟨ kc_srt , scons l ∅ ⟩ w r = fv uni (lv m w) $ by eq_trans [d1, h3]
+v5: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ fv uni (lv m w) = dt u M ⟨ kc_srt , scons m ∅ ⟩ w r $ by eq_sym [d2]
+v6: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ dt u M ⟨ kc_srt , scons l ∅ ⟩ w r = dt u M ⟨ kc_srt , scons m ∅ ⟩ w r $ by eq_trans [v4, v5]
+br: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ dt u M z w r = dt u M t w r $ by g3_rw [b1, b1t, v6]
+s3: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m ⇒ dt u M z w r = dt u M t w r $ by g3_split [p6, e0, kz, iz0, tt, e1, kz, it0, br]
+fin: $ H ⇒ z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m → dt u M z w r = dt u M t w r $ by imp_intro [s3]
+
+lemma g3_k_app (H: hyps) (M: class) (u w r z k j t f a g h: set): $ H ⇒ minv M $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ crn j ⊆ g3_P u M w $ > $ H ⇒ z = ⟨ k , j ⟩ $ > $ H ⇒ z ∊ trees ω $ > $ H ⇒ ra_eeqv z t ∈ lrel2 $ > $ H ⇒ z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 → dt u M z w r = dt u M t w r $
+----
+c0: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 $ by ax
+e0: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ z = ⟨ kc_app , scons f (scons a ∅) ⟩ $ by and_elim_l [c0]
+r0: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 $ by and_elim_r [c0]
+e1: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ t = ⟨ kc_app , scons g (scons h ∅) ⟩ $ by and_elim_l [r0]
+r1: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 $ by and_elim_r [r0]
+e2: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ ra_eeqv f g ∈ lrel2 $ by and_elim_l [r1]
+r2: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ ra_eeqv a h ∈ lrel2 $ by and_elim_r [r1]
+p1: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ minv M $ by weaken [#1]
+p2: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ uadm u $ by weaken [#2]
+p3: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ w ∊ lvals $ by weaken [#3]
+p4: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ crn j ⊆ g3_P u M w $ by weaken [#4]
+p5: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ z = ⟨ k , j ⟩ $ by weaken [#5]
+p6: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ z ∊ trees ω $ by weaken [#6]
+p7: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [#7]
+kz: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ kc_app ∈ kstr $ by kstr_app
+ize: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ isset ∅ $ by ax_empty
+iz0: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ isset (scons a ∅) $ by scons_set [ize]
+iz1: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ isset (scons f (scons a ∅)) $ by scons_set [iz0]
+ite: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ isset ∅ $ by ax_empty
+it0: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ isset (scons h ∅) $ by scons_set [ite]
+it1: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ isset (scons g (scons h ∅)) $ by scons_set [it0]
+ta: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ z ∊ trees ω ∧ t ∊ trees ω $ by g3_atoms [p7]
+tt: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ t ∊ trees ω $ by and_elim_r [ta]
+b1: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ z = ⟨ kc_app , scons f (scons a ∅) ⟩ $ by weaken [e0]
+b1t: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ t = ⟨ kc_app , scons g (scons h ∅) ⟩ $ by weaken [e1]
+b2: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ z ∊ trees ω $ by weaken [p6]
+b2t: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ t ∊ trees ω $ by weaken [tt]
+b8: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ w ∊ lvals $ by weaken [p3]
+b9: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+b4: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ isset ω $ by omega_set
+b3: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ ⟨ kc_app , scons f (scons a ∅) ⟩ ∈ trees ω $ by wcel_intro [b1, b2]
+b3t: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ ⟨ kc_app , scons g (scons h ∅) ⟩ ∈ trees ω $ by wcel_intro [b1t, b2t]
+b5k: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ kc_app ∈ kstr $ by kstr_app
+b5: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ isset kc_app $ by wcel_isset [b5k]
+ir: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ isset r $ by isset_var
+c1: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ crn j ⊆ g3_P u M w $ by weaken [p4]
+c2: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ z = ⟨ k , j ⟩ $ by weaken [p5]
+c5: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ isset (scons f (scons a ∅)) $ by weaken [iz1]
+c6: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ crn (scons f (scons a ∅)) ⊆ g3_P u M w $ by g3_crn [c1, c2, b1, b5, c5]
+a0: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ ra_eeqv f g ∈ lrel2 $ by weaken [e2]
+a0t: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ f ∊ trees ω ∧ g ∊ trees ω $ by g3_atoms [a0]
+a0l: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ f ∊ trees ω $ by and_elim_l [a0t]
+a0r: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ g ∊ trees ω $ by and_elim_r [a0t]
+a0lc: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ f ∈ trees ω $ by welc_wcel [a0l]
+a0rc: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ g ∈ trees ω $ by welc_wcel [a0r]
+a1: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ ra_eeqv a h ∈ lrel2 $ by weaken [r2]
+a1t: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ a ∊ trees ω ∧ h ∊ trees ω $ by g3_atoms [a1]
+a1l: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ a ∊ trees ω $ by and_elim_l [a1t]
+a1r: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ h ∊ trees ω $ by and_elim_r [a1t]
+a1lc: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ a ∈ trees ω $ by welc_wcel [a1l]
+a1rc: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ h ∈ trees ω $ by welc_wcel [a1r]
+m0s: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ isset f $ by isset_var
+m0m: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ f ∈ g3_P u M w $ by crn_scons_head [m0s, c6]
+m0w: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ f ∊ g3_P u M w $ by wcel_welc [m0m]
+m1t0: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ crn (scons a ∅) ⊆ g3_P u M w $ by crn_scons_tail [c6]
+m1s: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ isset a $ by isset_var
+m1m: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ a ∈ g3_P u M w $ by crn_scons_head [m1s, m1t0]
+m1w: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ a ∊ g3_P u M w $ by wcel_welc [m1m]
+h1: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ dt u M f w r = dt u M g w r $ by g3_P_e [m0w, a0, ir]
+h2: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ dt u M a w r = dt u M h w r $ by g3_P_e [m1w, a1, ir]
+d1: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ dt u M ⟨ kc_app , scons f (scons a ∅) ⟩ w r = ap (dt u M f w r) (dt u M a w r) $ by dt_app [a0lc, a1lc, b8, b9]
+d2: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ dt u M ⟨ kc_app , scons g (scons h ∅) ⟩ w r = ap (dt u M g w r) (dt u M h w r) $ by dt_app [a0rc, a1rc, b8, b9]
+h3: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ ap (dt u M f w r) (dt u M a w r) = ap (dt u M g w r) (dt u M h w r) $ by ap_eq [h1, h2]
+v4: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ dt u M ⟨ kc_app , scons f (scons a ∅) ⟩ w r = ap (dt u M g w r) (dt u M h w r) $ by eq_trans [d1, h3]
+v5: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ ap (dt u M g w r) (dt u M h w r) = dt u M ⟨ kc_app , scons g (scons h ∅) ⟩ w r $ by eq_sym [d2]
+v6: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ dt u M ⟨ kc_app , scons f (scons a ∅) ⟩ w r = dt u M ⟨ kc_app , scons g (scons h ∅) ⟩ w r $ by eq_trans [v4, v5]
+br: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 , r ∊ fseq u ⇒ dt u M z w r = dt u M t w r $ by g3_rw [b1, b1t, v6]
+s3: $ H , z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 ⇒ dt u M z w r = dt u M t w r $ by g3_split [p6, e0, kz, iz1, tt, e1, kz, it1, br]
+fin: $ H ⇒ z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 → dt u M z w r = dt u M t w r $ by imp_intro [s3]
+
+lemma g3_k_lam (H: hyps) (M: class) (u w r z k j t x0 x1 x2 x3: set): $ H ⇒ minv M $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ crn j ⊆ g3_P u M w $ > $ H ⇒ z = ⟨ k , j ⟩ $ > $ H ⇒ z ∊ trees ω $ > $ H ⇒ ra_eeqv z t ∈ lrel2 $ > $ H ⇒ z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 → dt u M z w r = dt u M t w r $
+----
+c0: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 $ by ax
+e0: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ $ by and_elim_l [c0]
+r0: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 $ by and_elim_r [c0]
+e1: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ $ by and_elim_l [r0]
+r1: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 $ by and_elim_r [r0]
+e2: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ ra_eeqv x0 x2 ∈ lrel2 $ by and_elim_l [r1]
+r2: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ ra_eeqv x1 x3 ∈ lrel2 $ by and_elim_r [r1]
+p1: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ minv M $ by weaken [#1]
+p2: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ uadm u $ by weaken [#2]
+p3: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ w ∊ lvals $ by weaken [#3]
+p4: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ crn j ⊆ g3_P u M w $ by weaken [#4]
+p5: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ z = ⟨ k , j ⟩ $ by weaken [#5]
+p6: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ z ∊ trees ω $ by weaken [#6]
+p7: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [#7]
+kz: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ kc_lam ∈ kstr $ by kstr_lam
+ize: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ isset ∅ $ by ax_empty
+iz0: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ isset (scons x1 ∅) $ by scons_set [ize]
+iz1: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ isset (scons x0 (scons x1 ∅)) $ by scons_set [iz0]
+ite: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ isset ∅ $ by ax_empty
+it0: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ isset (scons x3 ∅) $ by scons_set [ite]
+it1: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ isset (scons x2 (scons x3 ∅)) $ by scons_set [it0]
+ta: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ z ∊ trees ω ∧ t ∊ trees ω $ by g3_atoms [p7]
+tt: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ t ∊ trees ω $ by and_elim_r [ta]
+b1: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ $ by weaken [e0]
+b1t: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ $ by weaken [e1]
+b2: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ z ∊ trees ω $ by weaken [p6]
+b2t: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ t ∊ trees ω $ by weaken [tt]
+b8: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ w ∊ lvals $ by weaken [p3]
+b9: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+b4: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ isset ω $ by omega_set
+b3: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∈ trees ω $ by wcel_intro [b1, b2]
+b3t: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∈ trees ω $ by wcel_intro [b1t, b2t]
+b5k: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ kc_lam ∈ kstr $ by kstr_lam
+b5: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ isset kc_lam $ by wcel_isset [b5k]
+ir: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ isset r $ by isset_var
+c1: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ crn j ⊆ g3_P u M w $ by weaken [p4]
+c2: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ z = ⟨ k , j ⟩ $ by weaken [p5]
+c5: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ isset (scons x0 (scons x1 ∅)) $ by weaken [iz1]
+c6: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ crn (scons x0 (scons x1 ∅)) ⊆ g3_P u M w $ by g3_crn [c1, c2, b1, b5, c5]
+a0: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ ra_eeqv x0 x2 ∈ lrel2 $ by weaken [e2]
+a0t: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x0 ∊ trees ω ∧ x2 ∊ trees ω $ by g3_atoms [a0]
+a0l: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x0 ∊ trees ω $ by and_elim_l [a0t]
+a0r: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x2 ∊ trees ω $ by and_elim_r [a0t]
+a0lc: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x0 ∈ trees ω $ by welc_wcel [a0l]
+a0rc: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x2 ∈ trees ω $ by welc_wcel [a0r]
+a1: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ ra_eeqv x1 x3 ∈ lrel2 $ by weaken [r2]
+a1t: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x1 ∊ trees ω ∧ x3 ∊ trees ω $ by g3_atoms [a1]
+a1l: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x1 ∊ trees ω $ by and_elim_l [a1t]
+a1r: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x3 ∊ trees ω $ by and_elim_r [a1t]
+a1lc: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x1 ∈ trees ω $ by welc_wcel [a1l]
+a1rc: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x3 ∈ trees ω $ by welc_wcel [a1r]
+m0s: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ isset x0 $ by isset_var
+m0m: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x0 ∈ g3_P u M w $ by crn_scons_head [m0s, c6]
+m0w: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x0 ∊ g3_P u M w $ by wcel_welc [m0m]
+m1t0: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ crn (scons x1 ∅) ⊆ g3_P u M w $ by crn_scons_tail [c6]
+m1s: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ isset x1 $ by isset_var
+m1m: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x1 ∈ g3_P u M w $ by crn_scons_head [m1s, m1t0]
+m1w: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x1 ∊ g3_P u M w $ by wcel_welc [m1m]
+h1: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ dt u M x0 w r = dt u M x2 w r $ by g3_P_e [m0w, a0, ir]
+d1: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ dt u M ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ w r = clam y (dt u M x0 w r) (dt u M x1 w (scons y r)) $ by dt_lam [a0lc, a1lc, b8, b9]
+d2: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ dt u M ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ w r = clam y (dt u M x2 w r) (dt u M x3 w (scons y r)) $ by dt_lam [a0rc, a1rc, b8, b9]
+y1: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ isset (scons y r) $ by scons_set [ir]
+y2: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ dt u M x1 w (scons y r) = dt u M x3 w (scons y r) $ by g3_P_e [m1w, a1, y1]
+y3: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u , y ∊ dt u M x0 w r ⇒ dt u M x1 w (scons y r) = dt u M x3 w (scons y r) $ by weaken [y2]
+y4: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ y ∊ dt u M x0 w r → dt u M x1 w (scons y r) = dt u M x3 w (scons y r) $ by imp_intro [y3]
+y5: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ ∀ y (y ∊ dt u M x0 w r → dt u M x1 w (scons y r) = dt u M x3 w (scons y r)) $ by all_intro [y4]
+h3: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ clam y (dt u M x0 w r) (dt u M x1 w (scons y r)) = clam y (dt u M x2 w r) (dt u M x3 w (scons y r)) $ by clam_eq_pt [h1, y5]
+v4: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ dt u M ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ w r = clam y (dt u M x2 w r) (dt u M x3 w (scons y r)) $ by eq_trans [d1, h3]
+v5: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ clam y (dt u M x2 w r) (dt u M x3 w (scons y r)) = dt u M ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ w r $ by eq_sym [d2]
+v6: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ dt u M ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ w r = dt u M ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ w r $ by eq_trans [v4, v5]
+br: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ dt u M z w r = dt u M t w r $ by g3_rw [b1, b1t, v6]
+s3: $ H , z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ dt u M z w r = dt u M t w r $ by g3_split [p6, e0, kz, iz1, tt, e1, kz, it1, br]
+fin: $ H ⇒ z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 → dt u M z w r = dt u M t w r $ by imp_intro [s3]
+
+lemma g3_k_pi (H: hyps) (M: class) (u w r z k j t x0 x1 x2 x3: set): $ H ⇒ minv M $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ crn j ⊆ g3_P u M w $ > $ H ⇒ z = ⟨ k , j ⟩ $ > $ H ⇒ z ∊ trees ω $ > $ H ⇒ ra_eeqv z t ∈ lrel2 $ > $ H ⇒ z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 → dt u M z w r = dt u M t w r $
+----
+c0: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 $ by ax
+e0: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ $ by and_elim_l [c0]
+r0: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 $ by and_elim_r [c0]
+e1: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ $ by and_elim_l [r0]
+r1: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 $ by and_elim_r [r0]
+e2: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ ra_eeqv x0 x2 ∈ lrel2 $ by and_elim_l [r1]
+r2: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ ra_eeqv x1 x3 ∈ lrel2 $ by and_elim_r [r1]
+p1: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ minv M $ by weaken [#1]
+p2: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ uadm u $ by weaken [#2]
+p3: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ w ∊ lvals $ by weaken [#3]
+p4: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ crn j ⊆ g3_P u M w $ by weaken [#4]
+p5: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ z = ⟨ k , j ⟩ $ by weaken [#5]
+p6: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ z ∊ trees ω $ by weaken [#6]
+p7: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [#7]
+kz: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ kc_pi ∈ kstr $ by kstr_pi
+ize: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ isset ∅ $ by ax_empty
+iz0: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ isset (scons x1 ∅) $ by scons_set [ize]
+iz1: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ isset (scons x0 (scons x1 ∅)) $ by scons_set [iz0]
+ite: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ isset ∅ $ by ax_empty
+it0: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ isset (scons x3 ∅) $ by scons_set [ite]
+it1: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ isset (scons x2 (scons x3 ∅)) $ by scons_set [it0]
+ta: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ z ∊ trees ω ∧ t ∊ trees ω $ by g3_atoms [p7]
+tt: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ t ∊ trees ω $ by and_elim_r [ta]
+b1: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ $ by weaken [e0]
+b1t: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ $ by weaken [e1]
+b2: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ z ∊ trees ω $ by weaken [p6]
+b2t: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ t ∊ trees ω $ by weaken [tt]
+b8: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ w ∊ lvals $ by weaken [p3]
+b9: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+b4: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ isset ω $ by omega_set
+b3: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∈ trees ω $ by wcel_intro [b1, b2]
+b3t: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∈ trees ω $ by wcel_intro [b1t, b2t]
+b5k: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ kc_pi ∈ kstr $ by kstr_pi
+b5: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ isset kc_pi $ by wcel_isset [b5k]
+ir: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ isset r $ by isset_var
+c1: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ crn j ⊆ g3_P u M w $ by weaken [p4]
+c2: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ z = ⟨ k , j ⟩ $ by weaken [p5]
+c5: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ isset (scons x0 (scons x1 ∅)) $ by weaken [iz1]
+c6: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ crn (scons x0 (scons x1 ∅)) ⊆ g3_P u M w $ by g3_crn [c1, c2, b1, b5, c5]
+a0: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ ra_eeqv x0 x2 ∈ lrel2 $ by weaken [e2]
+a0t: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x0 ∊ trees ω ∧ x2 ∊ trees ω $ by g3_atoms [a0]
+a0l: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x0 ∊ trees ω $ by and_elim_l [a0t]
+a0r: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x2 ∊ trees ω $ by and_elim_r [a0t]
+a0lc: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x0 ∈ trees ω $ by welc_wcel [a0l]
+a0rc: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x2 ∈ trees ω $ by welc_wcel [a0r]
+a1: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ ra_eeqv x1 x3 ∈ lrel2 $ by weaken [r2]
+a1t: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x1 ∊ trees ω ∧ x3 ∊ trees ω $ by g3_atoms [a1]
+a1l: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x1 ∊ trees ω $ by and_elim_l [a1t]
+a1r: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x3 ∊ trees ω $ by and_elim_r [a1t]
+a1lc: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x1 ∈ trees ω $ by welc_wcel [a1l]
+a1rc: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x3 ∈ trees ω $ by welc_wcel [a1r]
+m0s: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ isset x0 $ by isset_var
+m0m: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x0 ∈ g3_P u M w $ by crn_scons_head [m0s, c6]
+m0w: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x0 ∊ g3_P u M w $ by wcel_welc [m0m]
+m1t0: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ crn (scons x1 ∅) ⊆ g3_P u M w $ by crn_scons_tail [c6]
+m1s: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ isset x1 $ by isset_var
+m1m: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x1 ∈ g3_P u M w $ by crn_scons_head [m1s, m1t0]
+m1w: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ x1 ∊ g3_P u M w $ by wcel_welc [m1m]
+h1: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ dt u M x0 w r = dt u M x2 w r $ by g3_P_e [m0w, a0, ir]
+d1: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ dt u M ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ w r = cpi y (dt u M x0 w r) (dt u M x1 w (scons y r)) $ by dt_pi [a0lc, a1lc, b8, b9]
+d2: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ dt u M ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ w r = cpi y (dt u M x2 w r) (dt u M x3 w (scons y r)) $ by dt_pi [a0rc, a1rc, b8, b9]
+y1: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ isset (scons y r) $ by scons_set [ir]
+y2: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ dt u M x1 w (scons y r) = dt u M x3 w (scons y r) $ by g3_P_e [m1w, a1, y1]
+y3: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u , y ∊ dt u M x0 w r ⇒ dt u M x1 w (scons y r) = dt u M x3 w (scons y r) $ by weaken [y2]
+y4: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ y ∊ dt u M x0 w r → dt u M x1 w (scons y r) = dt u M x3 w (scons y r) $ by imp_intro [y3]
+y5: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ ∀ y (y ∊ dt u M x0 w r → dt u M x1 w (scons y r) = dt u M x3 w (scons y r)) $ by all_intro [y4]
+h3: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ cpi y (dt u M x0 w r) (dt u M x1 w (scons y r)) = cpi y (dt u M x2 w r) (dt u M x3 w (scons y r)) $ by cpi_eq_pt [h1, y5]
+v4: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ dt u M ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ w r = cpi y (dt u M x2 w r) (dt u M x3 w (scons y r)) $ by eq_trans [d1, h3]
+v5: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ cpi y (dt u M x2 w r) (dt u M x3 w (scons y r)) = dt u M ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ w r $ by eq_sym [d2]
+v6: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ dt u M ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ w r = dt u M ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ w r $ by eq_trans [v4, v5]
+br: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 , r ∊ fseq u ⇒ dt u M z w r = dt u M t w r $ by g3_rw [b1, b1t, v6]
+s3: $ H , z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 ⇒ dt u M z w r = dt u M t w r $ by g3_split [p6, e0, kz, iz1, tt, e1, kz, it1, br]
+fin: $ H ⇒ z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 → dt u M z w r = dt u M t w r $ by imp_intro [s3]
+
+lemma g3_k_lit (H: hyps) (M: class) (u w r z k j t n: set): $ H ⇒ minv M $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ crn j ⊆ g3_P u M w $ > $ H ⇒ z = ⟨ k , j ⟩ $ > $ H ⇒ z ∊ trees ω $ > $ H ⇒ ra_eeqv z t ∈ lrel2 $ > $ H ⇒ z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩ → dt u M z w r = dt u M t w r $
+----
+c0: $ H , z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩ ⇒ z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩ $ by ax
+e0: $ H , z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩ ⇒ z = ⟨ kc_lit , scons n ∅ ⟩ $ by and_elim_l [c0]
+r0: $ H , z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩ ⇒ t = ⟨ kc_lit , scons n ∅ ⟩ $ by and_elim_r [c0]
+s1: $ H , z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩ ⇒ ⟨ kc_lit , scons n ∅ ⟩ = t $ by eq_sym [r0]
+s2: $ H , z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩ ⇒ z = t $ by eq_trans [e0, s1]
+q1: $ H , z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩ ⇒ u = u $ by eq_refl
+q2: $ H , z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩ ⇒ M = M $ by eq_refl
+q3: $ H , z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩ ⇒ w = w $ by eq_refl
+q4: $ H , z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩ ⇒ r = r $ by eq_refl
+s3: $ H , z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩ ⇒ dt u M z w r = dt u M t w r $ by dt_eq [q1, q2, s2, q3, q4]
+fin: $ H ⇒ z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩ → dt u M z w r = dt u M t w r $ by imp_intro [s3]
+
+lemma g3_k_cst (H: hyps) (M: class) (u w r z k j t a x4 x5: set): $ H ⇒ minv M $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ crn j ⊆ g3_P u M w $ > $ H ⇒ z = ⟨ k , j ⟩ $ > $ H ⇒ z ∊ trees ω $ > $ H ⇒ ra_eeqv z t ∈ lrel2 $ > $ H ⇒ z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 → dt u M z w r = dt u M t w r $
+----
+c0: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 $ by ax
+e0: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ $ by and_elim_l [c0]
+r0: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 $ by and_elim_r [c0]
+e1: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ $ by and_elim_l [r0]
+r1: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ ra_lseqv x4 x5 ∈ lrel2 $ by and_elim_r [r0]
+p1: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ minv M $ by weaken [#1]
+p2: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ uadm u $ by weaken [#2]
+p3: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ w ∊ lvals $ by weaken [#3]
+p4: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ crn j ⊆ g3_P u M w $ by weaken [#4]
+p5: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ z = ⟨ k , j ⟩ $ by weaken [#5]
+p6: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ z ∊ trees ω $ by weaken [#6]
+p7: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [#7]
+kza: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ kc_cst ∈ kexa $ by kexa_cst
+kzb: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ kexa ⊆ kstr $ by kexa_kstr
+kzc: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ kc_cst ∈ kstr $ by wcel_subset [kzb, kza]
+ize: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ isset ∅ $ by ax_empty
+iz0: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ isset (scons x4 ∅) $ by scons_set [ize]
+iz1: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ isset (scons a (scons x4 ∅)) $ by scons_set [iz0]
+ite: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ isset ∅ $ by ax_empty
+it0: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ isset (scons x5 ∅) $ by scons_set [ite]
+it1: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ isset (scons a (scons x5 ∅)) $ by scons_set [it0]
+ta: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ z ∊ trees ω ∧ t ∊ trees ω $ by g3_atoms [p7]
+tt: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ t ∊ trees ω $ by and_elim_r [ta]
+b1: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 , r ∊ fseq u ⇒ z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ $ by weaken [e0]
+b1t: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 , r ∊ fseq u ⇒ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ $ by weaken [e1]
+b2: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 , r ∊ fseq u ⇒ z ∊ trees ω $ by weaken [p6]
+b2t: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 , r ∊ fseq u ⇒ t ∊ trees ω $ by weaken [tt]
+b8: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 , r ∊ fseq u ⇒ w ∊ lvals $ by weaken [p3]
+b9: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+g1: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 , r ∊ fseq u ⇒ minv M $ by weaken [p1]
+g2: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 , r ∊ fseq u ⇒ uadm u $ by weaken [p2]
+g4a: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 , r ∊ fseq u ⇒ kc_cst ∈ kexa $ by kexa_cst
+g4b: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 , r ∊ fseq u ⇒ kexa ⊆ kstr $ by kexa_kstr
+g4c: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 , r ∊ fseq u ⇒ kc_cst ∈ kstr $ by wcel_subset [g4b, g4a]
+g5: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 , r ∊ fseq u ⇒ isset (scons a (scons x4 ∅)) $ by weaken [iz1]
+g7: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 , r ∊ fseq u ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [p7]
+br: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 , r ∊ fseq u ⇒ dt u M z w r = dt u M t w r $ by g3_minv_e [g1, g2, b1, g4a, g5, g7, b8, b9]
+s3: $ H , z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 ⇒ dt u M z w r = dt u M t w r $ by g3_split [p6, e0, kzc, iz1, tt, e1, kzc, it1, br]
+fin: $ H ⇒ z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 → dt u M z w r = dt u M t w r $ by imp_intro [s3]
+
+lemma g3_k_ind_ty (H: hyps) (M: class) (u w r z k j t x6 x7 i: set): $ H ⇒ minv M $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ crn j ⊆ g3_P u M w $ > $ H ⇒ z = ⟨ k , j ⟩ $ > $ H ⇒ z ∊ trees ω $ > $ H ⇒ ra_eeqv z t ∈ lrel2 $ > $ H ⇒ z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 → dt u M z w r = dt u M t w r $
+----
+c0: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 $ by ax
+e0: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ $ by and_elim_l [c0]
+r0: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 $ by and_elim_r [c0]
+e1: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ $ by and_elim_l [r0]
+r1: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ ra_ind_eqv x6 x7 ∈ lrel2 $ by and_elim_r [r0]
+p1: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ minv M $ by weaken [#1]
+p2: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ uadm u $ by weaken [#2]
+p3: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ w ∊ lvals $ by weaken [#3]
+p4: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ crn j ⊆ g3_P u M w $ by weaken [#4]
+p5: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ z = ⟨ k , j ⟩ $ by weaken [#5]
+p6: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ z ∊ trees ω $ by weaken [#6]
+p7: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [#7]
+kza: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ kc_ind_ty ∈ kexa $ by kexa_ind_ty
+kzb: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ kexa ⊆ kstr $ by kexa_kstr
+kzc: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ kc_ind_ty ∈ kstr $ by wcel_subset [kzb, kza]
+ize: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ isset ∅ $ by ax_empty
+iz0: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ isset (scons i ∅) $ by scons_set [ize]
+iz1: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ isset (scons x6 (scons i ∅)) $ by scons_set [iz0]
+ite: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ isset ∅ $ by ax_empty
+it0: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ isset (scons i ∅) $ by scons_set [ite]
+it1: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ isset (scons x7 (scons i ∅)) $ by scons_set [it0]
+ta: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ z ∊ trees ω ∧ t ∊ trees ω $ by g3_atoms [p7]
+tt: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ t ∊ trees ω $ by and_elim_r [ta]
+b1: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ $ by weaken [e0]
+b1t: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ $ by weaken [e1]
+b2: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ z ∊ trees ω $ by weaken [p6]
+b2t: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ t ∊ trees ω $ by weaken [tt]
+b8: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ w ∊ lvals $ by weaken [p3]
+b9: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+g1: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ minv M $ by weaken [p1]
+g2: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ uadm u $ by weaken [p2]
+g4a: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ kc_ind_ty ∈ kexa $ by kexa_ind_ty
+g4b: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ kexa ⊆ kstr $ by kexa_kstr
+g4c: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ kc_ind_ty ∈ kstr $ by wcel_subset [g4b, g4a]
+g5: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ isset (scons x6 (scons i ∅)) $ by weaken [iz1]
+g7: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [p7]
+br: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ dt u M z w r = dt u M t w r $ by g3_minv_e [g1, g2, b1, g4a, g5, g7, b8, b9]
+s3: $ H , z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ dt u M z w r = dt u M t w r $ by g3_split [p6, e0, kzc, iz1, tt, e1, kzc, it1, br]
+fin: $ H ⇒ z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 → dt u M z w r = dt u M t w r $ by imp_intro [s3]
+
+lemma g3_k_ind_ctor (H: hyps) (M: class) (u w r z k j t x6 x7 i c: set): $ H ⇒ minv M $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ crn j ⊆ g3_P u M w $ > $ H ⇒ z = ⟨ k , j ⟩ $ > $ H ⇒ z ∊ trees ω $ > $ H ⇒ ra_eeqv z t ∈ lrel2 $ > $ H ⇒ z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 → dt u M z w r = dt u M t w r $
+----
+c0: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 $ by ax
+e0: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ $ by and_elim_l [c0]
+r0: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 $ by and_elim_r [c0]
+e1: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ $ by and_elim_l [r0]
+r1: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ ra_ind_eqv x6 x7 ∈ lrel2 $ by and_elim_r [r0]
+p1: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ minv M $ by weaken [#1]
+p2: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ uadm u $ by weaken [#2]
+p3: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ w ∊ lvals $ by weaken [#3]
+p4: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ crn j ⊆ g3_P u M w $ by weaken [#4]
+p5: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ z = ⟨ k , j ⟩ $ by weaken [#5]
+p6: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ z ∊ trees ω $ by weaken [#6]
+p7: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [#7]
+kza: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ kc_ind_ctor ∈ kexa $ by kexa_ind_ctor
+kzb: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ kexa ⊆ kstr $ by kexa_kstr
+kzc: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ kc_ind_ctor ∈ kstr $ by wcel_subset [kzb, kza]
+ize: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ isset ∅ $ by ax_empty
+iz0: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ isset (scons c ∅) $ by scons_set [ize]
+iz1: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ isset (scons i (scons c ∅)) $ by scons_set [iz0]
+iz2: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ isset (scons x6 (scons i (scons c ∅))) $ by scons_set [iz1]
+ite: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ isset ∅ $ by ax_empty
+it0: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ isset (scons c ∅) $ by scons_set [ite]
+it1: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ isset (scons i (scons c ∅)) $ by scons_set [it0]
+it2: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ isset (scons x7 (scons i (scons c ∅))) $ by scons_set [it1]
+ta: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ z ∊ trees ω ∧ t ∊ trees ω $ by g3_atoms [p7]
+tt: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ t ∊ trees ω $ by and_elim_r [ta]
+b1: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ $ by weaken [e0]
+b1t: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ $ by weaken [e1]
+b2: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ z ∊ trees ω $ by weaken [p6]
+b2t: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ t ∊ trees ω $ by weaken [tt]
+b8: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ w ∊ lvals $ by weaken [p3]
+b9: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+g1: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ minv M $ by weaken [p1]
+g2: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ uadm u $ by weaken [p2]
+g4a: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ kc_ind_ctor ∈ kexa $ by kexa_ind_ctor
+g4b: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ kexa ⊆ kstr $ by kexa_kstr
+g4c: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ kc_ind_ctor ∈ kstr $ by wcel_subset [g4b, g4a]
+g5: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ isset (scons x6 (scons i (scons c ∅))) $ by weaken [iz2]
+g7: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [p7]
+br: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 , r ∊ fseq u ⇒ dt u M z w r = dt u M t w r $ by g3_minv_e [g1, g2, b1, g4a, g5, g7, b8, b9]
+s3: $ H , z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ⇒ dt u M z w r = dt u M t w r $ by g3_split [p6, e0, kzc, iz2, tt, e1, kzc, it2, br]
+fin: $ H ⇒ z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 → dt u M z w r = dt u M t w r $ by imp_intro [s3]
+
+lemma g3_k_ind_rec (H: hyps) (M: class) (u w r z k j t x6 x7 i v x8: set): $ H ⇒ minv M $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ crn j ⊆ g3_P u M w $ > $ H ⇒ z = ⟨ k , j ⟩ $ > $ H ⇒ z ∊ trees ω $ > $ H ⇒ ra_eeqv z t ∈ lrel2 $ > $ H ⇒ z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 → dt u M z w r = dt u M t w r $
+----
+c0: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 $ by ax
+e0: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ $ by and_elim_l [c0]
+r0: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 $ by and_elim_r [c0]
+e1: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ $ by and_elim_l [r0]
+r1: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 $ by and_elim_r [r0]
+e2: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ ra_ind_eqv x6 x7 ∈ lrel2 $ by and_elim_l [r1]
+r2: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ lveq v x8 $ by and_elim_r [r1]
+p1: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ minv M $ by weaken [#1]
+p2: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ uadm u $ by weaken [#2]
+p3: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ w ∊ lvals $ by weaken [#3]
+p4: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ crn j ⊆ g3_P u M w $ by weaken [#4]
+p5: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ z = ⟨ k , j ⟩ $ by weaken [#5]
+p6: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ z ∊ trees ω $ by weaken [#6]
+p7: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [#7]
+kza: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ kc_ind_rec ∈ kexa $ by kexa_ind_rec
+kzb: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ kexa ⊆ kstr $ by kexa_kstr
+kzc: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ kc_ind_rec ∈ kstr $ by wcel_subset [kzb, kza]
+ize: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ isset ∅ $ by ax_empty
+iz0: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ isset (scons v ∅) $ by scons_set [ize]
+iz1: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ isset (scons i (scons v ∅)) $ by scons_set [iz0]
+iz2: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ isset (scons x6 (scons i (scons v ∅))) $ by scons_set [iz1]
+ite: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ isset ∅ $ by ax_empty
+it0: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ isset (scons x8 ∅) $ by scons_set [ite]
+it1: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ isset (scons i (scons x8 ∅)) $ by scons_set [it0]
+it2: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ isset (scons x7 (scons i (scons x8 ∅))) $ by scons_set [it1]
+ta: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ z ∊ trees ω ∧ t ∊ trees ω $ by g3_atoms [p7]
+tt: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ t ∊ trees ω $ by and_elim_r [ta]
+b1: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 , r ∊ fseq u ⇒ z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ $ by weaken [e0]
+b1t: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 , r ∊ fseq u ⇒ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ $ by weaken [e1]
+b2: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 , r ∊ fseq u ⇒ z ∊ trees ω $ by weaken [p6]
+b2t: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 , r ∊ fseq u ⇒ t ∊ trees ω $ by weaken [tt]
+b8: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 , r ∊ fseq u ⇒ w ∊ lvals $ by weaken [p3]
+b9: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+g1: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 , r ∊ fseq u ⇒ minv M $ by weaken [p1]
+g2: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 , r ∊ fseq u ⇒ uadm u $ by weaken [p2]
+g4a: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 , r ∊ fseq u ⇒ kc_ind_rec ∈ kexa $ by kexa_ind_rec
+g4b: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 , r ∊ fseq u ⇒ kexa ⊆ kstr $ by kexa_kstr
+g4c: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 , r ∊ fseq u ⇒ kc_ind_rec ∈ kstr $ by wcel_subset [g4b, g4a]
+g5: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 , r ∊ fseq u ⇒ isset (scons x6 (scons i (scons v ∅))) $ by weaken [iz2]
+g7: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 , r ∊ fseq u ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [p7]
+br: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 , r ∊ fseq u ⇒ dt u M z w r = dt u M t w r $ by g3_minv_e [g1, g2, b1, g4a, g5, g7, b8, b9]
+s3: $ H , z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 ⇒ dt u M z w r = dt u M t w r $ by g3_split [p6, e0, kzc, iz2, tt, e1, kzc, it2, br]
+fin: $ H ⇒ z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 → dt u M z w r = dt u M t w r $ by imp_intro [s3]
+
+lemma g3_k_proj (H: hyps) (M: class) (u w r z k j t x1 i e x9: set): $ H ⇒ minv M $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ crn j ⊆ g3_P u M w $ > $ H ⇒ z = ⟨ k , j ⟩ $ > $ H ⇒ z ∊ trees ω $ > $ H ⇒ ra_eeqv z t ∈ lrel2 $ > $ H ⇒ z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 → dt u M z w r = dt u M t w r $
+----
+c0: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 $ by ax
+e0: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ $ by and_elim_l [c0]
+r0: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 $ by and_elim_r [c0]
+e1: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ $ by and_elim_l [r0]
+r1: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ ra_eeqv e x9 ∈ lrel2 $ by and_elim_r [r0]
+p1: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ minv M $ by weaken [#1]
+p2: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ uadm u $ by weaken [#2]
+p3: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ w ∊ lvals $ by weaken [#3]
+p4: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ crn j ⊆ g3_P u M w $ by weaken [#4]
+p5: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ z = ⟨ k , j ⟩ $ by weaken [#5]
+p6: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ z ∊ trees ω $ by weaken [#6]
+p7: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [#7]
+kz: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ kc_proj ∈ kstr $ by kstr_proj
+ize: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ isset ∅ $ by ax_empty
+iz0: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ isset (scons e ∅) $ by scons_set [ize]
+iz1: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ isset (scons i (scons e ∅)) $ by scons_set [iz0]
+iz2: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ isset (scons x1 (scons i (scons e ∅))) $ by scons_set [iz1]
+ite: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ isset ∅ $ by ax_empty
+it0: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ isset (scons x9 ∅) $ by scons_set [ite]
+it1: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ isset (scons i (scons x9 ∅)) $ by scons_set [it0]
+it2: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ isset (scons x1 (scons i (scons x9 ∅))) $ by scons_set [it1]
+ta: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ z ∊ trees ω ∧ t ∊ trees ω $ by g3_atoms [p7]
+tt: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ t ∊ trees ω $ by and_elim_r [ta]
+b1: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ $ by weaken [e0]
+b1t: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ $ by weaken [e1]
+b2: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ z ∊ trees ω $ by weaken [p6]
+b2t: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ t ∊ trees ω $ by weaken [tt]
+b8: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ w ∊ lvals $ by weaken [p3]
+b9: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+b4: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ isset ω $ by omega_set
+b3: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∈ trees ω $ by wcel_intro [b1, b2]
+b3t: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∈ trees ω $ by wcel_intro [b1t, b2t]
+b5k: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ kc_proj ∈ kstr $ by kstr_proj
+b5: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ isset kc_proj $ by wcel_isset [b5k]
+ir: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ isset r $ by isset_var
+c1: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ crn j ⊆ g3_P u M w $ by weaken [p4]
+c2: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ z = ⟨ k , j ⟩ $ by weaken [p5]
+c5: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ isset (scons x1 (scons i (scons e ∅))) $ by weaken [iz2]
+c6: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ crn (scons x1 (scons i (scons e ∅))) ⊆ g3_P u M w $ by g3_crn [c1, c2, b1, b5, c5]
+k3: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ x1 ∊ trees ω ∧ i ∊ trees ω ∧ e ∊ trees ω $ by trees_kids3 [b4, b3, b5]
+k3a: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ x1 ∊ trees ω $ by and_elim_l [k3]
+k3b: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ i ∊ trees ω ∧ e ∊ trees ω $ by and_elim_r [k3]
+k3c: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ i ∊ trees ω $ by and_elim_l [k3b]
+k3d: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ e ∊ trees ω $ by and_elim_r [k3b]
+k4a: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ x1 ∈ trees ω $ by welc_wcel [k3a]
+k4b: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ i ∈ trees ω $ by welc_wcel [k3c]
+k4c: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ e ∈ trees ω $ by welc_wcel [k3d]
+a0: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ ra_eeqv e x9 ∈ lrel2 $ by weaken [r1]
+a0t: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ e ∊ trees ω ∧ x9 ∊ trees ω $ by g3_atoms [a0]
+a0r: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ x9 ∊ trees ω $ by and_elim_r [a0t]
+a0rc: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ x9 ∈ trees ω $ by welc_wcel [a0r]
+m2t0: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ crn (scons i (scons e ∅)) ⊆ g3_P u M w $ by crn_scons_tail [c6]
+m2t1: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ crn (scons e ∅) ⊆ g3_P u M w $ by crn_scons_tail [m2t0]
+m2s: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ isset e $ by isset_var
+m2m: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ e ∈ g3_P u M w $ by crn_scons_head [m2s, m2t1]
+m2w: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ e ∊ g3_P u M w $ by wcel_welc [m2m]
+h1: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ dt u M e w r = dt u M x9 w r $ by g3_P_e [m2w, a0, ir]
+d1: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ dt u M ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ w r = fv (dt u M e w r) (suc (fv nvf i)) $ by dt_proj [k4a, k4b, k4c, b8, b9]
+d2: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ dt u M ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ w r = fv (dt u M x9 w r) (suc (fv nvf i)) $ by dt_proj [k4a, k4b, a0rc, b8, b9]
+h2: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ suc (fv nvf i) = suc (fv nvf i) $ by eq_refl
+h3: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ fv (dt u M e w r) (suc (fv nvf i)) = fv (dt u M x9 w r) (suc (fv nvf i)) $ by fv_eq [h1, h2]
+v4: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ dt u M ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ w r = fv (dt u M x9 w r) (suc (fv nvf i)) $ by eq_trans [d1, h3]
+v5: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ fv (dt u M x9 w r) (suc (fv nvf i)) = dt u M ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ w r $ by eq_sym [d2]
+v6: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ dt u M ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ w r = dt u M ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ w r $ by eq_trans [v4, v5]
+br: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ dt u M z w r = dt u M t w r $ by g3_rw [b1, b1t, v6]
+s3: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 ⇒ dt u M z w r = dt u M t w r $ by g3_split [p6, e0, kz, iz2, tt, e1, kz, it2, br]
+fin: $ H ⇒ z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 → dt u M z w r = dt u M t w r $ by imp_intro [s3]
+
+lemma g3_k_quot (H: hyps) (M: class) (u w r z k j t o p: set): $ H ⇒ minv M $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ crn j ⊆ g3_P u M w $ > $ H ⇒ z = ⟨ k , j ⟩ $ > $ H ⇒ z ∊ trees ω $ > $ H ⇒ ra_eeqv z t ∈ lrel2 $ > $ H ⇒ z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p → dt u M z w r = dt u M t w r $
+----
+c0: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p $ by ax
+e0: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ z = ⟨ kc_quot , scons o ∅ ⟩ $ by and_elim_l [c0]
+r0: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p $ by and_elim_r [c0]
+e1: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ t = ⟨ kc_quot , scons p ∅ ⟩ $ by and_elim_l [r0]
+r1: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ lveq o p $ by and_elim_r [r0]
+p1: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ minv M $ by weaken [#1]
+p2: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ uadm u $ by weaken [#2]
+p3: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ w ∊ lvals $ by weaken [#3]
+p4: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ crn j ⊆ g3_P u M w $ by weaken [#4]
+p5: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ z = ⟨ k , j ⟩ $ by weaken [#5]
+p6: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ z ∊ trees ω $ by weaken [#6]
+p7: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [#7]
+kza: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ kc_quot ∈ kexa $ by kexa_quot
+kzb: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ kexa ⊆ kstr $ by kexa_kstr
+kzc: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ kc_quot ∈ kstr $ by wcel_subset [kzb, kza]
+ize: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ isset ∅ $ by ax_empty
+iz0: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ isset (scons o ∅) $ by scons_set [ize]
+ite: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ isset ∅ $ by ax_empty
+it0: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ isset (scons p ∅) $ by scons_set [ite]
+ta: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ z ∊ trees ω ∧ t ∊ trees ω $ by g3_atoms [p7]
+tt: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ t ∊ trees ω $ by and_elim_r [ta]
+b1: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ z = ⟨ kc_quot , scons o ∅ ⟩ $ by weaken [e0]
+b1t: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ t = ⟨ kc_quot , scons p ∅ ⟩ $ by weaken [e1]
+b2: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ z ∊ trees ω $ by weaken [p6]
+b2t: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ t ∊ trees ω $ by weaken [tt]
+b8: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ w ∊ lvals $ by weaken [p3]
+b9: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+g1: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ minv M $ by weaken [p1]
+g2: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ uadm u $ by weaken [p2]
+g4a: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ kc_quot ∈ kexa $ by kexa_quot
+g4b: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ kexa ⊆ kstr $ by kexa_kstr
+g4c: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ kc_quot ∈ kstr $ by wcel_subset [g4b, g4a]
+g5: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ isset (scons o ∅) $ by weaken [iz0]
+g7: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [p7]
+br: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ dt u M z w r = dt u M t w r $ by g3_minv_e [g1, g2, b1, g4a, g5, g7, b8, b9]
+s3: $ H , z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p ⇒ dt u M z w r = dt u M t w r $ by g3_split [p6, e0, kzc, iz0, tt, e1, kzc, it0, br]
+fin: $ H ⇒ z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p → dt u M z w r = dt u M t w r $ by imp_intro [s3]
+
+lemma g3_k_quot_mk (H: hyps) (M: class) (u w r z k j t o p: set): $ H ⇒ minv M $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ crn j ⊆ g3_P u M w $ > $ H ⇒ z = ⟨ k , j ⟩ $ > $ H ⇒ z ∊ trees ω $ > $ H ⇒ ra_eeqv z t ∈ lrel2 $ > $ H ⇒ z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p → dt u M z w r = dt u M t w r $
+----
+c0: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p $ by ax
+e0: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ z = ⟨ kc_quot_mk , scons o ∅ ⟩ $ by and_elim_l [c0]
+r0: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p $ by and_elim_r [c0]
+e1: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ t = ⟨ kc_quot_mk , scons p ∅ ⟩ $ by and_elim_l [r0]
+r1: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ lveq o p $ by and_elim_r [r0]
+p1: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ minv M $ by weaken [#1]
+p2: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ uadm u $ by weaken [#2]
+p3: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ w ∊ lvals $ by weaken [#3]
+p4: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ crn j ⊆ g3_P u M w $ by weaken [#4]
+p5: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ z = ⟨ k , j ⟩ $ by weaken [#5]
+p6: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ z ∊ trees ω $ by weaken [#6]
+p7: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [#7]
+kza: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ kc_quot_mk ∈ kexa $ by kexa_quot_mk
+kzb: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ kexa ⊆ kstr $ by kexa_kstr
+kzc: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ kc_quot_mk ∈ kstr $ by wcel_subset [kzb, kza]
+ize: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ isset ∅ $ by ax_empty
+iz0: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ isset (scons o ∅) $ by scons_set [ize]
+ite: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ isset ∅ $ by ax_empty
+it0: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ isset (scons p ∅) $ by scons_set [ite]
+ta: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ z ∊ trees ω ∧ t ∊ trees ω $ by g3_atoms [p7]
+tt: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ t ∊ trees ω $ by and_elim_r [ta]
+b1: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ z = ⟨ kc_quot_mk , scons o ∅ ⟩ $ by weaken [e0]
+b1t: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ t = ⟨ kc_quot_mk , scons p ∅ ⟩ $ by weaken [e1]
+b2: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ z ∊ trees ω $ by weaken [p6]
+b2t: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ t ∊ trees ω $ by weaken [tt]
+b8: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ w ∊ lvals $ by weaken [p3]
+b9: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+g1: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ minv M $ by weaken [p1]
+g2: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ uadm u $ by weaken [p2]
+g4a: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ kc_quot_mk ∈ kexa $ by kexa_quot_mk
+g4b: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ kexa ⊆ kstr $ by kexa_kstr
+g4c: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ kc_quot_mk ∈ kstr $ by wcel_subset [g4b, g4a]
+g5: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ isset (scons o ∅) $ by weaken [iz0]
+g7: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [p7]
+br: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ dt u M z w r = dt u M t w r $ by g3_minv_e [g1, g2, b1, g4a, g5, g7, b8, b9]
+s3: $ H , z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p ⇒ dt u M z w r = dt u M t w r $ by g3_split [p6, e0, kzc, iz0, tt, e1, kzc, it0, br]
+fin: $ H ⇒ z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p → dt u M z w r = dt u M t w r $ by imp_intro [s3]
+
+lemma g3_k_quot_lift (H: hyps) (M: class) (u w r z k j t o v p x8: set): $ H ⇒ minv M $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ crn j ⊆ g3_P u M w $ > $ H ⇒ z = ⟨ k , j ⟩ $ > $ H ⇒ z ∊ trees ω $ > $ H ⇒ ra_eeqv z t ∈ lrel2 $ > $ H ⇒ z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 → dt u M z w r = dt u M t w r $
+----
+c0: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 $ by ax
+e0: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ $ by and_elim_l [c0]
+r0: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 $ by and_elim_r [c0]
+e1: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ $ by and_elim_l [r0]
+r1: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ lveq o p ∧ lveq v x8 $ by and_elim_r [r0]
+e2: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ lveq o p $ by and_elim_l [r1]
+r2: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ lveq v x8 $ by and_elim_r [r1]
+p1: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ minv M $ by weaken [#1]
+p2: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ uadm u $ by weaken [#2]
+p3: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ w ∊ lvals $ by weaken [#3]
+p4: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ crn j ⊆ g3_P u M w $ by weaken [#4]
+p5: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ z = ⟨ k , j ⟩ $ by weaken [#5]
+p6: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ z ∊ trees ω $ by weaken [#6]
+p7: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [#7]
+kza: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ kc_quot_lift ∈ kexa $ by kexa_quot_lift
+kzb: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ kexa ⊆ kstr $ by kexa_kstr
+kzc: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ kc_quot_lift ∈ kstr $ by wcel_subset [kzb, kza]
+ize: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ isset ∅ $ by ax_empty
+iz0: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ isset (scons v ∅) $ by scons_set [ize]
+iz1: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ isset (scons o (scons v ∅)) $ by scons_set [iz0]
+ite: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ isset ∅ $ by ax_empty
+it0: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ isset (scons x8 ∅) $ by scons_set [ite]
+it1: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ isset (scons p (scons x8 ∅)) $ by scons_set [it0]
+ta: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ z ∊ trees ω ∧ t ∊ trees ω $ by g3_atoms [p7]
+tt: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ t ∊ trees ω $ by and_elim_r [ta]
+b1: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 , r ∊ fseq u ⇒ z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ $ by weaken [e0]
+b1t: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 , r ∊ fseq u ⇒ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ $ by weaken [e1]
+b2: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 , r ∊ fseq u ⇒ z ∊ trees ω $ by weaken [p6]
+b2t: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 , r ∊ fseq u ⇒ t ∊ trees ω $ by weaken [tt]
+b8: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 , r ∊ fseq u ⇒ w ∊ lvals $ by weaken [p3]
+b9: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+g1: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 , r ∊ fseq u ⇒ minv M $ by weaken [p1]
+g2: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 , r ∊ fseq u ⇒ uadm u $ by weaken [p2]
+g4a: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 , r ∊ fseq u ⇒ kc_quot_lift ∈ kexa $ by kexa_quot_lift
+g4b: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 , r ∊ fseq u ⇒ kexa ⊆ kstr $ by kexa_kstr
+g4c: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 , r ∊ fseq u ⇒ kc_quot_lift ∈ kstr $ by wcel_subset [g4b, g4a]
+g5: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 , r ∊ fseq u ⇒ isset (scons o (scons v ∅)) $ by weaken [iz1]
+g7: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 , r ∊ fseq u ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [p7]
+br: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 , r ∊ fseq u ⇒ dt u M z w r = dt u M t w r $ by g3_minv_e [g1, g2, b1, g4a, g5, g7, b8, b9]
+s3: $ H , z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 ⇒ dt u M z w r = dt u M t w r $ by g3_split [p6, e0, kzc, iz1, tt, e1, kzc, it1, br]
+fin: $ H ⇒ z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 → dt u M z w r = dt u M t w r $ by imp_intro [s3]
+
+lemma g3_k_quot_ind (H: hyps) (M: class) (u w r z k j t o p: set): $ H ⇒ minv M $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ crn j ⊆ g3_P u M w $ > $ H ⇒ z = ⟨ k , j ⟩ $ > $ H ⇒ z ∊ trees ω $ > $ H ⇒ ra_eeqv z t ∈ lrel2 $ > $ H ⇒ z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p → dt u M z w r = dt u M t w r $
+----
+c0: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p $ by ax
+e0: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ z = ⟨ kc_quot_ind , scons o ∅ ⟩ $ by and_elim_l [c0]
+r0: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p $ by and_elim_r [c0]
+e1: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ t = ⟨ kc_quot_ind , scons p ∅ ⟩ $ by and_elim_l [r0]
+r1: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ lveq o p $ by and_elim_r [r0]
+p1: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ minv M $ by weaken [#1]
+p2: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ uadm u $ by weaken [#2]
+p3: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ w ∊ lvals $ by weaken [#3]
+p4: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ crn j ⊆ g3_P u M w $ by weaken [#4]
+p5: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ z = ⟨ k , j ⟩ $ by weaken [#5]
+p6: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ z ∊ trees ω $ by weaken [#6]
+p7: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [#7]
+kza: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ kc_quot_ind ∈ kexa $ by kexa_quot_ind
+kzb: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ kexa ⊆ kstr $ by kexa_kstr
+kzc: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ kc_quot_ind ∈ kstr $ by wcel_subset [kzb, kza]
+ize: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ isset ∅ $ by ax_empty
+iz0: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ isset (scons o ∅) $ by scons_set [ize]
+ite: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ isset ∅ $ by ax_empty
+it0: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ isset (scons p ∅) $ by scons_set [ite]
+ta: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ z ∊ trees ω ∧ t ∊ trees ω $ by g3_atoms [p7]
+tt: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ t ∊ trees ω $ by and_elim_r [ta]
+b1: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ z = ⟨ kc_quot_ind , scons o ∅ ⟩ $ by weaken [e0]
+b1t: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ t = ⟨ kc_quot_ind , scons p ∅ ⟩ $ by weaken [e1]
+b2: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ z ∊ trees ω $ by weaken [p6]
+b2t: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ t ∊ trees ω $ by weaken [tt]
+b8: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ w ∊ lvals $ by weaken [p3]
+b9: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ r ∊ fseq u $ by ax
+g1: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ minv M $ by weaken [p1]
+g2: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ uadm u $ by weaken [p2]
+g4a: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ kc_quot_ind ∈ kexa $ by kexa_quot_ind
+g4b: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ kexa ⊆ kstr $ by kexa_kstr
+g4c: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ kc_quot_ind ∈ kstr $ by wcel_subset [g4b, g4a]
+g5: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ isset (scons o ∅) $ by weaken [iz0]
+g7: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ ra_eeqv z t ∈ lrel2 $ by weaken [p7]
+br: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p , r ∊ fseq u ⇒ dt u M z w r = dt u M t w r $ by g3_minv_e [g1, g2, b1, g4a, g5, g7, b8, b9]
+s3: $ H , z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p ⇒ dt u M z w r = dt u M t w r $ by g3_split [p6, e0, kzc, iz0, tt, e1, kzc, it0, br]
+fin: $ H ⇒ z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p → dt u M z w r = dt u M t w r $ by imp_intro [s3]
+
+--| The induction step: a node and every tree it is `eeqv` to have the same
+--| value, when its children are in the class.
+lemma g3_node (G: hyps) (M: class) (u w r z k j t: set): $ G ⇒ minv M $ > $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ crn j ⊆ g3_P u M w $ > $ G ⇒ z = ⟨ k , j ⟩ $ > $ G ⇒ z ∊ trees ω $ > $ G ⇒ ra_eeqv z t ∈ lrel2 $ > $ G ⇒ dt u M z w r = dt u M t w r $
+----
+d0: $ G ⇒ ∃ e (z = e ∧ t = e) ∨ ∃ i (z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩) ∨ ∃ l ∃ m (z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m) ∨ ∃ f ∃ a ∃ g ∃ h (z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2) ∨ ∃ x0 ∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) ∨ ∃ x0 ∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) ∨ ∃ n (z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩) ∨ ∃ a ∃ x4 ∃ x5 (z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i (z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8) ∨ ∃ x1 ∃ i ∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2) ∨ ∃ o ∃ p (z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) ∨ ∃ o ∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p) $ by lrel2_eeqv_cases [#7]
+k0: $ G ⇒ z = e ∧ t = e → dt u M z w r = dt u M t w r $ by g3_k_refl [#1, #2, #3, #4, #5, #6, #7]
+k0a0: $ G ⇒ ∀ e ((z = e ∧ t = e) → dt u M z w r = dt u M t w r) $ by all_intro [k0]
+k0b0: $ G ⇒ (∃ e (z = e ∧ t = e)) → dt u M z w r = dt u M t w r $ by g3_exi [k0a0]
+k1: $ G ⇒ z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩ → dt u M z w r = dt u M t w r $ by g3_k_bvar [#1, #2, #3, #4, #5, #6, #7]
+k1a0: $ G ⇒ ∀ i ((z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩) → dt u M z w r = dt u M t w r) $ by all_intro [k1]
+k1b0: $ G ⇒ (∃ i (z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩)) → dt u M z w r = dt u M t w r $ by g3_exi [k1a0]
+k2: $ G ⇒ z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m → dt u M z w r = dt u M t w r $ by g3_k_srt [#1, #2, #3, #4, #5, #6, #7]
+k2a1: $ G ⇒ ∀ m ((z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m) → dt u M z w r = dt u M t w r) $ by all_intro [k2]
+k2b1: $ G ⇒ (∃ m (z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m)) → dt u M z w r = dt u M t w r $ by g3_exi [k2a1]
+k2a0: $ G ⇒ ∀ l (∃ m (z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m) → dt u M z w r = dt u M t w r) $ by all_intro [k2b1]
+k2b0: $ G ⇒ (∃ l ∃ m (z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m)) → dt u M z w r = dt u M t w r $ by g3_exi [k2a0]
+k3: $ G ⇒ z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2 → dt u M z w r = dt u M t w r $ by g3_k_app [#1, #2, #3, #4, #5, #6, #7]
+k3a3: $ G ⇒ ∀ h ((z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k3]
+k3b3: $ G ⇒ (∃ h (z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k3a3]
+k3a2: $ G ⇒ ∀ g (∃ h (z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k3b3]
+k3b2: $ G ⇒ (∃ g ∃ h (z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k3a2]
+k3a1: $ G ⇒ ∀ a (∃ g ∃ h (z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k3b2]
+k3b1: $ G ⇒ (∃ a ∃ g ∃ h (z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k3a1]
+k3a0: $ G ⇒ ∀ f (∃ a ∃ g ∃ h (z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k3b1]
+k3b0: $ G ⇒ (∃ f ∃ a ∃ g ∃ h (z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k3a0]
+k4: $ G ⇒ z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 → dt u M z w r = dt u M t w r $ by g3_k_lam [#1, #2, #3, #4, #5, #6, #7]
+k4a3: $ G ⇒ ∀ x3 ((z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k4]
+k4b3: $ G ⇒ (∃ x3 (z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k4a3]
+k4a2: $ G ⇒ ∀ x2 (∃ x3 (z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k4b3]
+k4b2: $ G ⇒ (∃ x2 ∃ x3 (z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k4a2]
+k4a1: $ G ⇒ ∀ x1 (∃ x2 ∃ x3 (z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k4b2]
+k4b1: $ G ⇒ (∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k4a1]
+k4a0: $ G ⇒ ∀ x0 (∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k4b1]
+k4b0: $ G ⇒ (∃ x0 ∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k4a0]
+k5: $ G ⇒ z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2 → dt u M z w r = dt u M t w r $ by g3_k_pi [#1, #2, #3, #4, #5, #6, #7]
+k5a3: $ G ⇒ ∀ x3 ((z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k5]
+k5b3: $ G ⇒ (∃ x3 (z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k5a3]
+k5a2: $ G ⇒ ∀ x2 (∃ x3 (z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k5b3]
+k5b2: $ G ⇒ (∃ x2 ∃ x3 (z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k5a2]
+k5a1: $ G ⇒ ∀ x1 (∃ x2 ∃ x3 (z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k5b2]
+k5b1: $ G ⇒ (∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k5a1]
+k5a0: $ G ⇒ ∀ x0 (∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k5b1]
+k5b0: $ G ⇒ (∃ x0 ∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k5a0]
+k6: $ G ⇒ z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩ → dt u M z w r = dt u M t w r $ by g3_k_lit [#1, #2, #3, #4, #5, #6, #7]
+k6a0: $ G ⇒ ∀ n ((z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩) → dt u M z w r = dt u M t w r) $ by all_intro [k6]
+k6b0: $ G ⇒ (∃ n (z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩)) → dt u M z w r = dt u M t w r $ by g3_exi [k6a0]
+k7: $ G ⇒ z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2 → dt u M z w r = dt u M t w r $ by g3_k_cst [#1, #2, #3, #4, #5, #6, #7]
+k7a2: $ G ⇒ ∀ x5 ((z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k7]
+k7b2: $ G ⇒ (∃ x5 (z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k7a2]
+k7a1: $ G ⇒ ∀ x4 (∃ x5 (z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k7b2]
+k7b1: $ G ⇒ (∃ x4 ∃ x5 (z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k7a1]
+k7a0: $ G ⇒ ∀ a (∃ x4 ∃ x5 (z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k7b1]
+k7b0: $ G ⇒ (∃ a ∃ x4 ∃ x5 (z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k7a0]
+k8: $ G ⇒ z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 → dt u M z w r = dt u M t w r $ by g3_k_ind_ty [#1, #2, #3, #4, #5, #6, #7]
+k8a2: $ G ⇒ ∀ i ((z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k8]
+k8b2: $ G ⇒ (∃ i (z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k8a2]
+k8a1: $ G ⇒ ∀ x7 (∃ i (z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k8b2]
+k8b1: $ G ⇒ (∃ x7 ∃ i (z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k8a1]
+k8a0: $ G ⇒ ∀ x6 (∃ x7 ∃ i (z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k8b1]
+k8b0: $ G ⇒ (∃ x6 ∃ x7 ∃ i (z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k8a0]
+k9: $ G ⇒ z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 → dt u M z w r = dt u M t w r $ by g3_k_ind_ctor [#1, #2, #3, #4, #5, #6, #7]
+k9a3: $ G ⇒ ∀ c ((z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k9]
+k9b3: $ G ⇒ (∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k9a3]
+k9a2: $ G ⇒ ∀ i (∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k9b3]
+k9b2: $ G ⇒ (∃ i ∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k9a2]
+k9a1: $ G ⇒ ∀ x7 (∃ i ∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k9b2]
+k9b1: $ G ⇒ (∃ x7 ∃ i ∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k9a1]
+k9a0: $ G ⇒ ∀ x6 (∃ x7 ∃ i ∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k9b1]
+k9b0: $ G ⇒ (∃ x6 ∃ x7 ∃ i ∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k9a0]
+k10: $ G ⇒ z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8 → dt u M z w r = dt u M t w r $ by g3_k_ind_rec [#1, #2, #3, #4, #5, #6, #7]
+k10a4: $ G ⇒ ∀ x8 ((z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8) → dt u M z w r = dt u M t w r) $ by all_intro [k10]
+k10b4: $ G ⇒ (∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8)) → dt u M z w r = dt u M t w r $ by g3_exi [k10a4]
+k10a3: $ G ⇒ ∀ v (∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8) → dt u M z w r = dt u M t w r) $ by all_intro [k10b4]
+k10b3: $ G ⇒ (∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8)) → dt u M z w r = dt u M t w r $ by g3_exi [k10a3]
+k10a2: $ G ⇒ ∀ i (∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8) → dt u M z w r = dt u M t w r) $ by all_intro [k10b3]
+k10b2: $ G ⇒ (∃ i ∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8)) → dt u M z w r = dt u M t w r $ by g3_exi [k10a2]
+k10a1: $ G ⇒ ∀ x7 (∃ i ∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8) → dt u M z w r = dt u M t w r) $ by all_intro [k10b2]
+k10b1: $ G ⇒ (∃ x7 ∃ i ∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8)) → dt u M z w r = dt u M t w r $ by g3_exi [k10a1]
+k10a0: $ G ⇒ ∀ x6 (∃ x7 ∃ i ∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8) → dt u M z w r = dt u M t w r) $ by all_intro [k10b1]
+k10b0: $ G ⇒ (∃ x6 ∃ x7 ∃ i ∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8)) → dt u M z w r = dt u M t w r $ by g3_exi [k10a0]
+k11: $ G ⇒ z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 → dt u M z w r = dt u M t w r $ by g3_k_proj [#1, #2, #3, #4, #5, #6, #7]
+k11a3: $ G ⇒ ∀ x9 ((z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k11]
+k11b3: $ G ⇒ (∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k11a3]
+k11a2: $ G ⇒ ∀ e (∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k11b3]
+k11b2: $ G ⇒ (∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k11a2]
+k11a1: $ G ⇒ ∀ i (∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k11b2]
+k11b1: $ G ⇒ (∃ i ∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k11a1]
+k11a0: $ G ⇒ ∀ x1 (∃ i ∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2) → dt u M z w r = dt u M t w r) $ by all_intro [k11b1]
+k11b0: $ G ⇒ (∃ x1 ∃ i ∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2)) → dt u M z w r = dt u M t w r $ by g3_exi [k11a0]
+k12: $ G ⇒ z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p → dt u M z w r = dt u M t w r $ by g3_k_quot [#1, #2, #3, #4, #5, #6, #7]
+k12a1: $ G ⇒ ∀ p ((z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p) → dt u M z w r = dt u M t w r) $ by all_intro [k12]
+k12b1: $ G ⇒ (∃ p (z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_exi [k12a1]
+k12a0: $ G ⇒ ∀ o (∃ p (z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p) → dt u M z w r = dt u M t w r) $ by all_intro [k12b1]
+k12b0: $ G ⇒ (∃ o ∃ p (z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_exi [k12a0]
+k13: $ G ⇒ z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p → dt u M z w r = dt u M t w r $ by g3_k_quot_mk [#1, #2, #3, #4, #5, #6, #7]
+k13a1: $ G ⇒ ∀ p ((z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p) → dt u M z w r = dt u M t w r) $ by all_intro [k13]
+k13b1: $ G ⇒ (∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_exi [k13a1]
+k13a0: $ G ⇒ ∀ o (∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p) → dt u M z w r = dt u M t w r) $ by all_intro [k13b1]
+k13b0: $ G ⇒ (∃ o ∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_exi [k13a0]
+k14: $ G ⇒ z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8 → dt u M z w r = dt u M t w r $ by g3_k_quot_lift [#1, #2, #3, #4, #5, #6, #7]
+k14a3: $ G ⇒ ∀ x8 ((z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) → dt u M z w r = dt u M t w r) $ by all_intro [k14]
+k14b3: $ G ⇒ (∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8)) → dt u M z w r = dt u M t w r $ by g3_exi [k14a3]
+k14a2: $ G ⇒ ∀ p (∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) → dt u M z w r = dt u M t w r) $ by all_intro [k14b3]
+k14b2: $ G ⇒ (∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8)) → dt u M z w r = dt u M t w r $ by g3_exi [k14a2]
+k14a1: $ G ⇒ ∀ v (∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) → dt u M z w r = dt u M t w r) $ by all_intro [k14b2]
+k14b1: $ G ⇒ (∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8)) → dt u M z w r = dt u M t w r $ by g3_exi [k14a1]
+k14a0: $ G ⇒ ∀ o (∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) → dt u M z w r = dt u M t w r) $ by all_intro [k14b1]
+k14b0: $ G ⇒ (∃ o ∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8)) → dt u M z w r = dt u M t w r $ by g3_exi [k14a0]
+k15: $ G ⇒ z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p → dt u M z w r = dt u M t w r $ by g3_k_quot_ind [#1, #2, #3, #4, #5, #6, #7]
+k15a1: $ G ⇒ ∀ p ((z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p) → dt u M z w r = dt u M t w r) $ by all_intro [k15]
+k15b1: $ G ⇒ (∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_exi [k15a1]
+k15a0: $ G ⇒ ∀ o (∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p) → dt u M z w r = dt u M t w r) $ by all_intro [k15b1]
+k15b0: $ G ⇒ (∃ o ∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_exi [k15a0]
+o14: $ G ⇒ (∃ o ∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) ∨ ∃ o ∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_ori [k14b0, k15b0]
+o13: $ G ⇒ (∃ o ∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) ∨ ∃ o ∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_ori [k13b0, o14]
+o12: $ G ⇒ (∃ o ∃ p (z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) ∨ ∃ o ∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_ori [k12b0, o13]
+o11: $ G ⇒ (∃ x1 ∃ i ∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2) ∨ ∃ o ∃ p (z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) ∨ ∃ o ∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_ori [k11b0, o12]
+o10: $ G ⇒ (∃ x6 ∃ x7 ∃ i ∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8) ∨ ∃ x1 ∃ i ∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2) ∨ ∃ o ∃ p (z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) ∨ ∃ o ∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_ori [k10b0, o11]
+o9: $ G ⇒ (∃ x6 ∃ x7 ∃ i ∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8) ∨ ∃ x1 ∃ i ∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2) ∨ ∃ o ∃ p (z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) ∨ ∃ o ∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_ori [k9b0, o10]
+o8: $ G ⇒ (∃ x6 ∃ x7 ∃ i (z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8) ∨ ∃ x1 ∃ i ∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2) ∨ ∃ o ∃ p (z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) ∨ ∃ o ∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_ori [k8b0, o9]
+o7: $ G ⇒ (∃ a ∃ x4 ∃ x5 (z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i (z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8) ∨ ∃ x1 ∃ i ∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2) ∨ ∃ o ∃ p (z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) ∨ ∃ o ∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_ori [k7b0, o8]
+o6: $ G ⇒ (∃ n (z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩) ∨ ∃ a ∃ x4 ∃ x5 (z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i (z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8) ∨ ∃ x1 ∃ i ∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2) ∨ ∃ o ∃ p (z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) ∨ ∃ o ∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_ori [k6b0, o7]
+o5: $ G ⇒ (∃ x0 ∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) ∨ ∃ n (z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩) ∨ ∃ a ∃ x4 ∃ x5 (z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i (z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8) ∨ ∃ x1 ∃ i ∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2) ∨ ∃ o ∃ p (z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) ∨ ∃ o ∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_ori [k5b0, o6]
+o4: $ G ⇒ (∃ x0 ∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) ∨ ∃ x0 ∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) ∨ ∃ n (z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩) ∨ ∃ a ∃ x4 ∃ x5 (z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i (z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8) ∨ ∃ x1 ∃ i ∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2) ∨ ∃ o ∃ p (z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) ∨ ∃ o ∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_ori [k4b0, o5]
+o3: $ G ⇒ (∃ f ∃ a ∃ g ∃ h (z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2) ∨ ∃ x0 ∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) ∨ ∃ x0 ∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) ∨ ∃ n (z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩) ∨ ∃ a ∃ x4 ∃ x5 (z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i (z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8) ∨ ∃ x1 ∃ i ∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2) ∨ ∃ o ∃ p (z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) ∨ ∃ o ∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_ori [k3b0, o4]
+o2: $ G ⇒ (∃ l ∃ m (z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m) ∨ ∃ f ∃ a ∃ g ∃ h (z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2) ∨ ∃ x0 ∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) ∨ ∃ x0 ∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) ∨ ∃ n (z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩) ∨ ∃ a ∃ x4 ∃ x5 (z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i (z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8) ∨ ∃ x1 ∃ i ∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2) ∨ ∃ o ∃ p (z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) ∨ ∃ o ∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_ori [k2b0, o3]
+o1: $ G ⇒ (∃ i (z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩) ∨ ∃ l ∃ m (z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m) ∨ ∃ f ∃ a ∃ g ∃ h (z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2) ∨ ∃ x0 ∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) ∨ ∃ x0 ∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) ∨ ∃ n (z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩) ∨ ∃ a ∃ x4 ∃ x5 (z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i (z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8) ∨ ∃ x1 ∃ i ∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2) ∨ ∃ o ∃ p (z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) ∨ ∃ o ∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_ori [k1b0, o2]
+o0: $ G ⇒ (∃ e (z = e ∧ t = e) ∨ ∃ i (z = ⟨ kc_bvar , scons i ∅ ⟩ ∧ t = ⟨ kc_bvar , scons i ∅ ⟩) ∨ ∃ l ∃ m (z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m) ∨ ∃ f ∃ a ∃ g ∃ h (z = ⟨ kc_app , scons f (scons a ∅) ⟩ ∧ t = ⟨ kc_app , scons g (scons h ∅) ⟩ ∧ ra_eeqv f g ∈ lrel2 ∧ ra_eeqv a h ∈ lrel2) ∨ ∃ x0 ∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_lam , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_lam , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) ∨ ∃ x0 ∃ x1 ∃ x2 ∃ x3 (z = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ t = ⟨ kc_pi , scons x2 (scons x3 ∅) ⟩ ∧ ra_eeqv x0 x2 ∈ lrel2 ∧ ra_eeqv x1 x3 ∈ lrel2) ∨ ∃ n (z = ⟨ kc_lit , scons n ∅ ⟩ ∧ t = ⟨ kc_lit , scons n ∅ ⟩) ∨ ∃ a ∃ x4 ∃ x5 (z = ⟨ kc_cst , scons a (scons x4 ∅) ⟩ ∧ t = ⟨ kc_cst , scons a (scons x5 ∅) ⟩ ∧ ra_lseqv x4 x5 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i (z = ⟨ kc_ind_ty , scons x6 (scons i ∅) ⟩ ∧ t = ⟨ kc_ind_ty , scons x7 (scons i ∅) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ c (z = ⟨ kc_ind_ctor , scons x6 (scons i (scons c ∅)) ⟩ ∧ t = ⟨ kc_ind_ctor , scons x7 (scons i (scons c ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2) ∨ ∃ x6 ∃ x7 ∃ i ∃ v ∃ x8 (z = ⟨ kc_ind_rec , scons x6 (scons i (scons v ∅)) ⟩ ∧ t = ⟨ kc_ind_rec , scons x7 (scons i (scons x8 ∅)) ⟩ ∧ ra_ind_eqv x6 x7 ∈ lrel2 ∧ lveq v x8) ∨ ∃ x1 ∃ i ∃ e ∃ x9 (z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2) ∨ ∃ o ∃ p (z = ⟨ kc_quot , scons o ∅ ⟩ ∧ t = ⟨ kc_quot , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ p (z = ⟨ kc_quot_mk , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_mk , scons p ∅ ⟩ ∧ lveq o p) ∨ ∃ o ∃ v ∃ p ∃ x8 (z = ⟨ kc_quot_lift , scons o (scons v ∅) ⟩ ∧ t = ⟨ kc_quot_lift , scons p (scons x8 ∅) ⟩ ∧ lveq o p ∧ lveq v x8) ∨ ∃ o ∃ p (z = ⟨ kc_quot_ind , scons o ∅ ⟩ ∧ t = ⟨ kc_quot_ind , scons p ∅ ⟩ ∧ lveq o p)) → dt u M z w r = dt u M t w r $ by g3_ori [k0b0, o1]
+fin: $ G ⇒ dt u M z w r = dt u M t w r $ by imp_elim [o0, d0]
+
+--| By induction on the trees.
+lemma g3_all (G: hyps) (M: class) (u w: set): $ G ⇒ minv M $ > $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ trees ω ⊆ g3_P u M w $
+----
+a1: $ G , k ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ g3_P u M w , z = ⟨ k , j ⟩ , ra_eeqv z t ∈ lrel2 ⇒ minv M $ by weaken [#1]
+a2: $ G , k ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ g3_P u M w , z = ⟨ k , j ⟩ , ra_eeqv z t ∈ lrel2 ⇒ uadm u $ by weaken [#2]
+a3: $ G , k ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ g3_P u M w , z = ⟨ k , j ⟩ , ra_eeqv z t ∈ lrel2 ⇒ w ∊ lvals $ by weaken [#3]
+a4: $ G , k ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ g3_P u M w , z = ⟨ k , j ⟩ , ra_eeqv z t ∈ lrel2 ⇒ crn j ⊆ g3_P u M w $ by ax
+a5: $ G , k ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ g3_P u M w , z = ⟨ k , j ⟩ , ra_eeqv z t ∈ lrel2 ⇒ z = ⟨ k , j ⟩ $ by ax
+a6k: $ G , k ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ g3_P u M w , z = ⟨ k , j ⟩ , ra_eeqv z t ∈ lrel2 ⇒ k ∊ ω $ by ax
+a6j: $ G , k ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ g3_P u M w , z = ⟨ k , j ⟩ , ra_eeqv z t ∈ lrel2 ⇒ j ∊ fseq (trees ω) $ by ax
+a6: $ G , k ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ g3_P u M w , z = ⟨ k , j ⟩ , ra_eeqv z t ∈ lrel2 ⇒ z ∊ trees ω $ by g3_ztree [a6k, a6j, a5]
+a7: $ G , k ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ g3_P u M w , z = ⟨ k , j ⟩ , ra_eeqv z t ∈ lrel2 ⇒ ra_eeqv z t ∈ lrel2 $ by ax
+n1: $ G , k ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ g3_P u M w , z = ⟨ k , j ⟩ , ra_eeqv z t ∈ lrel2 ⇒ dt u M z w r = dt u M t w r $ by g3_node [a1, a2, a3, a4, a5, a6, a7]
+n2: $ G , k ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ g3_P u M w , z = ⟨ k , j ⟩ ⇒ z ∊ g3_P u M w $ by g3_P_i [n1]
+n3: $ G , k ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ g3_P u M w , z = ⟨ k , j ⟩ ⇒ z = ⟨ k , j ⟩ $ by ax
+n4: $ G , k ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ g3_P u M w , z = ⟨ k , j ⟩ ⇒ ⟨ k , j ⟩ ∈ g3_P u M w $ by wcel_intro [n3, n2]
+n5: $ G , k ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ g3_P u M w ⇒ isset ⟨ k , j ⟩ $ by opair_isset
+n6: $ G , k ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ g3_P u M w ⇒ ⟨ k , j ⟩ ∈ g3_P u M w $ by isset_elim [n5, n4]
+n7: $ G , k ∊ ω , j ∊ fseq (trees ω) ⇒ crn j ⊆ g3_P u M w → ⟨ k , j ⟩ ∈ g3_P u M w $ by imp_intro [n6]
+n8: $ G , k ∊ ω ⇒ j ∊ fseq (trees ω) → crn j ⊆ g3_P u M w → ⟨ k , j ⟩ ∈ g3_P u M w $ by imp_intro [n7]
+n9: $ G ⇒ k ∊ ω → j ∊ fseq (trees ω) → crn j ⊆ g3_P u M w → ⟨ k , j ⟩ ∈ g3_P u M w $ by imp_intro [n8]
+n10: $ G ⇒ ∀ j (k ∊ ω → j ∊ fseq (trees ω) → crn j ⊆ g3_P u M w → ⟨ k , j ⟩ ∈ g3_P u M w) $ by all_intro [n9]
+n11: $ G ⇒ ∀ k ∀ j (k ∊ ω → j ∊ fseq (trees ω) → crn j ⊆ g3_P u M w → ⟨ k , j ⟩ ∈ g3_P u M w) $ by all_intro [n10]
+n12: $ G ⇒ isset ω $ by omega_set
+n13: $ G ⇒ trees ω ⊆ g3_P u M w $ by trees_ind_c [n12, n11]
+
+lrel2_eeqv_dt
+-------------
+l1: $ G ⇒ trees ω ⊆ g3_P u M w $ by g3_all [#1, #2, #5]
+l2: $ G ⇒ sig lsig lopen $ by lsig_sig
+l3: $ G ⇒ ofsort lsig lopen ks_expr ⊆ trees ω $ by ofsort_trees [l2]
+l4: $ G ⇒ t ∊ trees ω $ by subset_elim [l3, #3]
+l5: $ G ⇒ t ∊ g3_P u M w $ by subset_elim [l1, l4]
+l6: $ G ⇒ isset r $ by isset_var
+l7: $ G ⇒ dt u M t w r = dt u M t2 w r $ by g3_P_e [l5, #4, l6]
+
+eeqv_dt
+-------
+l1: $ _ ⇒ enc_expr e ∈ ofsort lsig lopen ks_expr $ by enc_expr_sorted
+l2: $ G ⇒ enc_expr e ∈ ofsort lsig lopen ks_expr $ by weaken [l1]
+l3: $ G ⇒ enc_expr e2 ∈ trees ω $ by enc_expr_trees
+l4: $ G ⇒ isset (enc_expr e2) $ by wcel_isset [l3]
+h1: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ minv M $ by weaken [#1]
+h2: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ uadm u $ by weaken [#3]
+h3: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ x ∊ ofsort lsig lopen ks_expr $ by ax
+h4: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ ra_eeqv (enc_expr e) (enc_expr e2) ∈ lrel2 $ by weaken [#2]
+h5: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ x = enc_expr e $ by ax
+h6: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ y = enc_expr e2 $ by ax
+h7: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ enc_expr e = x $ by eq_sym [h5]
+h8: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ enc_expr e2 = y $ by eq_sym [h6]
+h9: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ ra_eeqv (enc_expr e) (enc_expr e2) = ra_eeqv x y $ by ra_eeqv_eq [h7, h8]
+h10: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ ra_eeqv x y ∈ lrel2 $ by wcel_eq_l [h9, h4]
+h11: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ w ∊ lvals $ by weaken [#4]
+h12: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ r ∊ fseq u $ by weaken [#5]
+h13: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ dt u M x w r = dt u M y w r $ by lrel2_eeqv_dt [h1, h2, h3, h10, h11, h12]
+q1: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ u = u $ by eq_refl
+q2: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ M = M $ by eq_refl
+q3: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ w = w $ by eq_refl
+q4: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ r = r $ by eq_refl
+q5: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ dt u M (enc_expr e) w r = dt u M x w r $ by dt_eq [q1, q2, h7, q3, q4]
+q6: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ dt u M y w r = dt u M (enc_expr e2) w r $ by dt_eq [q1, q2, h6, q3, q4]
+q7: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ dt u M (enc_expr e) w r = dt u M y w r $ by eq_trans [q5, h13]
+h14: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr , y = enc_expr e2 ⇒ dt u M (enc_expr e) w r = dt u M (enc_expr e2) w r $ by eq_trans [q7, q6]
+h15: $ G , x = enc_expr e , x ∊ ofsort lsig lopen ks_expr ⇒ dt u M (enc_expr e) w r = dt u M (enc_expr e2) w r $ by isset_elim [l4, h14]
+h16: $ G ⇒ dt u M (enc_expr e) w r = dt u M (enc_expr e2) w r $ by wcel_elim [l2, h15]
+
+meeqv_df
+--------
+a1: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w ⇒ uadm u $ by ax
+a2: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w ⇒ w ∊ lvals $ by ax
+a3: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w ⇒ r ∊ sat u M (enc_ctx G) w $ by ax
+s1: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w ⇒ sat u M (enc_ctx G) w ⊆ fseq u $ by sat_fseq
+s2: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w ⇒ r ∊ fseq u $ by subset_elim [s1, a3]
+m0: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w ⇒ minv M $ by weaken [#1]
+e1: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w ⇒ dt u M (enc_expr e) w r = dt u M (enc_expr e2) w r $ by eeqv_dt [m0, #3, a1, a2, s2]
+m1: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w ⇒ dt u M (enc_expr e) w r ∈ dt u M (enc_expr A) w r $ by mdeq_mem [#2, a1, a2, a3]
+r1: $ mdeq M G e e2 A $ by mdeq_i [e1, m1]

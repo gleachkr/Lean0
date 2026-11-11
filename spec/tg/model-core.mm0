@@ -1,10 +1,11 @@
 -- model-core.mm0: the core rules of the judgment that need the metatheory of
 -- the syntax (layer I of the reduction, audit §11), for every hook `M`: the
 -- spec's `bvar`, `appDF`, `beta`, `eta`, `instDF` and `weakDF` with `mdeq M`
--- for `deq` (`ty G e A` is `deq G e e A`). With model-den.mm0's eight, these
--- are 14 of the 15 core rules; `eeqv_df` needs a property of the hook (its
--- invariance under `eeqv`) and waits for the hook's definition. Imports
--- model-meta.mm0; proofs in model-core.auf.
+-- for `deq` (`ty G e A` is `deq G e e A`), and `eeqv_df` for every hook that
+-- is invariant under `eeqv` (`minv`: the constructors it interprets denote
+-- the same on both sides of an `eeqv` atom, which C5 and C6 must prove of the
+-- hook they define). With model-den.mm0's eight, these are the 15 core rules.
+-- Imports model-meta.mm0; proofs in model-core.auf.
 
 import "model-meta.mm0";
 
@@ -25,3 +26,20 @@ theorem minstDF (M: class) (k: nat) (G0 G1 G: ctx) (A0 a e e2 A r r2 R: expr):
 theorem mweakDF (M: class) (n: nat) (G G2: ctx) (e e2 A r r2 R: expr):
   $ mdeq M G e e2 A $ > $ cext n G G2 $ >
   $ lift n nz e r $ > $ lift n nz e2 r2 $ > $ lift n nz A R $ > $ mdeq M G2 r r2 R $;
+
+--| The hook `M` is invariant under `eeqv`: a constructor it interprets denotes
+--| the same as every tree it is `eeqv` to (lean-tg2.mm0), at every valuation.
+def minv (M: class) (.u .k .s .t .w .r: set): fml =
+  $ ∀ u ∀ k ∀ s ∀ t ∀ w ∀ r (uadm u → k ∈ kexa → ra_eeqv ⟨ k , s ⟩ t ∈ lrel2 →
+      w ∊ lvals → r ∊ fseq u → dt u M ⟨ k , s ⟩ w r = dt u M t w r) $;
+--| Trees that are `eeqv` denote the same, for an invariant hook (by induction
+--| on the trees of sort `expr`, with `lrel2_eeqv_cases`).
+theorem lrel2_eeqv_dt (G: hyps) (M: class) (u t t2 w r: set):
+  $ G ⇒ minv M $ > $ G ⇒ uadm u $ > $ G ⇒ t ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_eeqv t t2 ∈ lrel2 $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ dt u M t w r = dt u M t2 w r $;
+theorem eeqv_dt (G: hyps) (M: class) (e e2: expr) (u w r: set):
+  $ G ⇒ minv M $ > $ eeqv e e2 $ > $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ dt u M (enc_expr e) w r = dt u M (enc_expr e2) w r $;
+theorem meeqv_df (M: class) (G: ctx) (e e2 A: expr):
+  $ _ ⇒ minv M $ > $ mdeq M G e e A $ > $ eeqv e e2 $ > $ mdeq M G e e2 A $;
