@@ -1,0 +1,254 @@
+-- model-nat.mm0: the pilot of layer E5 (audit §11): the four inductive rules
+-- of the spec at Lean's `Nat` (`nat_D`), in the model, for every hook `mcv H`
+-- whose `H` has the parts `hty`, `hctor` and `hrec` (`hind`): `ind_ty_ty`,
+-- `ind_ctor_ty` (both constructors), `ind_rec_ty` and `ind_iota` (both
+-- constructors), with `mdeq` for `deq`. The rules' side relations computed at
+-- `Nat` (the stage-B lemmas' statements), the recursor's type stated in full,
+-- and the iota rule's spine typing as one typing per argument.
+--
+-- The values. Nat's elements are the tuples `nzr` (`zero`, constructor 0, no
+-- fields) and `nsc y` (`succ`, constructor 1, the field `y`), the image
+-- `nnat` of ω under `nnf`. The family has the one type `0` with no parameters
+-- or indices, so its entries are `⟨ ∅ , ⟨ ∅ , y ⟩ ⟩`; `zero` denotes `nzr`,
+-- `succ` the trace of `nsc`, and the recursor at the motive `m`, the minors
+-- `z` and `ms` and the major `y` the fold's value at `y`, which is `z` at
+-- `nzr` and `ms` at `y` and the fold's value at `y` at `nsc y`.
+--
+-- The block is read with Part I's relations at its tree `tr_nat_D`
+-- (lean-tg3.mm0), its parts named here: the parameters `tn_P`, the list of
+-- types `tn_T`, Nat's type `tn_F` (`Sort 1`), and the constructors' types
+-- `tn_K0` (`#0`) and `tn_K1` (`#0 → #1`). Imports model-rec.mm0; proofs in
+-- model-nat.auf.
+
+import "model-rec.mm0";
+
+-- --------------------------------------------------------------------------
+-- The values
+-- --------------------------------------------------------------------------
+
+--| `zero`'s tuple: constructor 0, no fields.
+def nzr: class = $ scons ∅ ∅ $;
+--| `succ`'s tuple at the field `A`: constructor 1.
+def nsc (A: class): class = $ scons (suc ∅) (scons A ∅) $;
+--| The numbers' tuples, by recursion on ω.
+def nnf (.y: set): class = $ omrec nzr (cgr y (nsc y)) $;
+--| Nat's value: the tuples of the numbers.
+def nnat: class = $ crn nnf $;
+
+--| @congr
+theorem nsc_congr (A B: class): $ A ≐ B $ > $ nsc A ≐ nsc B $;
+--| @rewrite
+theorem sb_c_nsc {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (nsc A)) ≐ nsc (⟦ x / t ⟧ A) $;
+theorem nsc_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ nsc A = nsc B $;
+
+theorem nzr_set (G: hyps): $ G ⇒ isset nzr $;
+theorem nsc_set (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ isset (nsc A) $;
+--| The tuples are distinct, and `nsc` is injective.
+theorem nzr_ne_nsc (G: hyps) (y: set): $ G ⇒ ¬ nzr = nsc y $;
+theorem nsc_inj (G: hyps) (y y2: set): $ G ⇒ nsc y = nsc y2 $ > $ G ⇒ y = y2 $;
+--| The recursion's equations.
+theorem nnf_functional (G: hyps): $ G ⇒ functional nnf $;
+theorem nnf_cdm (G: hyps): $ G ⇒ cdm nnf = ω $;
+theorem nnf_zero (G: hyps): $ G ⇒ fv nnf ∅ = nzr $;
+theorem nnf_suc (G: hyps) (n: set): $ G ⇒ n ∊ ω $ > $ G ⇒ fv nnf (suc n) = nsc (fv nnf n) $;
+--| Nat's value: introduction, elimination, induction.
+theorem nnat_fv (G: hyps) (n: set): $ G ⇒ n ∊ ω $ > $ G ⇒ fv nnf n ∈ nnat $;
+theorem nnat_zero (G: hyps): $ G ⇒ nzr ∈ nnat $;
+theorem nnat_suc (G: hyps) (y: set): $ G ⇒ y ∊ nnat $ > $ G ⇒ nsc y ∈ nnat $;
+theorem nnat_cases (G: hyps) {x: set} (y: set):
+  $ G ⇒ y ∊ nnat $ > $ G ⇒ y = nzr ∨ ∃ x (x ∊ nnat ∧ y = nsc x) $;
+theorem nnat_ind {x y: set} (G: hyps) (p: fml y):
+  $ G ⇒ nzr ∈ {y | p} $ > $ G ⇒ ∀ x (x ∊ nnat → x ∊ {y | p} → nsc x ∈ {y | p}) $ >
+  $ G ⇒ nnat ⊆ {y | p} $;
+--| Nat's value is in the universe `U_1` (E2 at Nat), hence in every
+--| admissible universe.
+theorem nnat_uni (G: hyps): $ G ⇒ nnat ∈ fv uni (suc ∅) $;
+theorem nnat_u (G: hyps) (u: set): $ G ⇒ uadm u $ > $ G ⇒ nnat ∈ u $;
+theorem nnat_sub_u (G: hyps) (u: set): $ G ⇒ uadm u $ > $ G ⇒ nnat ⊆ u $;
+
+-- --------------------------------------------------------------------------
+-- Reading the block
+-- --------------------------------------------------------------------------
+
+--| The block's parts: no parameters; one type, of type `Sort 1`, with the
+--| constructors of types `#0` and `#0 → #1`.
+def tn_P: class = $ ⟨ kc_nil , ∅ ⟩ $;
+def tn_F: class = $ ⟨ kc_srt , scons ⟨ kc_ls , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ ∅ ⟩ $;
+def tn_K0: class = $ ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ $;
+def tn_K1: class = $ ⟨ kc_pi , scons tn_K0 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ $;
+def tn_T: class =
+  $ ⟨ kc_tcons , scons tn_F (scons ⟨ kc_ccons , scons tn_K0 (scons ⟨ kc_ccons , scons tn_K1
+      (scons ⟨ kc_cnil , ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_tnil , ∅ ⟩ ∅)) ⟩ $;
+
+theorem tr_nat_D_trees (G: hyps): $ G ⇒ tr_nat_D ∈ trees ω $;
+theorem tn_K0_trees (G: hyps): $ G ⇒ tn_K0 ∈ trees ω $;
+theorem tn_K1_trees (G: hyps): $ G ⇒ tn_K1 ∈ trees ω $;
+theorem tn_F_trees (G: hyps): $ G ⇒ tn_F ∈ trees ω $;
+--| `ind_data`, `nth_ty`, `nth_ctor`, `ntys` at Nat, and what they determine.
+theorem nat_iprt (G: hyps): $ G ⇒ iprt tr_nat_D tn_P tn_T $;
+theorem nat_iprt_det (G: hyps) (p t: set): $ G ⇒ iprt tr_nat_D p t $ > $ G ⇒ p = tn_P ∧ t = tn_T $;
+theorem nat_intys (G: hyps): $ G ⇒ intys tr_nat_D = suc ∅ $;
+theorem nat_ityf (G: hyps): $ G ⇒ ityf tr_nat_D ∅ tn_F $;
+theorem nat_ityf_det (G: hyps) (J F: class): $ G ⇒ ityf tr_nat_D J F $ > $ G ⇒ J = ∅ ∧ F = tn_F $;
+theorem nat_ictk0 (G: hyps): $ G ⇒ ictk tr_nat_D ∅ ∅ tn_K0 $;
+theorem nat_ictk1 (G: hyps): $ G ⇒ ictk tr_nat_D ∅ (suc ∅) tn_K1 $;
+theorem nat_ictk_cases (G: hyps) (J C K: class):
+  $ G ⇒ ictk tr_nat_D J C K $ > $ G ⇒ J = ∅ ∧ ((C = ∅ ∧ K = tn_K0) ∨ (C = suc ∅ ∧ K = tn_K1)) $;
+--| Nat is not a proposition at any level valuation.
+theorem nat_not_iprop (G: hyps) (J W: class): $ G ⇒ W ∈ lvals $ > $ G ⇒ ¬ iprop tr_nat_D J W $;
+--| The minors: `zero`'s is minor 0, `succ`'s minor 1; no indices.
+theorem nat_inmin (G: hyps): $ G ⇒ inmin tr_nat_D = suc (suc ∅) $;
+theorem nat_iminx0 (G: hyps): $ G ⇒ iminx tr_nat_D ∅ ∅ ∅ $;
+theorem nat_iminx1 (G: hyps): $ G ⇒ iminx tr_nat_D ∅ (suc ∅) (suc ∅) $;
+theorem nat_iminx_cases (G: hyps) (I C K: class): $ G ⇒ iminx tr_nat_D I C K $ > $ G ⇒ I = ∅ ∧ K = C $;
+theorem nat_inidx (G: hyps): $ G ⇒ inidx tr_nat_D ∅ = ∅ $;
+--| `succ`'s field is recursive, on type 0.
+theorem nat_irf1 (G: hyps): $ G ⇒ irf tr_nat_D tn_K1 ∅ ∅ $;
+theorem nat_irf1_det (G: hyps) (J: class): $ G ⇒ irf tr_nat_D tn_K1 ∅ J $ > $ G ⇒ J = ∅ $;
+
+-- --------------------------------------------------------------------------
+-- The telescopes
+-- --------------------------------------------------------------------------
+
+--| The one path of a telescope with no binders.
+def ept0: class = $ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩ $;
+--| The paths of `succ`'s type at `R`: one field, an element `x` of `#0`'s
+--| value `R(0)`, with its own telescope's one path.
+def nk1p (U R: class) (.x .z: set): class =
+  $ {z | ∃ x (x ∊ fv R ∅ ∧ x ∊ U ∧ z = ⟨ scons x ∅ , ⟨ scons x ∅ , ⟨ scons (csn ept0) ∅ , ∅ ⟩ ⟩ ⟩)} $;
+
+theorem nat_etel_F (G: hyps) (M W R: class) (u: set):
+  $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ etel u (dnf u M) tn_F W R = csn ept0 $;
+theorem nat_etel_K0 (G: hyps) (M W R: class) (u: set):
+  $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ etel u (dnf u M) tn_K0 W R = csn ept0 $;
+theorem nat_etel_K1 (G: hyps) (M W R: class) (u: set):
+  $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ etel u (dnf u M) tn_K1 W R = nk1p u R $;
+
+-- --------------------------------------------------------------------------
+-- The family and the constructors
+-- --------------------------------------------------------------------------
+
+--| The block's types valued by a candidate: one entry.
+theorem nat_ixs (G: hyps) (W Z: class): $ G ⇒ ixs tr_nat_D W Z = scons (ient tr_nat_D W Z ∅) ∅ $;
+--| The family: Nat's tuples at type 0, no arguments.
+theorem nat_ifam (G: hyps) (M: class) (u w: set):
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ ifam u (dnf u M) tr_nat_D w = csn ∅ × (csn ∅ × nnat) $;
+theorem nat_ity (G: hyps) (M: class) (u w: set):
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ ity u (dnf u M) tr_nat_D ∅ w = nnat $;
+--| The constructors' values: `nzr`, and the trace of `nsc`.
+theorem nat_ictor0 (G: hyps) (M: class) (u w: set):
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ ictor u (dnf u M) tr_nat_D ∅ ∅ w = nzr $;
+theorem nat_ictor1 {x: set} (G: hyps) (M: class) (u w: set):
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ ictor u (dnf u M) tr_nat_D ∅ (suc ∅) w = clam x nnat (nsc x) $;
+
+-- --------------------------------------------------------------------------
+-- The recursor
+-- --------------------------------------------------------------------------
+
+-- Throughout: `m` a motive (a trace from Nat's value into `U_V`), `z` an
+-- element of the motive at `nzr`, `ms` a trace taking `y` and an element of
+-- the motive at `y` into the motive at `nsc y`; the motives' valuation is
+-- `scons m ∅`, the minors' `scons ms (scons z ∅)` (minor 0 last).
+
+--| The motive and the minors are in their spaces.
+theorem nat_imots {x: set} (G: hyps) (M V: class) (u w m: set):
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
+  $ G ⇒ scons m ∅ ∈ imots u (dnf u M) tr_nat_D w ∅ V $;
+theorem nat_imins {x y h: set} (G: hyps) (M V: class) (u w m z ms: set):
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
+  $ G ⇒ z ∊ ap m nzr $ > $ G ⇒ ms ∊ cpi y nnat (cpi h (ap m y) (ap m (nsc y))) $ >
+  $ G ⇒ scons ms (scons z ∅) ∈ imins u (dnf u M) tr_nat_D w ∅ (scons m ∅) $;
+--| The fold: in the motive, `z` at `nzr`, `ms` at `nsc y`.
+theorem nat_fold_mem {x h: set} (G: hyps) (M V: class) (u w m z ms y: set):
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
+  $ G ⇒ z ∊ ap m nzr $ > $ G ⇒ ms ∊ cpi x nnat (cpi h (ap m x) (ap m (nsc x))) $ > $ G ⇒ y ∊ nnat $ >
+  $ G ⇒ fv (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅))) ⟨ ∅ , ⟨ ∅ , y ⟩ ⟩ ∈ ap m y $;
+theorem nat_fold_zero {x h: set} (G: hyps) (M V: class) (u w m z ms: set):
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
+  $ G ⇒ z ∊ ap m nzr $ > $ G ⇒ ms ∊ cpi x nnat (cpi h (ap m x) (ap m (nsc x))) $ >
+  $ G ⇒ fv (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅))) ⟨ ∅ , ⟨ ∅ , nzr ⟩ ⟩ = z $;
+theorem nat_fold_succ {x h: set} (G: hyps) (M V: class) (u w m z ms y: set):
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
+  $ G ⇒ z ∊ ap m nzr $ > $ G ⇒ ms ∊ cpi x nnat (cpi h (ap m x) (ap m (nsc x))) $ > $ G ⇒ y ∊ nnat $ >
+  $ G ⇒ fv (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅))) ⟨ ∅ , ⟨ ∅ , nsc y ⟩ ⟩ =
+      ap (ap ms y) (fv (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅))) ⟨ ∅ , ⟨ ∅ , y ⟩ ⟩) $;
+--| The recursor's value applied to the motive, the minors and a major.
+theorem nat_irc_ap {x h: set} (G: hyps) (M V: class) (u w m z ms y: set):
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
+  $ G ⇒ z ∊ ap m nzr $ > $ G ⇒ ms ∊ cpi x nnat (cpi h (ap m x) (ap m (nsc x))) $ > $ G ⇒ y ∊ nnat $ >
+  $ G ⇒ ap (ap (ap (ap (irc u (dnf u M) tr_nat_D ∅ V w) m) z) ms) y =
+      fv (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅))) ⟨ ∅ , ⟨ ∅ , y ⟩ ⟩ $;
+--| The recursor's value is in its type's (`Nat.rec`'s type, as sets).
+theorem nat_irc_mem {m x z k y h: set} (G: hyps) (M V: class) (u w: set):
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ >
+  $ G ⇒ irc u (dnf u M) tr_nat_D ∅ V w ∈
+      cpi m (cpi x nnat (fv uni V)) (cpi z (ap m nzr)
+        (cpi k (cpi y nnat (cpi h (ap m y) (ap m (nsc y)))) (cpi y nnat (ap m y)))) $;
+
+-- --------------------------------------------------------------------------
+-- The denotations, for a hook with the inductive parts
+-- --------------------------------------------------------------------------
+
+--| `H` has the parts for the types, the constructors and the recursors.
+def hind (H: class): fml = $ hty ⊆ H ∧ hctor ⊆ H ∧ hrec ⊆ H ∧ functional H $;
+
+theorem hind_hty (G: hyps) (H: class): $ G ⇒ hind H $ > $ G ⇒ hty ⊆ H $;
+theorem hind_hctor (G: hyps) (H: class): $ G ⇒ hind H $ > $ G ⇒ hctor ⊆ H $;
+theorem hind_hrec (G: hyps) (H: class): $ G ⇒ hind H $ > $ G ⇒ hrec ⊆ H $;
+theorem hind_functional (G: hyps) (H: class): $ G ⇒ hind H $ > $ G ⇒ functional H $;
+
+theorem dt_nat_ty (G: hyps) (H W R: class) (u: set):
+  $ G ⇒ hind H $ > $ G ⇒ uadm u $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ dt u (mcv H) (enc_expr nat_ty) W R = nnat $;
+theorem dt_nat_zero (G: hyps) (H W R: class) (u: set):
+  $ G ⇒ hind H $ > $ G ⇒ uadm u $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ dt u (mcv H) (enc_expr nat_zero) W R = nzr $;
+theorem dt_nat_succ {x: set} (G: hyps) (H W R: class) (u: set):
+  $ G ⇒ hind H $ > $ G ⇒ uadm u $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ dt u (mcv H) (enc_expr nat_succ) W R = clam x nnat (nsc x) $;
+theorem dt_nat_rec (G: hyps) (H W R: class) (v: lvl) (u: set):
+  $ G ⇒ hind H $ > $ G ⇒ uadm u $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ dt u (mcv H) (enc_expr (ind_rec nat_D nz v)) W R =
+      irc u (dnf u (mcv H)) tr_nat_D ∅ (lv (enc_lvl v) W) W $;
+--| The value of `Nat.rec`'s type.
+theorem dt_nat_rec_ty {m x z k y h: set} (G: hyps) (H W R: class) (v: lvl) (u: set):
+  $ G ⇒ hind H $ > $ G ⇒ uadm u $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ dt u (mcv H) (enc_expr (pi (pi nat_ty (srt v)) (pi (app (bvar nz) nat_zero)
+      (pi (pi nat_ty (pi (app (bvar n2) (bvar nz)) (app (bvar n3) (app nat_succ (bvar n1)))))
+        (pi nat_ty (app (bvar n3) (bvar nz))))))) W R =
+      cpi m (cpi x nnat (fv uni (lv (enc_lvl v) W))) (cpi z (ap m nzr)
+        (cpi k (cpi y nnat (cpi h (ap m y) (ap m (nsc y)))) (cpi y nnat (ap m y)))) $;
+
+-- --------------------------------------------------------------------------
+-- The rules at Nat
+-- --------------------------------------------------------------------------
+
+--| `ind_ty_ty`: `Nat : Sort 1`.
+theorem mnat_ty (H: class) (G: ctx): $ _ ⇒ hind H $ > $ mdeq (mcv H) G nat_ty nat_ty (srt (ls lz)) $;
+--| `ind_ctor_ty`: `Nat.zero : Nat` and `Nat.succ : Nat → Nat`.
+theorem mnat_zero_ty (H: class) (G: ctx): $ _ ⇒ hind H $ > $ mdeq (mcv H) G nat_zero nat_zero nat_ty $;
+theorem mnat_succ_ty (H: class) (G: ctx):
+  $ _ ⇒ hind H $ > $ mdeq (mcv H) G nat_succ nat_succ (pi nat_ty nat_ty) $;
+--| `ind_rec_ty`: `Nat.rec`'s type.
+theorem mnat_rec_ty (H: class) (G: ctx) (v: lvl):
+  $ _ ⇒ hind H $ >
+  $ mdeq (mcv H) G (ind_rec nat_D nz v) (ind_rec nat_D nz v)
+      (pi (pi nat_ty (srt v)) (pi (app (bvar nz) nat_zero)
+        (pi (pi nat_ty (pi (app (bvar n2) (bvar nz)) (app (bvar n3) (app nat_succ (bvar n1)))))
+          (pi nat_ty (app (bvar n3) (bvar nz)))))) $;
+--| `ind_iota` at `zero` and at `succ`, the spine typed argument by argument
+--| (the motive `mo`, the minors `mz` and `ms`, the major's field `a`).
+theorem mnat_iota_zero (H: class) (G: ctx) (v: lvl) (mo mz ms m1 m2: expr):
+  $ _ ⇒ hind H $ > $ mdeq (mcv H) G mo mo (pi nat_ty (srt v)) $ >
+  $ mdeq (mcv H) G mz mz (app mo nat_zero) $ > $ lift n1 nz mo m1 $ > $ lift n2 nz mo m2 $ >
+  $ mdeq (mcv H) G ms ms (pi nat_ty (pi (app m1 (bvar nz)) (app m2 (app nat_succ (bvar n1))))) $ >
+  $ mdeq (mcv H) G (app (app (app (app (ind_rec nat_D nz v) mo) mz) ms) nat_zero) mz (app mo nat_zero) $;
+theorem mnat_iota_succ (H: class) (G: ctx) (v: lvl) (mo mz ms m1 m2 a: expr):
+  $ _ ⇒ hind H $ > $ mdeq (mcv H) G mo mo (pi nat_ty (srt v)) $ >
+  $ mdeq (mcv H) G mz mz (app mo nat_zero) $ > $ lift n1 nz mo m1 $ > $ lift n2 nz mo m2 $ >
+  $ mdeq (mcv H) G ms ms (pi nat_ty (pi (app m1 (bvar nz)) (app m2 (app nat_succ (bvar n1))))) $ >
+  $ mdeq (mcv H) G a a nat_ty $ >
+  $ mdeq (mcv H) G (app (app (app (app (ind_rec nat_D nz v) mo) mz) ms) (app nat_succ a))
+      (app (app ms a) (app (app (app (app (ind_rec nat_D nz v) mo) mz) ms) a)) (app mo (app nat_succ a)) $;

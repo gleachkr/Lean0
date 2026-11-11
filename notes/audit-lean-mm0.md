@@ -1044,6 +1044,14 @@ The rest of the model is not yet the spec's `deq`, so it changes nothing that is
   hypotheses (`dt_ind_ty`, `dt_ind_ctor`, `dt_ind_rec`). That the typing and reduction rules of
   the schema hold of these values (positivity, the universe bound, the recursor's type, iota)
   is layer E, still to come.
+- **The rules at `Nat`** (`model-nat.mm0`, 2026-11-11, a pilot of layer E): for every hook
+  `mcv H` whose `H` has the three parts above (`hind`), `ind_ty_ty`, `ind_ctor_ty`,
+  `ind_rec_ty` and `ind_iota` hold at Lean's `Nat` with `mdeq` for `deq` (`mnat_ty`,
+  `mnat_zero_ty`, `mnat_succ_ty`, `mnat_rec_ty`, `mnat_iota_zero`, `mnat_iota_succ`; the iota
+  rules with each argument typed in place of the spine typing `sty`), all theorems. Nat's value
+  is the set of its tuples, an element of `U_1`; the family, the constructors' values and the
+  fold are computed from the definitions above, not assumed. The rest file's axioms are
+  unchanged: the general rules are layer E.
 
 **TG mode: a certificate verified against the library** (2026-11-09). The same certificate
 can be checked against the library instead of the spec:
