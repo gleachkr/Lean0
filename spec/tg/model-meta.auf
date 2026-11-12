@@ -1393,9 +1393,9 @@ def p1_clp (U M W: class) (.y .k .a .b .i: set): class = $ {y | ∀ k ∀ a ∀ 
 lemma p1_clp_e {i: set} (G: hyps i) (M: class) (u w x c d e: set): $ G ⇒ x ∊ p1_clp u M w $ > $ G ⇒ ra_closed c x ∈ lrel $ > $ G ⇒ d ∊ fseq u $ > $ G ⇒ e ∊ fseq u $ > $ G ⇒ ∀ i (i ∊ fv nvf c → fv d i = fv e i) $ > $ G ⇒ dt u M x w d = dt u M x w e $
 ----
 l1: $ G ⇒ ∀ k ∀ a ∀ b (⟨ kr_closed , scons k (scons x ∅) ⟩ ∈ lrel → a ∊ fseq u → b ∊ fseq u → ∀ i (i ∊ fv nvf k → fv a i = fv b i) → dt u M x w a = dt u M x w b) $ by cab_elim [#1]
-l2: $ G ⇒ ∀ a ∀ b (⟨ kr_closed , scons c (scons x ∅) ⟩ ∈ lrel → a ∊ fseq u → b ∊ fseq u → ∀ i (i ∊ fv nvf c → fv a i = fv b i) → dt u M x w a = dt u M x w b) $ by all_elim (t := $ c $) [l1]
-l3: $ G ⇒ ∀ b (⟨ kr_closed , scons c (scons x ∅) ⟩ ∈ lrel → d ∊ fseq u → b ∊ fseq u → ∀ i (i ∊ fv nvf c → fv d i = fv b i) → dt u M x w d = dt u M x w b) $ by all_elim (t := $ d $) [l2]
-l4: $ G ⇒ ⟨ kr_closed , scons c (scons x ∅) ⟩ ∈ lrel → d ∊ fseq u → e ∊ fseq u → ∀ i (i ∊ fv nvf c → fv d i = fv e i) → dt u M x w d = dt u M x w e $ by all_elim (t := $ e $) [l3]
+l2: $ G ⇒ ∀ a ∀ b (⟨ kr_closed , scons c (scons x ∅) ⟩ ∈ lrel → a ∊ fseq u → b ∊ fseq u → ∀ i (i ∊ fv nvf c → fv a i = fv b i) → dt u M x w a = dt u M x w b) $ by all_elim [l1]
+l3: $ G ⇒ ∀ b (⟨ kr_closed , scons c (scons x ∅) ⟩ ∈ lrel → d ∊ fseq u → b ∊ fseq u → ∀ i (i ∊ fv nvf c → fv d i = fv b i) → dt u M x w d = dt u M x w b) $ by all_elim [l2]
+l4: $ G ⇒ ⟨ kr_closed , scons c (scons x ∅) ⟩ ∈ lrel → d ∊ fseq u → e ∊ fseq u → ∀ i (i ∊ fv nvf c → fv d i = fv e i) → dt u M x w d = dt u M x w e $ by all_elim [l3]
 l5: $ G ⇒ d ∊ fseq u → e ∊ fseq u → ∀ i (i ∊ fv nvf c → fv d i = fv e i) → dt u M x w d = dt u M x w e $ by imp_elim [l4, #2]
 l6: $ G ⇒ e ∊ fseq u → ∀ i (i ∊ fv nvf c → fv d i = fv e i) → dt u M x w d = dt u M x w e $ by imp_elim [l5, #3]
 l7: $ G ⇒ ∀ i (i ∊ fv nvf c → fv d i = fv e i) → dt u M x w d = dt u M x w e $ by imp_elim [l6, #4]
@@ -1419,7 +1419,7 @@ l2a: $ G , j ∊ L ⇒ K = L $ by weaken [#1]
 l2: $ G , j ∊ L ⇒ L = K $ by eq_sym [l2a]
 l3: $ G , j ∊ L ⇒ j ∊ K $ by welc_eq [l2, l1]
 l4a: $ G , j ∊ L ⇒ ∀ i (i ∊ K → fv A i = fv B i) $ by weaken [#4]
-l4: $ G , j ∊ L ⇒ j ∊ K → fv A j = fv B j $ by all_elim (t := $ j $) [l4a]
+l4: $ G , j ∊ L ⇒ j ∊ K → fv A j = fv B j $ by all_elim [l4a]
 l5: $ G , j ∊ L ⇒ fv A j = fv B j $ by imp_elim [l4, l3]
 l6: $ G , j ∊ L ⇒ j = j $ by eq_refl
 l7a: $ G , j ∊ L ⇒ A = C $ by weaken [#2]
@@ -1550,7 +1550,7 @@ d4q: $ G ⇒ e = e $ by eq_refl
 d4: $ G ⇒ dt u M z w e = dt u M ⟨ kc_bvar , scons y ∅ ⟩ w e $ by dt_eq [rr0, rr1, #1, rr2, d4q]
 v1: $ G ⇒ fv nvf y ∈ fv nvf c $ by lrel_le_suc_sem [#3, k4b]
 m0: $ G , n = fv nvf y , n ∊ fv nvf c ⇒ ∀ i (i ∊ fv nvf c → fv d i = fv e i) $ by weaken [#7]
-m1: $ G , n = fv nvf y , n ∊ fv nvf c ⇒ n ∊ fv nvf c → fv d n = fv e n $ by all_elim (t := $ n $) [m0]
+m1: $ G , n = fv nvf y , n ∊ fv nvf c ⇒ n ∊ fv nvf c → fv d n = fv e n $ by all_elim [m0]
 m1a: $ G , n = fv nvf y , n ∊ fv nvf c ⇒ n ∊ fv nvf c $ by ax
 m2: $ G , n = fv nvf y , n ∊ fv nvf c ⇒ fv d n = fv e n $ by imp_elim [m1, m1a]
 m3a: $ G , n = fv nvf y , n ∊ fv nvf c ⇒ n = fv nvf y $ by ax
@@ -3392,7 +3392,7 @@ h8: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ p2_lp u M w n m s , z = �
 h9: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ p2_lp u M w n m s , z = ⟨ c , j ⟩ ⇒ ∀ e ∀ a ∀ r ∀ o (⟨ kr_lift , scons n (scons k (scons z (scons e ∅))) ⟩ ∈ lrel → a ∊ fseq u → cdm a = fv nvf k → r = scat a m → o = scat a s → dt u M e w r = dt u M z w o) $ by all_intro [h8]
 h10: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ p2_lp u M w n m s , z = ⟨ c , j ⟩ ⇒ ∀ k ∀ e ∀ a ∀ r ∀ o (⟨ kr_lift , scons n (scons k (scons z (scons e ∅))) ⟩ ∈ lrel → a ∊ fseq u → cdm a = fv nvf k → r = scat a m → o = scat a s → dt u M e w r = dt u M z w o) $ by all_intro [h9]
 h11: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ p2_lp u M w n m s ⇒ isset ⟨ c , j ⟩ $ by opair_isset
-h12: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ p2_lp u M w n m s ⇒ ⟨ c , j ⟩ ∈ p2_lp u M w n m s $ by wcel_cab_intro (p := $ ∀ k ∀ e ∀ a ∀ r ∀ o (⟨ kr_lift , scons n (scons k (scons x (scons e ∅))) ⟩ ∈ lrel → a ∊ fseq u → cdm a = fv nvf k → r = scat a m → o = scat a s → dt u M e w r = dt u M x w o) $) [h11, h10]
+h12: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ p2_lp u M w n m s ⇒ ⟨ c , j ⟩ ∈ p2_lp u M w n m s $ by wcel_cab_intro [h11, h10]
 h13: $ G , c ∊ ω , j ∊ fseq (trees ω) ⇒ crn j ⊆ p2_lp u M w n m s → ⟨ c , j ⟩ ∈ p2_lp u M w n m s $ by imp_intro [h12]
 h14: $ G , c ∊ ω ⇒ j ∊ fseq (trees ω) → crn j ⊆ p2_lp u M w n m s → ⟨ c , j ⟩ ∈ p2_lp u M w n m s $ by imp_intro [h13]
 h15: $ G ⇒ c ∊ ω → j ∊ fseq (trees ω) → crn j ⊆ p2_lp u M w n m s → ⟨ c , j ⟩ ∈ p2_lp u M w n m s $ by imp_intro [h14]
@@ -4981,7 +4981,7 @@ n9: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ p3_ip u M w , z = ⟨ c ,
 n10: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ p3_ip u M w , z = ⟨ c , j ⟩ ⇒ ∀ x6 ∀ x7 ∀ x8 ∀ x9 (⟨ kr_inst , scons x5 (scons z (scons x6 (scons x7 ∅))) ⟩ ∈ lrel → x8 ∊ fseq u → cdm x8 = fv nvf x5 → x9 ∊ fseq u → dt u M x6 w x9 ∈ u → dt u M x7 w (scat x8 x9) = dt u M z w (scat x8 (scons (dt u M x6 w x9) x9))) $ by all_intro [n9]
 n11: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ p3_ip u M w , z = ⟨ c , j ⟩ ⇒ ∀ x5 ∀ x6 ∀ x7 ∀ x8 ∀ x9 (⟨ kr_inst , scons x5 (scons z (scons x6 (scons x7 ∅))) ⟩ ∈ lrel → x8 ∊ fseq u → cdm x8 = fv nvf x5 → x9 ∊ fseq u → dt u M x6 w x9 ∈ u → dt u M x7 w (scat x8 x9) = dt u M z w (scat x8 (scons (dt u M x6 w x9) x9))) $ by all_intro [n10]
 n12: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ p3_ip u M w ⇒ isset ⟨ c , j ⟩ $ by opair_isset
-n13: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ p3_ip u M w ⇒ ⟨ c , j ⟩ ∈ p3_ip u M w $ by wcel_cab_intro (p := $ ∀ x5 ∀ x6 ∀ x7 ∀ x8 ∀ x9 (⟨ kr_inst , scons x5 (scons x (scons x6 (scons x7 ∅))) ⟩ ∈ lrel → x8 ∊ fseq u → cdm x8 = fv nvf x5 → x9 ∊ fseq u → dt u M x6 w x9 ∈ u → dt u M x7 w (scat x8 x9) = dt u M x w (scat x8 (scons (dt u M x6 w x9) x9))) $) [n12, n11]
+n13: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ p3_ip u M w ⇒ ⟨ c , j ⟩ ∈ p3_ip u M w $ by wcel_cab_intro [n12, n11]
 n14: $ G , c ∊ ω , j ∊ fseq (trees ω) ⇒ crn j ⊆ p3_ip u M w → ⟨ c , j ⟩ ∈ p3_ip u M w $ by imp_intro [n13]
 n15: $ G , c ∊ ω ⇒ j ∊ fseq (trees ω) → crn j ⊆ p3_ip u M w → ⟨ c , j ⟩ ∈ p3_ip u M w $ by imp_intro [n14]
 n16: $ G ⇒ c ∊ ω → j ∊ fseq (trees ω) → crn j ⊆ p3_ip u M w → ⟨ c , j ⟩ ∈ p3_ip u M w $ by imp_intro [n15]
@@ -5287,9 +5287,9 @@ def f1_lkp (U M W: class) (.y .n .a .r: set): class = $ {y | ∀ n ∀ a ∀ r (
 lemma f1_lkp_e (G: hyps) (M: class) (u w t c d e: set): $ G ⇒ t ∊ f1_lkp u M w $ > $ G ⇒ ra_lookup t c d ∈ lrel $ > $ G ⇒ e ∊ sat u M t w $ > $ G ⇒ fv e (fv nvf c) ∈ dt u M d w e $
 ----
 l1: $ G ⇒ ∀ n ∀ a ∀ r (⟨ kr_lookup , scons t (scons n (scons a ∅)) ⟩ ∈ lrel → r ∊ sat u M t w → fv r (fv nvf n) ∈ dt u M a w r) $ by cab_elim [#1]
-l2: $ G ⇒ ∀ a ∀ r (⟨ kr_lookup , scons t (scons c (scons a ∅)) ⟩ ∈ lrel → r ∊ sat u M t w → fv r (fv nvf c) ∈ dt u M a w r) $ by all_elim (t := $ c $) [l1]
-l3: $ G ⇒ ∀ r (⟨ kr_lookup , scons t (scons c (scons d ∅)) ⟩ ∈ lrel → r ∊ sat u M t w → fv r (fv nvf c) ∈ dt u M d w r) $ by all_elim (t := $ d $) [l2]
-l4: $ G ⇒ ⟨ kr_lookup , scons t (scons c (scons d ∅)) ⟩ ∈ lrel → e ∊ sat u M t w → fv e (fv nvf c) ∈ dt u M d w e $ by all_elim (t := $ e $) [l3]
+l2: $ G ⇒ ∀ a ∀ r (⟨ kr_lookup , scons t (scons c (scons a ∅)) ⟩ ∈ lrel → r ∊ sat u M t w → fv r (fv nvf c) ∈ dt u M a w r) $ by all_elim [l1]
+l3: $ G ⇒ ∀ r (⟨ kr_lookup , scons t (scons c (scons d ∅)) ⟩ ∈ lrel → r ∊ sat u M t w → fv r (fv nvf c) ∈ dt u M d w r) $ by all_elim [l2]
+l4: $ G ⇒ ⟨ kr_lookup , scons t (scons c (scons d ∅)) ⟩ ∈ lrel → e ∊ sat u M t w → fv e (fv nvf c) ∈ dt u M d w e $ by all_elim [l3]
 l5: $ G ⇒ e ∊ sat u M t w → fv e (fv nvf c) ∈ dt u M d w e $ by imp_elim [l4, #2]
 l6: $ G ⇒ fv e (fv nvf c) ∈ dt u M d w e $ by imp_elim [l5, #3]
 
@@ -5558,9 +5558,9 @@ def f2_cxp (U M W: class) (.y .k .a .b .q .t: set): class = $ {y | ∀ k ∀ a �
 lemma f2_cxp_e {q t: set} (G: hyps q t) (M: class) (u w x c d e: set): $ G ⇒ x ∊ f2_cxp u M w $ > $ G ⇒ ra_cext c d x ∈ lrel $ > $ G ⇒ e ∊ sat u M x w $ > $ G ⇒ ∃ q ∃ t (q ∊ fseq u ∧ cdm q = fv nvf c ∧ t ∊ sat u M d w ∧ e = scat q t) $
 ----
 l1: $ G ⇒ ∀ k ∀ a ∀ b (⟨ kr_cext , scons k (scons a (scons x ∅)) ⟩ ∈ lrel → b ∊ sat u M x w → ∃ q ∃ t (q ∊ fseq u ∧ cdm q = fv nvf k ∧ t ∊ sat u M a w ∧ b = scat q t)) $ by cab_elim [#1]
-l2: $ G ⇒ ∀ a ∀ b (⟨ kr_cext , scons c (scons a (scons x ∅)) ⟩ ∈ lrel → b ∊ sat u M x w → ∃ q ∃ t (q ∊ fseq u ∧ cdm q = fv nvf c ∧ t ∊ sat u M a w ∧ b = scat q t)) $ by all_elim (t := $ c $) [l1]
-l3: $ G ⇒ ∀ b (⟨ kr_cext , scons c (scons d (scons x ∅)) ⟩ ∈ lrel → b ∊ sat u M x w → ∃ q ∃ t (q ∊ fseq u ∧ cdm q = fv nvf c ∧ t ∊ sat u M d w ∧ b = scat q t)) $ by all_elim (t := $ d $) [l2]
-l4: $ G ⇒ ⟨ kr_cext , scons c (scons d (scons x ∅)) ⟩ ∈ lrel → e ∊ sat u M x w → ∃ q ∃ t (q ∊ fseq u ∧ cdm q = fv nvf c ∧ t ∊ sat u M d w ∧ e = scat q t) $ by all_elim (t := $ e $) [l3]
+l2: $ G ⇒ ∀ a ∀ b (⟨ kr_cext , scons c (scons a (scons x ∅)) ⟩ ∈ lrel → b ∊ sat u M x w → ∃ q ∃ t (q ∊ fseq u ∧ cdm q = fv nvf c ∧ t ∊ sat u M a w ∧ b = scat q t)) $ by all_elim [l1]
+l3: $ G ⇒ ∀ b (⟨ kr_cext , scons c (scons d (scons x ∅)) ⟩ ∈ lrel → b ∊ sat u M x w → ∃ q ∃ t (q ∊ fseq u ∧ cdm q = fv nvf c ∧ t ∊ sat u M d w ∧ b = scat q t)) $ by all_elim [l2]
+l4: $ G ⇒ ⟨ kr_cext , scons c (scons d (scons x ∅)) ⟩ ∈ lrel → e ∊ sat u M x w → ∃ q ∃ t (q ∊ fseq u ∧ cdm q = fv nvf c ∧ t ∊ sat u M d w ∧ e = scat q t) $ by all_elim [l3]
 l5: $ G ⇒ e ∊ sat u M x w → ∃ q ∃ t (q ∊ fseq u ∧ cdm q = fv nvf c ∧ t ∊ sat u M d w ∧ e = scat q t) $ by imp_elim [l4, #2]
 l6: $ G ⇒ ∃ q ∃ t (q ∊ fseq u ∧ cdm q = fv nvf c ∧ t ∊ sat u M d w ∧ e = scat q t) $ by imp_elim [l5, #3]
 
@@ -5939,8 +5939,8 @@ c1: $ G , x0 = dt u M e w r , x0 ∊ u , x1 = ∅ ⇒ r = scat x1 r ∧ scat x1 
 c2: $ G , x0 = dt u M e w r , x0 ∊ u , x1 = ∅ ⇒ r ∊ sat u M g w ∧ r = scat x1 r ∧ scat x1 (scons (dt u M e w r) r) ∈ sat u M x w $ by and_intro [k7, c1]
 c3: $ G , x0 = dt u M e w r , x0 ∊ u , x1 = ∅ ⇒ cdm x1 = fv nvf z ∧ r ∊ sat u M g w ∧ r = scat x1 r ∧ scat x1 (scons (dt u M e w r) r) ∈ sat u M x w $ by and_intro [k21, c2]
 c4: $ G , x0 = dt u M e w r , x0 ∊ u , x1 = ∅ ⇒ x1 ∊ fseq u ∧ cdm x1 = fv nvf z ∧ r ∊ sat u M g w ∧ r = scat x1 r ∧ scat x1 (scons (dt u M e w r) r) ∈ sat u M x w $ by and_intro [k20, c3]
-c5: $ G , x0 = dt u M e w r , x0 ∊ u , x1 = ∅ ⇒ ∃ t (x1 ∊ fseq u ∧ cdm x1 = fv nvf z ∧ t ∊ sat u M g w ∧ r = scat x1 t ∧ scat x1 (scons (dt u M e w t) t) ∈ sat u M x w) $ by ex_intro (t := $ r $) [c4]
-c6: $ G , x0 = dt u M e w r , x0 ∊ u , x1 = ∅ ⇒ ∃ p ∃ t (p ∊ fseq u ∧ cdm p = fv nvf z ∧ t ∊ sat u M g w ∧ r = scat p t ∧ scat p (scons (dt u M e w t) t) ∈ sat u M x w) $ by ex_intro (t := $ x1 $) [c5]
+c5: $ G , x0 = dt u M e w r , x0 ∊ u , x1 = ∅ ⇒ ∃ t (x1 ∊ fseq u ∧ cdm x1 = fv nvf z ∧ t ∊ sat u M g w ∧ r = scat x1 t ∧ scat x1 (scons (dt u M e w t) t) ∈ sat u M x w) $ by ex_intro [c4]
+c6: $ G , x0 = dt u M e w r , x0 ∊ u , x1 = ∅ ⇒ ∃ p ∃ t (p ∊ fseq u ∧ cdm p = fv nvf z ∧ t ∊ sat u M g w ∧ r = scat p t ∧ scat p (scons (dt u M e w t) t) ∈ sat u M x w) $ by ex_intro [c5]
 d0: $ G , x0 = dt u M e w r , x0 ∊ u ⇒ isset ∅ $ by ax_empty
 d1: $ G , x0 = dt u M e w r , x0 ∊ u ⇒ ∃ p ∃ t (p ∊ fseq u ∧ cdm p = fv nvf z ∧ t ∊ sat u M g w ∧ r = scat p t ∧ scat p (scons (dt u M e w t) t) ∈ sat u M x w) $ by isset_elim [d0, c6]
 d2: $ G ⇒ ∃ p ∃ t (p ∊ fseq u ∧ cdm p = fv nvf z ∧ t ∊ sat u M g w ∧ r = scat p t ∧ scat p (scons (dt u M e w t) t) ∈ sat u M x w) $ by wcel_elim [h4, d1]
@@ -6057,8 +6057,8 @@ s1: $ G , x2 = scons (dt u M e w b) b , x2 ∊ fseq u , x0 = scat a x2 , x0 ∊ 
 s2: $ G , x2 = scons (dt u M e w b) b , x2 ∊ fseq u , x0 = scat a x2 , x0 ∊ sat u M i w , x3 = scons o a , x3 ∊ fseq u ⇒ b ∊ sat u M g w ∧ r = scat x3 b ∧ scat x3 (scons (dt u M e w b) b) ∈ sat u M x w $ by and_intro [p9, s1]
 s3: $ G , x2 = scons (dt u M e w b) b , x2 ∊ fseq u , x0 = scat a x2 , x0 ∊ sat u M i w , x3 = scons o a , x3 ∊ fseq u ⇒ cdm x3 = fv nvf z ∧ b ∊ sat u M g w ∧ r = scat x3 b ∧ scat x3 (scons (dt u M e w b) b) ∈ sat u M x w $ by and_intro [n10, s2]
 s4: $ G , x2 = scons (dt u M e w b) b , x2 ∊ fseq u , x0 = scat a x2 , x0 ∊ sat u M i w , x3 = scons o a , x3 ∊ fseq u ⇒ x3 ∊ fseq u ∧ cdm x3 = fv nvf z ∧ b ∊ sat u M g w ∧ r = scat x3 b ∧ scat x3 (scons (dt u M e w b) b) ∈ sat u M x w $ by and_intro [g6, s3]
-s5: $ G , x2 = scons (dt u M e w b) b , x2 ∊ fseq u , x0 = scat a x2 , x0 ∊ sat u M i w , x3 = scons o a , x3 ∊ fseq u ⇒ ∃ t (x3 ∊ fseq u ∧ cdm x3 = fv nvf z ∧ t ∊ sat u M g w ∧ r = scat x3 t ∧ scat x3 (scons (dt u M e w t) t) ∈ sat u M x w) $ by ex_intro (t := $ b $) [s4]
-s6: $ G , x2 = scons (dt u M e w b) b , x2 ∊ fseq u , x0 = scat a x2 , x0 ∊ sat u M i w , x3 = scons o a , x3 ∊ fseq u ⇒ ∃ p ∃ t (p ∊ fseq u ∧ cdm p = fv nvf z ∧ t ∊ sat u M g w ∧ r = scat p t ∧ scat p (scons (dt u M e w t) t) ∈ sat u M x w) $ by ex_intro (t := $ x3 $) [s5]
+s5: $ G , x2 = scons (dt u M e w b) b , x2 ∊ fseq u , x0 = scat a x2 , x0 ∊ sat u M i w , x3 = scons o a , x3 ∊ fseq u ⇒ ∃ t (x3 ∊ fseq u ∧ cdm x3 = fv nvf z ∧ t ∊ sat u M g w ∧ r = scat x3 t ∧ scat x3 (scons (dt u M e w t) t) ∈ sat u M x w) $ by ex_intro [s4]
+s6: $ G , x2 = scons (dt u M e w b) b , x2 ∊ fseq u , x0 = scat a x2 , x0 ∊ sat u M i w , x3 = scons o a , x3 ∊ fseq u ⇒ ∃ p ∃ t (p ∊ fseq u ∧ cdm p = fv nvf z ∧ t ∊ sat u M g w ∧ r = scat p t ∧ scat p (scons (dt u M e w t) t) ∈ sat u M x w) $ by ex_intro [s5]
 s7: $ G , x2 = scons (dt u M e w b) b , x2 ∊ fseq u , x0 = scat a x2 , x0 ∊ sat u M i w ⇒ ∃ p ∃ t (p ∊ fseq u ∧ cdm p = fv nvf z ∧ t ∊ sat u M g w ∧ r = scat p t ∧ scat p (scons (dt u M e w t) t) ∈ sat u M x w) $ by wcel_elim [k0, s6]
 s8: $ G , x2 = scons (dt u M e w b) b , x2 ∊ fseq u ⇒ ∃ p ∃ t (p ∊ fseq u ∧ cdm p = fv nvf z ∧ t ∊ sat u M g w ∧ r = scat p t ∧ scat p (scons (dt u M e w t) t) ∈ sat u M x w) $ by wcel_elim [j6, s7]
 s9: $ G ⇒ ∃ p ∃ t (p ∊ fseq u ∧ cdm p = fv nvf z ∧ t ∊ sat u M g w ∧ r = scat p t ∧ scat p (scons (dt u M e w t) t) ∈ sat u M x w) $ by wcel_elim [x2s, s8]
@@ -6233,7 +6233,7 @@ n4: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ f3_cp u M w g h e , z = �
 n5: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ f3_cp u M w g h e , z = ⟨ c , j ⟩ ⇒ ∀ x6 ∀ x7 (⟨ kr_cinst , scons z (scons g (scons h (scons e (scons x5 (scons x6 ∅))))) ⟩ ∈ lrel → x7 ∊ sat u M x6 w → ∃ x8 ∃ x9 (x8 ∊ fseq u ∧ cdm x8 = fv nvf z ∧ x9 ∊ sat u M g w ∧ x7 = scat x8 x9 ∧ scat x8 (scons (dt u M e w x9) x9) ∈ sat u M x5 w)) $ by all_intro [n4]
 n6: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ f3_cp u M w g h e , z = ⟨ c , j ⟩ ⇒ ∀ x5 ∀ x6 ∀ x7 (⟨ kr_cinst , scons z (scons g (scons h (scons e (scons x5 (scons x6 ∅))))) ⟩ ∈ lrel → x7 ∊ sat u M x6 w → ∃ x8 ∃ x9 (x8 ∊ fseq u ∧ cdm x8 = fv nvf z ∧ x9 ∊ sat u M g w ∧ x7 = scat x8 x9 ∧ scat x8 (scons (dt u M e w x9) x9) ∈ sat u M x5 w)) $ by all_intro [n5]
 n7: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ f3_cp u M w g h e ⇒ isset ⟨ c , j ⟩ $ by opair_isset
-n8: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ f3_cp u M w g h e ⇒ ⟨ c , j ⟩ ∈ f3_cp u M w g h e $ by wcel_cab_intro (p := $ ∀ x5 ∀ x6 ∀ x7 (⟨ kr_cinst , scons y (scons g (scons h (scons e (scons x5 (scons x6 ∅))))) ⟩ ∈ lrel → x7 ∊ sat u M x6 w → ∃ x8 ∃ x9 (x8 ∊ fseq u ∧ cdm x8 = fv nvf y ∧ x9 ∊ sat u M g w ∧ x7 = scat x8 x9 ∧ scat x8 (scons (dt u M e w x9) x9) ∈ sat u M x5 w)) $) [n7, n6]
+n8: $ G , c ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ f3_cp u M w g h e ⇒ ⟨ c , j ⟩ ∈ f3_cp u M w g h e $ by wcel_cab_intro [n7, n6]
 n9: $ G , c ∊ ω , j ∊ fseq (trees ω) ⇒ crn j ⊆ f3_cp u M w g h e → ⟨ c , j ⟩ ∈ f3_cp u M w g h e $ by imp_intro [n8]
 n10: $ G , c ∊ ω ⇒ j ∊ fseq (trees ω) → crn j ⊆ f3_cp u M w g h e → ⟨ c , j ⟩ ∈ f3_cp u M w g h e $ by imp_intro [n9]
 n11: $ G ⇒ c ∊ ω → j ∊ fseq (trees ω) → crn j ⊆ f3_cp u M w g h e → ⟨ c , j ⟩ ∈ f3_cp u M w g h e $ by imp_intro [n10]
@@ -6321,8 +6321,8 @@ e1: $ H , x7 ∊ fseq u ∧ cdm x7 = fv nvf x1 ∧ x8 ∊ sat u M x2 w ∧ r = s
 e2: $ H , x7 ∊ fseq u ∧ cdm x7 = fv nvf x1 ∧ x8 ∊ sat u M x2 w ∧ r = scat x7 x8 ∧ scat x7 (scons (dt u M x4 w x8) x8) ∈ sat u M x5 w ⇒ x8 ∊ sat u M (enc_ctx G0) w ∧ r = scat x7 x8 ∧ scat x7 (scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w $ by and_intro [d2, e1]
 e3: $ H , x7 ∊ fseq u ∧ cdm x7 = fv nvf x1 ∧ x8 ∊ sat u M x2 w ∧ r = scat x7 x8 ∧ scat x7 (scons (dt u M x4 w x8) x8) ∈ sat u M x5 w ⇒ cdm x7 = fv nvf (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ r = scat x7 x8 ∧ scat x7 (scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w $ by and_intro [d1, e2]
 e4: $ H , x7 ∊ fseq u ∧ cdm x7 = fv nvf x1 ∧ x8 ∊ sat u M x2 w ∧ r = scat x7 x8 ∧ scat x7 (scons (dt u M x4 w x8) x8) ∈ sat u M x5 w ⇒ x7 ∊ fseq u ∧ cdm x7 = fv nvf (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ r = scat x7 x8 ∧ scat x7 (scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w $ by and_intro [b1, e3]
-e5: $ H , x7 ∊ fseq u ∧ cdm x7 = fv nvf x1 ∧ x8 ∊ sat u M x2 w ∧ r = scat x7 x8 ∧ scat x7 (scons (dt u M x4 w x8) x8) ∈ sat u M x5 w ⇒ ∃ t (x7 ∊ fseq u ∧ cdm x7 = fv nvf (enc_nat k) ∧ t ∊ sat u M (enc_ctx G0) w ∧ r = scat x7 t ∧ scat x7 (scons (dt u M (enc_expr a) w t) t) ∈ sat u M (enc_ctx G1) w) $ by ex_intro (t := $ x8 $) [e4]
-e6: $ H , x7 ∊ fseq u ∧ cdm x7 = fv nvf x1 ∧ x8 ∊ sat u M x2 w ∧ r = scat x7 x8 ∧ scat x7 (scons (dt u M x4 w x8) x8) ∈ sat u M x5 w ⇒ ∃ p ∃ t (p ∊ fseq u ∧ cdm p = fv nvf (enc_nat k) ∧ t ∊ sat u M (enc_ctx G0) w ∧ r = scat p t ∧ scat p (scons (dt u M (enc_expr a) w t) t) ∈ sat u M (enc_ctx G1) w) $ by ex_intro (t := $ x7 $) [e5]
+e5: $ H , x7 ∊ fseq u ∧ cdm x7 = fv nvf x1 ∧ x8 ∊ sat u M x2 w ∧ r = scat x7 x8 ∧ scat x7 (scons (dt u M x4 w x8) x8) ∈ sat u M x5 w ⇒ ∃ t (x7 ∊ fseq u ∧ cdm x7 = fv nvf (enc_nat k) ∧ t ∊ sat u M (enc_ctx G0) w ∧ r = scat x7 t ∧ scat x7 (scons (dt u M (enc_expr a) w t) t) ∈ sat u M (enc_ctx G1) w) $ by ex_intro [e4]
+e6: $ H , x7 ∊ fseq u ∧ cdm x7 = fv nvf x1 ∧ x8 ∊ sat u M x2 w ∧ r = scat x7 x8 ∧ scat x7 (scons (dt u M x4 w x8) x8) ∈ sat u M x5 w ⇒ ∃ p ∃ t (p ∊ fseq u ∧ cdm p = fv nvf (enc_nat k) ∧ t ∊ sat u M (enc_ctx G0) w ∧ r = scat p t ∧ scat p (scons (dt u M (enc_expr a) w t) t) ∈ sat u M (enc_ctx G1) w) $ by ex_intro [e5]
 f1a: $ H , ∃ x8 (x7 ∊ fseq u ∧ cdm x7 = fv nvf x1 ∧ x8 ∊ sat u M x2 w ∧ r = scat x7 x8 ∧ scat x7 (scons (dt u M x4 w x8) x8) ∈ sat u M x5 w) ⇒ ∃ x8 (x7 ∊ fseq u ∧ cdm x7 = fv nvf x1 ∧ x8 ∊ sat u M x2 w ∧ r = scat x7 x8 ∧ scat x7 (scons (dt u M x4 w x8) x8) ∈ sat u M x5 w) $ by ax
 f1: $ H , ∃ x8 (x7 ∊ fseq u ∧ cdm x7 = fv nvf x1 ∧ x8 ∊ sat u M x2 w ∧ r = scat x7 x8 ∧ scat x7 (scons (dt u M x4 w x8) x8) ∈ sat u M x5 w) ⇒ ∃ p ∃ t (p ∊ fseq u ∧ cdm p = fv nvf (enc_nat k) ∧ t ∊ sat u M (enc_ctx G0) w ∧ r = scat p t ∧ scat p (scons (dt u M (enc_expr a) w t) t) ∈ sat u M (enc_ctx G1) w) $ by ex_elim [f1a, e6]
 f2: $ H ⇒ ∃ p ∃ t (p ∊ fseq u ∧ cdm p = fv nvf (enc_nat k) ∧ t ∊ sat u M (enc_ctx G0) w ∧ r = scat p t ∧ scat p (scons (dt u M (enc_expr a) w t) t) ∈ sat u M (enc_ctx G1) w) $ by ex_elim [L, f1]
