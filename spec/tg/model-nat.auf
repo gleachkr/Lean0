@@ -2658,6 +2658,43 @@ a6: $ G ⇒ w ∈ lvals $ by welc_wcel [#2]
 a7: $ G ⇒ ient tr_nat_D w (csn ∅ × (csn ∅ × nnat)) ∅ = nnat $ by e3_ient_NN [a6]
 a8: $ G ⇒ ity u (dnf u M) tr_nat_D ∅ w = nnat $ by eq_trans [a5, a7]
 
+nat_igate
+---------
+l1: $ G ⇒ tr_nat_D ∈ trees ω $ by tr_nat_D_trees
+l2: $ G ⇒ iprt tr_nat_D tn_P tn_T $ by nat_iprt
+l3: $ G ⇒ ityf tr_nat_D ∅ tn_F $ by nat_ityf
+l4: $ G ⇒ ity u (dnf u M) tr_nat_D ∅ w = nnat $ by nat_ity [#1, #2]
+l5: $ G ⇒ ipi u (dnf u M) tn_P tn_F w = da (fv (dnf u M) tn_F) w ∅ $ by ipi_nil [#2]
+l6: $ G ⇒ dt u M tn_F w ∅ = da (fv (dnf u M) tn_F) w ∅ $ by eq_refl
+l7a: $ G ⇒ ⟨ kc_ls , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ ∈ trees ω $ by enc_lvl_trees (e := $ ls lz $)
+l7b: $ G ⇒ w ∈ lvals $ by welc_wcel [#2]
+l7c: $ G ⇒ ∅ ∈ fseq u $ by fseq_empty
+l7: $ G ⇒ dt u M tn_F w ∅ = fv uni (lv ⟨ kc_ls , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ w) $ by dt_srt_c [l7a, l7b, l7c]
+l8a: $ G ⇒ ⟨ kc_lz , ∅ ⟩ ∈ trees ω $ by enc_lvl_trees (e := $ lz $)
+l8: $ G ⇒ lv ⟨ kc_ls , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ w = suc (lv ⟨ kc_lz , ∅ ⟩ w) $ by lv_ls [l8a, #2]
+l9: $ G ⇒ lv ⟨ kc_lz , ∅ ⟩ w = ∅ $ by lv_lz
+l10: $ G ⇒ suc (lv ⟨ kc_lz , ∅ ⟩ w) = suc ∅ $ by suc_eq [l9]
+l11: $ G ⇒ lv ⟨ kc_ls , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ w = suc ∅ $ by eq_trans [l8, l10]
+l12a: $ G ⇒ uni = uni $ by eq_refl
+l12: $ G ⇒ fv uni (lv ⟨ kc_ls , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ w) = fv uni (suc ∅) $ by fv_eq [l12a, l11]
+l13: $ G ⇒ dt u M tn_F w ∅ = fv uni (suc ∅) $ by eq_trans [l7, l12]
+l14: $ G ⇒ da (fv (dnf u M) tn_F) w ∅ = dt u M tn_F w ∅ $ by eq_sym [l6]
+l15: $ G ⇒ ipi u (dnf u M) tn_P tn_F w = dt u M tn_F w ∅ $ by eq_trans [l5, l14]
+l16: $ G ⇒ ipi u (dnf u M) tn_P tn_F w = fv uni (suc ∅) $ by eq_trans [l15, l13]
+l17: $ G ⇒ fv uni (suc ∅) = ipi u (dnf u M) tn_P tn_F w $ by eq_sym [l16]
+l18: $ G ⇒ nnat ∈ fv uni (suc ∅) $ by nnat_uni
+l19: $ G ⇒ nnat ∈ ipi u (dnf u M) tn_P tn_F w $ by wcel_eq_r [l17, l18]
+l20: $ G ⇒ nnat = ity u (dnf u M) tr_nat_D ∅ w $ by eq_sym [l4]
+l21: $ G ⇒ ity u (dnf u M) tr_nat_D ∅ w ∈ ipi u (dnf u M) tn_P tn_F w $ by wcel_eq_l [l20, l19]
+l22: $ G ⇒ igate u (dnf u M) tr_nat_D ∅ w $ by igate_intro [l1, l2, l3, l21]
+
+nat_ityv
+--------
+l1: $ G ⇒ igate u (dnf u M) tr_nat_D ∅ w $ by nat_igate [#1, #2]
+l2: $ G ⇒ ityv u (dnf u M) tr_nat_D ∅ w = ity u (dnf u M) tr_nat_D ∅ w $ by ityv_gate [l1]
+l3: $ G ⇒ ity u (dnf u M) tr_nat_D ∅ w = nnat $ by nat_ity [#1, #2]
+l4: $ G ⇒ ityv u (dnf u M) tr_nat_D ∅ w = nnat $ by eq_trans [l2, l3]
+
 nat_ictor0
 ----------
 k0: $ G , o = ∅ ⇒ o = ∅ $ by ax
@@ -6758,19 +6795,19 @@ a1: $ G ⇒ hty ⊆ H $ by hind_hty [#1]
 a2: $ G ⇒ functional H $ by hind_functional [#1]
 a3: $ G ⇒ tr_nat_D ∈ trees ω $ by tr_nat_D_trees
 a4: $ G ⇒ enc_nat nz ∈ trees ω $ by enc_nat_trees
-a5: $ G ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons tr_nat_D (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ W R = mclip u (ity u (dnf u (mcv H)) tr_nat_D (fv nvf ⟨ kc_nz , ∅ ⟩) W) $ by dt_ind_ty_c [a1, a2, a3, a4, #3, #4]
+a5: $ G ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons tr_nat_D (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ W R = mclip u (ityv u (dnf u (mcv H)) tr_nat_D (fv nvf ⟨ kc_nz , ∅ ⟩) W) $ by dt_ind_ty_c [a1, a2, a3, a4, #3, #4]
 b1: $ G , w = W , w ∊ lvals ⇒ fv nvf ⟨ kc_nz , ∅ ⟩ = ∅ $ by nvf_nz
 b2: $ G , w = W , w ∊ lvals ⇒ tr_nat_D = tr_nat_D $ by eq_refl
 b3a: $ G , w = W , w ∊ lvals ⇒ w = W $ by ax
 b3: $ G , w = W , w ∊ lvals ⇒ W = w $ by eq_sym [b3a]
-b4: $ G , w = W , w ∊ lvals ⇒ ity u (dnf u (mcv H)) tr_nat_D (fv nvf ⟨ kc_nz , ∅ ⟩) W = ity u (dnf u (mcv H)) tr_nat_D ∅ w $ by ity_eq [b2, b1, b3]
+b4: $ G , w = W , w ∊ lvals ⇒ ityv u (dnf u (mcv H)) tr_nat_D (fv nvf ⟨ kc_nz , ∅ ⟩) W = ityv u (dnf u (mcv H)) tr_nat_D ∅ w $ by ityv_eq [b2, b1, b3]
 b5a: $ G , w = W , w ∊ lvals ⇒ uadm u $ by weaken [#2]
 b5b: $ G , w = W , w ∊ lvals ⇒ w ∊ lvals $ by ax
-b5: $ G , w = W , w ∊ lvals ⇒ ity u (dnf u (mcv H)) tr_nat_D ∅ w = nnat $ by nat_ity [b5a, b5b]
-b6: $ G , w = W , w ∊ lvals ⇒ ity u (dnf u (mcv H)) tr_nat_D (fv nvf ⟨ kc_nz , ∅ ⟩) W = nnat $ by eq_trans [b4, b5]
-b7: $ G ⇒ ity u (dnf u (mcv H)) tr_nat_D (fv nvf ⟨ kc_nz , ∅ ⟩) W = nnat $ by wcel_elim [#3, b6]
+b5: $ G , w = W , w ∊ lvals ⇒ ityv u (dnf u (mcv H)) tr_nat_D ∅ w = nnat $ by nat_ityv [b5a, b5b]
+b6: $ G , w = W , w ∊ lvals ⇒ ityv u (dnf u (mcv H)) tr_nat_D (fv nvf ⟨ kc_nz , ∅ ⟩) W = nnat $ by eq_trans [b4, b5]
+b7: $ G ⇒ ityv u (dnf u (mcv H)) tr_nat_D (fv nvf ⟨ kc_nz , ∅ ⟩) W = nnat $ by wcel_elim [#3, b6]
 c0: $ G ⇒ u = u $ by eq_refl
-c1: $ G ⇒ mclip u (ity u (dnf u (mcv H)) tr_nat_D (fv nvf ⟨ kc_nz , ∅ ⟩) W) = mclip u nnat $ by mclip_eq [c0, b7]
+c1: $ G ⇒ mclip u (ityv u (dnf u (mcv H)) tr_nat_D (fv nvf ⟨ kc_nz , ∅ ⟩) W) = mclip u nnat $ by mclip_eq [c0, b7]
 c2a: $ G ⇒ nnat ∈ u $ by nnat_u [#2]
 c2: $ G ⇒ mclip u nnat = nnat $ by mclip_in [c2a]
 c3: $ G ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons tr_nat_D (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ W R = mclip u nnat $ by eq_trans [a5, c1]

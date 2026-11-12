@@ -1038,7 +1038,10 @@ The rest of the model is not yet the spec's `deq`, so it changes nothing that is
   a set of points `nest a y`. A block's types are the least fixed point `ifam` of an operator
   that is monotone by construction (one step at every candidate below that is an element of
   the universe), so it is a fixed point whatever the data; a type that is a proposition at the
-  level valuation is valued by its collapse inside the operator. `ind_ty` is a type's entry,
+  level valuation is valued by its collapse inside the operator. `ind_ty` is a type's entry
+  when that lies in the curried `Π` of the parameters and the type's type (`igate`, `ityv`),
+  and `∅` otherwise: `ind_ty_ty` has only `tys_ok` as a premise, so the value must have its
+  type whatever the constructors (2026-11-12; for legal data the gate holds, layer E2),
   `ind_ctor` the trace of the constructor's tuple `c :: fields` (`∅` for a proposition), and
   `ind_rec` the trace, over the parameters, motives, minors, indices and major, of the fold, the
   least relation that relates a constructor's tuple to its minor at the fields and inductive

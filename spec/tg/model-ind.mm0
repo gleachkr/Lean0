@@ -29,10 +29,15 @@
 -- point `ifam` is a fixed point (`ifam_fix`). For legal data, `iop0` is
 -- monotone at candidates of `U` (positivity, layer E1) and `ifam` is in `U`
 -- (layer E2), and then `ifam` is closed under `iop0` itself (`ifam_closed`).
--- `ity` (the value of `ind_ty D j`) is type `j`'s entry; `ictor` (of
--- `ind_ctor D j c`) the trace of `c :: g` over the parameters and the fields,
--- `∅` for a proposition. The hook's parts `hty`, `hctor` give them at the
--- trees `ind_ty D J`, `ind_ctor D J C` (`dt_ind_ty`, `dt_ind_ctor`); the
+-- `ity` is type `j`'s entry; the value of `ind_ty D j` is `ityv`, which is
+-- `ity` when that lies in the curried `Π` (`ipi`) of the parameters and type
+-- `j`'s type (`igate`) and `∅` otherwise: `ind_ty_ty` has only `tys_ok` as a
+-- premise, so the value must have its type whatever the constructors, and an
+-- illegal block's types are empty (for legal data the gate holds, layer E2).
+-- `ictor` (of `ind_ctor D j c`) is the trace of `c :: g` over the parameters
+-- and the fields, `∅` for a proposition. The hook's parts `hty`, `hctor` give
+-- them at the trees `ind_ty D J`, `ind_ctor D J C` (`dt_ind_ty`,
+-- `dt_ind_ctor`); the
 -- recursors follow in a second part. Imports model-core.mm0; proofs in
 -- model-ind.auf.
 
@@ -648,13 +653,80 @@ theorem ictor_apn_c (G: hyps) (E D P T K J C Q: class) (u w f g t a: set):
   $ G ⇒ D ∈ trees ω $ > $ G ⇒ ¬ iprop D J w $ > $ G ⇒ iprt D P T $ > $ G ⇒ Q ∈ esat u E P w $ > $ G ⇒ ictk D J C K $ > $ G ⇒ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E K w (scat Q (ixs D w (ifam u E D w))) $ > $ G ⇒ apn (ictor u E D J C w) (scat f Q) = scons C g $;
 
 -- --------------------------------------------------------------------------
+-- The value of `ind_ty`: the gate
+-- --------------------------------------------------------------------------
+
+--| The curried `Π` of the telescope `P` and the type `F` (a tree in `P`'s
+--| context) at `W`: the traces whose points lie over `P`'s valuations, with
+--| the fiber at each in `F`'s value there.
+def ipi (U E P F W: class) (.x .y .p .q .z: set): class =
+  $ {x | x ⊆ {y | ∃ p ∃ z (p ∊ esat U E P W ∧ y = nest p z)} ∧
+      ∀ q (q ∊ esat U E P W → apn x q ∈ da (fv E F) W q)} $;
+--| The gate of `ind_ty D j` at `W`: type `j`'s entry lies in the curried `Π`
+--| of the parameters and its type.
+def igate (U E D j W: class) (.p .t .f: set): fml =
+  $ ∃ p ∃ t ∃ f (iprt D p t ∧ ityf D j f ∧ ity U E D j W ∈ ipi U E p f W) $;
+--| The value of `ind_ty D j` at `W` (`IndTy`): type `j`'s entry if gated, else `∅`.
+def ityv (U E D j W: class) (.z: set): class = $ {z | igate U E D j W ∧ z ∈ ity U E D j W} $;
+
+--| @congr
+theorem ipi_congr (A B C D E F H I J K: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ ipi A C E H J ≐ ipi B D F I K $;
+--| @rewrite
+theorem sb_c_ipi {x: set} (t: set x) (A B C D E: class x):
+  $ (⟦ x / t ⟧ (ipi A B C D E)) ≐ ipi (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
+--| @congr
+theorem igate_congr (A B C D E F H I J K: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ igate A C E H J ⟺ igate B D F I K $;
+--| @rewrite
+theorem sb_f_igate {x: set} (t: set x) (A B C D E: class x):
+  $ [x/t] (igate A B C D E) ⟺ igate (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
+--| @congr
+theorem ityv_congr (A B C D E F H I J K: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ ityv A C E H J ≐ ityv B D F I K $;
+--| @rewrite
+theorem sb_c_ityv {x: set} (t: set x) (A B C D E: class x):
+  $ (⟦ x / t ⟧ (ityv A B C D E)) ≐ ityv (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
+
+--| Membership of `ipi`, and its value at the empty telescope.
+theorem ipi_wcel {y p z q: set} (G: hyps) (U E P F W X: class):
+  $ G ⇒ isset X $ >
+  $ G ⇒ X ∈ ipi U E P F W ↔ (X ⊆ {y | ∃ p ∃ z (p ∊ esat U E P W ∧ y = nest p z)} ∧
+      ∀ q (q ∊ esat U E P W → apn X q ∈ da (fv E F) W q)) $;
+theorem ipi_nil (G: hyps) (E F: class) (u w: set):
+  $ G ⇒ w ∊ lvals $ > $ G ⇒ ipi u E ⟨ kc_nil , ∅ ⟩ F w = da (fv E F) w ∅ $;
+--| `ipi` reads its table only at the subtrees of the telescope and the type.
+theorem ipi_local (G: hyps) (E E2 P F W: class) (u: set):
+  $ G ⇒ P ∈ trees ω $ > $ G ⇒ F ∈ trees ω $ > $ G ⇒ eagr E E2 P $ > $ G ⇒ eagr E E2 F $ >
+  $ G ⇒ ipi u E P F W = ipi u E2 P F W $;
+--| Introduction of the gate, and the gate at the block's parts.
+theorem igate_intro (G: hyps) (U E D J W P T F: class):
+  $ G ⇒ D ∈ trees ω $ > $ G ⇒ iprt D P T $ > $ G ⇒ ityf D J F $ > $ G ⇒ ity U E D J W ∈ ipi U E P F W $ >
+  $ G ⇒ igate U E D J W $;
+theorem igate_ipi (G: hyps) (U E D J W P T F: class):
+  $ G ⇒ D ∈ trees ω $ > $ G ⇒ igate U E D J W $ > $ G ⇒ iprt D P T $ > $ G ⇒ ityf D J F $ >
+  $ G ⇒ ity U E D J W ∈ ipi U E P F W $;
+theorem igate_local (G: hyps) (E E2 D J W: class) (u: set):
+  $ G ⇒ D ∈ trees ω $ > $ G ⇒ eagr E E2 D $ > $ G ⇒ igate u E D J W ↔ igate u E2 D J W $;
+--| The value of `ind_ty`: `ity` under the gate, `∅` without it.
+theorem ityv_gate (G: hyps) (U E D J W: class): $ G ⇒ igate U E D J W $ > $ G ⇒ ityv U E D J W = ity U E D J W $;
+theorem ityv_ngate (G: hyps) (U E D J W: class): $ G ⇒ ¬ igate U E D J W $ > $ G ⇒ ityv U E D J W = ∅ $;
+--| The family's entry and the value of `ind_ty` are sets.
+theorem ity_set (G: hyps) (E D J W: class) (u: set): $ G ⇒ isset (ity u E D J W) $;
+theorem ityv_set (G: hyps) (E D J W: class) (u: set): $ G ⇒ isset (ityv u E D J W) $;
+theorem ityv_local (G: hyps) (E E2 D J W: class) (u: set):
+  $ G ⇒ D ∈ trees ω $ > $ G ⇒ eagr E E2 D $ > $ G ⇒ ityv u E D J W = ityv u E2 D J W $;
+theorem ityv_eq (G: hyps) (E D D2 J J2 W W2: class) (u: set):
+  $ G ⇒ D = D2 $ > $ G ⇒ J = J2 $ > $ G ⇒ W = W2 $ > $ G ⇒ ityv u E D J W = ityv u E D2 J2 W2 $;
+
+-- --------------------------------------------------------------------------
 -- The hook's parts for the types and the constructors
 -- --------------------------------------------------------------------------
 
---| At `ind_ty D J`, with the table `e`: `ity` over the level valuations.
+--| At `ind_ty D J`, with the table `e`: `ityv` over the level valuations.
 def hty (.u .d .j .e .w .z: set): class =
   $ {z | ∃ u ∃ d ∃ j ∃ e (z = ⟨ ⟨ u , ⟨ kc_ind_ty , ⟨ scons d (scons j ∅) , e ⟩ ⟩ ⟩ ,
-      clam w lvals (ity u e d (fv nvf j) w) ⟩)} $;
+      clam w lvals (ityv u e d (fv nvf j) w) ⟩)} $;
 --| At `ind_ctor D J C`: `ictor` over the level valuations.
 def hctor (.u .d .j .c .e .w .z: set): class =
   $ {z | ∃ u ∃ d ∃ j ∃ c ∃ e (z = ⟨ ⟨ u , ⟨ kc_ind_ctor , ⟨ scons d (scons j (scons c ∅)) , e ⟩ ⟩ ⟩ ,
@@ -662,15 +734,14 @@ def hctor (.u .d .j .c .e .w .z: set): class =
 
 theorem hty_functional (G: hyps): $ G ⇒ functional hty $;
 theorem hctor_functional (G: hyps): $ G ⇒ functional hctor $;
---| The values of `ind_ty` and `ind_ctor` are sets.
-theorem ity_set (G: hyps) (E D J W: class) (u: set): $ G ⇒ isset (ity u E D J W) $;
 --| The denotations of `ind_ty D J` and `ind_ctor D J C`, for a hook `mcv H`
 --| with `H` extending `hty` and `hctor`.
 theorem dt_ind_ty (G: hyps) (H: class) (u d j w r: set):
   $ G ⇒ hty ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ d ∊ trees ω $ > $ G ⇒ j ∊ trees ω $ >
   $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons d (scons j ∅) ⟩ w r =
-      mclip u (ity u (dnf u (mcv H)) d (fv nvf j) w) $;
+      mclip u (ityv u (dnf u (mcv H)) d (fv nvf j) w) $;
+--| The value of `ind_ctor` is a set.
 theorem ictor_set (G: hyps) (E D J C W: class) (u: set):
   $ G ⇒ D ∈ trees ω $ > $ G ⇒ isset C $ > $ G ⇒ isset (ictor u E D J C W) $;
 theorem dt_ind_ctor (G: hyps) (H: class) (u d j c w r: set):
@@ -681,6 +752,6 @@ theorem dt_ind_ctor (G: hyps) (H: class) (u d j c w r: set):
 --| Class forms of `dt_ind_ty` and `dt_ind_ctor` (the trees, the level
 --| valuation and the valuation as classes).
 theorem dt_ind_ty_c (G: hyps) (H D J W R: class) (u: set):
-  $ G ⇒ hty ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ D ∈ trees ω $ > $ G ⇒ J ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons D (scons J ∅) ⟩ W R = mclip u (ity u (dnf u (mcv H)) D (fv nvf J) W) $;
+  $ G ⇒ hty ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ D ∈ trees ω $ > $ G ⇒ J ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons D (scons J ∅) ⟩ W R = mclip u (ityv u (dnf u (mcv H)) D (fv nvf J) W) $;
 theorem dt_ind_ctor_c (G: hyps) (H D J C W R: class) (u: set):
   $ G ⇒ hctor ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ D ∈ trees ω $ > $ G ⇒ J ∈ trees ω $ > $ G ⇒ C ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ dt u (mcv H) ⟨ kc_ind_ctor , scons D (scons J (scons C ∅)) ⟩ W R = mclip u (ictor u (dnf u (mcv H)) D (fv nvf J) (fv nvf C) W) $;
