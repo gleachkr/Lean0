@@ -13,6 +13,7 @@ block). Each CASE changes one expression (a copy; shared subterms stay as they a
   mutual       B : Type                   becomes  B : Type 1   (A stays in Type)
   result       W.mk : W α                 becomes  W (W α)
   occurrence   V.mk : V α → V α           becomes  V (V α) → V α
+  index        IX.mk : IX True            becomes  IX E  (E : Type, the index a Prop)
 """
 import json, sys
 
@@ -122,6 +123,10 @@ elif case == "occurrence":
     c = decl("ctors", "V.mk")
     v_a = at(c["type"], [BODY, TYPE])  # `V α`
     c["type"] = replace(c["type"], [BODY, TYPE], new_expr({"app": {"fn": exprs[v_a]["app"]["fn"], "arg": v_a}}))
+elif case == "index":
+    c = decl("ctors", "IX.mk")
+    e = next(i for i, d in exprs.items() if "const" in d and names[d["const"]["name"]] == "E")
+    c["type"] = replace(c["type"], [("app", "arg")], e)
 else:
     sys.exit(f"unknown case {case}")
 

@@ -431,8 +431,8 @@ def cl_sty_app (J: class) (.G .h .A .f .a .B .C .C2 .w: set): class =
   $ {w | ∃ G ∃ h ∃ A ∃ f ∃ a ∃ B ∃ C ∃ C2 (w = ⟨ scons (ra_sty G h A f ⟨ kc_pi , scons B (scons C ∅) ⟩) ∅ , ra_sty G h A ⟨ kc_app , scons f (scons a ∅) ⟩ C2 ⟩ ∧ ra_deq G a a B ∈ J ∧ ra_inst ⟨ kc_nz , ∅ ⟩ C a C2 ∈ lrel)} $;
 def cl_cwf_pi (J: class) (.D .n .np .l .i .Ctx .d .k .A .B .A2 .u .w: set): class =
   $ {w | ∃ D ∃ n ∃ np ∃ l ∃ i ∃ Ctx ∃ d ∃ k ∃ A ∃ B ∃ A2 ∃ u (w = ⟨ scons (ra_cwf D n np l i ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d ∅ ⟩ B) ∅ , ra_cwf D n np l i Ctx d ⟨ kc_pi , scons A (scons B ∅) ⟩ ⟩ ∧ ra_add d np k ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n k A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u ∅ ⟩ ∈ J ∧ ra_ulevel l u ∈ lrel2 ∧ ra_ipos D n np d A ∈ lrel)} $;
-def cl_cwf_res (.D .n .np .l .i .Ctx .d .K .w: set): class =
-  $ {w | ∃ D ∃ n ∃ np ∃ l ∃ i ∃ Ctx ∃ d ∃ K (w = ⟨ ∅ , ra_cwf D n np l i Ctx d K ⟩ ∧ ra_indapp D n np d K i ∈ lrel)} $;
+def cl_cwf_res (.D .n .np .l .i .Ctx .d .k .K .K2 .b .P .T .F .C .R .R2 .S .w: set): class =
+  $ {w | ∃ D ∃ n ∃ np ∃ l ∃ i ∃ Ctx ∃ d ∃ k ∃ K ∃ K2 ∃ b ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (w = ⟨ scons (ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i ∅) ⟩ R2 K2 S) ∅ , ra_cwf D n np l i Ctx d K ⟩ ∧ ra_indapp D n np d K i ∈ lrel ∧ ra_add d np k ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n k K K2 ∈ lrel ∧ ra_ind_data D b P T ∈ lrel ∧ ra_nth_ty T i F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel)} $;
 def cl_ctors_wf_nil (.D .n .np .l .i .Ctx .w: set): class =
   $ {w | ∃ D ∃ n ∃ np ∃ l ∃ i ∃ Ctx (w = ⟨ ∅ , ra_ctors_wf D n np l i Ctx ⟨ kc_cnil , ∅ ⟩ ⟩)} $;
 def cl_ctors_wf_cons (.D .n .np .l .i .Ctx .K .C .w: set): class =
@@ -616,7 +616,7 @@ theorem lprog3_hprog (G: hyps) (J: class): $ G ⇒ hprog (lprog3 J) latoms $;
 theorem sty_nil_j (J: class) (G: ctx) (h A: expr): $ sty_j J G h A h A $;
 theorem sty_app_j (J: class) (G: ctx) (h A f a B C C2: expr): $ sty_j J G h A f (pi B C) $ > $ ty_j J G a B $ > $ inst nz C a C2 $ > $ sty_j J G h A (app f a) C2 $;
 theorem cwf_pi_j (J: class) (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (A B A2: expr) (u: lvl): $ add d np k $ > $ sinst D nz n k A A2 $ > $ ty_j J Ctx A2 (srt u) $ > $ ulevel l u $ > $ ipos D n np d A $ > $ cwf_j J D n np l i (cons A2 Ctx) (s d) B $ > $ cwf_j J D n np l i Ctx d (pi A B) $;
-theorem cwf_res_j (J: class) (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d: nat) (K: expr): $ indapp D n np d K i $ > $ cwf_j J D n np l i Ctx d K $;
+theorem cwf_res_j (J: class) (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (K K2: expr) (b: blk) (P: ctx) (T: tys) (F: expr) (C: ctors) (R R2 S: expr): $ indapp D n np d K i $ > $ add d np k $ > $ sinst D nz n k K K2 $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ pis P F R $ > $ lift k nz R R2 $ > $ sty_j J Ctx (ind_ty D i) R2 K2 S $ > $ cwf_j J D n np l i Ctx d K $;
 theorem ctors_wf_nil_j (J: class) (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx): $ ctors_wf_j J D n np l i Ctx cnil $;
 theorem ctors_wf_cons_j (J: class) (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (K: expr) (C: ctors): $ cwf_j J D n np l i Ctx nz K $ > $ ctors_wf_j J D n np l i Ctx C $ > $ ctors_wf_j J D n np l i Ctx (ccons K C) $;
 theorem tys_wf_nil_j (J: class) (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx): $ tys_wf_j J D n np l i Ctx tnil $;
@@ -751,10 +751,10 @@ theorem lrel3_sty_cases (G: hyps) (J: class) {G_v h_v A f_v a_v B C C2: set} (t1
   $ G ⇒ ra_sty t1 t2 t3 t4 t5 ∈ lrel3 J $ >
   $ G ⇒ ∃ G_v ∃ h_v ∃ A (t1 = G_v ∧ t2 = h_v ∧ t3 = A ∧ t4 = h_v ∧ t5 = A) ∨
       ∃ G_v ∃ h_v ∃ A ∃ f_v ∃ a_v ∃ B ∃ C ∃ C2 (t1 = G_v ∧ t2 = h_v ∧ t3 = A ∧ t4 = ⟨ kc_app , scons f_v (scons a_v ∅) ⟩ ∧ t5 = C2 ∧ ra_sty G_v h_v A f_v ⟨ kc_pi , scons B (scons C ∅) ⟩ ∈ lrel3 J ∧ ra_deq G_v a_v a_v B ∈ J ∧ ra_inst ⟨ kc_nz , ∅ ⟩ C a_v C2 ∈ lrel) $;
-theorem lrel3_cwf_cases (G: hyps) (J: class) {D n_v np l_v i_v Ctx d_v k_v A B A2 u_v K: set} (t1 t2 t3 t4 t5 t6 t7 t8: set):
+theorem lrel3_cwf_cases (G: hyps) (J: class) {D n_v np l_v i_v Ctx d_v k_v A B A2 u_v K K2 b_v P T F C R R2 S: set} (t1 t2 t3 t4 t5 t6 t7 t8: set):
   $ G ⇒ ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ∈ lrel3 J $ >
   $ G ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨
-      ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $;
+      ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $;
 theorem lrel3_ctors_wf_cases (G: hyps) (J: class) {D n_v np l_v i_v Ctx K C: set} (t1 t2 t3 t4 t5 t6 t7: set):
   $ G ⇒ ra_ctors_wf t1 t2 t3 t4 t5 t6 t7 ∈ lrel3 J $ >
   $ G ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = ⟨ kc_cnil , ∅ ⟩) ∨

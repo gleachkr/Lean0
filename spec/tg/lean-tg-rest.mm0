@@ -16,7 +16,7 @@ axiom sty_nil (G: ctx) (h A: expr): $ sty G h A h A $;
 axiom sty_app (G: ctx) (h A f a B C C2: expr): $ sty G h A f (pi B C) $ > $ ty G a B $ > $ inst nz C a C2 $ > $ sty G h A (app f a) C2 $;
 term cwf: ind > nat > nat > lvl > nat > ctx > nat > expr > wff;
 axiom cwf_pi (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (A B A2: expr) (u: lvl): $ add d np k $ > $ sinst D nz n k A A2 $ > $ ty Ctx A2 (srt u) $ > $ ulevel l u $ > $ ipos D n np d A $ > $ cwf D n np l i (cons A2 Ctx) (s d) B $ > $ cwf D n np l i Ctx d (pi A B) $;
-axiom cwf_res (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d: nat) (K: expr): $ indapp D n np d K i $ > $ cwf D n np l i Ctx d K $;
+axiom cwf_res (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (K K2: expr) (b: blk) (P: ctx) (T: tys) (F: expr) (C: ctors) (R R2 S: expr): $ indapp D n np d K i $ > $ add d np k $ > $ sinst D nz n k K K2 $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ pis P F R $ > $ lift k nz R R2 $ > $ sty Ctx (ind_ty D i) R2 K2 S $ > $ cwf D n np l i Ctx d K $;
 term ctors_wf: ind > nat > nat > lvl > nat > ctx > ctors > wff;
 axiom ctors_wf_nil (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx): $ ctors_wf D n np l i Ctx cnil $;
 axiom ctors_wf_cons (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (K: expr) (C: ctors): $ cwf D n np l i Ctx nz K $ > $ ctors_wf D n np l i Ctx C $ > $ ctors_wf D n np l i Ctx (ccons K C) $;

@@ -1555,7 +1555,14 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
     /// as written (a recursor's or a quotient primitive's type): each argument typed at its
     /// binder's type, `T` the rest of `A`. The premise of the reduction rules (audit §4).
     fn sty_spine(&mut self, h: ExprPtr<'t>, args: &[ExprPtr<'t>]) -> R<(ExprPtr<'t>, P)> {
-        let (mut ty, _) = self.infer(h)?;
+        let (ty, _) = self.infer(h)?;
+        self.sty_spine_at(h, ty, args)
+    }
+
+    /// `sty_spine` with the head's type given (a type of the head up to annotations: an
+    /// inductive type's type as the schema's data has it, for `cwf_res`).
+    pub(crate) fn sty_spine_at(&mut self, h: ExprPtr<'t>, ty: ExprPtr<'t>, args: &[ExprPtr<'t>]) -> R<(ExprPtr<'t>, P)> {
+        let mut ty = ty;
         let (g, he, te) = (self.ctx(), self.tr(h)?, self.tr(ty)?);
         let mut ps = mm(self.g.lean.sty_nil(&mut self.g.env, g, he, te))?;
         for &a in args {

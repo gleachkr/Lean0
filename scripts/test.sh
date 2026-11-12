@@ -281,7 +281,7 @@ echo "== negative tests: illegal inductive blocks (the schema must reject them)"
 # tests/lean/Illegal.lean (whose blocks the schema certifies, the control), and `--unchecked`
 # skips nanoda's check so that the schema alone judges it: `lean0 gen` must fail at the block,
 # naming the schema. nanoda rejects every one of them too (two by not terminating).
-for case in nonpositive universe elim mutual result occurrence; do
+for case in nonpositive universe elim mutual result occurrence index; do
   d="build/gen/illegal-$case"
   rm -rf "$d"; mkdir -p "$d"
   python3 scripts/illegal-export.py build/lean/illegal.ndjson "$d/x.ndjson" "$case"

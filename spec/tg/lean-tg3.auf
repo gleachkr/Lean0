@@ -1943,7 +1943,7 @@ l44: $ _ ⇒ ⟨ kc_pi , scons (enc_expr A) (scons (enc_expr B) ∅) ⟩ = enc_e
 l45: $ _ ⇒ ra_cwf (enc_ind D) (enc_nat n) (enc_nat np) (enc_lvl l) (enc_nat i) (enc_ctx Ctx) (enc_nat d) ⟨ kc_pi , scons (enc_expr A) (scons (enc_expr B) ∅) ⟩ = ra_cwf (enc_ind D) (enc_nat n) (enc_nat np) (enc_lvl l) (enc_nat i) (enc_ctx Ctx) (enc_nat d) (enc_expr (pi A B)) $ by ra_cwf_eq [l37, l38, l39, l40, l41, l42, l43, l44]
 l46: $ cwf_j J D n np l i Ctx d (pi A B) $ by wcel_eq_l [l45, l36]
 
-lemma j1_c_cwf_res (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8: class):
+lemma j1_c_cwf_res (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18: class):
   $ G ⇒ A1 ∈ trees ω $ >
   $ G ⇒ A2 ∈ trees ω $ >
   $ G ⇒ A3 ∈ trees ω $ >
@@ -1952,62 +1952,165 @@ lemma j1_c_cwf_res (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8: class):
   $ G ⇒ A6 ∈ trees ω $ >
   $ G ⇒ A7 ∈ trees ω $ >
   $ G ⇒ A8 ∈ trees ω $ >
-  $ G ⇒ ra_indapp A1 A2 A3 A7 A8 A5 ∈ lrel $ >
-  $ G ⇒ ra_cwf A1 A2 A3 A4 A5 A6 A7 A8 ∈ lrel3 J $
+  $ G ⇒ A9 ∈ trees ω $ >
+  $ G ⇒ A10 ∈ trees ω $ >
+  $ G ⇒ A11 ∈ trees ω $ >
+  $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ >
+  $ G ⇒ A14 ∈ trees ω $ >
+  $ G ⇒ A15 ∈ trees ω $ >
+  $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ >
+  $ G ⇒ A18 ∈ trees ω $ >
+  $ G ⇒ ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18 ∈ lrel3 J $ >
+  $ G ⇒ ra_indapp A1 A2 A3 A7 A9 A5 ∈ lrel $ >
+  $ G ⇒ ra_add A7 A3 A8 ∈ lrel $ >
+  $ G ⇒ ra_sinst A1 ⟨ kc_nz , ∅ ⟩ A2 A8 A9 A10 ∈ lrel $ >
+  $ G ⇒ ra_ind_data A1 A11 A12 A13 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A13 A5 A14 A15 ∈ lrel $ >
+  $ G ⇒ ra_pis A12 A14 A16 ∈ lrel $ >
+  $ G ⇒ ra_lift A8 ⟨ kc_nz , ∅ ⟩ A16 A17 ∈ lrel $ >
+  $ G ⇒ ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ∈ lrel3 J $
 ----
-l1: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ y = A1 $ by ax
-l2: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ z = A2 $ by ax
-l3: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ u = A3 $ by ax
-l4: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ v = A4 $ by ax
-l5: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ w = A5 $ by ax
-l6: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ a = A6 $ by ax
-l7: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ b = A7 $ by ax
-l8: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ c = A8 $ by ax
-l9: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ ra_indapp A1 A2 A3 A7 A8 A5 ∈ lrel $ by weaken [#9]
-l10: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ ra_indapp y z u b c w = ra_indapp A1 A2 A3 A7 A8 A5 $ by ra_indapp_eq [l1, l2, l3, l7, l8, l5]
-l11: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ ra_indapp A1 A2 A3 A7 A8 A5 = ra_indapp y z u b c w $ by eq_sym [l10]
-l12: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ ra_indapp y z u b c w ∈ lrel $ by wcel_eq_l [l11, l9]
-l13: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ⇒ x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ $ by ax
-l14: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ⇒ ra_indapp y z u b c w ∈ lrel $ by weaken [l12]
-l15: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ⇒ x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel $ by and_intro [l13, l14]
-l16: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ⇒ ∃ c (x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel) $ by ex_intro [l15]
-l17: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ⇒ ∃ b ∃ c (x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel) $ by ex_intro [l16]
-l18: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ⇒ ∃ a ∃ b ∃ c (x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel) $ by ex_intro [l17]
-l19: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ⇒ ∃ w ∃ a ∃ b ∃ c (x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel) $ by ex_intro [l18]
-l20: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ⇒ ∃ v ∃ w ∃ a ∃ b ∃ c (x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel) $ by ex_intro [l19]
-l21: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ⇒ ∃ u ∃ v ∃ w ∃ a ∃ b ∃ c (x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel) $ by ex_intro [l20]
-l22: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ⇒ ∃ z ∃ u ∃ v ∃ w ∃ a ∃ b ∃ c (x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel) $ by ex_intro [l21]
-l23: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ⇒ ∃ y ∃ z ∃ u ∃ v ∃ w ∃ a ∃ b ∃ c (x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel) $ by ex_intro [l22]
-l24: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ⇒ x ∊ cl_cwf_res $ by cab_intro [l23]
-l25: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ⇒ ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∈ cl_cwf_res $ by wcel_intro [l13, l24]
-l26: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ isset ⟨ ∅ , ra_cwf y z u v w a b c ⟩ $ by opair_isset
-l27: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∈ cl_cwf_res $ by isset_elim [l26, l25]
-l28: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ ∅ = ∅ $ by eq_refl
-l29: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ ra_cwf y z u v w a b c = ra_cwf A1 A2 A3 A4 A5 A6 A7 A8 $ by ra_cwf_eq [l1, l2, l3, l4, l5, l6, l7, l8]
-l30: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ ⟨ ∅ , ra_cwf y z u v w a b c ⟩ = ⟨ ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A8 ⟩ $ by opair_eq [l28, l29]
-l31: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ ⟨ ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A8 ⟩ ∈ cl_cwf_res $ by wcel_eq_l [l30, l27]
-l32: $ G ⇒ isset A8 $ by wcel_isset [#8]
-l33: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 ⇒ ⟨ ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A8 ⟩ ∈ cl_cwf_res $ by isset_elim [l32, l31]
-l34: $ G ⇒ isset A7 $ by wcel_isset [#7]
-l35: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ⟨ ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A8 ⟩ ∈ cl_cwf_res $ by isset_elim [l34, l33]
-l36: $ G ⇒ isset A6 $ by wcel_isset [#6]
-l37: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 ⇒ ⟨ ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A8 ⟩ ∈ cl_cwf_res $ by isset_elim [l36, l35]
-l38: $ G ⇒ isset A5 $ by wcel_isset [#5]
-l39: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ ⟨ ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A8 ⟩ ∈ cl_cwf_res $ by isset_elim [l38, l37]
-l40: $ G ⇒ isset A4 $ by wcel_isset [#4]
-l41: $ G , y = A1 , z = A2 , u = A3 ⇒ ⟨ ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A8 ⟩ ∈ cl_cwf_res $ by isset_elim [l40, l39]
-l42: $ G ⇒ isset A3 $ by wcel_isset [#3]
-l43: $ G , y = A1 , z = A2 ⇒ ⟨ ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A8 ⟩ ∈ cl_cwf_res $ by isset_elim [l42, l41]
-l44: $ G ⇒ isset A2 $ by wcel_isset [#2]
-l45: $ G , y = A1 ⇒ ⟨ ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A8 ⟩ ∈ cl_cwf_res $ by isset_elim [l44, l43]
-l46: $ G ⇒ isset A1 $ by wcel_isset [#1]
-l47: $ G ⇒ ⟨ ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A8 ⟩ ∈ cl_cwf_res $ by isset_elim [l46, l45]
-l48: $ G ⇒ ⟨ ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A8 ⟩ ∈ (cl_cwf_pi J) ∪ cl_cwf_res $ by j1_in_r [l47]
-l49: $ G ⇒ ⟨ ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A8 ⟩ ∈ j1_top J $ by j1_pr_cwf [l48]
-l50: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
-l51: $ G ⇒ crn ∅ ⊆ lrel3 J $ by crn_empty_sub
-l52: $ G ⇒ ra_cwf A1 A2 A3 A4 A5 A6 A7 A8 ∈ latoms $ by j1_ra_cwf [#1, #2, #3, #4, #5, #6, #7, #8]
-l53: $ G ⇒ ra_cwf A1 A2 A3 A4 A5 A6 A7 A8 ∈ lrel3 J $ by j1_horn [l49, l50, l52, l51]
+l1: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ y = A1 $ by ax
+l2: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ z = A2 $ by ax
+l3: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ u = A3 $ by ax
+l4: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ v = A4 $ by ax
+l5: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ w = A5 $ by ax
+l6: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ a = A6 $ by ax
+l7: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ b = A7 $ by ax
+l8: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ c = A8 $ by ax
+l9: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ f = A9 $ by ax
+l10: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ g = A10 $ by ax
+l11: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ i = A11 $ by ax
+l12: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ j = A12 $ by ax
+l13: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ k = A13 $ by ax
+l14: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ d = A14 $ by ax
+l15: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ e = A15 $ by ax
+l16: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ h = A16 $ by ax
+l17: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ l = A17 $ by ax
+l18: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ m = A18 $ by ax
+l19: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_indapp A1 A2 A3 A7 A9 A5 ∈ lrel $ by weaken [#20]
+l20: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_indapp y z u b f w = ra_indapp A1 A2 A3 A7 A9 A5 $ by ra_indapp_eq [l1, l2, l3, l7, l9, l5]
+l21: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_indapp A1 A2 A3 A7 A9 A5 = ra_indapp y z u b f w $ by eq_sym [l20]
+l22: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_indapp y z u b f w ∈ lrel $ by wcel_eq_l [l21, l19]
+l23: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_add A7 A3 A8 ∈ lrel $ by weaken [#21]
+l24: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_add b u c = ra_add A7 A3 A8 $ by ra_add_eq [l7, l3, l8]
+l25: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_add A7 A3 A8 = ra_add b u c $ by eq_sym [l24]
+l26: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_add b u c ∈ lrel $ by wcel_eq_l [l25, l23]
+l27: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_sinst A1 ⟨ kc_nz , ∅ ⟩ A2 A8 A9 A10 ∈ lrel $ by weaken [#22]
+l28: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ⟨ kc_nz , ∅ ⟩ = ⟨ kc_nz , ∅ ⟩ $ by eq_refl
+l29: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g = ra_sinst A1 ⟨ kc_nz , ∅ ⟩ A2 A8 A9 A10 $ by ra_sinst_eq [l1, l28, l2, l8, l9, l10]
+l30: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_sinst A1 ⟨ kc_nz , ∅ ⟩ A2 A8 A9 A10 = ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g $ by eq_sym [l29]
+l31: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel $ by wcel_eq_l [l30, l27]
+l32: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_ind_data A1 A11 A12 A13 ∈ lrel $ by weaken [#23]
+l33: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_ind_data y i j k = ra_ind_data A1 A11 A12 A13 $ by ra_ind_data_eq [l1, l11, l12, l13]
+l34: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_ind_data A1 A11 A12 A13 = ra_ind_data y i j k $ by eq_sym [l33]
+l35: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_ind_data y i j k ∈ lrel $ by wcel_eq_l [l34, l32]
+l36: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_nth_ty A13 A5 A14 A15 ∈ lrel $ by weaken [#24]
+l37: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_nth_ty k w d e = ra_nth_ty A13 A5 A14 A15 $ by ra_nth_ty_eq [l13, l5, l14, l15]
+l38: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_nth_ty A13 A5 A14 A15 = ra_nth_ty k w d e $ by eq_sym [l37]
+l39: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_nth_ty k w d e ∈ lrel $ by wcel_eq_l [l38, l36]
+l40: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_pis A12 A14 A16 ∈ lrel $ by weaken [#25]
+l41: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_pis j d h = ra_pis A12 A14 A16 $ by ra_pis_eq [l12, l14, l16]
+l42: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_pis A12 A14 A16 = ra_pis j d h $ by eq_sym [l41]
+l43: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_pis j d h ∈ lrel $ by wcel_eq_l [l42, l40]
+l44: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_lift A8 ⟨ kc_nz , ∅ ⟩ A16 A17 ∈ lrel $ by weaken [#26]
+l45: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_lift c ⟨ kc_nz , ∅ ⟩ h l = ra_lift A8 ⟨ kc_nz , ∅ ⟩ A16 A17 $ by ra_lift_eq [l8, l28, l16, l17]
+l46: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_lift A8 ⟨ kc_nz , ∅ ⟩ A16 A17 = ra_lift c ⟨ kc_nz , ∅ ⟩ h l $ by eq_sym [l45]
+l47: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel $ by wcel_eq_l [l46, l44]
+l48: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ $ by ax
+l49: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel $ by weaken [l47]
+l50: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ra_pis j d h ∈ lrel $ by weaken [l43]
+l51: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel $ by and_intro [l50, l49]
+l52: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ra_nth_ty k w d e ∈ lrel $ by weaken [l39]
+l53: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel $ by and_intro [l52, l51]
+l54: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ra_ind_data y i j k ∈ lrel $ by weaken [l35]
+l55: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel $ by and_intro [l54, l53]
+l56: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel $ by weaken [l31]
+l57: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel $ by and_intro [l56, l55]
+l58: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ra_add b u c ∈ lrel $ by weaken [l26]
+l59: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel $ by and_intro [l58, l57]
+l60: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ra_indapp y z u b f w ∈ lrel $ by weaken [l22]
+l61: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel $ by and_intro [l60, l59]
+l62: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel $ by and_intro [l48, l61]
+l63: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l62]
+l64: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l63]
+l65: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l64]
+l66: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ e ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l65]
+l67: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ d ∃ e ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l66]
+l68: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ k ∃ d ∃ e ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l67]
+l69: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ j ∃ k ∃ d ∃ e ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l68]
+l70: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ i ∃ j ∃ k ∃ d ∃ e ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l69]
+l71: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ g ∃ i ∃ j ∃ k ∃ d ∃ e ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l70]
+l72: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ f ∃ g ∃ i ∃ j ∃ k ∃ d ∃ e ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l71]
+l73: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ c ∃ f ∃ g ∃ i ∃ j ∃ k ∃ d ∃ e ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l72]
+l74: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ b ∃ c ∃ f ∃ g ∃ i ∃ j ∃ k ∃ d ∃ e ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l73]
+l75: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ a ∃ b ∃ c ∃ f ∃ g ∃ i ∃ j ∃ k ∃ d ∃ e ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l74]
+l76: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ w ∃ a ∃ b ∃ c ∃ f ∃ g ∃ i ∃ j ∃ k ∃ d ∃ e ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l75]
+l77: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ v ∃ w ∃ a ∃ b ∃ c ∃ f ∃ g ∃ i ∃ j ∃ k ∃ d ∃ e ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l76]
+l78: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ u ∃ v ∃ w ∃ a ∃ b ∃ c ∃ f ∃ g ∃ i ∃ j ∃ k ∃ d ∃ e ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l77]
+l79: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ z ∃ u ∃ v ∃ w ∃ a ∃ b ∃ c ∃ f ∃ g ∃ i ∃ j ∃ k ∃ d ∃ e ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l78]
+l80: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ∃ y ∃ z ∃ u ∃ v ∃ w ∃ a ∃ b ∃ c ∃ f ∃ g ∃ i ∃ j ∃ k ∃ d ∃ e ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by ex_intro [l79]
+l81: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ x ∊ cl_cwf_res $ by cab_intro [l80]
+l82: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ⇒ ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∈ cl_cwf_res $ by wcel_intro [l48, l81]
+l83: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ isset ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ $ by opair_isset
+l84: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∈ cl_cwf_res $ by isset_elim [l83, l82]
+l85: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ kc_ind_ty = kc_ind_ty $ by eq_refl
+l86: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ∅ = ∅ $ by eq_refl
+l87: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ scons w ∅ = scons A5 ∅ $ by scons_eq [l5, l86]
+l88: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ scons y (scons w ∅) = scons A1 (scons A5 ∅) $ by scons_eq [l1, l87]
+l89: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ = ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ $ by opair_eq [l85, l88]
+l90: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m = ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18 $ by ra_sty_eq [l6, l89, l17, l10, l18]
+l91: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ = scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ $ by scons_eq [l90, l86]
+l92: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ra_cwf y z u v w a b f = ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 $ by ra_cwf_eq [l1, l2, l3, l4, l5, l6, l7, l9]
+l93: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ = ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ $ by opair_eq [l91, l92]
+l94: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 , m = A18 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by wcel_eq_l [l93, l84]
+l95: $ G ⇒ isset A18 $ by wcel_isset [#18]
+l96: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 , l = A17 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l95, l94]
+l97: $ G ⇒ isset A17 $ by wcel_isset [#17]
+l98: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 , h = A16 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l97, l96]
+l99: $ G ⇒ isset A16 $ by wcel_isset [#16]
+l100: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 , e = A15 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l99, l98]
+l101: $ G ⇒ isset A15 $ by wcel_isset [#15]
+l102: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 , d = A14 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l101, l100]
+l103: $ G ⇒ isset A14 $ by wcel_isset [#14]
+l104: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 , k = A13 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l103, l102]
+l105: $ G ⇒ isset A13 $ by wcel_isset [#13]
+l106: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 , j = A12 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l105, l104]
+l107: $ G ⇒ isset A12 $ by wcel_isset [#12]
+l108: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l107, l106]
+l109: $ G ⇒ isset A11 $ by wcel_isset [#11]
+l110: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l109, l108]
+l111: $ G ⇒ isset A10 $ by wcel_isset [#10]
+l112: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l111, l110]
+l113: $ G ⇒ isset A9 $ by wcel_isset [#9]
+l114: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l113, l112]
+l115: $ G ⇒ isset A8 $ by wcel_isset [#8]
+l116: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l115, l114]
+l117: $ G ⇒ isset A7 $ by wcel_isset [#7]
+l118: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l117, l116]
+l119: $ G ⇒ isset A6 $ by wcel_isset [#6]
+l120: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l119, l118]
+l121: $ G ⇒ isset A5 $ by wcel_isset [#5]
+l122: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l121, l120]
+l123: $ G ⇒ isset A4 $ by wcel_isset [#4]
+l124: $ G , y = A1 , z = A2 , u = A3 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l123, l122]
+l125: $ G ⇒ isset A3 $ by wcel_isset [#3]
+l126: $ G , y = A1 , z = A2 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l125, l124]
+l127: $ G ⇒ isset A2 $ by wcel_isset [#2]
+l128: $ G , y = A1 ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l127, l126]
+l129: $ G ⇒ isset A1 $ by wcel_isset [#1]
+l130: $ G ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ cl_cwf_res $ by isset_elim [l129, l128]
+l131: $ G ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ (cl_cwf_pi J) ∪ cl_cwf_res $ by j1_in_r [l130]
+l132: $ G ⇒ ⟨ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ , ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ⟩ ∈ j1_top J $ by j1_pr_cwf [l131]
+l133: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
+l134: $ G ⇒ crn ∅ ⊆ lrel3 J $ by crn_empty_sub
+l135: $ G ⇒ (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∈ latoms $ by j1_lrel3_lat [#19]
+l136: $ G ⇒ scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅ ∈ fseq latoms $ by scons_fseq_c [l135, l133]
+l137: $ G ⇒ crn (scons (ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18) ∅) ⊆ lrel3 J $ by crn_scons_sub [#19, l134]
+l138: $ G ⇒ ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ∈ latoms $ by j1_ra_cwf [#1, #2, #3, #4, #5, #6, #7, #9]
+l139: $ G ⇒ ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ∈ lrel3 J $ by j1_horn [l132, l136, l138, l137]
 
 cwf_res_j
 ---------
@@ -2018,8 +2121,35 @@ l4: $ _ ⇒ enc_lvl l ∈ trees ω $ by enc_lvl_trees
 l5: $ _ ⇒ enc_nat i ∈ trees ω $ by enc_nat_trees
 l6: $ _ ⇒ enc_ctx Ctx ∈ trees ω $ by enc_ctx_trees
 l7: $ _ ⇒ enc_nat d ∈ trees ω $ by enc_nat_trees
-l8: $ _ ⇒ enc_expr K ∈ trees ω $ by enc_expr_trees
-l9: $ cwf_j J D n np l i Ctx d K $ by j1_c_cwf_res [l1, l2, l3, l4, l5, l6, l7, l8, #1]
+l8: $ _ ⇒ enc_nat k ∈ trees ω $ by enc_nat_trees
+l9: $ _ ⇒ enc_expr K ∈ trees ω $ by enc_expr_trees
+l10: $ _ ⇒ enc_expr K2 ∈ trees ω $ by enc_expr_trees
+l11: $ _ ⇒ enc_blk b ∈ trees ω $ by enc_blk_trees
+l12: $ _ ⇒ enc_ctx P ∈ trees ω $ by enc_ctx_trees
+l13: $ _ ⇒ enc_tys T ∈ trees ω $ by enc_tys_trees
+l14: $ _ ⇒ enc_expr F ∈ trees ω $ by enc_expr_trees
+l15: $ _ ⇒ enc_ctors C ∈ trees ω $ by enc_ctors_trees
+l16: $ _ ⇒ enc_expr R ∈ trees ω $ by enc_expr_trees
+l17: $ _ ⇒ enc_expr R2 ∈ trees ω $ by enc_expr_trees
+l18: $ _ ⇒ enc_expr S ∈ trees ω $ by enc_expr_trees
+l19: $ _ ⇒ enc_ctx Ctx = enc_ctx Ctx $ by eq_refl
+l20: $ _ ⇒ enc_expr (ind_ty D i) = ⟨ kc_ind_ty , scons (enc_ind D) (scons (enc_nat i) ∅) ⟩ $ by eq_refl
+l21: $ _ ⇒ enc_expr R2 = enc_expr R2 $ by eq_refl
+l22: $ _ ⇒ enc_expr K2 = enc_expr K2 $ by eq_refl
+l23: $ _ ⇒ enc_expr S = enc_expr S $ by eq_refl
+l24: $ _ ⇒ ra_sty (enc_ctx Ctx) (enc_expr (ind_ty D i)) (enc_expr R2) (enc_expr K2) (enc_expr S) = ra_sty (enc_ctx Ctx) ⟨ kc_ind_ty , scons (enc_ind D) (scons (enc_nat i) ∅) ⟩ (enc_expr R2) (enc_expr K2) (enc_expr S) $ by ra_sty_eq [l19, l20, l21, l22, l23]
+l25: $ _ ⇒ ra_sty (enc_ctx Ctx) ⟨ kc_ind_ty , scons (enc_ind D) (scons (enc_nat i) ∅) ⟩ (enc_expr R2) (enc_expr K2) (enc_expr S) ∈ lrel3 J $ by wcel_eq_l [l24, #8]
+l26: $ _ ⇒ enc_ind D = enc_ind D $ by eq_refl
+l27: $ _ ⇒ enc_nat nz = ⟨ kc_nz , ∅ ⟩ $ by eq_refl
+l28: $ _ ⇒ enc_nat n = enc_nat n $ by eq_refl
+l29: $ _ ⇒ enc_nat k = enc_nat k $ by eq_refl
+l30: $ _ ⇒ enc_expr K = enc_expr K $ by eq_refl
+l31: $ _ ⇒ ra_sinst (enc_ind D) (enc_nat nz) (enc_nat n) (enc_nat k) (enc_expr K) (enc_expr K2) = ra_sinst (enc_ind D) ⟨ kc_nz , ∅ ⟩ (enc_nat n) (enc_nat k) (enc_expr K) (enc_expr K2) $ by ra_sinst_eq [l26, l27, l28, l29, l30, l22]
+l32: $ _ ⇒ ra_sinst (enc_ind D) ⟨ kc_nz , ∅ ⟩ (enc_nat n) (enc_nat k) (enc_expr K) (enc_expr K2) ∈ lrel $ by wcel_eq_l [l31, #3]
+l33: $ _ ⇒ enc_expr R = enc_expr R $ by eq_refl
+l34: $ _ ⇒ ra_lift (enc_nat k) (enc_nat nz) (enc_expr R) (enc_expr R2) = ra_lift (enc_nat k) ⟨ kc_nz , ∅ ⟩ (enc_expr R) (enc_expr R2) $ by ra_lift_eq [l29, l27, l33, l21]
+l35: $ _ ⇒ ra_lift (enc_nat k) ⟨ kc_nz , ∅ ⟩ (enc_expr R) (enc_expr R2) ∈ lrel $ by wcel_eq_l [l34, #7]
+l36: $ cwf_j J D n np l i Ctx d K $ by j1_c_cwf_res [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l12, l13, l14, l15, l16, l17, l18, l25, #1, #2, l32, #4, #5, #6, l35]
 
 lemma j1_pr_ctors_wf (G: hyps) (J X: class): $ G ⇒ X ∈ pr_ctors_wf $ > $ G ⇒ X ∈ j1_top J $
 ----
@@ -14245,6 +14375,46 @@ l27: $ H , ∃ a2 ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a
 l28: $ H , ∃ a2 ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 p ⇒ c $ by ex_elim [l27, l26]
 l29: $ G , H ⇒ c $ by ex_elim [#1, l28]
 
+--| Elimination of 18 nested existentials.
+lemma j2_ex18 {a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18: set} (G: hyps a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18) (H: hyps) (p: fml a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18) (c: fml):
+  $ G ⇒ ∃ a1 ∃ a2 ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $ > $ H , p ⇒ c $ > $ G , H ⇒ c $
+----
+l1: $ H , ∃ a18 p ⇒ ∃ a18 p $ by ax
+l2: $ H , ∃ a18 p ⇒ c $ by ex_elim [l1, #2]
+l3: $ H , ∃ a17 ∃ a18 p ⇒ ∃ a17 ∃ a18 p $ by ax
+l4: $ H , ∃ a17 ∃ a18 p ⇒ c $ by ex_elim [l3, l2]
+l5: $ H , ∃ a16 ∃ a17 ∃ a18 p ⇒ ∃ a16 ∃ a17 ∃ a18 p $ by ax
+l6: $ H , ∃ a16 ∃ a17 ∃ a18 p ⇒ c $ by ex_elim [l5, l4]
+l7: $ H , ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $ by ax
+l8: $ H , ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ c $ by ex_elim [l7, l6]
+l9: $ H , ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $ by ax
+l10: $ H , ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ c $ by ex_elim [l9, l8]
+l11: $ H , ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $ by ax
+l12: $ H , ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ c $ by ex_elim [l11, l10]
+l13: $ H , ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $ by ax
+l14: $ H , ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ c $ by ex_elim [l13, l12]
+l15: $ H , ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $ by ax
+l16: $ H , ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ c $ by ex_elim [l15, l14]
+l17: $ H , ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $ by ax
+l18: $ H , ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ c $ by ex_elim [l17, l16]
+l19: $ H , ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $ by ax
+l20: $ H , ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ c $ by ex_elim [l19, l18]
+l21: $ H , ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $ by ax
+l22: $ H , ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ c $ by ex_elim [l21, l20]
+l23: $ H , ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $ by ax
+l24: $ H , ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ c $ by ex_elim [l23, l22]
+l25: $ H , ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $ by ax
+l26: $ H , ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ c $ by ex_elim [l25, l24]
+l27: $ H , ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $ by ax
+l28: $ H , ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ c $ by ex_elim [l27, l26]
+l29: $ H , ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $ by ax
+l30: $ H , ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ c $ by ex_elim [l29, l28]
+l31: $ H , ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $ by ax
+l32: $ H , ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ c $ by ex_elim [l31, l30]
+l33: $ H , ∃ a2 ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ ∃ a2 ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $ by ax
+l34: $ H , ∃ a2 ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p ⇒ c $ by ex_elim [l33, l32]
+l35: $ G , H ⇒ c $ by ex_elim [#1, l34]
+
 --| Elimination of 21 nested existentials.
 lemma j2_ex21 {a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21: set} (G: hyps a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21) (H: hyps) (p: fml a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18 a19 a20 a21) (c: fml):
   $ G ⇒ ∃ a1 ∃ a2 ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 ∃ a19 ∃ a20 ∃ a21 p $ > $ H , p ⇒ c $ > $ G , H ⇒ c $
@@ -14698,12 +14868,12 @@ l8: $ G ⇒ cl_cwf_pi J ⊆ j2_lab kr_cwf (suc kr_cwf) $ by subset_intro [l7]
 lemma j2_k_cwf_res (G: hyps): $ G ⇒ cl_cwf_res ⊆ j2_lab kr_cwf (suc kr_cwf) $
 ----
 l1: $ G , x ∊ cl_cwf_res ⇒ x ∊ cl_cwf_res $ by ax
-l2: $ G , x ∊ cl_cwf_res ⇒ ∃ y ∃ z ∃ u ∃ v ∃ w ∃ a ∃ b ∃ c (x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel) $ by cab_elim [l1]
-l3: $ G , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel ⇒ x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel $ by ax
-l4: $ G , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel ⇒ x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ $ by and_elim_l [l3]
-l5: $ G , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel ⇒ kr_cwf ∈ ω $ by kr_cwf_omega
-l6: $ G , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel ⇒ x ∊ j2_lab kr_cwf (suc kr_cwf) $ by j2_lab_self [l4, l5]
-l7: $ G , x ∊ cl_cwf_res ⇒ x ∊ j2_lab kr_cwf (suc kr_cwf) $ by j2_ex8 [l2, l6]
+l2: $ G , x ∊ cl_cwf_res ⇒ ∃ y ∃ z ∃ u ∃ v ∃ w ∃ a ∃ b ∃ c ∃ f ∃ g ∃ i ∃ j ∃ k ∃ d ∃ e ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by cab_elim [l1]
+l3: $ G , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel ⇒ x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel $ by ax
+l4: $ G , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel ⇒ x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ $ by and_elim_l [l3]
+l5: $ G , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel ⇒ kr_cwf ∈ ω $ by kr_cwf_omega
+l6: $ G , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel ⇒ x ∊ j2_lab kr_cwf (suc kr_cwf) $ by j2_lab_self [l4, l5]
+l7: $ G , x ∊ cl_cwf_res ⇒ x ∊ j2_lab kr_cwf (suc kr_cwf) $ by j2_ex18 [l2, l6]
 l8: $ G ⇒ cl_cwf_res ⊆ j2_lab kr_cwf (suc kr_cwf) $ by subset_intro [l7]
 
 lemma j2_p_cwf (G: hyps) (J: class): $ G ⇒ pr_cwf J ⊆ j2_lab kr_cwf (suc kr_cwf) $
@@ -19590,6 +19760,27 @@ l12: $ G ⇒ p3 ∧ p4 ∧ p5 ∧ p6 ∧ p7 ∧ p8 ∧ p9 ∧ p10 ∧ p11 ∧ p1
 l13: $ G ⇒ p2 ∧ p3 ∧ p4 ∧ p5 ∧ p6 ∧ p7 ∧ p8 ∧ p9 ∧ p10 ∧ p11 ∧ p12 ∧ p13 ∧ p14 ∧ q $ by and_intro [#2, l12]
 l14: $ G ⇒ p1 ∧ p2 ∧ p3 ∧ p4 ∧ p5 ∧ p6 ∧ p7 ∧ p8 ∧ p9 ∧ p10 ∧ p11 ∧ p12 ∧ p13 ∧ p14 ∧ q $ by and_intro [#1, l13]
 
+--| A conjunction of 16 formulas.
+lemma j2_and15 (G: hyps) (p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15 q: fml):
+  $ G ⇒ p1 $ > $ G ⇒ p2 $ > $ G ⇒ p3 $ > $ G ⇒ p4 $ > $ G ⇒ p5 $ > $ G ⇒ p6 $ > $ G ⇒ p7 $ > $ G ⇒ p8 $ > $ G ⇒ p9 $ > $ G ⇒ p10 $ > $ G ⇒ p11 $ > $ G ⇒ p12 $ > $ G ⇒ p13 $ > $ G ⇒ p14 $ > $ G ⇒ p15 $ > $ G ⇒ q $ >
+  $ G ⇒ p1 ∧ p2 ∧ p3 ∧ p4 ∧ p5 ∧ p6 ∧ p7 ∧ p8 ∧ p9 ∧ p10 ∧ p11 ∧ p12 ∧ p13 ∧ p14 ∧ p15 ∧ q $
+----
+l1: $ G ⇒ p15 ∧ q $ by and_intro [#15, #16]
+l2: $ G ⇒ p14 ∧ p15 ∧ q $ by and_intro [#14, l1]
+l3: $ G ⇒ p13 ∧ p14 ∧ p15 ∧ q $ by and_intro [#13, l2]
+l4: $ G ⇒ p12 ∧ p13 ∧ p14 ∧ p15 ∧ q $ by and_intro [#12, l3]
+l5: $ G ⇒ p11 ∧ p12 ∧ p13 ∧ p14 ∧ p15 ∧ q $ by and_intro [#11, l4]
+l6: $ G ⇒ p10 ∧ p11 ∧ p12 ∧ p13 ∧ p14 ∧ p15 ∧ q $ by and_intro [#10, l5]
+l7: $ G ⇒ p9 ∧ p10 ∧ p11 ∧ p12 ∧ p13 ∧ p14 ∧ p15 ∧ q $ by and_intro [#9, l6]
+l8: $ G ⇒ p8 ∧ p9 ∧ p10 ∧ p11 ∧ p12 ∧ p13 ∧ p14 ∧ p15 ∧ q $ by and_intro [#8, l7]
+l9: $ G ⇒ p7 ∧ p8 ∧ p9 ∧ p10 ∧ p11 ∧ p12 ∧ p13 ∧ p14 ∧ p15 ∧ q $ by and_intro [#7, l8]
+l10: $ G ⇒ p6 ∧ p7 ∧ p8 ∧ p9 ∧ p10 ∧ p11 ∧ p12 ∧ p13 ∧ p14 ∧ p15 ∧ q $ by and_intro [#6, l9]
+l11: $ G ⇒ p5 ∧ p6 ∧ p7 ∧ p8 ∧ p9 ∧ p10 ∧ p11 ∧ p12 ∧ p13 ∧ p14 ∧ p15 ∧ q $ by and_intro [#5, l10]
+l12: $ G ⇒ p4 ∧ p5 ∧ p6 ∧ p7 ∧ p8 ∧ p9 ∧ p10 ∧ p11 ∧ p12 ∧ p13 ∧ p14 ∧ p15 ∧ q $ by and_intro [#4, l11]
+l13: $ G ⇒ p3 ∧ p4 ∧ p5 ∧ p6 ∧ p7 ∧ p8 ∧ p9 ∧ p10 ∧ p11 ∧ p12 ∧ p13 ∧ p14 ∧ p15 ∧ q $ by and_intro [#3, l12]
+l14: $ G ⇒ p2 ∧ p3 ∧ p4 ∧ p5 ∧ p6 ∧ p7 ∧ p8 ∧ p9 ∧ p10 ∧ p11 ∧ p12 ∧ p13 ∧ p14 ∧ p15 ∧ q $ by and_intro [#2, l13]
+l15: $ G ⇒ p1 ∧ p2 ∧ p3 ∧ p4 ∧ p5 ∧ p6 ∧ p7 ∧ p8 ∧ p9 ∧ p10 ∧ p11 ∧ p12 ∧ p13 ∧ p14 ∧ p15 ∧ q $ by and_intro [#1, l14]
+
 --| A conjunction of 18 formulas.
 lemma j2_and17 (G: hyps) (p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15 p16 p17 q: fml):
   $ G ⇒ p1 $ > $ G ⇒ p2 $ > $ G ⇒ p3 $ > $ G ⇒ p4 $ > $ G ⇒ p5 $ > $ G ⇒ p6 $ > $ G ⇒ p7 $ > $ G ⇒ p8 $ > $ G ⇒ p9 $ > $ G ⇒ p10 $ > $ G ⇒ p11 $ > $ G ⇒ p12 $ > $ G ⇒ p13 $ > $ G ⇒ p14 $ > $ G ⇒ p15 $ > $ G ⇒ p16 $ > $ G ⇒ p17 $ > $ G ⇒ q $ >
@@ -19861,6 +20052,29 @@ l12: $ G ⇒ ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 �
 l13: $ G ⇒ ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 [a2/b2] [a1/b1] p $ by ex_intro (t := $ b3 $, p := $ ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 [a2/b2] [a1/b1] p $) [l12]
 l14: $ G ⇒ ∃ a2 ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 [a1/b1] p $ by ex_intro (t := $ b2 $, p := $ ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 [a1/b1] p $) [l13]
 l15: $ G ⇒ ∃ a1 ∃ a2 ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 p $ by ex_intro (t := $ b1 $, p := $ ∃ a2 ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 p $) [l14]
+
+--| Introduction of 18 nested existentials.
+lemma j2_exi18 {a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18: set} (G: hyps) (b1 b2 b3 b4 b5 b6 b7 b8 b9 b10 b11 b12 b13 b14 b15 b16 b17 b18: set) (p: fml a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11 a12 a13 a14 a15 a16 a17 a18):
+  $ G ⇒ [a18/b18] [a17/b17] [a16/b16] [a15/b15] [a14/b14] [a13/b13] [a12/b12] [a11/b11] [a10/b10] [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $ > $ G ⇒ ∃ a1 ∃ a2 ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $
+----
+l1: $ G ⇒ ∃ a18 [a17/b17] [a16/b16] [a15/b15] [a14/b14] [a13/b13] [a12/b12] [a11/b11] [a10/b10] [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $ by ex_intro [#1]
+l2: $ G ⇒ ∃ a17 ∃ a18 [a16/b16] [a15/b15] [a14/b14] [a13/b13] [a12/b12] [a11/b11] [a10/b10] [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $ by ex_intro (t := $ b17 $, p := $ ∃ a18 [a16/b16] [a15/b15] [a14/b14] [a13/b13] [a12/b12] [a11/b11] [a10/b10] [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $) [l1]
+l3: $ G ⇒ ∃ a16 ∃ a17 ∃ a18 [a15/b15] [a14/b14] [a13/b13] [a12/b12] [a11/b11] [a10/b10] [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $ by ex_intro (t := $ b16 $, p := $ ∃ a17 ∃ a18 [a15/b15] [a14/b14] [a13/b13] [a12/b12] [a11/b11] [a10/b10] [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $) [l2]
+l4: $ G ⇒ ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a14/b14] [a13/b13] [a12/b12] [a11/b11] [a10/b10] [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $ by ex_intro (t := $ b15 $, p := $ ∃ a16 ∃ a17 ∃ a18 [a14/b14] [a13/b13] [a12/b12] [a11/b11] [a10/b10] [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $) [l3]
+l5: $ G ⇒ ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a13/b13] [a12/b12] [a11/b11] [a10/b10] [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $ by ex_intro (t := $ b14 $, p := $ ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a13/b13] [a12/b12] [a11/b11] [a10/b10] [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $) [l4]
+l6: $ G ⇒ ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a12/b12] [a11/b11] [a10/b10] [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $ by ex_intro (t := $ b13 $, p := $ ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a12/b12] [a11/b11] [a10/b10] [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $) [l5]
+l7: $ G ⇒ ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a11/b11] [a10/b10] [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $ by ex_intro (t := $ b12 $, p := $ ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a11/b11] [a10/b10] [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $) [l6]
+l8: $ G ⇒ ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a10/b10] [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $ by ex_intro (t := $ b11 $, p := $ ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a10/b10] [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $) [l7]
+l9: $ G ⇒ ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $ by ex_intro (t := $ b10 $, p := $ ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a9/b9] [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $) [l8]
+l10: $ G ⇒ ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $ by ex_intro (t := $ b9 $, p := $ ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a8/b8] [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $) [l9]
+l11: $ G ⇒ ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $ by ex_intro (t := $ b8 $, p := $ ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a7/b7] [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $) [l10]
+l12: $ G ⇒ ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $ by ex_intro (t := $ b7 $, p := $ ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a6/b6] [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $) [l11]
+l13: $ G ⇒ ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $ by ex_intro (t := $ b6 $, p := $ ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a5/b5] [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $) [l12]
+l14: $ G ⇒ ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $ by ex_intro (t := $ b5 $, p := $ ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a4/b4] [a3/b3] [a2/b2] [a1/b1] p $) [l13]
+l15: $ G ⇒ ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a3/b3] [a2/b2] [a1/b1] p $ by ex_intro (t := $ b4 $, p := $ ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a3/b3] [a2/b2] [a1/b1] p $) [l14]
+l16: $ G ⇒ ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a2/b2] [a1/b1] p $ by ex_intro (t := $ b3 $, p := $ ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a2/b2] [a1/b1] p $) [l15]
+l17: $ G ⇒ ∃ a2 ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a1/b1] p $ by ex_intro (t := $ b2 $, p := $ ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 [a1/b1] p $) [l16]
+l18: $ G ⇒ ∃ a1 ∃ a2 ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $ by ex_intro (t := $ b1 $, p := $ ∃ a2 ∃ a3 ∃ a4 ∃ a5 ∃ a6 ∃ a7 ∃ a8 ∃ a9 ∃ a10 ∃ a11 ∃ a12 ∃ a13 ∃ a14 ∃ a15 ∃ a16 ∃ a17 ∃ a18 p $) [l17]
 
 -- Lemmas of j2: equations of argument lists.
 
@@ -20213,23 +20427,23 @@ l6: $ G , x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ , x = ⟨ scons (ra_cw
 l7: $ G , x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ , x ∊ cl_cwf_pi J ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) $ by j2_ex12 [l2, l6]
 l8: $ G ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) $ by wcel_elim [#1, l7]
 
-lemma j2_e_cwf_res (G: hyps) (J: class) {D n_v np l_v i_v Ctx d_v K: set} (pp t1 t2 t3 t4 t5 t6 t7 t8 x V1 V2 V3 V4 V5 V6 V7 V8: set):
-  $ G ⇒ x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ $ > $ G ⇒ x = ⟨ ∅ , ra_cwf V1 V2 V3 V4 V5 V6 V7 V8 ⟩ ∧ ra_indapp V1 V2 V3 V7 V8 V5 ∈ lrel $ > $ G ⇒ crn pp ⊆ lrel3 J $ >
-  $ G ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $
+lemma j2_e_cwf_res (G: hyps) (J: class) {D n_v np l_v i_v Ctx d_v k_v K K2 b_v P T F C R R2 S: set} (pp t1 t2 t3 t4 t5 t6 t7 t8 x V1 V2 V3 V4 V5 V6 V7 V8 V9 V10 V11 V12 V13 V14 V15 V16 V17 V18: set):
+  $ G ⇒ x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ $ > $ G ⇒ x = ⟨ scons (ra_sty V6 ⟨ kc_ind_ty , scons V1 (scons V5 ∅) ⟩ V17 V10 V18) ∅ , ra_cwf V1 V2 V3 V4 V5 V6 V7 V9 ⟩ ∧ ra_indapp V1 V2 V3 V7 V9 V5 ∈ lrel ∧ ra_add V7 V3 V8 ∈ lrel ∧ ra_sinst V1 ⟨ kc_nz , ∅ ⟩ V2 V8 V9 V10 ∈ lrel ∧ ra_ind_data V1 V11 V12 V13 ∈ lrel ∧ ra_nth_ty V13 V5 V14 V15 ∈ lrel ∧ ra_pis V12 V14 V16 ∈ lrel ∧ ra_lift V8 ⟨ kc_nz , ∅ ⟩ V16 V17 ∈ lrel $ > $ G ⇒ crn pp ⊆ lrel3 J $ >
+  $ G ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $
 ----
-l1: $ G ⇒ x = ⟨ ∅ , ra_cwf V1 V2 V3 V4 V5 V6 V7 V8 ⟩ $ by and_elim_l [#2]
-l2: $ G ⇒ ra_indapp V1 V2 V3 V7 V8 V5 ∈ lrel $ by and_elim_r [#2]
+l1: $ G ⇒ x = ⟨ scons (ra_sty V6 ⟨ kc_ind_ty , scons V1 (scons V5 ∅) ⟩ V17 V10 V18) ∅ , ra_cwf V1 V2 V3 V4 V5 V6 V7 V9 ⟩ $ by and_elim_l [#2]
+l2: $ G ⇒ ra_indapp V1 V2 V3 V7 V9 V5 ∈ lrel ∧ ra_add V7 V3 V8 ∈ lrel ∧ ra_sinst V1 ⟨ kc_nz , ∅ ⟩ V2 V8 V9 V10 ∈ lrel ∧ ra_ind_data V1 V11 V12 V13 ∈ lrel ∧ ra_nth_ty V13 V5 V14 V15 ∈ lrel ∧ ra_pis V12 V14 V16 ∈ lrel ∧ ra_lift V8 ⟨ kc_nz , ∅ ⟩ V16 V17 ∈ lrel $ by and_elim_r [#2]
 l3: $ G ⇒ ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ = x $ by eq_sym [#1]
-l4: $ G ⇒ ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ = ⟨ ∅ , ra_cwf V1 V2 V3 V4 V5 V6 V7 V8 ⟩ $ by eq_trans [l3, l1]
-l5: $ G ⇒ ⟨ ∅ , ra_cwf V1 V2 V3 V4 V5 V6 V7 V8 ⟩ = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ $ by eq_sym [l4]
-l6: $ G ⇒ isset (∅) $ by j2_opair_set_l [l5]
+l4: $ G ⇒ ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ = ⟨ scons (ra_sty V6 ⟨ kc_ind_ty , scons V1 (scons V5 ∅) ⟩ V17 V10 V18) ∅ , ra_cwf V1 V2 V3 V4 V5 V6 V7 V9 ⟩ $ by eq_trans [l3, l1]
+l5: $ G ⇒ ⟨ scons (ra_sty V6 ⟨ kc_ind_ty , scons V1 (scons V5 ∅) ⟩ V17 V10 V18) ∅ , ra_cwf V1 V2 V3 V4 V5 V6 V7 V9 ⟩ = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ $ by eq_sym [l4]
+l6: $ G ⇒ isset (scons (ra_sty V6 ⟨ kc_ind_ty , scons V1 (scons V5 ∅) ⟩ V17 V10 V18) ∅) $ by j2_opair_set_l [l5]
 l7: $ G ⇒ isset pp $ by isset_var
 l8: $ G ⇒ isset (ra_cwf t1 t2 t3 t4 t5 t6 t7 t8) $ by opair_isset
-l9: $ G ⇒ isset (ra_cwf V1 V2 V3 V4 V5 V6 V7 V8) $ by opair_isset
-l10: $ G ⇒ pp = ∅ ∧ ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 = ra_cwf V1 V2 V3 V4 V5 V6 V7 V8 $ by opair_inj_c [l4, l7, l8, l6, l9]
-l11: $ G ⇒ pp = ∅ $ by and_elim_l [l10]
-l12: $ G ⇒ ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 = ra_cwf V1 V2 V3 V4 V5 V6 V7 V8 $ by and_elim_r [l10]
-l13: $ G ⇒ isset V8 $ by isset_var
+l9: $ G ⇒ isset (ra_cwf V1 V2 V3 V4 V5 V6 V7 V9) $ by opair_isset
+l10: $ G ⇒ pp = scons (ra_sty V6 ⟨ kc_ind_ty , scons V1 (scons V5 ∅) ⟩ V17 V10 V18) ∅ ∧ ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 = ra_cwf V1 V2 V3 V4 V5 V6 V7 V9 $ by opair_inj_c [l4, l7, l8, l6, l9]
+l11: $ G ⇒ pp = scons (ra_sty V6 ⟨ kc_ind_ty , scons V1 (scons V5 ∅) ⟩ V17 V10 V18) ∅ $ by and_elim_l [l10]
+l12: $ G ⇒ ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 = ra_cwf V1 V2 V3 V4 V5 V6 V7 V9 $ by and_elim_r [l10]
+l13: $ G ⇒ isset V9 $ by isset_var
 l14: $ G ⇒ isset V7 $ by isset_var
 l15: $ G ⇒ isset V6 $ by isset_var
 l16: $ G ⇒ isset V5 $ by isset_var
@@ -20254,80 +20468,96 @@ l34: $ G ⇒ isset t2 $ by isset_var
 l35: $ G ⇒ scons t2 (scons t3 (scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅)))))) ∈ fseq j2_vv $ by j2_fs [l34, l33]
 l36: $ G ⇒ isset t1 $ by isset_var
 l37: $ G ⇒ scons t1 (scons t2 (scons t3 (scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅))))))) ∈ fseq j2_vv $ by j2_fs [l36, l35]
-l38: $ G ⇒ scons V8 ∅ ∈ fseq j2_vv $ by j2_fs [l13, l21]
-l39: $ G ⇒ scons V7 (scons V8 ∅) ∈ fseq j2_vv $ by j2_fs [l14, l38]
-l40: $ G ⇒ scons V6 (scons V7 (scons V8 ∅)) ∈ fseq j2_vv $ by j2_fs [l15, l39]
-l41: $ G ⇒ scons V5 (scons V6 (scons V7 (scons V8 ∅))) ∈ fseq j2_vv $ by j2_fs [l16, l40]
-l42: $ G ⇒ scons V4 (scons V5 (scons V6 (scons V7 (scons V8 ∅)))) ∈ fseq j2_vv $ by j2_fs [l17, l41]
-l43: $ G ⇒ scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V8 ∅))))) ∈ fseq j2_vv $ by j2_fs [l18, l42]
-l44: $ G ⇒ scons V2 (scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V8 ∅)))))) ∈ fseq j2_vv $ by j2_fs [l19, l43]
-l45: $ G ⇒ scons V1 (scons V2 (scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V8 ∅))))))) ∈ fseq j2_vv $ by j2_fs [l20, l44]
+l38: $ G ⇒ scons V9 ∅ ∈ fseq j2_vv $ by j2_fs [l13, l21]
+l39: $ G ⇒ scons V7 (scons V9 ∅) ∈ fseq j2_vv $ by j2_fs [l14, l38]
+l40: $ G ⇒ scons V6 (scons V7 (scons V9 ∅)) ∈ fseq j2_vv $ by j2_fs [l15, l39]
+l41: $ G ⇒ scons V5 (scons V6 (scons V7 (scons V9 ∅))) ∈ fseq j2_vv $ by j2_fs [l16, l40]
+l42: $ G ⇒ scons V4 (scons V5 (scons V6 (scons V7 (scons V9 ∅)))) ∈ fseq j2_vv $ by j2_fs [l17, l41]
+l43: $ G ⇒ scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V9 ∅))))) ∈ fseq j2_vv $ by j2_fs [l18, l42]
+l44: $ G ⇒ scons V2 (scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V9 ∅)))))) ∈ fseq j2_vv $ by j2_fs [l19, l43]
+l45: $ G ⇒ scons V1 (scons V2 (scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V9 ∅))))))) ∈ fseq j2_vv $ by j2_fs [l20, l44]
 l46: $ G ⇒ kr_cwf ∈ ω $ by kr_cwf_omega
 l47: $ G ⇒ isset kr_cwf $ by wcel_isset [l46]
 l48: $ G ⇒ isset (scons t1 (scons t2 (scons t3 (scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅)))))))) $ by wcel_isset [l37]
-l49: $ G ⇒ isset (scons V1 (scons V2 (scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V8 ∅)))))))) $ by wcel_isset [l45]
-l50: $ G ⇒ kr_cwf = kr_cwf ∧ scons t1 (scons t2 (scons t3 (scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅))))))) = scons V1 (scons V2 (scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V8 ∅))))))) $ by opair_inj_c [l12, l47, l48, l47, l49]
-l51: $ G ⇒ scons t1 (scons t2 (scons t3 (scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅))))))) = scons V1 (scons V2 (scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V8 ∅))))))) $ by and_elim_r [l50]
-l52: $ G ⇒ t1 = V1 ∧ scons t2 (scons t3 (scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅)))))) = scons V2 (scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V8 ∅)))))) $ by j2_scons_inj [l51, l36, l20, l35, l44]
+l49: $ G ⇒ isset (scons V1 (scons V2 (scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V9 ∅)))))))) $ by wcel_isset [l45]
+l50: $ G ⇒ kr_cwf = kr_cwf ∧ scons t1 (scons t2 (scons t3 (scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅))))))) = scons V1 (scons V2 (scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V9 ∅))))))) $ by opair_inj_c [l12, l47, l48, l47, l49]
+l51: $ G ⇒ scons t1 (scons t2 (scons t3 (scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅))))))) = scons V1 (scons V2 (scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V9 ∅))))))) $ by and_elim_r [l50]
+l52: $ G ⇒ t1 = V1 ∧ scons t2 (scons t3 (scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅)))))) = scons V2 (scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V9 ∅)))))) $ by j2_scons_inj [l51, l36, l20, l35, l44]
 l53: $ G ⇒ t1 = V1 $ by and_elim_l [l52]
-l54: $ G ⇒ scons t2 (scons t3 (scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅)))))) = scons V2 (scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V8 ∅)))))) $ by and_elim_r [l52]
-l55: $ G ⇒ t2 = V2 ∧ scons t3 (scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅))))) = scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V8 ∅))))) $ by j2_scons_inj [l54, l34, l19, l33, l43]
+l54: $ G ⇒ scons t2 (scons t3 (scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅)))))) = scons V2 (scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V9 ∅)))))) $ by and_elim_r [l52]
+l55: $ G ⇒ t2 = V2 ∧ scons t3 (scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅))))) = scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V9 ∅))))) $ by j2_scons_inj [l54, l34, l19, l33, l43]
 l56: $ G ⇒ t2 = V2 $ by and_elim_l [l55]
-l57: $ G ⇒ scons t3 (scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅))))) = scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V8 ∅))))) $ by and_elim_r [l55]
-l58: $ G ⇒ t3 = V3 ∧ scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅)))) = scons V4 (scons V5 (scons V6 (scons V7 (scons V8 ∅)))) $ by j2_scons_inj [l57, l32, l18, l31, l42]
+l57: $ G ⇒ scons t3 (scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅))))) = scons V3 (scons V4 (scons V5 (scons V6 (scons V7 (scons V9 ∅))))) $ by and_elim_r [l55]
+l58: $ G ⇒ t3 = V3 ∧ scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅)))) = scons V4 (scons V5 (scons V6 (scons V7 (scons V9 ∅)))) $ by j2_scons_inj [l57, l32, l18, l31, l42]
 l59: $ G ⇒ t3 = V3 $ by and_elim_l [l58]
-l60: $ G ⇒ scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅)))) = scons V4 (scons V5 (scons V6 (scons V7 (scons V8 ∅)))) $ by and_elim_r [l58]
-l61: $ G ⇒ t4 = V4 ∧ scons t5 (scons t6 (scons t7 (scons t8 ∅))) = scons V5 (scons V6 (scons V7 (scons V8 ∅))) $ by j2_scons_inj [l60, l30, l17, l29, l41]
+l60: $ G ⇒ scons t4 (scons t5 (scons t6 (scons t7 (scons t8 ∅)))) = scons V4 (scons V5 (scons V6 (scons V7 (scons V9 ∅)))) $ by and_elim_r [l58]
+l61: $ G ⇒ t4 = V4 ∧ scons t5 (scons t6 (scons t7 (scons t8 ∅))) = scons V5 (scons V6 (scons V7 (scons V9 ∅))) $ by j2_scons_inj [l60, l30, l17, l29, l41]
 l62: $ G ⇒ t4 = V4 $ by and_elim_l [l61]
-l63: $ G ⇒ scons t5 (scons t6 (scons t7 (scons t8 ∅))) = scons V5 (scons V6 (scons V7 (scons V8 ∅))) $ by and_elim_r [l61]
-l64: $ G ⇒ t5 = V5 ∧ scons t6 (scons t7 (scons t8 ∅)) = scons V6 (scons V7 (scons V8 ∅)) $ by j2_scons_inj [l63, l28, l16, l27, l40]
+l63: $ G ⇒ scons t5 (scons t6 (scons t7 (scons t8 ∅))) = scons V5 (scons V6 (scons V7 (scons V9 ∅))) $ by and_elim_r [l61]
+l64: $ G ⇒ t5 = V5 ∧ scons t6 (scons t7 (scons t8 ∅)) = scons V6 (scons V7 (scons V9 ∅)) $ by j2_scons_inj [l63, l28, l16, l27, l40]
 l65: $ G ⇒ t5 = V5 $ by and_elim_l [l64]
-l66: $ G ⇒ scons t6 (scons t7 (scons t8 ∅)) = scons V6 (scons V7 (scons V8 ∅)) $ by and_elim_r [l64]
-l67: $ G ⇒ t6 = V6 ∧ scons t7 (scons t8 ∅) = scons V7 (scons V8 ∅) $ by j2_scons_inj [l66, l26, l15, l25, l39]
+l66: $ G ⇒ scons t6 (scons t7 (scons t8 ∅)) = scons V6 (scons V7 (scons V9 ∅)) $ by and_elim_r [l64]
+l67: $ G ⇒ t6 = V6 ∧ scons t7 (scons t8 ∅) = scons V7 (scons V9 ∅) $ by j2_scons_inj [l66, l26, l15, l25, l39]
 l68: $ G ⇒ t6 = V6 $ by and_elim_l [l67]
-l69: $ G ⇒ scons t7 (scons t8 ∅) = scons V7 (scons V8 ∅) $ by and_elim_r [l67]
-l70: $ G ⇒ t7 = V7 ∧ scons t8 ∅ = scons V8 ∅ $ by j2_scons_inj [l69, l24, l14, l23, l38]
+l69: $ G ⇒ scons t7 (scons t8 ∅) = scons V7 (scons V9 ∅) $ by and_elim_r [l67]
+l70: $ G ⇒ t7 = V7 ∧ scons t8 ∅ = scons V9 ∅ $ by j2_scons_inj [l69, l24, l14, l23, l38]
 l71: $ G ⇒ t7 = V7 $ by and_elim_l [l70]
-l72: $ G ⇒ scons t8 ∅ = scons V8 ∅ $ by and_elim_r [l70]
-l73: $ G ⇒ t8 = V8 ∧ ∅ = ∅ $ by j2_scons_inj [l72, l22, l13, l21, l21]
-l74: $ G ⇒ t8 = V8 $ by and_elim_l [l73]
-l75: $ G ⇒ t1 = V1 ∧ t2 = V2 ∧ t3 = V3 ∧ t4 = V4 ∧ t5 = V5 ∧ t6 = V6 ∧ t7 = V7 ∧ t8 = V8 ∧ ra_indapp V1 V2 V3 V7 V8 V5 ∈ lrel $ by j2_and8 [l53, l56, l59, l62, l65, l68, l71, l74, l2]
-l76: $ G ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $ by j2_exi8 (b1 := $ V1 $, b2 := $ V2 $, b3 := $ V3 $, b4 := $ V4 $, b5 := $ V5 $, b6 := $ V6 $, b7 := $ V7 $, b8 := $ V8 $, p := $ t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel $) [l75]
+l72: $ G ⇒ scons t8 ∅ = scons V9 ∅ $ by and_elim_r [l70]
+l73: $ G ⇒ t8 = V9 ∧ ∅ = ∅ $ by j2_scons_inj [l72, l22, l13, l21, l21]
+l74: $ G ⇒ t8 = V9 $ by and_elim_l [l73]
+l75: $ G ⇒ crn pp = crn (scons (ra_sty V6 ⟨ kc_ind_ty , scons V1 (scons V5 ∅) ⟩ V17 V10 V18) ∅) $ by crn_eq [l11]
+l76: $ G ⇒ crn (scons (ra_sty V6 ⟨ kc_ind_ty , scons V1 (scons V5 ∅) ⟩ V17 V10 V18) ∅) ⊆ lrel3 J $ by subset_eq_l [l75, #3]
+l77: $ G ⇒ isset (ra_sty V6 ⟨ kc_ind_ty , scons V1 (scons V5 ∅) ⟩ V17 V10 V18) $ by opair_isset
+l78: $ G ⇒ ra_sty V6 ⟨ kc_ind_ty , scons V1 (scons V5 ∅) ⟩ V17 V10 V18 ∈ lrel3 J $ by crn_scons_head [l77, l76]
+l79: $ G ⇒ ra_indapp V1 V2 V3 V7 V9 V5 ∈ lrel $ by and_elim_l [l2]
+l80: $ G ⇒ ra_add V7 V3 V8 ∈ lrel ∧ ra_sinst V1 ⟨ kc_nz , ∅ ⟩ V2 V8 V9 V10 ∈ lrel ∧ ra_ind_data V1 V11 V12 V13 ∈ lrel ∧ ra_nth_ty V13 V5 V14 V15 ∈ lrel ∧ ra_pis V12 V14 V16 ∈ lrel ∧ ra_lift V8 ⟨ kc_nz , ∅ ⟩ V16 V17 ∈ lrel $ by and_elim_r [l2]
+l81: $ G ⇒ ra_add V7 V3 V8 ∈ lrel $ by and_elim_l [l80]
+l82: $ G ⇒ ra_sinst V1 ⟨ kc_nz , ∅ ⟩ V2 V8 V9 V10 ∈ lrel ∧ ra_ind_data V1 V11 V12 V13 ∈ lrel ∧ ra_nth_ty V13 V5 V14 V15 ∈ lrel ∧ ra_pis V12 V14 V16 ∈ lrel ∧ ra_lift V8 ⟨ kc_nz , ∅ ⟩ V16 V17 ∈ lrel $ by and_elim_r [l80]
+l83: $ G ⇒ ra_sinst V1 ⟨ kc_nz , ∅ ⟩ V2 V8 V9 V10 ∈ lrel $ by and_elim_l [l82]
+l84: $ G ⇒ ra_ind_data V1 V11 V12 V13 ∈ lrel ∧ ra_nth_ty V13 V5 V14 V15 ∈ lrel ∧ ra_pis V12 V14 V16 ∈ lrel ∧ ra_lift V8 ⟨ kc_nz , ∅ ⟩ V16 V17 ∈ lrel $ by and_elim_r [l82]
+l85: $ G ⇒ ra_ind_data V1 V11 V12 V13 ∈ lrel $ by and_elim_l [l84]
+l86: $ G ⇒ ra_nth_ty V13 V5 V14 V15 ∈ lrel ∧ ra_pis V12 V14 V16 ∈ lrel ∧ ra_lift V8 ⟨ kc_nz , ∅ ⟩ V16 V17 ∈ lrel $ by and_elim_r [l84]
+l87: $ G ⇒ ra_nth_ty V13 V5 V14 V15 ∈ lrel $ by and_elim_l [l86]
+l88: $ G ⇒ ra_pis V12 V14 V16 ∈ lrel ∧ ra_lift V8 ⟨ kc_nz , ∅ ⟩ V16 V17 ∈ lrel $ by and_elim_r [l86]
+l89: $ G ⇒ ra_pis V12 V14 V16 ∈ lrel $ by and_elim_l [l88]
+l90: $ G ⇒ ra_lift V8 ⟨ kc_nz , ∅ ⟩ V16 V17 ∈ lrel $ by and_elim_r [l88]
+l91: $ G ⇒ t1 = V1 ∧ t2 = V2 ∧ t3 = V3 ∧ t4 = V4 ∧ t5 = V5 ∧ t6 = V6 ∧ t7 = V7 ∧ t8 = V9 ∧ ra_indapp V1 V2 V3 V7 V9 V5 ∈ lrel ∧ ra_add V7 V3 V8 ∈ lrel ∧ ra_sinst V1 ⟨ kc_nz , ∅ ⟩ V2 V8 V9 V10 ∈ lrel ∧ ra_ind_data V1 V11 V12 V13 ∈ lrel ∧ ra_nth_ty V13 V5 V14 V15 ∈ lrel ∧ ra_pis V12 V14 V16 ∈ lrel ∧ ra_lift V8 ⟨ kc_nz , ∅ ⟩ V16 V17 ∈ lrel ∧ ra_sty V6 ⟨ kc_ind_ty , scons V1 (scons V5 ∅) ⟩ V17 V10 V18 ∈ lrel3 J $ by j2_and15 [l53, l56, l59, l62, l65, l68, l71, l74, l79, l81, l83, l85, l87, l89, l90, l78]
+l92: $ G ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $ by j2_exi18 (b1 := $ V1 $, b2 := $ V2 $, b3 := $ V3 $, b4 := $ V4 $, b5 := $ V5 $, b6 := $ V6 $, b7 := $ V7 $, b8 := $ V8 $, b9 := $ V9 $, b10 := $ V10 $, b11 := $ V11 $, b12 := $ V12 $, b13 := $ V13 $, b14 := $ V14 $, b15 := $ V15 $, b16 := $ V16 $, b17 := $ V17 $, b18 := $ V18 $, p := $ t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J $) [l91]
 
-lemma j2_d_cwf_res (G: hyps) (J: class) {D n_v np l_v i_v Ctx d_v K: set} (pp t1 t2 t3 t4 t5 t6 t7 t8: set):
+lemma j2_d_cwf_res (G: hyps) (J: class) {D n_v np l_v i_v Ctx d_v k_v K K2 b_v P T F C R R2 S: set} (pp t1 t2 t3 t4 t5 t6 t7 t8: set):
   $ G ⇒ ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res $ > $ G ⇒ crn pp ⊆ lrel3 J $ >
-  $ G ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $
+  $ G ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $
 ----
 l1: $ G , x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ , x ∊ cl_cwf_res ⇒ x ∊ cl_cwf_res $ by ax
-l2: $ G , x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ , x ∊ cl_cwf_res ⇒ ∃ y ∃ z ∃ u ∃ v ∃ w ∃ a ∃ b ∃ c (x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel) $ by cab_elim [l1]
-l3: $ G , x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel ⇒ x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ $ by ax
-l4: $ G , x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel ⇒ x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel $ by ax
-l5: $ G , x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel ⇒ crn pp ⊆ lrel3 J $ by weaken [#2]
-l6: $ G , x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ , x = ⟨ ∅ , ra_cwf y z u v w a b c ⟩ ∧ ra_indapp y z u b c w ∈ lrel ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $ by j2_e_cwf_res [l3, l4, l5]
-l7: $ G , x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ , x ∊ cl_cwf_res ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $ by j2_ex8 [l2, l6]
-l8: $ G ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $ by wcel_elim [#1, l7]
+l2: $ G , x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ , x ∊ cl_cwf_res ⇒ ∃ y ∃ z ∃ u ∃ v ∃ w ∃ a ∃ b ∃ c ∃ f ∃ g ∃ i ∃ j ∃ k ∃ d ∃ e ∃ h ∃ l ∃ m (x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel) $ by cab_elim [l1]
+l3: $ G , x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel ⇒ x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ $ by ax
+l4: $ G , x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel ⇒ x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel $ by ax
+l5: $ G , x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel ⇒ crn pp ⊆ lrel3 J $ by weaken [#2]
+l6: $ G , x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ , x = ⟨ scons (ra_sty a ⟨ kc_ind_ty , scons y (scons w ∅) ⟩ l g m) ∅ , ra_cwf y z u v w a b f ⟩ ∧ ra_indapp y z u b f w ∈ lrel ∧ ra_add b u c ∈ lrel ∧ ra_sinst y ⟨ kc_nz , ∅ ⟩ z c f g ∈ lrel ∧ ra_ind_data y i j k ∈ lrel ∧ ra_nth_ty k w d e ∈ lrel ∧ ra_pis j d h ∈ lrel ∧ ra_lift c ⟨ kc_nz , ∅ ⟩ h l ∈ lrel ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $ by j2_e_cwf_res [l3, l4, l5]
+l7: $ G , x = ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ , x ∊ cl_cwf_res ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $ by j2_ex18 [l2, l6]
+l8: $ G ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $ by wcel_elim [#1, l7]
 
-lemma j2_o_cwf (G: hyps) (J: class) {D n_v np l_v i_v Ctx d_v k_v A B A2 u_v K: set} (pp t1 t2 t3 t4 t5 t6 t7 t8: set):
+lemma j2_o_cwf (G: hyps) (J: class) {D n_v np l_v i_v Ctx d_v k_v A B A2 u_v K K2 b_v P T F C R R2 S: set} (pp t1 t2 t3 t4 t5 t6 t7 t8: set):
   $ G ⇒ ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ pr_cwf J $ > $ G ⇒ crn pp ⊆ lrel3 J $ >
-  $ G ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $
+  $ G ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $
 ----
 l1: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res ⇒ ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res $ by ax
 l2: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res ⇒ crn pp ⊆ lrel3 J $ by weaken [#2]
-l3: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $ by j2_d_cwf_res [l1, l2]
-l4: $ G ⇒ ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res → ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $ by imp_intro [l3]
+l3: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $ by j2_d_cwf_res [l1, l2]
+l4: $ G ⇒ ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res → ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $ by imp_intro [l3]
 l5: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) ⇒ ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) $ by ax
 l6: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) ⇒ ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∨ ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res $ by j2_wcel_cun_elim [l5]
 l7: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ⇒ ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J $ by ax
 l8: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ⇒ crn pp ⊆ lrel3 J $ by weaken [#2]
 l9: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) $ by j2_d_cwf_pi [l7, l8]
-l10: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $ by or_intro_l [l9]
+l10: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $ by or_intro_l [l9]
 l11: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res ⇒ ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res $ by ax
-l12: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res ⇒ ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res → ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $ by weaken [l4]
-l13: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $ by imp_elim [l12, l11]
-l14: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $ by or_intro_r [l13]
-l15: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $ by or_elim [l6, l10, l14]
-l16: $ G ⇒ ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) → ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $ by imp_intro [l15]
-l17: $ G ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $ by imp_elim [l16, #1]
+l12: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res ⇒ ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res → ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $ by weaken [l4]
+l13: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $ by imp_elim [l12, l11]
+l14: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_res ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $ by or_intro_r [l13]
+l15: $ G , ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $ by or_elim [l6, l10, l14]
+l16: $ G ⇒ ⟨ pp , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ cl_cwf_pi J ∪ (cl_cwf_res) → ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $ by imp_intro [l15]
+l17: $ G ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $ by imp_elim [l16, #1]
 
 lrel3_cwf_cases
 ---------------
@@ -20347,9 +20577,9 @@ l13: $ G , c = ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 , ⟨ p , c ⟩ ∈ lprog3 J ∧ c
 l14: $ G , c = ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 , ⟨ p , c ⟩ ∈ lprog3 J ∧ crn p ⊆ lrel3 J ⇒ ⟨ p , c ⟩ = ⟨ p , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ $ by opair_eq [l12, l13]
 l15: $ G , c = ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 , ⟨ p , c ⟩ ∈ lprog3 J ∧ crn p ⊆ lrel3 J ⇒ ⟨ p , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ lprog3 J $ by wcel_eq_l [l14, l10]
 l16: $ G , c = ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 , ⟨ p , c ⟩ ∈ lprog3 J ∧ crn p ⊆ lrel3 J ⇒ ⟨ p , ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⟩ ∈ pr_cwf J $ by lprog3_cwf_pr [l15]
-l17: $ G , c = ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 , ⟨ p , c ⟩ ∈ lprog3 J ∧ crn p ⊆ lrel3 J ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $ by j2_o_cwf [l16, l11]
-l18: $ G , c = ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $ by ex_elim [l8, l17]
-l19: $ G ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ K (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel) $ by isset_elim [l1, l18]
+l17: $ G , c = ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 , ⟨ p , c ⟩ ∈ lprog3 J ∧ crn p ⊆ lrel3 J ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $ by j2_o_cwf [l16, l11]
+l18: $ G , c = ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $ by ex_elim [l8, l17]
+l19: $ G ⇒ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ A ∃ B ∃ A2 ∃ u_v (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v A A2 ∈ lrel ∧ ra_deq Ctx A2 A2 ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_ulevel l_v u_v ∈ lrel2 ∧ ra_ipos D n_v np d_v A ∈ lrel ∧ ra_cwf D n_v np l_v i_v ⟨ kc_cons , scons A2 (scons Ctx ∅) ⟩ ⟨ kc_s , scons d_v ∅ ⟩ B ∈ lrel3 J) ∨ ∃ D ∃ n_v ∃ np ∃ l_v ∃ i_v ∃ Ctx ∃ d_v ∃ k_v ∃ K ∃ K2 ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ R ∃ R2 ∃ S (t1 = D ∧ t2 = n_v ∧ t3 = np ∧ t4 = l_v ∧ t5 = i_v ∧ t6 = Ctx ∧ t7 = d_v ∧ t8 = K ∧ ra_indapp D n_v np d_v K i_v ∈ lrel ∧ ra_add d_v np k_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v k_v K K2 ∈ lrel ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_pis P F R ∈ lrel ∧ ra_lift k_v ⟨ kc_nz , ∅ ⟩ R R2 ∈ lrel ∧ ra_sty Ctx ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ R2 K2 S ∈ lrel3 J) $ by isset_elim [l1, l18]
 
 lemma j2_e_ctors_wf_nil (G: hyps) (J: class) {D n_v np l_v i_v Ctx: set} (pp t1 t2 t3 t4 t5 t6 t7 x V1 V2 V3 V4 V5 V6: set):
   $ G ⇒ x = ⟨ pp , ra_ctors_wf t1 t2 t3 t4 t5 t6 t7 ⟩ $ > $ G ⇒ x = ⟨ ∅ , ra_ctors_wf V1 V2 V3 V4 V5 V6 ⟨ kc_cnil , ∅ ⟩ ⟩ $ > $ G ⇒ crn pp ⊆ lrel3 J $ >

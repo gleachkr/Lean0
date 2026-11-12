@@ -61,15 +61,27 @@ impl Block {
     fn data_term(&self, g: &mut Gen, us: &[E]) -> E { g.env.app(self.data, us) }
 }
 
-/// Typing facts for the prover: `(context, term) → (level, proof of ty context term (srt level))`.
+/// Typing facts for the prover: `(context, term) → (level, proof of ty context term (srt level))`,
+/// and for a constructor's result `(context, term) → proof of sty context head A term T`.
 #[derive(Default)]
 struct Facts {
     tys: HashMap<(E, E), (E, P)>,
+    stys: HashMap<(E, E), P>,
 }
 
 impl Hooks for Facts {
     fn prove(&mut self, h: &mut Horn, env: &mut Env, lean: &mut Lean, lv: &mut Levels, goal: E) -> Option<mm0kit::env::Result<P>> {
         let (t, args) = env.head(goal)?;
+        if t == env.term_id("sty") {
+            let (a0, a3) = (args[0], args[3]);
+            let (ctx, e) = (h.zonk(env, a0), h.zonk(env, a3));
+            if !h.is_ground(env, ctx) || !h.is_ground(env, e) {
+                return None
+            }
+            let &p = self.stys.get(&(ctx, e))?;
+            let c = env.concl(p);
+            return h.unify(env, goal, c).then_some(Ok(p))
+        }
         if t != lean.ids.ty {
             return None
         }
@@ -310,6 +322,24 @@ fn with_binders<'t, A>(
         el.close_pub();
     }
     r
+}
+
+/// Record the typing of a constructor's result `body` (with the open locals) as an `sty`
+/// spine of its head at the head's type with annotations consumed, as the block's data has it
+/// (`cwf_res`). An argument that does not have its binder's type leaves no fact, and the
+/// schema rejects the block.
+fn record_result<'t>(el: &mut Elab<'_, '_, 't, '_>, body: ExprPtr<'t>, facts: &mut Facts) -> R<()> {
+    let (f, args) = el.tc.ctx.unfold_apps(body);
+    let r = (|| {
+        let (ty, _) = el.infer(f)?;
+        let ty = strip_pis(el, ty);
+        el.sty_spine_at(f, ty, &args)
+    })();
+    if let Ok((_, p)) = r {
+        let key = (el.ctx_pub(), el.tr(body)?);
+        facts.stys.insert(key, p);
+    }
+    Ok(())
 }
 
 /// Record that `t` (with the open locals) is a type.
@@ -737,7 +767,7 @@ fn ctor_facts<'t>(el: &mut Elab<'_, '_, 't, '_>, ind: NamePtr<'t>, np: usize, al
         for h in &nst.st.all_inductives_incl_specialized {
             for c in &h.ctors {
                 let ty = strip_pis(el, c.ty);
-                with_binders(el, ty, np, None, facts, |_, _, _| Ok(()))?;
+                with_binders(el, ty, np, None, facts, record_result)?;
             }
         }
         return Ok(())
@@ -748,7 +778,7 @@ fn ctor_facts<'t>(el: &mut Elab<'_, '_, 't, '_>, ind: NamePtr<'t>, np: usize, al
         for &c in d.all_ctor_names.iter() {
             let Some(Declar::Constructor(cd)) = all.get(&c) else { return Err("a constructor of the block is not in the export".into()) };
             let ty = strip_pis(el, cd.info.ty);
-            with_binders(el, ty, np, None, facts, |_, _, _| Ok(()))?;
+            with_binders(el, ty, np, None, facts, record_result)?;
         }
     }
     Ok(())

@@ -934,13 +934,17 @@ axiom cseqv_cons (K K2: expr) (C C2: ctors): $ eeqv K K2 $ > $ cseqv C C2 $ > $ 
 --| at depth `d`, is well formed in `Ctx` (the fields so far, with the block's
 --| types put in, over the parameters and `G`): each field type is a type of
 --| an allowed level and positive, and the result is type `i` applied to the
---| parameters and indices (`checkConstructors`).
+--| parameters and indices, each argument typed at its binder's type in type
+--| `i`'s type (`checkConstructors`, whose `checkType` of the whole constructor
+--| type types the indices).
 term cwf: ind > nat > nat > lvl > nat > ctx > nat > expr > wff;
 axiom cwf_pi (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (A B A2: expr) (u: lvl):
   $ add d np k $ > $ sinst D 0 n k A A2 $ > $ ⟨ Ctx ⊢ A2 : srt u ⟩ $ > $ ulevel l u $ > $ ipos D n np d A $ >
   $ cwf D n np l i (A2 :: Ctx) (s d) B $ > $ cwf D n np l i Ctx d (Π A. B) $;
-axiom cwf_res (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d: nat) (K: expr):
-  $ indapp D n np d K i $ > $ cwf D n np l i Ctx d K $;
+axiom cwf_res (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (K K2: expr) (b: blk) (P: ctx)
+    (T: tys) (F: expr) (C: ctors) (R R2 S: expr):
+  $ indapp D n np d K i $ > $ add d np k $ > $ sinst D 0 n k K K2 $ > $ ind_data D b P T $ > $ nth_ty T i F C $ >
+  $ pis P F R $ > $ lift k 0 R R2 $ > $ sty Ctx (ind_ty D i) R2 K2 S $ > $ cwf D n np l i Ctx d K $;
 term ctors_wf: ind > nat > nat > lvl > nat > ctx > ctors > wff;
 axiom ctors_wf_nil (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx): $ ctors_wf D n np l i Ctx cnil $;
 axiom ctors_wf_cons (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (K: expr) (C: ctors):

@@ -4,7 +4,7 @@ each variant by one change to this module's export (a constructor's domain, a un
 recursor's motive, ...), and `scripts/test.sh` runs `lean0 gen --unchecked` on it, which skips
 nanoda's check so that the schema alone judges the block. This module itself is the control:
 every block is certified by the schema. -/
--- lean0-export: NP Big PD A W V
+-- lean0-export: NP Big PD A W V IX
 
 -- an empty type, a harmless domain
 inductive E : Type
@@ -39,3 +39,7 @@ inductive W (α : Type) : Type
 -- its parameter)
 inductive V (α : Type) : Type
   | mk : V α → V α
+
+-- `index`: the constructor's result `IX True` becomes `IX E` (an index of the wrong type)
+inductive IX : Prop → Type
+  | mk : IX True
