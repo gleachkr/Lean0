@@ -187,6 +187,141 @@ def nst_group (a1: ctx) (a2: ind) (a3: ind) (a4: expr) (a5: nat) (a6: nat) (a7: 
 
 theorem lprog2_hprog (G: hyps): $ G ⇒ hprog lprog2 latoms $;
 
+--| The clause axioms at classes (`lrel2_A` for the clause axiom `A`): at any
+--| trees `A1 .. An` for its variables, a clause's conclusion is derivable when
+--| its premises are and its side conditions hold.
+theorem lrel2_ulevel_prop (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ lveq A1 ⟨ kc_lz , ∅ ⟩ $ >
+  $ G ⇒ ra_ulevel A1 A2 ∈ lrel2 $;
+theorem lrel2_ulevel_le (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ lveq ⟨ kc_lmax , scons A1 (scons A2 ∅) ⟩ A1 $ >
+  $ G ⇒ ra_ulevel A1 A2 ∈ lrel2 $;
+theorem lrel2_eeqv_refl (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_eeqv A1 A1 ∈ lrel2 $;
+theorem lrel2_eeqv_bvar (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_eeqv ⟨ kc_bvar , scons A1 ∅ ⟩ ⟨ kc_bvar , scons A1 ∅ ⟩ ∈ lrel2 $;
+theorem lrel2_eeqv_srt (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ lveq A1 A2 $ >
+  $ G ⇒ ra_eeqv ⟨ kc_srt , scons A1 ∅ ⟩ ⟨ kc_srt , scons A2 ∅ ⟩ ∈ lrel2 $;
+theorem lrel2_eeqv_app (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_eeqv A1 A3 ∈ lrel2 $ >
+  $ G ⇒ ra_eeqv A2 A4 ∈ lrel2 $ >
+  $ G ⇒ ra_eeqv ⟨ kc_app , scons A1 (scons A2 ∅) ⟩ ⟨ kc_app , scons A3 (scons A4 ∅) ⟩ ∈ lrel2 $;
+theorem lrel2_eeqv_lam (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_eeqv A1 A3 ∈ lrel2 $ >
+  $ G ⇒ ra_eeqv A2 A4 ∈ lrel2 $ >
+  $ G ⇒ ra_eeqv ⟨ kc_lam , scons A1 (scons A2 ∅) ⟩ ⟨ kc_lam , scons A3 (scons A4 ∅) ⟩ ∈ lrel2 $;
+theorem lrel2_eeqv_pi (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_eeqv A1 A3 ∈ lrel2 $ >
+  $ G ⇒ ra_eeqv A2 A4 ∈ lrel2 $ >
+  $ G ⇒ ra_eeqv ⟨ kc_pi , scons A1 (scons A2 ∅) ⟩ ⟨ kc_pi , scons A3 (scons A4 ∅) ⟩ ∈ lrel2 $;
+theorem lrel2_eeqv_lit (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_eeqv ⟨ kc_lit , scons A1 ∅ ⟩ ⟨ kc_lit , scons A1 ∅ ⟩ ∈ lrel2 $;
+theorem lrel2_eeqv_cst (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_lseqv A2 A3 ∈ lrel2 $ >
+  $ G ⇒ ra_eeqv ⟨ kc_cst , scons A1 (scons A2 ∅) ⟩ ⟨ kc_cst , scons A1 (scons A3 ∅) ⟩ ∈ lrel2 $;
+theorem lrel2_eeqv_ind_ty (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_ind_eqv A1 A2 ∈ lrel2 $ >
+  $ G ⇒ ra_eeqv ⟨ kc_ind_ty , scons A1 (scons A3 ∅) ⟩ ⟨ kc_ind_ty , scons A2 (scons A3 ∅) ⟩ ∈ lrel2 $;
+theorem lrel2_eeqv_ind_ctor (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_ind_eqv A1 A2 ∈ lrel2 $ >
+  $ G ⇒ ra_eeqv ⟨ kc_ind_ctor , scons A1 (scons A3 (scons A4 ∅)) ⟩ ⟨ kc_ind_ctor , scons A2 (scons A3 (scons A4 ∅)) ⟩ ∈ lrel2 $;
+theorem lrel2_eeqv_ind_rec (G: hyps) (A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_ind_eqv A1 A2 ∈ lrel2 $ >
+  $ G ⇒ lveq A4 A5 $ >
+  $ G ⇒ ra_eeqv ⟨ kc_ind_rec , scons A1 (scons A3 (scons A4 ∅)) ⟩ ⟨ kc_ind_rec , scons A2 (scons A3 (scons A5 ∅)) ⟩ ∈ lrel2 $;
+theorem lrel2_eeqv_proj (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_eeqv A3 A4 ∈ lrel2 $ >
+  $ G ⇒ ra_eeqv ⟨ kc_proj , scons A1 (scons A2 (scons A3 ∅)) ⟩ ⟨ kc_proj , scons A1 (scons A2 (scons A4 ∅)) ⟩ ∈ lrel2 $;
+theorem lrel2_eeqv_quot (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ lveq A1 A2 $ >
+  $ G ⇒ ra_eeqv ⟨ kc_quot , scons A1 ∅ ⟩ ⟨ kc_quot , scons A2 ∅ ⟩ ∈ lrel2 $;
+theorem lrel2_eeqv_quot_mk (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ lveq A1 A2 $ >
+  $ G ⇒ ra_eeqv ⟨ kc_quot_mk , scons A1 ∅ ⟩ ⟨ kc_quot_mk , scons A2 ∅ ⟩ ∈ lrel2 $;
+theorem lrel2_eeqv_quot_lift (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ lveq A1 A3 $ >
+  $ G ⇒ lveq A2 A4 $ >
+  $ G ⇒ ra_eeqv ⟨ kc_quot_lift , scons A1 (scons A2 ∅) ⟩ ⟨ kc_quot_lift , scons A3 (scons A4 ∅) ⟩ ∈ lrel2 $;
+theorem lrel2_eeqv_quot_ind (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ lveq A1 A2 $ >
+  $ G ⇒ ra_eeqv ⟨ kc_quot_ind , scons A1 ∅ ⟩ ⟨ kc_quot_ind , scons A2 ∅ ⟩ ∈ lrel2 $;
+theorem lrel2_ind_eqv_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ >
+  $ G ⇒ ra_ceqv A4 A5 ∈ lrel2 $ >
+  $ G ⇒ ra_teqv A8 A9 ∈ lrel2 $ >
+  $ G ⇒ ra_ceqv A6 A7 ∈ lrel2 $ >
+  $ G ⇒ ra_ind_data A1 A3 A4 A8 ∈ lrel $ >
+  $ G ⇒ ra_ind_data A2 A3 A5 A9 ∈ lrel $ >
+  $ G ⇒ ra_ind_nested A1 A6 ∈ lrel $ >
+  $ G ⇒ ra_ind_nested A2 A7 ∈ lrel $ >
+  $ G ⇒ ra_ind_eqv A1 A2 ∈ lrel2 $;
+theorem lrel2_ceqv_nil (G: hyps):
+  $ G ⇒ ra_ceqv ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ∈ lrel2 $;
+theorem lrel2_ceqv_cons (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_eeqv A1 A2 ∈ lrel2 $ >
+  $ G ⇒ ra_ceqv A3 A4 ∈ lrel2 $ >
+  $ G ⇒ ra_ceqv ⟨ kc_cons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_cons , scons A2 (scons A4 ∅) ⟩ ∈ lrel2 $;
+theorem lrel2_teqv_nil (G: hyps):
+  $ G ⇒ ra_teqv ⟨ kc_tnil , ∅ ⟩ ⟨ kc_tnil , ∅ ⟩ ∈ lrel2 $;
+theorem lrel2_teqv_cons (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_eeqv A1 A2 ∈ lrel2 $ >
+  $ G ⇒ ra_cseqv A3 A4 ∈ lrel2 $ >
+  $ G ⇒ ra_teqv A5 A6 ∈ lrel2 $ >
+  $ G ⇒ ra_teqv ⟨ kc_tcons , scons A1 (scons A3 (scons A5 ∅)) ⟩ ⟨ kc_tcons , scons A2 (scons A4 (scons A6 ∅)) ⟩ ∈ lrel2 $;
+theorem lrel2_cseqv_nil (G: hyps):
+  $ G ⇒ ra_cseqv ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ ∈ lrel2 $;
+theorem lrel2_cseqv_cons (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_eeqv A1 A2 ∈ lrel2 $ >
+  $ G ⇒ ra_cseqv A3 A4 ∈ lrel2 $ >
+  $ G ⇒ ra_cseqv ⟨ kc_ccons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_ccons , scons A2 (scons A4 ∅) ⟩ ∈ lrel2 $;
+theorem lrel2_lseqv_nil (G: hyps):
+  $ G ⇒ ra_lseqv ⟨ kc_lnil , ∅ ⟩ ⟨ kc_lnil , ∅ ⟩ ∈ lrel2 $;
+theorem lrel2_lseqv_cons (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_lseqv A3 A4 ∈ lrel2 $ >
+  $ G ⇒ lveq A1 A2 $ >
+  $ G ⇒ ra_lseqv ⟨ kc_lcons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_lcons , scons A2 (scons A4 ∅) ⟩ ∈ lrel2 $;
+theorem lrel2_nst_group_done (G: hyps) (A1 A2 A3 A4 A5 A6 A7: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ >
+  $ G ⇒ ra_nst_group A1 A2 A3 A4 A5 A6 A6 A7 A7 ∈ lrel2 $;
+theorem lrel2_nst_group_cons (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ >
+  $ G ⇒ ra_nst_group A1 A2 A3 A4 ⟨ kc_s , scons A6 ∅ ⟩ ⟨ kc_s , scons A7 ∅ ⟩ A8 A10 A11 ∈ lrel2 $ >
+  $ G ⇒ ra_le ⟨ kc_s , scons A7 ∅ ⟩ A8 ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons A3 (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ A4 A9 ∈ lrel $ >
+  $ G ⇒ ra_rehead ⟨ kc_ind_ty , scons A3 (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ ⟨ kc_ind_ty , scons A3 (scons A7 ∅) ⟩ A9 A4 A5 ∈ lrel $ >
+  $ G ⇒ ra_aux_data A2 A3 A5 A6 A7 ∈ lrel $ >
+  $ G ⇒ ra_nst_group A1 A2 A3 A4 A6 A7 A8 ⟨ kc_cons , scons A5 (scons A10 ∅) ⟩ A11 ∈ lrel2 $;
+
 --| The clause axioms, in prefix form.
 theorem ulevel_prop (l u: lvl): $ leqv l lz $ > $ ulevel l u $;
 theorem ulevel_le (l u: lvl): $ leqv (lmax l u) l $ > $ ulevel l u $;

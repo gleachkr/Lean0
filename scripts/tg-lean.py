@@ -16,8 +16,9 @@ Reads the sorts and constructors of spec/lean.mm0 (every `term` whose sort is no
     clause axiom (`cl_A`, over all sets), the clauses of each relation (`pr_R`),
     the program `lprog` (their union, at the atoms `latoms`) and its derivable
     atoms `lrel`; each relation is a `def` (its atom is derivable), the spec's
-    definitions follow, and each clause axiom is stated as a theorem, in prefix
-    form; then, per relation, that the program's clauses concluding its atoms
+    definitions follow, each clause axiom `A` is stated at classes (`lrel_A`: at
+    trees for its variables, its conclusion's atom is derivable when its
+    premises' are) and as a theorem, in prefix form; then, per relation, that the program's clauses concluding its atoms
     are its own (`lprog_R_pr`) and inversion (`lrel_R_cases`); then the
     determinacy of the computing relations later layers need (`DET`);
   - the label facts: every label is a natural number (`k*_X_omega`), and
@@ -30,16 +31,17 @@ It also writes spec/tg/lean-tg2.mm0, the second stratum: the relations of Part I
 whose clauses need only Part I's relations and level equivalence (`eeqv` and its
 kind, found by `stratum2`), as a second program over Part I's least model in the
 same form, its labels continuing Part I's: the clauses' Part I premises and
-`≈` premises are side conditions of their ground instances (`.. ∈ lrel`, `lveq`).
-It imports model-levels.mm0 (for `lveq`).
+`≈` premises are side conditions of their ground instances (`.. ∈ lrel`, `lveq`);
+the clauses at classes are `lrel2_A`. It imports model-levels.mm0 (for `lveq`).
 
 It also writes spec/tg/lean-tg3.mm0, the third stratum: the other relations of
 Part II, which depend on the judgment `deq` (`stratum3`), as a third program in
 the same form over a parameter `J`, a class of judgment atoms standing for `deq`:
 each relation is a `def R_j J` and each clause axiom a theorem `A_j` for every
-`J`, the spec's statement with `deq` at `J`; a clause with more than `WIDE`
-variables binds them as one sequence. It imports lean-tg2.mm0, and model-den.mm0
-imports it.
+`J`, the spec's statement with `deq` at `J` (at classes `lrel3_A`); a clause with
+more than `WIDE` variables binds them as one sequence. At the end, congruence in
+`J` and substitution through every def that takes it (`D_congr`, `sb_c_D`, and
+`lrel3_eq`). It imports lean-tg2.mm0, and model-den.mm0 imports it.
 
 And it writes spec/tg/lean-tg-rest.mm0, which imports the model (model.mm0, the
 chain of `model-*.mm0` files and the strata over lean-tg.mm0) and states the
@@ -293,6 +295,26 @@ def right_nested(xs):
     return out
 
 
+def at_classes(name, bs, prems, concl, mem, j=False):
+    """The theorem `name` stating a clause at classes `A1 .. An` (its variables `bs`,
+    in order, given by `prems` and `concl` at those classes): the classes are trees,
+    and the premises (`G ⇒ p` for each text `p` of `prems`) give its conclusion in
+    `mem`. With `j`, the class `J` comes first."""
+    As = [f"A{i + 1}" for i in range(len(bs))]
+    cls = " ".join((["J"] if j else []) + As)
+    o = [f"theorem {name} (G: hyps){f' ({cls}: class)' if cls else ''}:"]
+    for i in range(0, len(As), 4):
+        o.append("  " + " > ".join(f"$ G ⇒ {a} ∈ trees ω $" for a in As[i:i + 4]) + " >")
+    o += [f"  $ G ⇒ {p} $ >" for p in prems]
+    o.append(f"  $ G ⇒ {concl} ∈ {mem} $;")
+    return o
+
+
+def class_env(bs):
+    """The variables `bs` of a clause at the classes `A1 .. An`."""
+    return {n: f"A{i + 1}" for i, (n, _) in enumerate(bs)}
+
+
 class Syntax:
     """The spec's terms over set variables: trees and atoms, and statements in prefix
     form; variables named like a name in `lib` get a suffix `_v`."""
@@ -327,10 +349,11 @@ class Syntax:
             sys.exit(f"tg-lean: {name} is not a constructor")
         return node(f"kc_{name}", [self.tree(a, env) for a in args])
 
-    def atom(self, e):
-        """A relation's formula as an atom, the spec's wff definitions unfolded."""
+    def atom(self, e, env=None):
+        """A relation's formula as an atom, the spec's wff definitions unfolded (its
+        variables the classes `env` gives, if any)."""
         _, name, args = self.unfold(e)
-        return f"ra_{name} " + " ".join(paren(self.tree(a)) for a in args)
+        return f"ra_{name} " + " ".join(paren(self.tree(a, env)) for a in args)
 
     def stmt(self, e):
         """A term in prefix form, its variables renamed as `var` does."""
@@ -358,9 +381,15 @@ def render_relations(text, ctors):
     lib = library_names()
     ours = ({f"kr_{r}" for r in rel_names} | {f"ra_{r}" for r in rel_names} | rel_names |
             {f"cl_{d[1]}" for d in axioms} | {f"pr_{r}" for r in rel_names} |
-            {d[1] for d in axioms} | {d[1] for d in defs} | {"latoms", "lprog", "lrel"})
+            {d[1] for d in axioms} | {d[1] for d in defs} | {"latoms", "lprog", "lrel"} |
+            {f"lrel_{d[1]}" for d in axioms})
     if ours & lib:
         sys.exit(f"tg-lean: names taken by the library: {sorted(ours & lib)}")
+    # the names `lrel_A` share their prefix with the inversions and determinacy
+    clash = {f"lrel_{d[1]}" for d in axioms} & ({f"lrel_{r}_cases" for r in rel_names} |
+                                                {f"lrel_{r}_det{k}" for r in rel_names for k in ("", "2")})
+    if clash:
+        sys.exit(f"tg-lean: clause names that clash with generated names: {sorted(clash)}")
 
     syn = Syntax(sp, ctor_names, lib)
     var, tree, atom, stmt = syn.var, syn.tree, syn.atom, syn.stmt
@@ -424,6 +453,14 @@ def render_relations(text, ctors):
         w(f"def {name}{b}: {result} = $ {mm0math.show(body)} $;")
     w("")
     w("theorem lprog_hprog (G: hyps): $ G ⇒ hprog lprog latoms $;")
+    w("")
+    w("--| The clause axioms at classes (`lrel_A` for the clause axiom `A`): at any")
+    w("--| trees `A1 .. An` for its variables, a clause's conclusion is derivable when")
+    w("--| its premises are.")
+    for _, name, bs, hyps, concl in axioms:
+        env = class_env(bs)
+        o += at_classes(f"lrel_{name}", bs, [f"{atom(h, env)} ∈ lrel" for h in hyps],
+                        atom(concl, env), "lrel")
     w("")
     w("--| The clause axioms of Part I, in prefix form.")
     for _, name, bs, hyps, concl in axioms:
@@ -508,23 +545,35 @@ def render_stratum2(text, ctors, enc):
            decl_names((ROOT / f"spec/tg/{LEVELS}").read_text(encoding="utf-8")))
     ours = ({f"kr_{r}" for r in names} | {f"ra_{r}" for r in names} | set(names) |
             {f"cl_{d[1]}" for d in axioms} | {f"pr_{r}" for r in names} |
-            {d[1] for d in axioms} | {"lprog2", "lrel2"})
+            {d[1] for d in axioms} | {"lprog2", "lrel2"} | {f"lrel2_{d[1]}" for d in axioms})
     if ours & lib:
         sys.exit(f"tg-lean: names taken by the library: {sorted(ours & lib)}")
+    if {f"lrel2_{d[1]}" for d in axioms} & {f"lrel2_{r}_cases" for r in names}:
+        sys.exit("tg-lean: a clause name clashes with an inversion's")
     ctor_names = {c for c, _, _, _ in ctors}
     syn = Syntax(sp, ctor_names, lib)
     tree, atom, stmt = syn.tree, syn.atom, syn.stmt
 
-    def premise(h):
+    def premise(h, env=None):
         """A premise: an atom of the stratum (a premise of the clause), or a side
-        condition (an atom of Part I derivable, or levels equivalent)."""
+        condition (an atom of Part I derivable, or levels equivalent); at the classes
+        `env` gives the variables, if any."""
         e = syn.unfold(h)
         if e[1] in names:
-            return "atom", atom(e)
+            return "atom", atom(e, env)
         if e[1] in part1_rels:
-            return "side", f"{atom(e)} ∈ lrel"
+            return "side", f"{atom(e, env)} ∈ lrel"
         assert e[1] == "leqv"
-        return "side", f"lveq {paren(tree(e[2][0]))} {paren(tree(e[2][1]))}"
+        return "side", f"lveq {paren(tree(e[2][0], env))} {paren(tree(e[2][1], env))}"
+
+    def at_classes2(d, mem, j=False):
+        """The clause `d` at classes (`lrel2_A`, `lrel3_A`): its premise atoms in `mem`,
+        then its side conditions."""
+        _, name, bs, hyps, concl = d
+        env = class_env(bs)
+        ps = [premise(h, env) for h in hyps]
+        prems = [f"{a} ∈ {mem}" for k, a in ps if k == "atom"] + [a for k, a in ps if k == "side"]
+        return at_classes(f"{mem.split()[0]}_{name}", bs, prems, atom(concl, env), mem, j)
 
     last = re.findall(r"^def (kr_\w+):", enc, re.M)[-1]
     o = ["-- lean-tg2.mm0: the relations of Part II of spec/lean.mm0 over level",
@@ -598,6 +647,12 @@ def render_stratum2(text, ctors, enc):
         w(f"def {r} {bs}: wff = $ _ ⇒ ra_{r} {e} ∈ lrel2 $;")
     w("")
     w("theorem lprog2_hprog (G: hyps): $ G ⇒ hprog lprog2 latoms $;")
+    w("")
+    w("--| The clause axioms at classes (`lrel2_A` for the clause axiom `A`): at any")
+    w("--| trees `A1 .. An` for its variables, a clause's conclusion is derivable when")
+    w("--| its premises are and its side conditions hold.")
+    for d in axioms:
+        o += at_classes2(d, "lrel2")
     w("")
     w("--| The clause axioms, in prefix form.")
     for _, name, bs, hyps, concl in axioms:
@@ -687,7 +742,7 @@ def render_stratum3(text, ctors, enc, enc2):
             {f"{n}_j" for n in jnames} | {f"cl_{d[1]}" for d in axioms} |
             {f"pr_{r}" for r in names} | {f"{d[1]}_j" for d in axioms} |
             {f"gi_{d[1]}" for d in wide} | {f"ix{i}" for i in range(nix)} |
-            {"lprog3", "lrel3"})
+            {"lprog3", "lrel3"} | {f"lrel3_{d[1]}" for d in axioms})
     if ours & lib:
         sys.exit(f"tg-lean: names taken by the library: {sorted(ours & lib)}")
     ctor_names = {c for c, _, _, _ in ctors}
@@ -701,21 +756,31 @@ def render_stratum3(text, ctors, enc, enc2):
     if taken:
         sys.exit(f"tg-lean: names taken by the library: {sorted(taken)}")
 
-    def premise(h):
+    def premise(h, env=None):
         """A premise: an atom of the stratum (a premise of the clause), or a side
         condition (an atom of Part I or of the second stratum derivable, levels
-        equivalent, or a judgment in `J`)."""
+        equivalent, or a judgment in `J`); at the classes `env` gives the
+        variables, if any."""
         e = syn.unfold(h)
         if e[1] in names:
-            return "atom", atom(e)
+            return "atom", atom(e, env)
         if e[1] in part1_rels:
-            return "side", f"{atom(e)} ∈ lrel"
+            return "side", f"{atom(e, env)} ∈ lrel"
         if e[1] in s2:
-            return "side", f"{atom(e)} ∈ lrel2"
+            return "side", f"{atom(e, env)} ∈ lrel2"
         if e[1] == "deq":
-            return "side", f"{atom(e)} ∈ J"
+            return "side", f"{atom(e, env)} ∈ J"
         assert e[1] == "leqv"
-        return "side", f"lveq {paren(tree(e[2][0]))} {paren(tree(e[2][1]))}"
+        return "side", f"lveq {paren(tree(e[2][0], env))} {paren(tree(e[2][1], env))}"
+
+    def at_classes3(d):
+        """The clause `d` at classes (`lrel3_A`): its premise atoms in `lrel3 J`, then
+        its side conditions."""
+        _, name, bs, hyps, concl = d
+        env = class_env(bs)
+        ps = [premise(h, env) for h in hyps]
+        prems = [f"{a} ∈ lrel3 J" for k, a in ps if k == "atom"] + [a for k, a in ps if k == "side"]
+        return at_classes(f"lrel3_{name}", bs, prems, atom(concl, env), "lrel3 J", True)
 
     def jstmt(e):
         """A formula of the spec in prefix form, `deq` and the relations over it at `J`."""
@@ -877,6 +942,14 @@ def render_stratum3(text, ctors, enc, enc2):
     w("")
     w("theorem lprog3_hprog (G: hyps) (J: class): $ G ⇒ hprog (lprog3 J) latoms $;")
     w("")
+    w("--| The clause axioms at classes (`lrel3_A` for the clause axiom `A`), at every")
+    w("--| `J`: at any trees `A1 .. An` for its variables, a clause's conclusion is")
+    w("--| derivable when its premises are and its side conditions hold (the wide ones")
+    w("--| after their instances' congruence).")
+    for d in axioms:
+        if d not in wide:
+            o += at_classes3(d)
+    w("")
 
     def clause_theorem(d):
         _, name, bs, hyps, concl = d
@@ -899,6 +972,9 @@ def render_stratum3(text, ctors, enc, enc2):
             w(f"theorem gi_{d[1]}_eq (G: hyps) ({'J ' if d[1] in jcl else ''}{vs}: class):")
             w("  " + " > ".join(f"$ G ⇒ {x} = {y} $" for x, y in zip(a, b)) +
               f" >\n  $ G ⇒ {gi} {' '.join(a)} = {gi} {' '.join(b)} $;")
+        w("--| The wide clause axioms at classes.")
+        for d in wide:
+            o += at_classes3(d)
         w("--| The wide clause axioms, at every `J`.")
         for d in wide:
             clause_theorem(d)
@@ -941,6 +1017,38 @@ def render_stratum3(text, ctors, enc, enc2):
         w(f"theorem lrel3_{r}_cases (G: hyps) (J: class){bb} ({' '.join(ts)}: set):")
         w(f"  $ G ⇒ ra_{r} {' '.join(ts)} ∈ lrel3 J $ >")
         w("  $ G ⇒ " + " ∨\n      ".join(cases) + " $;")
+
+    # congruence in `J` (and a wide clause's instances in their classes too), and
+    # substitution through the defs that take `J`
+    jdefs_ = ([(f"gi_{d[1]}", len(d[2]), d[1] in jcl) for d in wide] +
+              [(f"cl_{d[1]}", 0, True) for d in axioms if d[1] in jcl] +
+              [(f"pr_{r}", 0, True) for r in names if r in jpr] +
+              [("lprog3", 0, True), ("lrel3", 0, True)])
+    cnames = [n for D, _, _ in jdefs_ for n in (f"{D}_congr", f"sb_c_{D}")] + ["lrel3_eq"]
+    taken = set(cnames) & (lib | ours | {f"lrel3_{r}_cases" for r in names} |
+                           {f"lprog3_{r}_pr" for r in names} | decl_names("\n".join(o)))
+    if taken or len(set(cnames)) != len(cnames):
+        sys.exit(f"tg-lean: congruence names taken: {sorted(taken)}")
+    w("")
+    w("-- " + "-" * 74)
+    w("-- Congruence in `J`, substitution through it")
+    w("-- " + "-" * 74)
+    w("")
+    w("--| The defs that take the judgment atoms `J` (a wide clause's instances `gi_A`")
+    w("--| in their other classes too): congruence (`D_congr`, for rewriting) and")
+    w("--| substitution through them (`sb_c_D`, for the normalizer); then `lrel3_eq`.")
+    for D, n, j in jdefs_:
+        a = (["J"] if j else []) + [f"A{i}" for i in range(1, n + 1)]
+        b = (["J2"] if j else []) + [f"B{i}" for i in range(1, n + 1)]
+        vs = " ".join(v for xy in zip(a, b) for v in xy)  # @congr: old₀ new₀ old₁ ...
+        w("--| @congr")
+        w(f"theorem {D}_congr ({vs}: class): "
+          + " > ".join(f"$ {x} ≐ {y} $" for x, y in zip(a, b))
+          + f" > $ {D} {' '.join(a)} ≐ {D} {' '.join(b)} $;")
+        w("--| @rewrite")
+        w(f"theorem sb_c_{D} {{x: set}} (t: set x) ({' '.join(a)}: class x): "
+          f"$ (⟦ x / t ⟧ ({D} {' '.join(a)})) ≐ {D} {' '.join(f'(⟦ x / t ⟧ {v})' for v in a)} $;")
+    w("theorem lrel3_eq (G: hyps) (J J2: class): $ G ⇒ J = J2 $ > $ G ⇒ lrel3 J = lrel3 J2 $;")
     return "\n".join(o) + "\n"
 
 

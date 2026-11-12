@@ -1128,6 +1128,1140 @@ def nat_succ: expr = $ ind_ctor nat_D nz n1 $;
 
 theorem lprog_hprog (G: hyps): $ G ⇒ hprog lprog latoms $;
 
+--| The clause axioms at classes (`lrel_A` for the clause axiom `A`): at any
+--| trees `A1 .. An` for its variables, a clause's conclusion is derivable when
+--| its premises are.
+theorem lrel_le_z (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_le ⟨ kc_nz , ∅ ⟩ A1 ∈ lrel $;
+theorem lrel_le_s (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_le A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_le ⟨ kc_s , scons A1 ∅ ⟩ ⟨ kc_s , scons A2 ∅ ⟩ ∈ lrel $;
+theorem lrel_add_z (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_add A1 ⟨ kc_nz , ∅ ⟩ A1 ∈ lrel $;
+theorem lrel_add_s (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_add A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_add A1 ⟨ kc_s , scons A2 ∅ ⟩ ⟨ kc_s , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_lnth_z (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_lnth ⟨ kc_lcons , scons A1 (scons A2 ∅) ⟩ ⟨ kc_nz , ∅ ⟩ A1 ∈ lrel $;
+theorem lrel_lnth_s (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_lnth A3 A4 A2 ∈ lrel $ >
+  $ G ⇒ ra_lnth ⟨ kc_lcons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_s , scons A4 ∅ ⟩ A2 ∈ lrel $;
+theorem lrel_linst_z (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_linst A1 ⟨ kc_lz , ∅ ⟩ ⟨ kc_lz , ∅ ⟩ ∈ lrel $;
+theorem lrel_linst_s (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_linst A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_linst A1 ⟨ kc_ls , scons A2 ∅ ⟩ ⟨ kc_ls , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_linst_max (G: hyps) (A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_linst A1 A2 A4 ∈ lrel $ >
+  $ G ⇒ ra_linst A1 A3 A5 ∈ lrel $ >
+  $ G ⇒ ra_linst A1 ⟨ kc_lmax , scons A2 (scons A3 ∅) ⟩ ⟨ kc_lmax , scons A4 (scons A5 ∅) ⟩ ∈ lrel $;
+theorem lrel_linst_imax (G: hyps) (A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_linst A1 A2 A4 ∈ lrel $ >
+  $ G ⇒ ra_linst A1 A3 A5 ∈ lrel $ >
+  $ G ⇒ ra_linst A1 ⟨ kc_limax , scons A2 (scons A3 ∅) ⟩ ⟨ kc_limax , scons A4 (scons A5 ∅) ⟩ ∈ lrel $;
+theorem lrel_linst_param (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_lnth A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_linst A1 ⟨ kc_lparam , scons A2 ∅ ⟩ A3 ∈ lrel $;
+theorem lrel_lsubst_z (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_lsubst A1 ⟨ kc_lz , ∅ ⟩ A2 ⟨ kc_lz , ∅ ⟩ ∈ lrel $;
+theorem lrel_lsubst_s (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_lsubst A1 A2 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_lsubst A1 ⟨ kc_ls , scons A2 ∅ ⟩ A3 ⟨ kc_ls , scons A4 ∅ ⟩ ∈ lrel $;
+theorem lrel_lsubst_max (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_lsubst A1 A2 A4 A5 ∈ lrel $ >
+  $ G ⇒ ra_lsubst A1 A3 A4 A6 ∈ lrel $ >
+  $ G ⇒ ra_lsubst A1 ⟨ kc_lmax , scons A2 (scons A3 ∅) ⟩ A4 ⟨ kc_lmax , scons A5 (scons A6 ∅) ⟩ ∈ lrel $;
+theorem lrel_lsubst_imax (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_lsubst A1 A2 A4 A5 ∈ lrel $ >
+  $ G ⇒ ra_lsubst A1 A3 A4 A6 ∈ lrel $ >
+  $ G ⇒ ra_lsubst A1 ⟨ kc_limax , scons A2 (scons A3 ∅) ⟩ A4 ⟨ kc_limax , scons A5 (scons A6 ∅) ⟩ ∈ lrel $;
+theorem lrel_lsubst_eq (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_lsubst A1 ⟨ kc_lparam , scons A1 ∅ ⟩ A2 A2 ∈ lrel $;
+theorem lrel_lsubst_lt (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_le ⟨ kc_s , scons A2 ∅ ⟩ A1 ∈ lrel $ >
+  $ G ⇒ ra_lsubst A1 ⟨ kc_lparam , scons A2 ∅ ⟩ A3 ⟨ kc_lparam , scons A2 ∅ ⟩ ∈ lrel $;
+theorem lrel_lsubst_gt (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_le ⟨ kc_s , scons A1 ∅ ⟩ A2 ∈ lrel $ >
+  $ G ⇒ ra_lsubst A1 ⟨ kc_lparam , scons A2 ∅ ⟩ A3 ⟨ kc_lparam , scons A2 ∅ ⟩ ∈ lrel $;
+theorem lrel_closed_bvar (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_le ⟨ kc_s , scons A1 ∅ ⟩ A2 ∈ lrel $ >
+  $ G ⇒ ra_closed A2 ⟨ kc_bvar , scons A1 ∅ ⟩ ∈ lrel $;
+theorem lrel_closed_srt (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_closed A1 ⟨ kc_srt , scons A2 ∅ ⟩ ∈ lrel $;
+theorem lrel_closed_app (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_closed A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_closed A1 A3 ∈ lrel $ >
+  $ G ⇒ ra_closed A1 ⟨ kc_app , scons A2 (scons A3 ∅) ⟩ ∈ lrel $;
+theorem lrel_closed_lam (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_closed A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_s , scons A1 ∅ ⟩ A3 ∈ lrel $ >
+  $ G ⇒ ra_closed A1 ⟨ kc_lam , scons A2 (scons A3 ∅) ⟩ ∈ lrel $;
+theorem lrel_closed_pi (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_closed A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_s , scons A1 ∅ ⟩ A3 ∈ lrel $ >
+  $ G ⇒ ra_closed A1 ⟨ kc_pi , scons A2 (scons A3 ∅) ⟩ ∈ lrel $;
+theorem lrel_closed_cst (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_closed A1 ⟨ kc_cst , scons A2 (scons A3 ∅) ⟩ ∈ lrel $;
+theorem lrel_lift_bvar_lt (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_le ⟨ kc_s , scons A3 ∅ ⟩ A2 ∈ lrel $ >
+  $ G ⇒ ra_lift A1 A2 ⟨ kc_bvar , scons A3 ∅ ⟩ ⟨ kc_bvar , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_lift_bvar_ge (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_le A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_add A3 A1 A4 ∈ lrel $ >
+  $ G ⇒ ra_lift A1 A2 ⟨ kc_bvar , scons A3 ∅ ⟩ ⟨ kc_bvar , scons A4 ∅ ⟩ ∈ lrel $;
+theorem lrel_lift_srt (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_lift A1 A2 ⟨ kc_srt , scons A3 ∅ ⟩ ⟨ kc_srt , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_lift_app (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_lift A1 A2 A3 A5 ∈ lrel $ >
+  $ G ⇒ ra_lift A1 A2 A4 A6 ∈ lrel $ >
+  $ G ⇒ ra_lift A1 A2 ⟨ kc_app , scons A3 (scons A4 ∅) ⟩ ⟨ kc_app , scons A5 (scons A6 ∅) ⟩ ∈ lrel $;
+theorem lrel_lift_lam (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_lift A1 A2 A3 A5 ∈ lrel $ >
+  $ G ⇒ ra_lift A1 ⟨ kc_s , scons A2 ∅ ⟩ A4 A6 ∈ lrel $ >
+  $ G ⇒ ra_lift A1 A2 ⟨ kc_lam , scons A3 (scons A4 ∅) ⟩ ⟨ kc_lam , scons A5 (scons A6 ∅) ⟩ ∈ lrel $;
+theorem lrel_lift_pi (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_lift A1 A2 A3 A5 ∈ lrel $ >
+  $ G ⇒ ra_lift A1 ⟨ kc_s , scons A2 ∅ ⟩ A4 A6 ∈ lrel $ >
+  $ G ⇒ ra_lift A1 A2 ⟨ kc_pi , scons A3 (scons A4 ∅) ⟩ ⟨ kc_pi , scons A5 (scons A6 ∅) ⟩ ∈ lrel $;
+theorem lrel_lift_closed (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_closed A2 A4 ∈ lrel $ >
+  $ G ⇒ ra_le A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_lift A1 A3 A4 A4 ∈ lrel $;
+theorem lrel_inst_bvar_lt (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_le ⟨ kc_s , scons A2 ∅ ⟩ A1 ∈ lrel $ >
+  $ G ⇒ ra_inst A1 ⟨ kc_bvar , scons A2 ∅ ⟩ A3 ⟨ kc_bvar , scons A2 ∅ ⟩ ∈ lrel $;
+theorem lrel_inst_bvar_eq (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_lift A1 ⟨ kc_nz , ∅ ⟩ A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_inst A1 ⟨ kc_bvar , scons A1 ∅ ⟩ A2 A3 ∈ lrel $;
+theorem lrel_inst_bvar_gt (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_le A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_inst A1 ⟨ kc_bvar , scons ⟨ kc_s , scons A2 ∅ ⟩ ∅ ⟩ A3 ⟨ kc_bvar , scons A2 ∅ ⟩ ∈ lrel $;
+theorem lrel_inst_srt (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_inst A1 ⟨ kc_srt , scons A2 ∅ ⟩ A3 ⟨ kc_srt , scons A2 ∅ ⟩ ∈ lrel $;
+theorem lrel_inst_app (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_inst A1 A2 A4 A5 ∈ lrel $ >
+  $ G ⇒ ra_inst A1 A3 A4 A6 ∈ lrel $ >
+  $ G ⇒ ra_inst A1 ⟨ kc_app , scons A2 (scons A3 ∅) ⟩ A4 ⟨ kc_app , scons A5 (scons A6 ∅) ⟩ ∈ lrel $;
+theorem lrel_inst_lam (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_inst A1 A2 A4 A5 ∈ lrel $ >
+  $ G ⇒ ra_inst ⟨ kc_s , scons A1 ∅ ⟩ A3 A4 A6 ∈ lrel $ >
+  $ G ⇒ ra_inst A1 ⟨ kc_lam , scons A2 (scons A3 ∅) ⟩ A4 ⟨ kc_lam , scons A5 (scons A6 ∅) ⟩ ∈ lrel $;
+theorem lrel_inst_pi (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_inst A1 A2 A4 A5 ∈ lrel $ >
+  $ G ⇒ ra_inst ⟨ kc_s , scons A1 ∅ ⟩ A3 A4 A6 ∈ lrel $ >
+  $ G ⇒ ra_inst A1 ⟨ kc_pi , scons A2 (scons A3 ∅) ⟩ A4 ⟨ kc_pi , scons A5 (scons A6 ∅) ⟩ ∈ lrel $;
+theorem lrel_inst_closed (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_closed A1 A3 ∈ lrel $ >
+  $ G ⇒ ra_le A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_inst A2 A3 A4 A3 ∈ lrel $;
+theorem lrel_lookup_z (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_lift ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ⟨ kc_nz , ∅ ⟩ A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_lookup ⟨ kc_cons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_nz , ∅ ⟩ A2 ∈ lrel $;
+theorem lrel_lookup_s (G: hyps) (A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_lookup A4 A5 A2 ∈ lrel $ >
+  $ G ⇒ ra_lift ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ⟨ kc_nz , ∅ ⟩ A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_lookup ⟨ kc_cons , scons A1 (scons A4 ∅) ⟩ ⟨ kc_s , scons A5 ∅ ⟩ A3 ∈ lrel $;
+theorem lrel_cinst_z (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_cinst ⟨ kc_nz , ∅ ⟩ A1 A2 A3 ⟨ kc_cons , scons A2 (scons A1 ∅) ⟩ A1 ∈ lrel $;
+theorem lrel_cinst_s (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ ra_cinst A1 A2 A5 A6 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_inst A1 A7 A6 A8 ∈ lrel $ >
+  $ G ⇒ ra_cinst ⟨ kc_s , scons A1 ∅ ⟩ A2 A5 A6 ⟨ kc_cons , scons A7 (scons A3 ∅) ⟩ ⟨ kc_cons , scons A8 (scons A4 ∅) ⟩ ∈ lrel $;
+theorem lrel_cext_z (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_cext ⟨ kc_nz , ∅ ⟩ A1 A1 ∈ lrel $;
+theorem lrel_cext_s (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_cext A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_cext ⟨ kc_s , scons A1 ∅ ⟩ A2 ⟨ kc_cons , scons A4 (scons A3 ∅) ⟩ ∈ lrel $;
+theorem lrel_clen_nil (G: hyps):
+  $ G ⇒ ra_clen ⟨ kc_nil , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ ∈ lrel $;
+theorem lrel_clen_cons (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_clen A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_clen ⟨ kc_cons , scons A1 (scons A2 ∅) ⟩ ⟨ kc_s , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_cnth_z (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_cnth ⟨ kc_cons , scons A1 (scons A2 ∅) ⟩ ⟨ kc_nz , ∅ ⟩ A1 ∈ lrel $;
+theorem lrel_cnth_s (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_cnth A3 A4 A2 ∈ lrel $ >
+  $ G ⇒ ra_cnth ⟨ kc_cons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_s , scons A4 ∅ ⟩ A2 ∈ lrel $;
+theorem lrel_capp_nil (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_capp ⟨ kc_nil , ∅ ⟩ A1 A1 ∈ lrel $;
+theorem lrel_capp_cons (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_capp A2 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_capp ⟨ kc_cons , scons A1 (scons A2 ∅) ⟩ A3 ⟨ kc_cons , scons A1 (scons A4 ∅) ⟩ ∈ lrel $;
+theorem lrel_bsucc_0 (G: hyps):
+  $ G ⇒ ra_bsucc ⟨ kc_b0 , ∅ ⟩ ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∈ lrel $;
+theorem lrel_bsucc_d0 (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_bsucc ⟨ kc_bd0 , scons A1 ∅ ⟩ ⟨ kc_bd1 , scons A1 ∅ ⟩ ∈ lrel $;
+theorem lrel_bsucc_d1 (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_bsucc A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_bsucc ⟨ kc_bd1 , scons A1 ∅ ⟩ ⟨ kc_bd0 , scons A2 ∅ ⟩ ∈ lrel $;
+theorem lrel_bdbl_0 (G: hyps):
+  $ G ⇒ ra_bdbl ⟨ kc_b0 , ∅ ⟩ ⟨ kc_b0 , ∅ ⟩ ∈ lrel $;
+theorem lrel_bdbl_d0 (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_bdbl ⟨ kc_bd0 , scons A1 ∅ ⟩ ⟨ kc_bd0 , scons ⟨ kc_bd0 , scons A1 ∅ ⟩ ∅ ⟩ ∈ lrel $;
+theorem lrel_bdbl_d1 (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_bdbl ⟨ kc_bd1 , scons A1 ∅ ⟩ ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons A1 ∅ ⟩ ∅ ⟩ ∈ lrel $;
+theorem lrel_badd_0l (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_badd ⟨ kc_b0 , ∅ ⟩ A1 A1 ∈ lrel $;
+theorem lrel_badd_0r (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_badd A1 ⟨ kc_b0 , ∅ ⟩ A1 ∈ lrel $;
+theorem lrel_badd_00 (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_badd A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_badd ⟨ kc_bd0 , scons A1 ∅ ⟩ ⟨ kc_bd0 , scons A2 ∅ ⟩ ⟨ kc_bd0 , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_badd_01 (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_badd A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_badd ⟨ kc_bd0 , scons A1 ∅ ⟩ ⟨ kc_bd1 , scons A2 ∅ ⟩ ⟨ kc_bd1 , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_badd_10 (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_badd A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_badd ⟨ kc_bd1 , scons A1 ∅ ⟩ ⟨ kc_bd0 , scons A2 ∅ ⟩ ⟨ kc_bd1 , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_badd_11 (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_baddc A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_badd ⟨ kc_bd1 , scons A1 ∅ ⟩ ⟨ kc_bd1 , scons A2 ∅ ⟩ ⟨ kc_bd0 , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_baddc_0l (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_bsucc A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_baddc ⟨ kc_b0 , ∅ ⟩ A1 A2 ∈ lrel $;
+theorem lrel_baddc_0r (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_bsucc A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_baddc A1 ⟨ kc_b0 , ∅ ⟩ A2 ∈ lrel $;
+theorem lrel_baddc_00 (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_badd A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_baddc ⟨ kc_bd0 , scons A1 ∅ ⟩ ⟨ kc_bd0 , scons A2 ∅ ⟩ ⟨ kc_bd1 , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_baddc_01 (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_baddc A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_baddc ⟨ kc_bd0 , scons A1 ∅ ⟩ ⟨ kc_bd1 , scons A2 ∅ ⟩ ⟨ kc_bd0 , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_baddc_10 (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_baddc A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_baddc ⟨ kc_bd1 , scons A1 ∅ ⟩ ⟨ kc_bd0 , scons A2 ∅ ⟩ ⟨ kc_bd0 , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_baddc_11 (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_baddc A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_baddc ⟨ kc_bd1 , scons A1 ∅ ⟩ ⟨ kc_bd1 , scons A2 ∅ ⟩ ⟨ kc_bd1 , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_bmul_0 (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_bmul A1 ⟨ kc_b0 , ∅ ⟩ ⟨ kc_b0 , ∅ ⟩ ∈ lrel $;
+theorem lrel_bmul_d0 (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_bmul A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_bdbl A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_bmul A1 ⟨ kc_bd0 , scons A2 ∅ ⟩ A4 ∈ lrel $;
+theorem lrel_bmul_d1 (G: hyps) (A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_bmul A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_bdbl A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_badd A4 A1 A5 ∈ lrel $ >
+  $ G ⇒ ra_bmul A1 ⟨ kc_bd1 , scons A2 ∅ ⟩ A5 ∈ lrel $;
+theorem lrel_bpow_0 (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_bpow A1 ⟨ kc_b0 , ∅ ⟩ ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∈ lrel $;
+theorem lrel_bpow_d0 (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_bpow A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_bmul A3 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_bpow A1 ⟨ kc_bd0 , scons A2 ∅ ⟩ A4 ∈ lrel $;
+theorem lrel_bpow_d1 (G: hyps) (A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_bpow A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_bmul A3 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_bmul A4 A1 A5 ∈ lrel $ >
+  $ G ⇒ ra_bpow A1 ⟨ kc_bd1 , scons A2 ∅ ⟩ A5 ∈ lrel $;
+theorem lrel_band_0l (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_band ⟨ kc_b0 , ∅ ⟩ A1 ⟨ kc_b0 , ∅ ⟩ ∈ lrel $;
+theorem lrel_band_0r (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_band A1 ⟨ kc_b0 , ∅ ⟩ ⟨ kc_b0 , ∅ ⟩ ∈ lrel $;
+theorem lrel_band_00 (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_band A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_bdbl A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_band ⟨ kc_bd0 , scons A1 ∅ ⟩ ⟨ kc_bd0 , scons A2 ∅ ⟩ A4 ∈ lrel $;
+theorem lrel_band_01 (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_band A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_bdbl A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_band ⟨ kc_bd0 , scons A1 ∅ ⟩ ⟨ kc_bd1 , scons A2 ∅ ⟩ A4 ∈ lrel $;
+theorem lrel_band_10 (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_band A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_bdbl A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_band ⟨ kc_bd1 , scons A1 ∅ ⟩ ⟨ kc_bd0 , scons A2 ∅ ⟩ A4 ∈ lrel $;
+theorem lrel_band_11 (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_band A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_band ⟨ kc_bd1 , scons A1 ∅ ⟩ ⟨ kc_bd1 , scons A2 ∅ ⟩ ⟨ kc_bd1 , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_bor_0l (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_bor ⟨ kc_b0 , ∅ ⟩ A1 A1 ∈ lrel $;
+theorem lrel_bor_0r (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_bor A1 ⟨ kc_b0 , ∅ ⟩ A1 ∈ lrel $;
+theorem lrel_bor_00 (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_bor A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_bor ⟨ kc_bd0 , scons A1 ∅ ⟩ ⟨ kc_bd0 , scons A2 ∅ ⟩ ⟨ kc_bd0 , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_bor_01 (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_bor A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_bor ⟨ kc_bd0 , scons A1 ∅ ⟩ ⟨ kc_bd1 , scons A2 ∅ ⟩ ⟨ kc_bd1 , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_bor_10 (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_bor A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_bor ⟨ kc_bd1 , scons A1 ∅ ⟩ ⟨ kc_bd0 , scons A2 ∅ ⟩ ⟨ kc_bd1 , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_bor_11 (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_bor A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_bor ⟨ kc_bd1 , scons A1 ∅ ⟩ ⟨ kc_bd1 , scons A2 ∅ ⟩ ⟨ kc_bd1 , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_bxor_0l (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_bxor ⟨ kc_b0 , ∅ ⟩ A1 A1 ∈ lrel $;
+theorem lrel_bxor_0r (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_bxor A1 ⟨ kc_b0 , ∅ ⟩ A1 ∈ lrel $;
+theorem lrel_bxor_00 (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_bxor A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_bdbl A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_bxor ⟨ kc_bd0 , scons A1 ∅ ⟩ ⟨ kc_bd0 , scons A2 ∅ ⟩ A4 ∈ lrel $;
+theorem lrel_bxor_01 (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_bxor A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_bxor ⟨ kc_bd0 , scons A1 ∅ ⟩ ⟨ kc_bd1 , scons A2 ∅ ⟩ ⟨ kc_bd1 , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_bxor_10 (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_bxor A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_bxor ⟨ kc_bd1 , scons A1 ∅ ⟩ ⟨ kc_bd0 , scons A2 ∅ ⟩ ⟨ kc_bd1 , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_bxor_11 (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_bxor A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_bdbl A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_bxor ⟨ kc_bd1 , scons A1 ∅ ⟩ ⟨ kc_bd1 , scons A2 ∅ ⟩ A4 ∈ lrel $;
+theorem lrel_closed_lit (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_closed A1 ⟨ kc_lit , scons A2 ∅ ⟩ ∈ lrel $;
+theorem lrel_closed_ind_ty (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_closed A1 ⟨ kc_ind_ty , scons A2 (scons A3 ∅) ⟩ ∈ lrel $;
+theorem lrel_closed_ind_ctor (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_closed A1 ⟨ kc_ind_ctor , scons A2 (scons A3 (scons A4 ∅)) ⟩ ∈ lrel $;
+theorem lrel_closed_ind_rec (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_closed A1 ⟨ kc_ind_rec , scons A2 (scons A3 (scons A4 ∅)) ⟩ ∈ lrel $;
+theorem lrel_closed_proj (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_closed A1 A4 ∈ lrel $ >
+  $ G ⇒ ra_closed A1 ⟨ kc_proj , scons A2 (scons A3 (scons A4 ∅)) ⟩ ∈ lrel $;
+theorem lrel_lift_proj (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_lift A1 A2 A5 A6 ∈ lrel $ >
+  $ G ⇒ ra_lift A1 A2 ⟨ kc_proj , scons A3 (scons A4 (scons A5 ∅)) ⟩ ⟨ kc_proj , scons A3 (scons A4 (scons A6 ∅)) ⟩ ∈ lrel $;
+theorem lrel_inst_proj (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_inst A1 A4 A5 A6 ∈ lrel $ >
+  $ G ⇒ ra_inst A1 ⟨ kc_proj , scons A2 (scons A3 (scons A4 ∅)) ⟩ A5 ⟨ kc_proj , scons A2 (scons A3 (scons A6 ∅)) ⟩ ∈ lrel $;
+theorem lrel_ind_data_i (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_ind_data ⟨ kc_ind_mk , scons A1 (scons A2 (scons A3 ∅)) ⟩ A1 A2 A3 ∈ lrel $;
+theorem lrel_ind_data_n (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_ind_data ⟨ kc_ind_mkn , scons A1 (scons A2 (scons A3 (scons A4 ∅))) ⟩ A1 A2 A3 ∈ lrel $;
+theorem lrel_ind_nested_mk (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_ind_nested ⟨ kc_ind_mk , scons A1 (scons A2 (scons A3 ∅)) ⟩ ⟨ kc_nil , ∅ ⟩ ∈ lrel $;
+theorem lrel_ind_nested_mkn (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_ind_nested ⟨ kc_ind_mkn , scons A1 (scons A2 (scons A3 (scons A4 ∅))) ⟩ A4 ∈ lrel $;
+theorem lrel_nth_ty_z (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_nth_ty ⟨ kc_tcons , scons A1 (scons A2 (scons A3 ∅)) ⟩ ⟨ kc_nz , ∅ ⟩ A1 A2 ∈ lrel $;
+theorem lrel_nth_ty_s (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_nth_ty A5 A6 A1 A3 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty ⟨ kc_tcons , scons A2 (scons A4 (scons A5 ∅)) ⟩ ⟨ kc_s , scons A6 ∅ ⟩ A1 A3 ∈ lrel $;
+theorem lrel_nth_ctor_z (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_nth_ctor ⟨ kc_ccons , scons A1 (scons A2 ∅) ⟩ ⟨ kc_nz , ∅ ⟩ A1 ∈ lrel $;
+theorem lrel_nth_ctor_s (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_nth_ctor A3 A4 A1 ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor ⟨ kc_ccons , scons A2 (scons A3 ∅) ⟩ ⟨ kc_s , scons A4 ∅ ⟩ A1 ∈ lrel $;
+theorem lrel_clen_c_nil (G: hyps):
+  $ G ⇒ ra_clen_c ⟨ kc_cnil , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ ∈ lrel $;
+theorem lrel_clen_c_cons (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_clen_c A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_clen_c ⟨ kc_ccons , scons A1 (scons A2 ∅) ⟩ ⟨ kc_s , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_ntys_nil (G: hyps):
+  $ G ⇒ ra_ntys ⟨ kc_tnil , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ ∈ lrel $;
+theorem lrel_ntys_cons (G: hyps) (A1 A2 A3 A4 A5 A6 A7: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ >
+  $ G ⇒ ra_ntys A3 A4 A5 ∈ lrel $ >
+  $ G ⇒ ra_clen_c A2 A6 ∈ lrel $ >
+  $ G ⇒ ra_add A5 A6 A7 ∈ lrel $ >
+  $ G ⇒ ra_ntys ⟨ kc_tcons , scons A1 (scons A2 (scons A3 ∅)) ⟩ ⟨ kc_s , scons A4 ∅ ⟩ A7 ∈ lrel $;
+theorem lrel_minor_idx_z (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_minor_idx ⟨ kc_tcons , scons A1 (scons A2 (scons A3 ∅)) ⟩ ⟨ kc_nz , ∅ ⟩ A4 A4 ∈ lrel $;
+theorem lrel_minor_idx_s (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ ra_clen_c A2 A7 ∈ lrel $ >
+  $ G ⇒ ra_minor_idx A3 A4 A5 A6 ∈ lrel $ >
+  $ G ⇒ ra_add A7 A6 A8 ∈ lrel $ >
+  $ G ⇒ ra_minor_idx ⟨ kc_tcons , scons A1 (scons A2 (scons A3 ∅)) ⟩ ⟨ kc_s , scons A4 ∅ ⟩ A5 A8 ∈ lrel $;
+theorem lrel_npis_bvar (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_npis ⟨ kc_bvar , scons A1 ∅ ⟩ ⟨ kc_nz , ∅ ⟩ ∈ lrel $;
+theorem lrel_npis_app (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_npis ⟨ kc_app , scons A1 (scons A2 ∅) ⟩ ⟨ kc_nz , ∅ ⟩ ∈ lrel $;
+theorem lrel_npis_pi (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_npis A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_npis ⟨ kc_pi , scons A1 (scons A2 ∅) ⟩ ⟨ kc_s , scons A3 ∅ ⟩ ∈ lrel $;
+theorem lrel_nth_pi_z (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_nth_pi ⟨ kc_pi , scons A1 (scons A2 ∅) ⟩ ⟨ kc_nz , ∅ ⟩ A1 ∈ lrel $;
+theorem lrel_nth_pi_s (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_nth_pi A3 A4 A1 ∈ lrel $ >
+  $ G ⇒ ra_nth_pi ⟨ kc_pi , scons A2 (scons A3 ∅) ⟩ ⟨ kc_s , scons A4 ∅ ⟩ A1 ∈ lrel $;
+theorem lrel_isort_srt (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_isort ⟨ kc_srt , scons A1 ∅ ⟩ ⟨ kc_nz , ∅ ⟩ A1 ∈ lrel $;
+theorem lrel_isort_pi (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_isort A2 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_isort ⟨ kc_pi , scons A1 (scons A2 ∅) ⟩ ⟨ kc_s , scons A3 ∅ ⟩ A4 ∈ lrel $;
+theorem lrel_ind_arity_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ >
+  $ G ⇒ ra_ind_data A1 A2 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_clen A3 A5 ∈ lrel $ >
+  $ G ⇒ ra_ntys A4 A6 A7 ∈ lrel $ >
+  $ G ⇒ ra_ind_arity A1 A5 A6 A7 ∈ lrel $;
+theorem lrel_nidx_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ >
+  $ G ⇒ ra_ind_data A1 A2 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A4 A5 A7 A8 ∈ lrel $ >
+  $ G ⇒ ra_isort A7 A6 A9 ∈ lrel $ >
+  $ G ⇒ ra_nidx A1 A5 A6 ∈ lrel $;
+theorem lrel_nfields_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ >
+  $ G ⇒ ra_ind_data A1 A2 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A4 A5 A8 A10 ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor A10 A6 A9 ∈ lrel $ >
+  $ G ⇒ ra_npis A9 A7 ∈ lrel $ >
+  $ G ⇒ ra_nfields A1 A5 A6 A7 ∈ lrel $;
+theorem lrel_ndecl_nil (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_ndecl ⟨ kc_nil , ∅ ⟩ A1 A1 ∈ lrel $;
+theorem lrel_ndecl_cons (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_ndecl A2 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_ndecl ⟨ kc_cons , scons A1 (scons A2 ∅) ⟩ ⟨ kc_s , scons A3 ∅ ⟩ A4 ∈ lrel $;
+theorem lrel_aux_of_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ >
+  $ G ⇒ ra_ind_arity A1 A4 A5 A6 ∈ lrel $ >
+  $ G ⇒ ra_ndecl A2 A5 A7 ∈ lrel $ >
+  $ G ⇒ ra_add A7 A8 A3 ∈ lrel $ >
+  $ G ⇒ ra_cnth A2 A8 A9 ∈ lrel $ >
+  $ G ⇒ ra_aux_of A1 A2 A3 A9 ∈ lrel $;
+theorem lrel_pis_nil (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_pis ⟨ kc_nil , ∅ ⟩ A1 A1 ∈ lrel $;
+theorem lrel_pis_cons (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_pis A4 ⟨ kc_pi , scons A1 (scons A2 ∅) ⟩ A3 ∈ lrel $ >
+  $ G ⇒ ra_pis ⟨ kc_cons , scons A1 (scons A4 ∅) ⟩ A2 A3 ∈ lrel $;
+theorem lrel_lams_nil (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_lams ⟨ kc_nil , ∅ ⟩ A1 A1 ∈ lrel $;
+theorem lrel_lams_cons (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_lams A4 ⟨ kc_lam , scons A1 (scons A2 ∅) ⟩ A3 ∈ lrel $ >
+  $ G ⇒ ra_lams ⟨ kc_cons , scons A1 (scons A4 ∅) ⟩ A2 A3 ∈ lrel $;
+theorem lrel_tys_closed_nil (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_tys_closed A1 ⟨ kc_tnil , ∅ ⟩ ∈ lrel $;
+theorem lrel_tys_closed_cons (G: hyps) (A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_pis A1 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A3 ∈ lrel $ >
+  $ G ⇒ ra_tys_closed A1 A5 ∈ lrel $ >
+  $ G ⇒ ra_tys_closed A1 ⟨ kc_tcons , scons A2 (scons A4 (scons A5 ∅)) ⟩ ∈ lrel $;
+theorem lrel_pargs_z (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_pargs A1 A2 ⟨ kc_nz , ∅ ⟩ A1 ∈ lrel $;
+theorem lrel_pargs_s (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_pargs A1 ⟨ kc_s , scons A3 ∅ ⟩ A4 A2 ∈ lrel $ >
+  $ G ⇒ ra_pargs A1 A3 ⟨ kc_s , scons A4 ∅ ⟩ ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons A3 ∅ ⟩ ∅) ⟩ ∈ lrel $;
+theorem lrel_spine_z (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_spine A1 A1 ⟨ kc_nz , ∅ ⟩ ∈ lrel $;
+theorem lrel_spine_s (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_spine A1 A2 A4 ∈ lrel $ >
+  $ G ⇒ ra_spine A1 ⟨ kc_app , scons A2 (scons A3 ∅) ⟩ ⟨ kc_s , scons A4 ∅ ⟩ ∈ lrel $;
+theorem lrel_rehead_z (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_rehead A1 A2 ⟨ kc_nz , ∅ ⟩ A1 A2 ∈ lrel $;
+theorem lrel_rehead_s (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_rehead A1 A2 A6 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_rehead A1 A2 ⟨ kc_s , scons A6 ∅ ⟩ ⟨ kc_app , scons A3 (scons A5 ∅) ⟩ ⟨ kc_app , scons A4 (scons A5 ∅) ⟩ ∈ lrel $;
+theorem lrel_has_arg_z (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_has_arg ⟨ kc_app , scons A1 (scons A2 ∅) ⟩ A2 ∈ lrel $;
+theorem lrel_has_arg_s (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_has_arg A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_has_arg ⟨ kc_app , scons A1 (scons A3 ∅) ⟩ A2 ∈ lrel $;
+theorem lrel_leaf_has_pi (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_leaf_has ⟨ kc_s , scons A1 ∅ ⟩ A3 ∈ lrel $ >
+  $ G ⇒ ra_leaf_has A1 ⟨ kc_pi , scons A2 (scons A3 ∅) ⟩ ∈ lrel $;
+theorem lrel_leaf_has_app (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_has_arg A2 ⟨ kc_bvar , scons A1 ∅ ⟩ ∈ lrel $ >
+  $ G ⇒ ra_leaf_has A1 A2 ∈ lrel $;
+theorem lrel_pinst_head (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_pinst A1 ⟨ kc_ind_ty , scons A2 (scons A3 ∅) ⟩ A4 A4 ∈ lrel $;
+theorem lrel_pinst_head_c (G: hyps) (A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_pinst A1 ⟨ kc_ind_ctor , scons A2 (scons A3 (scons A4 ∅)) ⟩ A5 A5 ∈ lrel $;
+theorem lrel_pinst_app (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_pinst ⟨ kc_s , scons A1 ∅ ⟩ A2 A4 A5 ∈ lrel $ >
+  $ G ⇒ ra_inst A1 A5 A3 A6 ∈ lrel $ >
+  $ G ⇒ ra_pinst A1 ⟨ kc_app , scons A2 (scons A3 ∅) ⟩ A4 A6 ∈ lrel $;
+theorem lrel_closed_quot (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_closed A1 ⟨ kc_quot , scons A2 ∅ ⟩ ∈ lrel $;
+theorem lrel_closed_quot_mk (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_closed A1 ⟨ kc_quot_mk , scons A2 ∅ ⟩ ∈ lrel $;
+theorem lrel_closed_quot_lift (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_closed A1 ⟨ kc_quot_lift , scons A2 (scons A3 ∅) ⟩ ∈ lrel $;
+theorem lrel_closed_quot_ind (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_closed A1 ⟨ kc_quot_ind , scons A2 ∅ ⟩ ∈ lrel $;
+theorem lrel_sinst_done (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_sinst A1 A2 A2 A3 A4 A4 ∈ lrel $;
+theorem lrel_sinst_step (G: hyps) (A1 A2 A3 A4 A5 A6 A7: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ >
+  $ G ⇒ ra_le ⟨ kc_s , scons A2 ∅ ⟩ A3 ∈ lrel $ >
+  $ G ⇒ ra_inst A4 A5 ⟨ kc_ind_ty , scons A1 (scons A2 ∅) ⟩ A6 ∈ lrel $ >
+  $ G ⇒ ra_sinst A1 ⟨ kc_s , scons A2 ∅ ⟩ A3 A4 A6 A7 ∈ lrel $ >
+  $ G ⇒ ra_sinst A1 A2 A3 A4 A5 A7 ∈ lrel $;
+theorem lrel_iargs_z (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_iargs A1 ⟨ kc_nz , ∅ ⟩ A2 A2 ∈ lrel $;
+theorem lrel_iargs_s (G: hyps) (A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_iargs A1 A2 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_closed A1 A5 ∈ lrel $ >
+  $ G ⇒ ra_iargs A1 ⟨ kc_s , scons A2 ∅ ⟩ A3 ⟨ kc_app , scons A4 (scons A5 ∅) ⟩ ∈ lrel $;
+theorem lrel_indapp_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ >
+  $ G ⇒ ra_spine ⟨ kc_bvar , scons A7 ∅ ⟩ A11 A9 ∈ lrel $ >
+  $ G ⇒ ra_add A4 A3 A6 ∈ lrel $ >
+  $ G ⇒ ra_add A6 A5 A7 ∈ lrel $ >
+  $ G ⇒ ra_le ⟨ kc_s , scons A5 ∅ ⟩ A2 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_bvar , scons A7 ∅ ⟩ A4 A3 A10 ∈ lrel $ >
+  $ G ⇒ ra_nidx A1 A5 A8 ∈ lrel $ >
+  $ G ⇒ ra_iargs A6 A8 A10 A11 ∈ lrel $ >
+  $ G ⇒ ra_indapp A1 A2 A3 A4 A11 A5 ∈ lrel $;
+theorem lrel_ipos_closed (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_add A4 A3 A5 ∈ lrel $ >
+  $ G ⇒ ra_closed A5 A6 ∈ lrel $ >
+  $ G ⇒ ra_ipos A1 A2 A3 A4 A6 ∈ lrel $;
+theorem lrel_ipos_pi (G: hyps) (A1 A2 A3 A4 A5 A6 A7: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ >
+  $ G ⇒ ra_add A4 A3 A5 ∈ lrel $ >
+  $ G ⇒ ra_closed A5 A6 ∈ lrel $ >
+  $ G ⇒ ra_ipos A1 A2 A3 ⟨ kc_s , scons A4 ∅ ⟩ A7 ∈ lrel $ >
+  $ G ⇒ ra_ipos A1 A2 A3 A4 ⟨ kc_pi , scons A6 (scons A7 ∅) ⟩ ∈ lrel $;
+theorem lrel_ipos_app (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_indapp A1 A2 A3 A4 A6 A5 ∈ lrel $ >
+  $ G ⇒ ra_ipos A1 A2 A3 A4 A6 ∈ lrel $;
+theorem lrel_recfield_pi (G: hyps) (A1 A2 A3 A4 A5 A6 A7: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ >
+  $ G ⇒ ra_recfield A1 A2 A3 ⟨ kc_s , scons A4 ∅ ⟩ A7 A5 ∈ lrel $ >
+  $ G ⇒ ra_recfield A1 A2 A3 A4 ⟨ kc_pi , scons A6 (scons A7 ∅) ⟩ A5 ∈ lrel $;
+theorem lrel_recfield_app (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_indapp A1 A2 A3 A4 A6 A5 ∈ lrel $ >
+  $ G ⇒ ra_recfield A1 A2 A3 A4 A6 A5 ∈ lrel $;
+theorem lrel_rst_nil (G: hyps) (A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_rst A1 ⟨ kc_nil , ∅ ⟩ A2 A2 ∈ lrel $;
+theorem lrel_rst_ty (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons A1 (scons A3 ∅) ⟩ A9 A7 ∈ lrel $ >
+  $ G ⇒ ra_aux_of A1 A2 A3 A11 ∈ lrel $ >
+  $ G ⇒ ra_ind_arity A1 A4 A5 A6 ∈ lrel $ >
+  $ G ⇒ ra_sinst A1 ⟨ kc_nz , ∅ ⟩ A5 A4 A11 A12 ∈ lrel $ >
+  $ G ⇒ ra_add A4 A8 A7 ∈ lrel $ >
+  $ G ⇒ ra_spine A10 A9 A8 ∈ lrel $ >
+  $ G ⇒ ra_pinst ⟨ kc_nz , ∅ ⟩ A10 A12 A13 ∈ lrel $ >
+  $ G ⇒ ra_rehead A10 A13 A8 A9 A14 ∈ lrel $ >
+  $ G ⇒ ra_rst A1 A2 A9 A14 ∈ lrel $;
+theorem lrel_rst_ctor (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ > $ G ⇒ A18 ∈ trees ω $ > $ G ⇒ A19 ∈ trees ω $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ctor , scons A1 (scons A4 (scons A5 ∅)) ⟩ A13 A10 ∈ lrel $ >
+  $ G ⇒ ra_aux_of A1 A3 A4 A15 ∈ lrel $ >
+  $ G ⇒ ra_ind_arity A1 A7 A8 A9 ∈ lrel $ >
+  $ G ⇒ ra_sinst A1 ⟨ kc_nz , ∅ ⟩ A8 A7 A15 A16 ∈ lrel $ >
+  $ G ⇒ ra_add A7 A11 A10 ∈ lrel $ >
+  $ G ⇒ ra_spine A14 A13 A11 ∈ lrel $ >
+  $ G ⇒ ra_pinst ⟨ kc_nz , ∅ ⟩ A14 A16 A17 ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons A2 (scons A6 ∅) ⟩ A17 A12 ∈ lrel $ >
+  $ G ⇒ ra_rehead ⟨ kc_ind_ty , scons A2 (scons A6 ∅) ⟩ ⟨ kc_ind_ctor , scons A2 (scons A6 (scons A5 ∅)) ⟩ A12 A17 A18 ∈ lrel $ >
+  $ G ⇒ ra_rehead A14 A18 A11 A13 A19 ∈ lrel $ >
+  $ G ⇒ ra_rst A1 A3 A13 A19 ∈ lrel $;
+theorem lrel_rst_app (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_rst A1 A2 A3 A5 ∈ lrel $ >
+  $ G ⇒ ra_rst A1 A2 A4 A6 ∈ lrel $ >
+  $ G ⇒ ra_rst A1 A2 ⟨ kc_app , scons A3 (scons A4 ∅) ⟩ ⟨ kc_app , scons A5 (scons A6 ∅) ⟩ ∈ lrel $;
+theorem lrel_rst_lam (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_rst A1 A2 A3 A5 ∈ lrel $ >
+  $ G ⇒ ra_rst A1 A2 A4 A6 ∈ lrel $ >
+  $ G ⇒ ra_rst A1 A2 ⟨ kc_lam , scons A3 (scons A4 ∅) ⟩ ⟨ kc_lam , scons A5 (scons A6 ∅) ⟩ ∈ lrel $;
+theorem lrel_rst_pi (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_rst A1 A2 A3 A5 ∈ lrel $ >
+  $ G ⇒ ra_rst A1 A2 A4 A6 ∈ lrel $ >
+  $ G ⇒ ra_rst A1 A2 ⟨ kc_pi , scons A3 (scons A4 ∅) ⟩ ⟨ kc_pi , scons A5 (scons A6 ∅) ⟩ ∈ lrel $;
+theorem lrel_rst_proj (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_rst A1 A2 A5 A6 ∈ lrel $ >
+  $ G ⇒ ra_rst A1 A2 ⟨ kc_proj , scons A3 (scons A4 (scons A5 ∅)) ⟩ ⟨ kc_proj , scons A3 (scons A4 (scons A6 ∅)) ⟩ ∈ lrel $;
+theorem lrel_rst_refl (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_rst A1 A2 A3 A3 ∈ lrel $;
+theorem lrel_nst_hit_z (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons A7 (scons A8 ∅) ⟩ A1 A13 ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons A7 (scons A8 ∅) ⟩ A4 A12 ∈ lrel $ >
+  $ G ⇒ ra_add A13 A14 A12 ∈ lrel $ >
+  $ G ⇒ ra_lift A10 ⟨ kc_nz , ∅ ⟩ A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_spine A2 A4 A14 ∈ lrel $ >
+  $ G ⇒ ra_add A11 A9 A15 ∈ lrel $ >
+  $ G ⇒ ra_add A10 A15 A16 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_bvar , scons A16 ∅ ⟩ A10 A11 A3 ∈ lrel $ >
+  $ G ⇒ ra_rehead A2 A3 A14 A4 A5 ∈ lrel $ >
+  $ G ⇒ ra_nst_hit ⟨ kc_cons , scons A1 (scons A6 ∅) ⟩ A9 A10 A11 A4 A5 ∈ lrel $;
+theorem lrel_nst_hit_s (G: hyps) (A1 A2 A3 A4 A5 A6 A7: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ >
+  $ G ⇒ ra_nst_hit A4 ⟨ kc_s , scons A5 ∅ ⟩ A6 A7 A2 A3 ∈ lrel $ >
+  $ G ⇒ ra_nst_hit ⟨ kc_cons , scons A1 (scons A4 ∅) ⟩ A5 A6 A7 A2 A3 ∈ lrel $;
+theorem lrel_spz_refl (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_spz A1 A2 A3 A4 A4 ∈ lrel $;
+theorem lrel_spz_hit (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ >
+  $ G ⇒ ra_ind_arity A1 A4 A5 A6 ∈ lrel $ >
+  $ G ⇒ ra_ndecl A2 A5 A7 ∈ lrel $ >
+  $ G ⇒ ra_nst_hit A2 A7 A3 A4 A8 A9 ∈ lrel $ >
+  $ G ⇒ ra_spz A1 A2 A3 A8 A9 ∈ lrel $;
+theorem lrel_spz_app (G: hyps) (A1 A2 A3 A4 A5 A6 A7: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ >
+  $ G ⇒ ra_spz A1 A2 A3 A4 A6 ∈ lrel $ >
+  $ G ⇒ ra_spz A1 A2 A3 A5 A7 ∈ lrel $ >
+  $ G ⇒ ra_spz A1 A2 A3 ⟨ kc_app , scons A4 (scons A5 ∅) ⟩ ⟨ kc_app , scons A6 (scons A7 ∅) ⟩ ∈ lrel $;
+theorem lrel_spz_lam (G: hyps) (A1 A2 A3 A4 A5 A6 A7: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ >
+  $ G ⇒ ra_spz A1 A2 A3 A4 A6 ∈ lrel $ >
+  $ G ⇒ ra_spz A1 A2 ⟨ kc_s , scons A3 ∅ ⟩ A5 A7 ∈ lrel $ >
+  $ G ⇒ ra_spz A1 A2 A3 ⟨ kc_lam , scons A4 (scons A5 ∅) ⟩ ⟨ kc_lam , scons A6 (scons A7 ∅) ⟩ ∈ lrel $;
+theorem lrel_spz_pi (G: hyps) (A1 A2 A3 A4 A5 A6 A7: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ >
+  $ G ⇒ ra_spz A1 A2 A3 A4 A6 ∈ lrel $ >
+  $ G ⇒ ra_spz A1 A2 ⟨ kc_s , scons A3 ∅ ⟩ A5 A7 ∈ lrel $ >
+  $ G ⇒ ra_spz A1 A2 A3 ⟨ kc_pi , scons A4 (scons A5 ∅) ⟩ ⟨ kc_pi , scons A6 (scons A7 ∅) ⟩ ∈ lrel $;
+theorem lrel_spz_proj (G: hyps) (A1 A2 A3 A4 A5 A6 A7: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ >
+  $ G ⇒ ra_spz A1 A2 A3 A6 A7 ∈ lrel $ >
+  $ G ⇒ ra_spz A1 A2 A3 ⟨ kc_proj , scons A4 (scons A5 (scons A6 ∅)) ⟩ ⟨ kc_proj , scons A4 (scons A5 (scons A7 ∅)) ⟩ ∈ lrel $;
+theorem lrel_spz_ctors_nil (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_spz_ctors A1 A2 A3 A4 A5 A6 ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ ∈ lrel $;
+theorem lrel_spz_ctors_cons (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ >
+  $ G ⇒ ra_sinst A2 ⟨ kc_nz , ∅ ⟩ A11 A12 A6 A7 ∈ lrel $ >
+  $ G ⇒ ra_ind_nested A2 A4 ∈ lrel $ >
+  $ G ⇒ ra_rst A2 A4 A7 A8 ∈ lrel $ >
+  $ G ⇒ ra_pinst ⟨ kc_nz , ∅ ⟩ A5 A8 A9 ∈ lrel $ >
+  $ G ⇒ ra_spz A1 A3 ⟨ kc_nz , ∅ ⟩ A9 A10 ∈ lrel $ >
+  $ G ⇒ ra_spz_ctors A1 A3 A2 A5 A11 A12 A13 A14 ∈ lrel $ >
+  $ G ⇒ ra_spz_ctors A1 A3 A2 A5 A11 A12 ⟨ kc_ccons , scons A6 (scons A13 ∅) ⟩ ⟨ kc_ccons , scons A10 (scons A14 ∅) ⟩ ∈ lrel $;
+theorem lrel_aux_data_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ > $ G ⇒ A18 ∈ trees ω $ > $ G ⇒ A19 ∈ trees ω $ >
+  $ G ⇒ ra_ind_data A1 A3 A5 A8 ∈ lrel $ >
+  $ G ⇒ ra_ind_nested A1 A7 ∈ lrel $ >
+  $ G ⇒ ra_ind_data A2 A4 A6 A9 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A8 A10 A16 A18 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A9 A11 A17 A19 ∈ lrel $ >
+  $ G ⇒ ra_pinst ⟨ kc_nz , ∅ ⟩ A15 A17 A16 ∈ lrel $ >
+  $ G ⇒ ra_ind_arity A2 A12 A13 A14 ∈ lrel $ >
+  $ G ⇒ ra_spz_ctors A1 A7 A2 A15 A13 A12 A19 A18 ∈ lrel $ >
+  $ G ⇒ ra_aux_data A1 A2 A15 A10 A11 ∈ lrel $;
+theorem lrel_mty_pi (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ ra_mty A1 A2 A3 ⟨ kc_s , scons A4 ∅ ⟩ A5 A7 A8 ∈ lrel $ >
+  $ G ⇒ ra_mty A1 A2 A3 A4 A5 ⟨ kc_pi , scons A6 (scons A7 ∅) ⟩ ⟨ kc_pi , scons A6 (scons A8 ∅) ⟩ ∈ lrel $;
+theorem lrel_mty_srt (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ >
+  $ G ⇒ ra_add A4 A3 A5 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ty , scons A1 (scons A3 ∅) ⟩ A5 A2 A8 ∈ lrel $ >
+  $ G ⇒ ra_pargs A8 ⟨ kc_nz , ∅ ⟩ A4 A9 ∈ lrel $ >
+  $ G ⇒ ra_mty A1 A2 A3 A4 A6 ⟨ kc_srt , scons A7 ∅ ⟩ ⟨ kc_pi , scons A9 (scons ⟨ kc_srt , scons A6 ∅ ⟩ ∅) ⟩ ∈ lrel $;
+theorem lrel_motives_nil (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_motives A1 A2 A4 A3 ⟨ kc_tnil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ∈ lrel $;
+theorem lrel_motives_cons (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ >
+  $ G ⇒ ra_lift A3 ⟨ kc_nz , ∅ ⟩ A5 A6 ∈ lrel $ >
+  $ G ⇒ ra_mty A1 A2 A3 ⟨ kc_nz , ∅ ⟩ A4 A6 A7 ∈ lrel $ >
+  $ G ⇒ ra_motives A1 A2 A4 ⟨ kc_s , scons A3 ∅ ⟩ A9 A10 ∈ lrel $ >
+  $ G ⇒ ra_capp A10 ⟨ kc_cons , scons A7 (scons ⟨ kc_nil , ∅ ⟩ ∅) ⟩ A11 ∈ lrel $ >
+  $ G ⇒ ra_motives A1 A2 A4 A3 ⟨ kc_tcons , scons A5 (scons A8 (scons A9 ∅)) ⟩ A11 ∈ lrel $;
+theorem lrel_ihty_pi (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ >
+  $ G ⇒ ra_ihty A1 A2 A3 A4 A5 ⟨ kc_s , scons A6 ∅ ⟩ A8 A9 ∈ lrel $ >
+  $ G ⇒ ra_ihty A1 A2 A3 A4 A5 A6 ⟨ kc_pi , scons A7 (scons A8 ∅) ⟩ ⟨ kc_pi , scons A7 (scons A9 ∅) ⟩ ∈ lrel $;
+theorem lrel_ihty_app (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons A1 (scons A7 ∅) ⟩ A17 A9 ∈ lrel $ >
+  $ G ⇒ ra_nidx A1 A7 A8 ∈ lrel $ >
+  $ G ⇒ ra_add A2 A8 A9 ∈ lrel $ >
+  $ G ⇒ ra_rehead A14 ⟨ kc_bvar , scons A12 ∅ ⟩ A8 A17 A15 ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons A1 (scons A7 ∅) ⟩ A14 A2 ∈ lrel $ >
+  $ G ⇒ ra_add A6 A4 A10 ∈ lrel $ >
+  $ G ⇒ ra_add A10 A3 A11 ∈ lrel $ >
+  $ G ⇒ ra_add A12 ⟨ kc_s , scons A7 ∅ ⟩ A11 ∈ lrel $ >
+  $ G ⇒ ra_add A6 A5 A13 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_bvar , scons A13 ∅ ⟩ ⟨ kc_nz , ∅ ⟩ A6 A16 ∈ lrel $ >
+  $ G ⇒ ra_ihty A1 A2 A3 A4 A5 A6 A17 ⟨ kc_app , scons A15 (scons A16 ∅) ⟩ ∈ lrel $;
+theorem lrel_mwalk_pi_nr (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ ra_add A8 A2 A10 ∈ lrel $ >
+  $ G ⇒ ra_closed A10 A13 ∈ lrel $ >
+  $ G ⇒ ra_add A4 A3 A11 ∈ lrel $ >
+  $ G ⇒ ra_lift A11 A8 A13 A14 ∈ lrel $ >
+  $ G ⇒ ra_mwalk A1 A2 A3 A4 A5 A6 A7 ⟨ kc_s , scons A8 ∅ ⟩ A9 A12 A15 A16 ∈ lrel $ >
+  $ G ⇒ ra_mwalk A1 A2 A3 A4 A5 A6 A7 A8 A9 A12 ⟨ kc_pi , scons A13 (scons A15 ∅) ⟩ ⟨ kc_pi , scons A14 (scons A16 ∅) ⟩ ∈ lrel $;
+theorem lrel_mwalk_pi_rec (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ > $ G ⇒ A18 ∈ trees ω $ > $ G ⇒ A19 ∈ trees ω $ > $ G ⇒ A20 ∈ trees ω $ >
+  $ G ⇒ A21 ∈ trees ω $ > $ G ⇒ A22 ∈ trees ω $ > $ G ⇒ A23 ∈ trees ω $ > $ G ⇒ A24 ∈ trees ω $ >
+  $ G ⇒ ra_add A8 A2 A10 ∈ lrel $ >
+  $ G ⇒ ra_recfield A1 A3 A2 A8 A18 A12 ∈ lrel $ >
+  $ G ⇒ ra_sinst A1 ⟨ kc_nz , ∅ ⟩ A3 A10 A18 A19 ∈ lrel $ >
+  $ G ⇒ ra_add A4 A3 A11 ∈ lrel $ >
+  $ G ⇒ ra_lift A11 A8 A19 A20 ∈ lrel $ >
+  $ G ⇒ ra_add A9 A7 A13 ∈ lrel $ >
+  $ G ⇒ ra_add A14 A8 A13 ∈ lrel $ >
+  $ G ⇒ ra_add A15 ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ A14 ∈ lrel $ >
+  $ G ⇒ ra_add A13 A4 A16 ∈ lrel $ >
+  $ G ⇒ ra_lift A14 ⟨ kc_nz , ∅ ⟩ A20 A21 ∈ lrel $ >
+  $ G ⇒ ra_ihty A1 A2 A3 A16 A15 ⟨ kc_nz , ∅ ⟩ A21 A23 ∈ lrel $ >
+  $ G ⇒ ra_mwalk A1 A2 A3 A4 A5 A6 A7 ⟨ kc_s , scons A8 ∅ ⟩ ⟨ kc_s , scons A9 ∅ ⟩ ⟨ kc_cons , scons A23 (scons A17 ∅) ⟩ A22 A24 ∈ lrel $ >
+  $ G ⇒ ra_mwalk A1 A2 A3 A4 A5 A6 A7 A8 A9 A17 ⟨ kc_pi , scons A18 (scons A22 ∅) ⟩ ⟨ kc_pi , scons A20 (scons A24 ∅) ⟩ ∈ lrel $;
+theorem lrel_mwalk_res (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ > $ G ⇒ A18 ∈ trees ω $ > $ G ⇒ A19 ∈ trees ω $ > $ G ⇒ A20 ∈ trees ω $ >
+  $ G ⇒ A21 ∈ trees ω $ > $ G ⇒ A22 ∈ trees ω $ > $ G ⇒ A23 ∈ trees ω $ > $ G ⇒ A24 ∈ trees ω $ >
+  $ G ⇒ A25 ∈ trees ω $ > $ G ⇒ A26 ∈ trees ω $ >
+  $ G ⇒ ra_add A7 A2 A9 ∈ lrel $ >
+  $ G ⇒ ra_add A4 A3 A10 ∈ lrel $ >
+  $ G ⇒ ra_add A9 A5 A11 ∈ lrel $ >
+  $ G ⇒ ra_add A11 A10 A12 ∈ lrel $ >
+  $ G ⇒ ra_add A12 A8 A13 ∈ lrel $ >
+  $ G ⇒ ra_lift A10 A7 A19 A20 ∈ lrel $ >
+  $ G ⇒ ra_lift A8 ⟨ kc_nz , ∅ ⟩ A20 A21 ∈ lrel $ >
+  $ G ⇒ ra_nidx A1 A5 A14 ∈ lrel $ >
+  $ G ⇒ ra_rehead A22 ⟨ kc_bvar , scons A15 ∅ ⟩ A14 A21 A23 ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_bvar , scons A13 ∅ ⟩ A22 A2 ∈ lrel $ >
+  $ G ⇒ ra_add A8 A7 A16 ∈ lrel $ >
+  $ G ⇒ ra_add A16 A10 A17 ∈ lrel $ >
+  $ G ⇒ ra_add A15 ⟨ kc_s , scons A5 ∅ ⟩ A17 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ctor , scons A1 (scons A5 (scons A6 ∅)) ⟩ A17 A2 A24 ∈ lrel $ >
+  $ G ⇒ ra_pargs A24 A8 A7 A25 ∈ lrel $ >
+  $ G ⇒ ra_pis A18 ⟨ kc_app , scons A23 (scons A25 ∅) ⟩ A26 ∈ lrel $ >
+  $ G ⇒ ra_mwalk A1 A2 A3 A4 A5 A6 A7 A7 A8 A18 A19 A26 ∈ lrel $;
+theorem lrel_cminors_nil (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_cminors A1 A2 A3 A4 A5 A6 ⟨ kc_cnil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ∈ lrel $;
+theorem lrel_cminors_cons (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ ra_npis A8 A7 ∈ lrel $ >
+  $ G ⇒ ra_mwalk A1 A2 A3 A4 A5 A6 A7 ⟨ kc_nz , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ A8 A9 ∈ lrel $ >
+  $ G ⇒ ra_cminors A1 A2 A3 ⟨ kc_s , scons A4 ∅ ⟩ A5 ⟨ kc_s , scons A6 ∅ ⟩ A10 A11 ∈ lrel $ >
+  $ G ⇒ ra_capp A11 ⟨ kc_cons , scons A9 (scons ⟨ kc_nil , ∅ ⟩ ∅) ⟩ A12 ∈ lrel $ >
+  $ G ⇒ ra_cminors A1 A2 A3 A4 A5 A6 ⟨ kc_ccons , scons A8 (scons A10 ∅) ⟩ A12 ∈ lrel $;
+theorem lrel_minors_nil (G: hyps) (A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_minors A1 A2 A3 A4 A5 ⟨ kc_tnil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ∈ lrel $;
+theorem lrel_minors_cons (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ >
+  $ G ⇒ ra_cminors A1 A2 A3 A4 A5 ⟨ kc_nz , ∅ ⟩ A9 A11 ∈ lrel $ >
+  $ G ⇒ ra_clen_c A9 A6 ∈ lrel $ >
+  $ G ⇒ ra_add A4 A6 A7 ∈ lrel $ >
+  $ G ⇒ ra_minors A1 A2 A3 A7 ⟨ kc_s , scons A5 ∅ ⟩ A10 A12 ∈ lrel $ >
+  $ G ⇒ ra_capp A12 A11 A13 ∈ lrel $ >
+  $ G ⇒ ra_minors A1 A2 A3 A4 A5 ⟨ kc_tcons , scons A8 (scons A9 (scons A10 ∅)) ⟩ A13 ∈ lrel $;
+theorem lrel_rtail_pi (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ >
+  $ G ⇒ ra_rtail A1 A2 A3 A4 A5 ⟨ kc_s , scons A6 ∅ ⟩ A8 A9 ∈ lrel $ >
+  $ G ⇒ ra_rtail A1 A2 A3 A4 A5 A6 ⟨ kc_pi , scons A7 (scons A8 ∅) ⟩ ⟨ kc_pi , scons A7 (scons A9 ∅) ⟩ ∈ lrel $;
+theorem lrel_rtail_srt (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ >
+  $ G ⇒ ra_add A4 A3 A7 ∈ lrel $ >
+  $ G ⇒ ra_add A6 A7 A8 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A8 A2 A11 ∈ lrel $ >
+  $ G ⇒ ra_pargs A11 ⟨ kc_nz , ∅ ⟩ A6 A12 ∈ lrel $ >
+  $ G ⇒ ra_add A9 A5 A8 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_bvar , scons A9 ∅ ⟩ ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ A6 A13 ∈ lrel $ >
+  $ G ⇒ ra_rtail A1 A2 A3 A4 A5 A6 ⟨ kc_srt , scons A10 ∅ ⟩ ⟨ kc_pi , scons A12 (scons ⟨ kc_app , scons A13 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∈ lrel $;
+theorem lrel_rec_ty_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ > $ G ⇒ A18 ∈ trees ω $ > $ G ⇒ A19 ∈ trees ω $ >
+  $ G ⇒ ra_ind_data A1 A2 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_clen A3 A7 ∈ lrel $ >
+  $ G ⇒ ra_ntys A4 A8 A9 ∈ lrel $ >
+  $ G ⇒ ra_motives A1 A7 A5 ⟨ kc_nz , ∅ ⟩ A4 A11 ∈ lrel $ >
+  $ G ⇒ ra_minors A1 A7 A8 ⟨ kc_nz , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ A4 A12 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A4 A6 A13 A19 ∈ lrel $ >
+  $ G ⇒ ra_add A9 A8 A10 ∈ lrel $ >
+  $ G ⇒ ra_lift A10 ⟨ kc_nz , ∅ ⟩ A13 A14 ∈ lrel $ >
+  $ G ⇒ ra_rtail A1 A7 A8 A9 A6 ⟨ kc_nz , ∅ ⟩ A14 A15 ∈ lrel $ >
+  $ G ⇒ ra_pis A12 A15 A16 ∈ lrel $ >
+  $ G ⇒ ra_pis A11 A16 A17 ∈ lrel $ >
+  $ G ⇒ ra_pis A3 A17 A18 ∈ lrel $ >
+  $ G ⇒ ra_rec_ty A1 A5 A6 A18 ∈ lrel $;
+theorem lrel_ihval_lam (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ >
+  $ G ⇒ ra_ihval A1 A2 A3 A4 A5 A6 A7 ⟨ kc_s , scons A8 ∅ ⟩ A10 A11 ∈ lrel $ >
+  $ G ⇒ ra_ihval A1 A2 A3 A4 A5 A6 A7 A8 ⟨ kc_pi , scons A9 (scons A10 ∅) ⟩ ⟨ kc_lam , scons A9 (scons A11 ∅) ⟩ ∈ lrel $;
+theorem lrel_ihval_app (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ > $ G ⇒ A18 ∈ trees ω $ > $ G ⇒ A19 ∈ trees ω $ > $ G ⇒ A20 ∈ trees ω $ >
+  $ G ⇒ A21 ∈ trees ω $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons A1 (scons A9 ∅) ⟩ A21 A11 ∈ lrel $ >
+  $ G ⇒ ra_nidx A1 A9 A10 ∈ lrel $ >
+  $ G ⇒ ra_add A2 A10 A11 ∈ lrel $ >
+  $ G ⇒ ra_rehead A16 A18 A10 A21 A19 ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons A1 (scons A9 ∅) ⟩ A16 A2 ∈ lrel $ >
+  $ G ⇒ ra_add A8 A6 A12 ∈ lrel $ >
+  $ G ⇒ ra_add A4 A3 A13 ∈ lrel $ >
+  $ G ⇒ ra_add A12 A13 A14 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_rec , scons A1 (scons A9 (scons A5 ∅)) ⟩ A14 A2 A17 ∈ lrel $ >
+  $ G ⇒ ra_pargs A17 A12 A13 A18 ∈ lrel $ >
+  $ G ⇒ ra_add A8 A7 A15 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_bvar , scons A15 ∅ ⟩ ⟨ kc_nz , ∅ ⟩ A8 A20 ∈ lrel $ >
+  $ G ⇒ ra_ihval A1 A2 A3 A4 A5 A6 A7 A8 A21 ⟨ kc_app , scons A19 (scons A20 ∅) ⟩ ∈ lrel $;
+theorem lrel_rwalk_pi_nr (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ >
+  $ G ⇒ ra_add A7 A2 A8 ∈ lrel $ >
+  $ G ⇒ ra_closed A8 A11 ∈ lrel $ >
+  $ G ⇒ ra_add A4 A3 A9 ∈ lrel $ >
+  $ G ⇒ ra_lift A9 A7 A11 A12 ∈ lrel $ >
+  $ G ⇒ ra_rwalk A1 A2 A3 A4 A5 A6 ⟨ kc_s , scons A7 ∅ ⟩ A10 A13 A14 ∈ lrel $ >
+  $ G ⇒ ra_rwalk A1 A2 A3 A4 A5 A6 A7 A10 ⟨ kc_pi , scons A11 (scons A13 ∅) ⟩ ⟨ kc_lam , scons A12 (scons A14 ∅) ⟩ ∈ lrel $;
+theorem lrel_rwalk_pi_rec (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ > $ G ⇒ A18 ∈ trees ω $ > $ G ⇒ A19 ∈ trees ω $ > $ G ⇒ A20 ∈ trees ω $ >
+  $ G ⇒ ra_add A7 A2 A8 ∈ lrel $ >
+  $ G ⇒ ra_recfield A1 A3 A2 A7 A14 A10 ∈ lrel $ >
+  $ G ⇒ ra_sinst A1 ⟨ kc_nz , ∅ ⟩ A3 A8 A14 A15 ∈ lrel $ >
+  $ G ⇒ ra_add A4 A3 A9 ∈ lrel $ >
+  $ G ⇒ ra_lift A9 A7 A15 A16 ∈ lrel $ >
+  $ G ⇒ ra_add A11 A7 A6 ∈ lrel $ >
+  $ G ⇒ ra_add A12 ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ A11 ∈ lrel $ >
+  $ G ⇒ ra_lift A11 ⟨ kc_nz , ∅ ⟩ A16 A17 ∈ lrel $ >
+  $ G ⇒ ra_ihval A1 A2 A3 A4 A5 A6 A12 ⟨ kc_nz , ∅ ⟩ A17 A19 ∈ lrel $ >
+  $ G ⇒ ra_rwalk A1 A2 A3 A4 A5 A6 ⟨ kc_s , scons A7 ∅ ⟩ ⟨ kc_app , scons A13 (scons A19 ∅) ⟩ A18 A20 ∈ lrel $ >
+  $ G ⇒ ra_rwalk A1 A2 A3 A4 A5 A6 A7 A13 ⟨ kc_pi , scons A14 (scons A18 ∅) ⟩ ⟨ kc_lam , scons A16 (scons A20 ∅) ⟩ ∈ lrel $;
+theorem lrel_rwalk_res (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ ra_npis A8 ⟨ kc_nz , ∅ ⟩ ∈ lrel $ >
+  $ G ⇒ ra_rwalk A1 A2 A3 A4 A5 A6 A6 A7 A8 A7 ∈ lrel $;
+theorem lrel_rec_rhs_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ > $ G ⇒ A18 ∈ trees ω $ > $ G ⇒ A19 ∈ trees ω $ > $ G ⇒ A20 ∈ trees ω $ >
+  $ G ⇒ A21 ∈ trees ω $ > $ G ⇒ A22 ∈ trees ω $ > $ G ⇒ A23 ∈ trees ω $ > $ G ⇒ A24 ∈ trees ω $ >
+  $ G ⇒ ra_ind_data A1 A2 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_clen A3 A8 ∈ lrel $ >
+  $ G ⇒ ra_ntys A4 A9 A10 ∈ lrel $ >
+  $ G ⇒ ra_motives A1 A8 A5 ⟨ kc_nz , ∅ ⟩ A4 A15 ∈ lrel $ >
+  $ G ⇒ ra_minors A1 A8 A9 ⟨ kc_nz , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ A4 A16 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A4 A6 A17 A24 ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor A24 A7 A18 ∈ lrel $ >
+  $ G ⇒ ra_minor_idx A4 A6 A7 A11 ∈ lrel $ >
+  $ G ⇒ ra_npis A18 A12 ∈ lrel $ >
+  $ G ⇒ ra_add A12 A10 A13 ∈ lrel $ >
+  $ G ⇒ ra_add A14 ⟨ kc_s , scons A11 ∅ ⟩ A13 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_bvar , scons A14 ∅ ⟩ ⟨ kc_nz , ∅ ⟩ A12 A19 ∈ lrel $ >
+  $ G ⇒ ra_rwalk A1 A8 A9 A10 A5 A12 ⟨ kc_nz , ∅ ⟩ A19 A18 A20 ∈ lrel $ >
+  $ G ⇒ ra_lams A16 A20 A21 ∈ lrel $ >
+  $ G ⇒ ra_lams A15 A21 A22 ∈ lrel $ >
+  $ G ⇒ ra_lams A3 A22 A23 ∈ lrel $ >
+  $ G ⇒ ra_rec_rhs A1 A5 A6 A7 A23 ∈ lrel $;
+theorem lrel_rec_rule_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ >
+  $ G ⇒ ra_rec_rhs A1 A3 A4 A5 A6 ∈ lrel $ >
+  $ G ⇒ ra_ind_nested A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_rst A1 A2 A6 A7 ∈ lrel $ >
+  $ G ⇒ ra_rec_rule A1 A3 A4 A5 A7 ∈ lrel $;
+theorem lrel_struct_like_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ ra_ind_data A1 A2 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A4 A5 A6 ⟨ kc_ccons , scons A7 (scons ⟨ kc_cnil , ∅ ⟩ ∅) ⟩ ∈ lrel $ >
+  $ G ⇒ ra_isort A6 ⟨ kc_nz , ∅ ⟩ A8 ∈ lrel $ >
+  $ G ⇒ ra_struct_like A1 A5 ∈ lrel $;
+theorem lrel_field_ty_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ >
+  $ G ⇒ ra_ind_data A1 A2 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A4 A5 A10 A14 ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor A14 ⟨ kc_nz , ∅ ⟩ A11 ∈ lrel $ >
+  $ G ⇒ ra_clen A3 A7 ∈ lrel $ >
+  $ G ⇒ ra_ntys A4 A8 A9 ∈ lrel $ >
+  $ G ⇒ ra_sinst A1 ⟨ kc_nz , ∅ ⟩ A8 A7 A11 A12 ∈ lrel $ >
+  $ G ⇒ ra_nth_pi A12 A6 A13 ∈ lrel $ >
+  $ G ⇒ ra_field_ty A1 A5 A6 A13 ∈ lrel $;
+theorem lrel_qinst_z (G: hyps) (A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_qinst A1 A2 ⟨ kc_nz , ∅ ⟩ A4 A3 A3 ∈ lrel $;
+theorem lrel_qinst_s (G: hyps) (A1 A2 A3 A4 A5 A6 A7: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ >
+  $ G ⇒ ra_inst A6 A3 ⟨ kc_proj , scons A1 (scons A7 (scons A2 ∅)) ⟩ A4 ∈ lrel $ >
+  $ G ⇒ ra_qinst A1 A2 A6 ⟨ kc_s , scons A7 ∅ ⟩ A4 A5 ∈ lrel $ >
+  $ G ⇒ ra_qinst A1 A2 ⟨ kc_s , scons A6 ∅ ⟩ A7 A3 A5 ∈ lrel $;
+theorem lrel_nonrec_pi (G: hyps) (A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_add A2 A1 A3 ∈ lrel $ >
+  $ G ⇒ ra_closed A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_nonrec A1 ⟨ kc_s , scons A2 ∅ ⟩ A5 ∈ lrel $ >
+  $ G ⇒ ra_nonrec A1 A2 ⟨ kc_pi , scons A4 (scons A5 ∅) ⟩ ∈ lrel $;
+theorem lrel_nonrec_res (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_npis A3 ⟨ kc_nz , ∅ ⟩ ∈ lrel $ >
+  $ G ⇒ ra_nonrec A1 A2 A3 ∈ lrel $;
+theorem lrel_eta_ok_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ ra_struct_like A1 A5 ∈ lrel $ >
+  $ G ⇒ ra_ind_data A1 A2 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A4 A5 A7 ⟨ kc_ccons , scons A8 (scons ⟨ kc_cnil , ∅ ⟩ ∅) ⟩ ∈ lrel $ >
+  $ G ⇒ ra_clen A3 A6 ∈ lrel $ >
+  $ G ⇒ ra_nonrec A6 ⟨ kc_nz , ∅ ⟩ A8 ∈ lrel $ >
+  $ G ⇒ ra_eta_ok A1 A5 ∈ lrel $;
+theorem lrel_projs_z (G: hyps) (A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_projs A1 A2 ⟨ kc_nz , ∅ ⟩ A3 A3 ∈ lrel $;
+theorem lrel_projs_s (G: hyps) (A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_projs A1 A2 A5 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_projs A1 A2 ⟨ kc_s , scons A5 ∅ ⟩ A3 ⟨ kc_app , scons A4 (scons ⟨ kc_proj , scons A1 (scons A5 (scons A2 ∅)) ⟩ ∅) ⟩ ∈ lrel $;
+
 --| The clause axioms of Part I, in prefix form.
 theorem le_z (n: nat): $ le nz n $;
 theorem le_s (i n: nat): $ le i n $ > $ le (s i) (s n) $;

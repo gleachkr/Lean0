@@ -263,12 +263,8 @@ l4: $ G ⇒ isset P $ by wcel_isset [#2]
 l5: $ G ⇒ isset C $ by wcel_isset [#3]
 l6: $ G ⇒ C ∈ lrel2 $ by horn_intro_c [l3, l2, l4, l5, #4]
 
-lemma g1_c_ulevel_prop (G: hyps) (A1 A2: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ lveq A1 ⟨ kc_lz , ∅ ⟩ $ >
-  $ G ⇒ ra_ulevel A1 A2 ∈ lrel2 $
-----
+lrel2_ulevel_prop
+-----------------
 l1: $ G , y = A1 , z = A2 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 ⇒ lveq A1 ⟨ kc_lz , ∅ ⟩ $ by weaken [#3]
@@ -299,27 +295,13 @@ l27: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
 l28: $ G ⇒ ra_ulevel A1 A2 ∈ latoms $ by g1_ra_ulevel [#1, #2]
 l29: $ G ⇒ ra_ulevel A1 A2 ∈ lrel2 $ by g1_horn [l25, l26, l28, l27]
 
-ulevel_prop
------------
-l1: $ _ ⇒ enc_lvl l ∈ trees ω $ by enc_lvl_trees
-l2: $ _ ⇒ enc_lvl u ∈ trees ω $ by enc_lvl_trees
-l3: $ _ ⇒ lveq (enc_lvl l) (enc_lvl lz) $ by leqv_lveq [#1]
-l4: $ _ ⇒ enc_lvl l = enc_lvl l $ by eq_refl
-l5: $ _ ⇒ enc_lvl lz = ⟨ kc_lz , ∅ ⟩ $ by eq_refl
-l6: $ _ ⇒ lveq (enc_lvl l) ⟨ kc_lz , ∅ ⟩ $ by lveq_eq [l4, l5, l3]
-l7: $ ulevel l u $ by g1_c_ulevel_prop [l1, l2, l6]
-
 lemma g1_in_r (G: hyps) (X A B: class): $ G ⇒ X ∈ B $ > $ G ⇒ X ∈ A ∪ B $
 ----
 l1: $ G ⇒ B ⊆ A ∪ B $ by cun_subset_r
 l2: $ G ⇒ X ∈ A ∪ B $ by wcel_subset [l1, #1]
 
-lemma g1_c_ulevel_le (G: hyps) (A1 A2: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ lveq ⟨ kc_lmax , scons A1 (scons A2 ∅) ⟩ A1 $ >
-  $ G ⇒ ra_ulevel A1 A2 ∈ lrel2 $
-----
+lrel2_ulevel_le
+---------------
 l1: $ G , y = A1 , z = A2 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 ⇒ lveq ⟨ kc_lmax , scons A1 (scons A2 ∅) ⟩ A1 $ by weaken [#3]
@@ -354,16 +336,6 @@ l31: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
 l32: $ G ⇒ ra_ulevel A1 A2 ∈ latoms $ by g1_ra_ulevel [#1, #2]
 l33: $ G ⇒ ra_ulevel A1 A2 ∈ lrel2 $ by g1_horn [l29, l30, l32, l31]
 
-ulevel_le
----------
-l1: $ _ ⇒ enc_lvl l ∈ trees ω $ by enc_lvl_trees
-l2: $ _ ⇒ enc_lvl u ∈ trees ω $ by enc_lvl_trees
-l3: $ _ ⇒ lveq (enc_lvl (lmax l u)) (enc_lvl l) $ by leqv_lveq [#1]
-l4: $ _ ⇒ enc_lvl (lmax l u) = ⟨ kc_lmax , scons (enc_lvl l) (scons (enc_lvl u) ∅) ⟩ $ by eq_refl
-l5: $ _ ⇒ enc_lvl l = enc_lvl l $ by eq_refl
-l6: $ _ ⇒ lveq ⟨ kc_lmax , scons (enc_lvl l) (scons (enc_lvl u) ∅) ⟩ (enc_lvl l) $ by lveq_eq [l4, l5, l3]
-l7: $ ulevel l u $ by g1_c_ulevel_le [l1, l2, l6]
-
 lemma g1_pr_eeqv (G: hyps) (X: class): $ G ⇒ X ∈ pr_eeqv $ > $ G ⇒ X ∈ g1_top $
 ----
 l1: $ G ⇒ X ∈ pr_ulevel ∪ pr_eeqv $ by g1_in_r [#1]
@@ -380,10 +352,8 @@ l3: $ G ⇒ scons A1 (scons A2 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l
 l4: $ G ⇒ kr_eeqv ∈ ω $ by kr_eeqv_omega
 l5: $ G ⇒ ra_eeqv A1 A2 ∈ latoms $ by cxp_intro_c [l4, l3]
 
-lemma g1_c_eeqv_refl (G: hyps) (A1: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ ra_eeqv A1 A1 ∈ lrel2 $
-----
+lrel2_eeqv_refl
+---------------
 l1: $ G , y = A1 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , x = ⟨ ∅ , ra_eeqv y y ⟩ ⇒ x = ⟨ ∅ , ra_eeqv y y ⟩ $ by ax
 l3: $ G , y = A1 , x = ⟨ ∅ , ra_eeqv y y ⟩ ⇒ ∃ y (x = ⟨ ∅ , ra_eeqv y y ⟩) $ by ex_intro [l2]
@@ -404,16 +374,8 @@ l17: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
 l18: $ G ⇒ ra_eeqv A1 A1 ∈ latoms $ by g1_ra_eeqv [#1, #1]
 l19: $ G ⇒ ra_eeqv A1 A1 ∈ lrel2 $ by g1_horn [l15, l16, l18, l17]
 
-eeqv_refl
----------
-l1: $ _ ⇒ enc_expr e ∈ trees ω $ by enc_expr_trees
-l2: $ eeqv e e $ by g1_c_eeqv_refl [l1]
-
-lemma g1_c_eeqv_bvar (G: hyps) (A1: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_bvar , scons A1 ∅ ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_eeqv ⟨ kc_bvar , scons A1 ∅ ⟩ ⟨ kc_bvar , scons A1 ∅ ⟩ ∈ lrel2 $
-----
+lrel2_eeqv_bvar
+---------------
 l1: $ G , y = A1 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , x = ⟨ ∅ , ra_eeqv ⟨ kc_bvar , scons y ∅ ⟩ ⟨ kc_bvar , scons y ∅ ⟩ ⟩ ⇒ x = ⟨ ∅ , ra_eeqv ⟨ kc_bvar , scons y ∅ ⟩ ⟨ kc_bvar , scons y ∅ ⟩ ⟩ $ by ax
 l3: $ G , y = A1 , x = ⟨ ∅ , ra_eeqv ⟨ kc_bvar , scons y ∅ ⟩ ⟨ kc_bvar , scons y ∅ ⟩ ⟩ ⇒ ∃ y (x = ⟨ ∅ , ra_eeqv ⟨ kc_bvar , scons y ∅ ⟩ ⟨ kc_bvar , scons y ∅ ⟩ ⟩) $ by ex_intro [l2]
@@ -435,31 +397,19 @@ l18: $ G ⇒ ⟨ ∅ , ra_eeqv ⟨ kc_bvar , scons A1 ∅ ⟩ ⟨ kc_bvar , scon
 l19: $ G ⇒ ⟨ ∅ , ra_eeqv ⟨ kc_bvar , scons A1 ∅ ⟩ ⟨ kc_bvar , scons A1 ∅ ⟩ ⟩ ∈ g1_top $ by g1_pr_eeqv [l18]
 l20: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l21: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l22: $ G ⇒ ra_eeqv ⟨ kc_bvar , scons A1 ∅ ⟩ ⟨ kc_bvar , scons A1 ∅ ⟩ ∈ latoms $ by g1_ra_eeqv [#2, #2]
-l23: $ G ⇒ ra_eeqv ⟨ kc_bvar , scons A1 ∅ ⟩ ⟨ kc_bvar , scons A1 ∅ ⟩ ∈ lrel2 $ by g1_horn [l19, l20, l22, l21]
+l22: $ G ⇒ isset ω $ by omega_set
+l23: $ G ⇒ kc_bvar ∈ ω $ by kc_bvar_omega
+l24: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l25: $ G ⇒ scons A1 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#1, l24]
+l26: $ G ⇒ ⟨ kc_bvar , scons A1 ∅ ⟩ ∈ trees ω $ by trees_intro_c [l22, l23, l25]
+l27: $ G ⇒ ra_eeqv ⟨ kc_bvar , scons A1 ∅ ⟩ ⟨ kc_bvar , scons A1 ∅ ⟩ ∈ latoms $ by g1_ra_eeqv [l26, l26]
+l28: $ G ⇒ ra_eeqv ⟨ kc_bvar , scons A1 ∅ ⟩ ⟨ kc_bvar , scons A1 ∅ ⟩ ∈ lrel2 $ by g1_horn [l19, l20, l27, l21]
 
-eeqv_bvar
----------
-l1: $ _ ⇒ enc_nat i ∈ trees ω $ by enc_nat_trees
-l2: $ _ ⇒ enc_expr (bvar i) = ⟨ kc_bvar , scons (enc_nat i) ∅ ⟩ $ by eq_refl
-l3: $ _ ⇒ enc_expr (bvar i) ∈ trees ω $ by enc_expr_trees
-l4: $ _ ⇒ ⟨ kc_bvar , scons (enc_nat i) ∅ ⟩ ∈ trees ω $ by wcel_eq_l [l2, l3]
-l5: $ _ ⇒ ra_eeqv ⟨ kc_bvar , scons (enc_nat i) ∅ ⟩ ⟨ kc_bvar , scons (enc_nat i) ∅ ⟩ ∈ lrel2 $ by g1_c_eeqv_bvar [l1, l4]
-l6: $ _ ⇒ ⟨ kc_bvar , scons (enc_nat i) ∅ ⟩ = enc_expr (bvar i) $ by eq_refl
-l7: $ _ ⇒ ra_eeqv ⟨ kc_bvar , scons (enc_nat i) ∅ ⟩ ⟨ kc_bvar , scons (enc_nat i) ∅ ⟩ = ra_eeqv (enc_expr (bvar i)) (enc_expr (bvar i)) $ by ra_eeqv_eq [l6, l6]
-l8: $ eeqv (bvar i) (bvar i) $ by wcel_eq_l [l7, l5]
-
-lemma g1_c_eeqv_srt (G: hyps) (A1 A2: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_srt , scons A1 ∅ ⟩ ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_srt , scons A2 ∅ ⟩ ∈ trees ω $ >
-  $ G ⇒ lveq A1 A2 $ >
-  $ G ⇒ ra_eeqv ⟨ kc_srt , scons A1 ∅ ⟩ ⟨ kc_srt , scons A2 ∅ ⟩ ∈ lrel2 $
-----
+lrel2_eeqv_srt
+--------------
 l1: $ G , y = A1 , z = A2 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 ⇒ z = A2 $ by ax
-l3: $ G , y = A1 , z = A2 ⇒ lveq A1 A2 $ by weaken [#5]
+l3: $ G , y = A1 , z = A2 ⇒ lveq A1 A2 $ by weaken [#3]
 l4: $ G , y = A1 , z = A2 ⇒ A1 = y $ by eq_sym [l1]
 l5: $ G , y = A1 , z = A2 ⇒ A2 = z $ by eq_sym [l2]
 l6: $ G , y = A1 , z = A2 ⇒ lveq y z $ by lveq_eq [l4, l5, l3]
@@ -491,25 +441,15 @@ l31: $ G ⇒ ⟨ ∅ , ra_eeqv ⟨ kc_srt , scons A1 ∅ ⟩ ⟨ kc_srt , scons 
 l32: $ G ⇒ ⟨ ∅ , ra_eeqv ⟨ kc_srt , scons A1 ∅ ⟩ ⟨ kc_srt , scons A2 ∅ ⟩ ⟩ ∈ g1_top $ by g1_pr_eeqv [l31]
 l33: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l34: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l35: $ G ⇒ ra_eeqv ⟨ kc_srt , scons A1 ∅ ⟩ ⟨ kc_srt , scons A2 ∅ ⟩ ∈ latoms $ by g1_ra_eeqv [#3, #4]
-l36: $ G ⇒ ra_eeqv ⟨ kc_srt , scons A1 ∅ ⟩ ⟨ kc_srt , scons A2 ∅ ⟩ ∈ lrel2 $ by g1_horn [l32, l33, l35, l34]
-
-eeqv_srt
---------
-l1: $ _ ⇒ enc_lvl l ∈ trees ω $ by enc_lvl_trees
-l2: $ _ ⇒ enc_lvl l2 ∈ trees ω $ by enc_lvl_trees
-l3: $ _ ⇒ enc_expr (srt l) = ⟨ kc_srt , scons (enc_lvl l) ∅ ⟩ $ by eq_refl
-l4: $ _ ⇒ enc_expr (srt l) ∈ trees ω $ by enc_expr_trees
-l5: $ _ ⇒ ⟨ kc_srt , scons (enc_lvl l) ∅ ⟩ ∈ trees ω $ by wcel_eq_l [l3, l4]
-l6: $ _ ⇒ enc_expr (srt l2) = ⟨ kc_srt , scons (enc_lvl l2) ∅ ⟩ $ by eq_refl
-l7: $ _ ⇒ enc_expr (srt l2) ∈ trees ω $ by enc_expr_trees
-l8: $ _ ⇒ ⟨ kc_srt , scons (enc_lvl l2) ∅ ⟩ ∈ trees ω $ by wcel_eq_l [l6, l7]
-l9: $ _ ⇒ lveq (enc_lvl l) (enc_lvl l2) $ by leqv_lveq [#1]
-l10: $ _ ⇒ ra_eeqv ⟨ kc_srt , scons (enc_lvl l) ∅ ⟩ ⟨ kc_srt , scons (enc_lvl l2) ∅ ⟩ ∈ lrel2 $ by g1_c_eeqv_srt [l1, l2, l5, l8, l9]
-l11: $ _ ⇒ ⟨ kc_srt , scons (enc_lvl l) ∅ ⟩ = enc_expr (srt l) $ by eq_refl
-l12: $ _ ⇒ ⟨ kc_srt , scons (enc_lvl l2) ∅ ⟩ = enc_expr (srt l2) $ by eq_refl
-l13: $ _ ⇒ ra_eeqv ⟨ kc_srt , scons (enc_lvl l) ∅ ⟩ ⟨ kc_srt , scons (enc_lvl l2) ∅ ⟩ = ra_eeqv (enc_expr (srt l)) (enc_expr (srt l2)) $ by ra_eeqv_eq [l11, l12]
-l14: $ eeqv (srt l) (srt l2) $ by wcel_eq_l [l13, l10]
+l35: $ G ⇒ isset ω $ by omega_set
+l36: $ G ⇒ kc_srt ∈ ω $ by kc_srt_omega
+l37: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l38: $ G ⇒ scons A1 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#1, l37]
+l39: $ G ⇒ ⟨ kc_srt , scons A1 ∅ ⟩ ∈ trees ω $ by trees_intro_c [l35, l36, l38]
+l40: $ G ⇒ scons A2 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#2, l37]
+l41: $ G ⇒ ⟨ kc_srt , scons A2 ∅ ⟩ ∈ trees ω $ by trees_intro_c [l35, l36, l40]
+l42: $ G ⇒ ra_eeqv ⟨ kc_srt , scons A1 ∅ ⟩ ⟨ kc_srt , scons A2 ∅ ⟩ ∈ latoms $ by g1_ra_eeqv [l39, l41]
+l43: $ G ⇒ ra_eeqv ⟨ kc_srt , scons A1 ∅ ⟩ ⟨ kc_srt , scons A2 ∅ ⟩ ∈ lrel2 $ by g1_horn [l32, l33, l42, l34]
 
 --| A derivable atom of the stratum is an atom.
 lemma g1_lrel2_lat (G: hyps) (X: class): $ G ⇒ X ∈ lrel2 $ > $ G ⇒ X ∈ latoms $
@@ -518,17 +458,8 @@ l1: $ G ⇒ hprog lprog2 latoms $ by lprog2_hprog
 l2: $ G ⇒ horn lprog2 ⊆ latoms $ by horn_sub [l1]
 l3: $ G ⇒ X ∈ latoms $ by wcel_subset [l2, #1]
 
-lemma g1_c_eeqv_app (G: hyps) (A1 A2 A3 A4: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ A3 ∈ trees ω $ >
-  $ G ⇒ A4 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_app , scons A1 (scons A2 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_app , scons A3 (scons A4 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_eeqv A1 A3 ∈ lrel2 $ >
-  $ G ⇒ ra_eeqv A2 A4 ∈ lrel2 $ >
-  $ G ⇒ ra_eeqv ⟨ kc_app , scons A1 (scons A2 ∅) ⟩ ⟨ kc_app , scons A3 (scons A4 ∅) ⟩ ∈ lrel2 $
-----
+lrel2_eeqv_app
+--------------
 l1: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ u = A3 $ by ax
@@ -572,44 +503,26 @@ l40: $ G ⇒ ⟨ scons (ra_eeqv A1 A3) (scons (ra_eeqv A2 A4) ∅) , ra_eeqv ⟨
 l41: $ G ⇒ ⟨ scons (ra_eeqv A1 A3) (scons (ra_eeqv A2 A4) ∅) , ra_eeqv ⟨ kc_app , scons A1 (scons A2 ∅) ⟩ ⟨ kc_app , scons A3 (scons A4 ∅) ⟩ ⟩ ∈ g1_top $ by g1_pr_eeqv [l40]
 l42: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l43: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l44: $ G ⇒ (ra_eeqv A2 A4) ∈ latoms $ by g1_lrel2_lat [#8]
+l44: $ G ⇒ (ra_eeqv A2 A4) ∈ latoms $ by g1_lrel2_lat [#6]
 l45: $ G ⇒ scons (ra_eeqv A2 A4) ∅ ∈ fseq latoms $ by scons_fseq_c [l44, l42]
-l46: $ G ⇒ crn (scons (ra_eeqv A2 A4) ∅) ⊆ lrel2 $ by crn_scons_sub [#8, l43]
-l47: $ G ⇒ (ra_eeqv A1 A3) ∈ latoms $ by g1_lrel2_lat [#7]
+l46: $ G ⇒ crn (scons (ra_eeqv A2 A4) ∅) ⊆ lrel2 $ by crn_scons_sub [#6, l43]
+l47: $ G ⇒ (ra_eeqv A1 A3) ∈ latoms $ by g1_lrel2_lat [#5]
 l48: $ G ⇒ scons (ra_eeqv A1 A3) (scons (ra_eeqv A2 A4) ∅) ∈ fseq latoms $ by scons_fseq_c [l47, l45]
-l49: $ G ⇒ crn (scons (ra_eeqv A1 A3) (scons (ra_eeqv A2 A4) ∅)) ⊆ lrel2 $ by crn_scons_sub [#7, l46]
-l50: $ G ⇒ ra_eeqv ⟨ kc_app , scons A1 (scons A2 ∅) ⟩ ⟨ kc_app , scons A3 (scons A4 ∅) ⟩ ∈ latoms $ by g1_ra_eeqv [#5, #6]
-l51: $ G ⇒ ra_eeqv ⟨ kc_app , scons A1 (scons A2 ∅) ⟩ ⟨ kc_app , scons A3 (scons A4 ∅) ⟩ ∈ lrel2 $ by g1_horn [l41, l48, l50, l49]
+l49: $ G ⇒ crn (scons (ra_eeqv A1 A3) (scons (ra_eeqv A2 A4) ∅)) ⊆ lrel2 $ by crn_scons_sub [#5, l46]
+l50: $ G ⇒ isset ω $ by omega_set
+l51: $ G ⇒ kc_app ∈ ω $ by kc_app_omega
+l52: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l53: $ G ⇒ scons A2 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#2, l52]
+l54: $ G ⇒ scons A1 (scons A2 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l53]
+l55: $ G ⇒ ⟨ kc_app , scons A1 (scons A2 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l50, l51, l54]
+l56: $ G ⇒ scons A4 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#4, l52]
+l57: $ G ⇒ scons A3 (scons A4 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#3, l56]
+l58: $ G ⇒ ⟨ kc_app , scons A3 (scons A4 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l50, l51, l57]
+l59: $ G ⇒ ra_eeqv ⟨ kc_app , scons A1 (scons A2 ∅) ⟩ ⟨ kc_app , scons A3 (scons A4 ∅) ⟩ ∈ latoms $ by g1_ra_eeqv [l55, l58]
+l60: $ G ⇒ ra_eeqv ⟨ kc_app , scons A1 (scons A2 ∅) ⟩ ⟨ kc_app , scons A3 (scons A4 ∅) ⟩ ∈ lrel2 $ by g1_horn [l41, l48, l59, l49]
 
-eeqv_app
---------
-l1: $ _ ⇒ enc_expr f ∈ trees ω $ by enc_expr_trees
-l2: $ _ ⇒ enc_expr a ∈ trees ω $ by enc_expr_trees
-l3: $ _ ⇒ enc_expr f2 ∈ trees ω $ by enc_expr_trees
-l4: $ _ ⇒ enc_expr a2 ∈ trees ω $ by enc_expr_trees
-l5: $ _ ⇒ enc_expr (app f a) = ⟨ kc_app , scons (enc_expr f) (scons (enc_expr a) ∅) ⟩ $ by eq_refl
-l6: $ _ ⇒ enc_expr (app f a) ∈ trees ω $ by enc_expr_trees
-l7: $ _ ⇒ ⟨ kc_app , scons (enc_expr f) (scons (enc_expr a) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l5, l6]
-l8: $ _ ⇒ enc_expr (app f2 a2) = ⟨ kc_app , scons (enc_expr f2) (scons (enc_expr a2) ∅) ⟩ $ by eq_refl
-l9: $ _ ⇒ enc_expr (app f2 a2) ∈ trees ω $ by enc_expr_trees
-l10: $ _ ⇒ ⟨ kc_app , scons (enc_expr f2) (scons (enc_expr a2) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l8, l9]
-l11: $ _ ⇒ ra_eeqv ⟨ kc_app , scons (enc_expr f) (scons (enc_expr a) ∅) ⟩ ⟨ kc_app , scons (enc_expr f2) (scons (enc_expr a2) ∅) ⟩ ∈ lrel2 $ by g1_c_eeqv_app [l1, l2, l3, l4, l7, l10, #1, #2]
-l12: $ _ ⇒ ⟨ kc_app , scons (enc_expr f) (scons (enc_expr a) ∅) ⟩ = enc_expr (app f a) $ by eq_refl
-l13: $ _ ⇒ ⟨ kc_app , scons (enc_expr f2) (scons (enc_expr a2) ∅) ⟩ = enc_expr (app f2 a2) $ by eq_refl
-l14: $ _ ⇒ ra_eeqv ⟨ kc_app , scons (enc_expr f) (scons (enc_expr a) ∅) ⟩ ⟨ kc_app , scons (enc_expr f2) (scons (enc_expr a2) ∅) ⟩ = ra_eeqv (enc_expr (app f a)) (enc_expr (app f2 a2)) $ by ra_eeqv_eq [l12, l13]
-l15: $ eeqv (app f a) (app f2 a2) $ by wcel_eq_l [l14, l11]
-
-lemma g1_c_eeqv_lam (G: hyps) (A1 A2 A3 A4: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ A3 ∈ trees ω $ >
-  $ G ⇒ A4 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_lam , scons A1 (scons A2 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_lam , scons A3 (scons A4 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_eeqv A1 A3 ∈ lrel2 $ >
-  $ G ⇒ ra_eeqv A2 A4 ∈ lrel2 $ >
-  $ G ⇒ ra_eeqv ⟨ kc_lam , scons A1 (scons A2 ∅) ⟩ ⟨ kc_lam , scons A3 (scons A4 ∅) ⟩ ∈ lrel2 $
-----
+lrel2_eeqv_lam
+--------------
 l1: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ u = A3 $ by ax
@@ -654,44 +567,26 @@ l41: $ G ⇒ ⟨ scons (ra_eeqv A1 A3) (scons (ra_eeqv A2 A4) ∅) , ra_eeqv ⟨
 l42: $ G ⇒ ⟨ scons (ra_eeqv A1 A3) (scons (ra_eeqv A2 A4) ∅) , ra_eeqv ⟨ kc_lam , scons A1 (scons A2 ∅) ⟩ ⟨ kc_lam , scons A3 (scons A4 ∅) ⟩ ⟩ ∈ g1_top $ by g1_pr_eeqv [l41]
 l43: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l44: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l45: $ G ⇒ (ra_eeqv A2 A4) ∈ latoms $ by g1_lrel2_lat [#8]
+l45: $ G ⇒ (ra_eeqv A2 A4) ∈ latoms $ by g1_lrel2_lat [#6]
 l46: $ G ⇒ scons (ra_eeqv A2 A4) ∅ ∈ fseq latoms $ by scons_fseq_c [l45, l43]
-l47: $ G ⇒ crn (scons (ra_eeqv A2 A4) ∅) ⊆ lrel2 $ by crn_scons_sub [#8, l44]
-l48: $ G ⇒ (ra_eeqv A1 A3) ∈ latoms $ by g1_lrel2_lat [#7]
+l47: $ G ⇒ crn (scons (ra_eeqv A2 A4) ∅) ⊆ lrel2 $ by crn_scons_sub [#6, l44]
+l48: $ G ⇒ (ra_eeqv A1 A3) ∈ latoms $ by g1_lrel2_lat [#5]
 l49: $ G ⇒ scons (ra_eeqv A1 A3) (scons (ra_eeqv A2 A4) ∅) ∈ fseq latoms $ by scons_fseq_c [l48, l46]
-l50: $ G ⇒ crn (scons (ra_eeqv A1 A3) (scons (ra_eeqv A2 A4) ∅)) ⊆ lrel2 $ by crn_scons_sub [#7, l47]
-l51: $ G ⇒ ra_eeqv ⟨ kc_lam , scons A1 (scons A2 ∅) ⟩ ⟨ kc_lam , scons A3 (scons A4 ∅) ⟩ ∈ latoms $ by g1_ra_eeqv [#5, #6]
-l52: $ G ⇒ ra_eeqv ⟨ kc_lam , scons A1 (scons A2 ∅) ⟩ ⟨ kc_lam , scons A3 (scons A4 ∅) ⟩ ∈ lrel2 $ by g1_horn [l42, l49, l51, l50]
+l50: $ G ⇒ crn (scons (ra_eeqv A1 A3) (scons (ra_eeqv A2 A4) ∅)) ⊆ lrel2 $ by crn_scons_sub [#5, l47]
+l51: $ G ⇒ isset ω $ by omega_set
+l52: $ G ⇒ kc_lam ∈ ω $ by kc_lam_omega
+l53: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l54: $ G ⇒ scons A2 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#2, l53]
+l55: $ G ⇒ scons A1 (scons A2 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l54]
+l56: $ G ⇒ ⟨ kc_lam , scons A1 (scons A2 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l51, l52, l55]
+l57: $ G ⇒ scons A4 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#4, l53]
+l58: $ G ⇒ scons A3 (scons A4 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#3, l57]
+l59: $ G ⇒ ⟨ kc_lam , scons A3 (scons A4 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l51, l52, l58]
+l60: $ G ⇒ ra_eeqv ⟨ kc_lam , scons A1 (scons A2 ∅) ⟩ ⟨ kc_lam , scons A3 (scons A4 ∅) ⟩ ∈ latoms $ by g1_ra_eeqv [l56, l59]
+l61: $ G ⇒ ra_eeqv ⟨ kc_lam , scons A1 (scons A2 ∅) ⟩ ⟨ kc_lam , scons A3 (scons A4 ∅) ⟩ ∈ lrel2 $ by g1_horn [l42, l49, l60, l50]
 
-eeqv_lam
---------
-l1: $ _ ⇒ enc_expr A ∈ trees ω $ by enc_expr_trees
-l2: $ _ ⇒ enc_expr b ∈ trees ω $ by enc_expr_trees
-l3: $ _ ⇒ enc_expr A2 ∈ trees ω $ by enc_expr_trees
-l4: $ _ ⇒ enc_expr b2 ∈ trees ω $ by enc_expr_trees
-l5: $ _ ⇒ enc_expr (lam A b) = ⟨ kc_lam , scons (enc_expr A) (scons (enc_expr b) ∅) ⟩ $ by eq_refl
-l6: $ _ ⇒ enc_expr (lam A b) ∈ trees ω $ by enc_expr_trees
-l7: $ _ ⇒ ⟨ kc_lam , scons (enc_expr A) (scons (enc_expr b) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l5, l6]
-l8: $ _ ⇒ enc_expr (lam A2 b2) = ⟨ kc_lam , scons (enc_expr A2) (scons (enc_expr b2) ∅) ⟩ $ by eq_refl
-l9: $ _ ⇒ enc_expr (lam A2 b2) ∈ trees ω $ by enc_expr_trees
-l10: $ _ ⇒ ⟨ kc_lam , scons (enc_expr A2) (scons (enc_expr b2) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l8, l9]
-l11: $ _ ⇒ ra_eeqv ⟨ kc_lam , scons (enc_expr A) (scons (enc_expr b) ∅) ⟩ ⟨ kc_lam , scons (enc_expr A2) (scons (enc_expr b2) ∅) ⟩ ∈ lrel2 $ by g1_c_eeqv_lam [l1, l2, l3, l4, l7, l10, #1, #2]
-l12: $ _ ⇒ ⟨ kc_lam , scons (enc_expr A) (scons (enc_expr b) ∅) ⟩ = enc_expr (lam A b) $ by eq_refl
-l13: $ _ ⇒ ⟨ kc_lam , scons (enc_expr A2) (scons (enc_expr b2) ∅) ⟩ = enc_expr (lam A2 b2) $ by eq_refl
-l14: $ _ ⇒ ra_eeqv ⟨ kc_lam , scons (enc_expr A) (scons (enc_expr b) ∅) ⟩ ⟨ kc_lam , scons (enc_expr A2) (scons (enc_expr b2) ∅) ⟩ = ra_eeqv (enc_expr (lam A b)) (enc_expr (lam A2 b2)) $ by ra_eeqv_eq [l12, l13]
-l15: $ eeqv (lam A b) (lam A2 b2) $ by wcel_eq_l [l14, l11]
-
-lemma g1_c_eeqv_pi (G: hyps) (A1 A2 A3 A4: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ A3 ∈ trees ω $ >
-  $ G ⇒ A4 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_pi , scons A1 (scons A2 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_pi , scons A3 (scons A4 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_eeqv A1 A3 ∈ lrel2 $ >
-  $ G ⇒ ra_eeqv A2 A4 ∈ lrel2 $ >
-  $ G ⇒ ra_eeqv ⟨ kc_pi , scons A1 (scons A2 ∅) ⟩ ⟨ kc_pi , scons A3 (scons A4 ∅) ⟩ ∈ lrel2 $
-----
+lrel2_eeqv_pi
+-------------
 l1: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ u = A3 $ by ax
@@ -737,38 +632,26 @@ l42: $ G ⇒ ⟨ scons (ra_eeqv A1 A3) (scons (ra_eeqv A2 A4) ∅) , ra_eeqv ⟨
 l43: $ G ⇒ ⟨ scons (ra_eeqv A1 A3) (scons (ra_eeqv A2 A4) ∅) , ra_eeqv ⟨ kc_pi , scons A1 (scons A2 ∅) ⟩ ⟨ kc_pi , scons A3 (scons A4 ∅) ⟩ ⟩ ∈ g1_top $ by g1_pr_eeqv [l42]
 l44: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l45: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l46: $ G ⇒ (ra_eeqv A2 A4) ∈ latoms $ by g1_lrel2_lat [#8]
+l46: $ G ⇒ (ra_eeqv A2 A4) ∈ latoms $ by g1_lrel2_lat [#6]
 l47: $ G ⇒ scons (ra_eeqv A2 A4) ∅ ∈ fseq latoms $ by scons_fseq_c [l46, l44]
-l48: $ G ⇒ crn (scons (ra_eeqv A2 A4) ∅) ⊆ lrel2 $ by crn_scons_sub [#8, l45]
-l49: $ G ⇒ (ra_eeqv A1 A3) ∈ latoms $ by g1_lrel2_lat [#7]
+l48: $ G ⇒ crn (scons (ra_eeqv A2 A4) ∅) ⊆ lrel2 $ by crn_scons_sub [#6, l45]
+l49: $ G ⇒ (ra_eeqv A1 A3) ∈ latoms $ by g1_lrel2_lat [#5]
 l50: $ G ⇒ scons (ra_eeqv A1 A3) (scons (ra_eeqv A2 A4) ∅) ∈ fseq latoms $ by scons_fseq_c [l49, l47]
-l51: $ G ⇒ crn (scons (ra_eeqv A1 A3) (scons (ra_eeqv A2 A4) ∅)) ⊆ lrel2 $ by crn_scons_sub [#7, l48]
-l52: $ G ⇒ ra_eeqv ⟨ kc_pi , scons A1 (scons A2 ∅) ⟩ ⟨ kc_pi , scons A3 (scons A4 ∅) ⟩ ∈ latoms $ by g1_ra_eeqv [#5, #6]
-l53: $ G ⇒ ra_eeqv ⟨ kc_pi , scons A1 (scons A2 ∅) ⟩ ⟨ kc_pi , scons A3 (scons A4 ∅) ⟩ ∈ lrel2 $ by g1_horn [l43, l50, l52, l51]
+l51: $ G ⇒ crn (scons (ra_eeqv A1 A3) (scons (ra_eeqv A2 A4) ∅)) ⊆ lrel2 $ by crn_scons_sub [#5, l48]
+l52: $ G ⇒ isset ω $ by omega_set
+l53: $ G ⇒ kc_pi ∈ ω $ by kc_pi_omega
+l54: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l55: $ G ⇒ scons A2 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#2, l54]
+l56: $ G ⇒ scons A1 (scons A2 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l55]
+l57: $ G ⇒ ⟨ kc_pi , scons A1 (scons A2 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l52, l53, l56]
+l58: $ G ⇒ scons A4 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#4, l54]
+l59: $ G ⇒ scons A3 (scons A4 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#3, l58]
+l60: $ G ⇒ ⟨ kc_pi , scons A3 (scons A4 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l52, l53, l59]
+l61: $ G ⇒ ra_eeqv ⟨ kc_pi , scons A1 (scons A2 ∅) ⟩ ⟨ kc_pi , scons A3 (scons A4 ∅) ⟩ ∈ latoms $ by g1_ra_eeqv [l57, l60]
+l62: $ G ⇒ ra_eeqv ⟨ kc_pi , scons A1 (scons A2 ∅) ⟩ ⟨ kc_pi , scons A3 (scons A4 ∅) ⟩ ∈ lrel2 $ by g1_horn [l43, l50, l61, l51]
 
-eeqv_pi
--------
-l1: $ _ ⇒ enc_expr A ∈ trees ω $ by enc_expr_trees
-l2: $ _ ⇒ enc_expr b ∈ trees ω $ by enc_expr_trees
-l3: $ _ ⇒ enc_expr A2 ∈ trees ω $ by enc_expr_trees
-l4: $ _ ⇒ enc_expr b2 ∈ trees ω $ by enc_expr_trees
-l5: $ _ ⇒ enc_expr (pi A b) = ⟨ kc_pi , scons (enc_expr A) (scons (enc_expr b) ∅) ⟩ $ by eq_refl
-l6: $ _ ⇒ enc_expr (pi A b) ∈ trees ω $ by enc_expr_trees
-l7: $ _ ⇒ ⟨ kc_pi , scons (enc_expr A) (scons (enc_expr b) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l5, l6]
-l8: $ _ ⇒ enc_expr (pi A2 b2) = ⟨ kc_pi , scons (enc_expr A2) (scons (enc_expr b2) ∅) ⟩ $ by eq_refl
-l9: $ _ ⇒ enc_expr (pi A2 b2) ∈ trees ω $ by enc_expr_trees
-l10: $ _ ⇒ ⟨ kc_pi , scons (enc_expr A2) (scons (enc_expr b2) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l8, l9]
-l11: $ _ ⇒ ra_eeqv ⟨ kc_pi , scons (enc_expr A) (scons (enc_expr b) ∅) ⟩ ⟨ kc_pi , scons (enc_expr A2) (scons (enc_expr b2) ∅) ⟩ ∈ lrel2 $ by g1_c_eeqv_pi [l1, l2, l3, l4, l7, l10, #1, #2]
-l12: $ _ ⇒ ⟨ kc_pi , scons (enc_expr A) (scons (enc_expr b) ∅) ⟩ = enc_expr (pi A b) $ by eq_refl
-l13: $ _ ⇒ ⟨ kc_pi , scons (enc_expr A2) (scons (enc_expr b2) ∅) ⟩ = enc_expr (pi A2 b2) $ by eq_refl
-l14: $ _ ⇒ ra_eeqv ⟨ kc_pi , scons (enc_expr A) (scons (enc_expr b) ∅) ⟩ ⟨ kc_pi , scons (enc_expr A2) (scons (enc_expr b2) ∅) ⟩ = ra_eeqv (enc_expr (pi A b)) (enc_expr (pi A2 b2)) $ by ra_eeqv_eq [l12, l13]
-l15: $ eeqv (pi A b) (pi A2 b2) $ by wcel_eq_l [l14, l11]
-
-lemma g1_c_eeqv_lit (G: hyps) (A1: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_lit , scons A1 ∅ ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_eeqv ⟨ kc_lit , scons A1 ∅ ⟩ ⟨ kc_lit , scons A1 ∅ ⟩ ∈ lrel2 $
-----
+lrel2_eeqv_lit
+--------------
 l1: $ G , y = A1 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , x = ⟨ ∅ , ra_eeqv ⟨ kc_lit , scons y ∅ ⟩ ⟨ kc_lit , scons y ∅ ⟩ ⟩ ⇒ x = ⟨ ∅ , ra_eeqv ⟨ kc_lit , scons y ∅ ⟩ ⟨ kc_lit , scons y ∅ ⟩ ⟩ $ by ax
 l3: $ G , y = A1 , x = ⟨ ∅ , ra_eeqv ⟨ kc_lit , scons y ∅ ⟩ ⟨ kc_lit , scons y ∅ ⟩ ⟩ ⇒ ∃ y (x = ⟨ ∅ , ra_eeqv ⟨ kc_lit , scons y ∅ ⟩ ⟨ kc_lit , scons y ∅ ⟩ ⟩) $ by ex_intro [l2]
@@ -795,29 +678,16 @@ l23: $ G ⇒ ⟨ ∅ , ra_eeqv ⟨ kc_lit , scons A1 ∅ ⟩ ⟨ kc_lit , scons 
 l24: $ G ⇒ ⟨ ∅ , ra_eeqv ⟨ kc_lit , scons A1 ∅ ⟩ ⟨ kc_lit , scons A1 ∅ ⟩ ⟩ ∈ g1_top $ by g1_pr_eeqv [l23]
 l25: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l26: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l27: $ G ⇒ ra_eeqv ⟨ kc_lit , scons A1 ∅ ⟩ ⟨ kc_lit , scons A1 ∅ ⟩ ∈ latoms $ by g1_ra_eeqv [#2, #2]
-l28: $ G ⇒ ra_eeqv ⟨ kc_lit , scons A1 ∅ ⟩ ⟨ kc_lit , scons A1 ∅ ⟩ ∈ lrel2 $ by g1_horn [l24, l25, l27, l26]
+l27: $ G ⇒ isset ω $ by omega_set
+l28: $ G ⇒ kc_lit ∈ ω $ by kc_lit_omega
+l29: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l30: $ G ⇒ scons A1 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#1, l29]
+l31: $ G ⇒ ⟨ kc_lit , scons A1 ∅ ⟩ ∈ trees ω $ by trees_intro_c [l27, l28, l30]
+l32: $ G ⇒ ra_eeqv ⟨ kc_lit , scons A1 ∅ ⟩ ⟨ kc_lit , scons A1 ∅ ⟩ ∈ latoms $ by g1_ra_eeqv [l31, l31]
+l33: $ G ⇒ ra_eeqv ⟨ kc_lit , scons A1 ∅ ⟩ ⟨ kc_lit , scons A1 ∅ ⟩ ∈ lrel2 $ by g1_horn [l24, l25, l32, l26]
 
-eeqv_lit
---------
-l1: $ _ ⇒ enc_bin n ∈ trees ω $ by enc_bin_trees
-l2: $ _ ⇒ enc_expr (lit n) = ⟨ kc_lit , scons (enc_bin n) ∅ ⟩ $ by eq_refl
-l3: $ _ ⇒ enc_expr (lit n) ∈ trees ω $ by enc_expr_trees
-l4: $ _ ⇒ ⟨ kc_lit , scons (enc_bin n) ∅ ⟩ ∈ trees ω $ by wcel_eq_l [l2, l3]
-l5: $ _ ⇒ ra_eeqv ⟨ kc_lit , scons (enc_bin n) ∅ ⟩ ⟨ kc_lit , scons (enc_bin n) ∅ ⟩ ∈ lrel2 $ by g1_c_eeqv_lit [l1, l4]
-l6: $ _ ⇒ ⟨ kc_lit , scons (enc_bin n) ∅ ⟩ = enc_expr (lit n) $ by eq_refl
-l7: $ _ ⇒ ra_eeqv ⟨ kc_lit , scons (enc_bin n) ∅ ⟩ ⟨ kc_lit , scons (enc_bin n) ∅ ⟩ = ra_eeqv (enc_expr (lit n)) (enc_expr (lit n)) $ by ra_eeqv_eq [l6, l6]
-l8: $ eeqv (lit n) (lit n) $ by wcel_eq_l [l7, l5]
-
-lemma g1_c_eeqv_cst (G: hyps) (A1 A2 A3: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ A3 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_cst , scons A1 (scons A2 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_cst , scons A1 (scons A3 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_lseqv A2 A3 ∈ lrel2 $ >
-  $ G ⇒ ra_eeqv ⟨ kc_cst , scons A1 (scons A2 ∅) ⟩ ⟨ kc_cst , scons A1 (scons A3 ∅) ⟩ ∈ lrel2 $
-----
+lrel2_eeqv_cst
+--------------
 l1: $ G , y = A1 , z = A2 , u = A3 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 , u = A3 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 , u = A3 ⇒ u = A3 $ by ax
@@ -859,38 +729,23 @@ l38: $ G ⇒ ⟨ scons (ra_lseqv A2 A3) ∅ , ra_eeqv ⟨ kc_cst , scons A1 (sco
 l39: $ G ⇒ ⟨ scons (ra_lseqv A2 A3) ∅ , ra_eeqv ⟨ kc_cst , scons A1 (scons A2 ∅) ⟩ ⟨ kc_cst , scons A1 (scons A3 ∅) ⟩ ⟩ ∈ g1_top $ by g1_pr_eeqv [l38]
 l40: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l41: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l42: $ G ⇒ (ra_lseqv A2 A3) ∈ latoms $ by g1_lrel2_lat [#6]
+l42: $ G ⇒ (ra_lseqv A2 A3) ∈ latoms $ by g1_lrel2_lat [#4]
 l43: $ G ⇒ scons (ra_lseqv A2 A3) ∅ ∈ fseq latoms $ by scons_fseq_c [l42, l40]
-l44: $ G ⇒ crn (scons (ra_lseqv A2 A3) ∅) ⊆ lrel2 $ by crn_scons_sub [#6, l41]
-l45: $ G ⇒ ra_eeqv ⟨ kc_cst , scons A1 (scons A2 ∅) ⟩ ⟨ kc_cst , scons A1 (scons A3 ∅) ⟩ ∈ latoms $ by g1_ra_eeqv [#4, #5]
-l46: $ G ⇒ ra_eeqv ⟨ kc_cst , scons A1 (scons A2 ∅) ⟩ ⟨ kc_cst , scons A1 (scons A3 ∅) ⟩ ∈ lrel2 $ by g1_horn [l39, l43, l45, l44]
+l44: $ G ⇒ crn (scons (ra_lseqv A2 A3) ∅) ⊆ lrel2 $ by crn_scons_sub [#4, l41]
+l45: $ G ⇒ isset ω $ by omega_set
+l46: $ G ⇒ kc_cst ∈ ω $ by kc_cst_omega
+l47: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l48: $ G ⇒ scons A2 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#2, l47]
+l49: $ G ⇒ scons A1 (scons A2 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l48]
+l50: $ G ⇒ ⟨ kc_cst , scons A1 (scons A2 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l45, l46, l49]
+l51: $ G ⇒ scons A3 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#3, l47]
+l52: $ G ⇒ scons A1 (scons A3 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l51]
+l53: $ G ⇒ ⟨ kc_cst , scons A1 (scons A3 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l45, l46, l52]
+l54: $ G ⇒ ra_eeqv ⟨ kc_cst , scons A1 (scons A2 ∅) ⟩ ⟨ kc_cst , scons A1 (scons A3 ∅) ⟩ ∈ latoms $ by g1_ra_eeqv [l50, l53]
+l55: $ G ⇒ ra_eeqv ⟨ kc_cst , scons A1 (scons A2 ∅) ⟩ ⟨ kc_cst , scons A1 (scons A3 ∅) ⟩ ∈ lrel2 $ by g1_horn [l39, l43, l54, l44]
 
-eeqv_cst
---------
-l1: $ _ ⇒ enc_atom a ∈ trees ω $ by enc_atom_trees
-l2: $ _ ⇒ enc_lvls S ∈ trees ω $ by enc_lvls_trees
-l3: $ _ ⇒ enc_lvls S2 ∈ trees ω $ by enc_lvls_trees
-l4: $ _ ⇒ enc_expr (cst a S) = ⟨ kc_cst , scons (enc_atom a) (scons (enc_lvls S) ∅) ⟩ $ by eq_refl
-l5: $ _ ⇒ enc_expr (cst a S) ∈ trees ω $ by enc_expr_trees
-l6: $ _ ⇒ ⟨ kc_cst , scons (enc_atom a) (scons (enc_lvls S) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l4, l5]
-l7: $ _ ⇒ enc_expr (cst a S2) = ⟨ kc_cst , scons (enc_atom a) (scons (enc_lvls S2) ∅) ⟩ $ by eq_refl
-l8: $ _ ⇒ enc_expr (cst a S2) ∈ trees ω $ by enc_expr_trees
-l9: $ _ ⇒ ⟨ kc_cst , scons (enc_atom a) (scons (enc_lvls S2) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l7, l8]
-l10: $ _ ⇒ ra_eeqv ⟨ kc_cst , scons (enc_atom a) (scons (enc_lvls S) ∅) ⟩ ⟨ kc_cst , scons (enc_atom a) (scons (enc_lvls S2) ∅) ⟩ ∈ lrel2 $ by g1_c_eeqv_cst [l1, l2, l3, l6, l9, #1]
-l11: $ _ ⇒ ⟨ kc_cst , scons (enc_atom a) (scons (enc_lvls S) ∅) ⟩ = enc_expr (cst a S) $ by eq_refl
-l12: $ _ ⇒ ⟨ kc_cst , scons (enc_atom a) (scons (enc_lvls S2) ∅) ⟩ = enc_expr (cst a S2) $ by eq_refl
-l13: $ _ ⇒ ra_eeqv ⟨ kc_cst , scons (enc_atom a) (scons (enc_lvls S) ∅) ⟩ ⟨ kc_cst , scons (enc_atom a) (scons (enc_lvls S2) ∅) ⟩ = ra_eeqv (enc_expr (cst a S)) (enc_expr (cst a S2)) $ by ra_eeqv_eq [l11, l12]
-l14: $ eeqv (cst a S) (cst a S2) $ by wcel_eq_l [l13, l10]
-
-lemma g1_c_eeqv_ind_ty (G: hyps) (A1 A2 A3: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ A3 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_ind_ty , scons A1 (scons A3 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_ind_ty , scons A2 (scons A3 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_ind_eqv A1 A2 ∈ lrel2 $ >
-  $ G ⇒ ra_eeqv ⟨ kc_ind_ty , scons A1 (scons A3 ∅) ⟩ ⟨ kc_ind_ty , scons A2 (scons A3 ∅) ⟩ ∈ lrel2 $
-----
+lrel2_eeqv_ind_ty
+-----------------
 l1: $ G , y = A1 , z = A2 , u = A3 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 , u = A3 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 , u = A3 ⇒ u = A3 $ by ax
@@ -932,39 +787,22 @@ l38: $ G ⇒ ⟨ scons (ra_ind_eqv A1 A2) ∅ , ra_eeqv ⟨ kc_ind_ty , scons A1
 l39: $ G ⇒ ⟨ scons (ra_ind_eqv A1 A2) ∅ , ra_eeqv ⟨ kc_ind_ty , scons A1 (scons A3 ∅) ⟩ ⟨ kc_ind_ty , scons A2 (scons A3 ∅) ⟩ ⟩ ∈ g1_top $ by g1_pr_eeqv [l38]
 l40: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l41: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l42: $ G ⇒ (ra_ind_eqv A1 A2) ∈ latoms $ by g1_lrel2_lat [#6]
+l42: $ G ⇒ (ra_ind_eqv A1 A2) ∈ latoms $ by g1_lrel2_lat [#4]
 l43: $ G ⇒ scons (ra_ind_eqv A1 A2) ∅ ∈ fseq latoms $ by scons_fseq_c [l42, l40]
-l44: $ G ⇒ crn (scons (ra_ind_eqv A1 A2) ∅) ⊆ lrel2 $ by crn_scons_sub [#6, l41]
-l45: $ G ⇒ ra_eeqv ⟨ kc_ind_ty , scons A1 (scons A3 ∅) ⟩ ⟨ kc_ind_ty , scons A2 (scons A3 ∅) ⟩ ∈ latoms $ by g1_ra_eeqv [#4, #5]
-l46: $ G ⇒ ra_eeqv ⟨ kc_ind_ty , scons A1 (scons A3 ∅) ⟩ ⟨ kc_ind_ty , scons A2 (scons A3 ∅) ⟩ ∈ lrel2 $ by g1_horn [l39, l43, l45, l44]
+l44: $ G ⇒ crn (scons (ra_ind_eqv A1 A2) ∅) ⊆ lrel2 $ by crn_scons_sub [#4, l41]
+l45: $ G ⇒ isset ω $ by omega_set
+l46: $ G ⇒ kc_ind_ty ∈ ω $ by kc_ind_ty_omega
+l47: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l48: $ G ⇒ scons A3 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#3, l47]
+l49: $ G ⇒ scons A1 (scons A3 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l48]
+l50: $ G ⇒ ⟨ kc_ind_ty , scons A1 (scons A3 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l45, l46, l49]
+l51: $ G ⇒ scons A2 (scons A3 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#2, l48]
+l52: $ G ⇒ ⟨ kc_ind_ty , scons A2 (scons A3 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l45, l46, l51]
+l53: $ G ⇒ ra_eeqv ⟨ kc_ind_ty , scons A1 (scons A3 ∅) ⟩ ⟨ kc_ind_ty , scons A2 (scons A3 ∅) ⟩ ∈ latoms $ by g1_ra_eeqv [l50, l52]
+l54: $ G ⇒ ra_eeqv ⟨ kc_ind_ty , scons A1 (scons A3 ∅) ⟩ ⟨ kc_ind_ty , scons A2 (scons A3 ∅) ⟩ ∈ lrel2 $ by g1_horn [l39, l43, l53, l44]
 
-eeqv_ind_ty
------------
-l1: $ _ ⇒ enc_ind D ∈ trees ω $ by enc_ind_trees
-l2: $ _ ⇒ enc_ind D2 ∈ trees ω $ by enc_ind_trees
-l3: $ _ ⇒ enc_nat i ∈ trees ω $ by enc_nat_trees
-l4: $ _ ⇒ enc_expr (ind_ty D i) = ⟨ kc_ind_ty , scons (enc_ind D) (scons (enc_nat i) ∅) ⟩ $ by eq_refl
-l5: $ _ ⇒ enc_expr (ind_ty D i) ∈ trees ω $ by enc_expr_trees
-l6: $ _ ⇒ ⟨ kc_ind_ty , scons (enc_ind D) (scons (enc_nat i) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l4, l5]
-l7: $ _ ⇒ enc_expr (ind_ty D2 i) = ⟨ kc_ind_ty , scons (enc_ind D2) (scons (enc_nat i) ∅) ⟩ $ by eq_refl
-l8: $ _ ⇒ enc_expr (ind_ty D2 i) ∈ trees ω $ by enc_expr_trees
-l9: $ _ ⇒ ⟨ kc_ind_ty , scons (enc_ind D2) (scons (enc_nat i) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l7, l8]
-l10: $ _ ⇒ ra_eeqv ⟨ kc_ind_ty , scons (enc_ind D) (scons (enc_nat i) ∅) ⟩ ⟨ kc_ind_ty , scons (enc_ind D2) (scons (enc_nat i) ∅) ⟩ ∈ lrel2 $ by g1_c_eeqv_ind_ty [l1, l2, l3, l6, l9, #1]
-l11: $ _ ⇒ ⟨ kc_ind_ty , scons (enc_ind D) (scons (enc_nat i) ∅) ⟩ = enc_expr (ind_ty D i) $ by eq_refl
-l12: $ _ ⇒ ⟨ kc_ind_ty , scons (enc_ind D2) (scons (enc_nat i) ∅) ⟩ = enc_expr (ind_ty D2 i) $ by eq_refl
-l13: $ _ ⇒ ra_eeqv ⟨ kc_ind_ty , scons (enc_ind D) (scons (enc_nat i) ∅) ⟩ ⟨ kc_ind_ty , scons (enc_ind D2) (scons (enc_nat i) ∅) ⟩ = ra_eeqv (enc_expr (ind_ty D i)) (enc_expr (ind_ty D2 i)) $ by ra_eeqv_eq [l11, l12]
-l14: $ eeqv (ind_ty D i) (ind_ty D2 i) $ by wcel_eq_l [l13, l10]
-
-lemma g1_c_eeqv_ind_ctor (G: hyps) (A1 A2 A3 A4: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ A3 ∈ trees ω $ >
-  $ G ⇒ A4 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_ind_ctor , scons A1 (scons A3 (scons A4 ∅)) ⟩ ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_ind_ctor , scons A2 (scons A3 (scons A4 ∅)) ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_ind_eqv A1 A2 ∈ lrel2 $ >
-  $ G ⇒ ra_eeqv ⟨ kc_ind_ctor , scons A1 (scons A3 (scons A4 ∅)) ⟩ ⟨ kc_ind_ctor , scons A2 (scons A3 (scons A4 ∅)) ⟩ ∈ lrel2 $
-----
+lrel2_eeqv_ind_ctor
+-------------------
 l1: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ u = A3 $ by ax
@@ -1012,48 +850,29 @@ l44: $ G ⇒ ⟨ scons (ra_ind_eqv A1 A2) ∅ , ra_eeqv ⟨ kc_ind_ctor , scons 
 l45: $ G ⇒ ⟨ scons (ra_ind_eqv A1 A2) ∅ , ra_eeqv ⟨ kc_ind_ctor , scons A1 (scons A3 (scons A4 ∅)) ⟩ ⟨ kc_ind_ctor , scons A2 (scons A3 (scons A4 ∅)) ⟩ ⟩ ∈ g1_top $ by g1_pr_eeqv [l44]
 l46: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l47: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l48: $ G ⇒ (ra_ind_eqv A1 A2) ∈ latoms $ by g1_lrel2_lat [#7]
+l48: $ G ⇒ (ra_ind_eqv A1 A2) ∈ latoms $ by g1_lrel2_lat [#5]
 l49: $ G ⇒ scons (ra_ind_eqv A1 A2) ∅ ∈ fseq latoms $ by scons_fseq_c [l48, l46]
-l50: $ G ⇒ crn (scons (ra_ind_eqv A1 A2) ∅) ⊆ lrel2 $ by crn_scons_sub [#7, l47]
-l51: $ G ⇒ ra_eeqv ⟨ kc_ind_ctor , scons A1 (scons A3 (scons A4 ∅)) ⟩ ⟨ kc_ind_ctor , scons A2 (scons A3 (scons A4 ∅)) ⟩ ∈ latoms $ by g1_ra_eeqv [#5, #6]
-l52: $ G ⇒ ra_eeqv ⟨ kc_ind_ctor , scons A1 (scons A3 (scons A4 ∅)) ⟩ ⟨ kc_ind_ctor , scons A2 (scons A3 (scons A4 ∅)) ⟩ ∈ lrel2 $ by g1_horn [l45, l49, l51, l50]
+l50: $ G ⇒ crn (scons (ra_ind_eqv A1 A2) ∅) ⊆ lrel2 $ by crn_scons_sub [#5, l47]
+l51: $ G ⇒ isset ω $ by omega_set
+l52: $ G ⇒ kc_ind_ctor ∈ ω $ by kc_ind_ctor_omega
+l53: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l54: $ G ⇒ scons A4 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#4, l53]
+l55: $ G ⇒ scons A3 (scons A4 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#3, l54]
+l56: $ G ⇒ scons A1 (scons A3 (scons A4 ∅)) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l55]
+l57: $ G ⇒ ⟨ kc_ind_ctor , scons A1 (scons A3 (scons A4 ∅)) ⟩ ∈ trees ω $ by trees_intro_c [l51, l52, l56]
+l58: $ G ⇒ scons A2 (scons A3 (scons A4 ∅)) ∈ fseq (trees ω) $ by scons_fseq_c [#2, l55]
+l59: $ G ⇒ ⟨ kc_ind_ctor , scons A2 (scons A3 (scons A4 ∅)) ⟩ ∈ trees ω $ by trees_intro_c [l51, l52, l58]
+l60: $ G ⇒ ra_eeqv ⟨ kc_ind_ctor , scons A1 (scons A3 (scons A4 ∅)) ⟩ ⟨ kc_ind_ctor , scons A2 (scons A3 (scons A4 ∅)) ⟩ ∈ latoms $ by g1_ra_eeqv [l57, l59]
+l61: $ G ⇒ ra_eeqv ⟨ kc_ind_ctor , scons A1 (scons A3 (scons A4 ∅)) ⟩ ⟨ kc_ind_ctor , scons A2 (scons A3 (scons A4 ∅)) ⟩ ∈ lrel2 $ by g1_horn [l45, l49, l60, l50]
 
-eeqv_ind_ctor
--------------
-l1: $ _ ⇒ enc_ind D ∈ trees ω $ by enc_ind_trees
-l2: $ _ ⇒ enc_ind D2 ∈ trees ω $ by enc_ind_trees
-l3: $ _ ⇒ enc_nat i ∈ trees ω $ by enc_nat_trees
-l4: $ _ ⇒ enc_nat c ∈ trees ω $ by enc_nat_trees
-l5: $ _ ⇒ enc_expr (ind_ctor D i c) = ⟨ kc_ind_ctor , scons (enc_ind D) (scons (enc_nat i) (scons (enc_nat c) ∅)) ⟩ $ by eq_refl
-l6: $ _ ⇒ enc_expr (ind_ctor D i c) ∈ trees ω $ by enc_expr_trees
-l7: $ _ ⇒ ⟨ kc_ind_ctor , scons (enc_ind D) (scons (enc_nat i) (scons (enc_nat c) ∅)) ⟩ ∈ trees ω $ by wcel_eq_l [l5, l6]
-l8: $ _ ⇒ enc_expr (ind_ctor D2 i c) = ⟨ kc_ind_ctor , scons (enc_ind D2) (scons (enc_nat i) (scons (enc_nat c) ∅)) ⟩ $ by eq_refl
-l9: $ _ ⇒ enc_expr (ind_ctor D2 i c) ∈ trees ω $ by enc_expr_trees
-l10: $ _ ⇒ ⟨ kc_ind_ctor , scons (enc_ind D2) (scons (enc_nat i) (scons (enc_nat c) ∅)) ⟩ ∈ trees ω $ by wcel_eq_l [l8, l9]
-l11: $ _ ⇒ ra_eeqv ⟨ kc_ind_ctor , scons (enc_ind D) (scons (enc_nat i) (scons (enc_nat c) ∅)) ⟩ ⟨ kc_ind_ctor , scons (enc_ind D2) (scons (enc_nat i) (scons (enc_nat c) ∅)) ⟩ ∈ lrel2 $ by g1_c_eeqv_ind_ctor [l1, l2, l3, l4, l7, l10, #1]
-l12: $ _ ⇒ ⟨ kc_ind_ctor , scons (enc_ind D) (scons (enc_nat i) (scons (enc_nat c) ∅)) ⟩ = enc_expr (ind_ctor D i c) $ by eq_refl
-l13: $ _ ⇒ ⟨ kc_ind_ctor , scons (enc_ind D2) (scons (enc_nat i) (scons (enc_nat c) ∅)) ⟩ = enc_expr (ind_ctor D2 i c) $ by eq_refl
-l14: $ _ ⇒ ra_eeqv ⟨ kc_ind_ctor , scons (enc_ind D) (scons (enc_nat i) (scons (enc_nat c) ∅)) ⟩ ⟨ kc_ind_ctor , scons (enc_ind D2) (scons (enc_nat i) (scons (enc_nat c) ∅)) ⟩ = ra_eeqv (enc_expr (ind_ctor D i c)) (enc_expr (ind_ctor D2 i c)) $ by ra_eeqv_eq [l12, l13]
-l15: $ eeqv (ind_ctor D i c) (ind_ctor D2 i c) $ by wcel_eq_l [l14, l11]
-
-lemma g1_c_eeqv_ind_rec (G: hyps) (A1 A2 A3 A4 A5: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ A3 ∈ trees ω $ >
-  $ G ⇒ A4 ∈ trees ω $ >
-  $ G ⇒ A5 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_ind_rec , scons A1 (scons A3 (scons A4 ∅)) ⟩ ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_ind_rec , scons A2 (scons A3 (scons A5 ∅)) ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_ind_eqv A1 A2 ∈ lrel2 $ >
-  $ G ⇒ lveq A4 A5 $ >
-  $ G ⇒ ra_eeqv ⟨ kc_ind_rec , scons A1 (scons A3 (scons A4 ∅)) ⟩ ⟨ kc_ind_rec , scons A2 (scons A3 (scons A5 ∅)) ⟩ ∈ lrel2 $
-----
+lrel2_eeqv_ind_rec
+------------------
 l1: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 ⇒ u = A3 $ by ax
 l4: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 ⇒ v = A4 $ by ax
 l5: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 ⇒ w = A5 $ by ax
-l6: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 ⇒ lveq A4 A5 $ by weaken [#9]
+l6: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 ⇒ lveq A4 A5 $ by weaken [#7]
 l7: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 ⇒ A4 = v $ by eq_sym [l4]
 l8: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 ⇒ A5 = w $ by eq_sym [l5]
 l9: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 ⇒ lveq v w $ by lveq_eq [l7, l8, l6]
@@ -1108,42 +927,25 @@ l57: $ G ⇒ ⟨ scons (ra_ind_eqv A1 A2) ∅ , ra_eeqv ⟨ kc_ind_rec , scons A
 l58: $ G ⇒ ⟨ scons (ra_ind_eqv A1 A2) ∅ , ra_eeqv ⟨ kc_ind_rec , scons A1 (scons A3 (scons A4 ∅)) ⟩ ⟨ kc_ind_rec , scons A2 (scons A3 (scons A5 ∅)) ⟩ ⟩ ∈ g1_top $ by g1_pr_eeqv [l57]
 l59: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l60: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l61: $ G ⇒ (ra_ind_eqv A1 A2) ∈ latoms $ by g1_lrel2_lat [#8]
+l61: $ G ⇒ (ra_ind_eqv A1 A2) ∈ latoms $ by g1_lrel2_lat [#6]
 l62: $ G ⇒ scons (ra_ind_eqv A1 A2) ∅ ∈ fseq latoms $ by scons_fseq_c [l61, l59]
-l63: $ G ⇒ crn (scons (ra_ind_eqv A1 A2) ∅) ⊆ lrel2 $ by crn_scons_sub [#8, l60]
-l64: $ G ⇒ ra_eeqv ⟨ kc_ind_rec , scons A1 (scons A3 (scons A4 ∅)) ⟩ ⟨ kc_ind_rec , scons A2 (scons A3 (scons A5 ∅)) ⟩ ∈ latoms $ by g1_ra_eeqv [#6, #7]
-l65: $ G ⇒ ra_eeqv ⟨ kc_ind_rec , scons A1 (scons A3 (scons A4 ∅)) ⟩ ⟨ kc_ind_rec , scons A2 (scons A3 (scons A5 ∅)) ⟩ ∈ lrel2 $ by g1_horn [l58, l62, l64, l63]
+l63: $ G ⇒ crn (scons (ra_ind_eqv A1 A2) ∅) ⊆ lrel2 $ by crn_scons_sub [#6, l60]
+l64: $ G ⇒ isset ω $ by omega_set
+l65: $ G ⇒ kc_ind_rec ∈ ω $ by kc_ind_rec_omega
+l66: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l67: $ G ⇒ scons A4 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#4, l66]
+l68: $ G ⇒ scons A3 (scons A4 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#3, l67]
+l69: $ G ⇒ scons A1 (scons A3 (scons A4 ∅)) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l68]
+l70: $ G ⇒ ⟨ kc_ind_rec , scons A1 (scons A3 (scons A4 ∅)) ⟩ ∈ trees ω $ by trees_intro_c [l64, l65, l69]
+l71: $ G ⇒ scons A5 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#5, l66]
+l72: $ G ⇒ scons A3 (scons A5 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#3, l71]
+l73: $ G ⇒ scons A2 (scons A3 (scons A5 ∅)) ∈ fseq (trees ω) $ by scons_fseq_c [#2, l72]
+l74: $ G ⇒ ⟨ kc_ind_rec , scons A2 (scons A3 (scons A5 ∅)) ⟩ ∈ trees ω $ by trees_intro_c [l64, l65, l73]
+l75: $ G ⇒ ra_eeqv ⟨ kc_ind_rec , scons A1 (scons A3 (scons A4 ∅)) ⟩ ⟨ kc_ind_rec , scons A2 (scons A3 (scons A5 ∅)) ⟩ ∈ latoms $ by g1_ra_eeqv [l70, l74]
+l76: $ G ⇒ ra_eeqv ⟨ kc_ind_rec , scons A1 (scons A3 (scons A4 ∅)) ⟩ ⟨ kc_ind_rec , scons A2 (scons A3 (scons A5 ∅)) ⟩ ∈ lrel2 $ by g1_horn [l58, l62, l75, l63]
 
-eeqv_ind_rec
-------------
-l1: $ _ ⇒ enc_ind D ∈ trees ω $ by enc_ind_trees
-l2: $ _ ⇒ enc_ind D2 ∈ trees ω $ by enc_ind_trees
-l3: $ _ ⇒ enc_nat i ∈ trees ω $ by enc_nat_trees
-l4: $ _ ⇒ enc_lvl v ∈ trees ω $ by enc_lvl_trees
-l5: $ _ ⇒ enc_lvl v2 ∈ trees ω $ by enc_lvl_trees
-l6: $ _ ⇒ enc_expr (ind_rec D i v) = ⟨ kc_ind_rec , scons (enc_ind D) (scons (enc_nat i) (scons (enc_lvl v) ∅)) ⟩ $ by eq_refl
-l7: $ _ ⇒ enc_expr (ind_rec D i v) ∈ trees ω $ by enc_expr_trees
-l8: $ _ ⇒ ⟨ kc_ind_rec , scons (enc_ind D) (scons (enc_nat i) (scons (enc_lvl v) ∅)) ⟩ ∈ trees ω $ by wcel_eq_l [l6, l7]
-l9: $ _ ⇒ enc_expr (ind_rec D2 i v2) = ⟨ kc_ind_rec , scons (enc_ind D2) (scons (enc_nat i) (scons (enc_lvl v2) ∅)) ⟩ $ by eq_refl
-l10: $ _ ⇒ enc_expr (ind_rec D2 i v2) ∈ trees ω $ by enc_expr_trees
-l11: $ _ ⇒ ⟨ kc_ind_rec , scons (enc_ind D2) (scons (enc_nat i) (scons (enc_lvl v2) ∅)) ⟩ ∈ trees ω $ by wcel_eq_l [l9, l10]
-l12: $ _ ⇒ lveq (enc_lvl v) (enc_lvl v2) $ by leqv_lveq [#2]
-l13: $ _ ⇒ ra_eeqv ⟨ kc_ind_rec , scons (enc_ind D) (scons (enc_nat i) (scons (enc_lvl v) ∅)) ⟩ ⟨ kc_ind_rec , scons (enc_ind D2) (scons (enc_nat i) (scons (enc_lvl v2) ∅)) ⟩ ∈ lrel2 $ by g1_c_eeqv_ind_rec [l1, l2, l3, l4, l5, l8, l11, #1, l12]
-l14: $ _ ⇒ ⟨ kc_ind_rec , scons (enc_ind D) (scons (enc_nat i) (scons (enc_lvl v) ∅)) ⟩ = enc_expr (ind_rec D i v) $ by eq_refl
-l15: $ _ ⇒ ⟨ kc_ind_rec , scons (enc_ind D2) (scons (enc_nat i) (scons (enc_lvl v2) ∅)) ⟩ = enc_expr (ind_rec D2 i v2) $ by eq_refl
-l16: $ _ ⇒ ra_eeqv ⟨ kc_ind_rec , scons (enc_ind D) (scons (enc_nat i) (scons (enc_lvl v) ∅)) ⟩ ⟨ kc_ind_rec , scons (enc_ind D2) (scons (enc_nat i) (scons (enc_lvl v2) ∅)) ⟩ = ra_eeqv (enc_expr (ind_rec D i v)) (enc_expr (ind_rec D2 i v2)) $ by ra_eeqv_eq [l14, l15]
-l17: $ eeqv (ind_rec D i v) (ind_rec D2 i v2) $ by wcel_eq_l [l16, l13]
-
-lemma g1_c_eeqv_proj (G: hyps) (A1 A2 A3 A4: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ A3 ∈ trees ω $ >
-  $ G ⇒ A4 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_proj , scons A1 (scons A2 (scons A3 ∅)) ⟩ ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_proj , scons A1 (scons A2 (scons A4 ∅)) ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_eeqv A3 A4 ∈ lrel2 $ >
-  $ G ⇒ ra_eeqv ⟨ kc_proj , scons A1 (scons A2 (scons A3 ∅)) ⟩ ⟨ kc_proj , scons A1 (scons A2 (scons A4 ∅)) ⟩ ∈ lrel2 $
-----
+lrel2_eeqv_proj
+---------------
 l1: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ u = A3 $ by ax
@@ -1195,41 +997,28 @@ l48: $ G ⇒ ⟨ scons (ra_eeqv A3 A4) ∅ , ra_eeqv ⟨ kc_proj , scons A1 (sco
 l49: $ G ⇒ ⟨ scons (ra_eeqv A3 A4) ∅ , ra_eeqv ⟨ kc_proj , scons A1 (scons A2 (scons A3 ∅)) ⟩ ⟨ kc_proj , scons A1 (scons A2 (scons A4 ∅)) ⟩ ⟩ ∈ g1_top $ by g1_pr_eeqv [l48]
 l50: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l51: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l52: $ G ⇒ (ra_eeqv A3 A4) ∈ latoms $ by g1_lrel2_lat [#7]
+l52: $ G ⇒ (ra_eeqv A3 A4) ∈ latoms $ by g1_lrel2_lat [#5]
 l53: $ G ⇒ scons (ra_eeqv A3 A4) ∅ ∈ fseq latoms $ by scons_fseq_c [l52, l50]
-l54: $ G ⇒ crn (scons (ra_eeqv A3 A4) ∅) ⊆ lrel2 $ by crn_scons_sub [#7, l51]
-l55: $ G ⇒ ra_eeqv ⟨ kc_proj , scons A1 (scons A2 (scons A3 ∅)) ⟩ ⟨ kc_proj , scons A1 (scons A2 (scons A4 ∅)) ⟩ ∈ latoms $ by g1_ra_eeqv [#5, #6]
-l56: $ G ⇒ ra_eeqv ⟨ kc_proj , scons A1 (scons A2 (scons A3 ∅)) ⟩ ⟨ kc_proj , scons A1 (scons A2 (scons A4 ∅)) ⟩ ∈ lrel2 $ by g1_horn [l49, l53, l55, l54]
+l54: $ G ⇒ crn (scons (ra_eeqv A3 A4) ∅) ⊆ lrel2 $ by crn_scons_sub [#5, l51]
+l55: $ G ⇒ isset ω $ by omega_set
+l56: $ G ⇒ kc_proj ∈ ω $ by kc_proj_omega
+l57: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l58: $ G ⇒ scons A3 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#3, l57]
+l59: $ G ⇒ scons A2 (scons A3 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#2, l58]
+l60: $ G ⇒ scons A1 (scons A2 (scons A3 ∅)) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l59]
+l61: $ G ⇒ ⟨ kc_proj , scons A1 (scons A2 (scons A3 ∅)) ⟩ ∈ trees ω $ by trees_intro_c [l55, l56, l60]
+l62: $ G ⇒ scons A4 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#4, l57]
+l63: $ G ⇒ scons A2 (scons A4 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#2, l62]
+l64: $ G ⇒ scons A1 (scons A2 (scons A4 ∅)) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l63]
+l65: $ G ⇒ ⟨ kc_proj , scons A1 (scons A2 (scons A4 ∅)) ⟩ ∈ trees ω $ by trees_intro_c [l55, l56, l64]
+l66: $ G ⇒ ra_eeqv ⟨ kc_proj , scons A1 (scons A2 (scons A3 ∅)) ⟩ ⟨ kc_proj , scons A1 (scons A2 (scons A4 ∅)) ⟩ ∈ latoms $ by g1_ra_eeqv [l61, l65]
+l67: $ G ⇒ ra_eeqv ⟨ kc_proj , scons A1 (scons A2 (scons A3 ∅)) ⟩ ⟨ kc_proj , scons A1 (scons A2 (scons A4 ∅)) ⟩ ∈ lrel2 $ by g1_horn [l49, l53, l66, l54]
 
-eeqv_proj
----------
-l1: $ _ ⇒ enc_blk b ∈ trees ω $ by enc_blk_trees
-l2: $ _ ⇒ enc_nat i ∈ trees ω $ by enc_nat_trees
-l3: $ _ ⇒ enc_expr e ∈ trees ω $ by enc_expr_trees
-l4: $ _ ⇒ enc_expr e2 ∈ trees ω $ by enc_expr_trees
-l5: $ _ ⇒ enc_expr (proj b i e) = ⟨ kc_proj , scons (enc_blk b) (scons (enc_nat i) (scons (enc_expr e) ∅)) ⟩ $ by eq_refl
-l6: $ _ ⇒ enc_expr (proj b i e) ∈ trees ω $ by enc_expr_trees
-l7: $ _ ⇒ ⟨ kc_proj , scons (enc_blk b) (scons (enc_nat i) (scons (enc_expr e) ∅)) ⟩ ∈ trees ω $ by wcel_eq_l [l5, l6]
-l8: $ _ ⇒ enc_expr (proj b i e2) = ⟨ kc_proj , scons (enc_blk b) (scons (enc_nat i) (scons (enc_expr e2) ∅)) ⟩ $ by eq_refl
-l9: $ _ ⇒ enc_expr (proj b i e2) ∈ trees ω $ by enc_expr_trees
-l10: $ _ ⇒ ⟨ kc_proj , scons (enc_blk b) (scons (enc_nat i) (scons (enc_expr e2) ∅)) ⟩ ∈ trees ω $ by wcel_eq_l [l8, l9]
-l11: $ _ ⇒ ra_eeqv ⟨ kc_proj , scons (enc_blk b) (scons (enc_nat i) (scons (enc_expr e) ∅)) ⟩ ⟨ kc_proj , scons (enc_blk b) (scons (enc_nat i) (scons (enc_expr e2) ∅)) ⟩ ∈ lrel2 $ by g1_c_eeqv_proj [l1, l2, l3, l4, l7, l10, #1]
-l12: $ _ ⇒ ⟨ kc_proj , scons (enc_blk b) (scons (enc_nat i) (scons (enc_expr e) ∅)) ⟩ = enc_expr (proj b i e) $ by eq_refl
-l13: $ _ ⇒ ⟨ kc_proj , scons (enc_blk b) (scons (enc_nat i) (scons (enc_expr e2) ∅)) ⟩ = enc_expr (proj b i e2) $ by eq_refl
-l14: $ _ ⇒ ra_eeqv ⟨ kc_proj , scons (enc_blk b) (scons (enc_nat i) (scons (enc_expr e) ∅)) ⟩ ⟨ kc_proj , scons (enc_blk b) (scons (enc_nat i) (scons (enc_expr e2) ∅)) ⟩ = ra_eeqv (enc_expr (proj b i e)) (enc_expr (proj b i e2)) $ by ra_eeqv_eq [l12, l13]
-l15: $ eeqv (proj b i e) (proj b i e2) $ by wcel_eq_l [l14, l11]
-
-lemma g1_c_eeqv_quot (G: hyps) (A1 A2: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_quot , scons A1 ∅ ⟩ ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_quot , scons A2 ∅ ⟩ ∈ trees ω $ >
-  $ G ⇒ lveq A1 A2 $ >
-  $ G ⇒ ra_eeqv ⟨ kc_quot , scons A1 ∅ ⟩ ⟨ kc_quot , scons A2 ∅ ⟩ ∈ lrel2 $
-----
+lrel2_eeqv_quot
+---------------
 l1: $ G , y = A1 , z = A2 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 ⇒ z = A2 $ by ax
-l3: $ G , y = A1 , z = A2 ⇒ lveq A1 A2 $ by weaken [#5]
+l3: $ G , y = A1 , z = A2 ⇒ lveq A1 A2 $ by weaken [#3]
 l4: $ G , y = A1 , z = A2 ⇒ A1 = y $ by eq_sym [l1]
 l5: $ G , y = A1 , z = A2 ⇒ A2 = z $ by eq_sym [l2]
 l6: $ G , y = A1 , z = A2 ⇒ lveq y z $ by lveq_eq [l4, l5, l3]
@@ -1271,37 +1060,21 @@ l41: $ G ⇒ ⟨ ∅ , ra_eeqv ⟨ kc_quot , scons A1 ∅ ⟩ ⟨ kc_quot , scon
 l42: $ G ⇒ ⟨ ∅ , ra_eeqv ⟨ kc_quot , scons A1 ∅ ⟩ ⟨ kc_quot , scons A2 ∅ ⟩ ⟩ ∈ g1_top $ by g1_pr_eeqv [l41]
 l43: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l44: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l45: $ G ⇒ ra_eeqv ⟨ kc_quot , scons A1 ∅ ⟩ ⟨ kc_quot , scons A2 ∅ ⟩ ∈ latoms $ by g1_ra_eeqv [#3, #4]
-l46: $ G ⇒ ra_eeqv ⟨ kc_quot , scons A1 ∅ ⟩ ⟨ kc_quot , scons A2 ∅ ⟩ ∈ lrel2 $ by g1_horn [l42, l43, l45, l44]
+l45: $ G ⇒ isset ω $ by omega_set
+l46: $ G ⇒ kc_quot ∈ ω $ by kc_quot_omega
+l47: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l48: $ G ⇒ scons A1 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#1, l47]
+l49: $ G ⇒ ⟨ kc_quot , scons A1 ∅ ⟩ ∈ trees ω $ by trees_intro_c [l45, l46, l48]
+l50: $ G ⇒ scons A2 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#2, l47]
+l51: $ G ⇒ ⟨ kc_quot , scons A2 ∅ ⟩ ∈ trees ω $ by trees_intro_c [l45, l46, l50]
+l52: $ G ⇒ ra_eeqv ⟨ kc_quot , scons A1 ∅ ⟩ ⟨ kc_quot , scons A2 ∅ ⟩ ∈ latoms $ by g1_ra_eeqv [l49, l51]
+l53: $ G ⇒ ra_eeqv ⟨ kc_quot , scons A1 ∅ ⟩ ⟨ kc_quot , scons A2 ∅ ⟩ ∈ lrel2 $ by g1_horn [l42, l43, l52, l44]
 
-eeqv_quot
----------
-l1: $ _ ⇒ enc_lvl u ∈ trees ω $ by enc_lvl_trees
-l2: $ _ ⇒ enc_lvl u2 ∈ trees ω $ by enc_lvl_trees
-l3: $ _ ⇒ enc_expr (quot u) = ⟨ kc_quot , scons (enc_lvl u) ∅ ⟩ $ by eq_refl
-l4: $ _ ⇒ enc_expr (quot u) ∈ trees ω $ by enc_expr_trees
-l5: $ _ ⇒ ⟨ kc_quot , scons (enc_lvl u) ∅ ⟩ ∈ trees ω $ by wcel_eq_l [l3, l4]
-l6: $ _ ⇒ enc_expr (quot u2) = ⟨ kc_quot , scons (enc_lvl u2) ∅ ⟩ $ by eq_refl
-l7: $ _ ⇒ enc_expr (quot u2) ∈ trees ω $ by enc_expr_trees
-l8: $ _ ⇒ ⟨ kc_quot , scons (enc_lvl u2) ∅ ⟩ ∈ trees ω $ by wcel_eq_l [l6, l7]
-l9: $ _ ⇒ lveq (enc_lvl u) (enc_lvl u2) $ by leqv_lveq [#1]
-l10: $ _ ⇒ ra_eeqv ⟨ kc_quot , scons (enc_lvl u) ∅ ⟩ ⟨ kc_quot , scons (enc_lvl u2) ∅ ⟩ ∈ lrel2 $ by g1_c_eeqv_quot [l1, l2, l5, l8, l9]
-l11: $ _ ⇒ ⟨ kc_quot , scons (enc_lvl u) ∅ ⟩ = enc_expr (quot u) $ by eq_refl
-l12: $ _ ⇒ ⟨ kc_quot , scons (enc_lvl u2) ∅ ⟩ = enc_expr (quot u2) $ by eq_refl
-l13: $ _ ⇒ ra_eeqv ⟨ kc_quot , scons (enc_lvl u) ∅ ⟩ ⟨ kc_quot , scons (enc_lvl u2) ∅ ⟩ = ra_eeqv (enc_expr (quot u)) (enc_expr (quot u2)) $ by ra_eeqv_eq [l11, l12]
-l14: $ eeqv (quot u) (quot u2) $ by wcel_eq_l [l13, l10]
-
-lemma g1_c_eeqv_quot_mk (G: hyps) (A1 A2: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_quot_mk , scons A1 ∅ ⟩ ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_quot_mk , scons A2 ∅ ⟩ ∈ trees ω $ >
-  $ G ⇒ lveq A1 A2 $ >
-  $ G ⇒ ra_eeqv ⟨ kc_quot_mk , scons A1 ∅ ⟩ ⟨ kc_quot_mk , scons A2 ∅ ⟩ ∈ lrel2 $
-----
+lrel2_eeqv_quot_mk
+------------------
 l1: $ G , y = A1 , z = A2 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 ⇒ z = A2 $ by ax
-l3: $ G , y = A1 , z = A2 ⇒ lveq A1 A2 $ by weaken [#5]
+l3: $ G , y = A1 , z = A2 ⇒ lveq A1 A2 $ by weaken [#3]
 l4: $ G , y = A1 , z = A2 ⇒ A1 = y $ by eq_sym [l1]
 l5: $ G , y = A1 , z = A2 ⇒ A2 = z $ by eq_sym [l2]
 l6: $ G , y = A1 , z = A2 ⇒ lveq y z $ by lveq_eq [l4, l5, l3]
@@ -1344,46 +1117,27 @@ l42: $ G ⇒ ⟨ ∅ , ra_eeqv ⟨ kc_quot_mk , scons A1 ∅ ⟩ ⟨ kc_quot_mk 
 l43: $ G ⇒ ⟨ ∅ , ra_eeqv ⟨ kc_quot_mk , scons A1 ∅ ⟩ ⟨ kc_quot_mk , scons A2 ∅ ⟩ ⟩ ∈ g1_top $ by g1_pr_eeqv [l42]
 l44: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l45: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l46: $ G ⇒ ra_eeqv ⟨ kc_quot_mk , scons A1 ∅ ⟩ ⟨ kc_quot_mk , scons A2 ∅ ⟩ ∈ latoms $ by g1_ra_eeqv [#3, #4]
-l47: $ G ⇒ ra_eeqv ⟨ kc_quot_mk , scons A1 ∅ ⟩ ⟨ kc_quot_mk , scons A2 ∅ ⟩ ∈ lrel2 $ by g1_horn [l43, l44, l46, l45]
+l46: $ G ⇒ isset ω $ by omega_set
+l47: $ G ⇒ kc_quot_mk ∈ ω $ by kc_quot_mk_omega
+l48: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l49: $ G ⇒ scons A1 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#1, l48]
+l50: $ G ⇒ ⟨ kc_quot_mk , scons A1 ∅ ⟩ ∈ trees ω $ by trees_intro_c [l46, l47, l49]
+l51: $ G ⇒ scons A2 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#2, l48]
+l52: $ G ⇒ ⟨ kc_quot_mk , scons A2 ∅ ⟩ ∈ trees ω $ by trees_intro_c [l46, l47, l51]
+l53: $ G ⇒ ra_eeqv ⟨ kc_quot_mk , scons A1 ∅ ⟩ ⟨ kc_quot_mk , scons A2 ∅ ⟩ ∈ latoms $ by g1_ra_eeqv [l50, l52]
+l54: $ G ⇒ ra_eeqv ⟨ kc_quot_mk , scons A1 ∅ ⟩ ⟨ kc_quot_mk , scons A2 ∅ ⟩ ∈ lrel2 $ by g1_horn [l43, l44, l53, l45]
 
-eeqv_quot_mk
-------------
-l1: $ _ ⇒ enc_lvl u ∈ trees ω $ by enc_lvl_trees
-l2: $ _ ⇒ enc_lvl u2 ∈ trees ω $ by enc_lvl_trees
-l3: $ _ ⇒ enc_expr (quot_mk u) = ⟨ kc_quot_mk , scons (enc_lvl u) ∅ ⟩ $ by eq_refl
-l4: $ _ ⇒ enc_expr (quot_mk u) ∈ trees ω $ by enc_expr_trees
-l5: $ _ ⇒ ⟨ kc_quot_mk , scons (enc_lvl u) ∅ ⟩ ∈ trees ω $ by wcel_eq_l [l3, l4]
-l6: $ _ ⇒ enc_expr (quot_mk u2) = ⟨ kc_quot_mk , scons (enc_lvl u2) ∅ ⟩ $ by eq_refl
-l7: $ _ ⇒ enc_expr (quot_mk u2) ∈ trees ω $ by enc_expr_trees
-l8: $ _ ⇒ ⟨ kc_quot_mk , scons (enc_lvl u2) ∅ ⟩ ∈ trees ω $ by wcel_eq_l [l6, l7]
-l9: $ _ ⇒ lveq (enc_lvl u) (enc_lvl u2) $ by leqv_lveq [#1]
-l10: $ _ ⇒ ra_eeqv ⟨ kc_quot_mk , scons (enc_lvl u) ∅ ⟩ ⟨ kc_quot_mk , scons (enc_lvl u2) ∅ ⟩ ∈ lrel2 $ by g1_c_eeqv_quot_mk [l1, l2, l5, l8, l9]
-l11: $ _ ⇒ ⟨ kc_quot_mk , scons (enc_lvl u) ∅ ⟩ = enc_expr (quot_mk u) $ by eq_refl
-l12: $ _ ⇒ ⟨ kc_quot_mk , scons (enc_lvl u2) ∅ ⟩ = enc_expr (quot_mk u2) $ by eq_refl
-l13: $ _ ⇒ ra_eeqv ⟨ kc_quot_mk , scons (enc_lvl u) ∅ ⟩ ⟨ kc_quot_mk , scons (enc_lvl u2) ∅ ⟩ = ra_eeqv (enc_expr (quot_mk u)) (enc_expr (quot_mk u2)) $ by ra_eeqv_eq [l11, l12]
-l14: $ eeqv (quot_mk u) (quot_mk u2) $ by wcel_eq_l [l13, l10]
-
-lemma g1_c_eeqv_quot_lift (G: hyps) (A1 A2 A3 A4: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ A3 ∈ trees ω $ >
-  $ G ⇒ A4 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_quot_lift , scons A1 (scons A2 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_quot_lift , scons A3 (scons A4 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ lveq A1 A3 $ >
-  $ G ⇒ lveq A2 A4 $ >
-  $ G ⇒ ra_eeqv ⟨ kc_quot_lift , scons A1 (scons A2 ∅) ⟩ ⟨ kc_quot_lift , scons A3 (scons A4 ∅) ⟩ ∈ lrel2 $
-----
+lrel2_eeqv_quot_lift
+--------------------
 l1: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ u = A3 $ by ax
 l4: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ v = A4 $ by ax
-l5: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ lveq A1 A3 $ by weaken [#7]
+l5: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ lveq A1 A3 $ by weaken [#5]
 l6: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ A1 = y $ by eq_sym [l1]
 l7: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ A3 = u $ by eq_sym [l3]
 l8: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ lveq y u $ by lveq_eq [l6, l7, l5]
-l9: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ lveq A2 A4 $ by weaken [#8]
+l9: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ lveq A2 A4 $ by weaken [#6]
 l10: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ A2 = z $ by eq_sym [l2]
 l11: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ A4 = v $ by eq_sym [l4]
 l12: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ lveq z v $ by lveq_eq [l10, l11, l9]
@@ -1437,40 +1191,23 @@ l59: $ G ⇒ ⟨ ∅ , ra_eeqv ⟨ kc_quot_lift , scons A1 (scons A2 ∅) ⟩ �
 l60: $ G ⇒ ⟨ ∅ , ra_eeqv ⟨ kc_quot_lift , scons A1 (scons A2 ∅) ⟩ ⟨ kc_quot_lift , scons A3 (scons A4 ∅) ⟩ ⟩ ∈ g1_top $ by g1_pr_eeqv [l59]
 l61: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l62: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l63: $ G ⇒ ra_eeqv ⟨ kc_quot_lift , scons A1 (scons A2 ∅) ⟩ ⟨ kc_quot_lift , scons A3 (scons A4 ∅) ⟩ ∈ latoms $ by g1_ra_eeqv [#5, #6]
-l64: $ G ⇒ ra_eeqv ⟨ kc_quot_lift , scons A1 (scons A2 ∅) ⟩ ⟨ kc_quot_lift , scons A3 (scons A4 ∅) ⟩ ∈ lrel2 $ by g1_horn [l60, l61, l63, l62]
+l63: $ G ⇒ isset ω $ by omega_set
+l64: $ G ⇒ kc_quot_lift ∈ ω $ by kc_quot_lift_omega
+l65: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l66: $ G ⇒ scons A2 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#2, l65]
+l67: $ G ⇒ scons A1 (scons A2 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l66]
+l68: $ G ⇒ ⟨ kc_quot_lift , scons A1 (scons A2 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l63, l64, l67]
+l69: $ G ⇒ scons A4 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#4, l65]
+l70: $ G ⇒ scons A3 (scons A4 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#3, l69]
+l71: $ G ⇒ ⟨ kc_quot_lift , scons A3 (scons A4 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l63, l64, l70]
+l72: $ G ⇒ ra_eeqv ⟨ kc_quot_lift , scons A1 (scons A2 ∅) ⟩ ⟨ kc_quot_lift , scons A3 (scons A4 ∅) ⟩ ∈ latoms $ by g1_ra_eeqv [l68, l71]
+l73: $ G ⇒ ra_eeqv ⟨ kc_quot_lift , scons A1 (scons A2 ∅) ⟩ ⟨ kc_quot_lift , scons A3 (scons A4 ∅) ⟩ ∈ lrel2 $ by g1_horn [l60, l61, l72, l62]
 
-eeqv_quot_lift
---------------
-l1: $ _ ⇒ enc_lvl u ∈ trees ω $ by enc_lvl_trees
-l2: $ _ ⇒ enc_lvl v ∈ trees ω $ by enc_lvl_trees
-l3: $ _ ⇒ enc_lvl u2 ∈ trees ω $ by enc_lvl_trees
-l4: $ _ ⇒ enc_lvl v2 ∈ trees ω $ by enc_lvl_trees
-l5: $ _ ⇒ enc_expr (quot_lift u v) = ⟨ kc_quot_lift , scons (enc_lvl u) (scons (enc_lvl v) ∅) ⟩ $ by eq_refl
-l6: $ _ ⇒ enc_expr (quot_lift u v) ∈ trees ω $ by enc_expr_trees
-l7: $ _ ⇒ ⟨ kc_quot_lift , scons (enc_lvl u) (scons (enc_lvl v) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l5, l6]
-l8: $ _ ⇒ enc_expr (quot_lift u2 v2) = ⟨ kc_quot_lift , scons (enc_lvl u2) (scons (enc_lvl v2) ∅) ⟩ $ by eq_refl
-l9: $ _ ⇒ enc_expr (quot_lift u2 v2) ∈ trees ω $ by enc_expr_trees
-l10: $ _ ⇒ ⟨ kc_quot_lift , scons (enc_lvl u2) (scons (enc_lvl v2) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l8, l9]
-l11: $ _ ⇒ lveq (enc_lvl u) (enc_lvl u2) $ by leqv_lveq [#1]
-l12: $ _ ⇒ lveq (enc_lvl v) (enc_lvl v2) $ by leqv_lveq [#2]
-l13: $ _ ⇒ ra_eeqv ⟨ kc_quot_lift , scons (enc_lvl u) (scons (enc_lvl v) ∅) ⟩ ⟨ kc_quot_lift , scons (enc_lvl u2) (scons (enc_lvl v2) ∅) ⟩ ∈ lrel2 $ by g1_c_eeqv_quot_lift [l1, l2, l3, l4, l7, l10, l11, l12]
-l14: $ _ ⇒ ⟨ kc_quot_lift , scons (enc_lvl u) (scons (enc_lvl v) ∅) ⟩ = enc_expr (quot_lift u v) $ by eq_refl
-l15: $ _ ⇒ ⟨ kc_quot_lift , scons (enc_lvl u2) (scons (enc_lvl v2) ∅) ⟩ = enc_expr (quot_lift u2 v2) $ by eq_refl
-l16: $ _ ⇒ ra_eeqv ⟨ kc_quot_lift , scons (enc_lvl u) (scons (enc_lvl v) ∅) ⟩ ⟨ kc_quot_lift , scons (enc_lvl u2) (scons (enc_lvl v2) ∅) ⟩ = ra_eeqv (enc_expr (quot_lift u v)) (enc_expr (quot_lift u2 v2)) $ by ra_eeqv_eq [l14, l15]
-l17: $ eeqv (quot_lift u v) (quot_lift u2 v2) $ by wcel_eq_l [l16, l13]
-
-lemma g1_c_eeqv_quot_ind (G: hyps) (A1 A2: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_quot_ind , scons A1 ∅ ⟩ ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_quot_ind , scons A2 ∅ ⟩ ∈ trees ω $ >
-  $ G ⇒ lveq A1 A2 $ >
-  $ G ⇒ ra_eeqv ⟨ kc_quot_ind , scons A1 ∅ ⟩ ⟨ kc_quot_ind , scons A2 ∅ ⟩ ∈ lrel2 $
-----
+lrel2_eeqv_quot_ind
+-------------------
 l1: $ G , y = A1 , z = A2 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 ⇒ z = A2 $ by ax
-l3: $ G , y = A1 , z = A2 ⇒ lveq A1 A2 $ by weaken [#5]
+l3: $ G , y = A1 , z = A2 ⇒ lveq A1 A2 $ by weaken [#3]
 l4: $ G , y = A1 , z = A2 ⇒ A1 = y $ by eq_sym [l1]
 l5: $ G , y = A1 , z = A2 ⇒ A2 = z $ by eq_sym [l2]
 l6: $ G , y = A1 , z = A2 ⇒ lveq y z $ by lveq_eq [l4, l5, l3]
@@ -1514,25 +1251,15 @@ l43: $ G ⇒ ⟨ ∅ , ra_eeqv ⟨ kc_quot_ind , scons A1 ∅ ⟩ ⟨ kc_quot_in
 l44: $ G ⇒ ⟨ ∅ , ra_eeqv ⟨ kc_quot_ind , scons A1 ∅ ⟩ ⟨ kc_quot_ind , scons A2 ∅ ⟩ ⟩ ∈ g1_top $ by g1_pr_eeqv [l43]
 l45: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l46: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l47: $ G ⇒ ra_eeqv ⟨ kc_quot_ind , scons A1 ∅ ⟩ ⟨ kc_quot_ind , scons A2 ∅ ⟩ ∈ latoms $ by g1_ra_eeqv [#3, #4]
-l48: $ G ⇒ ra_eeqv ⟨ kc_quot_ind , scons A1 ∅ ⟩ ⟨ kc_quot_ind , scons A2 ∅ ⟩ ∈ lrel2 $ by g1_horn [l44, l45, l47, l46]
-
-eeqv_quot_ind
--------------
-l1: $ _ ⇒ enc_lvl u ∈ trees ω $ by enc_lvl_trees
-l2: $ _ ⇒ enc_lvl u2 ∈ trees ω $ by enc_lvl_trees
-l3: $ _ ⇒ enc_expr (quot_ind u) = ⟨ kc_quot_ind , scons (enc_lvl u) ∅ ⟩ $ by eq_refl
-l4: $ _ ⇒ enc_expr (quot_ind u) ∈ trees ω $ by enc_expr_trees
-l5: $ _ ⇒ ⟨ kc_quot_ind , scons (enc_lvl u) ∅ ⟩ ∈ trees ω $ by wcel_eq_l [l3, l4]
-l6: $ _ ⇒ enc_expr (quot_ind u2) = ⟨ kc_quot_ind , scons (enc_lvl u2) ∅ ⟩ $ by eq_refl
-l7: $ _ ⇒ enc_expr (quot_ind u2) ∈ trees ω $ by enc_expr_trees
-l8: $ _ ⇒ ⟨ kc_quot_ind , scons (enc_lvl u2) ∅ ⟩ ∈ trees ω $ by wcel_eq_l [l6, l7]
-l9: $ _ ⇒ lveq (enc_lvl u) (enc_lvl u2) $ by leqv_lveq [#1]
-l10: $ _ ⇒ ra_eeqv ⟨ kc_quot_ind , scons (enc_lvl u) ∅ ⟩ ⟨ kc_quot_ind , scons (enc_lvl u2) ∅ ⟩ ∈ lrel2 $ by g1_c_eeqv_quot_ind [l1, l2, l5, l8, l9]
-l11: $ _ ⇒ ⟨ kc_quot_ind , scons (enc_lvl u) ∅ ⟩ = enc_expr (quot_ind u) $ by eq_refl
-l12: $ _ ⇒ ⟨ kc_quot_ind , scons (enc_lvl u2) ∅ ⟩ = enc_expr (quot_ind u2) $ by eq_refl
-l13: $ _ ⇒ ra_eeqv ⟨ kc_quot_ind , scons (enc_lvl u) ∅ ⟩ ⟨ kc_quot_ind , scons (enc_lvl u2) ∅ ⟩ = ra_eeqv (enc_expr (quot_ind u)) (enc_expr (quot_ind u2)) $ by ra_eeqv_eq [l11, l12]
-l14: $ eeqv (quot_ind u) (quot_ind u2) $ by wcel_eq_l [l13, l10]
+l47: $ G ⇒ isset ω $ by omega_set
+l48: $ G ⇒ kc_quot_ind ∈ ω $ by kc_quot_ind_omega
+l49: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l50: $ G ⇒ scons A1 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#1, l49]
+l51: $ G ⇒ ⟨ kc_quot_ind , scons A1 ∅ ⟩ ∈ trees ω $ by trees_intro_c [l47, l48, l50]
+l52: $ G ⇒ scons A2 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#2, l49]
+l53: $ G ⇒ ⟨ kc_quot_ind , scons A2 ∅ ⟩ ∈ trees ω $ by trees_intro_c [l47, l48, l52]
+l54: $ G ⇒ ra_eeqv ⟨ kc_quot_ind , scons A1 ∅ ⟩ ⟨ kc_quot_ind , scons A2 ∅ ⟩ ∈ latoms $ by g1_ra_eeqv [l51, l53]
+l55: $ G ⇒ ra_eeqv ⟨ kc_quot_ind , scons A1 ∅ ⟩ ⟨ kc_quot_ind , scons A2 ∅ ⟩ ∈ lrel2 $ by g1_horn [l44, l45, l54, l46]
 
 lemma g1_pr_ind_eqv (G: hyps) (X: class): $ G ⇒ X ∈ pr_ind_eqv $ > $ G ⇒ X ∈ g1_top $
 ----
@@ -1550,25 +1277,8 @@ l3: $ G ⇒ scons A1 (scons A2 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l
 l4: $ G ⇒ kr_ind_eqv ∈ ω $ by kr_ind_eqv_omega
 l5: $ G ⇒ ra_ind_eqv A1 A2 ∈ latoms $ by cxp_intro_c [l4, l3]
 
-lemma g1_c_ind_eqv_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ A3 ∈ trees ω $ >
-  $ G ⇒ A4 ∈ trees ω $ >
-  $ G ⇒ A5 ∈ trees ω $ >
-  $ G ⇒ A6 ∈ trees ω $ >
-  $ G ⇒ A7 ∈ trees ω $ >
-  $ G ⇒ A8 ∈ trees ω $ >
-  $ G ⇒ A9 ∈ trees ω $ >
-  $ G ⇒ ra_ceqv A4 A5 ∈ lrel2 $ >
-  $ G ⇒ ra_teqv A8 A9 ∈ lrel2 $ >
-  $ G ⇒ ra_ceqv A6 A7 ∈ lrel2 $ >
-  $ G ⇒ ra_ind_data A1 A3 A4 A8 ∈ lrel $ >
-  $ G ⇒ ra_ind_data A2 A3 A5 A9 ∈ lrel $ >
-  $ G ⇒ ra_ind_nested A1 A6 ∈ lrel $ >
-  $ G ⇒ ra_ind_nested A2 A7 ∈ lrel $ >
-  $ G ⇒ ra_ind_eqv A1 A2 ∈ lrel2 $
-----
+lrel2_ind_eqv_i
+---------------
 l1: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 ⇒ u = A3 $ by ax
@@ -1659,19 +1369,6 @@ l87: $ G ⇒ crn (scons (ra_ceqv A4 A5) (scons (ra_teqv A8 A9) (scons (ra_ceqv A
 l88: $ G ⇒ ra_ind_eqv A1 A2 ∈ latoms $ by g1_ra_ind_eqv [#1, #2]
 l89: $ G ⇒ ra_ind_eqv A1 A2 ∈ lrel2 $ by g1_horn [l76, l86, l88, l87]
 
-ind_eqv_i
----------
-l1: $ _ ⇒ enc_ind D ∈ trees ω $ by enc_ind_trees
-l2: $ _ ⇒ enc_ind D2 ∈ trees ω $ by enc_ind_trees
-l3: $ _ ⇒ enc_blk b ∈ trees ω $ by enc_blk_trees
-l4: $ _ ⇒ enc_ctx P ∈ trees ω $ by enc_ctx_trees
-l5: $ _ ⇒ enc_ctx P2 ∈ trees ω $ by enc_ctx_trees
-l6: $ _ ⇒ enc_ctx N ∈ trees ω $ by enc_ctx_trees
-l7: $ _ ⇒ enc_ctx N2 ∈ trees ω $ by enc_ctx_trees
-l8: $ _ ⇒ enc_tys T ∈ trees ω $ by enc_tys_trees
-l9: $ _ ⇒ enc_tys T2 ∈ trees ω $ by enc_tys_trees
-l10: $ ind_eqv D D2 $ by g1_c_ind_eqv_i [l1, l2, l3, l4, l5, l6, l7, l8, l9, #3, #4, #7, #1, #2, #5, #6]
-
 lemma g1_pr_ceqv (G: hyps) (X: class): $ G ⇒ X ∈ pr_ceqv $ > $ G ⇒ X ∈ g1_top $
 ----
 l1: $ G ⇒ X ∈ pr_ind_eqv ∪ pr_ceqv $ by g1_in_r [#1]
@@ -1688,10 +1385,8 @@ l3: $ G ⇒ scons A1 (scons A2 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l
 l4: $ G ⇒ kr_ceqv ∈ ω $ by kr_ceqv_omega
 l5: $ G ⇒ ra_ceqv A1 A2 ∈ latoms $ by cxp_intro_c [l4, l3]
 
-lemma g1_c_ceqv_nil (G: hyps):
-  $ G ⇒ ⟨ kc_nil , ∅ ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_ceqv ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ∈ lrel2 $
-----
+lrel2_ceqv_nil
+--------------
 l1: $ G , x = ⟨ ∅ , ra_ceqv ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ⟩ ⇒ x = ⟨ ∅ , ra_ceqv ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ⟩ $ by ax
 l2: $ G , x = ⟨ ∅ , ra_ceqv ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ⟩ ⇒ x ∊ cl_ceqv_nil $ by cab_intro [l1]
 l3: $ G , x = ⟨ ∅ , ra_ceqv ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ⟩ ⇒ ⟨ ∅ , ra_ceqv ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ⟩ ∈ cl_ceqv_nil $ by wcel_intro [l1, l2]
@@ -1701,30 +1396,15 @@ l6: $ G ⇒ ⟨ ∅ , ra_ceqv ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ⟩ ∈ 
 l7: $ G ⇒ ⟨ ∅ , ra_ceqv ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ⟩ ∈ g1_top $ by g1_pr_ceqv [l6]
 l8: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l9: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l10: $ G ⇒ ra_ceqv ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ∈ latoms $ by g1_ra_ceqv [#1, #1]
-l11: $ G ⇒ ra_ceqv ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ∈ lrel2 $ by g1_horn [l7, l8, l10, l9]
+l10: $ G ⇒ isset ω $ by omega_set
+l11: $ G ⇒ kc_nil ∈ ω $ by kc_nil_omega
+l12: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l13: $ G ⇒ ⟨ kc_nil , ∅ ⟩ ∈ trees ω $ by trees_intro_c [l10, l11, l12]
+l14: $ G ⇒ ra_ceqv ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ∈ latoms $ by g1_ra_ceqv [l13, l13]
+l15: $ G ⇒ ra_ceqv ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ∈ lrel2 $ by g1_horn [l7, l8, l14, l9]
 
-ceqv_nil
---------
-l1: $ _ ⇒ enc_ctx nil = ⟨ kc_nil , ∅ ⟩ $ by eq_refl
-l2: $ _ ⇒ enc_ctx nil ∈ trees ω $ by enc_ctx_trees
-l3: $ _ ⇒ ⟨ kc_nil , ∅ ⟩ ∈ trees ω $ by wcel_eq_l [l1, l2]
-l4: $ _ ⇒ ra_ceqv ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ∈ lrel2 $ by g1_c_ceqv_nil [l3]
-l5: $ _ ⇒ ⟨ kc_nil , ∅ ⟩ = enc_ctx nil $ by eq_refl
-l6: $ _ ⇒ ra_ceqv ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ = ra_ceqv (enc_ctx nil) (enc_ctx nil) $ by ra_ceqv_eq [l5, l5]
-l7: $ ceqv nil nil $ by wcel_eq_l [l6, l4]
-
-lemma g1_c_ceqv_cons (G: hyps) (A1 A2 A3 A4: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ A3 ∈ trees ω $ >
-  $ G ⇒ A4 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_cons , scons A1 (scons A3 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_cons , scons A2 (scons A4 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_eeqv A1 A2 ∈ lrel2 $ >
-  $ G ⇒ ra_ceqv A3 A4 ∈ lrel2 $ >
-  $ G ⇒ ra_ceqv ⟨ kc_cons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_cons , scons A2 (scons A4 ∅) ⟩ ∈ lrel2 $
-----
+lrel2_ceqv_cons
+---------------
 l1: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ u = A3 $ by ax
@@ -1765,32 +1445,23 @@ l37: $ G ⇒ ⟨ scons (ra_eeqv A1 A2) (scons (ra_ceqv A3 A4) ∅) , ra_ceqv ⟨
 l38: $ G ⇒ ⟨ scons (ra_eeqv A1 A2) (scons (ra_ceqv A3 A4) ∅) , ra_ceqv ⟨ kc_cons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_cons , scons A2 (scons A4 ∅) ⟩ ⟩ ∈ g1_top $ by g1_pr_ceqv [l37]
 l39: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l40: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l41: $ G ⇒ (ra_ceqv A3 A4) ∈ latoms $ by g1_lrel2_lat [#8]
+l41: $ G ⇒ (ra_ceqv A3 A4) ∈ latoms $ by g1_lrel2_lat [#6]
 l42: $ G ⇒ scons (ra_ceqv A3 A4) ∅ ∈ fseq latoms $ by scons_fseq_c [l41, l39]
-l43: $ G ⇒ crn (scons (ra_ceqv A3 A4) ∅) ⊆ lrel2 $ by crn_scons_sub [#8, l40]
-l44: $ G ⇒ (ra_eeqv A1 A2) ∈ latoms $ by g1_lrel2_lat [#7]
+l43: $ G ⇒ crn (scons (ra_ceqv A3 A4) ∅) ⊆ lrel2 $ by crn_scons_sub [#6, l40]
+l44: $ G ⇒ (ra_eeqv A1 A2) ∈ latoms $ by g1_lrel2_lat [#5]
 l45: $ G ⇒ scons (ra_eeqv A1 A2) (scons (ra_ceqv A3 A4) ∅) ∈ fseq latoms $ by scons_fseq_c [l44, l42]
-l46: $ G ⇒ crn (scons (ra_eeqv A1 A2) (scons (ra_ceqv A3 A4) ∅)) ⊆ lrel2 $ by crn_scons_sub [#7, l43]
-l47: $ G ⇒ ra_ceqv ⟨ kc_cons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_cons , scons A2 (scons A4 ∅) ⟩ ∈ latoms $ by g1_ra_ceqv [#5, #6]
-l48: $ G ⇒ ra_ceqv ⟨ kc_cons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_cons , scons A2 (scons A4 ∅) ⟩ ∈ lrel2 $ by g1_horn [l38, l45, l47, l46]
-
-ceqv_cons
----------
-l1: $ _ ⇒ enc_expr A ∈ trees ω $ by enc_expr_trees
-l2: $ _ ⇒ enc_expr A2 ∈ trees ω $ by enc_expr_trees
-l3: $ _ ⇒ enc_ctx G ∈ trees ω $ by enc_ctx_trees
-l4: $ _ ⇒ enc_ctx G2 ∈ trees ω $ by enc_ctx_trees
-l5: $ _ ⇒ enc_ctx (cons A G) = ⟨ kc_cons , scons (enc_expr A) (scons (enc_ctx G) ∅) ⟩ $ by eq_refl
-l6: $ _ ⇒ enc_ctx (cons A G) ∈ trees ω $ by enc_ctx_trees
-l7: $ _ ⇒ ⟨ kc_cons , scons (enc_expr A) (scons (enc_ctx G) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l5, l6]
-l8: $ _ ⇒ enc_ctx (cons A2 G2) = ⟨ kc_cons , scons (enc_expr A2) (scons (enc_ctx G2) ∅) ⟩ $ by eq_refl
-l9: $ _ ⇒ enc_ctx (cons A2 G2) ∈ trees ω $ by enc_ctx_trees
-l10: $ _ ⇒ ⟨ kc_cons , scons (enc_expr A2) (scons (enc_ctx G2) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l8, l9]
-l11: $ _ ⇒ ra_ceqv ⟨ kc_cons , scons (enc_expr A) (scons (enc_ctx G) ∅) ⟩ ⟨ kc_cons , scons (enc_expr A2) (scons (enc_ctx G2) ∅) ⟩ ∈ lrel2 $ by g1_c_ceqv_cons [l1, l2, l3, l4, l7, l10, #1, #2]
-l12: $ _ ⇒ ⟨ kc_cons , scons (enc_expr A) (scons (enc_ctx G) ∅) ⟩ = enc_ctx (cons A G) $ by eq_refl
-l13: $ _ ⇒ ⟨ kc_cons , scons (enc_expr A2) (scons (enc_ctx G2) ∅) ⟩ = enc_ctx (cons A2 G2) $ by eq_refl
-l14: $ _ ⇒ ra_ceqv ⟨ kc_cons , scons (enc_expr A) (scons (enc_ctx G) ∅) ⟩ ⟨ kc_cons , scons (enc_expr A2) (scons (enc_ctx G2) ∅) ⟩ = ra_ceqv (enc_ctx (cons A G)) (enc_ctx (cons A2 G2)) $ by ra_ceqv_eq [l12, l13]
-l15: $ ceqv (cons A G) (cons A2 G2) $ by wcel_eq_l [l14, l11]
+l46: $ G ⇒ crn (scons (ra_eeqv A1 A2) (scons (ra_ceqv A3 A4) ∅)) ⊆ lrel2 $ by crn_scons_sub [#5, l43]
+l47: $ G ⇒ isset ω $ by omega_set
+l48: $ G ⇒ kc_cons ∈ ω $ by kc_cons_omega
+l49: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l50: $ G ⇒ scons A3 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#3, l49]
+l51: $ G ⇒ scons A1 (scons A3 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l50]
+l52: $ G ⇒ ⟨ kc_cons , scons A1 (scons A3 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l47, l48, l51]
+l53: $ G ⇒ scons A4 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#4, l49]
+l54: $ G ⇒ scons A2 (scons A4 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#2, l53]
+l55: $ G ⇒ ⟨ kc_cons , scons A2 (scons A4 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l47, l48, l54]
+l56: $ G ⇒ ra_ceqv ⟨ kc_cons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_cons , scons A2 (scons A4 ∅) ⟩ ∈ latoms $ by g1_ra_ceqv [l52, l55]
+l57: $ G ⇒ ra_ceqv ⟨ kc_cons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_cons , scons A2 (scons A4 ∅) ⟩ ∈ lrel2 $ by g1_horn [l38, l45, l56, l46]
 
 lemma g1_pr_teqv (G: hyps) (X: class): $ G ⇒ X ∈ pr_teqv $ > $ G ⇒ X ∈ g1_top $
 ----
@@ -1808,10 +1479,8 @@ l3: $ G ⇒ scons A1 (scons A2 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l
 l4: $ G ⇒ kr_teqv ∈ ω $ by kr_teqv_omega
 l5: $ G ⇒ ra_teqv A1 A2 ∈ latoms $ by cxp_intro_c [l4, l3]
 
-lemma g1_c_teqv_nil (G: hyps):
-  $ G ⇒ ⟨ kc_tnil , ∅ ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_teqv ⟨ kc_tnil , ∅ ⟩ ⟨ kc_tnil , ∅ ⟩ ∈ lrel2 $
-----
+lrel2_teqv_nil
+--------------
 l1: $ G , x = ⟨ ∅ , ra_teqv ⟨ kc_tnil , ∅ ⟩ ⟨ kc_tnil , ∅ ⟩ ⟩ ⇒ x = ⟨ ∅ , ra_teqv ⟨ kc_tnil , ∅ ⟩ ⟨ kc_tnil , ∅ ⟩ ⟩ $ by ax
 l2: $ G , x = ⟨ ∅ , ra_teqv ⟨ kc_tnil , ∅ ⟩ ⟨ kc_tnil , ∅ ⟩ ⟩ ⇒ x ∊ cl_teqv_nil $ by cab_intro [l1]
 l3: $ G , x = ⟨ ∅ , ra_teqv ⟨ kc_tnil , ∅ ⟩ ⟨ kc_tnil , ∅ ⟩ ⟩ ⇒ ⟨ ∅ , ra_teqv ⟨ kc_tnil , ∅ ⟩ ⟨ kc_tnil , ∅ ⟩ ⟩ ∈ cl_teqv_nil $ by wcel_intro [l1, l2]
@@ -1821,33 +1490,15 @@ l6: $ G ⇒ ⟨ ∅ , ra_teqv ⟨ kc_tnil , ∅ ⟩ ⟨ kc_tnil , ∅ ⟩ ⟩ �
 l7: $ G ⇒ ⟨ ∅ , ra_teqv ⟨ kc_tnil , ∅ ⟩ ⟨ kc_tnil , ∅ ⟩ ⟩ ∈ g1_top $ by g1_pr_teqv [l6]
 l8: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l9: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l10: $ G ⇒ ra_teqv ⟨ kc_tnil , ∅ ⟩ ⟨ kc_tnil , ∅ ⟩ ∈ latoms $ by g1_ra_teqv [#1, #1]
-l11: $ G ⇒ ra_teqv ⟨ kc_tnil , ∅ ⟩ ⟨ kc_tnil , ∅ ⟩ ∈ lrel2 $ by g1_horn [l7, l8, l10, l9]
+l10: $ G ⇒ isset ω $ by omega_set
+l11: $ G ⇒ kc_tnil ∈ ω $ by kc_tnil_omega
+l12: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l13: $ G ⇒ ⟨ kc_tnil , ∅ ⟩ ∈ trees ω $ by trees_intro_c [l10, l11, l12]
+l14: $ G ⇒ ra_teqv ⟨ kc_tnil , ∅ ⟩ ⟨ kc_tnil , ∅ ⟩ ∈ latoms $ by g1_ra_teqv [l13, l13]
+l15: $ G ⇒ ra_teqv ⟨ kc_tnil , ∅ ⟩ ⟨ kc_tnil , ∅ ⟩ ∈ lrel2 $ by g1_horn [l7, l8, l14, l9]
 
-teqv_nil
---------
-l1: $ _ ⇒ enc_tys tnil = ⟨ kc_tnil , ∅ ⟩ $ by eq_refl
-l2: $ _ ⇒ enc_tys tnil ∈ trees ω $ by enc_tys_trees
-l3: $ _ ⇒ ⟨ kc_tnil , ∅ ⟩ ∈ trees ω $ by wcel_eq_l [l1, l2]
-l4: $ _ ⇒ ra_teqv ⟨ kc_tnil , ∅ ⟩ ⟨ kc_tnil , ∅ ⟩ ∈ lrel2 $ by g1_c_teqv_nil [l3]
-l5: $ _ ⇒ ⟨ kc_tnil , ∅ ⟩ = enc_tys tnil $ by eq_refl
-l6: $ _ ⇒ ra_teqv ⟨ kc_tnil , ∅ ⟩ ⟨ kc_tnil , ∅ ⟩ = ra_teqv (enc_tys tnil) (enc_tys tnil) $ by ra_teqv_eq [l5, l5]
-l7: $ teqv tnil tnil $ by wcel_eq_l [l6, l4]
-
-lemma g1_c_teqv_cons (G: hyps) (A1 A2 A3 A4 A5 A6: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ A3 ∈ trees ω $ >
-  $ G ⇒ A4 ∈ trees ω $ >
-  $ G ⇒ A5 ∈ trees ω $ >
-  $ G ⇒ A6 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_tcons , scons A1 (scons A3 (scons A5 ∅)) ⟩ ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_tcons , scons A2 (scons A4 (scons A6 ∅)) ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_eeqv A1 A2 ∈ lrel2 $ >
-  $ G ⇒ ra_cseqv A3 A4 ∈ lrel2 $ >
-  $ G ⇒ ra_teqv A5 A6 ∈ lrel2 $ >
-  $ G ⇒ ra_teqv ⟨ kc_tcons , scons A1 (scons A3 (scons A5 ∅)) ⟩ ⟨ kc_tcons , scons A2 (scons A4 (scons A6 ∅)) ⟩ ∈ lrel2 $
-----
+lrel2_teqv_cons
+---------------
 l1: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ u = A3 $ by ax
@@ -1900,37 +1551,28 @@ l49: $ G ⇒ ⟨ scons (ra_eeqv A1 A2) (scons (ra_cseqv A3 A4) (scons (ra_teqv A
 l50: $ G ⇒ ⟨ scons (ra_eeqv A1 A2) (scons (ra_cseqv A3 A4) (scons (ra_teqv A5 A6) ∅)) , ra_teqv ⟨ kc_tcons , scons A1 (scons A3 (scons A5 ∅)) ⟩ ⟨ kc_tcons , scons A2 (scons A4 (scons A6 ∅)) ⟩ ⟩ ∈ g1_top $ by g1_pr_teqv [l49]
 l51: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l52: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l53: $ G ⇒ (ra_teqv A5 A6) ∈ latoms $ by g1_lrel2_lat [#11]
+l53: $ G ⇒ (ra_teqv A5 A6) ∈ latoms $ by g1_lrel2_lat [#9]
 l54: $ G ⇒ scons (ra_teqv A5 A6) ∅ ∈ fseq latoms $ by scons_fseq_c [l53, l51]
-l55: $ G ⇒ crn (scons (ra_teqv A5 A6) ∅) ⊆ lrel2 $ by crn_scons_sub [#11, l52]
-l56: $ G ⇒ (ra_cseqv A3 A4) ∈ latoms $ by g1_lrel2_lat [#10]
+l55: $ G ⇒ crn (scons (ra_teqv A5 A6) ∅) ⊆ lrel2 $ by crn_scons_sub [#9, l52]
+l56: $ G ⇒ (ra_cseqv A3 A4) ∈ latoms $ by g1_lrel2_lat [#8]
 l57: $ G ⇒ scons (ra_cseqv A3 A4) (scons (ra_teqv A5 A6) ∅) ∈ fseq latoms $ by scons_fseq_c [l56, l54]
-l58: $ G ⇒ crn (scons (ra_cseqv A3 A4) (scons (ra_teqv A5 A6) ∅)) ⊆ lrel2 $ by crn_scons_sub [#10, l55]
-l59: $ G ⇒ (ra_eeqv A1 A2) ∈ latoms $ by g1_lrel2_lat [#9]
+l58: $ G ⇒ crn (scons (ra_cseqv A3 A4) (scons (ra_teqv A5 A6) ∅)) ⊆ lrel2 $ by crn_scons_sub [#8, l55]
+l59: $ G ⇒ (ra_eeqv A1 A2) ∈ latoms $ by g1_lrel2_lat [#7]
 l60: $ G ⇒ scons (ra_eeqv A1 A2) (scons (ra_cseqv A3 A4) (scons (ra_teqv A5 A6) ∅)) ∈ fseq latoms $ by scons_fseq_c [l59, l57]
-l61: $ G ⇒ crn (scons (ra_eeqv A1 A2) (scons (ra_cseqv A3 A4) (scons (ra_teqv A5 A6) ∅))) ⊆ lrel2 $ by crn_scons_sub [#9, l58]
-l62: $ G ⇒ ra_teqv ⟨ kc_tcons , scons A1 (scons A3 (scons A5 ∅)) ⟩ ⟨ kc_tcons , scons A2 (scons A4 (scons A6 ∅)) ⟩ ∈ latoms $ by g1_ra_teqv [#7, #8]
-l63: $ G ⇒ ra_teqv ⟨ kc_tcons , scons A1 (scons A3 (scons A5 ∅)) ⟩ ⟨ kc_tcons , scons A2 (scons A4 (scons A6 ∅)) ⟩ ∈ lrel2 $ by g1_horn [l50, l60, l62, l61]
-
-teqv_cons
----------
-l1: $ _ ⇒ enc_expr F ∈ trees ω $ by enc_expr_trees
-l2: $ _ ⇒ enc_expr F2 ∈ trees ω $ by enc_expr_trees
-l3: $ _ ⇒ enc_ctors C ∈ trees ω $ by enc_ctors_trees
-l4: $ _ ⇒ enc_ctors C2 ∈ trees ω $ by enc_ctors_trees
-l5: $ _ ⇒ enc_tys T ∈ trees ω $ by enc_tys_trees
-l6: $ _ ⇒ enc_tys T2 ∈ trees ω $ by enc_tys_trees
-l7: $ _ ⇒ enc_tys (tcons F C T) = ⟨ kc_tcons , scons (enc_expr F) (scons (enc_ctors C) (scons (enc_tys T) ∅)) ⟩ $ by eq_refl
-l8: $ _ ⇒ enc_tys (tcons F C T) ∈ trees ω $ by enc_tys_trees
-l9: $ _ ⇒ ⟨ kc_tcons , scons (enc_expr F) (scons (enc_ctors C) (scons (enc_tys T) ∅)) ⟩ ∈ trees ω $ by wcel_eq_l [l7, l8]
-l10: $ _ ⇒ enc_tys (tcons F2 C2 T2) = ⟨ kc_tcons , scons (enc_expr F2) (scons (enc_ctors C2) (scons (enc_tys T2) ∅)) ⟩ $ by eq_refl
-l11: $ _ ⇒ enc_tys (tcons F2 C2 T2) ∈ trees ω $ by enc_tys_trees
-l12: $ _ ⇒ ⟨ kc_tcons , scons (enc_expr F2) (scons (enc_ctors C2) (scons (enc_tys T2) ∅)) ⟩ ∈ trees ω $ by wcel_eq_l [l10, l11]
-l13: $ _ ⇒ ra_teqv ⟨ kc_tcons , scons (enc_expr F) (scons (enc_ctors C) (scons (enc_tys T) ∅)) ⟩ ⟨ kc_tcons , scons (enc_expr F2) (scons (enc_ctors C2) (scons (enc_tys T2) ∅)) ⟩ ∈ lrel2 $ by g1_c_teqv_cons [l1, l2, l3, l4, l5, l6, l9, l12, #1, #2, #3]
-l14: $ _ ⇒ ⟨ kc_tcons , scons (enc_expr F) (scons (enc_ctors C) (scons (enc_tys T) ∅)) ⟩ = enc_tys (tcons F C T) $ by eq_refl
-l15: $ _ ⇒ ⟨ kc_tcons , scons (enc_expr F2) (scons (enc_ctors C2) (scons (enc_tys T2) ∅)) ⟩ = enc_tys (tcons F2 C2 T2) $ by eq_refl
-l16: $ _ ⇒ ra_teqv ⟨ kc_tcons , scons (enc_expr F) (scons (enc_ctors C) (scons (enc_tys T) ∅)) ⟩ ⟨ kc_tcons , scons (enc_expr F2) (scons (enc_ctors C2) (scons (enc_tys T2) ∅)) ⟩ = ra_teqv (enc_tys (tcons F C T)) (enc_tys (tcons F2 C2 T2)) $ by ra_teqv_eq [l14, l15]
-l17: $ teqv (tcons F C T) (tcons F2 C2 T2) $ by wcel_eq_l [l16, l13]
+l61: $ G ⇒ crn (scons (ra_eeqv A1 A2) (scons (ra_cseqv A3 A4) (scons (ra_teqv A5 A6) ∅))) ⊆ lrel2 $ by crn_scons_sub [#7, l58]
+l62: $ G ⇒ isset ω $ by omega_set
+l63: $ G ⇒ kc_tcons ∈ ω $ by kc_tcons_omega
+l64: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l65: $ G ⇒ scons A5 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#5, l64]
+l66: $ G ⇒ scons A3 (scons A5 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#3, l65]
+l67: $ G ⇒ scons A1 (scons A3 (scons A5 ∅)) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l66]
+l68: $ G ⇒ ⟨ kc_tcons , scons A1 (scons A3 (scons A5 ∅)) ⟩ ∈ trees ω $ by trees_intro_c [l62, l63, l67]
+l69: $ G ⇒ scons A6 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#6, l64]
+l70: $ G ⇒ scons A4 (scons A6 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#4, l69]
+l71: $ G ⇒ scons A2 (scons A4 (scons A6 ∅)) ∈ fseq (trees ω) $ by scons_fseq_c [#2, l70]
+l72: $ G ⇒ ⟨ kc_tcons , scons A2 (scons A4 (scons A6 ∅)) ⟩ ∈ trees ω $ by trees_intro_c [l62, l63, l71]
+l73: $ G ⇒ ra_teqv ⟨ kc_tcons , scons A1 (scons A3 (scons A5 ∅)) ⟩ ⟨ kc_tcons , scons A2 (scons A4 (scons A6 ∅)) ⟩ ∈ latoms $ by g1_ra_teqv [l68, l72]
+l74: $ G ⇒ ra_teqv ⟨ kc_tcons , scons A1 (scons A3 (scons A5 ∅)) ⟩ ⟨ kc_tcons , scons A2 (scons A4 (scons A6 ∅)) ⟩ ∈ lrel2 $ by g1_horn [l50, l60, l73, l61]
 
 lemma g1_pr_cseqv (G: hyps) (X: class): $ G ⇒ X ∈ pr_cseqv $ > $ G ⇒ X ∈ g1_top $
 ----
@@ -1948,10 +1590,8 @@ l3: $ G ⇒ scons A1 (scons A2 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l
 l4: $ G ⇒ kr_cseqv ∈ ω $ by kr_cseqv_omega
 l5: $ G ⇒ ra_cseqv A1 A2 ∈ latoms $ by cxp_intro_c [l4, l3]
 
-lemma g1_c_cseqv_nil (G: hyps):
-  $ G ⇒ ⟨ kc_cnil , ∅ ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_cseqv ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ ∈ lrel2 $
-----
+lrel2_cseqv_nil
+---------------
 l1: $ G , x = ⟨ ∅ , ra_cseqv ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ ⟩ ⇒ x = ⟨ ∅ , ra_cseqv ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ ⟩ $ by ax
 l2: $ G , x = ⟨ ∅ , ra_cseqv ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ ⟩ ⇒ x ∊ cl_cseqv_nil $ by cab_intro [l1]
 l3: $ G , x = ⟨ ∅ , ra_cseqv ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ ⟩ ⇒ ⟨ ∅ , ra_cseqv ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ ⟩ ∈ cl_cseqv_nil $ by wcel_intro [l1, l2]
@@ -1961,30 +1601,15 @@ l6: $ G ⇒ ⟨ ∅ , ra_cseqv ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ ⟩ �
 l7: $ G ⇒ ⟨ ∅ , ra_cseqv ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ ⟩ ∈ g1_top $ by g1_pr_cseqv [l6]
 l8: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l9: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l10: $ G ⇒ ra_cseqv ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ ∈ latoms $ by g1_ra_cseqv [#1, #1]
-l11: $ G ⇒ ra_cseqv ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ ∈ lrel2 $ by g1_horn [l7, l8, l10, l9]
+l10: $ G ⇒ isset ω $ by omega_set
+l11: $ G ⇒ kc_cnil ∈ ω $ by kc_cnil_omega
+l12: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l13: $ G ⇒ ⟨ kc_cnil , ∅ ⟩ ∈ trees ω $ by trees_intro_c [l10, l11, l12]
+l14: $ G ⇒ ra_cseqv ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ ∈ latoms $ by g1_ra_cseqv [l13, l13]
+l15: $ G ⇒ ra_cseqv ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ ∈ lrel2 $ by g1_horn [l7, l8, l14, l9]
 
-cseqv_nil
----------
-l1: $ _ ⇒ enc_ctors cnil = ⟨ kc_cnil , ∅ ⟩ $ by eq_refl
-l2: $ _ ⇒ enc_ctors cnil ∈ trees ω $ by enc_ctors_trees
-l3: $ _ ⇒ ⟨ kc_cnil , ∅ ⟩ ∈ trees ω $ by wcel_eq_l [l1, l2]
-l4: $ _ ⇒ ra_cseqv ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ ∈ lrel2 $ by g1_c_cseqv_nil [l3]
-l5: $ _ ⇒ ⟨ kc_cnil , ∅ ⟩ = enc_ctors cnil $ by eq_refl
-l6: $ _ ⇒ ra_cseqv ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ = ra_cseqv (enc_ctors cnil) (enc_ctors cnil) $ by ra_cseqv_eq [l5, l5]
-l7: $ cseqv cnil cnil $ by wcel_eq_l [l6, l4]
-
-lemma g1_c_cseqv_cons (G: hyps) (A1 A2 A3 A4: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ A3 ∈ trees ω $ >
-  $ G ⇒ A4 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_ccons , scons A1 (scons A3 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_ccons , scons A2 (scons A4 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_eeqv A1 A2 ∈ lrel2 $ >
-  $ G ⇒ ra_cseqv A3 A4 ∈ lrel2 $ >
-  $ G ⇒ ra_cseqv ⟨ kc_ccons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_ccons , scons A2 (scons A4 ∅) ⟩ ∈ lrel2 $
-----
+lrel2_cseqv_cons
+----------------
 l1: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ u = A3 $ by ax
@@ -2025,32 +1650,23 @@ l37: $ G ⇒ ⟨ scons (ra_eeqv A1 A2) (scons (ra_cseqv A3 A4) ∅) , ra_cseqv �
 l38: $ G ⇒ ⟨ scons (ra_eeqv A1 A2) (scons (ra_cseqv A3 A4) ∅) , ra_cseqv ⟨ kc_ccons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_ccons , scons A2 (scons A4 ∅) ⟩ ⟩ ∈ g1_top $ by g1_pr_cseqv [l37]
 l39: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l40: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l41: $ G ⇒ (ra_cseqv A3 A4) ∈ latoms $ by g1_lrel2_lat [#8]
+l41: $ G ⇒ (ra_cseqv A3 A4) ∈ latoms $ by g1_lrel2_lat [#6]
 l42: $ G ⇒ scons (ra_cseqv A3 A4) ∅ ∈ fseq latoms $ by scons_fseq_c [l41, l39]
-l43: $ G ⇒ crn (scons (ra_cseqv A3 A4) ∅) ⊆ lrel2 $ by crn_scons_sub [#8, l40]
-l44: $ G ⇒ (ra_eeqv A1 A2) ∈ latoms $ by g1_lrel2_lat [#7]
+l43: $ G ⇒ crn (scons (ra_cseqv A3 A4) ∅) ⊆ lrel2 $ by crn_scons_sub [#6, l40]
+l44: $ G ⇒ (ra_eeqv A1 A2) ∈ latoms $ by g1_lrel2_lat [#5]
 l45: $ G ⇒ scons (ra_eeqv A1 A2) (scons (ra_cseqv A3 A4) ∅) ∈ fseq latoms $ by scons_fseq_c [l44, l42]
-l46: $ G ⇒ crn (scons (ra_eeqv A1 A2) (scons (ra_cseqv A3 A4) ∅)) ⊆ lrel2 $ by crn_scons_sub [#7, l43]
-l47: $ G ⇒ ra_cseqv ⟨ kc_ccons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_ccons , scons A2 (scons A4 ∅) ⟩ ∈ latoms $ by g1_ra_cseqv [#5, #6]
-l48: $ G ⇒ ra_cseqv ⟨ kc_ccons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_ccons , scons A2 (scons A4 ∅) ⟩ ∈ lrel2 $ by g1_horn [l38, l45, l47, l46]
-
-cseqv_cons
-----------
-l1: $ _ ⇒ enc_expr K ∈ trees ω $ by enc_expr_trees
-l2: $ _ ⇒ enc_expr K2 ∈ trees ω $ by enc_expr_trees
-l3: $ _ ⇒ enc_ctors C ∈ trees ω $ by enc_ctors_trees
-l4: $ _ ⇒ enc_ctors C2 ∈ trees ω $ by enc_ctors_trees
-l5: $ _ ⇒ enc_ctors (ccons K C) = ⟨ kc_ccons , scons (enc_expr K) (scons (enc_ctors C) ∅) ⟩ $ by eq_refl
-l6: $ _ ⇒ enc_ctors (ccons K C) ∈ trees ω $ by enc_ctors_trees
-l7: $ _ ⇒ ⟨ kc_ccons , scons (enc_expr K) (scons (enc_ctors C) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l5, l6]
-l8: $ _ ⇒ enc_ctors (ccons K2 C2) = ⟨ kc_ccons , scons (enc_expr K2) (scons (enc_ctors C2) ∅) ⟩ $ by eq_refl
-l9: $ _ ⇒ enc_ctors (ccons K2 C2) ∈ trees ω $ by enc_ctors_trees
-l10: $ _ ⇒ ⟨ kc_ccons , scons (enc_expr K2) (scons (enc_ctors C2) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l8, l9]
-l11: $ _ ⇒ ra_cseqv ⟨ kc_ccons , scons (enc_expr K) (scons (enc_ctors C) ∅) ⟩ ⟨ kc_ccons , scons (enc_expr K2) (scons (enc_ctors C2) ∅) ⟩ ∈ lrel2 $ by g1_c_cseqv_cons [l1, l2, l3, l4, l7, l10, #1, #2]
-l12: $ _ ⇒ ⟨ kc_ccons , scons (enc_expr K) (scons (enc_ctors C) ∅) ⟩ = enc_ctors (ccons K C) $ by eq_refl
-l13: $ _ ⇒ ⟨ kc_ccons , scons (enc_expr K2) (scons (enc_ctors C2) ∅) ⟩ = enc_ctors (ccons K2 C2) $ by eq_refl
-l14: $ _ ⇒ ra_cseqv ⟨ kc_ccons , scons (enc_expr K) (scons (enc_ctors C) ∅) ⟩ ⟨ kc_ccons , scons (enc_expr K2) (scons (enc_ctors C2) ∅) ⟩ = ra_cseqv (enc_ctors (ccons K C)) (enc_ctors (ccons K2 C2)) $ by ra_cseqv_eq [l12, l13]
-l15: $ cseqv (ccons K C) (ccons K2 C2) $ by wcel_eq_l [l14, l11]
+l46: $ G ⇒ crn (scons (ra_eeqv A1 A2) (scons (ra_cseqv A3 A4) ∅)) ⊆ lrel2 $ by crn_scons_sub [#5, l43]
+l47: $ G ⇒ isset ω $ by omega_set
+l48: $ G ⇒ kc_ccons ∈ ω $ by kc_ccons_omega
+l49: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l50: $ G ⇒ scons A3 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#3, l49]
+l51: $ G ⇒ scons A1 (scons A3 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l50]
+l52: $ G ⇒ ⟨ kc_ccons , scons A1 (scons A3 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l47, l48, l51]
+l53: $ G ⇒ scons A4 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#4, l49]
+l54: $ G ⇒ scons A2 (scons A4 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#2, l53]
+l55: $ G ⇒ ⟨ kc_ccons , scons A2 (scons A4 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l47, l48, l54]
+l56: $ G ⇒ ra_cseqv ⟨ kc_ccons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_ccons , scons A2 (scons A4 ∅) ⟩ ∈ latoms $ by g1_ra_cseqv [l52, l55]
+l57: $ G ⇒ ra_cseqv ⟨ kc_ccons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_ccons , scons A2 (scons A4 ∅) ⟩ ∈ lrel2 $ by g1_horn [l38, l45, l56, l46]
 
 lemma g1_pr_lseqv (G: hyps) (X: class): $ G ⇒ X ∈ pr_lseqv $ > $ G ⇒ X ∈ g1_top $
 ----
@@ -2068,10 +1684,8 @@ l3: $ G ⇒ scons A1 (scons A2 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l
 l4: $ G ⇒ kr_lseqv ∈ ω $ by kr_lseqv_omega
 l5: $ G ⇒ ra_lseqv A1 A2 ∈ latoms $ by cxp_intro_c [l4, l3]
 
-lemma g1_c_lseqv_nil (G: hyps):
-  $ G ⇒ ⟨ kc_lnil , ∅ ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_lseqv ⟨ kc_lnil , ∅ ⟩ ⟨ kc_lnil , ∅ ⟩ ∈ lrel2 $
-----
+lrel2_lseqv_nil
+---------------
 l1: $ G , x = ⟨ ∅ , ra_lseqv ⟨ kc_lnil , ∅ ⟩ ⟨ kc_lnil , ∅ ⟩ ⟩ ⇒ x = ⟨ ∅ , ra_lseqv ⟨ kc_lnil , ∅ ⟩ ⟨ kc_lnil , ∅ ⟩ ⟩ $ by ax
 l2: $ G , x = ⟨ ∅ , ra_lseqv ⟨ kc_lnil , ∅ ⟩ ⟨ kc_lnil , ∅ ⟩ ⟩ ⇒ x ∊ cl_lseqv_nil $ by cab_intro [l1]
 l3: $ G , x = ⟨ ∅ , ra_lseqv ⟨ kc_lnil , ∅ ⟩ ⟨ kc_lnil , ∅ ⟩ ⟩ ⇒ ⟨ ∅ , ra_lseqv ⟨ kc_lnil , ∅ ⟩ ⟨ kc_lnil , ∅ ⟩ ⟩ ∈ cl_lseqv_nil $ by wcel_intro [l1, l2]
@@ -2081,35 +1695,20 @@ l6: $ G ⇒ ⟨ ∅ , ra_lseqv ⟨ kc_lnil , ∅ ⟩ ⟨ kc_lnil , ∅ ⟩ ⟩ �
 l7: $ G ⇒ ⟨ ∅ , ra_lseqv ⟨ kc_lnil , ∅ ⟩ ⟨ kc_lnil , ∅ ⟩ ⟩ ∈ g1_top $ by g1_pr_lseqv [l6]
 l8: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l9: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l10: $ G ⇒ ra_lseqv ⟨ kc_lnil , ∅ ⟩ ⟨ kc_lnil , ∅ ⟩ ∈ latoms $ by g1_ra_lseqv [#1, #1]
-l11: $ G ⇒ ra_lseqv ⟨ kc_lnil , ∅ ⟩ ⟨ kc_lnil , ∅ ⟩ ∈ lrel2 $ by g1_horn [l7, l8, l10, l9]
+l10: $ G ⇒ isset ω $ by omega_set
+l11: $ G ⇒ kc_lnil ∈ ω $ by kc_lnil_omega
+l12: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l13: $ G ⇒ ⟨ kc_lnil , ∅ ⟩ ∈ trees ω $ by trees_intro_c [l10, l11, l12]
+l14: $ G ⇒ ra_lseqv ⟨ kc_lnil , ∅ ⟩ ⟨ kc_lnil , ∅ ⟩ ∈ latoms $ by g1_ra_lseqv [l13, l13]
+l15: $ G ⇒ ra_lseqv ⟨ kc_lnil , ∅ ⟩ ⟨ kc_lnil , ∅ ⟩ ∈ lrel2 $ by g1_horn [l7, l8, l14, l9]
 
-lseqv_nil
----------
-l1: $ _ ⇒ enc_lvls lnil = ⟨ kc_lnil , ∅ ⟩ $ by eq_refl
-l2: $ _ ⇒ enc_lvls lnil ∈ trees ω $ by enc_lvls_trees
-l3: $ _ ⇒ ⟨ kc_lnil , ∅ ⟩ ∈ trees ω $ by wcel_eq_l [l1, l2]
-l4: $ _ ⇒ ra_lseqv ⟨ kc_lnil , ∅ ⟩ ⟨ kc_lnil , ∅ ⟩ ∈ lrel2 $ by g1_c_lseqv_nil [l3]
-l5: $ _ ⇒ ⟨ kc_lnil , ∅ ⟩ = enc_lvls lnil $ by eq_refl
-l6: $ _ ⇒ ra_lseqv ⟨ kc_lnil , ∅ ⟩ ⟨ kc_lnil , ∅ ⟩ = ra_lseqv (enc_lvls lnil) (enc_lvls lnil) $ by ra_lseqv_eq [l5, l5]
-l7: $ lseqv lnil lnil $ by wcel_eq_l [l6, l4]
-
-lemma g1_c_lseqv_cons (G: hyps) (A1 A2 A3 A4: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ A3 ∈ trees ω $ >
-  $ G ⇒ A4 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_lcons , scons A1 (scons A3 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_lcons , scons A2 (scons A4 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_lseqv A3 A4 ∈ lrel2 $ >
-  $ G ⇒ lveq A1 A2 $ >
-  $ G ⇒ ra_lseqv ⟨ kc_lcons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_lcons , scons A2 (scons A4 ∅) ⟩ ∈ lrel2 $
-----
+lrel2_lseqv_cons
+----------------
 l1: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ u = A3 $ by ax
 l4: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ v = A4 $ by ax
-l5: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ lveq A1 A2 $ by weaken [#8]
+l5: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ lveq A1 A2 $ by weaken [#6]
 l6: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ A1 = y $ by eq_sym [l1]
 l7: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ A2 = z $ by eq_sym [l2]
 l8: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ lveq y z $ by lveq_eq [l6, l7, l5]
@@ -2149,30 +1748,20 @@ l41: $ G ⇒ ⟨ scons (ra_lseqv A3 A4) ∅ , ra_lseqv ⟨ kc_lcons , scons A1 (
 l42: $ G ⇒ ⟨ scons (ra_lseqv A3 A4) ∅ , ra_lseqv ⟨ kc_lcons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_lcons , scons A2 (scons A4 ∅) ⟩ ⟩ ∈ g1_top $ by g1_pr_lseqv [l41]
 l43: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l44: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l45: $ G ⇒ (ra_lseqv A3 A4) ∈ latoms $ by g1_lrel2_lat [#7]
+l45: $ G ⇒ (ra_lseqv A3 A4) ∈ latoms $ by g1_lrel2_lat [#5]
 l46: $ G ⇒ scons (ra_lseqv A3 A4) ∅ ∈ fseq latoms $ by scons_fseq_c [l45, l43]
-l47: $ G ⇒ crn (scons (ra_lseqv A3 A4) ∅) ⊆ lrel2 $ by crn_scons_sub [#7, l44]
-l48: $ G ⇒ ra_lseqv ⟨ kc_lcons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_lcons , scons A2 (scons A4 ∅) ⟩ ∈ latoms $ by g1_ra_lseqv [#5, #6]
-l49: $ G ⇒ ra_lseqv ⟨ kc_lcons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_lcons , scons A2 (scons A4 ∅) ⟩ ∈ lrel2 $ by g1_horn [l42, l46, l48, l47]
-
-lseqv_cons
-----------
-l1: $ _ ⇒ enc_lvl l ∈ trees ω $ by enc_lvl_trees
-l2: $ _ ⇒ enc_lvl l2 ∈ trees ω $ by enc_lvl_trees
-l3: $ _ ⇒ enc_lvls S ∈ trees ω $ by enc_lvls_trees
-l4: $ _ ⇒ enc_lvls S2 ∈ trees ω $ by enc_lvls_trees
-l5: $ _ ⇒ enc_lvls (lcons l S) = ⟨ kc_lcons , scons (enc_lvl l) (scons (enc_lvls S) ∅) ⟩ $ by eq_refl
-l6: $ _ ⇒ enc_lvls (lcons l S) ∈ trees ω $ by enc_lvls_trees
-l7: $ _ ⇒ ⟨ kc_lcons , scons (enc_lvl l) (scons (enc_lvls S) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l5, l6]
-l8: $ _ ⇒ enc_lvls (lcons l2 S2) = ⟨ kc_lcons , scons (enc_lvl l2) (scons (enc_lvls S2) ∅) ⟩ $ by eq_refl
-l9: $ _ ⇒ enc_lvls (lcons l2 S2) ∈ trees ω $ by enc_lvls_trees
-l10: $ _ ⇒ ⟨ kc_lcons , scons (enc_lvl l2) (scons (enc_lvls S2) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l8, l9]
-l11: $ _ ⇒ lveq (enc_lvl l) (enc_lvl l2) $ by leqv_lveq [#1]
-l12: $ _ ⇒ ra_lseqv ⟨ kc_lcons , scons (enc_lvl l) (scons (enc_lvls S) ∅) ⟩ ⟨ kc_lcons , scons (enc_lvl l2) (scons (enc_lvls S2) ∅) ⟩ ∈ lrel2 $ by g1_c_lseqv_cons [l1, l2, l3, l4, l7, l10, #2, l11]
-l13: $ _ ⇒ ⟨ kc_lcons , scons (enc_lvl l) (scons (enc_lvls S) ∅) ⟩ = enc_lvls (lcons l S) $ by eq_refl
-l14: $ _ ⇒ ⟨ kc_lcons , scons (enc_lvl l2) (scons (enc_lvls S2) ∅) ⟩ = enc_lvls (lcons l2 S2) $ by eq_refl
-l15: $ _ ⇒ ra_lseqv ⟨ kc_lcons , scons (enc_lvl l) (scons (enc_lvls S) ∅) ⟩ ⟨ kc_lcons , scons (enc_lvl l2) (scons (enc_lvls S2) ∅) ⟩ = ra_lseqv (enc_lvls (lcons l S)) (enc_lvls (lcons l2 S2)) $ by ra_lseqv_eq [l13, l14]
-l16: $ lseqv (lcons l S) (lcons l2 S2) $ by wcel_eq_l [l15, l12]
+l47: $ G ⇒ crn (scons (ra_lseqv A3 A4) ∅) ⊆ lrel2 $ by crn_scons_sub [#5, l44]
+l48: $ G ⇒ isset ω $ by omega_set
+l49: $ G ⇒ kc_lcons ∈ ω $ by kc_lcons_omega
+l50: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l51: $ G ⇒ scons A3 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#3, l50]
+l52: $ G ⇒ scons A1 (scons A3 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#1, l51]
+l53: $ G ⇒ ⟨ kc_lcons , scons A1 (scons A3 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l48, l49, l52]
+l54: $ G ⇒ scons A4 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#4, l50]
+l55: $ G ⇒ scons A2 (scons A4 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#2, l54]
+l56: $ G ⇒ ⟨ kc_lcons , scons A2 (scons A4 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l48, l49, l55]
+l57: $ G ⇒ ra_lseqv ⟨ kc_lcons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_lcons , scons A2 (scons A4 ∅) ⟩ ∈ latoms $ by g1_ra_lseqv [l53, l56]
+l58: $ G ⇒ ra_lseqv ⟨ kc_lcons , scons A1 (scons A3 ∅) ⟩ ⟨ kc_lcons , scons A2 (scons A4 ∅) ⟩ ∈ lrel2 $ by g1_horn [l42, l46, l57, l47]
 
 lemma g1_pr_nst_group (G: hyps) (X: class): $ G ⇒ X ∈ pr_nst_group $ > $ G ⇒ X ∈ g1_top $
 ----
@@ -2197,16 +1786,8 @@ l10: $ G ⇒ scons A1 (scons A2 (scons A3 (scons A4 (scons A5 (scons A6 (scons A
 l11: $ G ⇒ kr_nst_group ∈ ω $ by kr_nst_group_omega
 l12: $ G ⇒ ra_nst_group A1 A2 A3 A4 A5 A6 A7 A8 A9 ∈ latoms $ by cxp_intro_c [l11, l10]
 
-lemma g1_c_nst_group_done (G: hyps) (A1 A2 A3 A4 A5 A6 A7: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ A3 ∈ trees ω $ >
-  $ G ⇒ A4 ∈ trees ω $ >
-  $ G ⇒ A5 ∈ trees ω $ >
-  $ G ⇒ A6 ∈ trees ω $ >
-  $ G ⇒ A7 ∈ trees ω $ >
-  $ G ⇒ ra_nst_group A1 A2 A3 A4 A5 A6 A6 A7 A7 ∈ lrel2 $
-----
+lrel2_nst_group_done
+--------------------
 l1: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 ⇒ u = A3 $ by ax
@@ -2251,37 +1832,8 @@ l41: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
 l42: $ G ⇒ ra_nst_group A1 A2 A3 A4 A5 A6 A6 A7 A7 ∈ latoms $ by g1_ra_nst_group [#1, #2, #3, #4, #5, #6, #6, #7, #7]
 l43: $ G ⇒ ra_nst_group A1 A2 A3 A4 A5 A6 A6 A7 A7 ∈ lrel2 $ by g1_horn [l39, l40, l42, l41]
 
-nst_group_done
---------------
-l1: $ _ ⇒ enc_ctx G ∈ trees ω $ by enc_ctx_trees
-l2: $ _ ⇒ enc_ind D ∈ trees ω $ by enc_ind_trees
-l3: $ _ ⇒ enc_ind I ∈ trees ω $ by enc_ind_trees
-l4: $ _ ⇒ enc_expr X0 ∈ trees ω $ by enc_expr_trees
-l5: $ _ ⇒ enc_nat j ∈ trees ω $ by enc_nat_trees
-l6: $ _ ⇒ enc_nat ni ∈ trees ω $ by enc_nat_trees
-l7: $ _ ⇒ enc_ctx N ∈ trees ω $ by enc_ctx_trees
-l8: $ nst_group G D I X0 j ni ni N N $ by g1_c_nst_group_done [l1, l2, l3, l4, l5, l6, l7]
-
-lemma g1_c_nst_group_cons (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ A3 ∈ trees ω $ >
-  $ G ⇒ A4 ∈ trees ω $ >
-  $ G ⇒ A5 ∈ trees ω $ >
-  $ G ⇒ A6 ∈ trees ω $ >
-  $ G ⇒ A7 ∈ trees ω $ >
-  $ G ⇒ A8 ∈ trees ω $ >
-  $ G ⇒ A9 ∈ trees ω $ >
-  $ G ⇒ A10 ∈ trees ω $ >
-  $ G ⇒ A11 ∈ trees ω $ >
-  $ G ⇒ ⟨ kc_cons , scons A5 (scons A10 ∅) ⟩ ∈ trees ω $ >
-  $ G ⇒ ra_nst_group A1 A2 A3 A4 ⟨ kc_s , scons A6 ∅ ⟩ ⟨ kc_s , scons A7 ∅ ⟩ A8 A10 A11 ∈ lrel2 $ >
-  $ G ⇒ ra_le ⟨ kc_s , scons A7 ∅ ⟩ A8 ∈ lrel $ >
-  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons A3 (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ A4 A9 ∈ lrel $ >
-  $ G ⇒ ra_rehead ⟨ kc_ind_ty , scons A3 (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ ⟨ kc_ind_ty , scons A3 (scons A7 ∅) ⟩ A9 A4 A5 ∈ lrel $ >
-  $ G ⇒ ra_aux_data A2 A3 A5 A6 A7 ∈ lrel $ >
-  $ G ⇒ ra_nst_group A1 A2 A3 A4 A6 A7 A8 ⟨ kc_cons , scons A5 (scons A10 ∅) ⟩ A11 ∈ lrel2 $
-----
+lrel2_nst_group_cons
+--------------------
 l1: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ y = A1 $ by ax
 l2: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ z = A2 $ by ax
 l3: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ u = A3 $ by ax
@@ -2293,7 +1845,7 @@ l8: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 
 l9: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ f = A9 $ by ax
 l10: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ g = A10 $ by ax
 l11: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ i = A11 $ by ax
-l12: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_le ⟨ kc_s , scons A7 ∅ ⟩ A8 ∈ lrel $ by weaken [#14]
+l12: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_le ⟨ kc_s , scons A7 ∅ ⟩ A8 ∈ lrel $ by weaken [#13]
 l13: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ kc_s = kc_s $ by eq_refl
 l14: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ∅ = ∅ $ by eq_refl
 l15: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ scons b ∅ = scons A7 ∅ $ by scons_eq [l7, l14]
@@ -2301,7 +1853,7 @@ l16: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8
 l17: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_le ⟨ kc_s , scons b ∅ ⟩ c = ra_le ⟨ kc_s , scons A7 ∅ ⟩ A8 $ by ra_le_eq [l16, l8]
 l18: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_le ⟨ kc_s , scons A7 ∅ ⟩ A8 = ra_le ⟨ kc_s , scons b ∅ ⟩ c $ by eq_sym [l17]
 l19: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_le ⟨ kc_s , scons b ∅ ⟩ c ∈ lrel $ by wcel_eq_l [l18, l12]
-l20: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_spine ⟨ kc_ind_ty , scons A3 (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ A4 A9 ∈ lrel $ by weaken [#15]
+l20: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_spine ⟨ kc_ind_ty , scons A3 (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ A4 A9 ∈ lrel $ by weaken [#14]
 l21: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ kc_ind_ty = kc_ind_ty $ by eq_refl
 l22: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ scons ⟨ kc_nz , ∅ ⟩ ∅ = scons ⟨ kc_nz , ∅ ⟩ ∅ $ by eq_refl
 l23: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ scons u (scons ⟨ kc_nz , ∅ ⟩ ∅) = scons A3 (scons ⟨ kc_nz , ∅ ⟩ ∅) $ by scons_eq [l3, l22]
@@ -2309,13 +1861,13 @@ l24: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8
 l25: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_spine ⟨ kc_ind_ty , scons u (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ v f = ra_spine ⟨ kc_ind_ty , scons A3 (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ A4 A9 $ by ra_spine_eq [l24, l4, l9]
 l26: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_spine ⟨ kc_ind_ty , scons A3 (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ A4 A9 = ra_spine ⟨ kc_ind_ty , scons u (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ v f $ by eq_sym [l25]
 l27: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_spine ⟨ kc_ind_ty , scons u (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ v f ∈ lrel $ by wcel_eq_l [l26, l20]
-l28: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_rehead ⟨ kc_ind_ty , scons A3 (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ ⟨ kc_ind_ty , scons A3 (scons A7 ∅) ⟩ A9 A4 A5 ∈ lrel $ by weaken [#16]
+l28: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_rehead ⟨ kc_ind_ty , scons A3 (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ ⟨ kc_ind_ty , scons A3 (scons A7 ∅) ⟩ A9 A4 A5 ∈ lrel $ by weaken [#15]
 l29: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ scons u (scons b ∅) = scons A3 (scons A7 ∅) $ by scons_eq [l3, l15]
 l30: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ⟨ kc_ind_ty , scons u (scons b ∅) ⟩ = ⟨ kc_ind_ty , scons A3 (scons A7 ∅) ⟩ $ by opair_eq [l21, l29]
 l31: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_rehead ⟨ kc_ind_ty , scons u (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ ⟨ kc_ind_ty , scons u (scons b ∅) ⟩ f v w = ra_rehead ⟨ kc_ind_ty , scons A3 (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ ⟨ kc_ind_ty , scons A3 (scons A7 ∅) ⟩ A9 A4 A5 $ by ra_rehead_eq [l24, l30, l9, l4, l5]
 l32: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_rehead ⟨ kc_ind_ty , scons A3 (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ ⟨ kc_ind_ty , scons A3 (scons A7 ∅) ⟩ A9 A4 A5 = ra_rehead ⟨ kc_ind_ty , scons u (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ ⟨ kc_ind_ty , scons u (scons b ∅) ⟩ f v w $ by eq_sym [l31]
 l33: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_rehead ⟨ kc_ind_ty , scons u (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ ⟨ kc_ind_ty , scons u (scons b ∅) ⟩ f v w ∈ lrel $ by wcel_eq_l [l32, l28]
-l34: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_aux_data A2 A3 A5 A6 A7 ∈ lrel $ by weaken [#17]
+l34: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_aux_data A2 A3 A5 A6 A7 ∈ lrel $ by weaken [#16]
 l35: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_aux_data z u w a b = ra_aux_data A2 A3 A5 A6 A7 $ by ra_aux_data_eq [l2, l3, l5, l6, l7]
 l36: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_aux_data A2 A3 A5 A6 A7 = ra_aux_data z u w a b $ by eq_sym [l35]
 l37: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , b = A7 , c = A8 , f = A9 , g = A10 , i = A11 ⇒ ra_aux_data z u w a b ∈ lrel $ by wcel_eq_l [l36, l34]
@@ -2380,11 +1932,315 @@ l95: $ G ⇒ ⟨ scons (ra_nst_group A1 A2 A3 A4 ⟨ kc_s , scons A6 ∅ ⟩ ⟨
 l96: $ G ⇒ ⟨ scons (ra_nst_group A1 A2 A3 A4 ⟨ kc_s , scons A6 ∅ ⟩ ⟨ kc_s , scons A7 ∅ ⟩ A8 A10 A11) ∅ , ra_nst_group A1 A2 A3 A4 A6 A7 A8 ⟨ kc_cons , scons A5 (scons A10 ∅) ⟩ A11 ⟩ ∈ g1_top $ by g1_pr_nst_group [l95]
 l97: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
 l98: $ G ⇒ crn ∅ ⊆ lrel2 $ by crn_empty_sub
-l99: $ G ⇒ (ra_nst_group A1 A2 A3 A4 ⟨ kc_s , scons A6 ∅ ⟩ ⟨ kc_s , scons A7 ∅ ⟩ A8 A10 A11) ∈ latoms $ by g1_lrel2_lat [#13]
+l99: $ G ⇒ (ra_nst_group A1 A2 A3 A4 ⟨ kc_s , scons A6 ∅ ⟩ ⟨ kc_s , scons A7 ∅ ⟩ A8 A10 A11) ∈ latoms $ by g1_lrel2_lat [#12]
 l100: $ G ⇒ scons (ra_nst_group A1 A2 A3 A4 ⟨ kc_s , scons A6 ∅ ⟩ ⟨ kc_s , scons A7 ∅ ⟩ A8 A10 A11) ∅ ∈ fseq latoms $ by scons_fseq_c [l99, l97]
-l101: $ G ⇒ crn (scons (ra_nst_group A1 A2 A3 A4 ⟨ kc_s , scons A6 ∅ ⟩ ⟨ kc_s , scons A7 ∅ ⟩ A8 A10 A11) ∅) ⊆ lrel2 $ by crn_scons_sub [#13, l98]
-l102: $ G ⇒ ra_nst_group A1 A2 A3 A4 A6 A7 A8 ⟨ kc_cons , scons A5 (scons A10 ∅) ⟩ A11 ∈ latoms $ by g1_ra_nst_group [#1, #2, #3, #4, #6, #7, #8, #12, #11]
-l103: $ G ⇒ ra_nst_group A1 A2 A3 A4 A6 A7 A8 ⟨ kc_cons , scons A5 (scons A10 ∅) ⟩ A11 ∈ lrel2 $ by g1_horn [l96, l100, l102, l101]
+l101: $ G ⇒ crn (scons (ra_nst_group A1 A2 A3 A4 ⟨ kc_s , scons A6 ∅ ⟩ ⟨ kc_s , scons A7 ∅ ⟩ A8 A10 A11) ∅) ⊆ lrel2 $ by crn_scons_sub [#12, l98]
+l102: $ G ⇒ isset ω $ by omega_set
+l103: $ G ⇒ kc_cons ∈ ω $ by kc_cons_omega
+l104: $ G ⇒ ∅ ∈ fseq (trees ω) $ by fseq_empty
+l105: $ G ⇒ scons A10 ∅ ∈ fseq (trees ω) $ by scons_fseq_c [#10, l104]
+l106: $ G ⇒ scons A5 (scons A10 ∅) ∈ fseq (trees ω) $ by scons_fseq_c [#5, l105]
+l107: $ G ⇒ ⟨ kc_cons , scons A5 (scons A10 ∅) ⟩ ∈ trees ω $ by trees_intro_c [l102, l103, l106]
+l108: $ G ⇒ ra_nst_group A1 A2 A3 A4 A6 A7 A8 ⟨ kc_cons , scons A5 (scons A10 ∅) ⟩ A11 ∈ latoms $ by g1_ra_nst_group [#1, #2, #3, #4, #6, #7, #8, l107, #11]
+l109: $ G ⇒ ra_nst_group A1 A2 A3 A4 A6 A7 A8 ⟨ kc_cons , scons A5 (scons A10 ∅) ⟩ A11 ∈ lrel2 $ by g1_horn [l96, l100, l108, l101]
+
+ulevel_prop
+-----------
+l1: $ _ ⇒ enc_lvl l ∈ trees ω $ by enc_lvl_trees
+l2: $ _ ⇒ enc_lvl u ∈ trees ω $ by enc_lvl_trees
+l3: $ _ ⇒ lveq (enc_lvl l) (enc_lvl lz) $ by leqv_lveq [#1]
+l4: $ _ ⇒ enc_lvl l = enc_lvl l $ by eq_refl
+l5: $ _ ⇒ enc_lvl lz = ⟨ kc_lz , ∅ ⟩ $ by eq_refl
+l6: $ _ ⇒ lveq (enc_lvl l) ⟨ kc_lz , ∅ ⟩ $ by lveq_eq [l4, l5, l3]
+l7: $ ulevel l u $ by lrel2_ulevel_prop [l1, l2, l6]
+
+ulevel_le
+---------
+l1: $ _ ⇒ enc_lvl l ∈ trees ω $ by enc_lvl_trees
+l2: $ _ ⇒ enc_lvl u ∈ trees ω $ by enc_lvl_trees
+l3: $ _ ⇒ lveq (enc_lvl (lmax l u)) (enc_lvl l) $ by leqv_lveq [#1]
+l4: $ _ ⇒ enc_lvl (lmax l u) = ⟨ kc_lmax , scons (enc_lvl l) (scons (enc_lvl u) ∅) ⟩ $ by eq_refl
+l5: $ _ ⇒ enc_lvl l = enc_lvl l $ by eq_refl
+l6: $ _ ⇒ lveq ⟨ kc_lmax , scons (enc_lvl l) (scons (enc_lvl u) ∅) ⟩ (enc_lvl l) $ by lveq_eq [l4, l5, l3]
+l7: $ ulevel l u $ by lrel2_ulevel_le [l1, l2, l6]
+
+eeqv_refl
+---------
+l1: $ _ ⇒ enc_expr e ∈ trees ω $ by enc_expr_trees
+l2: $ eeqv e e $ by lrel2_eeqv_refl [l1]
+
+eeqv_bvar
+---------
+l1: $ _ ⇒ enc_nat i ∈ trees ω $ by enc_nat_trees
+l2: $ _ ⇒ ra_eeqv ⟨ kc_bvar , scons (enc_nat i) ∅ ⟩ ⟨ kc_bvar , scons (enc_nat i) ∅ ⟩ ∈ lrel2 $ by lrel2_eeqv_bvar [l1]
+l3: $ _ ⇒ ⟨ kc_bvar , scons (enc_nat i) ∅ ⟩ = enc_expr (bvar i) $ by eq_refl
+l4: $ _ ⇒ ra_eeqv ⟨ kc_bvar , scons (enc_nat i) ∅ ⟩ ⟨ kc_bvar , scons (enc_nat i) ∅ ⟩ = ra_eeqv (enc_expr (bvar i)) (enc_expr (bvar i)) $ by ra_eeqv_eq [l3, l3]
+l5: $ eeqv (bvar i) (bvar i) $ by wcel_eq_l [l4, l2]
+
+eeqv_srt
+--------
+l1: $ _ ⇒ enc_lvl l ∈ trees ω $ by enc_lvl_trees
+l2: $ _ ⇒ enc_lvl l2 ∈ trees ω $ by enc_lvl_trees
+l3: $ _ ⇒ lveq (enc_lvl l) (enc_lvl l2) $ by leqv_lveq [#1]
+l4: $ _ ⇒ ra_eeqv ⟨ kc_srt , scons (enc_lvl l) ∅ ⟩ ⟨ kc_srt , scons (enc_lvl l2) ∅ ⟩ ∈ lrel2 $ by lrel2_eeqv_srt [l1, l2, l3]
+l5: $ _ ⇒ ⟨ kc_srt , scons (enc_lvl l) ∅ ⟩ = enc_expr (srt l) $ by eq_refl
+l6: $ _ ⇒ ⟨ kc_srt , scons (enc_lvl l2) ∅ ⟩ = enc_expr (srt l2) $ by eq_refl
+l7: $ _ ⇒ ra_eeqv ⟨ kc_srt , scons (enc_lvl l) ∅ ⟩ ⟨ kc_srt , scons (enc_lvl l2) ∅ ⟩ = ra_eeqv (enc_expr (srt l)) (enc_expr (srt l2)) $ by ra_eeqv_eq [l5, l6]
+l8: $ eeqv (srt l) (srt l2) $ by wcel_eq_l [l7, l4]
+
+eeqv_app
+--------
+l1: $ _ ⇒ enc_expr f ∈ trees ω $ by enc_expr_trees
+l2: $ _ ⇒ enc_expr a ∈ trees ω $ by enc_expr_trees
+l3: $ _ ⇒ enc_expr f2 ∈ trees ω $ by enc_expr_trees
+l4: $ _ ⇒ enc_expr a2 ∈ trees ω $ by enc_expr_trees
+l5: $ _ ⇒ ra_eeqv ⟨ kc_app , scons (enc_expr f) (scons (enc_expr a) ∅) ⟩ ⟨ kc_app , scons (enc_expr f2) (scons (enc_expr a2) ∅) ⟩ ∈ lrel2 $ by lrel2_eeqv_app [l1, l2, l3, l4, #1, #2]
+l6: $ _ ⇒ ⟨ kc_app , scons (enc_expr f) (scons (enc_expr a) ∅) ⟩ = enc_expr (app f a) $ by eq_refl
+l7: $ _ ⇒ ⟨ kc_app , scons (enc_expr f2) (scons (enc_expr a2) ∅) ⟩ = enc_expr (app f2 a2) $ by eq_refl
+l8: $ _ ⇒ ra_eeqv ⟨ kc_app , scons (enc_expr f) (scons (enc_expr a) ∅) ⟩ ⟨ kc_app , scons (enc_expr f2) (scons (enc_expr a2) ∅) ⟩ = ra_eeqv (enc_expr (app f a)) (enc_expr (app f2 a2)) $ by ra_eeqv_eq [l6, l7]
+l9: $ eeqv (app f a) (app f2 a2) $ by wcel_eq_l [l8, l5]
+
+eeqv_lam
+--------
+l1: $ _ ⇒ enc_expr A ∈ trees ω $ by enc_expr_trees
+l2: $ _ ⇒ enc_expr b ∈ trees ω $ by enc_expr_trees
+l3: $ _ ⇒ enc_expr A2 ∈ trees ω $ by enc_expr_trees
+l4: $ _ ⇒ enc_expr b2 ∈ trees ω $ by enc_expr_trees
+l5: $ _ ⇒ ra_eeqv ⟨ kc_lam , scons (enc_expr A) (scons (enc_expr b) ∅) ⟩ ⟨ kc_lam , scons (enc_expr A2) (scons (enc_expr b2) ∅) ⟩ ∈ lrel2 $ by lrel2_eeqv_lam [l1, l2, l3, l4, #1, #2]
+l6: $ _ ⇒ ⟨ kc_lam , scons (enc_expr A) (scons (enc_expr b) ∅) ⟩ = enc_expr (lam A b) $ by eq_refl
+l7: $ _ ⇒ ⟨ kc_lam , scons (enc_expr A2) (scons (enc_expr b2) ∅) ⟩ = enc_expr (lam A2 b2) $ by eq_refl
+l8: $ _ ⇒ ra_eeqv ⟨ kc_lam , scons (enc_expr A) (scons (enc_expr b) ∅) ⟩ ⟨ kc_lam , scons (enc_expr A2) (scons (enc_expr b2) ∅) ⟩ = ra_eeqv (enc_expr (lam A b)) (enc_expr (lam A2 b2)) $ by ra_eeqv_eq [l6, l7]
+l9: $ eeqv (lam A b) (lam A2 b2) $ by wcel_eq_l [l8, l5]
+
+eeqv_pi
+-------
+l1: $ _ ⇒ enc_expr A ∈ trees ω $ by enc_expr_trees
+l2: $ _ ⇒ enc_expr b ∈ trees ω $ by enc_expr_trees
+l3: $ _ ⇒ enc_expr A2 ∈ trees ω $ by enc_expr_trees
+l4: $ _ ⇒ enc_expr b2 ∈ trees ω $ by enc_expr_trees
+l5: $ _ ⇒ ra_eeqv ⟨ kc_pi , scons (enc_expr A) (scons (enc_expr b) ∅) ⟩ ⟨ kc_pi , scons (enc_expr A2) (scons (enc_expr b2) ∅) ⟩ ∈ lrel2 $ by lrel2_eeqv_pi [l1, l2, l3, l4, #1, #2]
+l6: $ _ ⇒ ⟨ kc_pi , scons (enc_expr A) (scons (enc_expr b) ∅) ⟩ = enc_expr (pi A b) $ by eq_refl
+l7: $ _ ⇒ ⟨ kc_pi , scons (enc_expr A2) (scons (enc_expr b2) ∅) ⟩ = enc_expr (pi A2 b2) $ by eq_refl
+l8: $ _ ⇒ ra_eeqv ⟨ kc_pi , scons (enc_expr A) (scons (enc_expr b) ∅) ⟩ ⟨ kc_pi , scons (enc_expr A2) (scons (enc_expr b2) ∅) ⟩ = ra_eeqv (enc_expr (pi A b)) (enc_expr (pi A2 b2)) $ by ra_eeqv_eq [l6, l7]
+l9: $ eeqv (pi A b) (pi A2 b2) $ by wcel_eq_l [l8, l5]
+
+eeqv_lit
+--------
+l1: $ _ ⇒ enc_bin n ∈ trees ω $ by enc_bin_trees
+l2: $ _ ⇒ ra_eeqv ⟨ kc_lit , scons (enc_bin n) ∅ ⟩ ⟨ kc_lit , scons (enc_bin n) ∅ ⟩ ∈ lrel2 $ by lrel2_eeqv_lit [l1]
+l3: $ _ ⇒ ⟨ kc_lit , scons (enc_bin n) ∅ ⟩ = enc_expr (lit n) $ by eq_refl
+l4: $ _ ⇒ ra_eeqv ⟨ kc_lit , scons (enc_bin n) ∅ ⟩ ⟨ kc_lit , scons (enc_bin n) ∅ ⟩ = ra_eeqv (enc_expr (lit n)) (enc_expr (lit n)) $ by ra_eeqv_eq [l3, l3]
+l5: $ eeqv (lit n) (lit n) $ by wcel_eq_l [l4, l2]
+
+eeqv_cst
+--------
+l1: $ _ ⇒ enc_atom a ∈ trees ω $ by enc_atom_trees
+l2: $ _ ⇒ enc_lvls S ∈ trees ω $ by enc_lvls_trees
+l3: $ _ ⇒ enc_lvls S2 ∈ trees ω $ by enc_lvls_trees
+l4: $ _ ⇒ ra_eeqv ⟨ kc_cst , scons (enc_atom a) (scons (enc_lvls S) ∅) ⟩ ⟨ kc_cst , scons (enc_atom a) (scons (enc_lvls S2) ∅) ⟩ ∈ lrel2 $ by lrel2_eeqv_cst [l1, l2, l3, #1]
+l5: $ _ ⇒ ⟨ kc_cst , scons (enc_atom a) (scons (enc_lvls S) ∅) ⟩ = enc_expr (cst a S) $ by eq_refl
+l6: $ _ ⇒ ⟨ kc_cst , scons (enc_atom a) (scons (enc_lvls S2) ∅) ⟩ = enc_expr (cst a S2) $ by eq_refl
+l7: $ _ ⇒ ra_eeqv ⟨ kc_cst , scons (enc_atom a) (scons (enc_lvls S) ∅) ⟩ ⟨ kc_cst , scons (enc_atom a) (scons (enc_lvls S2) ∅) ⟩ = ra_eeqv (enc_expr (cst a S)) (enc_expr (cst a S2)) $ by ra_eeqv_eq [l5, l6]
+l8: $ eeqv (cst a S) (cst a S2) $ by wcel_eq_l [l7, l4]
+
+eeqv_ind_ty
+-----------
+l1: $ _ ⇒ enc_ind D ∈ trees ω $ by enc_ind_trees
+l2: $ _ ⇒ enc_ind D2 ∈ trees ω $ by enc_ind_trees
+l3: $ _ ⇒ enc_nat i ∈ trees ω $ by enc_nat_trees
+l4: $ _ ⇒ ra_eeqv ⟨ kc_ind_ty , scons (enc_ind D) (scons (enc_nat i) ∅) ⟩ ⟨ kc_ind_ty , scons (enc_ind D2) (scons (enc_nat i) ∅) ⟩ ∈ lrel2 $ by lrel2_eeqv_ind_ty [l1, l2, l3, #1]
+l5: $ _ ⇒ ⟨ kc_ind_ty , scons (enc_ind D) (scons (enc_nat i) ∅) ⟩ = enc_expr (ind_ty D i) $ by eq_refl
+l6: $ _ ⇒ ⟨ kc_ind_ty , scons (enc_ind D2) (scons (enc_nat i) ∅) ⟩ = enc_expr (ind_ty D2 i) $ by eq_refl
+l7: $ _ ⇒ ra_eeqv ⟨ kc_ind_ty , scons (enc_ind D) (scons (enc_nat i) ∅) ⟩ ⟨ kc_ind_ty , scons (enc_ind D2) (scons (enc_nat i) ∅) ⟩ = ra_eeqv (enc_expr (ind_ty D i)) (enc_expr (ind_ty D2 i)) $ by ra_eeqv_eq [l5, l6]
+l8: $ eeqv (ind_ty D i) (ind_ty D2 i) $ by wcel_eq_l [l7, l4]
+
+eeqv_ind_ctor
+-------------
+l1: $ _ ⇒ enc_ind D ∈ trees ω $ by enc_ind_trees
+l2: $ _ ⇒ enc_ind D2 ∈ trees ω $ by enc_ind_trees
+l3: $ _ ⇒ enc_nat i ∈ trees ω $ by enc_nat_trees
+l4: $ _ ⇒ enc_nat c ∈ trees ω $ by enc_nat_trees
+l5: $ _ ⇒ ra_eeqv ⟨ kc_ind_ctor , scons (enc_ind D) (scons (enc_nat i) (scons (enc_nat c) ∅)) ⟩ ⟨ kc_ind_ctor , scons (enc_ind D2) (scons (enc_nat i) (scons (enc_nat c) ∅)) ⟩ ∈ lrel2 $ by lrel2_eeqv_ind_ctor [l1, l2, l3, l4, #1]
+l6: $ _ ⇒ ⟨ kc_ind_ctor , scons (enc_ind D) (scons (enc_nat i) (scons (enc_nat c) ∅)) ⟩ = enc_expr (ind_ctor D i c) $ by eq_refl
+l7: $ _ ⇒ ⟨ kc_ind_ctor , scons (enc_ind D2) (scons (enc_nat i) (scons (enc_nat c) ∅)) ⟩ = enc_expr (ind_ctor D2 i c) $ by eq_refl
+l8: $ _ ⇒ ra_eeqv ⟨ kc_ind_ctor , scons (enc_ind D) (scons (enc_nat i) (scons (enc_nat c) ∅)) ⟩ ⟨ kc_ind_ctor , scons (enc_ind D2) (scons (enc_nat i) (scons (enc_nat c) ∅)) ⟩ = ra_eeqv (enc_expr (ind_ctor D i c)) (enc_expr (ind_ctor D2 i c)) $ by ra_eeqv_eq [l6, l7]
+l9: $ eeqv (ind_ctor D i c) (ind_ctor D2 i c) $ by wcel_eq_l [l8, l5]
+
+eeqv_ind_rec
+------------
+l1: $ _ ⇒ enc_ind D ∈ trees ω $ by enc_ind_trees
+l2: $ _ ⇒ enc_ind D2 ∈ trees ω $ by enc_ind_trees
+l3: $ _ ⇒ enc_nat i ∈ trees ω $ by enc_nat_trees
+l4: $ _ ⇒ enc_lvl v ∈ trees ω $ by enc_lvl_trees
+l5: $ _ ⇒ enc_lvl v2 ∈ trees ω $ by enc_lvl_trees
+l6: $ _ ⇒ lveq (enc_lvl v) (enc_lvl v2) $ by leqv_lveq [#2]
+l7: $ _ ⇒ ra_eeqv ⟨ kc_ind_rec , scons (enc_ind D) (scons (enc_nat i) (scons (enc_lvl v) ∅)) ⟩ ⟨ kc_ind_rec , scons (enc_ind D2) (scons (enc_nat i) (scons (enc_lvl v2) ∅)) ⟩ ∈ lrel2 $ by lrel2_eeqv_ind_rec [l1, l2, l3, l4, l5, #1, l6]
+l8: $ _ ⇒ ⟨ kc_ind_rec , scons (enc_ind D) (scons (enc_nat i) (scons (enc_lvl v) ∅)) ⟩ = enc_expr (ind_rec D i v) $ by eq_refl
+l9: $ _ ⇒ ⟨ kc_ind_rec , scons (enc_ind D2) (scons (enc_nat i) (scons (enc_lvl v2) ∅)) ⟩ = enc_expr (ind_rec D2 i v2) $ by eq_refl
+l10: $ _ ⇒ ra_eeqv ⟨ kc_ind_rec , scons (enc_ind D) (scons (enc_nat i) (scons (enc_lvl v) ∅)) ⟩ ⟨ kc_ind_rec , scons (enc_ind D2) (scons (enc_nat i) (scons (enc_lvl v2) ∅)) ⟩ = ra_eeqv (enc_expr (ind_rec D i v)) (enc_expr (ind_rec D2 i v2)) $ by ra_eeqv_eq [l8, l9]
+l11: $ eeqv (ind_rec D i v) (ind_rec D2 i v2) $ by wcel_eq_l [l10, l7]
+
+eeqv_proj
+---------
+l1: $ _ ⇒ enc_blk b ∈ trees ω $ by enc_blk_trees
+l2: $ _ ⇒ enc_nat i ∈ trees ω $ by enc_nat_trees
+l3: $ _ ⇒ enc_expr e ∈ trees ω $ by enc_expr_trees
+l4: $ _ ⇒ enc_expr e2 ∈ trees ω $ by enc_expr_trees
+l5: $ _ ⇒ ra_eeqv ⟨ kc_proj , scons (enc_blk b) (scons (enc_nat i) (scons (enc_expr e) ∅)) ⟩ ⟨ kc_proj , scons (enc_blk b) (scons (enc_nat i) (scons (enc_expr e2) ∅)) ⟩ ∈ lrel2 $ by lrel2_eeqv_proj [l1, l2, l3, l4, #1]
+l6: $ _ ⇒ ⟨ kc_proj , scons (enc_blk b) (scons (enc_nat i) (scons (enc_expr e) ∅)) ⟩ = enc_expr (proj b i e) $ by eq_refl
+l7: $ _ ⇒ ⟨ kc_proj , scons (enc_blk b) (scons (enc_nat i) (scons (enc_expr e2) ∅)) ⟩ = enc_expr (proj b i e2) $ by eq_refl
+l8: $ _ ⇒ ra_eeqv ⟨ kc_proj , scons (enc_blk b) (scons (enc_nat i) (scons (enc_expr e) ∅)) ⟩ ⟨ kc_proj , scons (enc_blk b) (scons (enc_nat i) (scons (enc_expr e2) ∅)) ⟩ = ra_eeqv (enc_expr (proj b i e)) (enc_expr (proj b i e2)) $ by ra_eeqv_eq [l6, l7]
+l9: $ eeqv (proj b i e) (proj b i e2) $ by wcel_eq_l [l8, l5]
+
+eeqv_quot
+---------
+l1: $ _ ⇒ enc_lvl u ∈ trees ω $ by enc_lvl_trees
+l2: $ _ ⇒ enc_lvl u2 ∈ trees ω $ by enc_lvl_trees
+l3: $ _ ⇒ lveq (enc_lvl u) (enc_lvl u2) $ by leqv_lveq [#1]
+l4: $ _ ⇒ ra_eeqv ⟨ kc_quot , scons (enc_lvl u) ∅ ⟩ ⟨ kc_quot , scons (enc_lvl u2) ∅ ⟩ ∈ lrel2 $ by lrel2_eeqv_quot [l1, l2, l3]
+l5: $ _ ⇒ ⟨ kc_quot , scons (enc_lvl u) ∅ ⟩ = enc_expr (quot u) $ by eq_refl
+l6: $ _ ⇒ ⟨ kc_quot , scons (enc_lvl u2) ∅ ⟩ = enc_expr (quot u2) $ by eq_refl
+l7: $ _ ⇒ ra_eeqv ⟨ kc_quot , scons (enc_lvl u) ∅ ⟩ ⟨ kc_quot , scons (enc_lvl u2) ∅ ⟩ = ra_eeqv (enc_expr (quot u)) (enc_expr (quot u2)) $ by ra_eeqv_eq [l5, l6]
+l8: $ eeqv (quot u) (quot u2) $ by wcel_eq_l [l7, l4]
+
+eeqv_quot_mk
+------------
+l1: $ _ ⇒ enc_lvl u ∈ trees ω $ by enc_lvl_trees
+l2: $ _ ⇒ enc_lvl u2 ∈ trees ω $ by enc_lvl_trees
+l3: $ _ ⇒ lveq (enc_lvl u) (enc_lvl u2) $ by leqv_lveq [#1]
+l4: $ _ ⇒ ra_eeqv ⟨ kc_quot_mk , scons (enc_lvl u) ∅ ⟩ ⟨ kc_quot_mk , scons (enc_lvl u2) ∅ ⟩ ∈ lrel2 $ by lrel2_eeqv_quot_mk [l1, l2, l3]
+l5: $ _ ⇒ ⟨ kc_quot_mk , scons (enc_lvl u) ∅ ⟩ = enc_expr (quot_mk u) $ by eq_refl
+l6: $ _ ⇒ ⟨ kc_quot_mk , scons (enc_lvl u2) ∅ ⟩ = enc_expr (quot_mk u2) $ by eq_refl
+l7: $ _ ⇒ ra_eeqv ⟨ kc_quot_mk , scons (enc_lvl u) ∅ ⟩ ⟨ kc_quot_mk , scons (enc_lvl u2) ∅ ⟩ = ra_eeqv (enc_expr (quot_mk u)) (enc_expr (quot_mk u2)) $ by ra_eeqv_eq [l5, l6]
+l8: $ eeqv (quot_mk u) (quot_mk u2) $ by wcel_eq_l [l7, l4]
+
+eeqv_quot_lift
+--------------
+l1: $ _ ⇒ enc_lvl u ∈ trees ω $ by enc_lvl_trees
+l2: $ _ ⇒ enc_lvl v ∈ trees ω $ by enc_lvl_trees
+l3: $ _ ⇒ enc_lvl u2 ∈ trees ω $ by enc_lvl_trees
+l4: $ _ ⇒ enc_lvl v2 ∈ trees ω $ by enc_lvl_trees
+l5: $ _ ⇒ lveq (enc_lvl u) (enc_lvl u2) $ by leqv_lveq [#1]
+l6: $ _ ⇒ lveq (enc_lvl v) (enc_lvl v2) $ by leqv_lveq [#2]
+l7: $ _ ⇒ ra_eeqv ⟨ kc_quot_lift , scons (enc_lvl u) (scons (enc_lvl v) ∅) ⟩ ⟨ kc_quot_lift , scons (enc_lvl u2) (scons (enc_lvl v2) ∅) ⟩ ∈ lrel2 $ by lrel2_eeqv_quot_lift [l1, l2, l3, l4, l5, l6]
+l8: $ _ ⇒ ⟨ kc_quot_lift , scons (enc_lvl u) (scons (enc_lvl v) ∅) ⟩ = enc_expr (quot_lift u v) $ by eq_refl
+l9: $ _ ⇒ ⟨ kc_quot_lift , scons (enc_lvl u2) (scons (enc_lvl v2) ∅) ⟩ = enc_expr (quot_lift u2 v2) $ by eq_refl
+l10: $ _ ⇒ ra_eeqv ⟨ kc_quot_lift , scons (enc_lvl u) (scons (enc_lvl v) ∅) ⟩ ⟨ kc_quot_lift , scons (enc_lvl u2) (scons (enc_lvl v2) ∅) ⟩ = ra_eeqv (enc_expr (quot_lift u v)) (enc_expr (quot_lift u2 v2)) $ by ra_eeqv_eq [l8, l9]
+l11: $ eeqv (quot_lift u v) (quot_lift u2 v2) $ by wcel_eq_l [l10, l7]
+
+eeqv_quot_ind
+-------------
+l1: $ _ ⇒ enc_lvl u ∈ trees ω $ by enc_lvl_trees
+l2: $ _ ⇒ enc_lvl u2 ∈ trees ω $ by enc_lvl_trees
+l3: $ _ ⇒ lveq (enc_lvl u) (enc_lvl u2) $ by leqv_lveq [#1]
+l4: $ _ ⇒ ra_eeqv ⟨ kc_quot_ind , scons (enc_lvl u) ∅ ⟩ ⟨ kc_quot_ind , scons (enc_lvl u2) ∅ ⟩ ∈ lrel2 $ by lrel2_eeqv_quot_ind [l1, l2, l3]
+l5: $ _ ⇒ ⟨ kc_quot_ind , scons (enc_lvl u) ∅ ⟩ = enc_expr (quot_ind u) $ by eq_refl
+l6: $ _ ⇒ ⟨ kc_quot_ind , scons (enc_lvl u2) ∅ ⟩ = enc_expr (quot_ind u2) $ by eq_refl
+l7: $ _ ⇒ ra_eeqv ⟨ kc_quot_ind , scons (enc_lvl u) ∅ ⟩ ⟨ kc_quot_ind , scons (enc_lvl u2) ∅ ⟩ = ra_eeqv (enc_expr (quot_ind u)) (enc_expr (quot_ind u2)) $ by ra_eeqv_eq [l5, l6]
+l8: $ eeqv (quot_ind u) (quot_ind u2) $ by wcel_eq_l [l7, l4]
+
+ind_eqv_i
+---------
+l1: $ _ ⇒ enc_ind D ∈ trees ω $ by enc_ind_trees
+l2: $ _ ⇒ enc_ind D2 ∈ trees ω $ by enc_ind_trees
+l3: $ _ ⇒ enc_blk b ∈ trees ω $ by enc_blk_trees
+l4: $ _ ⇒ enc_ctx P ∈ trees ω $ by enc_ctx_trees
+l5: $ _ ⇒ enc_ctx P2 ∈ trees ω $ by enc_ctx_trees
+l6: $ _ ⇒ enc_ctx N ∈ trees ω $ by enc_ctx_trees
+l7: $ _ ⇒ enc_ctx N2 ∈ trees ω $ by enc_ctx_trees
+l8: $ _ ⇒ enc_tys T ∈ trees ω $ by enc_tys_trees
+l9: $ _ ⇒ enc_tys T2 ∈ trees ω $ by enc_tys_trees
+l10: $ ind_eqv D D2 $ by lrel2_ind_eqv_i [l1, l2, l3, l4, l5, l6, l7, l8, l9, #3, #4, #7, #1, #2, #5, #6]
+
+ceqv_nil
+--------
+l1: $ _ ⇒ ra_ceqv ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ∈ lrel2 $ by lrel2_ceqv_nil []
+l2: $ _ ⇒ ⟨ kc_nil , ∅ ⟩ = enc_ctx nil $ by eq_refl
+l3: $ _ ⇒ ra_ceqv ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ = ra_ceqv (enc_ctx nil) (enc_ctx nil) $ by ra_ceqv_eq [l2, l2]
+l4: $ ceqv nil nil $ by wcel_eq_l [l3, l1]
+
+ceqv_cons
+---------
+l1: $ _ ⇒ enc_expr A ∈ trees ω $ by enc_expr_trees
+l2: $ _ ⇒ enc_expr A2 ∈ trees ω $ by enc_expr_trees
+l3: $ _ ⇒ enc_ctx G ∈ trees ω $ by enc_ctx_trees
+l4: $ _ ⇒ enc_ctx G2 ∈ trees ω $ by enc_ctx_trees
+l5: $ _ ⇒ ra_ceqv ⟨ kc_cons , scons (enc_expr A) (scons (enc_ctx G) ∅) ⟩ ⟨ kc_cons , scons (enc_expr A2) (scons (enc_ctx G2) ∅) ⟩ ∈ lrel2 $ by lrel2_ceqv_cons [l1, l2, l3, l4, #1, #2]
+l6: $ _ ⇒ ⟨ kc_cons , scons (enc_expr A) (scons (enc_ctx G) ∅) ⟩ = enc_ctx (cons A G) $ by eq_refl
+l7: $ _ ⇒ ⟨ kc_cons , scons (enc_expr A2) (scons (enc_ctx G2) ∅) ⟩ = enc_ctx (cons A2 G2) $ by eq_refl
+l8: $ _ ⇒ ra_ceqv ⟨ kc_cons , scons (enc_expr A) (scons (enc_ctx G) ∅) ⟩ ⟨ kc_cons , scons (enc_expr A2) (scons (enc_ctx G2) ∅) ⟩ = ra_ceqv (enc_ctx (cons A G)) (enc_ctx (cons A2 G2)) $ by ra_ceqv_eq [l6, l7]
+l9: $ ceqv (cons A G) (cons A2 G2) $ by wcel_eq_l [l8, l5]
+
+teqv_nil
+--------
+l1: $ _ ⇒ ra_teqv ⟨ kc_tnil , ∅ ⟩ ⟨ kc_tnil , ∅ ⟩ ∈ lrel2 $ by lrel2_teqv_nil []
+l2: $ _ ⇒ ⟨ kc_tnil , ∅ ⟩ = enc_tys tnil $ by eq_refl
+l3: $ _ ⇒ ra_teqv ⟨ kc_tnil , ∅ ⟩ ⟨ kc_tnil , ∅ ⟩ = ra_teqv (enc_tys tnil) (enc_tys tnil) $ by ra_teqv_eq [l2, l2]
+l4: $ teqv tnil tnil $ by wcel_eq_l [l3, l1]
+
+teqv_cons
+---------
+l1: $ _ ⇒ enc_expr F ∈ trees ω $ by enc_expr_trees
+l2: $ _ ⇒ enc_expr F2 ∈ trees ω $ by enc_expr_trees
+l3: $ _ ⇒ enc_ctors C ∈ trees ω $ by enc_ctors_trees
+l4: $ _ ⇒ enc_ctors C2 ∈ trees ω $ by enc_ctors_trees
+l5: $ _ ⇒ enc_tys T ∈ trees ω $ by enc_tys_trees
+l6: $ _ ⇒ enc_tys T2 ∈ trees ω $ by enc_tys_trees
+l7: $ _ ⇒ ra_teqv ⟨ kc_tcons , scons (enc_expr F) (scons (enc_ctors C) (scons (enc_tys T) ∅)) ⟩ ⟨ kc_tcons , scons (enc_expr F2) (scons (enc_ctors C2) (scons (enc_tys T2) ∅)) ⟩ ∈ lrel2 $ by lrel2_teqv_cons [l1, l2, l3, l4, l5, l6, #1, #2, #3]
+l8: $ _ ⇒ ⟨ kc_tcons , scons (enc_expr F) (scons (enc_ctors C) (scons (enc_tys T) ∅)) ⟩ = enc_tys (tcons F C T) $ by eq_refl
+l9: $ _ ⇒ ⟨ kc_tcons , scons (enc_expr F2) (scons (enc_ctors C2) (scons (enc_tys T2) ∅)) ⟩ = enc_tys (tcons F2 C2 T2) $ by eq_refl
+l10: $ _ ⇒ ra_teqv ⟨ kc_tcons , scons (enc_expr F) (scons (enc_ctors C) (scons (enc_tys T) ∅)) ⟩ ⟨ kc_tcons , scons (enc_expr F2) (scons (enc_ctors C2) (scons (enc_tys T2) ∅)) ⟩ = ra_teqv (enc_tys (tcons F C T)) (enc_tys (tcons F2 C2 T2)) $ by ra_teqv_eq [l8, l9]
+l11: $ teqv (tcons F C T) (tcons F2 C2 T2) $ by wcel_eq_l [l10, l7]
+
+cseqv_nil
+---------
+l1: $ _ ⇒ ra_cseqv ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ ∈ lrel2 $ by lrel2_cseqv_nil []
+l2: $ _ ⇒ ⟨ kc_cnil , ∅ ⟩ = enc_ctors cnil $ by eq_refl
+l3: $ _ ⇒ ra_cseqv ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ = ra_cseqv (enc_ctors cnil) (enc_ctors cnil) $ by ra_cseqv_eq [l2, l2]
+l4: $ cseqv cnil cnil $ by wcel_eq_l [l3, l1]
+
+cseqv_cons
+----------
+l1: $ _ ⇒ enc_expr K ∈ trees ω $ by enc_expr_trees
+l2: $ _ ⇒ enc_expr K2 ∈ trees ω $ by enc_expr_trees
+l3: $ _ ⇒ enc_ctors C ∈ trees ω $ by enc_ctors_trees
+l4: $ _ ⇒ enc_ctors C2 ∈ trees ω $ by enc_ctors_trees
+l5: $ _ ⇒ ra_cseqv ⟨ kc_ccons , scons (enc_expr K) (scons (enc_ctors C) ∅) ⟩ ⟨ kc_ccons , scons (enc_expr K2) (scons (enc_ctors C2) ∅) ⟩ ∈ lrel2 $ by lrel2_cseqv_cons [l1, l2, l3, l4, #1, #2]
+l6: $ _ ⇒ ⟨ kc_ccons , scons (enc_expr K) (scons (enc_ctors C) ∅) ⟩ = enc_ctors (ccons K C) $ by eq_refl
+l7: $ _ ⇒ ⟨ kc_ccons , scons (enc_expr K2) (scons (enc_ctors C2) ∅) ⟩ = enc_ctors (ccons K2 C2) $ by eq_refl
+l8: $ _ ⇒ ra_cseqv ⟨ kc_ccons , scons (enc_expr K) (scons (enc_ctors C) ∅) ⟩ ⟨ kc_ccons , scons (enc_expr K2) (scons (enc_ctors C2) ∅) ⟩ = ra_cseqv (enc_ctors (ccons K C)) (enc_ctors (ccons K2 C2)) $ by ra_cseqv_eq [l6, l7]
+l9: $ cseqv (ccons K C) (ccons K2 C2) $ by wcel_eq_l [l8, l5]
+
+lseqv_nil
+---------
+l1: $ _ ⇒ ra_lseqv ⟨ kc_lnil , ∅ ⟩ ⟨ kc_lnil , ∅ ⟩ ∈ lrel2 $ by lrel2_lseqv_nil []
+l2: $ _ ⇒ ⟨ kc_lnil , ∅ ⟩ = enc_lvls lnil $ by eq_refl
+l3: $ _ ⇒ ra_lseqv ⟨ kc_lnil , ∅ ⟩ ⟨ kc_lnil , ∅ ⟩ = ra_lseqv (enc_lvls lnil) (enc_lvls lnil) $ by ra_lseqv_eq [l2, l2]
+l4: $ lseqv lnil lnil $ by wcel_eq_l [l3, l1]
+
+lseqv_cons
+----------
+l1: $ _ ⇒ enc_lvl l ∈ trees ω $ by enc_lvl_trees
+l2: $ _ ⇒ enc_lvl l2 ∈ trees ω $ by enc_lvl_trees
+l3: $ _ ⇒ enc_lvls S ∈ trees ω $ by enc_lvls_trees
+l4: $ _ ⇒ enc_lvls S2 ∈ trees ω $ by enc_lvls_trees
+l5: $ _ ⇒ lveq (enc_lvl l) (enc_lvl l2) $ by leqv_lveq [#1]
+l6: $ _ ⇒ ra_lseqv ⟨ kc_lcons , scons (enc_lvl l) (scons (enc_lvls S) ∅) ⟩ ⟨ kc_lcons , scons (enc_lvl l2) (scons (enc_lvls S2) ∅) ⟩ ∈ lrel2 $ by lrel2_lseqv_cons [l1, l2, l3, l4, #2, l5]
+l7: $ _ ⇒ ⟨ kc_lcons , scons (enc_lvl l) (scons (enc_lvls S) ∅) ⟩ = enc_lvls (lcons l S) $ by eq_refl
+l8: $ _ ⇒ ⟨ kc_lcons , scons (enc_lvl l2) (scons (enc_lvls S2) ∅) ⟩ = enc_lvls (lcons l2 S2) $ by eq_refl
+l9: $ _ ⇒ ra_lseqv ⟨ kc_lcons , scons (enc_lvl l) (scons (enc_lvls S) ∅) ⟩ ⟨ kc_lcons , scons (enc_lvl l2) (scons (enc_lvls S2) ∅) ⟩ = ra_lseqv (enc_lvls (lcons l S)) (enc_lvls (lcons l2 S2)) $ by ra_lseqv_eq [l7, l8]
+l10: $ lseqv (lcons l S) (lcons l2 S2) $ by wcel_eq_l [l9, l6]
+
+nst_group_done
+--------------
+l1: $ _ ⇒ enc_ctx G ∈ trees ω $ by enc_ctx_trees
+l2: $ _ ⇒ enc_ind D ∈ trees ω $ by enc_ind_trees
+l3: $ _ ⇒ enc_ind I ∈ trees ω $ by enc_ind_trees
+l4: $ _ ⇒ enc_expr X0 ∈ trees ω $ by enc_expr_trees
+l5: $ _ ⇒ enc_nat j ∈ trees ω $ by enc_nat_trees
+l6: $ _ ⇒ enc_nat ni ∈ trees ω $ by enc_nat_trees
+l7: $ _ ⇒ enc_ctx N ∈ trees ω $ by enc_ctx_trees
+l8: $ nst_group G D I X0 j ni ni N N $ by lrel2_nst_group_done [l1, l2, l3, l4, l5, l6, l7]
 
 nst_group_cons
 --------------
@@ -2399,42 +2255,39 @@ l8: $ _ ⇒ enc_nat ni ∈ trees ω $ by enc_nat_trees
 l9: $ _ ⇒ enc_nat npi ∈ trees ω $ by enc_nat_trees
 l10: $ _ ⇒ enc_ctx N ∈ trees ω $ by enc_ctx_trees
 l11: $ _ ⇒ enc_ctx N2 ∈ trees ω $ by enc_ctx_trees
-l12: $ _ ⇒ enc_ctx (cons X N) = ⟨ kc_cons , scons (enc_expr X) (scons (enc_ctx N) ∅) ⟩ $ by eq_refl
-l13: $ _ ⇒ enc_ctx (cons X N) ∈ trees ω $ by enc_ctx_trees
-l14: $ _ ⇒ ⟨ kc_cons , scons (enc_expr X) (scons (enc_ctx N) ∅) ⟩ ∈ trees ω $ by wcel_eq_l [l12, l13]
-l15: $ _ ⇒ enc_ctx G = enc_ctx G $ by eq_refl
-l16: $ _ ⇒ enc_ind D = enc_ind D $ by eq_refl
-l17: $ _ ⇒ enc_ind I = enc_ind I $ by eq_refl
-l18: $ _ ⇒ enc_expr X0 = enc_expr X0 $ by eq_refl
-l19: $ _ ⇒ enc_nat (s j) = ⟨ kc_s , scons (enc_nat j) ∅ ⟩ $ by eq_refl
-l20: $ _ ⇒ enc_nat (s i) = ⟨ kc_s , scons (enc_nat i) ∅ ⟩ $ by eq_refl
-l21: $ _ ⇒ enc_nat ni = enc_nat ni $ by eq_refl
-l22: $ _ ⇒ enc_ctx N = enc_ctx N $ by eq_refl
-l23: $ _ ⇒ enc_ctx N2 = enc_ctx N2 $ by eq_refl
-l24: $ _ ⇒ ra_nst_group (enc_ctx G) (enc_ind D) (enc_ind I) (enc_expr X0) (enc_nat (s j)) (enc_nat (s i)) (enc_nat ni) (enc_ctx N) (enc_ctx N2) = ra_nst_group (enc_ctx G) (enc_ind D) (enc_ind I) (enc_expr X0) ⟨ kc_s , scons (enc_nat j) ∅ ⟩ ⟨ kc_s , scons (enc_nat i) ∅ ⟩ (enc_nat ni) (enc_ctx N) (enc_ctx N2) $ by ra_nst_group_eq [l15, l16, l17, l18, l19, l20, l21, l22, l23]
-l25: $ _ ⇒ ra_nst_group (enc_ctx G) (enc_ind D) (enc_ind I) (enc_expr X0) ⟨ kc_s , scons (enc_nat j) ∅ ⟩ ⟨ kc_s , scons (enc_nat i) ∅ ⟩ (enc_nat ni) (enc_ctx N) (enc_ctx N2) ∈ lrel2 $ by wcel_eq_l [l24, #5]
-l26: $ _ ⇒ ra_le (enc_nat (s i)) (enc_nat ni) = ra_le ⟨ kc_s , scons (enc_nat i) ∅ ⟩ (enc_nat ni) $ by ra_le_eq [l20, l21]
-l27: $ _ ⇒ ra_le ⟨ kc_s , scons (enc_nat i) ∅ ⟩ (enc_nat ni) ∈ lrel $ by wcel_eq_l [l26, #1]
-l28: $ _ ⇒ enc_expr (ind_ty I nz) = ⟨ kc_ind_ty , scons (enc_ind I) (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ $ by eq_refl
-l29: $ _ ⇒ enc_nat npi = enc_nat npi $ by eq_refl
-l30: $ _ ⇒ ra_spine (enc_expr (ind_ty I nz)) (enc_expr X0) (enc_nat npi) = ra_spine ⟨ kc_ind_ty , scons (enc_ind I) (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ (enc_expr X0) (enc_nat npi) $ by ra_spine_eq [l28, l18, l29]
-l31: $ _ ⇒ ra_spine ⟨ kc_ind_ty , scons (enc_ind I) (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ (enc_expr X0) (enc_nat npi) ∈ lrel $ by wcel_eq_l [l30, #2]
-l32: $ _ ⇒ enc_expr (ind_ty I i) = ⟨ kc_ind_ty , scons (enc_ind I) (scons (enc_nat i) ∅) ⟩ $ by eq_refl
-l33: $ _ ⇒ enc_expr X = enc_expr X $ by eq_refl
-l34: $ _ ⇒ ra_rehead (enc_expr (ind_ty I nz)) (enc_expr (ind_ty I i)) (enc_nat npi) (enc_expr X0) (enc_expr X) = ra_rehead ⟨ kc_ind_ty , scons (enc_ind I) (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ ⟨ kc_ind_ty , scons (enc_ind I) (scons (enc_nat i) ∅) ⟩ (enc_nat npi) (enc_expr X0) (enc_expr X) $ by ra_rehead_eq [l28, l32, l29, l18, l33]
-l35: $ _ ⇒ ra_rehead ⟨ kc_ind_ty , scons (enc_ind I) (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ ⟨ kc_ind_ty , scons (enc_ind I) (scons (enc_nat i) ∅) ⟩ (enc_nat npi) (enc_expr X0) (enc_expr X) ∈ lrel $ by wcel_eq_l [l34, #3]
-l36: $ _ ⇒ ra_nst_group (enc_ctx G) (enc_ind D) (enc_ind I) (enc_expr X0) (enc_nat j) (enc_nat i) (enc_nat ni) ⟨ kc_cons , scons (enc_expr X) (scons (enc_ctx N) ∅) ⟩ (enc_ctx N2) ∈ lrel2 $ by g1_c_nst_group_cons [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l14, l25, l27, l31, l35, #4]
-l37: $ _ ⇒ enc_ctx G = enc_ctx G $ by eq_refl
-l38: $ _ ⇒ enc_ind D = enc_ind D $ by eq_refl
-l39: $ _ ⇒ enc_ind I = enc_ind I $ by eq_refl
-l40: $ _ ⇒ enc_expr X0 = enc_expr X0 $ by eq_refl
-l41: $ _ ⇒ enc_nat j = enc_nat j $ by eq_refl
-l42: $ _ ⇒ enc_nat i = enc_nat i $ by eq_refl
-l43: $ _ ⇒ enc_nat ni = enc_nat ni $ by eq_refl
-l44: $ _ ⇒ ⟨ kc_cons , scons (enc_expr X) (scons (enc_ctx N) ∅) ⟩ = enc_ctx (cons X N) $ by eq_refl
-l45: $ _ ⇒ enc_ctx N2 = enc_ctx N2 $ by eq_refl
-l46: $ _ ⇒ ra_nst_group (enc_ctx G) (enc_ind D) (enc_ind I) (enc_expr X0) (enc_nat j) (enc_nat i) (enc_nat ni) ⟨ kc_cons , scons (enc_expr X) (scons (enc_ctx N) ∅) ⟩ (enc_ctx N2) = ra_nst_group (enc_ctx G) (enc_ind D) (enc_ind I) (enc_expr X0) (enc_nat j) (enc_nat i) (enc_nat ni) (enc_ctx (cons X N)) (enc_ctx N2) $ by ra_nst_group_eq [l37, l38, l39, l40, l41, l42, l43, l44, l45]
-l47: $ nst_group G D I X0 j i ni (cons X N) N2 $ by wcel_eq_l [l46, l36]
+l12: $ _ ⇒ enc_ctx G = enc_ctx G $ by eq_refl
+l13: $ _ ⇒ enc_ind D = enc_ind D $ by eq_refl
+l14: $ _ ⇒ enc_ind I = enc_ind I $ by eq_refl
+l15: $ _ ⇒ enc_expr X0 = enc_expr X0 $ by eq_refl
+l16: $ _ ⇒ enc_nat (s j) = ⟨ kc_s , scons (enc_nat j) ∅ ⟩ $ by eq_refl
+l17: $ _ ⇒ enc_nat (s i) = ⟨ kc_s , scons (enc_nat i) ∅ ⟩ $ by eq_refl
+l18: $ _ ⇒ enc_nat ni = enc_nat ni $ by eq_refl
+l19: $ _ ⇒ enc_ctx N = enc_ctx N $ by eq_refl
+l20: $ _ ⇒ enc_ctx N2 = enc_ctx N2 $ by eq_refl
+l21: $ _ ⇒ ra_nst_group (enc_ctx G) (enc_ind D) (enc_ind I) (enc_expr X0) (enc_nat (s j)) (enc_nat (s i)) (enc_nat ni) (enc_ctx N) (enc_ctx N2) = ra_nst_group (enc_ctx G) (enc_ind D) (enc_ind I) (enc_expr X0) ⟨ kc_s , scons (enc_nat j) ∅ ⟩ ⟨ kc_s , scons (enc_nat i) ∅ ⟩ (enc_nat ni) (enc_ctx N) (enc_ctx N2) $ by ra_nst_group_eq [l12, l13, l14, l15, l16, l17, l18, l19, l20]
+l22: $ _ ⇒ ra_nst_group (enc_ctx G) (enc_ind D) (enc_ind I) (enc_expr X0) ⟨ kc_s , scons (enc_nat j) ∅ ⟩ ⟨ kc_s , scons (enc_nat i) ∅ ⟩ (enc_nat ni) (enc_ctx N) (enc_ctx N2) ∈ lrel2 $ by wcel_eq_l [l21, #5]
+l23: $ _ ⇒ ra_le (enc_nat (s i)) (enc_nat ni) = ra_le ⟨ kc_s , scons (enc_nat i) ∅ ⟩ (enc_nat ni) $ by ra_le_eq [l17, l18]
+l24: $ _ ⇒ ra_le ⟨ kc_s , scons (enc_nat i) ∅ ⟩ (enc_nat ni) ∈ lrel $ by wcel_eq_l [l23, #1]
+l25: $ _ ⇒ enc_expr (ind_ty I nz) = ⟨ kc_ind_ty , scons (enc_ind I) (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ $ by eq_refl
+l26: $ _ ⇒ enc_nat npi = enc_nat npi $ by eq_refl
+l27: $ _ ⇒ ra_spine (enc_expr (ind_ty I nz)) (enc_expr X0) (enc_nat npi) = ra_spine ⟨ kc_ind_ty , scons (enc_ind I) (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ (enc_expr X0) (enc_nat npi) $ by ra_spine_eq [l25, l15, l26]
+l28: $ _ ⇒ ra_spine ⟨ kc_ind_ty , scons (enc_ind I) (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ (enc_expr X0) (enc_nat npi) ∈ lrel $ by wcel_eq_l [l27, #2]
+l29: $ _ ⇒ enc_expr (ind_ty I i) = ⟨ kc_ind_ty , scons (enc_ind I) (scons (enc_nat i) ∅) ⟩ $ by eq_refl
+l30: $ _ ⇒ enc_expr X = enc_expr X $ by eq_refl
+l31: $ _ ⇒ ra_rehead (enc_expr (ind_ty I nz)) (enc_expr (ind_ty I i)) (enc_nat npi) (enc_expr X0) (enc_expr X) = ra_rehead ⟨ kc_ind_ty , scons (enc_ind I) (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ ⟨ kc_ind_ty , scons (enc_ind I) (scons (enc_nat i) ∅) ⟩ (enc_nat npi) (enc_expr X0) (enc_expr X) $ by ra_rehead_eq [l25, l29, l26, l15, l30]
+l32: $ _ ⇒ ra_rehead ⟨ kc_ind_ty , scons (enc_ind I) (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ ⟨ kc_ind_ty , scons (enc_ind I) (scons (enc_nat i) ∅) ⟩ (enc_nat npi) (enc_expr X0) (enc_expr X) ∈ lrel $ by wcel_eq_l [l31, #3]
+l33: $ _ ⇒ ra_nst_group (enc_ctx G) (enc_ind D) (enc_ind I) (enc_expr X0) (enc_nat j) (enc_nat i) (enc_nat ni) ⟨ kc_cons , scons (enc_expr X) (scons (enc_ctx N) ∅) ⟩ (enc_ctx N2) ∈ lrel2 $ by lrel2_nst_group_cons [l1, l2, l3, l4, l5, l6, l7, l8, l9, l10, l11, l22, l24, l28, l32, #4]
+l34: $ _ ⇒ enc_ctx G = enc_ctx G $ by eq_refl
+l35: $ _ ⇒ enc_ind D = enc_ind D $ by eq_refl
+l36: $ _ ⇒ enc_ind I = enc_ind I $ by eq_refl
+l37: $ _ ⇒ enc_expr X0 = enc_expr X0 $ by eq_refl
+l38: $ _ ⇒ enc_nat j = enc_nat j $ by eq_refl
+l39: $ _ ⇒ enc_nat i = enc_nat i $ by eq_refl
+l40: $ _ ⇒ enc_nat ni = enc_nat ni $ by eq_refl
+l41: $ _ ⇒ ⟨ kc_cons , scons (enc_expr X) (scons (enc_ctx N) ∅) ⟩ = enc_ctx (cons X N) $ by eq_refl
+l42: $ _ ⇒ enc_ctx N2 = enc_ctx N2 $ by eq_refl
+l43: $ _ ⇒ ra_nst_group (enc_ctx G) (enc_ind D) (enc_ind I) (enc_expr X0) (enc_nat j) (enc_nat i) (enc_nat ni) ⟨ kc_cons , scons (enc_expr X) (scons (enc_ctx N) ∅) ⟩ (enc_ctx N2) = ra_nst_group (enc_ctx G) (enc_ind D) (enc_ind I) (enc_expr X0) (enc_nat j) (enc_nat i) (enc_nat ni) (enc_ctx (cons X N)) (enc_ctx N2) $ by ra_nst_group_eq [l34, l35, l36, l37, l38, l39, l40, l41, l42]
+l44: $ nst_group G D I X0 j i ni (cons X N) N2 $ by wcel_eq_l [l43, l33]
 
 -- Lemmas of g2 (the range lprog2_ulevel_pr .. lrel2_nst_group_cases): inversion
 -- of the relations of the second stratum. Generated by a script (g2's gen.py,

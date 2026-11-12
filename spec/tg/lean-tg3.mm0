@@ -612,6 +612,441 @@ def ty_j (J: class) (G: ctx) (e A: expr): wff = $ deq_j J G e e A $;
 
 theorem lprog3_hprog (G: hyps) (J: class): $ G ⇒ hprog (lprog3 J) latoms $;
 
+--| The clause axioms at classes (`lrel3_A` for the clause axiom `A`), at every
+--| `J`: at any trees `A1 .. An` for its variables, a clause's conclusion is
+--| derivable when its premises are and its side conditions hold (the wide ones
+--| after their instances' congruence).
+theorem lrel3_sty_nil (G: hyps) (J A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_sty A1 A2 A3 A2 A3 ∈ lrel3 J $;
+theorem lrel3_sty_app (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ ra_sty A1 A2 A3 A4 ⟨ kc_pi , scons A6 (scons A7 ∅) ⟩ ∈ lrel3 J $ >
+  $ G ⇒ ra_deq A1 A5 A5 A6 ∈ J $ >
+  $ G ⇒ ra_inst ⟨ kc_nz , ∅ ⟩ A7 A5 A8 ∈ lrel $ >
+  $ G ⇒ ra_sty A1 A2 A3 ⟨ kc_app , scons A4 (scons A5 ∅) ⟩ A8 ∈ lrel3 J $;
+theorem lrel3_cwf_pi (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ ra_cwf A1 A2 A3 A4 A5 ⟨ kc_cons , scons A11 (scons A6 ∅) ⟩ ⟨ kc_s , scons A7 ∅ ⟩ A10 ∈ lrel3 J $ >
+  $ G ⇒ ra_add A7 A3 A8 ∈ lrel $ >
+  $ G ⇒ ra_sinst A1 ⟨ kc_nz , ∅ ⟩ A2 A8 A9 A11 ∈ lrel $ >
+  $ G ⇒ ra_deq A6 A11 A11 ⟨ kc_srt , scons A12 ∅ ⟩ ∈ J $ >
+  $ G ⇒ ra_ulevel A4 A12 ∈ lrel2 $ >
+  $ G ⇒ ra_ipos A1 A2 A3 A7 A9 ∈ lrel $ >
+  $ G ⇒ ra_cwf A1 A2 A3 A4 A5 A6 A7 ⟨ kc_pi , scons A9 (scons A10 ∅) ⟩ ∈ lrel3 J $;
+theorem lrel3_cwf_res (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ > $ G ⇒ A18 ∈ trees ω $ >
+  $ G ⇒ ra_sty A6 ⟨ kc_ind_ty , scons A1 (scons A5 ∅) ⟩ A17 A10 A18 ∈ lrel3 J $ >
+  $ G ⇒ ra_indapp A1 A2 A3 A7 A9 A5 ∈ lrel $ >
+  $ G ⇒ ra_add A7 A3 A8 ∈ lrel $ >
+  $ G ⇒ ra_sinst A1 ⟨ kc_nz , ∅ ⟩ A2 A8 A9 A10 ∈ lrel $ >
+  $ G ⇒ ra_ind_data A1 A11 A12 A13 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A13 A5 A14 A15 ∈ lrel $ >
+  $ G ⇒ ra_pis A12 A14 A16 ∈ lrel $ >
+  $ G ⇒ ra_lift A8 ⟨ kc_nz , ∅ ⟩ A16 A17 ∈ lrel $ >
+  $ G ⇒ ra_cwf A1 A2 A3 A4 A5 A6 A7 A9 ∈ lrel3 J $;
+theorem lrel3_ctors_wf_nil (G: hyps) (J A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_ctors_wf A1 A2 A3 A4 A5 A6 ⟨ kc_cnil , ∅ ⟩ ∈ lrel3 J $;
+theorem lrel3_ctors_wf_cons (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ ra_cwf A1 A2 A3 A4 A5 A6 ⟨ kc_nz , ∅ ⟩ A7 ∈ lrel3 J $ >
+  $ G ⇒ ra_ctors_wf A1 A2 A3 A4 A5 A6 A8 ∈ lrel3 J $ >
+  $ G ⇒ ra_ctors_wf A1 A2 A3 A4 A5 A6 ⟨ kc_ccons , scons A7 (scons A8 ∅) ⟩ ∈ lrel3 J $;
+theorem lrel3_tys_wf_nil (G: hyps) (J A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_tys_wf A1 A2 A3 A4 A5 A6 ⟨ kc_tnil , ∅ ⟩ ∈ lrel3 J $;
+theorem lrel3_tys_wf_cons (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ >
+  $ G ⇒ ra_ctors_wf A1 A2 A3 A4 A6 A8 A10 ∈ lrel3 J $ >
+  $ G ⇒ ra_tys_wf A1 A2 A3 A4 ⟨ kc_s , scons A6 ∅ ⟩ A8 A11 ∈ lrel3 J $ >
+  $ G ⇒ ra_isort A9 A7 A5 ∈ lrel $ >
+  $ G ⇒ lveq A5 A4 $ >
+  $ G ⇒ ra_tys_wf A1 A2 A3 A4 A6 A8 ⟨ kc_tcons , scons A9 (scons A10 (scons A11 ∅)) ⟩ ∈ lrel3 J $;
+theorem lrel3_ctx_wf_nil (G: hyps) (J A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_ctx_wf A1 ⟨ kc_nil , ∅ ⟩ ∈ lrel3 J $;
+theorem lrel3_ctx_wf_cons (G: hyps) (J A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_ctx_wf A1 A2 ∈ lrel3 J $ >
+  $ G ⇒ ra_capp A2 A1 A3 ∈ lrel $ >
+  $ G ⇒ ra_deq A3 A4 A4 ⟨ kc_srt , scons A5 ∅ ⟩ ∈ J $ >
+  $ G ⇒ ra_ctx_wf A1 ⟨ kc_cons , scons A4 (scons A2 ∅) ⟩ ∈ lrel3 J $;
+theorem lrel3_tys_ty_nil (G: hyps) (J A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_tys_ty A1 ⟨ kc_tnil , ∅ ⟩ ∈ lrel3 J $;
+theorem lrel3_tys_ty_cons (G: hyps) (J A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_tys_ty A1 A4 ∈ lrel3 J $ >
+  $ G ⇒ ra_deq A1 A2 A2 ⟨ kc_srt , scons A5 ∅ ⟩ ∈ J $ >
+  $ G ⇒ ra_tys_ty A1 ⟨ kc_tcons , scons A2 (scons A3 (scons A4 ∅)) ⟩ ∈ lrel3 J $;
+theorem lrel3_tys_ok_i (G: hyps) (J A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_ctx_wf A1 A5 ∈ lrel3 J $ >
+  $ G ⇒ ra_tys_ty A2 A6 ∈ lrel3 J $ >
+  $ G ⇒ ra_ind_data A3 A4 A5 A6 ∈ lrel $ >
+  $ G ⇒ ra_tys_closed A5 A6 ∈ lrel $ >
+  $ G ⇒ ra_capp A5 A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_tys_ok A1 A3 ∈ lrel3 J $;
+theorem lrel3_ind_wf_i (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ >
+  $ G ⇒ ra_tys_ok A1 A3 ∈ lrel3 J $ >
+  $ G ⇒ ra_tys_wf A3 A9 A8 A13 ⟨ kc_nz , ∅ ⟩ A2 A7 ∈ lrel3 J $ >
+  $ G ⇒ ra_nst_ok A1 A3 A12 A6 ∈ lrel3 J $ >
+  $ G ⇒ ra_ind_data A3 A4 A5 A7 ∈ lrel $ >
+  $ G ⇒ ra_clen A5 A8 ∈ lrel $ >
+  $ G ⇒ ra_ntys A7 A9 A10 ∈ lrel $ >
+  $ G ⇒ ra_capp A5 A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A7 ⟨ kc_nz , ∅ ⟩ A14 A15 ∈ lrel $ >
+  $ G ⇒ ra_isort A14 A11 A13 ∈ lrel $ >
+  $ G ⇒ ra_ind_nested A3 A6 ∈ lrel $ >
+  $ G ⇒ ra_ndecl A6 A9 A12 ∈ lrel $ >
+  $ G ⇒ ra_ind_wf A1 A3 ∈ lrel3 J $;
+theorem lrel3_nst_ok_nil (G: hyps) (J A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_nst_ok A1 A2 A3 ⟨ kc_nil , ∅ ⟩ ∈ lrel3 J $;
+theorem lrel3_nst_ok_cons (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ >
+  $ G ⇒ ra_ind_wf A1 A3 ∈ lrel3 J $ >
+  $ G ⇒ ra_nst_ok A1 A2 A5 A12 ∈ lrel3 J $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons A3 (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ A10 A6 ∈ lrel $ >
+  $ G ⇒ ra_ind_arity A3 A6 A7 A8 ∈ lrel $ >
+  $ G ⇒ ra_ind_nested A3 A13 ∈ lrel $ >
+  $ G ⇒ ra_ndecl A13 A7 A9 ∈ lrel $ >
+  $ G ⇒ ra_nst_group A1 A2 A3 A10 A4 ⟨ kc_nz , ∅ ⟩ A9 ⟨ kc_cons , scons A10 (scons A11 ∅) ⟩ A12 ∈ lrel2 $ >
+  $ G ⇒ ra_add A4 A9 A5 ∈ lrel $ >
+  $ G ⇒ ra_nst_ok A1 A2 A4 ⟨ kc_cons , scons A10 (scons A11 ∅) ⟩ ∈ lrel3 J $;
+theorem lrel3_large_nz (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ >
+  $ G ⇒ ra_ind_data A2 A3 A4 A5 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A5 ⟨ kc_nz , ∅ ⟩ A6 A7 ∈ lrel $ >
+  $ G ⇒ ra_isort A6 A8 A9 ∈ lrel $ >
+  $ G ⇒ lveq ⟨ kc_lmax , scons ⟨ kc_ls , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ (scons A9 ∅) ⟩ A9 $ >
+  $ G ⇒ ra_large A1 A2 ∈ lrel3 J $;
+theorem lrel3_large_empty (G: hyps) (J A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_ind_data A2 A3 A4 ⟨ kc_tcons , scons A5 (scons ⟨ kc_cnil , ∅ ⟩ (scons ⟨ kc_tnil , ∅ ⟩ ∅)) ⟩ ∈ lrel $ >
+  $ G ⇒ ra_large A1 A2 ∈ lrel3 J $;
+theorem lrel3_large_single (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ ra_fir A3 A8 A2 ⟨ kc_nz , ∅ ⟩ A7 ∈ lrel3 J $ >
+  $ G ⇒ ra_ind_data A3 A4 A5 ⟨ kc_tcons , scons A6 (scons ⟨ kc_ccons , scons A7 (scons ⟨ kc_cnil , ∅ ⟩ ∅) ⟩ (scons ⟨ kc_tnil , ∅ ⟩ ∅)) ⟩ ∈ lrel $ >
+  $ G ⇒ ra_clen A5 A8 ∈ lrel $ >
+  $ G ⇒ ra_capp A5 A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_large A1 A3 ∈ lrel3 J $;
+theorem lrel3_fir_res (G: hyps) (J A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_indapp A1 ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ A2 A4 A5 ⟨ kc_nz , ∅ ⟩ ∈ lrel $ >
+  $ G ⇒ ra_fir A1 A2 A3 A4 A5 ∈ lrel3 J $;
+theorem lrel3_fir_arg (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ ra_fir A1 A2 ⟨ kc_cons , scons A7 (scons A3 ∅) ⟩ ⟨ kc_s , scons A4 ∅ ⟩ A8 ∈ lrel3 J $ >
+  $ G ⇒ ra_leaf_has ⟨ kc_nz , ∅ ⟩ A8 ∈ lrel $ >
+  $ G ⇒ ra_add A4 A2 A5 ∈ lrel $ >
+  $ G ⇒ ra_sinst A1 ⟨ kc_nz , ∅ ⟩ ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ A5 A6 A7 ∈ lrel $ >
+  $ G ⇒ ra_fir A1 A2 A3 A4 ⟨ kc_pi , scons A6 (scons A8 ∅) ⟩ ∈ lrel3 J $;
+theorem lrel3_fir_prop (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ ra_fir A1 A2 ⟨ kc_cons , scons A7 (scons A3 ∅) ⟩ ⟨ kc_s , scons A4 ∅ ⟩ A8 ∈ lrel3 J $ >
+  $ G ⇒ ra_add A4 A2 A5 ∈ lrel $ >
+  $ G ⇒ ra_sinst A1 ⟨ kc_nz , ∅ ⟩ ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ A5 A6 A7 ∈ lrel $ >
+  $ G ⇒ ra_deq A3 A7 A7 ⟨ kc_srt , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ ∈ J $ >
+  $ G ⇒ ra_fir A1 A2 A3 A4 ⟨ kc_pi , scons A6 (scons A8 ∅) ⟩ ∈ lrel3 J $;
+theorem lrel3_elim_prop (G: hyps) (J A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ lveq A3 ⟨ kc_lz , ∅ ⟩ $ >
+  $ G ⇒ ra_elim_ok A1 A2 A3 ∈ lrel3 J $;
+theorem lrel3_elim_large (G: hyps) (J A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_large A1 A2 ∈ lrel3 J $ >
+  $ G ⇒ ra_elim_ok A1 A2 A3 ∈ lrel3 J $;
+theorem lrel3_fprops_z (G: hyps) (J A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_fprops A1 A2 A3 A4 A5 ⟨ kc_nz , ∅ ⟩ A6 ∈ lrel3 J $;
+theorem lrel3_fprops_s (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ >
+  $ G ⇒ ra_fprops A1 A2 A3 ⟨ kc_cons , scons A9 (scons A4 ∅) ⟩ ⟨ kc_s , scons A5 ∅ ⟩ A6 A10 ∈ lrel3 J $ >
+  $ G ⇒ ra_add A5 A3 A7 ∈ lrel $ >
+  $ G ⇒ ra_sinst A1 ⟨ kc_nz , ∅ ⟩ A2 A7 A8 A9 ∈ lrel $ >
+  $ G ⇒ ra_deq A4 A9 A9 ⟨ kc_srt , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ ∈ J $ >
+  $ G ⇒ ra_fprops A1 A2 A3 A4 A5 ⟨ kc_s , scons A6 ∅ ⟩ ⟨ kc_pi , scons A8 (scons A10 ∅) ⟩ ∈ lrel3 J $;
+theorem lrel3_proj_ok_sort (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ >
+  $ G ⇒ ra_ind_data A2 A3 A4 A5 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A5 A6 A8 A9 ∈ lrel $ >
+  $ G ⇒ ra_isort A8 ⟨ kc_nz , ∅ ⟩ A10 ∈ lrel $ >
+  $ G ⇒ lveq ⟨ kc_lmax , scons ⟨ kc_ls , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ (scons A10 ∅) ⟩ A10 $ >
+  $ G ⇒ ra_proj_ok A1 A2 A6 A7 ∈ lrel3 J $;
+theorem lrel3_proj_ok_prop (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ >
+  $ G ⇒ ra_fprops A3 A10 A9 A2 ⟨ kc_nz , ∅ ⟩ ⟨ kc_s , scons A8 ∅ ⟩ A13 ∈ lrel3 J $ >
+  $ G ⇒ ra_ind_data A3 A4 A5 A6 ∈ lrel $ >
+  $ G ⇒ ra_clen A5 A9 ∈ lrel $ >
+  $ G ⇒ ra_ntys A6 A10 A11 ∈ lrel $ >
+  $ G ⇒ ra_capp A5 A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A6 A7 A12 A14 ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor A14 ⟨ kc_nz , ∅ ⟩ A13 ∈ lrel $ >
+  $ G ⇒ ra_proj_ok A1 A3 A7 A8 ∈ lrel3 J $;
+theorem lrel3_add_eqs_i (G: hyps) (J A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A2 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A2 A2 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons tr_nat_ty ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons tr_nat_zero ∅) ⟩ ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_add_eqs A1 A2 ∈ lrel3 J $;
+theorem lrel3_pred_eqs_i (G: hyps) (J A1 A2: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A2 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A2 A2 ⟨ kc_pi , scons tr_nat_ty (scons tr_nat_ty ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 ⟨ kc_app , scons A2 (scons tr_nat_zero ∅) ⟩ tr_nat_zero tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ⟨ kc_app , scons A2 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_pred_eqs A1 A2 ∈ lrel3 J $;
+theorem lrel3_sub_eqs_i (G: hyps) (J A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_pred_eqs A1 A3 ∈ lrel3 J $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A2 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A2 A2 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons tr_nat_ty ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons tr_nat_zero ∅) ⟩ ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons A3 (scons ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_sub_eqs A1 A2 A3 ∈ lrel3 J $;
+theorem lrel3_mul_eqs_i (G: hyps) (J A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_add_eqs A1 A3 ∈ lrel3 J $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A2 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A2 A2 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons tr_nat_ty ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons tr_nat_zero ∅) ⟩ tr_nat_zero tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A3 (scons ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_mul_eqs A1 A2 A3 ∈ lrel3 J $;
+theorem lrel3_pow_eqs_i (G: hyps) (J A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_mul_eqs A1 A3 A4 ∈ lrel3 J $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A2 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A2 A2 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons tr_nat_ty ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons tr_nat_zero ∅) ⟩ ⟨ kc_app , scons tr_nat_succ (scons tr_nat_zero ∅) ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A3 (scons ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_pow_eqs A1 A2 A3 A4 ∈ lrel3 J $;
+theorem lrel3_beq_eqs_i (G: hyps) (J A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A2 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A3 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A4 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A5 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A2 A2 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons A3 ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons tr_nat_zero ∅) ⟩ (scons tr_nat_zero ∅) ⟩ A4 A3 ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons tr_nat_zero ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ A5 A3 ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons tr_nat_zero ∅) ⟩ A5 A3 ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ A3 ∈ J $ >
+  $ G ⇒ ra_beq_eqs A1 A2 A3 A4 A5 ∈ lrel3 J $;
+theorem lrel3_ble_eqs_i (G: hyps) (J A1 A2 A3 A4 A5: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A2 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A3 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A4 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A5 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A2 A2 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons A3 ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons tr_nat_zero ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ A4 A3 ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons tr_nat_zero ∅) ⟩ A5 A3 ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ A3 ∈ J $ >
+  $ G ⇒ ra_ble_eqs A1 A2 A3 A4 A5 ∈ lrel3 J $;
+theorem lrel3_shl_eqs_i (G: hyps) (J A1 A2 A3 A4: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ ra_mul_eqs A1 A3 A4 ∈ lrel3 J $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A2 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A2 A2 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons tr_nat_ty ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons tr_nat_zero ∅) ⟩ ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_app , scons ⟨ kc_app , scons A3 (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_shl_eqs A1 A2 A3 A4 ∈ lrel3 J $;
+theorem lrel3_shr_eqs_i (G: hyps) (J A1 A2 A3: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A2 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A3 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A2 A2 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons tr_nat_ty ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons tr_nat_zero ∅) ⟩ ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A3 (scons ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_shr_eqs A1 A2 A3 ∈ lrel3 J $;
+theorem lrel3_dec_eqs_i (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A2 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A3 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A4 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A5 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A6 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A7 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A8 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A9 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A10 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A11 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A10 A10 ⟨ kc_pi , scons ⟨ kc_srt , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A8 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons A3 ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A11 A11 ⟨ kc_pi , scons ⟨ kc_srt , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A8 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons A4 ∅) ⟩ (scons ⟨ kc_app , scons A5 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons ⟨ kc_pi , scons ⟨ kc_app , scons A5 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons tr_nat_ty ∅) ⟩ (scons ⟨ kc_cons , scons ⟨ kc_pi , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons tr_nat_ty ∅) ⟩ (scons ⟨ kc_cons , scons ⟨ kc_app , scons ⟨ kc_app , scons A8 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons A3 ∅) ⟩ (scons ⟨ kc_cons , scons ⟨ kc_srt , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ (scons A1 ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A9 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons A3 ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A10 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons ⟨ kc_pi , scons ⟨ kc_app , scons A5 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons tr_nat_ty ∅) ⟩ (scons ⟨ kc_cons , scons ⟨ kc_pi , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons tr_nat_ty ∅) ⟩ (scons ⟨ kc_cons , scons ⟨ kc_app , scons ⟨ kc_app , scons A8 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons A4 ∅) ⟩ (scons ⟨ kc_cons , scons ⟨ kc_srt , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ (scons A1 ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A9 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons A4 ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_dec_eqs A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 ∈ lrel3 J $;
+theorem lrel3_ite_eqs_i (G: hyps) (J A1 A2 A3 A4 A5 A6 A7: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A2 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A3 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A4 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A5 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A6 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A7 ∈ lrel $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons ⟨ kc_app , scons ⟨ kc_app , scons A5 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons A3 ∅) ⟩ (scons ⟨ kc_cons , scons ⟨ kc_srt , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ (scons A1 ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A6 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons A3 ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons ⟨ kc_app , scons ⟨ kc_app , scons A5 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons A4 ∅) ⟩ (scons ⟨ kc_cons , scons ⟨ kc_srt , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ (scons A1 ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A6 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons A4 ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_ite_eqs A1 A2 A3 A4 A5 A6 A7 ∈ lrel3 J $;
+theorem lrel3_natle_dec_i (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ >
+  $ G ⇒ ra_dec_eqs A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 ∈ lrel3 J $ >
+  $ G ⇒ ra_ble_eqs A1 A14 A2 A3 A4 ∈ lrel3 J $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A12 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A13 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A15 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A12 A12 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_srt , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A15 A15 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_app , scons ⟨ kc_app , scons A8 (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A14 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A13 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A9 (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A14 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A15 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons A6 (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_natle_dec A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 ∈ lrel3 J $;
+theorem lrel3_nateq_dec_i (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ >
+  $ G ⇒ ra_dec_eqs A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 ∈ lrel3 J $ >
+  $ G ⇒ ra_beq_eqs A1 A14 A2 A3 A4 ∈ lrel3 J $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A12 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A13 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A15 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A12 A12 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_srt , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A15 A15 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_app , scons ⟨ kc_app , scons A8 (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A14 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A13 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A9 (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A14 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A15 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons A6 (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_nateq_dec A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 ∈ lrel3 J $;
+theorem lrel3_bool_dec_i (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A2 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A3 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A4 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A5 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A6 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A7 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A8 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A9 ∈ lrel $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A6 (scons ⟨ kc_app , scons A8 (scons A3 ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A9 (scons A3 ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons A8 (scons A3 ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons A5 (scons ⟨ kc_app , scons A8 (scons A3 ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A6 (scons ⟨ kc_app , scons A8 (scons A4 ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A9 (scons A4 ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons A8 (scons A4 ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons A5 (scons ⟨ kc_app , scons A8 (scons A4 ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons ⟨ kc_app , scons A8 (scons A3 ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A9 (scons A3 ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons ⟨ kc_app , scons A8 (scons A4 ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A9 (scons A4 ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_bool_dec A1 A2 A3 A4 A5 A6 A7 A8 A9 ∈ lrel3 J $;
+theorem lrel3_div_eqs_i (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ > $ G ⇒ A18 ∈ trees ω $ > $ G ⇒ A19 ∈ trees ω $ > $ G ⇒ A20 ∈ trees ω $ >
+  $ G ⇒ A21 ∈ trees ω $ >
+  $ G ⇒ ra_natle_dec A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 ∈ lrel3 J $ >
+  $ G ⇒ ra_sub_eqs A1 A16 A17 ∈ lrel3 J $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A18 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A19 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A20 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A21 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A18 A18 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons tr_nat_ty ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A19 A19 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons tr_nat_ty ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A20 A20 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A21 A21 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_app , scons ⟨ kc_app , scons A16 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A18 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A13 (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A19 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons A5 (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A19 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A13 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A19 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A16 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A21 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons A5 (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_div_eqs A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 ∈ lrel3 J $;
+theorem lrel3_mod_eqs_i (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ > $ G ⇒ A18 ∈ trees ω $ > $ G ⇒ A19 ∈ trees ω $ > $ G ⇒ A20 ∈ trees ω $ >
+  $ G ⇒ A21 ∈ trees ω $ > $ G ⇒ A22 ∈ trees ω $ >
+  $ G ⇒ ra_natle_dec A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 ∈ lrel3 J $ >
+  $ G ⇒ ra_sub_eqs A1 A16 A17 ∈ lrel3 J $ >
+  $ G ⇒ ra_ite_eqs A1 A2 A3 A4 A8 A9 A18 ∈ lrel3 J $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A19 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A20 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A21 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A22 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A19 A19 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons tr_nat_ty ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A20 A20 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons tr_nat_ty ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A21 A21 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A22 A22 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_app , scons ⟨ kc_app , scons A16 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A19 (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A19 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A18 (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A13 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A13 (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A21 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons A5 (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A13 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A16 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A22 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons A5 (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_mod_eqs A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 ∈ lrel3 J $;
+theorem lrel3_fix_eqs_i (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A2 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A3 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A4 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A5 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A6 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A7 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A8 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A9 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A10 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A11 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A12 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A13 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A14 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A12 A12 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_srt , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons A9 ∅) ⟩ (scons A10 ∅) ⟩ (scons A11 ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons A9 ∅) ⟩ (scons A10 ∅) ⟩ (scons A11 ∅) ⟩ ⟨ kc_pi , scons ⟨ kc_pi , scons A9 (scons ⟨ kc_pi , scons ⟨ kc_pi , scons A9 (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A10 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A10 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons A9 (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A10 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A13 A13 ⟨ kc_pi , scons A9 (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A8 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A14 A14 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons A9 (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_pi , scons A9 (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons A9 (scons ⟨ kc_cons , scons ⟨ kc_pi , scons A9 (scons ⟨ kc_pi , scons ⟨ kc_pi , scons A9 (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A10 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A10 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A6 (scons A9 ∅) ⟩ (scons A10 ∅) ⟩ (scons A11 ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons A9 ∅) ⟩ (scons A10 ∅) ⟩ (scons A11 ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A8 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A13 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons A10 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ⟨ kc_app , scons A8 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A2 (scons ⟨ kc_app , scons A3 (scons ⟨ kc_app , scons ⟨ kc_app , scons A5 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A4 (scons ⟨ kc_app , scons ⟨ kc_app , scons A5 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_cons , scons A9 (scons ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons ⟨ kc_pi , scons A9 (scons ⟨ kc_pi , scons ⟨ kc_pi , scons A9 (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A10 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A10 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons A1 ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons A9 ∅) ⟩ (scons A10 ∅) ⟩ (scons A11 ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons A9 (scons ⟨ kc_lam , scons ⟨ kc_app , scons ⟨ kc_app , scons A12 (scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A11 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons A9 ∅) ⟩ (scons A10 ∅) ⟩ (scons A11 ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A14 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons A10 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_fix_eqs A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 ∈ lrel3 J $;
+
 --| The clause axioms, at every `J` (in prefix form; the wide ones after).
 theorem sty_nil_j (J: class) (G: ctx) (h A: expr): $ sty_j J G h A h A $;
 theorem sty_app_j (J: class) (G: ctx) (h A f a B C C2: expr): $ sty_j J G h A f (pi B C) $ > $ ty_j J G a B $ > $ inst nz C a C2 $ > $ sty_j J G h A (app f a) C2 $;
@@ -669,6 +1104,94 @@ theorem gi_bitwise_eqs_i_eq (G: hyps) (J A1 B1 A2 B2 A3 B3 A4 B4 A5 B5 A6 B6 A7 
 theorem gi_bitop_eqs_i_eq (G: hyps) (J A1 B1 A2 B2 A3 B3 A4 B4 A5 B5 A6 B6 A7 B7 A8 B8 A9 B9 A10 B10 A11 B11 A12 B12 A13 B13 A14 B14 A15 B15 A16 B16 A17 B17 A18 B18 A19 B19 A20 B20 A21 B21 A22 B22 A23 B23 A24 B24 A25 B25 A26 B26 A27 B27 A28 B28 A29 B29 A30 B30 A31 B31 A32 B32 A33 B33 A34 B34 A35 B35 A36 B36 A37 B37 A38 B38 A39 B39 A40 B40 A41 B41 A42 B42 A43 B43 A44 B44 A45 B45 A46 B46 A47 B47 A48 B48 A49 B49 A50 B50 A51 B51: class):
   $ G ⇒ A1 = B1 $ > $ G ⇒ A2 = B2 $ > $ G ⇒ A3 = B3 $ > $ G ⇒ A4 = B4 $ > $ G ⇒ A5 = B5 $ > $ G ⇒ A6 = B6 $ > $ G ⇒ A7 = B7 $ > $ G ⇒ A8 = B8 $ > $ G ⇒ A9 = B9 $ > $ G ⇒ A10 = B10 $ > $ G ⇒ A11 = B11 $ > $ G ⇒ A12 = B12 $ > $ G ⇒ A13 = B13 $ > $ G ⇒ A14 = B14 $ > $ G ⇒ A15 = B15 $ > $ G ⇒ A16 = B16 $ > $ G ⇒ A17 = B17 $ > $ G ⇒ A18 = B18 $ > $ G ⇒ A19 = B19 $ > $ G ⇒ A20 = B20 $ > $ G ⇒ A21 = B21 $ > $ G ⇒ A22 = B22 $ > $ G ⇒ A23 = B23 $ > $ G ⇒ A24 = B24 $ > $ G ⇒ A25 = B25 $ > $ G ⇒ A26 = B26 $ > $ G ⇒ A27 = B27 $ > $ G ⇒ A28 = B28 $ > $ G ⇒ A29 = B29 $ > $ G ⇒ A30 = B30 $ > $ G ⇒ A31 = B31 $ > $ G ⇒ A32 = B32 $ > $ G ⇒ A33 = B33 $ > $ G ⇒ A34 = B34 $ > $ G ⇒ A35 = B35 $ > $ G ⇒ A36 = B36 $ > $ G ⇒ A37 = B37 $ > $ G ⇒ A38 = B38 $ > $ G ⇒ A39 = B39 $ > $ G ⇒ A40 = B40 $ > $ G ⇒ A41 = B41 $ > $ G ⇒ A42 = B42 $ > $ G ⇒ A43 = B43 $ > $ G ⇒ A44 = B44 $ > $ G ⇒ A45 = B45 $ > $ G ⇒ A46 = B46 $ > $ G ⇒ A47 = B47 $ > $ G ⇒ A48 = B48 $ > $ G ⇒ A49 = B49 $ > $ G ⇒ A50 = B50 $ > $ G ⇒ A51 = B51 $ >
   $ G ⇒ gi_bitop_eqs_i J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45 A46 A47 A48 A49 A50 A51 = gi_bitop_eqs_i J B1 B2 B3 B4 B5 B6 B7 B8 B9 B10 B11 B12 B13 B14 B15 B16 B17 B18 B19 B20 B21 B22 B23 B24 B25 B26 B27 B28 B29 B30 B31 B32 B33 B34 B35 B36 B37 B38 B39 B40 B41 B42 B43 B44 B45 B46 B47 B48 B49 B50 B51 $;
+--| The wide clause axioms at classes.
+theorem lrel3_gcd_eqs_i (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 A33 A34 A35 A36 A37 A38 A39 A40 A41: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ > $ G ⇒ A18 ∈ trees ω $ > $ G ⇒ A19 ∈ trees ω $ > $ G ⇒ A20 ∈ trees ω $ >
+  $ G ⇒ A21 ∈ trees ω $ > $ G ⇒ A22 ∈ trees ω $ > $ G ⇒ A23 ∈ trees ω $ > $ G ⇒ A24 ∈ trees ω $ >
+  $ G ⇒ A25 ∈ trees ω $ > $ G ⇒ A26 ∈ trees ω $ > $ G ⇒ A27 ∈ trees ω $ > $ G ⇒ A28 ∈ trees ω $ >
+  $ G ⇒ A29 ∈ trees ω $ > $ G ⇒ A30 ∈ trees ω $ > $ G ⇒ A31 ∈ trees ω $ > $ G ⇒ A32 ∈ trees ω $ >
+  $ G ⇒ A33 ∈ trees ω $ > $ G ⇒ A34 ∈ trees ω $ > $ G ⇒ A35 ∈ trees ω $ > $ G ⇒ A36 ∈ trees ω $ >
+  $ G ⇒ A37 ∈ trees ω $ > $ G ⇒ A38 ∈ trees ω $ > $ G ⇒ A39 ∈ trees ω $ > $ G ⇒ A40 ∈ trees ω $ >
+  $ G ⇒ A41 ∈ trees ω $ >
+  $ G ⇒ ra_mod_eqs A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 ∈ lrel3 J $ >
+  $ G ⇒ ra_nateq_dec A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A23 A24 A25 A26 ∈ lrel3 J $ >
+  $ G ⇒ ra_bool_dec A1 A2 A3 A4 A5 A7 A18 A27 A28 ∈ lrel3 J $ >
+  $ G ⇒ ra_fix_eqs A1 A18 A27 A28 A25 A29 A30 A31 A32 A33 A34 A35 A36 A37 ∈ lrel3 J $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A38 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A39 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A40 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A41 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A38 A38 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons tr_nat_ty ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A40 A40 ⟨ kc_pi , scons A32 (scons ⟨ kc_pi , scons ⟨ kc_pi , scons A32 (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A35 (scons ⟨ kc_app , scons A34 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A34 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A33 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A33 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A39 A39 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons A32 ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A41 A41 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons ⟨ kc_app , scons A5 (scons ⟨ kc_app , scons ⟨ kc_app , scons A23 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A35 (scons ⟨ kc_app , scons A34 (scons ⟨ kc_app , scons ⟨ kc_app , scons A39 (scons ⟨ kc_app , scons ⟨ kc_app , scons A19 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A34 (scons ⟨ kc_app , scons ⟨ kc_app , scons A39 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A38 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A29 (scons A32 ∅) ⟩ (scons A33 ∅) ⟩ (scons A34 ∅) ⟩ (scons A40 ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A39 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons A34 (scons ⟨ kc_app , scons ⟨ kc_app , scons A39 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons ⟨ kc_pi , scons A32 (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A35 (scons ⟨ kc_app , scons A34 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A34 (scons ⟨ kc_app , scons ⟨ kc_app , scons A39 (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A33 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A40 (scons ⟨ kc_app , scons ⟨ kc_app , scons A39 (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ⟨ kc_app , scons A33 (scons ⟨ kc_app , scons ⟨ kc_app , scons A39 (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons ⟨ kc_pi , scons A32 (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A35 (scons ⟨ kc_app , scons A34 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A34 (scons ⟨ kc_app , scons ⟨ kc_app , scons A39 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A33 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_cons , scons ⟨ kc_app , scons A5 (scons ⟨ kc_app , scons ⟨ kc_app , scons A23 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A40 (scons ⟨ kc_app , scons ⟨ kc_app , scons A39 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A39 (scons ⟨ kc_app , scons ⟨ kc_app , scons A19 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A41 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons A33 (scons ⟨ kc_app , scons ⟨ kc_app , scons A39 (scons ⟨ kc_app , scons tr_nat_succ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_gcd_eqs A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 A33 A34 A35 A36 A37 A38 A39 A40 A41 ∈ lrel3 J $;
+theorem lrel3_bitwise_eqs_i (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ > $ G ⇒ A18 ∈ trees ω $ > $ G ⇒ A19 ∈ trees ω $ > $ G ⇒ A20 ∈ trees ω $ >
+  $ G ⇒ A21 ∈ trees ω $ > $ G ⇒ A22 ∈ trees ω $ > $ G ⇒ A23 ∈ trees ω $ > $ G ⇒ A24 ∈ trees ω $ >
+  $ G ⇒ A25 ∈ trees ω $ > $ G ⇒ A26 ∈ trees ω $ > $ G ⇒ A27 ∈ trees ω $ > $ G ⇒ A28 ∈ trees ω $ >
+  $ G ⇒ A29 ∈ trees ω $ > $ G ⇒ A30 ∈ trees ω $ > $ G ⇒ A31 ∈ trees ω $ > $ G ⇒ A32 ∈ trees ω $ >
+  $ G ⇒ A33 ∈ trees ω $ > $ G ⇒ A34 ∈ trees ω $ > $ G ⇒ A35 ∈ trees ω $ > $ G ⇒ A36 ∈ trees ω $ >
+  $ G ⇒ A37 ∈ trees ω $ > $ G ⇒ A38 ∈ trees ω $ > $ G ⇒ A39 ∈ trees ω $ > $ G ⇒ A40 ∈ trees ω $ >
+  $ G ⇒ A41 ∈ trees ω $ > $ G ⇒ A42 ∈ trees ω $ > $ G ⇒ A43 ∈ trees ω $ > $ G ⇒ A44 ∈ trees ω $ >
+  $ G ⇒ A45 ∈ trees ω $ >
+  $ G ⇒ ra_div_eqs A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A22 A23 ∈ lrel3 J $ >
+  $ G ⇒ ra_mod_eqs A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A24 A20 A21 A22 A23 ∈ lrel3 J $ >
+  $ G ⇒ ra_nateq_dec A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A25 A26 A27 A28 ∈ lrel3 J $ >
+  $ G ⇒ ra_bool_dec A1 A2 A3 A4 A5 A7 A24 A29 A30 ∈ lrel3 J $ >
+  $ G ⇒ ra_add_eqs A1 A31 ∈ lrel3 J $ >
+  $ G ⇒ ra_fix_eqs A1 A24 A29 A30 A27 A32 A33 A34 A35 A36 A37 A38 A39 A40 ∈ lrel3 J $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A41 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A42 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A43 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A44 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A45 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A41 A41 ⟨ kc_pi , scons ⟨ kc_pi , scons A2 (scons ⟨ kc_pi , scons A2 (scons A2 ∅) ⟩ ∅) ⟩ (scons ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons tr_nat_ty ∅) ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A43 A43 ⟨ kc_pi , scons ⟨ kc_pi , scons A2 (scons ⟨ kc_pi , scons A2 (scons A2 ∅) ⟩ ∅) ⟩ (scons ⟨ kc_pi , scons A35 (scons ⟨ kc_pi , scons ⟨ kc_pi , scons A35 (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A38 (scons ⟨ kc_app , scons A37 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A37 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A36 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A36 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A42 A42 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons A35 ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A44 A44 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons ⟨ kc_app , scons A5 (scons ⟨ kc_app , scons ⟨ kc_app , scons A25 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A38 (scons ⟨ kc_app , scons A37 (scons ⟨ kc_app , scons ⟨ kc_app , scons A42 (scons ⟨ kc_app , scons ⟨ kc_app , scons A18 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A18 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A37 (scons ⟨ kc_app , scons ⟨ kc_app , scons A42 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons ⟨ kc_pi , scons A2 (scons ⟨ kc_pi , scons A2 (scons A2 ∅) ⟩ ∅) ⟩ (scons A1 ∅) ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A41 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A32 (scons A35 ∅) ⟩ (scons A36 ∅) ⟩ (scons A37 ∅) ⟩ (scons ⟨ kc_app , scons A43 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A42 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons A1 ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons A37 (scons ⟨ kc_app , scons ⟨ kc_app , scons A42 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ tr_nat_ty ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons ⟨ kc_app , scons ⟨ kc_app , scons A8 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_cons , scons A2 (scons ⟨ kc_cons , scons ⟨ kc_srt , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ (scons A1 ∅) ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons A45 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A9 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ A2 ∈ J $ >
+  $ G ⇒ ra_deq ⟨ kc_cons , scons ⟨ kc_pi , scons A35 (scons ⟨ kc_pi , scons ⟨ kc_app , scons ⟨ kc_app , scons A38 (scons ⟨ kc_app , scons A37 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A37 (scons ⟨ kc_app , scons ⟨ kc_app , scons A42 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A36 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons tr_nat_ty (scons ⟨ kc_cons , scons ⟨ kc_pi , scons A2 (scons ⟨ kc_pi , scons A2 (scons A2 ∅) ⟩ ∅) ⟩ (scons A1 ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A43 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A42 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons ⟨ kc_app , scons ⟨ kc_app , scons A25 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A26 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons ⟨ kc_app , scons A25 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons ⟨ kc_app , scons A29 (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons A4 ∅) ⟩ (scons A3 ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A30 (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons A4 ∅) ⟩ (scons A3 ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons A29 (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons A4 ∅) ⟩ (scons A3 ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons A5 (scons ⟨ kc_app , scons A29 (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons A4 ∅) ⟩ (scons A3 ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons A5 (scons ⟨ kc_app , scons ⟨ kc_app , scons A25 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons ⟨ kc_app , scons ⟨ kc_app , scons A25 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A26 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons ⟨ kc_app , scons A25 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons ⟨ kc_app , scons A29 (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons A3 ∅) ⟩ (scons A4 ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A30 (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons A3 ∅) ⟩ (scons A4 ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons A29 (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons A3 ∅) ⟩ (scons A4 ∅) ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons A5 (scons ⟨ kc_app , scons A29 (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons A3 ∅) ⟩ (scons A4 ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons A5 (scons ⟨ kc_app , scons ⟨ kc_app , scons A25 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A7 (scons ⟨ kc_app , scons A29 (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A45 (scons ⟨ kc_app , scons ⟨ kc_app , scons A25 (scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A26 (scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A45 (scons ⟨ kc_app , scons ⟨ kc_app , scons A25 (scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A26 (scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons A30 (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A45 (scons ⟨ kc_app , scons ⟨ kc_app , scons A25 (scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A26 (scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A45 (scons ⟨ kc_app , scons ⟨ kc_app , scons A25 (scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A26 (scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons A29 (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A45 (scons ⟨ kc_app , scons ⟨ kc_app , scons A25 (scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A26 (scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A45 (scons ⟨ kc_app , scons ⟨ kc_app , scons A25 (scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A26 (scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A31 (scons ⟨ kc_app , scons ⟨ kc_app , scons A31 (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A42 (scons ⟨ kc_app , scons ⟨ kc_app , scons A18 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A18 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A44 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A42 (scons ⟨ kc_app , scons ⟨ kc_app , scons A18 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A18 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A44 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lam , scons ⟨ kc_app , scons A5 (scons ⟨ kc_app , scons A29 (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A45 (scons ⟨ kc_app , scons ⟨ kc_app , scons A25 (scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A26 (scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A45 (scons ⟨ kc_app , scons ⟨ kc_app , scons A25 (scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A26 (scons ⟨ kc_app , scons ⟨ kc_app , scons A20 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A31 (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A42 (scons ⟨ kc_app , scons ⟨ kc_app , scons A18 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A18 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A44 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A42 (scons ⟨ kc_app , scons ⟨ kc_app , scons A18 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons A18 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ kc_bd1 , scons ⟨ kc_b0 , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons A44 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ ⟨ kc_app , scons A36 (scons ⟨ kc_app , scons ⟨ kc_app , scons A42 (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_bitwise_eqs A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45 ∈ lrel3 J $;
+theorem lrel3_bitop_eqs_i (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45 A46 A47 A48 A49 A50 A51: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ > $ G ⇒ A18 ∈ trees ω $ > $ G ⇒ A19 ∈ trees ω $ > $ G ⇒ A20 ∈ trees ω $ >
+  $ G ⇒ A21 ∈ trees ω $ > $ G ⇒ A22 ∈ trees ω $ > $ G ⇒ A23 ∈ trees ω $ > $ G ⇒ A24 ∈ trees ω $ >
+  $ G ⇒ A25 ∈ trees ω $ > $ G ⇒ A26 ∈ trees ω $ > $ G ⇒ A27 ∈ trees ω $ > $ G ⇒ A28 ∈ trees ω $ >
+  $ G ⇒ A29 ∈ trees ω $ > $ G ⇒ A30 ∈ trees ω $ > $ G ⇒ A31 ∈ trees ω $ > $ G ⇒ A32 ∈ trees ω $ >
+  $ G ⇒ A33 ∈ trees ω $ > $ G ⇒ A34 ∈ trees ω $ > $ G ⇒ A35 ∈ trees ω $ > $ G ⇒ A36 ∈ trees ω $ >
+  $ G ⇒ A37 ∈ trees ω $ > $ G ⇒ A38 ∈ trees ω $ > $ G ⇒ A39 ∈ trees ω $ > $ G ⇒ A40 ∈ trees ω $ >
+  $ G ⇒ A41 ∈ trees ω $ > $ G ⇒ A42 ∈ trees ω $ > $ G ⇒ A43 ∈ trees ω $ > $ G ⇒ A44 ∈ trees ω $ >
+  $ G ⇒ A45 ∈ trees ω $ > $ G ⇒ A46 ∈ trees ω $ > $ G ⇒ A47 ∈ trees ω $ > $ G ⇒ A48 ∈ trees ω $ >
+  $ G ⇒ A49 ∈ trees ω $ > $ G ⇒ A50 ∈ trees ω $ > $ G ⇒ A51 ∈ trees ω $ >
+  $ G ⇒ ra_bitwise_eqs A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45 ∈ lrel3 J $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A46 ∈ lrel $ >
+  $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ A47 ∈ lrel $ >
+  $ G ⇒ ra_deq A1 A46 A46 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons tr_nat_ty ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A47 A47 ⟨ kc_pi , scons A2 (scons ⟨ kc_pi , scons A2 (scons A2 ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 A46 ⟨ kc_app , scons A41 (scons A47 ∅) ⟩ ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons tr_nat_ty ∅) ⟩ ∅) ⟩ ∈ J $ >
+  $ G ⇒ ra_deq A1 ⟨ kc_app , scons ⟨ kc_app , scons A47 (scons A3 ∅) ⟩ (scons A3 ∅) ⟩ A48 A2 ∈ J $ >
+  $ G ⇒ ra_deq A1 ⟨ kc_app , scons ⟨ kc_app , scons A47 (scons A3 ∅) ⟩ (scons A4 ∅) ⟩ A49 A2 ∈ J $ >
+  $ G ⇒ ra_deq A1 ⟨ kc_app , scons ⟨ kc_app , scons A47 (scons A4 ∅) ⟩ (scons A3 ∅) ⟩ A50 A2 ∈ J $ >
+  $ G ⇒ ra_deq A1 ⟨ kc_app , scons ⟨ kc_app , scons A47 (scons A4 ∅) ⟩ (scons A4 ∅) ⟩ A51 A2 ∈ J $ >
+  $ G ⇒ ra_bitop_eqs A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45 A46 A47 A48 A49 A50 A51 ∈ lrel3 J $;
 --| The wide clause axioms, at every `J`.
 theorem gcd_eqs_i_j (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr): $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem $ > $ nateq_dec_j J G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $ > $ bool_dec_j J G B t u Not dite ite bp bd $ > $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ closed nz f $ > $ closed nz pack $ > $ closed nz F $ > $ closed nz pfF $ > $ ty_j J G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ ty_j J G F (fix_fty al motive hm ltN) $ > $ ty_j J G pack (pi nat_ty (pi nat_ty al)) $ > $ ty_j J G pfF (pi nat_ty (pi nat_ty (pi (app Not (app (app eqN (bvar n1)) lit0)) (app (app ltN (app hm (app (app pack (app (app fm (bvar n1)) (bvar n2))) (bvar n2)))) (app hm (app (app pack (bvar n2)) (bvar n1))))))) $ > $ deq_j J (cons nat_ty (cons nat_ty G)) (app (app f (bvar n1)) (bvar nz)) (app (app (app (app (app fix al) motive) hm) F) (app (app pack (bvar n1)) (bvar nz))) nat_ty $ > $ deq_j J (cons nat_ty (cons nat_ty G)) (app hm (app (app pack (bvar n1)) (bvar nz))) (bvar n1) nat_ty $ > $ deq_j J (cons (pi al (pi (app (app ltN (app hm (bvar nz))) (app hm (app (app pack lit0) (bvar n1)))) (app motive (bvar n1)))) (cons nat_ty G)) (app (app F (app (app pack lit0) (bvar n1))) (bvar nz)) (bvar n1) (app motive (app (app pack lit0) (bvar n1))) $ > $ deq_j J (cons (pi al (pi (app (app ltN (app hm (bvar nz))) (app hm (app (app pack (app nat_succ (bvar n3))) (bvar n2)))) (app motive (bvar n1)))) (cons (app Not (app (app eqN (app nat_succ (bvar n1))) lit0)) (cons nat_ty (cons nat_ty G)))) (app (app F (app (app pack (app nat_succ (bvar n3))) (bvar n2))) (bvar nz)) (app (app (bvar nz) (app (app pack (app (app fm (bvar n2)) (app nat_succ (bvar n3)))) (app nat_succ (bvar n3)))) (app (app (app pfF (app nat_succ (bvar n3))) (bvar n2)) (bvar n1))) (app motive (app (app pack (app nat_succ (bvar n3))) (bvar n2))) $ > $ gcd_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $;
 theorem bitwise_eqs_i_j (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ div_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god pfs lem $ > $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem $ > $ nateq_dec_j J G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $ > $ bool_dec_j J G B t u Not dite ite bp bd $ > $ add_eqs_j J G fa $ > $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ closed nz fb $ > $ closed nz pack $ > $ closed nz Fb $ > $ closed nz pfB $ > $ closed nz dec $ > $ ty_j J G fb (pi (pi B (pi B B)) (pi nat_ty (pi nat_ty nat_ty))) $ > $ ty_j J G Fb (pi (pi B (pi B B)) (fix_fty al motive hm ltN)) $ > $ ty_j J G pack (pi nat_ty (pi nat_ty al)) $ > $ ty_j J G pfB (pi nat_ty (pi nat_ty (pi (app Not (app (app eqN (bvar n1)) lit0)) (app (app ltN (app hm (app (app pack (app (app fd (bvar n2)) lit2)) (app (app fd (bvar n1)) lit2)))) (app hm (app (app pack (bvar n2)) (bvar n1))))))) $ > $ deq_j J (cons nat_ty (cons nat_ty (cons (pi B (pi B B)) G))) (app (app (app fb (bvar n2)) (bvar n1)) (bvar nz)) (app (app (app (app (app fix al) motive) hm) (app Fb (bvar n2))) (app (app pack (bvar n1)) (bvar nz))) nat_ty $ > $ deq_j J (cons nat_ty (cons nat_ty G)) (app hm (app (app pack (bvar n1)) (bvar nz))) (bvar n1) nat_ty $ > $ deq_j J (cons (app (app T (bvar n1)) (bvar nz)) (cons B (cons Prop G))) (app (app dec (bvar n2)) (app (app (app R (bvar n2)) (bvar n1)) (bvar nz))) (bvar n1) B $ > $ deq_j J (cons (pi al (pi (app (app ltN (app hm (bvar nz))) (app hm (app (app pack (bvar n2)) (bvar n1)))) (app motive (bvar n1)))) (cons nat_ty (cons nat_ty (cons (pi B (pi B B)) G)))) (app (app (app Fb (bvar n3)) (app (app pack (bvar n2)) (bvar n1))) (bvar nz)) (app (app (app (app dite (app (app eqN (bvar n2)) lit0)) (app (app deqN (bvar n2)) lit0)) (lam (app (app eqN (bvar n2)) lit0) (app (app (app (app dite (app bp (app (app (bvar n4) u) t))) (app bd (app (app (bvar n4) u) t))) (lam (app bp (app (app (bvar n4) u) t)) (bvar n3))) (lam (app Not (app bp (app (app (bvar n4) u) t))) lit0)))) (lam (app Not (app (app eqN (bvar n2)) lit0)) (app (app (app (app dite (app (app eqN (bvar n2)) lit0)) (app (app deqN (bvar n2)) lit0)) (lam (app (app eqN (bvar n2)) lit0) (app (app (app (app dite (app bp (app (app (bvar n5) t) u))) (app bd (app (app (bvar n5) t) u))) (lam (app bp (app (app (bvar n5) t) u)) (bvar n5))) (lam (app Not (app bp (app (app (bvar n5) t) u))) lit0)))) (lam (app Not (app (app eqN (bvar n2)) lit0)) (app (app (app (app dite (app bp (app (app (bvar n5) (app (app dec (app (app eqN (app (app fm (bvar n4)) lit2)) lit1)) (app (app deqN (app (app fm (bvar n4)) lit2)) lit1))) (app (app dec (app (app eqN (app (app fm (bvar n3)) lit2)) lit1)) (app (app deqN (app (app fm (bvar n3)) lit2)) lit1))))) (app bd (app (app (bvar n5) (app (app dec (app (app eqN (app (app fm (bvar n4)) lit2)) lit1)) (app (app deqN (app (app fm (bvar n4)) lit2)) lit1))) (app (app dec (app (app eqN (app (app fm (bvar n3)) lit2)) lit1)) (app (app deqN (app (app fm (bvar n3)) lit2)) lit1))))) (lam (app bp (app (app (bvar n5) (app (app dec (app (app eqN (app (app fm (bvar n4)) lit2)) lit1)) (app (app deqN (app (app fm (bvar n4)) lit2)) lit1))) (app (app dec (app (app eqN (app (app fm (bvar n3)) lit2)) lit1)) (app (app deqN (app (app fm (bvar n3)) lit2)) lit1)))) (app (app fa (app (app fa (app (app (bvar n3) (app (app pack (app (app fd (bvar n5)) lit2)) (app (app fd (bvar n4)) lit2))) (app (app (app pfB (bvar n5)) (bvar n4)) (bvar n2)))) (app (app (bvar n3) (app (app pack (app (app fd (bvar n5)) lit2)) (app (app fd (bvar n4)) lit2))) (app (app (app pfB (bvar n5)) (bvar n4)) (bvar n2))))) lit1))) (lam (app Not (app bp (app (app (bvar n5) (app (app dec (app (app eqN (app (app fm (bvar n4)) lit2)) lit1)) (app (app deqN (app (app fm (bvar n4)) lit2)) lit1))) (app (app dec (app (app eqN (app (app fm (bvar n3)) lit2)) lit1)) (app (app deqN (app (app fm (bvar n3)) lit2)) lit1))))) (app (app fa (app (app (bvar n3) (app (app pack (app (app fd (bvar n5)) lit2)) (app (app fd (bvar n4)) lit2))) (app (app (app pfB (bvar n5)) (bvar n4)) (bvar n2)))) (app (app (bvar n3) (app (app pack (app (app fd (bvar n5)) lit2)) (app (app fd (bvar n4)) lit2))) (app (app (app pfB (bvar n5)) (bvar n4)) (bvar n2)))))))))) (app motive (app (app pack (bvar n2)) (bvar n1))) $ > $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $;
@@ -863,3 +1386,240 @@ theorem lrel3_bitwise_eqs_cases (G: hyps) (J: class) (t1 t2 t3 t4 t5 t6 t7 t8 t9
 theorem lrel3_bitop_eqs_cases (G: hyps) (J: class) (t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15 t16 t17 t18 t19 t20 t21 t22 t23 t24 t25 t26 t27 t28 t29 t30 t31 t32 t33 t34 t35 t36 t37 t38 t39 t40 t41 t42 t43 t44 t45 t46 t47 t48 t49 t50 t51: set):
   $ G ⇒ ra_bitop_eqs t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15 t16 t17 t18 t19 t20 t21 t22 t23 t24 t25 t26 t27 t28 t29 t30 t31 t32 t33 t34 t35 t36 t37 t38 t39 t40 t41 t42 t43 t44 t45 t46 t47 t48 t49 t50 t51 ∈ lrel3 J $ >
   $ G ⇒ (ra_bitwise_eqs t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 t11 t12 t13 t14 t15 t16 t17 t18 t19 t20 t21 t22 t23 t24 t25 t26 t27 t28 t29 t30 t31 t32 t33 t34 t35 t36 t37 t38 t39 t40 t41 t42 t43 t44 t45 ∈ lrel3 J ∧ ra_closed ⟨ kc_nz , ∅ ⟩ t46 ∈ lrel ∧ ra_closed ⟨ kc_nz , ∅ ⟩ t47 ∈ lrel ∧ ra_deq t1 t46 t46 ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons tr_nat_ty ∅) ⟩ ∅) ⟩ ∈ J ∧ ra_deq t1 t47 t47 ⟨ kc_pi , scons t2 (scons ⟨ kc_pi , scons t2 (scons t2 ∅) ⟩ ∅) ⟩ ∈ J ∧ ra_deq t1 t46 ⟨ kc_app , scons t41 (scons t47 ∅) ⟩ ⟨ kc_pi , scons tr_nat_ty (scons ⟨ kc_pi , scons tr_nat_ty (scons tr_nat_ty ∅) ⟩ ∅) ⟩ ∈ J ∧ ra_deq t1 ⟨ kc_app , scons ⟨ kc_app , scons t47 (scons t3 ∅) ⟩ (scons t3 ∅) ⟩ t48 t2 ∈ J ∧ ra_deq t1 ⟨ kc_app , scons ⟨ kc_app , scons t47 (scons t3 ∅) ⟩ (scons t4 ∅) ⟩ t49 t2 ∈ J ∧ ra_deq t1 ⟨ kc_app , scons ⟨ kc_app , scons t47 (scons t4 ∅) ⟩ (scons t3 ∅) ⟩ t50 t2 ∈ J ∧ ra_deq t1 ⟨ kc_app , scons ⟨ kc_app , scons t47 (scons t4 ∅) ⟩ (scons t4 ∅) ⟩ t51 t2 ∈ J) $;
+
+-- --------------------------------------------------------------------------
+-- Congruence in `J`, substitution through it
+-- --------------------------------------------------------------------------
+
+--| The defs that take the judgment atoms `J` (a wide clause's instances `gi_A`
+--| in their other classes too): congruence (`D_congr`, for rewriting) and
+--| substitution through them (`sb_c_D`, for the normalizer); then `lrel3_eq`.
+--| @congr
+theorem gi_gcd_eqs_i_congr (J J2 A1 B1 A2 B2 A3 B3 A4 B4 A5 B5 A6 B6 A7 B7 A8 B8 A9 B9 A10 B10 A11 B11 A12 B12 A13 B13 A14 B14 A15 B15 A16 B16 A17 B17 A18 B18 A19 B19 A20 B20 A21 B21 A22 B22 A23 B23 A24 B24 A25 B25 A26 B26 A27 B27 A28 B28 A29 B29 A30 B30 A31 B31 A32 B32 A33 B33 A34 B34 A35 B35 A36 B36 A37 B37 A38 B38 A39 B39 A40 B40 A41 B41: class): $ J ≐ J2 $ > $ A1 ≐ B1 $ > $ A2 ≐ B2 $ > $ A3 ≐ B3 $ > $ A4 ≐ B4 $ > $ A5 ≐ B5 $ > $ A6 ≐ B6 $ > $ A7 ≐ B7 $ > $ A8 ≐ B8 $ > $ A9 ≐ B9 $ > $ A10 ≐ B10 $ > $ A11 ≐ B11 $ > $ A12 ≐ B12 $ > $ A13 ≐ B13 $ > $ A14 ≐ B14 $ > $ A15 ≐ B15 $ > $ A16 ≐ B16 $ > $ A17 ≐ B17 $ > $ A18 ≐ B18 $ > $ A19 ≐ B19 $ > $ A20 ≐ B20 $ > $ A21 ≐ B21 $ > $ A22 ≐ B22 $ > $ A23 ≐ B23 $ > $ A24 ≐ B24 $ > $ A25 ≐ B25 $ > $ A26 ≐ B26 $ > $ A27 ≐ B27 $ > $ A28 ≐ B28 $ > $ A29 ≐ B29 $ > $ A30 ≐ B30 $ > $ A31 ≐ B31 $ > $ A32 ≐ B32 $ > $ A33 ≐ B33 $ > $ A34 ≐ B34 $ > $ A35 ≐ B35 $ > $ A36 ≐ B36 $ > $ A37 ≐ B37 $ > $ A38 ≐ B38 $ > $ A39 ≐ B39 $ > $ A40 ≐ B40 $ > $ A41 ≐ B41 $ > $ gi_gcd_eqs_i J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 A33 A34 A35 A36 A37 A38 A39 A40 A41 ≐ gi_gcd_eqs_i J2 B1 B2 B3 B4 B5 B6 B7 B8 B9 B10 B11 B12 B13 B14 B15 B16 B17 B18 B19 B20 B21 B22 B23 B24 B25 B26 B27 B28 B29 B30 B31 B32 B33 B34 B35 B36 B37 B38 B39 B40 B41 $;
+--| @rewrite
+theorem sb_c_gi_gcd_eqs_i {x: set} (t: set x) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 A33 A34 A35 A36 A37 A38 A39 A40 A41: class x): $ (⟦ x / t ⟧ (gi_gcd_eqs_i J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 A33 A34 A35 A36 A37 A38 A39 A40 A41)) ≐ gi_gcd_eqs_i (⟦ x / t ⟧ J) (⟦ x / t ⟧ A1) (⟦ x / t ⟧ A2) (⟦ x / t ⟧ A3) (⟦ x / t ⟧ A4) (⟦ x / t ⟧ A5) (⟦ x / t ⟧ A6) (⟦ x / t ⟧ A7) (⟦ x / t ⟧ A8) (⟦ x / t ⟧ A9) (⟦ x / t ⟧ A10) (⟦ x / t ⟧ A11) (⟦ x / t ⟧ A12) (⟦ x / t ⟧ A13) (⟦ x / t ⟧ A14) (⟦ x / t ⟧ A15) (⟦ x / t ⟧ A16) (⟦ x / t ⟧ A17) (⟦ x / t ⟧ A18) (⟦ x / t ⟧ A19) (⟦ x / t ⟧ A20) (⟦ x / t ⟧ A21) (⟦ x / t ⟧ A22) (⟦ x / t ⟧ A23) (⟦ x / t ⟧ A24) (⟦ x / t ⟧ A25) (⟦ x / t ⟧ A26) (⟦ x / t ⟧ A27) (⟦ x / t ⟧ A28) (⟦ x / t ⟧ A29) (⟦ x / t ⟧ A30) (⟦ x / t ⟧ A31) (⟦ x / t ⟧ A32) (⟦ x / t ⟧ A33) (⟦ x / t ⟧ A34) (⟦ x / t ⟧ A35) (⟦ x / t ⟧ A36) (⟦ x / t ⟧ A37) (⟦ x / t ⟧ A38) (⟦ x / t ⟧ A39) (⟦ x / t ⟧ A40) (⟦ x / t ⟧ A41) $;
+--| @congr
+theorem gi_bitwise_eqs_i_congr (J J2 A1 B1 A2 B2 A3 B3 A4 B4 A5 B5 A6 B6 A7 B7 A8 B8 A9 B9 A10 B10 A11 B11 A12 B12 A13 B13 A14 B14 A15 B15 A16 B16 A17 B17 A18 B18 A19 B19 A20 B20 A21 B21 A22 B22 A23 B23 A24 B24 A25 B25 A26 B26 A27 B27 A28 B28 A29 B29 A30 B30 A31 B31 A32 B32 A33 B33 A34 B34 A35 B35 A36 B36 A37 B37 A38 B38 A39 B39 A40 B40 A41 B41 A42 B42 A43 B43 A44 B44 A45 B45: class): $ J ≐ J2 $ > $ A1 ≐ B1 $ > $ A2 ≐ B2 $ > $ A3 ≐ B3 $ > $ A4 ≐ B4 $ > $ A5 ≐ B5 $ > $ A6 ≐ B6 $ > $ A7 ≐ B7 $ > $ A8 ≐ B8 $ > $ A9 ≐ B9 $ > $ A10 ≐ B10 $ > $ A11 ≐ B11 $ > $ A12 ≐ B12 $ > $ A13 ≐ B13 $ > $ A14 ≐ B14 $ > $ A15 ≐ B15 $ > $ A16 ≐ B16 $ > $ A17 ≐ B17 $ > $ A18 ≐ B18 $ > $ A19 ≐ B19 $ > $ A20 ≐ B20 $ > $ A21 ≐ B21 $ > $ A22 ≐ B22 $ > $ A23 ≐ B23 $ > $ A24 ≐ B24 $ > $ A25 ≐ B25 $ > $ A26 ≐ B26 $ > $ A27 ≐ B27 $ > $ A28 ≐ B28 $ > $ A29 ≐ B29 $ > $ A30 ≐ B30 $ > $ A31 ≐ B31 $ > $ A32 ≐ B32 $ > $ A33 ≐ B33 $ > $ A34 ≐ B34 $ > $ A35 ≐ B35 $ > $ A36 ≐ B36 $ > $ A37 ≐ B37 $ > $ A38 ≐ B38 $ > $ A39 ≐ B39 $ > $ A40 ≐ B40 $ > $ A41 ≐ B41 $ > $ A42 ≐ B42 $ > $ A43 ≐ B43 $ > $ A44 ≐ B44 $ > $ A45 ≐ B45 $ > $ gi_bitwise_eqs_i J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45 ≐ gi_bitwise_eqs_i J2 B1 B2 B3 B4 B5 B6 B7 B8 B9 B10 B11 B12 B13 B14 B15 B16 B17 B18 B19 B20 B21 B22 B23 B24 B25 B26 B27 B28 B29 B30 B31 B32 B33 B34 B35 B36 B37 B38 B39 B40 B41 B42 B43 B44 B45 $;
+--| @rewrite
+theorem sb_c_gi_bitwise_eqs_i {x: set} (t: set x) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45: class x): $ (⟦ x / t ⟧ (gi_bitwise_eqs_i J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45)) ≐ gi_bitwise_eqs_i (⟦ x / t ⟧ J) (⟦ x / t ⟧ A1) (⟦ x / t ⟧ A2) (⟦ x / t ⟧ A3) (⟦ x / t ⟧ A4) (⟦ x / t ⟧ A5) (⟦ x / t ⟧ A6) (⟦ x / t ⟧ A7) (⟦ x / t ⟧ A8) (⟦ x / t ⟧ A9) (⟦ x / t ⟧ A10) (⟦ x / t ⟧ A11) (⟦ x / t ⟧ A12) (⟦ x / t ⟧ A13) (⟦ x / t ⟧ A14) (⟦ x / t ⟧ A15) (⟦ x / t ⟧ A16) (⟦ x / t ⟧ A17) (⟦ x / t ⟧ A18) (⟦ x / t ⟧ A19) (⟦ x / t ⟧ A20) (⟦ x / t ⟧ A21) (⟦ x / t ⟧ A22) (⟦ x / t ⟧ A23) (⟦ x / t ⟧ A24) (⟦ x / t ⟧ A25) (⟦ x / t ⟧ A26) (⟦ x / t ⟧ A27) (⟦ x / t ⟧ A28) (⟦ x / t ⟧ A29) (⟦ x / t ⟧ A30) (⟦ x / t ⟧ A31) (⟦ x / t ⟧ A32) (⟦ x / t ⟧ A33) (⟦ x / t ⟧ A34) (⟦ x / t ⟧ A35) (⟦ x / t ⟧ A36) (⟦ x / t ⟧ A37) (⟦ x / t ⟧ A38) (⟦ x / t ⟧ A39) (⟦ x / t ⟧ A40) (⟦ x / t ⟧ A41) (⟦ x / t ⟧ A42) (⟦ x / t ⟧ A43) (⟦ x / t ⟧ A44) (⟦ x / t ⟧ A45) $;
+--| @congr
+theorem gi_bitop_eqs_i_congr (J J2 A1 B1 A2 B2 A3 B3 A4 B4 A5 B5 A6 B6 A7 B7 A8 B8 A9 B9 A10 B10 A11 B11 A12 B12 A13 B13 A14 B14 A15 B15 A16 B16 A17 B17 A18 B18 A19 B19 A20 B20 A21 B21 A22 B22 A23 B23 A24 B24 A25 B25 A26 B26 A27 B27 A28 B28 A29 B29 A30 B30 A31 B31 A32 B32 A33 B33 A34 B34 A35 B35 A36 B36 A37 B37 A38 B38 A39 B39 A40 B40 A41 B41 A42 B42 A43 B43 A44 B44 A45 B45 A46 B46 A47 B47 A48 B48 A49 B49 A50 B50 A51 B51: class): $ J ≐ J2 $ > $ A1 ≐ B1 $ > $ A2 ≐ B2 $ > $ A3 ≐ B3 $ > $ A4 ≐ B4 $ > $ A5 ≐ B5 $ > $ A6 ≐ B6 $ > $ A7 ≐ B7 $ > $ A8 ≐ B8 $ > $ A9 ≐ B9 $ > $ A10 ≐ B10 $ > $ A11 ≐ B11 $ > $ A12 ≐ B12 $ > $ A13 ≐ B13 $ > $ A14 ≐ B14 $ > $ A15 ≐ B15 $ > $ A16 ≐ B16 $ > $ A17 ≐ B17 $ > $ A18 ≐ B18 $ > $ A19 ≐ B19 $ > $ A20 ≐ B20 $ > $ A21 ≐ B21 $ > $ A22 ≐ B22 $ > $ A23 ≐ B23 $ > $ A24 ≐ B24 $ > $ A25 ≐ B25 $ > $ A26 ≐ B26 $ > $ A27 ≐ B27 $ > $ A28 ≐ B28 $ > $ A29 ≐ B29 $ > $ A30 ≐ B30 $ > $ A31 ≐ B31 $ > $ A32 ≐ B32 $ > $ A33 ≐ B33 $ > $ A34 ≐ B34 $ > $ A35 ≐ B35 $ > $ A36 ≐ B36 $ > $ A37 ≐ B37 $ > $ A38 ≐ B38 $ > $ A39 ≐ B39 $ > $ A40 ≐ B40 $ > $ A41 ≐ B41 $ > $ A42 ≐ B42 $ > $ A43 ≐ B43 $ > $ A44 ≐ B44 $ > $ A45 ≐ B45 $ > $ A46 ≐ B46 $ > $ A47 ≐ B47 $ > $ A48 ≐ B48 $ > $ A49 ≐ B49 $ > $ A50 ≐ B50 $ > $ A51 ≐ B51 $ > $ gi_bitop_eqs_i J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45 A46 A47 A48 A49 A50 A51 ≐ gi_bitop_eqs_i J2 B1 B2 B3 B4 B5 B6 B7 B8 B9 B10 B11 B12 B13 B14 B15 B16 B17 B18 B19 B20 B21 B22 B23 B24 B25 B26 B27 B28 B29 B30 B31 B32 B33 B34 B35 B36 B37 B38 B39 B40 B41 B42 B43 B44 B45 B46 B47 B48 B49 B50 B51 $;
+--| @rewrite
+theorem sb_c_gi_bitop_eqs_i {x: set} (t: set x) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45 A46 A47 A48 A49 A50 A51: class x): $ (⟦ x / t ⟧ (gi_bitop_eqs_i J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20 A21 A22 A23 A24 A25 A26 A27 A28 A29 A30 A31 A32 A33 A34 A35 A36 A37 A38 A39 A40 A41 A42 A43 A44 A45 A46 A47 A48 A49 A50 A51)) ≐ gi_bitop_eqs_i (⟦ x / t ⟧ J) (⟦ x / t ⟧ A1) (⟦ x / t ⟧ A2) (⟦ x / t ⟧ A3) (⟦ x / t ⟧ A4) (⟦ x / t ⟧ A5) (⟦ x / t ⟧ A6) (⟦ x / t ⟧ A7) (⟦ x / t ⟧ A8) (⟦ x / t ⟧ A9) (⟦ x / t ⟧ A10) (⟦ x / t ⟧ A11) (⟦ x / t ⟧ A12) (⟦ x / t ⟧ A13) (⟦ x / t ⟧ A14) (⟦ x / t ⟧ A15) (⟦ x / t ⟧ A16) (⟦ x / t ⟧ A17) (⟦ x / t ⟧ A18) (⟦ x / t ⟧ A19) (⟦ x / t ⟧ A20) (⟦ x / t ⟧ A21) (⟦ x / t ⟧ A22) (⟦ x / t ⟧ A23) (⟦ x / t ⟧ A24) (⟦ x / t ⟧ A25) (⟦ x / t ⟧ A26) (⟦ x / t ⟧ A27) (⟦ x / t ⟧ A28) (⟦ x / t ⟧ A29) (⟦ x / t ⟧ A30) (⟦ x / t ⟧ A31) (⟦ x / t ⟧ A32) (⟦ x / t ⟧ A33) (⟦ x / t ⟧ A34) (⟦ x / t ⟧ A35) (⟦ x / t ⟧ A36) (⟦ x / t ⟧ A37) (⟦ x / t ⟧ A38) (⟦ x / t ⟧ A39) (⟦ x / t ⟧ A40) (⟦ x / t ⟧ A41) (⟦ x / t ⟧ A42) (⟦ x / t ⟧ A43) (⟦ x / t ⟧ A44) (⟦ x / t ⟧ A45) (⟦ x / t ⟧ A46) (⟦ x / t ⟧ A47) (⟦ x / t ⟧ A48) (⟦ x / t ⟧ A49) (⟦ x / t ⟧ A50) (⟦ x / t ⟧ A51) $;
+--| @congr
+theorem cl_sty_app_congr (J J2: class): $ J ≐ J2 $ > $ cl_sty_app J ≐ cl_sty_app J2 $;
+--| @rewrite
+theorem sb_c_cl_sty_app {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_sty_app J)) ≐ cl_sty_app (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_cwf_pi_congr (J J2: class): $ J ≐ J2 $ > $ cl_cwf_pi J ≐ cl_cwf_pi J2 $;
+--| @rewrite
+theorem sb_c_cl_cwf_pi {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_cwf_pi J)) ≐ cl_cwf_pi (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_ctx_wf_cons_congr (J J2: class): $ J ≐ J2 $ > $ cl_ctx_wf_cons J ≐ cl_ctx_wf_cons J2 $;
+--| @rewrite
+theorem sb_c_cl_ctx_wf_cons {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_ctx_wf_cons J)) ≐ cl_ctx_wf_cons (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_tys_ty_cons_congr (J J2: class): $ J ≐ J2 $ > $ cl_tys_ty_cons J ≐ cl_tys_ty_cons J2 $;
+--| @rewrite
+theorem sb_c_cl_tys_ty_cons {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_tys_ty_cons J)) ≐ cl_tys_ty_cons (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_fir_prop_congr (J J2: class): $ J ≐ J2 $ > $ cl_fir_prop J ≐ cl_fir_prop J2 $;
+--| @rewrite
+theorem sb_c_cl_fir_prop {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_fir_prop J)) ≐ cl_fir_prop (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_fprops_s_congr (J J2: class): $ J ≐ J2 $ > $ cl_fprops_s J ≐ cl_fprops_s J2 $;
+--| @rewrite
+theorem sb_c_cl_fprops_s {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_fprops_s J)) ≐ cl_fprops_s (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_add_eqs_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_add_eqs_i J ≐ cl_add_eqs_i J2 $;
+--| @rewrite
+theorem sb_c_cl_add_eqs_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_add_eqs_i J)) ≐ cl_add_eqs_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_pred_eqs_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_pred_eqs_i J ≐ cl_pred_eqs_i J2 $;
+--| @rewrite
+theorem sb_c_cl_pred_eqs_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_pred_eqs_i J)) ≐ cl_pred_eqs_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_sub_eqs_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_sub_eqs_i J ≐ cl_sub_eqs_i J2 $;
+--| @rewrite
+theorem sb_c_cl_sub_eqs_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_sub_eqs_i J)) ≐ cl_sub_eqs_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_mul_eqs_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_mul_eqs_i J ≐ cl_mul_eqs_i J2 $;
+--| @rewrite
+theorem sb_c_cl_mul_eqs_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_mul_eqs_i J)) ≐ cl_mul_eqs_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_pow_eqs_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_pow_eqs_i J ≐ cl_pow_eqs_i J2 $;
+--| @rewrite
+theorem sb_c_cl_pow_eqs_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_pow_eqs_i J)) ≐ cl_pow_eqs_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_beq_eqs_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_beq_eqs_i J ≐ cl_beq_eqs_i J2 $;
+--| @rewrite
+theorem sb_c_cl_beq_eqs_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_beq_eqs_i J)) ≐ cl_beq_eqs_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_ble_eqs_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_ble_eqs_i J ≐ cl_ble_eqs_i J2 $;
+--| @rewrite
+theorem sb_c_cl_ble_eqs_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_ble_eqs_i J)) ≐ cl_ble_eqs_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_shl_eqs_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_shl_eqs_i J ≐ cl_shl_eqs_i J2 $;
+--| @rewrite
+theorem sb_c_cl_shl_eqs_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_shl_eqs_i J)) ≐ cl_shl_eqs_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_shr_eqs_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_shr_eqs_i J ≐ cl_shr_eqs_i J2 $;
+--| @rewrite
+theorem sb_c_cl_shr_eqs_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_shr_eqs_i J)) ≐ cl_shr_eqs_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_dec_eqs_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_dec_eqs_i J ≐ cl_dec_eqs_i J2 $;
+--| @rewrite
+theorem sb_c_cl_dec_eqs_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_dec_eqs_i J)) ≐ cl_dec_eqs_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_ite_eqs_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_ite_eqs_i J ≐ cl_ite_eqs_i J2 $;
+--| @rewrite
+theorem sb_c_cl_ite_eqs_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_ite_eqs_i J)) ≐ cl_ite_eqs_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_natle_dec_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_natle_dec_i J ≐ cl_natle_dec_i J2 $;
+--| @rewrite
+theorem sb_c_cl_natle_dec_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_natle_dec_i J)) ≐ cl_natle_dec_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_nateq_dec_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_nateq_dec_i J ≐ cl_nateq_dec_i J2 $;
+--| @rewrite
+theorem sb_c_cl_nateq_dec_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_nateq_dec_i J)) ≐ cl_nateq_dec_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_bool_dec_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_bool_dec_i J ≐ cl_bool_dec_i J2 $;
+--| @rewrite
+theorem sb_c_cl_bool_dec_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_bool_dec_i J)) ≐ cl_bool_dec_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_div_eqs_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_div_eqs_i J ≐ cl_div_eqs_i J2 $;
+--| @rewrite
+theorem sb_c_cl_div_eqs_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_div_eqs_i J)) ≐ cl_div_eqs_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_mod_eqs_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_mod_eqs_i J ≐ cl_mod_eqs_i J2 $;
+--| @rewrite
+theorem sb_c_cl_mod_eqs_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_mod_eqs_i J)) ≐ cl_mod_eqs_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_fix_eqs_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_fix_eqs_i J ≐ cl_fix_eqs_i J2 $;
+--| @rewrite
+theorem sb_c_cl_fix_eqs_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_fix_eqs_i J)) ≐ cl_fix_eqs_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_gcd_eqs_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_gcd_eqs_i J ≐ cl_gcd_eqs_i J2 $;
+--| @rewrite
+theorem sb_c_cl_gcd_eqs_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_gcd_eqs_i J)) ≐ cl_gcd_eqs_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_bitwise_eqs_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_bitwise_eqs_i J ≐ cl_bitwise_eqs_i J2 $;
+--| @rewrite
+theorem sb_c_cl_bitwise_eqs_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_bitwise_eqs_i J)) ≐ cl_bitwise_eqs_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem cl_bitop_eqs_i_congr (J J2: class): $ J ≐ J2 $ > $ cl_bitop_eqs_i J ≐ cl_bitop_eqs_i J2 $;
+--| @rewrite
+theorem sb_c_cl_bitop_eqs_i {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (cl_bitop_eqs_i J)) ≐ cl_bitop_eqs_i (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_sty_congr (J J2: class): $ J ≐ J2 $ > $ pr_sty J ≐ pr_sty J2 $;
+--| @rewrite
+theorem sb_c_pr_sty {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_sty J)) ≐ pr_sty (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_cwf_congr (J J2: class): $ J ≐ J2 $ > $ pr_cwf J ≐ pr_cwf J2 $;
+--| @rewrite
+theorem sb_c_pr_cwf {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_cwf J)) ≐ pr_cwf (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_ctx_wf_congr (J J2: class): $ J ≐ J2 $ > $ pr_ctx_wf J ≐ pr_ctx_wf J2 $;
+--| @rewrite
+theorem sb_c_pr_ctx_wf {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_ctx_wf J)) ≐ pr_ctx_wf (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_tys_ty_congr (J J2: class): $ J ≐ J2 $ > $ pr_tys_ty J ≐ pr_tys_ty J2 $;
+--| @rewrite
+theorem sb_c_pr_tys_ty {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_tys_ty J)) ≐ pr_tys_ty (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_fir_congr (J J2: class): $ J ≐ J2 $ > $ pr_fir J ≐ pr_fir J2 $;
+--| @rewrite
+theorem sb_c_pr_fir {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_fir J)) ≐ pr_fir (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_fprops_congr (J J2: class): $ J ≐ J2 $ > $ pr_fprops J ≐ pr_fprops J2 $;
+--| @rewrite
+theorem sb_c_pr_fprops {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_fprops J)) ≐ pr_fprops (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_add_eqs_congr (J J2: class): $ J ≐ J2 $ > $ pr_add_eqs J ≐ pr_add_eqs J2 $;
+--| @rewrite
+theorem sb_c_pr_add_eqs {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_add_eqs J)) ≐ pr_add_eqs (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_pred_eqs_congr (J J2: class): $ J ≐ J2 $ > $ pr_pred_eqs J ≐ pr_pred_eqs J2 $;
+--| @rewrite
+theorem sb_c_pr_pred_eqs {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_pred_eqs J)) ≐ pr_pred_eqs (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_sub_eqs_congr (J J2: class): $ J ≐ J2 $ > $ pr_sub_eqs J ≐ pr_sub_eqs J2 $;
+--| @rewrite
+theorem sb_c_pr_sub_eqs {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_sub_eqs J)) ≐ pr_sub_eqs (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_mul_eqs_congr (J J2: class): $ J ≐ J2 $ > $ pr_mul_eqs J ≐ pr_mul_eqs J2 $;
+--| @rewrite
+theorem sb_c_pr_mul_eqs {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_mul_eqs J)) ≐ pr_mul_eqs (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_pow_eqs_congr (J J2: class): $ J ≐ J2 $ > $ pr_pow_eqs J ≐ pr_pow_eqs J2 $;
+--| @rewrite
+theorem sb_c_pr_pow_eqs {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_pow_eqs J)) ≐ pr_pow_eqs (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_beq_eqs_congr (J J2: class): $ J ≐ J2 $ > $ pr_beq_eqs J ≐ pr_beq_eqs J2 $;
+--| @rewrite
+theorem sb_c_pr_beq_eqs {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_beq_eqs J)) ≐ pr_beq_eqs (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_ble_eqs_congr (J J2: class): $ J ≐ J2 $ > $ pr_ble_eqs J ≐ pr_ble_eqs J2 $;
+--| @rewrite
+theorem sb_c_pr_ble_eqs {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_ble_eqs J)) ≐ pr_ble_eqs (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_shl_eqs_congr (J J2: class): $ J ≐ J2 $ > $ pr_shl_eqs J ≐ pr_shl_eqs J2 $;
+--| @rewrite
+theorem sb_c_pr_shl_eqs {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_shl_eqs J)) ≐ pr_shl_eqs (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_shr_eqs_congr (J J2: class): $ J ≐ J2 $ > $ pr_shr_eqs J ≐ pr_shr_eqs J2 $;
+--| @rewrite
+theorem sb_c_pr_shr_eqs {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_shr_eqs J)) ≐ pr_shr_eqs (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_dec_eqs_congr (J J2: class): $ J ≐ J2 $ > $ pr_dec_eqs J ≐ pr_dec_eqs J2 $;
+--| @rewrite
+theorem sb_c_pr_dec_eqs {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_dec_eqs J)) ≐ pr_dec_eqs (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_ite_eqs_congr (J J2: class): $ J ≐ J2 $ > $ pr_ite_eqs J ≐ pr_ite_eqs J2 $;
+--| @rewrite
+theorem sb_c_pr_ite_eqs {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_ite_eqs J)) ≐ pr_ite_eqs (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_natle_dec_congr (J J2: class): $ J ≐ J2 $ > $ pr_natle_dec J ≐ pr_natle_dec J2 $;
+--| @rewrite
+theorem sb_c_pr_natle_dec {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_natle_dec J)) ≐ pr_natle_dec (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_nateq_dec_congr (J J2: class): $ J ≐ J2 $ > $ pr_nateq_dec J ≐ pr_nateq_dec J2 $;
+--| @rewrite
+theorem sb_c_pr_nateq_dec {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_nateq_dec J)) ≐ pr_nateq_dec (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_bool_dec_congr (J J2: class): $ J ≐ J2 $ > $ pr_bool_dec J ≐ pr_bool_dec J2 $;
+--| @rewrite
+theorem sb_c_pr_bool_dec {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_bool_dec J)) ≐ pr_bool_dec (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_div_eqs_congr (J J2: class): $ J ≐ J2 $ > $ pr_div_eqs J ≐ pr_div_eqs J2 $;
+--| @rewrite
+theorem sb_c_pr_div_eqs {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_div_eqs J)) ≐ pr_div_eqs (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_mod_eqs_congr (J J2: class): $ J ≐ J2 $ > $ pr_mod_eqs J ≐ pr_mod_eqs J2 $;
+--| @rewrite
+theorem sb_c_pr_mod_eqs {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_mod_eqs J)) ≐ pr_mod_eqs (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_fix_eqs_congr (J J2: class): $ J ≐ J2 $ > $ pr_fix_eqs J ≐ pr_fix_eqs J2 $;
+--| @rewrite
+theorem sb_c_pr_fix_eqs {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_fix_eqs J)) ≐ pr_fix_eqs (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_gcd_eqs_congr (J J2: class): $ J ≐ J2 $ > $ pr_gcd_eqs J ≐ pr_gcd_eqs J2 $;
+--| @rewrite
+theorem sb_c_pr_gcd_eqs {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_gcd_eqs J)) ≐ pr_gcd_eqs (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_bitwise_eqs_congr (J J2: class): $ J ≐ J2 $ > $ pr_bitwise_eqs J ≐ pr_bitwise_eqs J2 $;
+--| @rewrite
+theorem sb_c_pr_bitwise_eqs {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_bitwise_eqs J)) ≐ pr_bitwise_eqs (⟦ x / t ⟧ J) $;
+--| @congr
+theorem pr_bitop_eqs_congr (J J2: class): $ J ≐ J2 $ > $ pr_bitop_eqs J ≐ pr_bitop_eqs J2 $;
+--| @rewrite
+theorem sb_c_pr_bitop_eqs {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (pr_bitop_eqs J)) ≐ pr_bitop_eqs (⟦ x / t ⟧ J) $;
+--| @congr
+theorem lprog3_congr (J J2: class): $ J ≐ J2 $ > $ lprog3 J ≐ lprog3 J2 $;
+--| @rewrite
+theorem sb_c_lprog3 {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (lprog3 J)) ≐ lprog3 (⟦ x / t ⟧ J) $;
+--| @congr
+theorem lrel3_congr (J J2: class): $ J ≐ J2 $ > $ lrel3 J ≐ lrel3 J2 $;
+--| @rewrite
+theorem sb_c_lrel3 {x: set} (t: set x) (J: class x): $ (⟦ x / t ⟧ (lrel3 J)) ≐ lrel3 (⟦ x / t ⟧ J) $;
+theorem lrel3_eq (G: hyps) (J J2: class): $ G ⇒ J = J2 $ > $ G ⇒ lrel3 J = lrel3 J2 $;
