@@ -2920,6 +2920,7 @@ lemma j1_c_tys_ok_i (G: hyps) (J A1 A2 A3 A4 A5 A6: class):
   $ G ⇒ ra_ctx_wf A1 A5 ∈ lrel3 J $ >
   $ G ⇒ ra_tys_ty A2 A6 ∈ lrel3 J $ >
   $ G ⇒ ra_ind_data A3 A4 A5 A6 ∈ lrel $ >
+  $ G ⇒ ra_tys_closed A5 A6 ∈ lrel $ >
   $ G ⇒ ra_capp A5 A1 A2 ∈ lrel $ >
   $ G ⇒ ra_tys_ok A1 A3 ∈ lrel3 J $
 ----
@@ -2933,56 +2934,62 @@ l7: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_ind_data A3
 l8: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_ind_data u v w a = ra_ind_data A3 A4 A5 A6 $ by ra_ind_data_eq [l3, l4, l5, l6]
 l9: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_ind_data A3 A4 A5 A6 = ra_ind_data u v w a $ by eq_sym [l8]
 l10: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_ind_data u v w a ∈ lrel $ by wcel_eq_l [l9, l7]
-l11: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_capp A5 A1 A2 ∈ lrel $ by weaken [#10]
-l12: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_capp w y z = ra_capp A5 A1 A2 $ by ra_capp_eq [l5, l1, l2]
-l13: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_capp A5 A1 A2 = ra_capp w y z $ by eq_sym [l12]
-l14: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_capp w y z ∈ lrel $ by wcel_eq_l [l13, l11]
-l15: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ $ by ax
-l16: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ra_capp w y z ∈ lrel $ by weaken [l14]
-l17: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ra_ind_data u v w a ∈ lrel $ by weaken [l10]
-l18: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel $ by and_intro [l17, l16]
-l19: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel $ by and_intro [l15, l18]
-l20: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ∃ a (x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel) $ by ex_intro [l19]
-l21: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ∃ w ∃ a (x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel) $ by ex_intro [l20]
-l22: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ∃ v ∃ w ∃ a (x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel) $ by ex_intro [l21]
-l23: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ∃ u ∃ v ∃ w ∃ a (x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel) $ by ex_intro [l22]
-l24: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ∃ z ∃ u ∃ v ∃ w ∃ a (x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel) $ by ex_intro [l23]
-l25: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ∃ y ∃ z ∃ u ∃ v ∃ w ∃ a (x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel) $ by ex_intro [l24]
-l26: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ x ∊ cl_tys_ok_i $ by cab_intro [l25]
-l27: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∈ cl_tys_ok_i $ by wcel_intro [l15, l26]
-l28: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ isset ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ $ by opair_isset
-l29: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∈ cl_tys_ok_i $ by isset_elim [l28, l27]
-l30: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_ctx_wf y w = ra_ctx_wf A1 A5 $ by ra_ctx_wf_eq [l1, l5]
-l31: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_tys_ty z a = ra_tys_ty A2 A6 $ by ra_tys_ty_eq [l2, l6]
-l32: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ∅ = ∅ $ by eq_refl
-l33: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ scons (ra_tys_ty z a) ∅ = scons (ra_tys_ty A2 A6) ∅ $ by scons_eq [l31, l32]
-l34: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) = scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) $ by scons_eq [l30, l33]
-l35: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_tys_ok y u = ra_tys_ok A1 A3 $ by ra_tys_ok_eq [l1, l3]
-l36: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ = ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ $ by opair_eq [l34, l35]
-l37: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ ∈ cl_tys_ok_i $ by wcel_eq_l [l36, l29]
-l38: $ G ⇒ isset A6 $ by wcel_isset [#6]
-l39: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 ⇒ ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ ∈ cl_tys_ok_i $ by isset_elim [l38, l37]
-l40: $ G ⇒ isset A5 $ by wcel_isset [#5]
-l41: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ ∈ cl_tys_ok_i $ by isset_elim [l40, l39]
-l42: $ G ⇒ isset A4 $ by wcel_isset [#4]
-l43: $ G , y = A1 , z = A2 , u = A3 ⇒ ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ ∈ cl_tys_ok_i $ by isset_elim [l42, l41]
-l44: $ G ⇒ isset A3 $ by wcel_isset [#3]
-l45: $ G , y = A1 , z = A2 ⇒ ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ ∈ cl_tys_ok_i $ by isset_elim [l44, l43]
-l46: $ G ⇒ isset A2 $ by wcel_isset [#2]
-l47: $ G , y = A1 ⇒ ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ ∈ cl_tys_ok_i $ by isset_elim [l46, l45]
-l48: $ G ⇒ isset A1 $ by wcel_isset [#1]
-l49: $ G ⇒ ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ ∈ cl_tys_ok_i $ by isset_elim [l48, l47]
-l50: $ G ⇒ ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ ∈ j1_top J $ by j1_pr_tys_ok [l49]
-l51: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
-l52: $ G ⇒ crn ∅ ⊆ lrel3 J $ by crn_empty_sub
-l53: $ G ⇒ (ra_tys_ty A2 A6) ∈ latoms $ by j1_lrel3_lat [#8]
-l54: $ G ⇒ scons (ra_tys_ty A2 A6) ∅ ∈ fseq latoms $ by scons_fseq_c [l53, l51]
-l55: $ G ⇒ crn (scons (ra_tys_ty A2 A6) ∅) ⊆ lrel3 J $ by crn_scons_sub [#8, l52]
-l56: $ G ⇒ (ra_ctx_wf A1 A5) ∈ latoms $ by j1_lrel3_lat [#7]
-l57: $ G ⇒ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) ∈ fseq latoms $ by scons_fseq_c [l56, l54]
-l58: $ G ⇒ crn (scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅)) ⊆ lrel3 J $ by crn_scons_sub [#7, l55]
-l59: $ G ⇒ ra_tys_ok A1 A3 ∈ latoms $ by j1_ra_tys_ok [#1, #3]
-l60: $ G ⇒ ra_tys_ok A1 A3 ∈ lrel3 J $ by j1_horn [l50, l57, l59, l58]
+l11: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_tys_closed A5 A6 ∈ lrel $ by weaken [#10]
+l12: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_tys_closed w a = ra_tys_closed A5 A6 $ by ra_tys_closed_eq [l5, l6]
+l13: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_tys_closed A5 A6 = ra_tys_closed w a $ by eq_sym [l12]
+l14: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_tys_closed w a ∈ lrel $ by wcel_eq_l [l13, l11]
+l15: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_capp A5 A1 A2 ∈ lrel $ by weaken [#11]
+l16: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_capp w y z = ra_capp A5 A1 A2 $ by ra_capp_eq [l5, l1, l2]
+l17: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_capp A5 A1 A2 = ra_capp w y z $ by eq_sym [l16]
+l18: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_capp w y z ∈ lrel $ by wcel_eq_l [l17, l15]
+l19: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ $ by ax
+l20: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ra_capp w y z ∈ lrel $ by weaken [l18]
+l21: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ra_tys_closed w a ∈ lrel $ by weaken [l14]
+l22: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel $ by and_intro [l21, l20]
+l23: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ra_ind_data u v w a ∈ lrel $ by weaken [l10]
+l24: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel $ by and_intro [l23, l22]
+l25: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel $ by and_intro [l19, l24]
+l26: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ∃ a (x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel) $ by ex_intro [l25]
+l27: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ∃ w ∃ a (x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel) $ by ex_intro [l26]
+l28: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ∃ v ∃ w ∃ a (x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel) $ by ex_intro [l27]
+l29: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ∃ u ∃ v ∃ w ∃ a (x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel) $ by ex_intro [l28]
+l30: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ∃ z ∃ u ∃ v ∃ w ∃ a (x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel) $ by ex_intro [l29]
+l31: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ∃ y ∃ z ∃ u ∃ v ∃ w ∃ a (x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel) $ by ex_intro [l30]
+l32: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ x ∊ cl_tys_ok_i $ by cab_intro [l31]
+l33: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ⇒ ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∈ cl_tys_ok_i $ by wcel_intro [l19, l32]
+l34: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ isset ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ $ by opair_isset
+l35: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∈ cl_tys_ok_i $ by isset_elim [l34, l33]
+l36: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_ctx_wf y w = ra_ctx_wf A1 A5 $ by ra_ctx_wf_eq [l1, l5]
+l37: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_tys_ty z a = ra_tys_ty A2 A6 $ by ra_tys_ty_eq [l2, l6]
+l38: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ∅ = ∅ $ by eq_refl
+l39: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ scons (ra_tys_ty z a) ∅ = scons (ra_tys_ty A2 A6) ∅ $ by scons_eq [l37, l38]
+l40: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) = scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) $ by scons_eq [l36, l39]
+l41: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ra_tys_ok y u = ra_tys_ok A1 A3 $ by ra_tys_ok_eq [l1, l3]
+l42: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ = ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ $ by opair_eq [l40, l41]
+l43: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 , a = A6 ⇒ ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ ∈ cl_tys_ok_i $ by wcel_eq_l [l42, l35]
+l44: $ G ⇒ isset A6 $ by wcel_isset [#6]
+l45: $ G , y = A1 , z = A2 , u = A3 , v = A4 , w = A5 ⇒ ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ ∈ cl_tys_ok_i $ by isset_elim [l44, l43]
+l46: $ G ⇒ isset A5 $ by wcel_isset [#5]
+l47: $ G , y = A1 , z = A2 , u = A3 , v = A4 ⇒ ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ ∈ cl_tys_ok_i $ by isset_elim [l46, l45]
+l48: $ G ⇒ isset A4 $ by wcel_isset [#4]
+l49: $ G , y = A1 , z = A2 , u = A3 ⇒ ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ ∈ cl_tys_ok_i $ by isset_elim [l48, l47]
+l50: $ G ⇒ isset A3 $ by wcel_isset [#3]
+l51: $ G , y = A1 , z = A2 ⇒ ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ ∈ cl_tys_ok_i $ by isset_elim [l50, l49]
+l52: $ G ⇒ isset A2 $ by wcel_isset [#2]
+l53: $ G , y = A1 ⇒ ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ ∈ cl_tys_ok_i $ by isset_elim [l52, l51]
+l54: $ G ⇒ isset A1 $ by wcel_isset [#1]
+l55: $ G ⇒ ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ ∈ cl_tys_ok_i $ by isset_elim [l54, l53]
+l56: $ G ⇒ ⟨ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) , ra_tys_ok A1 A3 ⟩ ∈ j1_top J $ by j1_pr_tys_ok [l55]
+l57: $ G ⇒ ∅ ∈ fseq latoms $ by fseq_empty
+l58: $ G ⇒ crn ∅ ⊆ lrel3 J $ by crn_empty_sub
+l59: $ G ⇒ (ra_tys_ty A2 A6) ∈ latoms $ by j1_lrel3_lat [#8]
+l60: $ G ⇒ scons (ra_tys_ty A2 A6) ∅ ∈ fseq latoms $ by scons_fseq_c [l59, l57]
+l61: $ G ⇒ crn (scons (ra_tys_ty A2 A6) ∅) ⊆ lrel3 J $ by crn_scons_sub [#8, l58]
+l62: $ G ⇒ (ra_ctx_wf A1 A5) ∈ latoms $ by j1_lrel3_lat [#7]
+l63: $ G ⇒ scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅) ∈ fseq latoms $ by scons_fseq_c [l62, l60]
+l64: $ G ⇒ crn (scons (ra_ctx_wf A1 A5) (scons (ra_tys_ty A2 A6) ∅)) ⊆ lrel3 J $ by crn_scons_sub [#7, l61]
+l65: $ G ⇒ ra_tys_ok A1 A3 ∈ latoms $ by j1_ra_tys_ok [#1, #3]
+l66: $ G ⇒ ra_tys_ok A1 A3 ∈ lrel3 J $ by j1_horn [l56, l63, l65, l64]
 
 tys_ok_i_j
 ----------
@@ -2992,7 +2999,7 @@ l3: $ _ ⇒ enc_ind D ∈ trees ω $ by enc_ind_trees
 l4: $ _ ⇒ enc_blk b ∈ trees ω $ by enc_blk_trees
 l5: $ _ ⇒ enc_ctx P ∈ trees ω $ by enc_ctx_trees
 l6: $ _ ⇒ enc_tys T ∈ trees ω $ by enc_tys_trees
-l7: $ tys_ok_j J G D $ by j1_c_tys_ok_i [l1, l2, l3, l4, l5, l6, #2, #4, #1, #3]
+l7: $ tys_ok_j J G D $ by j1_c_tys_ok_i [l1, l2, l3, l4, l5, l6, #3, #5, #1, #2, #4]
 
 lemma j1_pr_ind_wf (G: hyps) (J X: class): $ G ⇒ X ∈ pr_ind_wf $ > $ G ⇒ X ∈ j1_top J $
 ----
@@ -14992,11 +14999,11 @@ l3: $ G ⇒ pr_tys_ty J ⊆ j2_lab kr_tys_ty (suc kr_tys_ty) $ by cun_least [l2,
 lemma j2_k_tys_ok_i (G: hyps): $ G ⇒ cl_tys_ok_i ⊆ j2_lab kr_tys_ok (suc kr_tys_ok) $
 ----
 l1: $ G , x ∊ cl_tys_ok_i ⇒ x ∊ cl_tys_ok_i $ by ax
-l2: $ G , x ∊ cl_tys_ok_i ⇒ ∃ y ∃ z ∃ u ∃ v ∃ w ∃ a (x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel) $ by cab_elim [l1]
-l3: $ G , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel ⇒ x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel $ by ax
-l4: $ G , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel ⇒ x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ $ by and_elim_l [l3]
-l5: $ G , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel ⇒ kr_tys_ok ∈ ω $ by kr_tys_ok_omega
-l6: $ G , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel ⇒ x ∊ j2_lab kr_tys_ok (suc kr_tys_ok) $ by j2_lab_self [l4, l5]
+l2: $ G , x ∊ cl_tys_ok_i ⇒ ∃ y ∃ z ∃ u ∃ v ∃ w ∃ a (x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel) $ by cab_elim [l1]
+l3: $ G , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel ⇒ x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel $ by ax
+l4: $ G , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel ⇒ x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ $ by and_elim_l [l3]
+l5: $ G , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel ⇒ kr_tys_ok ∈ ω $ by kr_tys_ok_omega
+l6: $ G , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel ⇒ x ∊ j2_lab kr_tys_ok (suc kr_tys_ok) $ by j2_lab_self [l4, l5]
 l7: $ G , x ∊ cl_tys_ok_i ⇒ x ∊ j2_lab kr_tys_ok (suc kr_tys_ok) $ by j2_ex6 [l2, l6]
 l8: $ G ⇒ cl_tys_ok_i ⊆ j2_lab kr_tys_ok (suc kr_tys_ok) $ by subset_intro [l7]
 
@@ -21328,11 +21335,11 @@ l18: $ G , c = ra_tys_ty t1 t2 ⇒ ∃ Ctx (t1 = Ctx ∧ t2 = ⟨ kc_tnil , ∅ 
 l19: $ G ⇒ ∃ Ctx (t1 = Ctx ∧ t2 = ⟨ kc_tnil , ∅ ⟩) ∨ ∃ Ctx ∃ F ∃ C ∃ T ∃ u_v (t1 = Ctx ∧ t2 = ⟨ kc_tcons , scons F (scons C (scons T ∅)) ⟩ ∧ ra_deq Ctx F F ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_tys_ty Ctx T ∈ lrel3 J) $ by isset_elim [l1, l18]
 
 lemma j2_e_tys_ok_i (G: hyps) (J: class) {G_v G2 D b_v P T: set} (pp t1 t2 x V1 V2 V3 V4 V5 V6: set):
-  $ G ⇒ x = ⟨ pp , ra_tys_ok t1 t2 ⟩ $ > $ G ⇒ x = ⟨ scons (ra_ctx_wf V1 V5) (scons (ra_tys_ty V2 V6) ∅) , ra_tys_ok V1 V3 ⟩ ∧ ra_ind_data V3 V4 V5 V6 ∈ lrel ∧ ra_capp V5 V1 V2 ∈ lrel $ > $ G ⇒ crn pp ⊆ lrel3 J $ >
-  $ G ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $
+  $ G ⇒ x = ⟨ pp , ra_tys_ok t1 t2 ⟩ $ > $ G ⇒ x = ⟨ scons (ra_ctx_wf V1 V5) (scons (ra_tys_ty V2 V6) ∅) , ra_tys_ok V1 V3 ⟩ ∧ ra_ind_data V3 V4 V5 V6 ∈ lrel ∧ ra_tys_closed V5 V6 ∈ lrel ∧ ra_capp V5 V1 V2 ∈ lrel $ > $ G ⇒ crn pp ⊆ lrel3 J $ >
+  $ G ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_tys_closed P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $
 ----
 l1: $ G ⇒ x = ⟨ scons (ra_ctx_wf V1 V5) (scons (ra_tys_ty V2 V6) ∅) , ra_tys_ok V1 V3 ⟩ $ by and_elim_l [#2]
-l2: $ G ⇒ ra_ind_data V3 V4 V5 V6 ∈ lrel ∧ ra_capp V5 V1 V2 ∈ lrel $ by and_elim_r [#2]
+l2: $ G ⇒ ra_ind_data V3 V4 V5 V6 ∈ lrel ∧ ra_tys_closed V5 V6 ∈ lrel ∧ ra_capp V5 V1 V2 ∈ lrel $ by and_elim_r [#2]
 l3: $ G ⇒ ⟨ pp , ra_tys_ok t1 t2 ⟩ = x $ by eq_sym [#1]
 l4: $ G ⇒ ⟨ pp , ra_tys_ok t1 t2 ⟩ = ⟨ scons (ra_ctx_wf V1 V5) (scons (ra_tys_ty V2 V6) ∅) , ra_tys_ok V1 V3 ⟩ $ by eq_trans [l3, l1]
 l5: $ G ⇒ ⟨ scons (ra_ctx_wf V1 V5) (scons (ra_tys_ty V2 V6) ∅) , ra_tys_ok V1 V3 ⟩ = ⟨ pp , ra_tys_ok t1 t2 ⟩ $ by eq_sym [l4]
@@ -21371,28 +21378,30 @@ l37: $ G ⇒ crn (scons (ra_tys_ty V2 V6) ∅) ⊆ lrel3 J $ by crn_scons_tail [
 l38: $ G ⇒ isset (ra_tys_ty V2 V6) $ by opair_isset
 l39: $ G ⇒ ra_tys_ty V2 V6 ∈ lrel3 J $ by crn_scons_head [l38, l37]
 l40: $ G ⇒ ra_ind_data V3 V4 V5 V6 ∈ lrel $ by and_elim_l [l2]
-l41: $ G ⇒ ra_capp V5 V1 V2 ∈ lrel $ by and_elim_r [l2]
-l42: $ G ⇒ t1 = V1 ∧ t2 = V3 ∧ ra_ind_data V3 V4 V5 V6 ∈ lrel ∧ ra_ctx_wf V1 V5 ∈ lrel3 J ∧ ra_capp V5 V1 V2 ∈ lrel ∧ ra_tys_ty V2 V6 ∈ lrel3 J $ by j2_and5 [l29, l32, l40, l36, l41, l39]
-l43: $ G ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $ by j2_exi6 [l42]
+l41: $ G ⇒ ra_tys_closed V5 V6 ∈ lrel ∧ ra_capp V5 V1 V2 ∈ lrel $ by and_elim_r [l2]
+l42: $ G ⇒ ra_tys_closed V5 V6 ∈ lrel $ by and_elim_l [l41]
+l43: $ G ⇒ ra_capp V5 V1 V2 ∈ lrel $ by and_elim_r [l41]
+l44: $ G ⇒ t1 = V1 ∧ t2 = V3 ∧ ra_ind_data V3 V4 V5 V6 ∈ lrel ∧ ra_tys_closed V5 V6 ∈ lrel ∧ ra_ctx_wf V1 V5 ∈ lrel3 J ∧ ra_capp V5 V1 V2 ∈ lrel ∧ ra_tys_ty V2 V6 ∈ lrel3 J $ by j2_and6 [l29, l32, l40, l42, l36, l43, l39]
+l45: $ G ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_tys_closed P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $ by j2_exi6 [l44]
 
 lemma j2_d_tys_ok_i (G: hyps) (J: class) {G_v G2 D b_v P T: set} (pp t1 t2: set):
   $ G ⇒ ⟨ pp , ra_tys_ok t1 t2 ⟩ ∈ cl_tys_ok_i $ > $ G ⇒ crn pp ⊆ lrel3 J $ >
-  $ G ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $
+  $ G ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_tys_closed P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $
 ----
 l1: $ G , x = ⟨ pp , ra_tys_ok t1 t2 ⟩ , x ∊ cl_tys_ok_i ⇒ x ∊ cl_tys_ok_i $ by ax
-l2: $ G , x = ⟨ pp , ra_tys_ok t1 t2 ⟩ , x ∊ cl_tys_ok_i ⇒ ∃ y ∃ z ∃ u ∃ v ∃ w ∃ a (x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel) $ by cab_elim [l1]
-l3: $ G , x = ⟨ pp , ra_tys_ok t1 t2 ⟩ , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel ⇒ x = ⟨ pp , ra_tys_ok t1 t2 ⟩ $ by ax
-l4: $ G , x = ⟨ pp , ra_tys_ok t1 t2 ⟩ , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel ⇒ x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel $ by ax
-l5: $ G , x = ⟨ pp , ra_tys_ok t1 t2 ⟩ , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel ⇒ crn pp ⊆ lrel3 J $ by weaken [#2]
-l6: $ G , x = ⟨ pp , ra_tys_ok t1 t2 ⟩ , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_capp w y z ∈ lrel ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $ by j2_e_tys_ok_i [l3, l4, l5]
-l7: $ G , x = ⟨ pp , ra_tys_ok t1 t2 ⟩ , x ∊ cl_tys_ok_i ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $ by j2_ex6 [l2, l6]
-l8: $ G ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $ by wcel_elim [#1, l7]
+l2: $ G , x = ⟨ pp , ra_tys_ok t1 t2 ⟩ , x ∊ cl_tys_ok_i ⇒ ∃ y ∃ z ∃ u ∃ v ∃ w ∃ a (x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel) $ by cab_elim [l1]
+l3: $ G , x = ⟨ pp , ra_tys_ok t1 t2 ⟩ , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel ⇒ x = ⟨ pp , ra_tys_ok t1 t2 ⟩ $ by ax
+l4: $ G , x = ⟨ pp , ra_tys_ok t1 t2 ⟩ , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel ⇒ x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel $ by ax
+l5: $ G , x = ⟨ pp , ra_tys_ok t1 t2 ⟩ , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel ⇒ crn pp ⊆ lrel3 J $ by weaken [#2]
+l6: $ G , x = ⟨ pp , ra_tys_ok t1 t2 ⟩ , x = ⟨ scons (ra_ctx_wf y w) (scons (ra_tys_ty z a) ∅) , ra_tys_ok y u ⟩ ∧ ra_ind_data u v w a ∈ lrel ∧ ra_tys_closed w a ∈ lrel ∧ ra_capp w y z ∈ lrel ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_tys_closed P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $ by j2_e_tys_ok_i [l3, l4, l5]
+l7: $ G , x = ⟨ pp , ra_tys_ok t1 t2 ⟩ , x ∊ cl_tys_ok_i ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_tys_closed P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $ by j2_ex6 [l2, l6]
+l8: $ G ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_tys_closed P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $ by wcel_elim [#1, l7]
 
 lemma j2_o_tys_ok (G: hyps) (J: class) {G_v G2 D b_v P T: set} (pp t1 t2: set):
   $ G ⇒ ⟨ pp , ra_tys_ok t1 t2 ⟩ ∈ pr_tys_ok $ > $ G ⇒ crn pp ⊆ lrel3 J $ >
-  $ G ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $
+  $ G ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_tys_closed P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $
 ----
-l1: $ G ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $ by j2_d_tys_ok_i [#1, #2]
+l1: $ G ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_tys_closed P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $ by j2_d_tys_ok_i [#1, #2]
 
 lrel3_tys_ok_cases
 ------------------
@@ -21412,9 +21421,9 @@ l13: $ G , c = ra_tys_ok t1 t2 , ⟨ p , c ⟩ ∈ lprog3 J ∧ crn p ⊆ lrel3 
 l14: $ G , c = ra_tys_ok t1 t2 , ⟨ p , c ⟩ ∈ lprog3 J ∧ crn p ⊆ lrel3 J ⇒ ⟨ p , c ⟩ = ⟨ p , ra_tys_ok t1 t2 ⟩ $ by opair_eq [l12, l13]
 l15: $ G , c = ra_tys_ok t1 t2 , ⟨ p , c ⟩ ∈ lprog3 J ∧ crn p ⊆ lrel3 J ⇒ ⟨ p , ra_tys_ok t1 t2 ⟩ ∈ lprog3 J $ by wcel_eq_l [l14, l10]
 l16: $ G , c = ra_tys_ok t1 t2 , ⟨ p , c ⟩ ∈ lprog3 J ∧ crn p ⊆ lrel3 J ⇒ ⟨ p , ra_tys_ok t1 t2 ⟩ ∈ pr_tys_ok $ by lprog3_tys_ok_pr [l15]
-l17: $ G , c = ra_tys_ok t1 t2 , ⟨ p , c ⟩ ∈ lprog3 J ∧ crn p ⊆ lrel3 J ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $ by j2_o_tys_ok [l16, l11]
-l18: $ G , c = ra_tys_ok t1 t2 ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $ by ex_elim [l8, l17]
-l19: $ G ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $ by isset_elim [l1, l18]
+l17: $ G , c = ra_tys_ok t1 t2 , ⟨ p , c ⟩ ∈ lprog3 J ∧ crn p ⊆ lrel3 J ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_tys_closed P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $ by j2_o_tys_ok [l16, l11]
+l18: $ G , c = ra_tys_ok t1 t2 ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_tys_closed P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $ by ex_elim [l8, l17]
+l19: $ G ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_tys_closed P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $ by isset_elim [l1, l18]
 
 lemma j2_e_ind_wf_i (G: hyps) (J: class) {G_v G2 D b_v P N T np n_v m_v k_v n0 l_v F C: set} (pp t1 t2 x V1 V2 V3 V4 V5 V6 V7 V8 V9 V10 V11 V12 V13 V14 V15: set):
   $ G ⇒ x = ⟨ pp , ra_ind_wf t1 t2 ⟩ $ > $ G ⇒ x = ⟨ scons (ra_tys_ok V1 V3) (scons (ra_tys_wf V3 V9 V8 V13 ⟨ kc_nz , ∅ ⟩ V2 V7) (scons (ra_nst_ok V1 V3 V12 V6) ∅)) , ra_ind_wf V1 V3 ⟩ ∧ ra_ind_data V3 V4 V5 V7 ∈ lrel ∧ ra_clen V5 V8 ∈ lrel ∧ ra_ntys V7 V9 V10 ∈ lrel ∧ ra_capp V5 V1 V2 ∈ lrel ∧ ra_nth_ty V7 ⟨ kc_nz , ∅ ⟩ V14 V15 ∈ lrel ∧ ra_isort V14 V11 V13 ∈ lrel ∧ ra_ind_nested V3 V6 ∈ lrel ∧ ra_ndecl V6 V9 V12 ∈ lrel $ > $ G ⇒ crn pp ⊆ lrel3 J $ >

@@ -518,6 +518,13 @@ axiom pis_cons (A b T: expr) (P: ctx): $ pis P (Π A. b) T $ > $ pis (A :: P) b 
 term lams: ctx > expr > expr > wff;
 axiom lams_nil (b: expr): $ lams [] b b $;
 axiom lams_cons (A b T: expr) (P: ctx): $ lams P (λ A. b) T $ > $ lams (A :: P) b T $;
+--| `tys_closed P T`: each type's type over the parameters is closed with them,
+--| `Π P. F` closed (a block is a closed constant: it mentions no variable of
+--| the context it is used in).
+term tys_closed: ctx > tys > wff;
+axiom tys_closed_nil (P: ctx): $ tys_closed P tnil $;
+axiom tys_closed_cons (P: ctx) (F R: expr) (C: ctors) (T: tys):
+  $ pis P F R $ > $ closed 0 R $ > $ tys_closed P T $ > $ tys_closed P (tcons F C T) $;
 
 --| `pargs X d n e`: `e = X @ #(d+n-1) @ ... @ #d` (the `n` variables above
 --| depth `d`). `spine h e k`: `e` is `h` applied to `k` arguments; read with
@@ -967,13 +974,14 @@ term tys_ty: ctx > tys > wff;
 axiom tys_ty_nil (Ctx: ctx): $ tys_ty Ctx tnil $;
 axiom tys_ty_cons (Ctx: ctx) (F: expr) (C: ctors) (T: tys) (u: lvl):
   $ ⟨ Ctx ⊢ F : srt u ⟩ $ > $ tys_ty Ctx T $ > $ tys_ty Ctx (tcons F C T) $;
---| `tys_ok G D`: the parameters are types over the earlier ones and the types'
---| types are types: what typing `ind_ty D i` needs (the kernel adds the types
---| before it checks the constructors; a block whose constructors are not
---| legal denotes a family of empty types).
+--| `tys_ok G D`: the parameters and the types' types are closed, the
+--| parameters are types over the earlier ones and the types' types are types:
+--| what typing `ind_ty D i` needs (the kernel adds the types before it checks
+--| the constructors; a block whose constructors are not legal denotes a family
+--| of empty types).
 term tys_ok: ctx > ind > wff;
 axiom tys_ok_i (G G2: ctx) (D: ind) (b: blk) (P: ctx) (T: tys):
-  $ ind_data D b P T $ > $ ctx_wf G P $ > $ capp P G G2 $ > $ tys_ty G2 T $ > $ tys_ok G D $;
+  $ ind_data D b P T $ > $ tys_closed P T $ > $ ctx_wf G P $ > $ capp P G G2 $ > $ tys_ty G2 T $ > $ tys_ok G D $;
 --| A well-formed block, in context `G` (`ind_wf_i`, after `nst_ok` below).
 term ind_wf: ctx > ind > wff;
 --| `nst_ok G D j N2`: the occurrences `N2` (from auxiliary type `j` on) come

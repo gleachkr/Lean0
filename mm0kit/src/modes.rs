@@ -81,6 +81,7 @@ pub const TABLE: &[(&str, Kind, &str)] = &[
     // telescopes and applications
     ("pis", Kind::Fn, "++-"),
     ("lams", Kind::Fn, "++-"),
+    ("tys_closed", Kind::Check, ""),
     ("capp", Kind::Fn, "++-"),
     ("pargs", Kind::Fn, "+++-"),
     ("rehead", Kind::Fn, "-+++-"),

@@ -406,7 +406,8 @@ def kr_ndecl: class = $ suc kr_nfields $;
 def kr_aux_of: class = $ suc kr_ndecl $;
 def kr_pis: class = $ suc kr_aux_of $;
 def kr_lams: class = $ suc kr_pis $;
-def kr_pargs: class = $ suc kr_lams $;
+def kr_tys_closed: class = $ suc kr_lams $;
+def kr_pargs: class = $ suc kr_tys_closed $;
 def kr_spine: class = $ suc kr_pargs $;
 def kr_rehead: class = $ suc kr_spine $;
 def kr_has_arg: class = $ suc kr_rehead $;
@@ -483,6 +484,7 @@ def ra_ndecl (a1 a2 a3: class): class = $ ⟨ kr_ndecl , scons a1 (scons a2 (sco
 def ra_aux_of (a1 a2 a3 a4: class): class = $ ⟨ kr_aux_of , scons a1 (scons a2 (scons a3 (scons a4 ∅))) ⟩ $;
 def ra_pis (a1 a2 a3: class): class = $ ⟨ kr_pis , scons a1 (scons a2 (scons a3 ∅)) ⟩ $;
 def ra_lams (a1 a2 a3: class): class = $ ⟨ kr_lams , scons a1 (scons a2 (scons a3 ∅)) ⟩ $;
+def ra_tys_closed (a1 a2: class): class = $ ⟨ kr_tys_closed , scons a1 (scons a2 ∅) ⟩ $;
 def ra_pargs (a1 a2 a3 a4: class): class = $ ⟨ kr_pargs , scons a1 (scons a2 (scons a3 (scons a4 ∅))) ⟩ $;
 def ra_spine (a1 a2 a3: class): class = $ ⟨ kr_spine , scons a1 (scons a2 (scons a3 ∅)) ⟩ $;
 def ra_rehead (a1 a2 a3 a4 a5: class): class = $ ⟨ kr_rehead , scons a1 (scons a2 (scons a3 (scons a4 (scons a5 ∅)))) ⟩ $;
@@ -781,6 +783,10 @@ def cl_lams_nil (.b .w: set): class =
   $ {w | ∃ b (w = ⟨ ∅ , ra_lams ⟨ kc_nil , ∅ ⟩ b b ⟩)} $;
 def cl_lams_cons (.A .b .T .P .w: set): class =
   $ {w | ∃ A ∃ b ∃ T ∃ P (w = ⟨ scons (ra_lams P ⟨ kc_lam , scons A (scons b ∅) ⟩ T) ∅ , ra_lams ⟨ kc_cons , scons A (scons P ∅) ⟩ b T ⟩)} $;
+def cl_tys_closed_nil (.P .w: set): class =
+  $ {w | ∃ P (w = ⟨ ∅ , ra_tys_closed P ⟨ kc_tnil , ∅ ⟩ ⟩)} $;
+def cl_tys_closed_cons (.P .F .R .C .T .w: set): class =
+  $ {w | ∃ P ∃ F ∃ R ∃ C ∃ T (w = ⟨ scons (ra_pis P F R) (scons (ra_closed ⟨ kc_nz , ∅ ⟩ R) (scons (ra_tys_closed P T) ∅)) , ra_tys_closed P ⟨ kc_tcons , scons F (scons C (scons T ∅)) ⟩ ⟩)} $;
 def cl_pargs_z (.X .d .w: set): class =
   $ {w | ∃ X ∃ d (w = ⟨ ∅ , ra_pargs X d ⟨ kc_nz , ∅ ⟩ X ⟩)} $;
 def cl_pargs_s (.X .e .d .n .w: set): class =
@@ -979,6 +985,7 @@ def pr_ndecl: class = $ cl_ndecl_nil ∪ cl_ndecl_cons $;
 def pr_aux_of: class = $ cl_aux_of_i $;
 def pr_pis: class = $ cl_pis_nil ∪ cl_pis_cons $;
 def pr_lams: class = $ cl_lams_nil ∪ cl_lams_cons $;
+def pr_tys_closed: class = $ cl_tys_closed_nil ∪ cl_tys_closed_cons $;
 def pr_pargs: class = $ cl_pargs_z ∪ cl_pargs_s $;
 def pr_spine: class = $ cl_spine_z ∪ cl_spine_s $;
 def pr_rehead: class = $ cl_rehead_z ∪ cl_rehead_s $;
@@ -1016,7 +1023,7 @@ def pr_projs: class = $ cl_projs_z ∪ cl_projs_s $;
 
 --| The program, at the atoms.
 def lprog: class =
-  $ ((((((pr_le ∪ pr_add) ∪ (pr_lnth ∪ pr_linst)) ∪ ((pr_lsubst ∪ pr_closed) ∪ (pr_lift ∪ (pr_inst ∪ pr_lookup)))) ∪ (((pr_cinst ∪ pr_cext) ∪ (pr_clen ∪ pr_cnth)) ∪ ((pr_capp ∪ pr_bsucc) ∪ (pr_bdbl ∪ (pr_badd ∪ pr_baddc))))) ∪ ((((pr_bmul ∪ pr_bpow) ∪ (pr_band ∪ pr_bor)) ∪ ((pr_bxor ∪ pr_ind_data) ∪ (pr_ind_nested ∪ (pr_nth_ty ∪ pr_nth_ctor)))) ∪ (((pr_clen_c ∪ pr_ntys) ∪ (pr_minor_idx ∪ (pr_npis ∪ pr_nth_pi))) ∪ ((pr_isort ∪ pr_ind_arity) ∪ (pr_nidx ∪ (pr_nfields ∪ pr_ndecl)))))) ∪ (((((pr_aux_of ∪ pr_pis) ∪ (pr_lams ∪ pr_pargs)) ∪ ((pr_spine ∪ pr_rehead) ∪ (pr_has_arg ∪ (pr_leaf_has ∪ pr_pinst)))) ∪ (((pr_sinst ∪ pr_iargs) ∪ (pr_indapp ∪ pr_ipos)) ∪ ((pr_recfield ∪ pr_rst) ∪ (pr_nst_hit ∪ (pr_spz ∪ pr_spz_ctors))))) ∪ ((((pr_aux_data ∪ pr_mty) ∪ (pr_motives ∪ pr_ihty)) ∪ ((pr_mwalk ∪ pr_cminors) ∪ (pr_minors ∪ (pr_rtail ∪ pr_rec_ty)))) ∪ (((pr_ihval ∪ pr_rwalk) ∪ (pr_rec_rhs ∪ (pr_rec_rule ∪ pr_struct_like))) ∪ ((pr_field_ty ∪ pr_qinst) ∪ (pr_nonrec ∪ (pr_eta_ok ∪ pr_projs))))))) ∩
+  $ ((((((pr_le ∪ pr_add) ∪ (pr_lnth ∪ pr_linst)) ∪ ((pr_lsubst ∪ pr_closed) ∪ (pr_lift ∪ (pr_inst ∪ pr_lookup)))) ∪ (((pr_cinst ∪ pr_cext) ∪ (pr_clen ∪ pr_cnth)) ∪ ((pr_capp ∪ pr_bsucc) ∪ (pr_bdbl ∪ (pr_badd ∪ pr_baddc))))) ∪ ((((pr_bmul ∪ pr_bpow) ∪ (pr_band ∪ pr_bor)) ∪ ((pr_bxor ∪ pr_ind_data) ∪ (pr_ind_nested ∪ (pr_nth_ty ∪ pr_nth_ctor)))) ∪ (((pr_clen_c ∪ pr_ntys) ∪ (pr_minor_idx ∪ (pr_npis ∪ pr_nth_pi))) ∪ ((pr_isort ∪ pr_ind_arity) ∪ (pr_nidx ∪ (pr_nfields ∪ pr_ndecl)))))) ∪ (((((pr_aux_of ∪ pr_pis) ∪ (pr_lams ∪ pr_tys_closed)) ∪ ((pr_pargs ∪ pr_spine) ∪ (pr_rehead ∪ (pr_has_arg ∪ pr_leaf_has)))) ∪ (((pr_pinst ∪ pr_sinst) ∪ (pr_iargs ∪ (pr_indapp ∪ pr_ipos))) ∪ ((pr_recfield ∪ pr_rst) ∪ (pr_nst_hit ∪ (pr_spz ∪ pr_spz_ctors))))) ∪ ((((pr_aux_data ∪ pr_mty) ∪ (pr_motives ∪ pr_ihty)) ∪ ((pr_mwalk ∪ pr_cminors) ∪ (pr_minors ∪ (pr_rtail ∪ pr_rec_ty)))) ∪ (((pr_ihval ∪ pr_rwalk) ∪ (pr_rec_rhs ∪ (pr_rec_rule ∪ pr_struct_like))) ∪ ((pr_field_ty ∪ pr_qinst) ∪ (pr_nonrec ∪ (pr_eta_ok ∪ pr_projs))))))) ∩
     (fseq latoms × latoms) $;
 --| The derivable atoms.
 def lrel: class = $ horn lprog $;
@@ -1062,6 +1069,7 @@ def ndecl (a1: ctx) (a2: nat) (a3: nat): wff = $ _ ⇒ ra_ndecl (enc_ctx a1) (en
 def aux_of (a1: ind) (a2: ctx) (a3: nat) (a4: expr): wff = $ _ ⇒ ra_aux_of (enc_ind a1) (enc_ctx a2) (enc_nat a3) (enc_expr a4) ∈ lrel $;
 def pis (a1: ctx) (a2: expr) (a3: expr): wff = $ _ ⇒ ra_pis (enc_ctx a1) (enc_expr a2) (enc_expr a3) ∈ lrel $;
 def lams (a1: ctx) (a2: expr) (a3: expr): wff = $ _ ⇒ ra_lams (enc_ctx a1) (enc_expr a2) (enc_expr a3) ∈ lrel $;
+def tys_closed (a1: ctx) (a2: tys): wff = $ _ ⇒ ra_tys_closed (enc_ctx a1) (enc_tys a2) ∈ lrel $;
 def pargs (a1: expr) (a2: nat) (a3: nat) (a4: expr): wff = $ _ ⇒ ra_pargs (enc_expr a1) (enc_nat a2) (enc_nat a3) (enc_expr a4) ∈ lrel $;
 def spine (a1: expr) (a2: expr) (a3: nat): wff = $ _ ⇒ ra_spine (enc_expr a1) (enc_expr a2) (enc_nat a3) ∈ lrel $;
 def rehead (a1: expr) (a2: expr) (a3: nat) (a4: expr) (a5: expr): wff = $ _ ⇒ ra_rehead (enc_expr a1) (enc_expr a2) (enc_nat a3) (enc_expr a4) (enc_expr a5) ∈ lrel $;
@@ -1252,6 +1260,8 @@ theorem pis_nil (b: expr): $ pis nil b b $;
 theorem pis_cons (A b T: expr) (P: ctx): $ pis P (pi A b) T $ > $ pis (cons A P) b T $;
 theorem lams_nil (b: expr): $ lams nil b b $;
 theorem lams_cons (A b T: expr) (P: ctx): $ lams P (lam A b) T $ > $ lams (cons A P) b T $;
+theorem tys_closed_nil (P: ctx): $ tys_closed P tnil $;
+theorem tys_closed_cons (P: ctx) (F R: expr) (C: ctors) (T: tys): $ pis P F R $ > $ closed nz R $ > $ tys_closed P T $ > $ tys_closed P (tcons F C T) $;
 theorem pargs_z (X: expr) (d: nat): $ pargs X d nz X $;
 theorem pargs_s (X e: expr) (d n: nat): $ pargs X (s d) n e $ > $ pargs X d (s n) (app e (bvar d)) $;
 theorem spine_z (h: expr): $ spine h h nz $;
@@ -1413,6 +1423,8 @@ theorem lprog_pis_pr (G: hyps) (P A1 A2 A3: class):
   $ G ⇒ ⟨ P , ra_pis A1 A2 A3 ⟩ ∈ lprog $ > $ G ⇒ ⟨ P , ra_pis A1 A2 A3 ⟩ ∈ pr_pis $;
 theorem lprog_lams_pr (G: hyps) (P A1 A2 A3: class):
   $ G ⇒ ⟨ P , ra_lams A1 A2 A3 ⟩ ∈ lprog $ > $ G ⇒ ⟨ P , ra_lams A1 A2 A3 ⟩ ∈ pr_lams $;
+theorem lprog_tys_closed_pr (G: hyps) (P A1 A2: class):
+  $ G ⇒ ⟨ P , ra_tys_closed A1 A2 ⟩ ∈ lprog $ > $ G ⇒ ⟨ P , ra_tys_closed A1 A2 ⟩ ∈ pr_tys_closed $;
 theorem lprog_pargs_pr (G: hyps) (P A1 A2 A3 A4: class):
   $ G ⇒ ⟨ P , ra_pargs A1 A2 A3 A4 ⟩ ∈ lprog $ > $ G ⇒ ⟨ P , ra_pargs A1 A2 A3 A4 ⟩ ∈ pr_pargs $;
 theorem lprog_spine_pr (G: hyps) (P A1 A2 A3: class):
@@ -1700,6 +1712,10 @@ theorem lrel_lams_cases (G: hyps) {b_v A T P: set} (t1 t2 t3: set):
   $ G ⇒ ra_lams t1 t2 t3 ∈ lrel $ >
   $ G ⇒ ∃ b_v (t1 = ⟨ kc_nil , ∅ ⟩ ∧ t2 = b_v ∧ t3 = b_v) ∨
       ∃ A ∃ b_v ∃ T ∃ P (t1 = ⟨ kc_cons , scons A (scons P ∅) ⟩ ∧ t2 = b_v ∧ t3 = T ∧ ra_lams P ⟨ kc_lam , scons A (scons b_v ∅) ⟩ T ∈ lrel) $;
+theorem lrel_tys_closed_cases (G: hyps) {P F R C T: set} (t1 t2: set):
+  $ G ⇒ ra_tys_closed t1 t2 ∈ lrel $ >
+  $ G ⇒ ∃ P (t1 = P ∧ t2 = ⟨ kc_tnil , ∅ ⟩) ∨
+      ∃ P ∃ F ∃ R ∃ C ∃ T (t1 = P ∧ t2 = ⟨ kc_tcons , scons F (scons C (scons T ∅)) ⟩ ∧ ra_pis P F R ∈ lrel ∧ ra_closed ⟨ kc_nz , ∅ ⟩ R ∈ lrel ∧ ra_tys_closed P T ∈ lrel) $;
 theorem lrel_pargs_cases (G: hyps) {X d_v e_v n_v: set} (t1 t2 t3 t4: set):
   $ G ⇒ ra_pargs t1 t2 t3 t4 ∈ lrel $ >
   $ G ⇒ ∃ X ∃ d_v (t1 = X ∧ t2 = d_v ∧ t3 = ⟨ kc_nz , ∅ ⟩ ∧ t4 = X) ∨
@@ -1999,6 +2015,7 @@ theorem kr_ndecl_omega (G: hyps): $ G ⇒ kr_ndecl ∈ ω $;
 theorem kr_aux_of_omega (G: hyps): $ G ⇒ kr_aux_of ∈ ω $;
 theorem kr_pis_omega (G: hyps): $ G ⇒ kr_pis ∈ ω $;
 theorem kr_lams_omega (G: hyps): $ G ⇒ kr_lams ∈ ω $;
+theorem kr_tys_closed_omega (G: hyps): $ G ⇒ kr_tys_closed ∈ ω $;
 theorem kr_pargs_omega (G: hyps): $ G ⇒ kr_pargs ∈ ω $;
 theorem kr_spine_omega (G: hyps): $ G ⇒ kr_spine ∈ ω $;
 theorem kr_rehead_omega (G: hyps): $ G ⇒ kr_rehead ∈ ω $;
@@ -2906,6 +2923,11 @@ theorem ra_lams_congr (A1 B1 A2 B2 A3 B3: class): $ A1 ≐ B1 $ > $ A2 ≐ B2 $ 
 theorem ra_lams_eq (G: hyps) (A1 B1 A2 B2 A3 B3: class): $ G ⇒ A1 = B1 $ > $ G ⇒ A2 = B2 $ > $ G ⇒ A3 = B3 $ > $ G ⇒ ra_lams A1 A2 A3 = ra_lams B1 B2 B3 $;
 --| @rewrite
 theorem sb_c_ra_lams {x: set} (t: set x) (A1 A2 A3: class x): $ (⟦ x / t ⟧ (ra_lams A1 A2 A3)) ≐ ra_lams (⟦ x / t ⟧ A1) (⟦ x / t ⟧ A2) (⟦ x / t ⟧ A3) $;
+--| @congr
+theorem ra_tys_closed_congr (A1 B1 A2 B2: class): $ A1 ≐ B1 $ > $ A2 ≐ B2 $ > $ ra_tys_closed A1 A2 ≐ ra_tys_closed B1 B2 $;
+theorem ra_tys_closed_eq (G: hyps) (A1 B1 A2 B2: class): $ G ⇒ A1 = B1 $ > $ G ⇒ A2 = B2 $ > $ G ⇒ ra_tys_closed A1 A2 = ra_tys_closed B1 B2 $;
+--| @rewrite
+theorem sb_c_ra_tys_closed {x: set} (t: set x) (A1 A2: class x): $ (⟦ x / t ⟧ (ra_tys_closed A1 A2)) ≐ ra_tys_closed (⟦ x / t ⟧ A1) (⟦ x / t ⟧ A2) $;
 --| @congr
 theorem ra_pargs_congr (A1 B1 A2 B2 A3 B3 A4 B4: class): $ A1 ≐ B1 $ > $ A2 ≐ B2 $ > $ A3 ≐ B3 $ > $ A4 ≐ B4 $ > $ ra_pargs A1 A2 A3 A4 ≐ ra_pargs B1 B2 B3 B4 $;
 theorem ra_pargs_eq (G: hyps) (A1 B1 A2 B2 A3 B3 A4 B4: class): $ G ⇒ A1 = B1 $ > $ G ⇒ A2 = B2 $ > $ G ⇒ A3 = B3 $ > $ G ⇒ A4 = B4 $ > $ G ⇒ ra_pargs A1 A2 A3 A4 = ra_pargs B1 B2 B3 B4 $;
