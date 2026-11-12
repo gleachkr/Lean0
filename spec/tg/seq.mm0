@@ -75,6 +75,8 @@ theorem fseq_fn_into (G: hyps) (A: class) (s: set):
   $ G ⇒ s ∊ fseq A $ > $ G ⇒ fn_into s (cdm s) A $;
 theorem fseq_fv (G: hyps) (A: class) (s i: set):
   $ G ⇒ s ∊ fseq A $ > $ G ⇒ i ∊ cdm s $ > $ G ⇒ fv s i ∈ A $;
+--| Every value of a sequence over `A` is in `A`, when `∅` is (out of the domain the value is `∅`).
+theorem fseq_fv_total (G: hyps) (A I: class) (r: set): $ G ⇒ ∅ ∈ A $ > $ G ⇒ r ∊ fseq A $ > $ G ⇒ fv r I ∈ A $;
 theorem fseq_crn (G: hyps) (A: class) (s: set): $ G ⇒ s ∊ fseq A $ > $ G ⇒ crn s ⊆ A $;
 --| Class form of `fseq_crn`.
 theorem fseq_crn_c (G: hyps) (A S: class): $ G ⇒ S ∈ fseq A $ > $ G ⇒ crn S ⊆ A $;
@@ -115,6 +117,9 @@ theorem scons_fv_suc (G: hyps) (a s i: set): $ G ⇒ fv (scons a s) (suc i) = fv
 --| Class form of `scons_fv_suc`.
 theorem scons_fv_suc_c (G: hyps) (A S I: class):
   $ G ⇒ isset A $ > $ G ⇒ isset S $ > $ G ⇒ isset I $ > $ G ⇒ fv (scons A S) (suc I) = fv S I $;
+--| Entrywise inclusion of two sequences survives a common head.
+theorem scons_fv_sub {i: set} (G: hyps) (x a b: set):
+  $ G ⇒ ∀ i (fv a i ⊆ fv b i) $ > $ G ⇒ ∀ i (fv (scons x a) i ⊆ fv (scons x b) i) $;
 theorem scons_inj (G: hyps) (a b s t: set):
   $ G ⇒ rel s $ > $ G ⇒ rel t $ > $ G ⇒ scons a s = scons b t $ > $ G ⇒ a = b ∧ s = t $;
 --| Class form of `scons_inj` for two-entry sequences.
@@ -197,6 +202,9 @@ theorem scons_agree {i: set} (G: hyps) (K: class) (x s s2: set):
   $ G ⇒ ∀ i (i ∊ suc K → fv (scons x s) i = fv (scons x s2) i) $;
 theorem scat_scons (G: hyps) (A: class) (a s t: set):
   $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq A $ > $ G ⇒ scat (scons a s) t = scons a (scat s t) $;
+--| Class form of `scat_scons`.
+theorem scat_scons_c (G: hyps) (V X S T: class):
+  $ G ⇒ isset X $ > $ G ⇒ S ∈ fseq V $ > $ G ⇒ T ∈ fseq V $ > $ G ⇒ scat (scons X S) T = scons X (scat S T) $;
 --| Prefixing a one-entry sequence is `scons`.
 theorem scat_scons_empty (G: hyps) (A: class) (x q: set): $ G ⇒ q ∊ fseq A $ > $ G ⇒ scat (scons x ∅) q = scons x q $;
 --| Concatenating two one-entry sequences.
@@ -210,6 +218,12 @@ theorem ssnoc_scat (G: hyps) (A: class) (s a: set):
   $ G ⇒ s ∊ fseq A $ > $ G ⇒ ssnoc s a = scat s (scons a ∅) $;
 --| Appending to the empty sequence.
 theorem ssnoc_empty (G: hyps) (x: set): $ G ⇒ ssnoc ∅ x = scons x ∅ $;
+--| An entry moves from the end of the first part to the front of the second.
+theorem scat_ssnoc_scons (G: hyps) (A: class) (e x s: set):
+  $ G ⇒ e ∊ fseq A $ > $ G ⇒ x ∊ A $ > $ G ⇒ s ∊ fseq A $ > $ G ⇒ scat (ssnoc e x) s = scat e (scons x s) $;
+--| A sequence is empty or ends in an entry.
+theorem fseq_cases_snoc {e f: set} (G: hyps) (A: class) (v: set):
+  $ G ⇒ v ∊ fseq A $ > $ G ⇒ v = ∅ ∨ ∃ e ∃ f (e ∊ fseq A ∧ f ∊ A ∧ v = ssnoc e f) $;
 
 -- --------------------------------------------------------------------------
 -- Mapping a function over a sequence

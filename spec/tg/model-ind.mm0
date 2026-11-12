@@ -231,6 +231,11 @@ theorem apn_ssnoc (G: hyps) (A F: class) (s a: set):
   $ G ⇒ s ∊ fseq A $ > $ G ⇒ apn F (ssnoc s a) = apn (ap F a) s $;
 theorem apn_scons (G: hyps) (A F: class) (s a: set):
   $ G ⇒ s ∊ fseq A $ > $ G ⇒ apn F (scons a s) = ap (apn F s) a $;
+--| Class form of `apn_scons`.
+theorem apn_scons_c (G: hyps) (V F X S: class):
+  $ G ⇒ isset X $ > $ G ⇒ S ∈ fseq V $ > $ G ⇒ apn F (scons X S) = ap (apn F S) X $;
+--| `apn` is monotone in the trace.
+theorem apn_mono (G: hyps) (F F2 S: class): $ G ⇒ F ⊆ F2 $ > $ G ⇒ apn F S ⊆ apn F2 S $;
 theorem apn_scat (G: hyps) (A F: class) (s t: set):
   $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq A $ > $ G ⇒ apn F (scat s t) = apn (apn F t) s $;
 --| A curried trace's value at any set is a set when the trace is a set without
@@ -327,6 +332,15 @@ theorem esat_cons {r x q: set} (G: hyps) (E A T: class) (u w: set):
   $ G ⇒ A ∈ trees ω $ > $ G ⇒ T ∈ trees ω $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ esat u E ⟨ kc_cons , scons A (scons T ∅) ⟩ w =
       {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ esat u E T w ∧ x ∊ da (fv E A) w q ∧ r = scons x q)} $;
+--| A valuation of `A :: P`: an element of `A`'s value at a valuation of `P`
+--| in front of it (in the `cuni_elim` style).
+theorem esat_cons_intro (G: hyps) (E A P: class) (u w a c: set):
+  $ G ⇒ A ∈ trees ω $ > $ G ⇒ P ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ c ∊ esat u E P w $ >
+  $ G ⇒ a ∊ da (fv E A) w c $ > $ G ⇒ a ∊ u $ > $ G ⇒ scons a c ∈ esat u E ⟨ kc_cons , scons A (scons P ∅) ⟩ w $;
+theorem esat_cons_elim {x q: set} (G H: hyps) (E A P: class) (u w e: set) (d: fml):
+  $ G ⇒ A ∈ trees ω $ > $ G ⇒ P ∈ trees ω $ > $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ e ∊ esat u E ⟨ kc_cons , scons A (scons P ∅) ⟩ w $ >
+  $ H , q ∊ esat u E P w , x ∊ da (fv E A) w q , e = scons x q ⇒ d $ > $ G , H ⇒ d $;
 theorem esf_cdm (G: hyps) (E: class) (u: set): $ G ⇒ cdm (esf u E) = trees ω $;
 --| Two valuations satisfying the same context tree have the same length.
 theorem esat_len (G: hyps) (E T: class) (u w p q: set):
@@ -374,6 +388,44 @@ theorem etel_local (G: hyps) (E E2 T W R: class) (u: set):
 --| `etel` under equal arguments (the universe and the table fixed).
 theorem etel_eq (G: hyps) (U E T T2 W W2 R R2: class):
   $ G ⇒ T = T2 $ > $ G ⇒ W = W2 $ > $ G ⇒ R = R2 $ > $ G ⇒ etel U E T W R = etel U E T2 W2 R2 $;
+--| `esat` under equal trees and level valuations.
+theorem esat_eq (G: hyps) (U E T T2 W W2: class):
+  $ G ⇒ T = T2 $ > $ G ⇒ W = W2 $ > $ G ⇒ esat U E T W = esat U E T2 W2 $;
+--| A path with no fields, `⟨ ∅ , ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ ⟩`, determines its
+--| arguments `A`, and equal arguments give equal paths.
+theorem path0_inj (G: hyps) (A B: class):
+  $ G ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ ⟩ = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , B ⟩ ⟩ ⟩ $ > $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ A = B $;
+theorem path0_eq (G: hyps) (A B: class):
+  $ G ⇒ A = B $ > $ G ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ ⟩ = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , B ⟩ ⟩ ⟩ $;
+--| `etel_other` for a node given as a tree.
+theorem etel_other_trees (G: hyps) (E K S: class) (u w r: set):
+  $ G ⇒ ⟨ K , S ⟩ ∈ trees ω $ > $ G ⇒ ¬ K = kc_pi $ > $ G ⇒ ¬ K = kc_app $ > $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ r ∊ fseq u $ > $ G ⇒ etel u E ⟨ K , S ⟩ w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩ $;
+--| An application of a tree with one path and no fields has one path and no
+--| fields, with the argument's value in front.
+theorem etel_app_csn (G: hyps) (E F A2 A: class) (u w r: set):
+  $ G ⇒ F ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ etel u E F w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ ⟩ $ > $ G ⇒ isset A $ >
+  $ G ⇒ etel u E ⟨ kc_app , scons F (scons A2 ∅) ⟩ w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ $;
+--| An application's and a `Π`'s paths at two valuations are equal when their
+--| parts' are (the head's paths and the argument's value; the domain's value
+--| and paths, and the body's paths at every extension).
+theorem etel_app_vals (G: hyps) (E F A: class) (u w r r2: set):
+  $ G ⇒ F ∈ trees ω $ > $ G ⇒ A ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ r2 ∊ fseq u $ >
+  $ G ⇒ etel u E F w r = etel u E F w r2 $ > $ G ⇒ da (fv E A) w r = da (fv E A) w r2 $ >
+  $ G ⇒ etel u E ⟨ kc_app , scons F (scons A ∅) ⟩ w r = etel u E ⟨ kc_app , scons F (scons A ∅) ⟩ w r2 $;
+theorem etel_pi_vals {x: set} (G: hyps) (E A B: class) (u w r r2: set):
+  $ G ⇒ A ∈ trees ω $ > $ G ⇒ B ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ r2 ∊ fseq u $ >
+  $ G ⇒ da (fv E A) w r = da (fv E A) w r2 $ > $ G ⇒ etel u E A w r = etel u E A w r2 $ >
+  $ G ⇒ ∀ x (x ∊ u → etel u E B w (scons x r) = etel u E B w (scons x r2)) $ >
+  $ G ⇒ etel u E ⟨ kc_pi , scons A (scons B ∅) ⟩ w r = etel u E ⟨ kc_pi , scons A (scons B ∅) ⟩ w r2 $;
+--| `etel_pi_vals` for inclusion: the paths grow when the domain's value grows,
+--| its paths are equal and the body's paths grow at every extension.
+theorem etel_pi_mono {x: set} (G: hyps) (E A B: class) (u w r s: set):
+  $ G ⇒ A ∈ trees ω $ > $ G ⇒ B ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ s ∊ fseq u $ >
+  $ G ⇒ da (fv E A) w r ⊆ da (fv E A) w s $ > $ G ⇒ etel u E A w r = etel u E A w s $ >
+  $ G ⇒ ∀ x (x ∊ u → etel u E B w (scons x r) ⊆ etel u E B w (scons x s)) $ >
+  $ G ⇒ etel u E ⟨ kc_pi , scons A (scons B ∅) ⟩ w r ⊆ etel u E ⟨ kc_pi , scons A (scons B ∅) ⟩ w s $;
 
 -- --------------------------------------------------------------------------
 -- Reading the block
@@ -622,6 +674,12 @@ theorem etel_det_c (G: hyps) (E T W: class) (u r f g t a g2 t2 a2: set):
 --| A satisfying valuation comes with a set level valuation.
 theorem esat_isset (G: hyps) (E T W: class) (u p: set):
   $ G ⇒ T ∈ trees ω $ > $ G ⇒ p ∊ esat u E T W $ > $ G ⇒ isset W $;
+--| The level valuation of a telescope's valuation, and the valuations of a
+--| tree's paths, are level valuations and valuations over `u`.
+theorem esat_lvals (G: hyps) (E P W: class) (u q: set):
+  $ G ⇒ P ∈ trees ω $ > $ G ⇒ q ∊ esat u E P W $ > $ G ⇒ W ∈ lvals $;
+theorem etel_dom (G: hyps) (E Q: class) (u o x0 x1: set):
+  $ G ⇒ o ∊ trees ω $ > $ G ⇒ Q ∈ etel u E o x0 x1 $ > $ G ⇒ x0 ∊ lvals ∧ x1 ∊ fseq u $;
 --| The constructor's value at a path of its type: the tuple of the fields.
 theorem ictor_apn (G: hyps) (E D P T K: class) (u w j c p f g t a: set):
   $ G ⇒ D ∈ trees ω $ > $ G ⇒ ¬ iprop D j w $ > $ G ⇒ iprt D P T $ > $ G ⇒ p ∊ esat u E P w $ >
@@ -699,6 +757,9 @@ theorem ipi_nil (G: hyps) (E F: class) (u w: set):
 theorem ipi_local (G: hyps) (E E2 P F W: class) (u: set):
   $ G ⇒ P ∈ trees ω $ > $ G ⇒ F ∈ trees ω $ > $ G ⇒ eagr E E2 P $ > $ G ⇒ eagr E E2 F $ >
   $ G ⇒ ipi u E P F W = ipi u E2 P F W $;
+--| `ipi` under equal telescopes, bodies and level valuations.
+theorem ipi_eq (G: hyps) (U E P P2 F F2 W W2: class):
+  $ G ⇒ P = P2 $ > $ G ⇒ F = F2 $ > $ G ⇒ W = W2 $ > $ G ⇒ ipi U E P F W = ipi U E P2 F2 W2 $;
 --| Introduction of the gate, and the gate at the block's parts.
 theorem igate_intro (G: hyps) (U E D J W P T F: class):
   $ G ⇒ D ∈ trees ω $ > $ G ⇒ iprt D P T $ > $ G ⇒ ityf D J F $ > $ G ⇒ ity U E D J W ∈ ipi U E P F W $ >

@@ -119,6 +119,19 @@ theorem trees_ind_c (G: hyps) {k s: set} (L P: class):
   $ G ⇒ isset L $ >
   $ G ⇒ ∀ k ∀ s (k ∊ L → s ∊ fseq (trees L) → crn s ⊆ P → ⟨ k , s ⟩ ∈ P) $ >
   $ G ⇒ trees L ⊆ P $;
+--| The trees of `ω`: a set named as a node is a tree, a tree is a node (in
+--| the `cuni_elim` style), and induction with the step as a sequent.
+theorem trees_omega_intro (G: hyps) (k j z: set):
+  $ G ⇒ k ∊ ω $ > $ G ⇒ j ∊ fseq (trees ω) $ > $ G ⇒ z = ⟨ k , j ⟩ $ > $ G ⇒ z ∊ trees ω $;
+theorem trees_omega_elim {k j: set} (G H: hyps) (T: class) (c: fml):
+  $ G ⇒ T ∈ trees ω $ > $ H , k ∊ ω , j ∊ fseq (trees ω) , T = ⟨ k , j ⟩ ⇒ c $ > $ G , H ⇒ c $;
+theorem trees_omega_ind {k j: set} (G: hyps) (P: class):
+  $ G , k ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ P ⇒ ⟨ k , j ⟩ ∈ P $ > $ G ⇒ trees ω ⊆ P $;
+--| The children of a node named twice: the inductive hypothesis on `j` moves
+--| to `S`.
+theorem node_crn_sub (G: hyps) (X K S: class) (z c j: set):
+  $ G ⇒ crn j ⊆ X $ > $ G ⇒ z = ⟨ c , j ⟩ $ > $ G ⇒ z = ⟨ K , S ⟩ $ > $ G ⇒ isset K $ > $ G ⇒ isset S $ >
+  $ G ⇒ crn S ⊆ X $;
 theorem trees_set (G: hyps) (l: set): $ G ⇒ isset (trees l) $;
 --| Class form of `trees_set`.
 theorem trees_set_c (G: hyps) (L: class): $ G ⇒ isset L $ > $ G ⇒ isset (trees L) $;

@@ -1683,6 +1683,53 @@ l6: $ G , f ∊ cpi x C B ⇒ f ∊ cpi x C B $ by ax
 l7: $ G , f ∊ cpi x C B ⇒ f ∊ cpi x A B $ by q0_cpi_dom_sub [l5, l6]
 l8: $ G ⇒ cpi x A B = cpi x C B $ by eq_intro [l3, l7]
 
+lemma a0_clam_sub {x: set} (G: hyps) (A: class) (B C: class x): $ G ⇒ ∀ x (x ∊ A → B ⊆ C) $ > $ G ⇒ clam x A (⋃ B) ⊆ clam x A (⋃ C) $
+----
+n1: $ G , c ∊ clam x A (⋃ B) ⇒ c ∊ clam x A (⋃ B) $ by ax
+n2: $ G , c ∊ clam x A (⋃ B) , c = ⟨ a , b ⟩ , a ∊ A , b ∊ ⋃ (⟦ x / a ⟧ B) ⇒ b ∊ ⋃ (⟦ x / a ⟧ B) $ by ax
+n3a: $ G , c ∊ clam x A (⋃ B) , c = ⟨ a , b ⟩ , a ∊ A , b ∊ ⋃ (⟦ x / a ⟧ B) , e ∊ (⟦ x / a ⟧ B) , b ∊ e ⇒ ∀ x (x ∊ A → B ⊆ C) $ by weaken [#1]
+n3b: $ G , c ∊ clam x A (⋃ B) , c = ⟨ a , b ⟩ , a ∊ A , b ∊ ⋃ (⟦ x / a ⟧ B) , e ∊ (⟦ x / a ⟧ B) , b ∊ e ⇒ a ∊ A → (⟦ x / a ⟧ B) ⊆ (⟦ x / a ⟧ C) $ by all_elim [n3a]
+n3c: $ G , c ∊ clam x A (⋃ B) , c = ⟨ a , b ⟩ , a ∊ A , b ∊ ⋃ (⟦ x / a ⟧ B) , e ∊ (⟦ x / a ⟧ B) , b ∊ e ⇒ a ∊ A $ by ax
+n3d: $ G , c ∊ clam x A (⋃ B) , c = ⟨ a , b ⟩ , a ∊ A , b ∊ ⋃ (⟦ x / a ⟧ B) , e ∊ (⟦ x / a ⟧ B) , b ∊ e ⇒ (⟦ x / a ⟧ B) ⊆ (⟦ x / a ⟧ C) $ by imp_elim [n3b, n3c]
+n3e0: $ G , c ∊ clam x A (⋃ B) , c = ⟨ a , b ⟩ , a ∊ A , b ∊ ⋃ (⟦ x / a ⟧ B) , e ∊ (⟦ x / a ⟧ B) , b ∊ e ⇒ e ∊ (⟦ x / a ⟧ B) $ by ax
+n3e: $ G , c ∊ clam x A (⋃ B) , c = ⟨ a , b ⟩ , a ∊ A , b ∊ ⋃ (⟦ x / a ⟧ B) , e ∊ (⟦ x / a ⟧ B) , b ∊ e ⇒ e ∊ (⟦ x / a ⟧ C) $ by subset_elim [n3d, n3e0]
+n3f: $ G , c ∊ clam x A (⋃ B) , c = ⟨ a , b ⟩ , a ∊ A , b ∊ ⋃ (⟦ x / a ⟧ B) , e ∊ (⟦ x / a ⟧ B) , b ∊ e ⇒ b ∊ e $ by ax
+n3: $ G , c ∊ clam x A (⋃ B) , c = ⟨ a , b ⟩ , a ∊ A , b ∊ ⋃ (⟦ x / a ⟧ B) , e ∊ (⟦ x / a ⟧ B) , b ∊ e ⇒ b ∊ ⋃ (⟦ x / a ⟧ C) $ by cuni_intro [n3f, n3e]
+n4: $ G , c ∊ clam x A (⋃ B) , c = ⟨ a , b ⟩ , a ∊ A , b ∊ ⋃ (⟦ x / a ⟧ B) ⇒ b ∊ ⋃ (⟦ x / a ⟧ C) $ by cuni_elim [n2, n3]
+n5a: $ G , c ∊ clam x A (⋃ B) , c = ⟨ a , b ⟩ , a ∊ A , b ∊ ⋃ (⟦ x / a ⟧ B) ⇒ a ∊ A $ by ax
+n5: $ G , c ∊ clam x A (⋃ B) , c = ⟨ a , b ⟩ , a ∊ A , b ∊ ⋃ (⟦ x / a ⟧ B) ⇒ ⟨ a , b ⟩ ∈ clam x A (⋃ C) $ by clam_intro [n5a, n4]
+n6: $ G , c ∊ clam x A (⋃ B) , c = ⟨ a , b ⟩ , a ∊ A , b ∊ ⋃ (⟦ x / a ⟧ B) ⇒ c = ⟨ a , b ⟩ $ by ax
+n7: $ G , c ∊ clam x A (⋃ B) , c = ⟨ a , b ⟩ , a ∊ A , b ∊ ⋃ (⟦ x / a ⟧ B) ⇒ ⟨ a , b ⟩ = c $ by eq_sym [n6]
+n8: $ G , c ∊ clam x A (⋃ B) , c = ⟨ a , b ⟩ , a ∊ A , b ∊ ⋃ (⟦ x / a ⟧ B) ⇒ c ∈ clam x A (⋃ C) $ by wcel_eq_l [n7, n5]
+n9: $ G , c ∊ clam x A (⋃ B) , c = ⟨ a , b ⟩ , a ∊ A , b ∊ ⋃ (⟦ x / a ⟧ B) ⇒ c ∊ clam x A (⋃ C) $ by wcel_welc [n8]
+n10: $ G , c ∊ clam x A (⋃ B) ⇒ c ∊ clam x A (⋃ C) $ by clam_elim_mem [n1, n9]
+n11: $ G ⇒ clam x A (⋃ B) ⊆ clam x A (⋃ C) $ by subset_intro [n10]
+
+
+cpi_mono
+--------
+l1: $ G , f ∊ cpi x A B ⇒ f ∊ cpi x A B $ by ax
+l2: $ G , f ∊ cpi x A B ⇒ f ⊆ clam x A (⋃ B) $ by cpi_elim_sub [l1]
+l3a: $ G ⇒ clam x A (⋃ B) ⊆ clam x A (⋃ C) $ by a0_clam_sub [#1]
+l3: $ G , f ∊ cpi x A B ⇒ clam x A (⋃ B) ⊆ clam x A (⋃ C) $ by weaken [l3a]
+l4: $ G , f ∊ cpi x A B ⇒ f ⊆ clam x A (⋃ C) $ by subset_trans [l2, l3]
+m0: $ G , f ∊ cpi x A B , y ∊ A ⇒ f ∊ cpi x A B $ by weaken [l1]
+m0b: $ G , f ∊ cpi x A B , y ∊ A ⇒ y ∊ A $ by ax
+m1: $ G , f ∊ cpi x A B , y ∊ A ⇒ ap f y ∈ (⟦ x / y ⟧ B) $ by cpi_elim_ap [m0, m0b]
+m2: $ G , f ∊ cpi x A B , y ∊ A ⇒ ∀ x (x ∊ A → B ⊆ C) $ by weaken [#1]
+m3: $ G , f ∊ cpi x A B , y ∊ A ⇒ y ∊ A → (⟦ x / y ⟧ B) ⊆ (⟦ x / y ⟧ C) $ by all_elim [m2]
+m4: $ G , f ∊ cpi x A B , y ∊ A ⇒ (⟦ x / y ⟧ B) ⊆ (⟦ x / y ⟧ C) $ by imp_elim [m3, m0b]
+m5: $ G , f ∊ cpi x A B , y ∊ A ⇒ ap f y ∈ (⟦ x / y ⟧ C) $ by wcel_subset [m4, m1]
+m6: $ G , f ∊ cpi x A B ⇒ y ∊ A → ap f y ∈ (⟦ x / y ⟧ C) $ by imp_intro [m5]
+m7: $ G , f ∊ cpi x A B ⇒ ∀ y (y ∊ A → ap f y ∈ (⟦ x / y ⟧ C)) $ by all_intro [m6]
+m8: $ _ ⇒ ∀ x (x ∊ A → ap f x ∈ C) ↔ ∀ y (y ∊ A → ap f y ∈ (⟦ x / y ⟧ C)) $ by all_alpha
+m9: $ G , f ∊ cpi x A B ⇒ ∀ x (x ∊ A → ap f x ∈ C) ↔ ∀ y (y ∊ A → ap f y ∈ (⟦ x / y ⟧ C)) $ by weaken [m8]
+m10: $ G , f ∊ cpi x A B ⇒ ∀ x (x ∊ A → ap f x ∈ C) $ by bi_elim_r [m9, m7]
+l6: $ G , f ∊ cpi x A B ⇒ f ∊ cpi x A C $ by cpi_intro [l4, m10]
+l7: $ G ⇒ cpi x A B ⊆ cpi x A C $ by subset_intro [l6]
+
+--| Entrywise inclusion survives a common head.
+
 sb_c_cpi
 -------
 l1: $ (⟦ y / t ⟧ {g | g ⊆ clam x A (⋃ B) ∧ ∀ x (x ∊ A → ap g x ∈ B)}) ≐ {g | g ⊆ clam x (⟦ y / t ⟧ A) (⋃ (⟦ y / t ⟧ B)) ∧ ∀ x (x ∊ (⟦ y / t ⟧ A) → ap g x ∈ (⟦ y / t ⟧ B))} $ by ceqt_refl

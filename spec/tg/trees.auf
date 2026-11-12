@@ -790,6 +790,75 @@ l21: $ G , x = L ⇒ trees x = trees L $ by trees_eq [l20]
 l22: $ G , x = L ⇒ trees L ⊆ P $ by subset_eq_l [l21, l19]
 l24: $ G ⇒ trees L ⊆ P $ by isset_elim [#1, l22]
 
+trees_omega_intro
+-----------------
+l1: $ G ⇒ ⟨ k , j ⟩ ∈ ω × fseq (trees ω) $ by cxp_intro [#1, #2]
+l2: $ G ⇒ isset ω $ by omega_set
+l3: $ G ⇒ ω × fseq (trees ω) = trees ω $ by trees_fix_c [l2]
+l4: $ G ⇒ ⟨ k , j ⟩ ∈ trees ω $ by wcel_eq_r [l3, l1]
+l5: $ G ⇒ ⟨ k , j ⟩ = z $ by eq_sym [#3]
+l6: $ G ⇒ z ∈ trees ω $ by wcel_eq_l [l5, l4]
+l7: $ G ⇒ z ∊ trees ω $ by wcel_welc [l6]
+
+trees_omega_elim
+----------------
+a1: $ H , o = ω , x = T , x ∊ trees ω ⇒ o = ω $ by ax
+a2: $ H , o = ω , x = T , x ∊ trees ω ⇒ ω = o $ by eq_sym [a1]
+a3: $ H , o = ω , x = T , x ∊ trees ω ⇒ trees ω = trees o $ by trees_eq [a2]
+a4: $ H , o = ω , x = T , x ∊ trees ω ⇒ x ∊ trees ω $ by ax
+a5: $ H , o = ω , x = T , x ∊ trees ω ⇒ x ∊ trees o $ by welc_eq [a3, a4]
+a6: $ H , o = ω , x = T , x ∊ trees ω ⇒ ∃ k ∃ j (k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩) $ by trees_elim [a5]
+b1: $ H , o = ω , x = T , x ∊ trees ω , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ ⇒ k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ $ by ax
+b2: $ H , o = ω , x = T , x ∊ trees ω , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ ⇒ k ∊ o $ by and_elim_l [b1]
+b3: $ H , o = ω , x = T , x ∊ trees ω , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ ⇒ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ $ by and_elim_r [b1]
+b4: $ H , o = ω , x = T , x ∊ trees ω , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ ⇒ j ∊ fseq (trees o) $ by and_elim_l [b3]
+b5: $ H , o = ω , x = T , x ∊ trees ω , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ ⇒ x = ⟨ k , j ⟩ $ by and_elim_r [b3]
+b6: $ H , o = ω , x = T , x ∊ trees ω , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ ⇒ o = ω $ by ax
+b7: $ H , o = ω , x = T , x ∊ trees ω , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ ⇒ k ∊ ω $ by welc_eq [b6, b2]
+b8: $ H , o = ω , x = T , x ∊ trees ω , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ ⇒ trees o = trees ω $ by trees_eq [b6]
+b9: $ H , o = ω , x = T , x ∊ trees ω , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ ⇒ fseq (trees o) = fseq (trees ω) $ by fseq_eq [b8]
+b10: $ H , o = ω , x = T , x ∊ trees ω , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ ⇒ j ∊ fseq (trees ω) $ by welc_eq [b9, b4]
+b11: $ H , o = ω , x = T , x ∊ trees ω , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ ⇒ x = T $ by ax
+b12: $ H , o = ω , x = T , x ∊ trees ω , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ ⇒ T = x $ by eq_sym [b11]
+b13: $ H , o = ω , x = T , x ∊ trees ω , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ ⇒ T = ⟨ k , j ⟩ $ by eq_trans [b12, b5]
+c1: $ H , k ∊ ω , j ∊ fseq (trees ω) ⇒ T = ⟨ k , j ⟩ → c $ by imp_intro [#2]
+c2: $ H , k ∊ ω ⇒ j ∊ fseq (trees ω) → T = ⟨ k , j ⟩ → c $ by imp_intro [c1]
+c3: $ H ⇒ k ∊ ω → j ∊ fseq (trees ω) → T = ⟨ k , j ⟩ → c $ by imp_intro [c2]
+wc4_1: $ H , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ , o = ω , x = T , x ∊ trees ω ⇒ k ∊ ω → j ∊ fseq (trees ω) → T = ⟨ k , j ⟩ → c $ by weaken [c3]
+c4: $ H , o = ω , x = T , x ∊ trees ω , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ ⇒ k ∊ ω → j ∊ fseq (trees ω) → T = ⟨ k , j ⟩ → c $ by weaken [wc4_1]
+c5: $ H , o = ω , x = T , x ∊ trees ω , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ ⇒ j ∊ fseq (trees ω) → T = ⟨ k , j ⟩ → c $ by imp_elim [c4, b7]
+c6: $ H , o = ω , x = T , x ∊ trees ω , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ ⇒ T = ⟨ k , j ⟩ → c $ by imp_elim [c5, b10]
+c7: $ H , o = ω , x = T , x ∊ trees ω , k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩ ⇒ c $ by imp_elim [c6, b13]
+d1: $ H , o = ω , x = T , x ∊ trees ω , ∃ j (k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩) ⇒ ∃ j (k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩) $ by ax
+d2: $ H , o = ω , x = T , x ∊ trees ω , ∃ j (k ∊ o ∧ j ∊ fseq (trees o) ∧ x = ⟨ k , j ⟩) ⇒ c $ by ex_elim [d1, c7]
+d3: $ H , o = ω , x = T , x ∊ trees ω ⇒ c $ by ex_elim [a6, d2]
+wd4_2: $ G , H , o = ω ⇒ T ∈ trees ω $ by weaken [#1]
+d4: $ G , H , o = ω ⇒ c $ by wcel_elim [wd4_2, d3]
+d5: $ G ⇒ isset ω $ by omega_set
+wd6_3: $ G , H ⇒ isset ω $ by weaken [d5]
+d6: $ G , H ⇒ c $ by isset_elim [wd6_3, d4]
+
+trees_omega_ind
+---------------
+l1: $ G , k ∊ ω , j ∊ fseq (trees ω) ⇒ crn j ⊆ P → ⟨ k , j ⟩ ∈ P $ by imp_intro [#1]
+l2: $ G , k ∊ ω ⇒ j ∊ fseq (trees ω) → crn j ⊆ P → ⟨ k , j ⟩ ∈ P $ by imp_intro [l1]
+l3: $ G ⇒ k ∊ ω → j ∊ fseq (trees ω) → crn j ⊆ P → ⟨ k , j ⟩ ∈ P $ by imp_intro [l2]
+l4: $ G ⇒ ∀ j (k ∊ ω → j ∊ fseq (trees ω) → crn j ⊆ P → ⟨ k , j ⟩ ∈ P) $ by all_intro [l3]
+l5: $ G ⇒ ∀ k ∀ j (k ∊ ω → j ∊ fseq (trees ω) → crn j ⊆ P → ⟨ k , j ⟩ ∈ P) $ by all_intro [l4]
+l6: $ G ⇒ isset ω $ by omega_set
+l7: $ G ⇒ trees ω ⊆ P $ by trees_ind_c [l6, l5]
+
+node_crn_sub
+------------
+l1: $ G ⇒ ⟨ c , j ⟩ = z $ by eq_sym [#2]
+l2: $ G ⇒ ⟨ c , j ⟩ = ⟨ K , S ⟩ $ by eq_trans [l1, #3]
+l3: $ G ⇒ isset c $ by isset_var
+l4: $ G ⇒ isset j $ by isset_var
+l5: $ G ⇒ c = K ∧ j = S $ by opair_inj_c [l2, l3, l4, #4, #5]
+l6: $ G ⇒ j = S $ by and_elim_r [l5]
+l7: $ G ⇒ crn j = crn S $ by crn_eq [l6]
+l8: $ G ⇒ crn S ⊆ X $ by subset_eq_l [l7, #1]
+
 trees_set
 ---------
 f1: $ G , w = ω ⇒ mono x (l × fseq x) $ by trees_op_mono

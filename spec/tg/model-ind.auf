@@ -2322,6 +2322,38 @@ l4: $ G ⇒ nest (scons a s) y ∈ F ↔ ⟨ a , y ⟩ ∈ apn F s $ by bi_intro
 l5: $ G ⇒ ∀ y (nest (scons a s) y ∈ F ↔ ⟨ a , y ⟩ ∈ apn F s) $ by all_intro [l4]
 l6: $ G ⇒ apn F (scons a s) = ap (apn F s) a $ by cab_eq [l5]
 
+apn_scons_c
+-----------
+c1: $ G , x0 = X , x1 = S , x1 ∊ fseq V ⇒ x1 ∊ fseq V $ by ax
+c2: $ G , x0 = X , x1 = S , x1 ∊ fseq V ⇒ apn F (scons x0 x1) = ap (apn F x1) x0 $ by apn_scons [c1]
+c3: $ G , x0 = X , x1 = S , x1 ∊ fseq V ⇒ x0 = X $ by ax
+c4: $ G , x0 = X , x1 = S , x1 ∊ fseq V ⇒ x1 = S $ by ax
+c5: $ G , x0 = X , x1 = S , x1 ∊ fseq V ⇒ scons x0 x1 = scons X S $ by scons_eq [c3, c4]
+c6: $ G , x0 = X , x1 = S , x1 ∊ fseq V ⇒ F = F $ by eq_refl
+c7: $ G , x0 = X , x1 = S , x1 ∊ fseq V ⇒ apn F (scons x0 x1) = apn F (scons X S) $ by apn_eq [c6, c5]
+c8: $ G , x0 = X , x1 = S , x1 ∊ fseq V ⇒ apn F x1 = apn F S $ by apn_eq [c6, c4]
+c9: $ G , x0 = X , x1 = S , x1 ∊ fseq V ⇒ ap (apn F x1) x0 = ap (apn F S) X $ by ap_eq [c8, c3]
+c10a: $ G , x0 = X , x1 = S , x1 ∊ fseq V ⇒ apn F (scons X S) = apn F (scons x0 x1) $ by eq_sym [c7]
+c10b: $ G , x0 = X , x1 = S , x1 ∊ fseq V ⇒ apn F (scons X S) = ap (apn F x1) x0 $ by eq_trans [c10a, c2]
+c10: $ G , x0 = X , x1 = S , x1 ∊ fseq V ⇒ apn F (scons X S) = ap (apn F S) X $ by eq_trans [c10b, c9]
+wd1_13: $ G , x0 = X ⇒ S ∈ fseq V $ by weaken [#2]
+d1: $ G , x0 = X ⇒ apn F (scons X S) = ap (apn F S) X $ by wcel_elim [wd1_13, c10]
+d2: $ G ⇒ apn F (scons X S) = ap (apn F S) X $ by isset_elim [#1, d1]
+
+apn_mono
+--------
+a1: $ G , v ∊ apn F S ⇒ v ∊ apn F S $ by ax
+a2: $ G , v ∊ apn F S ⇒ v ∈ apn F S $ by welc_wcel [a1]
+a3: $ G , v ∊ apn F S ⇒ isset v $ by isset_var
+a4: $ G , v ∊ apn F S ⇒ v ∈ apn F S ↔ nest S v ∈ F $ by apn_wcel [a3]
+a5: $ G , v ∊ apn F S ⇒ nest S v ∈ F $ by bi_elim_l [a4, a2]
+a6: $ G , v ∊ apn F S ⇒ F ⊆ F2 $ by weaken [#1]
+a7: $ G , v ∊ apn F S ⇒ nest S v ∈ F2 $ by wcel_subset [a6, a5]
+a8: $ G , v ∊ apn F S ⇒ v ∈ apn F2 S ↔ nest S v ∈ F2 $ by apn_wcel [a3]
+a9: $ G , v ∊ apn F S ⇒ v ∈ apn F2 S $ by bi_elim_r [a8, a7]
+a10: $ G , v ∊ apn F S ⇒ v ∊ apn F2 S $ by wcel_welc [a9]
+a11: $ G ⇒ apn F S ⊆ apn F2 S $ by subset_intro [a10]
+
 apn_scat
 --------
 l0: $ G ⇒ isset y $ by isset_var
@@ -3338,6 +3370,57 @@ q5: $ G , a = A , a ∊ trees ω , b = T , b ∊ trees ω ⇒ esat u E ⟨ kc_co
 q6a: $ G , a = A , a ∊ trees ω ⇒ T ∈ trees ω $ by weaken [#2]
 q6: $ G , a = A , a ∊ trees ω ⇒ esat u E ⟨ kc_cons , scons A (scons T ∅) ⟩ w = {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ esat u E T w ∧ x ∊ da (fv E A) w q ∧ r = scons x q) } $ by wcel_elim [q6a, q5]
 q7: $ G ⇒ esat u E ⟨ kc_cons , scons A (scons T ∅) ⟩ w = {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ esat u E T w ∧ x ∊ da (fv E A) w q ∧ r = scons x q) } $ by wcel_elim [#1, q6]
+
+esat_cons_intro
+---------------
+k1: $ G ⇒ esat u E P w ⊆ fseq u $ by esat_fseq
+k2: $ G ⇒ c ∊ fseq u $ by subset_elim [k1, #4]
+k3: $ G ⇒ scons a c ∈ fseq u $ by scons_fseq [#6, k2]
+k4: $ G ⇒ isset (scons a c) $ by wcel_isset [k3]
+m1: $ G , v = scons a c ⇒ v = scons a c $ by ax
+m1b: $ G , v = scons a c ⇒ scons a c = v $ by eq_sym [m1]
+m2: $ G , v = scons a c ⇒ scons a c ∈ fseq u $ by weaken [k3]
+m3: $ G , v = scons a c ⇒ v ∈ fseq u $ by wcel_eq_l [m1b, m2]
+m4: $ G , v = scons a c ⇒ v ∊ fseq u $ by wcel_welc [m3]
+m5a: $ G , v = scons a c ⇒ c ∊ esat u E P w $ by weaken [#4]
+m5b: $ G , v = scons a c ⇒ a ∊ da (fv E A) w c $ by weaken [#5]
+m5c: $ G , v = scons a c ⇒ a ∊ da (fv E A) w c ∧ v = scons a c $ by and_intro [m5b, m1]
+m5: $ G , v = scons a c ⇒ c ∊ esat u E P w ∧ a ∊ da (fv E A) w c ∧ v = scons a c $ by and_intro [m5a, m5c]
+m6: $ G , v = scons a c ⇒ ∃ q (q ∊ esat u E P w ∧ a ∊ da (fv E A) w q ∧ v = scons a q) $ by ex_intro [m5]
+m7: $ G , v = scons a c ⇒ ∃ x ∃ q (q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ v = scons x q) $ by ex_intro [m6]
+m8: $ G , v = scons a c ⇒ v ∊ fseq u ∧ ∃ x ∃ q (q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ v = scons x q) $ by and_intro [m4, m7]
+m9: $ G , v = scons a c ⇒ v ∊ {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ r = scons x q)} $ by cab_intro [m8]
+m10a: $ G , v = scons a c ⇒ A ∈ trees ω $ by weaken [#1]
+m10b: $ G , v = scons a c ⇒ P ∈ trees ω $ by weaken [#2]
+m10c: $ G , v = scons a c ⇒ w ∊ lvals $ by weaken [#3]
+m10: $ G , v = scons a c ⇒ esat u E ⟨ kc_cons , scons A (scons P ∅) ⟩ w = {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ r = scons x q)} $ by esat_cons [m10a, m10b, m10c]
+m11: $ G , v = scons a c ⇒ {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ r = scons x q)} = esat u E ⟨ kc_cons , scons A (scons P ∅) ⟩ w $ by eq_sym [m10]
+m12: $ G , v = scons a c ⇒ v ∊ esat u E ⟨ kc_cons , scons A (scons P ∅) ⟩ w $ by welc_eq [m11, m9]
+m13: $ G , v = scons a c ⇒ v ∈ esat u E ⟨ kc_cons , scons A (scons P ∅) ⟩ w $ by welc_wcel [m12]
+m14: $ G , v = scons a c ⇒ scons a c ∈ esat u E ⟨ kc_cons , scons A (scons P ∅) ⟩ w $ by wcel_eq_l [m1, m13]
+n1: $ G ⇒ scons a c ∈ esat u E ⟨ kc_cons , scons A (scons P ∅) ⟩ w $ by isset_elim [k4, m14]
+
+esat_cons_elim
+--------------
+k1: $ G ⇒ esat u E ⟨ kc_cons , scons A (scons P ∅) ⟩ w = {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ r = scons x q)} $ by esat_cons [#1, #2, #3]
+k2: $ G ⇒ e ∊ {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ r = scons x q)} $ by welc_eq [k1, #4]
+k3: $ G ⇒ e ∊ fseq u ∧ ∃ x ∃ q (q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ e = scons x q) $ by cab_elim [k2]
+k4: $ G ⇒ ∃ x ∃ q (q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ e = scons x q) $ by and_elim_r [k3]
+h1: $ H , q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ e = scons x q ⇒ q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ e = scons x q $ by ax
+h2: $ H , q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ e = scons x q ⇒ q ∊ esat u E P w $ by and_elim_l [h1]
+h3: $ H , q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ e = scons x q ⇒ x ∊ da (fv E A) w q ∧ e = scons x q $ by and_elim_r [h1]
+h4: $ H , q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ e = scons x q ⇒ x ∊ da (fv E A) w q $ by and_elim_l [h3]
+h5: $ H , q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ e = scons x q ⇒ e = scons x q $ by and_elim_r [h3]
+i1: $ H , q ∊ esat u E P w , x ∊ da (fv E A) w q ⇒ e = scons x q → d $ by imp_intro [#5]
+i2: $ H , q ∊ esat u E P w ⇒ x ∊ da (fv E A) w q → e = scons x q → d $ by imp_intro [i1]
+i3: $ H ⇒ q ∊ esat u E P w → x ∊ da (fv E A) w q → e = scons x q → d $ by imp_intro [i2]
+i4: $ H , q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ e = scons x q ⇒ q ∊ esat u E P w → x ∊ da (fv E A) w q → e = scons x q → d $ by weaken [i3]
+i5: $ H , q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ e = scons x q ⇒ x ∊ da (fv E A) w q → e = scons x q → d $ by imp_elim [i4, h2]
+i6: $ H , q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ e = scons x q ⇒ e = scons x q → d $ by imp_elim [i5, h4]
+i7: $ H , q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ e = scons x q ⇒ d $ by imp_elim [i6, h5]
+e0: $ H , ∃ q (q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ e = scons x q) ⇒ ∃ q (q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ e = scons x q) $ by ax
+e1: $ H , ∃ q (q ∊ esat u E P w ∧ x ∊ da (fv E A) w q ∧ e = scons x q) ⇒ d $ by ex_elim [e0, i7]
+e2: $ G , H ⇒ d $ by ex_elim [k4, e1]
 
 lemma c3_cc_mem {o p: set} (G: hyps) (u: set) (X: class o p) (w r m: set):
   $ G ⇒ m ∊ ap (ap (clam o lvals (clam p (fseq u) X)) w) r $ >
@@ -6178,6 +6261,296 @@ etel_eq
 l1: $ G ⇒ etf U E = etf U E $ by eq_refl
 l2: $ G ⇒ fv (etf U E) T = fv (etf U E) T2 $ by fv_eq [l1, #1]
 l3: $ G ⇒ etel U E T W R = etel U E T2 W2 R2 $ by da_eq [l2, #2, #3]
+
+esat_eq
+-------
+l1: $ G ⇒ esf U E = esf U E $ by eq_refl
+l2: $ G ⇒ fv (esf U E) T = fv (esf U E) T2 $ by fv_eq [l1, #1]
+l3: $ G ⇒ esat U E T W = esat U E T2 W2 $ by ap_eq [l2, #2]
+
+path0_inj
+---------
+l1: $ G ⇒ isset ∅ $ by ax_empty
+l2: $ G ⇒ isset ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ $ by opair_isset
+l3: $ G ⇒ isset ⟨ ∅ , ⟨ ∅ , B ⟩ ⟩ $ by opair_isset
+l4: $ G ⇒ ∅ = ∅ ∧ ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ = ⟨ ∅ , ⟨ ∅ , B ⟩ ⟩ $ by opair_inj_c [#1, l1, l2, l1, l3]
+l5: $ G ⇒ ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ = ⟨ ∅ , ⟨ ∅ , B ⟩ ⟩ $ by and_elim_r [l4]
+l6: $ G ⇒ isset ⟨ ∅ , A ⟩ $ by opair_isset
+l7: $ G ⇒ isset ⟨ ∅ , B ⟩ $ by opair_isset
+l8: $ G ⇒ ∅ = ∅ ∧ ⟨ ∅ , A ⟩ = ⟨ ∅ , B ⟩ $ by opair_inj_c [l5, l1, l6, l1, l7]
+l9: $ G ⇒ ⟨ ∅ , A ⟩ = ⟨ ∅ , B ⟩ $ by and_elim_r [l8]
+l10: $ G ⇒ ∅ = ∅ ∧ A = B $ by opair_inj_c [l9, l1, #2, l1, #3]
+l11: $ G ⇒ A = B $ by and_elim_r [l10]
+
+path0_eq
+--------
+l1: $ G ⇒ ∅ = ∅ $ by eq_refl
+l2: $ G ⇒ ⟨ ∅ , A ⟩ = ⟨ ∅ , B ⟩ $ by opair_eq [l1, #1]
+l3: $ G ⇒ ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ = ⟨ ∅ , ⟨ ∅ , B ⟩ ⟩ $ by opair_eq [l1, l2]
+l4: $ G ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ ⟩ = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , B ⟩ ⟩ ⟩ $ by opair_eq [l1, l3]
+
+etel_other_trees
+----------------
+l1: $ G ⇒ ⟨ K , S ⟩ ∈ trees ω $ by weaken [#1]
+m2: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ k ∊ ω $ by ax
+m4: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ j ∊ fseq (trees ω) $ by ax
+m8: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ ⟨ K , S ⟩ = ⟨ k , j ⟩ $ by ax
+m9: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ isset K $ by opair_eq_isset [m8]
+m10: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ isset k $ by isset_var
+m11: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ K = k $ by opair_inj_l_c [m8, m9, m10]
+n1: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) , k = kc_pi ⇒ k = kc_pi $ by ax
+wn2_5: $ G , j ∊ fseq (trees ω) , k = kc_pi , k ∊ ω , ⟨ K , S ⟩ = ⟨ k , j ⟩ ⇒ K = k $ by weaken [m11]
+n2: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) , k = kc_pi ⇒ K = k $ by weaken [wn2_5]
+n3: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) , k = kc_pi ⇒ K = kc_pi $ by eq_trans [n2, n1]
+wn4_6: $ G , j ∊ fseq (trees ω) , k = kc_pi , k ∊ ω , ⟨ K , S ⟩ = ⟨ k , j ⟩ ⇒ ¬ K = kc_pi $ by weaken [#2]
+n4: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) , k = kc_pi ⇒ ¬ K = kc_pi $ by weaken [wn4_6]
+n5: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) , k = kc_pi ⇒ ⊥ $ by not_elim [n4, n3]
+n6: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ ¬ k = kc_pi $ by not_intro [n5]
+o1: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) , k = kc_app ⇒ k = kc_app $ by ax
+wo2_7: $ G , j ∊ fseq (trees ω) , k = kc_app , k ∊ ω , ⟨ K , S ⟩ = ⟨ k , j ⟩ ⇒ K = k $ by weaken [m11]
+o2: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) , k = kc_app ⇒ K = k $ by weaken [wo2_7]
+o3: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) , k = kc_app ⇒ K = kc_app $ by eq_trans [o2, o1]
+wo4_8: $ G , j ∊ fseq (trees ω) , k = kc_app , k ∊ ω , ⟨ K , S ⟩ = ⟨ k , j ⟩ ⇒ ¬ K = kc_app $ by weaken [#3]
+o4: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) , k = kc_app ⇒ ¬ K = kc_app $ by weaken [wo4_8]
+o5: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) , k = kc_app ⇒ ⊥ $ by not_elim [o4, o3]
+o6: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ ¬ k = kc_app $ by not_intro [o5]
+p0: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ k ∈ ω $ by welc_wcel [m2]
+p0b: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ j ∈ fseq (trees ω) $ by welc_wcel [m4]
+wp1_9: $ G , j ∊ fseq (trees ω) , k ∊ ω , ⟨ K , S ⟩ = ⟨ k , j ⟩ ⇒ w ∊ lvals $ by weaken [#4]
+p1: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ w ∊ lvals $ by weaken [wp1_9]
+wp2_10: $ G , j ∊ fseq (trees ω) , k ∊ ω , ⟨ K , S ⟩ = ⟨ k , j ⟩ ⇒ r ∊ fseq u $ by weaken [#5]
+p2: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ r ∊ fseq u $ by weaken [wp2_10]
+p3: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ etel u E ⟨ k , j ⟩ w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩ $ by etel_other [p0, p0b, n6, o6, p1, p2]
+p4: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ w = w $ by eq_refl
+p5: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ r = r $ by eq_refl
+p6: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ etel u E ⟨ K , S ⟩ w r = etel u E ⟨ k , j ⟩ w r $ by etel_eq [m8, p4, p5]
+p7: $ G , ⟨ K , S ⟩ = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ etel u E ⟨ K , S ⟩ w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩ $ by eq_trans [p6, p3]
+q2: $ G ⇒ etel u E ⟨ K , S ⟩ w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩ $ by trees_omega_elim [l1, p7]
+
+etel_app_csn
+------------
+e1: $ G ⇒ etel u E ⟨ kc_app , scons F (scons A2 ∅) ⟩ w r = {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} $ by etel_app [#1, #2, #3, #4]
+a1: $ G , x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} ⇒ x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} $ by ax
+a2: $ G , x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} ⇒ ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩) $ by cab_elim [a1]
+b1: $ G , x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ $ by ax
+b2: $ G , x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r $ by and_elim_l [b1]
+b3: $ G , x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ ⇒ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ $ by and_elim_r [b1]
+b4: $ G , x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ ⇒ etel u E F w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ ⟩ $ by weaken [#5]
+b5: $ G , x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ ⟩ $ by wcel_eq_r [b4, b2]
+b6: $ G , x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ ⟩ $ by csn_elim_c [b5]
+b7: $ G , x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ ⇒ isset a $ by isset_var
+b8: $ G , x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ ⇒ isset A $ by weaken [#6]
+b9: $ G , x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ ⇒ a = A $ by path0_inj [b6, b7, b8]
+b10: $ G , x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ ⇒ (da (fv E A2) w r) = (da (fv E A2) w r) $ by eq_refl
+b11: $ G , x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ ⇒ scons (da (fv E A2) w r) a = scons (da (fv E A2) w r) A $ by scons_eq [b10, b9]
+b12: $ G , x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ $ by path0_eq [b11]
+b13: $ G , x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ ⇒ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ $ by eq_trans [b3, b12]
+b14: $ G , x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ ⇒ x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ $ by csn_intro [b13]
+a3: $ G , x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} ⇒ x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ $ by ex_elim [a2, b14]
+d1: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ a = A $ by ax
+d2: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ isset ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ ⟩ $ by opair_isset
+d3: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ ⟩ ∈ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ ⟩ $ by csn_intro_var_c [d2]
+d4: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ etel u E F w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ ⟩ $ by weaken [#5]
+d5: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ ⟩ = etel u E F w r $ by eq_sym [d4]
+d6: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ ⟩ ∈ etel u E F w r $ by wcel_eq_r [d5, d3]
+d7: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ ⟩ $ by path0_eq [d1]
+d8: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , A ⟩ ⟩ ⟩ = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ $ by eq_sym [d7]
+d9: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r $ by wcel_eq_l [d8, d6]
+d10: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ $ by ax
+d11: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ $ by csn_elim [d10]
+d12: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ (da (fv E A2) w r) = (da (fv E A2) w r) $ by eq_refl
+d13: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ A = a $ by eq_sym [d1]
+d14: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ scons (da (fv E A2) w r) A = scons (da (fv E A2) w r) a $ by scons_eq [d12, d13]
+d15: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ $ by path0_eq [d14]
+d16: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ $ by eq_trans [d11, d15]
+d17: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩ $ by and_intro [d9, d16]
+d18: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ x = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩) $ by ex_intro [d17]
+d19: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ , a = A ⇒ x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} $ by cab_intro [d18]
+d20: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ ⇒ isset A $ by weaken [#6]
+d21: $ G , x ∊ csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ ⇒ x ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} $ by isset_elim [d20, d19]
+e2: $ G ⇒ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) a ⟩ ⟩ ⟩)} = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ $ by eq_intro [a3, d21]
+e3: $ G ⇒ etel u E ⟨ kc_app , scons F (scons A2 ∅) ⟩ w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A2) w r) A ⟩ ⟩ ⟩ $ by eq_trans [e1, e2]
+
+lemma a0_app_sub (G: hyps) {a y: set} (P P2 V V2: class): $ G ⇒ P = P2 $ > $ G ⇒ V = V2 $ > $ G ⇒ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩)} ⊆ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P2 ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V2 a ⟩ ⟩ ⟩)} $
+----
+a1: $ G , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩ ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩ $ by ax
+a2: $ G , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩ ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P $ by and_elim_l [a1]
+a3: $ G , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩ ⇒ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩ $ by and_elim_r [a1]
+b1: $ G , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩ ⇒ P = P2 $ by weaken [#1]
+b2: $ G , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩ ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P2 $ by wcel_eq_r [b1, a2]
+b3: $ G , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩ ⇒ V = V2 $ by weaken [#2]
+b4: $ G , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩ ⇒ a = a $ by eq_refl
+b5: $ G , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩ ⇒ scons V a = scons V2 a $ by scons_eq [b3, b4]
+b6: $ G , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩ ⇒ ∅ = ∅ $ by eq_refl
+b7: $ G , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩ ⇒ ⟨ ∅ , scons V a ⟩ = ⟨ ∅ , scons V2 a ⟩ $ by opair_eq [b6, b5]
+b8: $ G , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩ ⇒ ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ = ⟨ ∅ , ⟨ ∅ , scons V2 a ⟩ ⟩ $ by opair_eq [b6, b7]
+b9: $ G , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩ ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩ = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V2 a ⟩ ⟩ ⟩ $ by opair_eq [b6, b8]
+b10: $ G , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩ ⇒ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V2 a ⟩ ⟩ ⟩ $ by eq_trans [a3, b9]
+c1: $ G , ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩ ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P2 ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V2 a ⟩ ⟩ ⟩ $ by and_intro [b2, b10]
+c2: $ G ⇒ (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩) → (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P2 ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V2 a ⟩ ⟩ ⟩) $ by imp_intro [c1]
+d1: $ G ⇒ ∀ a ((⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩) → (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P2 ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V2 a ⟩ ⟩ ⟩)) $ by all_intro [c2]
+e1a: $ G , v ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩)} ⇒ v ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩)} $ by ax
+e1: $ G , v ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩)} ⇒ ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩) $ by cab_elim [e1a]
+e2a: $ G , v ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩)} ⇒ ∀ a ((⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩) → (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P2 ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V2 a ⟩ ⟩ ⟩)) $ by weaken [d1]
+e2: $ G , v ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩)} ⇒ ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P2 ∧ v = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V2 a ⟩ ⟩ ⟩) $ by ex_mp [e2a, e1]
+e3: $ G , v ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩)} ⇒ v ∊ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P2 ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V2 a ⟩ ⟩ ⟩)} $ by cab_intro [e2]
+e4: $ G ⇒ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩)} ⊆ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P2 ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V2 a ⟩ ⟩ ⟩)} $ by subset_intro [e3]
+
+lemma a0_app_eq (G: hyps) {a y: set} (P P2 V V2: class): $ G ⇒ P = P2 $ > $ G ⇒ V = V2 $ > $ G ⇒ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩)} = {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P2 ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V2 a ⟩ ⟩ ⟩)} $
+----
+l1: $ G ⇒ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩)} ⊆ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P2 ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V2 a ⟩ ⟩ ⟩)} $ by a0_app_sub [#1, #2]
+l2: $ G ⇒ P2 = P $ by eq_sym [#1]
+l3: $ G ⇒ V2 = V $ by eq_sym [#2]
+l4: $ G ⇒ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P2 ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V2 a ⟩ ⟩ ⟩)} ⊆ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩)} $ by a0_app_sub [l2, l3]
+l5: $ G ⇒ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V a ⟩ ⟩ ⟩)} = {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ P2 ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons V2 a ⟩ ⟩ ⟩)} $ by subset_antisym [l1, l4]
+
+etel_app_vals
+-------------
+v3: $ G ⇒ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A) w r) a ⟩ ⟩ ⟩)} = {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r2 ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A) w r2) a ⟩ ⟩ ⟩)} $ by a0_app_eq [#6, #7]
+v4: $ G ⇒ etel u E ⟨ kc_app , scons F (scons A ∅) ⟩ w r = {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A) w r) a ⟩ ⟩ ⟩)} $ by etel_app [#1, #2, #3, #4]
+v5: $ G ⇒ etel u E ⟨ kc_app , scons F (scons A ∅) ⟩ w r2 = {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r2 ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A) w r2) a ⟩ ⟩ ⟩)} $ by etel_app [#1, #2, #3, #5]
+f1: $ G ⇒ {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r2 ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A) w r2) a ⟩ ⟩ ⟩)} = etel u E ⟨ kc_app , scons F (scons A ∅) ⟩ w r2 $ by eq_sym [v5]
+f2: $ G ⇒ etel u E ⟨ kc_app , scons F (scons A ∅) ⟩ w r = {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u E F w r2 ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E A) w r2) a ⟩ ⟩ ⟩)} $ by eq_trans [v4, v3]
+f3: $ G ⇒ etel u E ⟨ kc_app , scons F (scons A ∅) ⟩ w r = etel u E ⟨ kc_app , scons F (scons A ∅) ⟩ w r2 $ by eq_trans [f2, f1]
+
+lemma a0_pi_sub (G: hyps) {x f g t a y: set} (U E X X2 T T2 B: class) (w d e: set): $ G ⇒ X = X2 $ > $ G ⇒ T = T2 $ > $ G ⇒ ∀ x (x ∊ U → etel U E B w (scons x d) = etel U E B w (scons x e)) $ > $ G ⇒ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)} ⊆ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)} $
+----
+a1: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ $ by ax
+a2: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ x ∊ X $ by and_elim_l [a1]
+a3: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ $ by and_elim_r [a1]
+a4: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ x ∊ U $ by and_elim_l [a3]
+a5: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ $ by and_elim_r [a3]
+a6: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) $ by and_elim_l [a5]
+a7: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ $ by and_elim_r [a5]
+b1: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ X = X2 $ by weaken [#1]
+b2: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ x ∊ X2 $ by welc_eq [b1, a2]
+b3: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ ∀ x (x ∊ U → etel U E B w (scons x d) = etel U E B w (scons x e)) $ by weaken [#3]
+b4: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ x ∊ U → etel U E B w (scons x d) = etel U E B w (scons x e) $ by all_elim [b3]
+b5: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ etel U E B w (scons x d) = etel U E B w (scons x e) $ by imp_elim [b4, a4]
+b6: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) $ by wcel_eq_r [b5, a6]
+b7: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ T = T2 $ by weaken [#2]
+b8: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ t = t $ by eq_refl
+b9: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ scons T t = scons T2 t $ by scons_eq [b7, b8]
+b10: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ a = a $ by eq_refl
+b11: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ ⟨ scons T t , a ⟩ = ⟨ scons T2 t , a ⟩ $ by opair_eq [b9, b10]
+b12: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ scons x g = scons x g $ by eq_refl
+b13: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ = ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ $ by opair_eq [b12, b11]
+b14: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ ssnoc f x = ssnoc f x $ by eq_refl
+b15: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩ $ by opair_eq [b14, b13]
+b16: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩ $ by eq_trans [a7, b15]
+c1: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩ $ by and_intro [b6, b16]
+c2: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩ $ by and_intro [a4, c1]
+c3: $ G , x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩ ⇒ x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩ $ by and_intro [b2, c2]
+c4: $ G ⇒ (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩) → (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩) $ by imp_intro [c3]
+d0a: $ G ⇒ ∀ a ((x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩) → (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)) $ by all_intro [c4]
+d0b: $ G , ∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩) ⇒ ∀ a ((x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩) → (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)) $ by weaken [d0a]
+d0c: $ G , ∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩) ⇒ ∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩) $ by ax
+d0d: $ G , ∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩) ⇒ ∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩) $ by ex_mp [d0b, d0c]
+d0: $ G ⇒ (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)) → (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)) $ by imp_intro [d0d]
+d1a: $ G ⇒ ∀ t ((∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)) → (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩))) $ by all_intro [d0]
+d1b: $ G , ∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)) ⇒ ∀ t ((∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)) → (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩))) $ by weaken [d1a]
+d1c: $ G , ∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)) ⇒ ∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)) $ by ax
+d1d: $ G , ∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)) ⇒ ∃ t (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)) $ by ex_mp [d1b, d1c]
+d1: $ G ⇒ (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩))) → (∃ t (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩))) $ by imp_intro [d1d]
+d2a: $ G ⇒ ∀ g ((∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩))) → (∃ t (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)))) $ by all_intro [d1]
+d2b: $ G , ∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩))) ⇒ ∀ g ((∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩))) → (∃ t (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)))) $ by weaken [d2a]
+d2c: $ G , ∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩))) ⇒ ∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩))) $ by ax
+d2d: $ G , ∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩))) ⇒ ∃ g (∃ t (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩))) $ by ex_mp [d2b, d2c]
+d2: $ G ⇒ (∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)))) → (∃ g (∃ t (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)))) $ by imp_intro [d2d]
+d3a: $ G ⇒ ∀ f ((∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)))) → (∃ g (∃ t (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩))))) $ by all_intro [d2]
+d3b: $ G , ∃ f (∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)))) ⇒ ∀ f ((∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)))) → (∃ g (∃ t (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩))))) $ by weaken [d3a]
+d3c: $ G , ∃ f (∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)))) ⇒ ∃ f (∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)))) $ by ax
+d3d: $ G , ∃ f (∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)))) ⇒ ∃ f (∃ g (∃ t (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)))) $ by ex_mp [d3b, d3c]
+d3: $ G ⇒ (∃ f (∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩))))) → (∃ f (∃ g (∃ t (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩))))) $ by imp_intro [d3d]
+d4a: $ G ⇒ ∀ x ((∃ f (∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩))))) → (∃ f (∃ g (∃ t (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)))))) $ by all_intro [d3]
+d4b: $ G , ∃ x (∃ f (∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩))))) ⇒ ∀ x ((∃ f (∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩))))) → (∃ f (∃ g (∃ t (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)))))) $ by weaken [d4a]
+d4c: $ G , ∃ x (∃ f (∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩))))) ⇒ ∃ x (∃ f (∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩))))) $ by ax
+d4d: $ G , ∃ x (∃ f (∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩))))) ⇒ ∃ x (∃ f (∃ g (∃ t (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩))))) $ by ex_mp [d4b, d4c]
+d4: $ G ⇒ (∃ x (∃ f (∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)))))) → (∃ x (∃ f (∃ g (∃ t (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)))))) $ by imp_intro [d4d]
+e1a: $ G , v ∊ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)} ⇒ v ∊ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)} $ by ax
+e1: $ G , v ∊ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)} ⇒ ∃ x (∃ f (∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩))))) $ by cab_elim [e1a]
+e2a: $ G , v ∊ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)} ⇒ (∃ x (∃ f (∃ g (∃ t (∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)))))) → (∃ x (∃ f (∃ g (∃ t (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)))))) $ by weaken [d4]
+e2: $ G , v ∊ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)} ⇒ ∃ x (∃ f (∃ g (∃ t (∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩))))) $ by imp_elim [e2a, e1]
+e3: $ G , v ∊ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)} ⇒ v ∊ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)} $ by cab_intro [e2]
+e4: $ G ⇒ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)} ⊆ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)} $ by subset_intro [e3]
+
+lemma a0_pi_eq (G: hyps) {x f g t a y: set} (U E X X2 T T2 B: class) (w d e: set): $ G ⇒ X = X2 $ > $ G ⇒ T = T2 $ > $ G ⇒ ∀ x (x ∊ U → etel U E B w (scons x d) = etel U E B w (scons x e)) $ > $ G ⇒ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)} = {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)} $
+----
+l1: $ G ⇒ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)} ⊆ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)} $ by a0_pi_sub [#1, #2, #3]
+l2: $ G ⇒ X2 = X $ by eq_sym [#1]
+l3: $ G ⇒ T2 = T $ by eq_sym [#2]
+m1: $ G , x ∊ U ⇒ ∀ x (x ∊ U → etel U E B w (scons x d) = etel U E B w (scons x e)) $ by weaken [#3]
+m2: $ G , x ∊ U ⇒ x ∊ U → etel U E B w (scons x d) = etel U E B w (scons x e) $ by all_elim [m1]
+m3a: $ G , x ∊ U ⇒ x ∊ U $ by ax
+m3: $ G , x ∊ U ⇒ etel U E B w (scons x d) = etel U E B w (scons x e) $ by imp_elim [m2, m3a]
+m4: $ G , x ∊ U ⇒ etel U E B w (scons x e) = etel U E B w (scons x d) $ by eq_sym [m3]
+m5: $ G ⇒ x ∊ U → etel U E B w (scons x e) = etel U E B w (scons x d) $ by imp_intro [m4]
+m6: $ G ⇒ ∀ x (x ∊ U → etel U E B w (scons x e) = etel U E B w (scons x d)) $ by all_intro [m5]
+l5: $ G ⇒ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)} ⊆ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)} $ by a0_pi_sub [l2, l3, m6]
+l6: $ G ⇒ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x d) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T t , a ⟩ ⟩ ⟩)} = {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ X2 ∧ x ∊ U ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E B w (scons x e) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons T2 t , a ⟩ ⟩ ⟩)} $ by subset_antisym [l1, l5]
+
+etel_pi_vals
+------------
+v3: $ G ⇒ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E B w (scons x r) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u E A w r) t , a ⟩ ⟩ ⟩)} = {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ da (fv E A) w r2 ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E B w (scons x r2) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u E A w r2) t , a ⟩ ⟩ ⟩)} $ by a0_pi_eq [#6, #7, #8]
+v4: $ G ⇒ etel u E ⟨ kc_pi , scons A (scons B ∅) ⟩ w r = {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E B w (scons x r) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u E A w r) t , a ⟩ ⟩ ⟩)} $ by etel_pi [#1, #2, #3, #4]
+v5: $ G ⇒ etel u E ⟨ kc_pi , scons A (scons B ∅) ⟩ w r2 = {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ da (fv E A) w r2 ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E B w (scons x r2) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u E A w r2) t , a ⟩ ⟩ ⟩)} $ by etel_pi [#1, #2, #3, #5]
+f1: $ G ⇒ {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ da (fv E A) w r2 ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E B w (scons x r2) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u E A w r2) t , a ⟩ ⟩ ⟩)} = etel u E ⟨ kc_pi , scons A (scons B ∅) ⟩ w r2 $ by eq_sym [v5]
+f2: $ G ⇒ etel u E ⟨ kc_pi , scons A (scons B ∅) ⟩ w r = {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ da (fv E A) w r2 ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E B w (scons x r2) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u E A w r2) t , a ⟩ ⟩ ⟩)} $ by eq_trans [v4, v3]
+f3: $ G ⇒ etel u E ⟨ kc_pi , scons A (scons B ∅) ⟩ w r = etel u E ⟨ kc_pi , scons A (scons B ∅) ⟩ w r2 $ by eq_trans [f2, f1]
+
+etel_pi_mono
+------------
+p1: $ G ⇒ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r = {y | ∃ x ∃ f ∃ g ∃ t ∃ c (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩)} $ by etel_pi [#1, #2, #3, #4]
+p2: $ G ⇒ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w s = {y | ∃ x ∃ f ∃ g ∃ t ∃ c (x ∊ da (fv E A) w s ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x s) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w s) t , c ⟩ ⟩ ⟩)} $ by etel_pi [#1, #2, #3, #5]
+h1: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r ⇒ v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r $ by ax
+h2: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r ⇒ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r = {y | ∃ x ∃ f ∃ g ∃ t ∃ c (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩)} $ by weaken [p1]
+h3: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r ⇒ v ∊ {y | ∃ x ∃ f ∃ g ∃ t ∃ c (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩)} $ by welc_eq [h2, h1]
+h4: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r ⇒ ∃ x ∃ f ∃ g ∃ t ∃ c (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩) $ by cab_elim [h3]
+k0: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ $ by ax
+k1: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ x ∊ da (fv E A) w r $ by and_elim_l [k0]
+k2: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ $ by and_elim_r [k0]
+k3: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ x ∊ u $ by and_elim_l [k2]
+k4: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ $ by and_elim_r [k2]
+k5: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) $ by and_elim_l [k4]
+k6: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ $ by and_elim_r [k4]
+k7: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ da (fv E A) w r ⊆ da (fv E A) w s $ by weaken [#6]
+k8: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ x ∊ da (fv E A) w s $ by subset_elim [k7, k1]
+k9: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ ∀ x (x ∊ u → etel u (E) B w (scons x r) ⊆ etel u (E) B w (scons x s)) $ by weaken [#8]
+k10: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ x ∊ u → etel u (E) B w (scons x r) ⊆ etel u (E) B w (scons x s) $ by all_elim [k9]
+k11: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ etel u (E) B w (scons x r) ⊆ etel u (E) B w (scons x s) $ by imp_elim [k10, k3]
+k12: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x s) $ by wcel_subset [k11, k5]
+k13: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ etel u (E) A w r = etel u (E) A w s $ by weaken [#7]
+k14: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ t = t $ by eq_refl
+k15: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ scons (etel u (E) A w r) t = scons (etel u (E) A w s) t $ by scons_eq [k13, k14]
+k16: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ c = c $ by eq_refl
+k17: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ ⟨ scons (etel u (E) A w r) t , c ⟩ = ⟨ scons (etel u (E) A w s) t , c ⟩ $ by opair_eq [k15, k16]
+k18: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ scons x g = scons x g $ by eq_refl
+k19: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ = ⟨ scons x g , ⟨ scons (etel u (E) A w s) t , c ⟩ ⟩ $ by opair_eq [k18, k17]
+k20: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ ssnoc f x = ssnoc f x $ by eq_refl
+k21: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w s) t , c ⟩ ⟩ ⟩ $ by opair_eq [k20, k19]
+k22: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w s) t , c ⟩ ⟩ ⟩ $ by eq_trans [k6, k21]
+k23: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x s) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w s) t , c ⟩ ⟩ ⟩ $ by and_intro [k12, k22]
+k24: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x s) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w s) t , c ⟩ ⟩ ⟩ $ by and_intro [k3, k23]
+k25: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ x ∊ da (fv E A) w s ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x s) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w s) t , c ⟩ ⟩ ⟩ $ by and_intro [k8, k24]
+k26: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ ∃ c (x ∊ da (fv E A) w s ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x s) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w s) t , c ⟩ ⟩ ⟩) $ by ex_intro [k25]
+k27: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ ∃ t ∃ c (x ∊ da (fv E A) w s ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x s) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w s) t , c ⟩ ⟩ ⟩) $ by ex_intro [k26]
+k28: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ ∃ g ∃ t ∃ c (x ∊ da (fv E A) w s ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x s) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w s) t , c ⟩ ⟩ ⟩) $ by ex_intro [k27]
+k29: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ ∃ f ∃ g ∃ t ∃ c (x ∊ da (fv E A) w s ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x s) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w s) t , c ⟩ ⟩ ⟩) $ by ex_intro [k28]
+k30: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ ∃ x ∃ f ∃ g ∃ t ∃ c (x ∊ da (fv E A) w s ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x s) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w s) t , c ⟩ ⟩ ⟩) $ by ex_intro [k29]
+k31: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ v ∊ {y | ∃ x ∃ f ∃ g ∃ t ∃ c (x ∊ da (fv E A) w s ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x s) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w s) t , c ⟩ ⟩ ⟩)} $ by cab_intro [k30]
+k32: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w s = {y | ∃ x ∃ f ∃ g ∃ t ∃ c (x ∊ da (fv E A) w s ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x s) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w s) t , c ⟩ ⟩ ⟩)} $ by weaken [p2]
+k33: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ {y | ∃ x ∃ f ∃ g ∃ t ∃ c (x ∊ da (fv E A) w s ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x s) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w s) t , c ⟩ ⟩ ⟩)} = etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w s $ by eq_sym [k32]
+k34: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩ ⇒ v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w s $ by welc_eq [k33, k31]
+m1: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , ∃ c (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩) ⇒ ∃ c (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩) $ by ax
+m2: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , ∃ c (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩) ⇒ v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w s $ by ex_elim [m1, k34]
+m3: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , ∃ t ∃ c (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩) ⇒ ∃ t ∃ c (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩) $ by ax
+m4: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , ∃ t ∃ c (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩) ⇒ v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w s $ by ex_elim [m3, m2]
+m5: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , ∃ g ∃ t ∃ c (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩) ⇒ ∃ g ∃ t ∃ c (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩) $ by ax
+m6: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , ∃ g ∃ t ∃ c (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩) ⇒ v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w s $ by ex_elim [m5, m4]
+m7: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , ∃ f ∃ g ∃ t ∃ c (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩) ⇒ ∃ f ∃ g ∃ t ∃ c (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩) $ by ax
+m8: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r , ∃ f ∃ g ∃ t ∃ c (x ∊ da (fv E A) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , c ⟩ ⟩ ⟩ ∈ etel u (E) B w (scons x r) ∧ v = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u (E) A w r) t , c ⟩ ⟩ ⟩) ⇒ v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w s $ by ex_elim [m7, m6]
+m9: $ G , v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r ⇒ v ∊ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w s $ by ex_elim [h4, m8]
+m10: $ G ⇒ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w r ⊆ etel u (E) ⟨ kc_pi , scons A (scons B ∅) ⟩ w s $ by subset_intro [m9]
 
 iprt_congr
 ----------
@@ -9662,6 +10035,158 @@ g13: $ G , o = ω ⇒ isset W $ by isset_elim [g12, g11]
 g14: $ G ⇒ isset ω $ by omega_set
 g15: $ G ⇒ isset W $ by isset_elim [g14, g13]
 
+lemma a0_esb_lv (G: hyps) (M K S V W: class) (u y: set): $ G ⇒ ⟨ W , y ⟩ ∈ esb u M K S V $ > $ G ⇒ W ∈ lvals $
+----
+r1: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V ⇒ c ∊ esb u M K S V $ by ax
+r2: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V ⇒ (K = kc_nil ∧ c ∊ (clam g lvals (csn ∅))) ∨ (K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) })) $ by cab_elim [r1]
+r3: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_nil ∧ c ∊ (clam g lvals (csn ∅)) ⇒ K = kc_nil ∧ c ∊ (clam g lvals (csn ∅)) $ by ax
+r4: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_nil ∧ c ∊ (clam g lvals (csn ∅)) ⇒ c ∊ (clam g lvals (csn ∅)) $ by and_elim_r [r3]
+s1: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_nil ∧ c ∊ (clam g lvals (csn ∅)) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ csn ∅ ⇒ c = ⟨ W , y ⟩ $ by ax
+s2: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_nil ∧ c ∊ (clam g lvals (csn ∅)) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ csn ∅ ⇒ c = ⟨ a , b ⟩ $ by ax
+s3: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_nil ∧ c ∊ (clam g lvals (csn ∅)) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ csn ∅ ⇒ ⟨ W , y ⟩ = c $ by eq_sym [s1]
+s4: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_nil ∧ c ∊ (clam g lvals (csn ∅)) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ csn ∅ ⇒ ⟨ W , y ⟩ = ⟨ a , b ⟩ $ by eq_trans [s3, s2]
+s5: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_nil ∧ c ∊ (clam g lvals (csn ∅)) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ csn ∅ ⇒ isset W $ by opair_eq_isset [s4]
+s6: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_nil ∧ c ∊ (clam g lvals (csn ∅)) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ csn ∅ ⇒ isset y $ by isset_var
+s7: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_nil ∧ c ∊ (clam g lvals (csn ∅)) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ csn ∅ ⇒ isset a $ by isset_var
+s8: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_nil ∧ c ∊ (clam g lvals (csn ∅)) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ csn ∅ ⇒ isset b $ by isset_var
+s9: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_nil ∧ c ∊ (clam g lvals (csn ∅)) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ csn ∅ ⇒ W = a ∧ y = b $ by opair_inj_c [s4, s5, s6, s7, s8]
+s10: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_nil ∧ c ∊ (clam g lvals (csn ∅)) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ csn ∅ ⇒ W = a $ by and_elim_l [s9]
+s11: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_nil ∧ c ∊ (clam g lvals (csn ∅)) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ csn ∅ ⇒ a = W $ by eq_sym [s10]
+s12: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_nil ∧ c ∊ (clam g lvals (csn ∅)) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ csn ∅ ⇒ a ∊ lvals $ by ax
+s13: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_nil ∧ c ∊ (clam g lvals (csn ∅)) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ csn ∅ ⇒ W ∈ lvals $ by wcel_intro [s11, s12]
+s18: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_nil ∧ c ∊ (clam g lvals (csn ∅)) ⇒ W ∈ lvals $ by clam_elim_mem [r4, s13]
+t3: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) ⇒ K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) $ by ax
+t4: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) ⇒ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) $ by and_elim_r [t3]
+u1: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) a ∧ x ∊ da (fv M (fv S ∅)) a q ∧ r = scons x q) } ⇒ c = ⟨ W , y ⟩ $ by ax
+u2: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) a ∧ x ∊ da (fv M (fv S ∅)) a q ∧ r = scons x q) } ⇒ c = ⟨ a , b ⟩ $ by ax
+u3: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) a ∧ x ∊ da (fv M (fv S ∅)) a q ∧ r = scons x q) } ⇒ ⟨ W , y ⟩ = c $ by eq_sym [u1]
+u4: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) a ∧ x ∊ da (fv M (fv S ∅)) a q ∧ r = scons x q) } ⇒ ⟨ W , y ⟩ = ⟨ a , b ⟩ $ by eq_trans [u3, u2]
+u5: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) a ∧ x ∊ da (fv M (fv S ∅)) a q ∧ r = scons x q) } ⇒ isset W $ by opair_eq_isset [u4]
+u6: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) a ∧ x ∊ da (fv M (fv S ∅)) a q ∧ r = scons x q) } ⇒ isset y $ by isset_var
+u7: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) a ∧ x ∊ da (fv M (fv S ∅)) a q ∧ r = scons x q) } ⇒ isset a $ by isset_var
+u8: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) a ∧ x ∊ da (fv M (fv S ∅)) a q ∧ r = scons x q) } ⇒ isset b $ by isset_var
+u9: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) a ∧ x ∊ da (fv M (fv S ∅)) a q ∧ r = scons x q) } ⇒ W = a ∧ y = b $ by opair_inj_c [u4, u5, u6, u7, u8]
+u10: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) a ∧ x ∊ da (fv M (fv S ∅)) a q ∧ r = scons x q) } ⇒ W = a $ by and_elim_l [u9]
+u11: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) a ∧ x ∊ da (fv M (fv S ∅)) a q ∧ r = scons x q) } ⇒ a = W $ by eq_sym [u10]
+u12: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) a ∧ x ∊ da (fv M (fv S ∅)) a q ∧ r = scons x q) } ⇒ a ∊ lvals $ by ax
+u13: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) , c = ⟨ a , b ⟩ , a ∊ lvals , b ∊ {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) a ∧ x ∊ da (fv M (fv S ∅)) a q ∧ r = scons x q) } ⇒ W ∈ lvals $ by wcel_intro [u11, u12]
+u16: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V , K = kc_cons ∧ c ∊ (clam g lvals {r | r ∊ fseq u ∧ ∃ x ∃ q (q ∊ ap (fv V (suc ∅)) g ∧ x ∊ da (fv M (fv S ∅)) g q ∧ r = scons x q) }) ⇒ W ∈ lvals $ by clam_elim_mem [t4, u13]
+v1: $ G , c = ⟨ W , y ⟩ , c ∊ esb u M K S V ⇒ W ∈ lvals $ by or_elim [r2, s18, u16]
+v2: $ G ⇒ W ∈ lvals $ by wcel_elim [#1, v1]
+
+esat_lvals
+----------
+a1: $ G ⇒ ⟨ W , q ⟩ ∈ fv (esf u E) P $ by ap_elim [#2]
+b1: $ G , t = P , t ∊ trees ω ⇒ t ∊ trees ω $ by ax
+b2w: $ G , t = P , t ∊ trees ω ⇒ isset ω $ by omega_set
+b2: $ G , t = P , t ∊ trees ω ⇒ ω × fseq (trees ω) = trees ω $ by trees_fix_c [b2w]
+b3: $ G , t = P , t ∊ trees ω ⇒ trees ω = ω × fseq (trees ω) $ by eq_sym [b2]
+b4: $ G , t = P , t ∊ trees ω ⇒ t ∊ ω × fseq (trees ω) $ by welc_eq [b3, b1]
+d1: $ G , t = P , t ∊ trees ω , t = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ k ∊ ω $ by ax
+d2: $ G , t = P , t ∊ trees ω , t = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ j ∊ fseq (trees ω) $ by ax
+d3: $ G , t = P , t ∊ trees ω , t = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ fv (esf u E) ⟨ k , j ⟩ = esb u E k j (ccom (esf u E) j) $ by esf_node [d1, d2]
+d4: $ G , t = P , t ∊ trees ω , t = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ t = P $ by ax
+d5: $ G , t = P , t ∊ trees ω , t = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ P = t $ by eq_sym [d4]
+d6: $ G , t = P , t ∊ trees ω , t = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ t = ⟨ k , j ⟩ $ by ax
+d7: $ G , t = P , t ∊ trees ω , t = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ P = ⟨ k , j ⟩ $ by eq_trans [d5, d6]
+d8: $ G , t = P , t ∊ trees ω , t = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ esf u E = esf u E $ by eq_refl
+d9: $ G , t = P , t ∊ trees ω , t = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ fv (esf u E) P = fv (esf u E) ⟨ k , j ⟩ $ by fv_eq [d8, d7]
+d10: $ G , t = P , t ∊ trees ω , t = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ fv (esf u E) P = esb u E k j (ccom (esf u E) j) $ by eq_trans [d9, d3]
+d11a: $ G , t = P , t ∊ trees ω , t = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ ⟨ W , q ⟩ ∈ fv (esf u E) P $ by weaken [a1]
+d11: $ G , t = P , t ∊ trees ω , t = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ ⟨ W , q ⟩ ∈ esb u E k j (ccom (esf u E) j) $ by wcel_eq_r [d10, d11a]
+d12: $ G , t = P , t ∊ trees ω , t = ⟨ k , j ⟩ , k ∊ ω , j ∊ fseq (trees ω) ⇒ W ∈ lvals $ by a0_esb_lv [d11]
+e1: $ G , t = P , t ∊ trees ω ⇒ W ∈ lvals $ by cxp_elim [b4, d12]
+e2: $ G ⇒ W ∈ lvals $ by wcel_elim [#1, e1]
+
+lemma a0_cc {w r: set} (G: hyps w r) (U: class) (B: class w r) (d z x0 x1 q: set): $ G ⇒ d = ⟨ x0 , z ⟩ $ > $ G ⇒ z = ⟨ x1 , q ⟩ $ > $ G ⇒ d ∊ clam w lvals (clam r (fseq U) B) $ > $ G ⇒ x0 ∊ lvals ∧ x1 ∊ fseq U $
+----
+l1: $ G ⇒ d ∈ clam w lvals (clam r (fseq U) B) $ by welc_wcel [#3]
+l2: $ G ⇒ ⟨ x0 , z ⟩ ∈ clam w lvals (clam r (fseq U) B) $ by wcel_eq_l [#1, l1]
+l3: $ G ⇒ x0 ∊ lvals ∧ z ∊ clam r (fseq U) (⟦ w / x0 ⟧ B) $ by clam_elim [l2]
+l4: $ G ⇒ x0 ∊ lvals $ by and_elim_l [l3]
+l5: $ G ⇒ z ∊ clam r (fseq U) (⟦ w / x0 ⟧ B) $ by and_elim_r [l3]
+l6: $ G ⇒ z ∈ clam r (fseq U) (⟦ w / x0 ⟧ B) $ by welc_wcel [l5]
+l7: $ G ⇒ ⟨ x1 , q ⟩ ∈ clam r (fseq U) (⟦ w / x0 ⟧ B) $ by wcel_eq_l [#2, l6]
+l8: $ G ⇒ x1 ∊ fseq U ∧ q ∊ (⟦ r / x1 ⟧ (⟦ w / x0 ⟧ B)) $ by clam_elim [l7]
+l9: $ G ⇒ x1 ∊ fseq U $ by and_elim_l [l8]
+l10: $ G ⇒ x0 ∊ lvals ∧ x1 ∊ fseq U $ by and_intro [l4, l9]
+
+lemma a0_etel_dom (G: hyps) (E: class) (u o q x0 x1: set): $ G ⇒ o ∊ trees ω $ > $ G ⇒ q ∊ etel u E o x0 x1 $ > $ G ⇒ x0 ∊ lvals ∧ x1 ∊ fseq u $
+----
+p0: $ G ⇒ isset ω $ by omega_set
+p1a: $ G , l = ω ⇒ l = ω $ by ax
+p1b: $ G , l = ω ⇒ ω = l $ by eq_sym [p1a]
+p1c: $ G , l = ω ⇒ trees ω = trees l $ by trees_eq [p1b]
+p1d: $ G , l = ω ⇒ o ∊ trees ω $ by weaken [#1]
+p1e: $ G , l = ω ⇒ o ∊ trees l $ by welc_eq [p1c, p1d]
+p1: $ G , l = ω ⇒ ∃ k ∃ j (k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩) $ by trees_elim [p1e]
+e0: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ $ by ax
+e0a: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ l = ω $ by ax
+e0b: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ ω = l $ by eq_sym [e0a]
+e0c: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ trees l = trees ω $ by trees_eq [e0a]
+e0d: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ fseq (trees l) = fseq (trees ω) $ by fseq_eq [e0c]
+e1a: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ k ∊ l $ by and_elim_l [e0]
+e1: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ k ∊ ω $ by welc_eq [e0a, e1a]
+e1b: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ $ by and_elim_r [e0]
+e2a: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ j ∊ fseq (trees l) $ by and_elim_l [e1b]
+e2: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ j ∊ fseq (trees ω) $ by welc_eq [e0d, e2a]
+e3: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ o = ⟨ k , j ⟩ $ by and_elim_r [e1b]
+e3b: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ c = ccom (etf u E) j $ by ax
+e4: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ fv (etf u E) ⟨ k , j ⟩ = etb u E k j c $ by etf_node [e1, e2, e3b]
+e5a: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ etf u E = etf u E $ by eq_refl
+e5: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ fv (etf u E) o = fv (etf u E) ⟨ k , j ⟩ $ by fv_eq [e5a, e3]
+e6: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ fv (etf u E) o = etb u E k j c $ by eq_trans [e5, e4]
+e7: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ q ∊ ap (ap (fv (etf u E) o) x0) x1 $ by weaken [#2]
+e8a: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ x0 = x0 $ by eq_refl
+e8b: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ x1 = x1 $ by eq_refl
+e8c: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ ap (fv (etf u E) o) x0 = ap (etb u E k j c) x0 $ by ap_eq [e6, e8a]
+e8: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ q ∊ ap (ap (etb u E k j c) x0) x1 $ by welc_ap_eq [e8c, e8b, e7]
+e9: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ ⟨ x1 , q ⟩ ∈ ap (etb u E k j c) x0 $ by ap_elim [e8]
+f1: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 ⇒ z ∊ ap (etb u E k j c) x0 $ by ax
+f2: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 ⇒ ⟨ x0 , z ⟩ ∈ etb u E k j c $ by ap_elim [f1]
+g1: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c ⇒ d ∊ etb u E k j c $ by ax
+g2: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c ⇒ (k = kc_pi ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ da (fv E (fv j ∅)) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ da (fv c (suc ∅)) w (scons x r) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (da (fv c ∅) w r) t , a ⟩ ⟩ ⟩)})) ∨ (k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ da (fv c ∅) w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E (fv j (suc ∅))) w r) a ⟩ ⟩ ⟩)})) ∨ (¬ k = kc_pi ∧ ¬ k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) (csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩))) $ by cab_elim [g1]
+g3: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c ⇒ d = ⟨ x0 , z ⟩ $ by ax
+g4: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c ⇒ z = ⟨ x1 , q ⟩ $ by ax
+h1a: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , k = kc_pi ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ da (fv E (fv j ∅)) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ da (fv c (suc ∅)) w (scons x r) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (da (fv c ∅) w r) t , a ⟩ ⟩ ⟩)}) ⇒ k = kc_pi ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ da (fv E (fv j ∅)) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ da (fv c (suc ∅)) w (scons x r) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (da (fv c ∅) w r) t , a ⟩ ⟩ ⟩)}) $ by ax
+h1b: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , k = kc_pi ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ da (fv E (fv j ∅)) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ da (fv c (suc ∅)) w (scons x r) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (da (fv c ∅) w r) t , a ⟩ ⟩ ⟩)}) ⇒ d ∊ clam w lvals (clam r (fseq u) {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ da (fv E (fv j ∅)) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ da (fv c (suc ∅)) w (scons x r) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (da (fv c ∅) w r) t , a ⟩ ⟩ ⟩)}) $ by and_elim_r [h1a]
+h1c: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , k = kc_pi ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ da (fv E (fv j ∅)) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ da (fv c (suc ∅)) w (scons x r) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (da (fv c ∅) w r) t , a ⟩ ⟩ ⟩)}) ⇒ d = ⟨ x0 , z ⟩ $ by weaken [g3]
+h1d: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , k = kc_pi ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ da (fv E (fv j ∅)) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ da (fv c (suc ∅)) w (scons x r) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (da (fv c ∅) w r) t , a ⟩ ⟩ ⟩)}) ⇒ z = ⟨ x1 , q ⟩ $ by weaken [g4]
+h1: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , k = kc_pi ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ da (fv E (fv j ∅)) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ da (fv c (suc ∅)) w (scons x r) ∧ y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (da (fv c ∅) w r) t , a ⟩ ⟩ ⟩)}) ⇒ x0 ∊ lvals ∧ x1 ∊ fseq u $ by a0_cc [h1c, h1d, h1b]
+h2a: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ da (fv c ∅) w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E (fv j (suc ∅))) w r) a ⟩ ⟩ ⟩)}) ⇒ k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ da (fv c ∅) w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E (fv j (suc ∅))) w r) a ⟩ ⟩ ⟩)}) $ by ax
+h2b: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ da (fv c ∅) w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E (fv j (suc ∅))) w r) a ⟩ ⟩ ⟩)}) ⇒ d ∊ clam w lvals (clam r (fseq u) {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ da (fv c ∅) w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E (fv j (suc ∅))) w r) a ⟩ ⟩ ⟩)}) $ by and_elim_r [h2a]
+h2c: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ da (fv c ∅) w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E (fv j (suc ∅))) w r) a ⟩ ⟩ ⟩)}) ⇒ d = ⟨ x0 , z ⟩ $ by weaken [g3]
+h2d: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ da (fv c ∅) w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E (fv j (suc ∅))) w r) a ⟩ ⟩ ⟩)}) ⇒ z = ⟨ x1 , q ⟩ $ by weaken [g4]
+h2: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ da (fv c ∅) w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E (fv j (suc ∅))) w r) a ⟩ ⟩ ⟩)}) ⇒ x0 ∊ lvals ∧ x1 ∊ fseq u $ by a0_cc [h2c, h2d, h2b]
+h3a: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , ¬ k = kc_pi ∧ ¬ k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) (csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩)) ⇒ ¬ k = kc_pi ∧ ¬ k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) (csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩)) $ by ax
+h3e: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , ¬ k = kc_pi ∧ ¬ k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) (csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩)) ⇒ ¬ k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) (csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩)) $ by and_elim_r [h3a]
+h3b: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , ¬ k = kc_pi ∧ ¬ k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) (csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩)) ⇒ d ∊ clam w lvals (clam r (fseq u) (csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩)) $ by and_elim_r [h3e]
+h3c: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , ¬ k = kc_pi ∧ ¬ k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) (csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩)) ⇒ d = ⟨ x0 , z ⟩ $ by weaken [g3]
+h3d: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , ¬ k = kc_pi ∧ ¬ k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) (csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩)) ⇒ z = ⟨ x1 , q ⟩ $ by weaken [g4]
+h3: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , ¬ k = kc_pi ∧ ¬ k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) (csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩)) ⇒ x0 ∊ lvals ∧ x1 ∊ fseq u $ by a0_cc [h3c, h3d, h3b]
+h4a: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , (k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ da (fv c ∅) w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E (fv j (suc ∅))) w r) a ⟩ ⟩ ⟩)})) ∨ (¬ k = kc_pi ∧ ¬ k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) (csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩))) ⇒ (k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ da (fv c ∅) w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E (fv j (suc ∅))) w r) a ⟩ ⟩ ⟩)})) ∨ (¬ k = kc_pi ∧ ¬ k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) (csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩))) $ by ax
+h4b: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , (k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ da (fv c ∅) w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E (fv j (suc ∅))) w r) a ⟩ ⟩ ⟩)})) ∨ (¬ k = kc_pi ∧ ¬ k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) (csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩))) , k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ da (fv c ∅) w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E (fv j (suc ∅))) w r) a ⟩ ⟩ ⟩)}) ⇒ x0 ∊ lvals ∧ x1 ∊ fseq u $ by weaken [h2]
+h4c: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , (k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ da (fv c ∅) w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E (fv j (suc ∅))) w r) a ⟩ ⟩ ⟩)})) ∨ (¬ k = kc_pi ∧ ¬ k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) (csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩))) , ¬ k = kc_pi ∧ ¬ k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) (csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩)) ⇒ x0 ∊ lvals ∧ x1 ∊ fseq u $ by weaken [h3]
+h4: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c , (k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) {y | ∃ a (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ da (fv c ∅) w r ∧ y = ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , scons (da (fv E (fv j (suc ∅))) w r) a ⟩ ⟩ ⟩)})) ∨ (¬ k = kc_pi ∧ ¬ k = kc_app ∧ d ∊ clam w lvals (clam r (fseq u) (csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩))) ⇒ x0 ∊ lvals ∧ x1 ∊ fseq u $ by or_elim [h4a, h4b, h4c]
+h5: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 , d = ⟨ x0 , z ⟩ , d ∊ etb u E k j c ⇒ x0 ∊ lvals ∧ x1 ∊ fseq u $ by or_elim [g2, h1, h4]
+f3: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j , z = ⟨ x1 , q ⟩ , z ∊ ap (etb u E k j c) x0 ⇒ x0 ∊ lvals ∧ x1 ∊ fseq u $ by wcel_elim [f2, h5]
+e10: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ , c = ccom (etf u E) j ⇒ x0 ∊ lvals ∧ x1 ∊ fseq u $ by wcel_elim [e9, f3]
+e11a: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ ⇒ functional (etf u E) $ by etf_functional
+e11b: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ ⇒ isset j $ by isset_var
+e11: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ ⇒ isset (ccom (etf u E) j) $ by ccom_set [e11a, e11b]
+e12: $ G , l = ω , k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩ ⇒ x0 ∊ lvals ∧ x1 ∊ fseq u $ by isset_elim [e11, e10]
+e13: $ G , l = ω , ∃ j (k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩) ⇒ ∃ j (k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩) $ by ax
+e14: $ G , l = ω , ∃ j (k ∊ l ∧ j ∊ fseq (trees l) ∧ o = ⟨ k , j ⟩) ⇒ x0 ∊ lvals ∧ x1 ∊ fseq u $ by ex_elim [e13, e12]
+e15: $ G , l = ω ⇒ x0 ∊ lvals ∧ x1 ∊ fseq u $ by ex_elim [p1, e14]
+e16: $ G ⇒ x0 ∊ lvals ∧ x1 ∊ fseq u $ by isset_elim [p0, e15]
+
+etel_dom
+--------
+l1: $ G , z = Q , z ∊ etel u E o x0 x1 ⇒ z ∊ etel u E o x0 x1 $ by ax
+l2: $ G , z = Q , z ∊ etel u E o x0 x1 ⇒ o ∊ trees ω $ by weaken [#1]
+l3: $ G , z = Q , z ∊ etel u E o x0 x1 ⇒ x0 ∊ lvals ∧ x1 ∊ fseq u $ by a0_etel_dom [l2, l1]
+l4: $ G ⇒ x0 ∊ lvals ∧ x1 ∊ fseq u $ by wcel_elim [#2, l3]
+
 ictor_apn
 ---------
 t1: $ G ⇒ P ∈ fv tsub D ∧ T ∈ fv tsub D $ by iprt_tsub [#1, #3]
@@ -10337,6 +10862,68 @@ l5: $ G ⇒ esat u E2 P W = esat u E P W $ by eq_sym [l1]
 l6: $ G ⇒ fv E2 F = fv E F $ by eq_sym [l3]
 l7: $ G ⇒ ipi u E2 P F W ⊆ ipi u E P F W $ by i3_ipi_sub [l5, l6, l3w]
 l8: $ G ⇒ ipi u E P F W = ipi u E2 P F W $ by subset_antisym [l4, l7]
+
+lemma a0_nsub {y p z: set} (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ {y | ∃ p ∃ z (p ∊ A ∧ y = nest p z)} ⊆ {y | ∃ p ∃ z (p ∊ B ∧ y = nest p z)} $
+----
+a1: $ G , v ∊ {y | ∃ p ∃ z (p ∊ A ∧ y = nest p z)} ⇒ v ∊ {y | ∃ p ∃ z (p ∊ A ∧ y = nest p z)} $ by ax
+a2: $ G , v ∊ {y | ∃ p ∃ z (p ∊ A ∧ y = nest p z)} ⇒ ∃ p ∃ z (p ∊ A ∧ v = nest p z) $ by cab_elim [a1]
+b1: $ G , p ∊ A ∧ v = nest p z ⇒ p ∊ A ∧ v = nest p z $ by ax
+b2: $ G , p ∊ A ∧ v = nest p z ⇒ p ∊ A $ by and_elim_l [b1]
+b3: $ G , p ∊ A ∧ v = nest p z ⇒ v = nest p z $ by and_elim_r [b1]
+b4: $ G , p ∊ A ∧ v = nest p z ⇒ A = B $ by weaken [#1]
+b5: $ G , p ∊ A ∧ v = nest p z ⇒ p ∊ B $ by welc_eq [b4, b2]
+b6: $ G , p ∊ A ∧ v = nest p z ⇒ p ∊ B ∧ v = nest p z $ by and_intro [b5, b3]
+b7: $ G , p ∊ A ∧ v = nest p z ⇒ ∃ z (p ∊ B ∧ v = nest p z) $ by ex_intro [b6]
+b8: $ G , p ∊ A ∧ v = nest p z ⇒ ∃ p ∃ z (p ∊ B ∧ v = nest p z) $ by ex_intro [b7]
+b9: $ G , p ∊ A ∧ v = nest p z ⇒ v ∊ {y | ∃ p ∃ z (p ∊ B ∧ y = nest p z)} $ by cab_intro [b8]
+e0: $ G , ∃ z (p ∊ A ∧ v = nest p z) ⇒ ∃ z (p ∊ A ∧ v = nest p z) $ by ax
+e1: $ G , ∃ z (p ∊ A ∧ v = nest p z) ⇒ v ∊ {y | ∃ p ∃ z (p ∊ B ∧ y = nest p z)} $ by ex_elim [e0, b9]
+e2: $ G , v ∊ {y | ∃ p ∃ z (p ∊ A ∧ y = nest p z)} ⇒ v ∊ {y | ∃ p ∃ z (p ∊ B ∧ y = nest p z)} $ by ex_elim [a2, e1]
+e3: $ G ⇒ {y | ∃ p ∃ z (p ∊ A ∧ y = nest p z)} ⊆ {y | ∃ p ∃ z (p ∊ B ∧ y = nest p z)} $ by subset_intro [e2]
+
+lemma a0_ipi_sub (G: hyps) (U E E2 P P2 F F2 W W2: class): $ G ⇒ esat U E P W = esat U E2 P2 W2 $ > $ G ⇒ fv E F = fv E2 F2 $ > $ G ⇒ W = W2 $ > $ G ⇒ ipi U E P F W ⊆ ipi U E2 P2 F2 W2 $
+----
+c1: $ G , x ∊ ipi U E P F W ⇒ x ∊ ipi U E P F W $ by ax
+c2: $ G , x ∊ ipi U E P F W ⇒ x ⊆ {y | ∃ p ∃ z (p ∊ esat U E P W ∧ y = nest p z)} ∧ ∀ q (q ∊ esat U E P W → apn x q ∈ da (fv E F) W q) $ by cab_elim [c1]
+c3: $ G , x ∊ ipi U E P F W ⇒ x ⊆ {y | ∃ p ∃ z (p ∊ esat U E P W ∧ y = nest p z)} $ by and_elim_l [c2]
+c4a: $ G , x ∊ ipi U E P F W ⇒ esat U E P W = esat U E2 P2 W2 $ by weaken [#1]
+c4: $ G , x ∊ ipi U E P F W ⇒ {y | ∃ p ∃ z (p ∊ esat U E P W ∧ y = nest p z)} ⊆ {y | ∃ p ∃ z (p ∊ esat U E2 P2 W2 ∧ y = nest p z)} $ by a0_nsub [c4a]
+c5: $ G , x ∊ ipi U E P F W ⇒ x ⊆ {y | ∃ p ∃ z (p ∊ esat U E2 P2 W2 ∧ y = nest p z)} $ by subset_trans [c3, c4]
+c6: $ G , x ∊ ipi U E P F W ⇒ ∀ q (q ∊ esat U E P W → apn x q ∈ da (fv E F) W q) $ by and_elim_r [c2]
+d5: $ G , x ∊ ipi U E P F W ⇒ q ∊ esat U E P W → apn x q ∈ da (fv E F) W q $ by all_elim [c6]
+d1: $ G , x ∊ ipi U E P F W , q ∊ esat U E2 P2 W2 ⇒ q ∊ esat U E2 P2 W2 $ by ax
+d2: $ G , x ∊ ipi U E P F W , q ∊ esat U E2 P2 W2 ⇒ esat U E P W = esat U E2 P2 W2 $ by weaken [#1]
+d3: $ G , x ∊ ipi U E P F W , q ∊ esat U E2 P2 W2 ⇒ esat U E2 P2 W2 = esat U E P W $ by eq_sym [d2]
+d4: $ G , x ∊ ipi U E P F W , q ∊ esat U E2 P2 W2 ⇒ q ∊ esat U E P W $ by welc_eq [d3, d1]
+d6: $ G , x ∊ ipi U E P F W , q ∊ esat U E2 P2 W2 ⇒ q ∊ esat U E P W → apn x q ∈ da (fv E F) W q $ by weaken [d5]
+d7: $ G , x ∊ ipi U E P F W , q ∊ esat U E2 P2 W2 ⇒ apn x q ∈ da (fv E F) W q $ by imp_elim [d6, d4]
+d8: $ G , x ∊ ipi U E P F W , q ∊ esat U E2 P2 W2 ⇒ fv E F = fv E2 F2 $ by weaken [#2]
+d9: $ G , x ∊ ipi U E P F W , q ∊ esat U E2 P2 W2 ⇒ W = W2 $ by weaken [#3]
+d10: $ G , x ∊ ipi U E P F W , q ∊ esat U E2 P2 W2 ⇒ q = q $ by eq_refl
+d11: $ G , x ∊ ipi U E P F W , q ∊ esat U E2 P2 W2 ⇒ da (fv E F) W q = da (fv E2 F2) W2 q $ by da_eq [d8, d9, d10]
+d12: $ G , x ∊ ipi U E P F W , q ∊ esat U E2 P2 W2 ⇒ apn x q ∈ da (fv E2 F2) W2 q $ by wcel_eq_r [d11, d7]
+d13: $ G , x ∊ ipi U E P F W ⇒ q ∊ esat U E2 P2 W2 → apn x q ∈ da (fv E2 F2) W2 q $ by imp_intro [d12]
+d14: $ G , x ∊ ipi U E P F W ⇒ ∀ q (q ∊ esat U E2 P2 W2 → apn x q ∈ da (fv E2 F2) W2 q) $ by all_intro [d13]
+d15: $ G , x ∊ ipi U E P F W ⇒ x ⊆ {y | ∃ p ∃ z (p ∊ esat U E2 P2 W2 ∧ y = nest p z)} ∧ ∀ q (q ∊ esat U E2 P2 W2 → apn x q ∈ da (fv E2 F2) W2 q) $ by and_intro [c5, d14]
+d16: $ G , x ∊ ipi U E P F W ⇒ x ∊ ipi U E2 P2 F2 W2 $ by cab_intro [d15]
+d17: $ G ⇒ ipi U E P F W ⊆ ipi U E2 P2 F2 W2 $ by subset_intro [d16]
+
+ipi_eq
+------
+e1b: $ G ⇒ esf U E = esf U E $ by eq_refl
+e2: $ G ⇒ fv (esf U E) P = fv (esf U E) P2 $ by fv_eq [e1b, #1]
+e3: $ G ⇒ esat U E P W = esat U E P2 W2 $ by ap_eq [e2, #3]
+e4: $ G ⇒ E = E $ by eq_refl
+e5: $ G ⇒ fv E F = fv E F2 $ by fv_eq [e4, #2]
+e6: $ G ⇒ ipi U E P F W ⊆ ipi U E P2 F2 W2 $ by a0_ipi_sub [e3, e5, #3]
+e7: $ G ⇒ P2 = P $ by eq_sym [#1]
+e8: $ G ⇒ F2 = F $ by eq_sym [#2]
+e9: $ G ⇒ W2 = W $ by eq_sym [#3]
+e10: $ G ⇒ fv (esf U E) P2 = fv (esf U E) P $ by fv_eq [e1b, e7]
+e11: $ G ⇒ esat U E P2 W2 = esat U E P W $ by ap_eq [e10, e9]
+e12: $ G ⇒ fv E F2 = fv E F $ by fv_eq [e4, e8]
+e13: $ G ⇒ ipi U E P2 F2 W2 ⊆ ipi U E P F W $ by a0_ipi_sub [e11, e12, e9]
+e14: $ G ⇒ ipi U E P F W = ipi U E P2 F2 W2 $ by subset_antisym [e6, e13]
 
 igate_intro
 -----------

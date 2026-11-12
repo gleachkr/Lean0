@@ -21,6 +21,14 @@ import "lean-tg.mm0";
 
 --| A tree of a sort is a tree.
 theorem lsig_ofsort_trees (G: hyps) (K: class) (t: set): $ G ⇒ t ∊ ofsort lsig lopen K $ > $ G ⇒ t ∈ trees ω $;
+--| The children of an application are expressions, those of a context's cons
+--| an expression and a context.
+theorem ofsort_app_kids (G: hyps) (e a: set):
+  $ G ⇒ ⟨ kc_app , scons e (scons a ∅) ⟩ ∈ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ e ∊ ofsort lsig lopen ks_expr ∧ a ∊ ofsort lsig lopen ks_expr $;
+theorem ofsort_cons_kids (G: hyps) (a p: set):
+  $ G ⇒ ⟨ kc_cons , scons a (scons p ∅) ⟩ ∈ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ a ∊ ofsort lsig lopen ks_expr ∧ p ∊ ofsort lsig lopen ks_ctx $;
 --| A derivable atom is an atom: a label in `ω` with a sequence of trees.
 theorem lrel_latoms (G: hyps) (X: class): $ G ⇒ X ∈ lrel $ > $ G ⇒ X ∈ latoms $;
 --| The arguments of a derivable atom are trees (by arity).
@@ -32,6 +40,10 @@ theorem lrel_args3 (G: hyps) (K: class) (a b c: set):
 theorem lrel_args4 (G: hyps) (K: class) (a b c d: set):
   $ G ⇒ ⟨ K , scons a (scons b (scons c (scons d ∅))) ⟩ ∈ lrel $ > $ G ⇒ isset K $ >
   $ G ⇒ a ∊ trees ω ∧ b ∊ trees ω ∧ c ∊ trees ω ∧ d ∊ trees ω $;
+--| `lrel_args4` and `lrel_args6` at five arguments.
+theorem lrel_args5 (G: hyps) (K: class) (a b c d e: set):
+  $ G ⇒ ⟨ K , scons a (scons b (scons c (scons d (scons e ∅)))) ⟩ ∈ lrel $ > $ G ⇒ isset K $ >
+  $ G ⇒ a ∊ trees ω ∧ b ∊ trees ω ∧ c ∊ trees ω ∧ d ∊ trees ω ∧ e ∊ trees ω $;
 theorem lrel_args6 (G: hyps) (K: class) (a b c d e f: set):
   $ G ⇒ ⟨ K , scons a (scons b (scons c (scons d (scons e (scons f ∅))))) ⟩ ∈ lrel $ > $ G ⇒ isset K $ >
   $ G ⇒ a ∊ trees ω ∧ b ∊ trees ω ∧ c ∊ trees ω ∧ d ∊ trees ω ∧ e ∊ trees ω ∧ f ∊ trees ω $;

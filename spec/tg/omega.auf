@@ -836,6 +836,71 @@ e15: $ G , ¬ isset A ⇒ isset (ap F A) $ by subset_isset [e14, e13]
 e16: $ G , ¬ isset A ⇒ isset (fv F A) $ by cuni_set [e15]
 e17: $ G ⇒ isset (fv F A) $ by or_elim [e1, e2, e16]
 
+fv_agree_eq
+-----------
+l1: $ G , j ∊ L ⇒ j ∊ L $ by ax
+l2a: $ G , j ∊ L ⇒ K = L $ by weaken [#1]
+l2: $ G , j ∊ L ⇒ L = K $ by eq_sym [l2a]
+l3: $ G , j ∊ L ⇒ j ∊ K $ by welc_eq [l2, l1]
+l4a: $ G , j ∊ L ⇒ ∀ i (i ∊ K → fv A i = fv B i) $ by weaken [#4]
+l4: $ G , j ∊ L ⇒ j ∊ K → fv A j = fv B j $ by all_elim [l4a]
+l5: $ G , j ∊ L ⇒ fv A j = fv B j $ by imp_elim [l4, l3]
+l6: $ G , j ∊ L ⇒ j = j $ by eq_refl
+l7a: $ G , j ∊ L ⇒ A = C $ by weaken [#2]
+l7: $ G , j ∊ L ⇒ C = A $ by eq_sym [l7a]
+l8: $ G , j ∊ L ⇒ fv C j = fv A j $ by fv_eq [l7, l6]
+l9a: $ G , j ∊ L ⇒ B = D $ by weaken [#3]
+l9: $ G , j ∊ L ⇒ fv B j = fv D j $ by fv_eq [l9a, l6]
+l10: $ G , j ∊ L ⇒ fv C j = fv B j $ by eq_trans [l8, l5]
+l11: $ G , j ∊ L ⇒ fv C j = fv D j $ by eq_trans [l10, l9]
+l12: $ G ⇒ j ∊ L → fv C j = fv D j $ by imp_intro [l11]
+l13: $ G ⇒ ∀ j (j ∊ L → fv C j = fv D j) $ by all_intro [l12]
+l14: $ _ ⇒ ∀ j (j ∊ L → fv C j = fv D j) ↔ ∀ i (i ∊ L → fv C i = fv D i) $ by all_alpha
+l15: $ G ⇒ ∀ j (j ∊ L → fv C j = fv D j) ↔ ∀ i (i ∊ L → fv C i = fv D i) $ by weaken [l14]
+l16: $ G ⇒ ∀ i (i ∊ L → fv C i = fv D i) $ by bi_elim_l [l15, l13]
+
+fv_agree_c
+----------
+a1: $ G , v = A , v ∊ K ⇒ ∀ i (i ∊ K → fv R i = fv R2 i) $ by weaken [#1]
+a2: $ G , v = A , v ∊ K ⇒ v ∊ K → fv R v = fv R2 v $ by all_elim [a1]
+a3: $ G , v = A , v ∊ K ⇒ v ∊ K $ by ax
+a4: $ G , v = A , v ∊ K ⇒ fv R v = fv R2 v $ by imp_elim [a2, a3]
+a5: $ G , v = A , v ∊ K ⇒ v = A $ by ax
+a5s: $ G , v = A , v ∊ K ⇒ A = v $ by eq_sym [a5]
+a6: $ G , v = A , v ∊ K ⇒ R = R $ by eq_refl
+a6b: $ G , v = A , v ∊ K ⇒ R2 = R2 $ by eq_refl
+a7: $ G , v = A , v ∊ K ⇒ fv R A = fv R v $ by fv_eq [a6, a5s]
+a8: $ G , v = A , v ∊ K ⇒ fv R2 v = fv R2 A $ by fv_eq [a6b, a5]
+a9: $ G , v = A , v ∊ K ⇒ fv R A = fv R2 v $ by eq_trans [a7, a4]
+a10: $ G , v = A , v ∊ K ⇒ fv R A = fv R2 A $ by eq_trans [a9, a8]
+a11: $ G ⇒ fv R A = fv R2 A $ by wcel_elim [#2, a10]
+
+fv_sub_eq
+---------
+l2: $ G ⇒ j = j $ by eq_refl
+l3: $ G ⇒ fv A j = fv C j $ by fv_eq [#1, l2]
+l4: $ G ⇒ fv B j = fv D j $ by fv_eq [#2, l2]
+l5: $ G ⇒ fv A j ⊆ fv B j $ by all_elim [#3]
+l6: $ G ⇒ fv C j ⊆ fv B j $ by subset_eq_l [l3, l5]
+l7: $ G ⇒ fv C j ⊆ fv D j $ by subset_eq_r [l4, l6]
+l8: $ G ⇒ ∀ j (fv C j ⊆ fv D j) $ by all_intro [l7]
+l9: $ _ ⇒ ∀ j (fv C j ⊆ fv D j) ↔ ∀ i (fv C i ⊆ fv D i) $ by all_alpha
+l10: $ G ⇒ ∀ j (fv C j ⊆ fv D j) ↔ ∀ i (fv C i ⊆ fv D i) $ by weaken [l9]
+l11: $ G ⇒ ∀ i (fv C i ⊆ fv D i) $ by bi_elim_l [l10, l8]
+
+fv_sub_c
+--------
+a1: $ G , v = A ⇒ ∀ i (fv R i ⊆ fv R2 i) $ by weaken [#1]
+a2: $ G , v = A ⇒ fv R v ⊆ fv R2 v $ by all_elim [a1]
+a3: $ G , v = A ⇒ v = A $ by ax
+a4: $ G , v = A ⇒ R = R $ by eq_refl
+a4b: $ G , v = A ⇒ R2 = R2 $ by eq_refl
+a5: $ G , v = A ⇒ fv R v = fv R A $ by fv_eq [a4, a3]
+a6: $ G , v = A ⇒ fv R2 v = fv R2 A $ by fv_eq [a4b, a3]
+a7: $ G , v = A ⇒ fv R A ⊆ fv R2 v $ by subset_eq_l [a5, a2]
+a8: $ G , v = A ⇒ fv R A ⊆ fv R2 A $ by subset_eq_r [a6, a7]
+a9: $ G ⇒ fv R A ⊆ fv R2 A $ by isset_elim [#2, a8]
+
 omapx_congr
 -----------
 c1: $ fv g ∅ ≐ fv g ∅ $ by ceqt_refl
