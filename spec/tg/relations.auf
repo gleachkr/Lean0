@@ -910,6 +910,19 @@ l9: $ G , z ∊ cres S B ⇒ B = A $ by weaken [l6]
 l10: $ G , z ∊ cres S B ⇒ z ∊ cres R A $ by welc_cres_eq [l8, l9, l7]
 l11: $ G ⇒ cres R A = cres S B $ by eq_intro [l4, l10]
 
+cres_empty
+----------
+l1: $ G , o ∊ cres R ∅ ⇒ o ∊ {z | ∃ x ∃ y (z = ⟨ x , y ⟩ ∧ x ∊ ∅ ∧ ⟨ x , y ⟩ ∈ R)} $ by ax
+l2: $ G , o ∊ cres R ∅ ⇒ ∃ x ∃ y (o = ⟨ x , y ⟩ ∧ x ∊ ∅ ∧ ⟨ x , y ⟩ ∈ R) $ by cab_elim [l1]
+l3: $ G , o ∊ cres R ∅ , o = ⟨ x , y ⟩ ∧ x ∊ ∅ ∧ ⟨ x , y ⟩ ∈ R ⇒ o = ⟨ x , y ⟩ ∧ x ∊ ∅ ∧ ⟨ x , y ⟩ ∈ R $ by ax
+l4: $ G , o ∊ cres R ∅ , o = ⟨ x , y ⟩ ∧ x ∊ ∅ ∧ ⟨ x , y ⟩ ∈ R ⇒ x ∊ ∅ ∧ ⟨ x , y ⟩ ∈ R $ by and_elim_r [l3]
+l5: $ G , o ∊ cres R ∅ , o = ⟨ x , y ⟩ ∧ x ∊ ∅ ∧ ⟨ x , y ⟩ ∈ R ⇒ x ∊ ∅ $ by and_elim_l [l4]
+l6: $ G , o ∊ cres R ∅ , o = ⟨ x , y ⟩ ∧ x ∊ ∅ ∧ ⟨ x , y ⟩ ∈ R ⇒ ⊥ $ by empty_elim [l5]
+l7: $ G , o ∊ cres R ∅ , ∃ y (o = ⟨ x , y ⟩ ∧ x ∊ ∅ ∧ ⟨ x , y ⟩ ∈ R) ⇒ ∃ y (o = ⟨ x , y ⟩ ∧ x ∊ ∅ ∧ ⟨ x , y ⟩ ∈ R) $ by ax
+l8: $ G , o ∊ cres R ∅ , ∃ y (o = ⟨ x , y ⟩ ∧ x ∊ ∅ ∧ ⟨ x , y ⟩ ∈ R) ⇒ ⊥ $ by ex_elim [l7, l6]
+l9: $ G , o ∊ cres R ∅ ⇒ ⊥ $ by ex_elim [l2, l8]
+l10: $ G ⇒ cres R ∅ = ∅ $ by empty_eq_intro [l9]
+
 sb_c_cres
 ---------
 l1: $ (⟦ x / t ⟧ {z | ∃ u ∃ v (z = ⟨ u , v ⟩ ∧ u ∊ A ∧ ⟨ u , v ⟩ ∈ R)}) ≐ {z | ∃ u ∃ v (z = ⟨ u , v ⟩ ∧ u ∊ (⟦ x / t ⟧ A) ∧ ⟨ u , v ⟩ ∈ (⟦ x / t ⟧ R))} $ by ceqt_refl
@@ -1593,6 +1606,52 @@ l8: $ (x ∊ A → ap g x ∈ B) ⟺ (x ∊ C → ap g x ∈ D) $ by im_congr [l
 l9: $ (∀ x (x ∊ A → ap g x ∈ B)) ⟺ (∀ x (x ∊ C → ap g x ∈ D)) $ by all_congr [l8]
 l10: $ (g ⊆ clam x A (⋃ B) ∧ ∀ x (x ∊ A → ap g x ∈ B)) ⟺ (g ⊆ clam x C (⋃ D) ∧ ∀ x (x ∊ C → ap g x ∈ D)) $ by and_congr [l3, l9]
 l11: $ {g | g ⊆ clam x A (⋃ B) ∧ ∀ x (x ∊ A → ap g x ∈ B)} ≐ {g | g ⊆ clam x C (⋃ D) ∧ ∀ x (x ∊ C → ap g x ∈ D)} $ by cab_congr [l10]
+
+clam_alpha
+----------
+l1: $ ∃ x ∃ v (z = ⟨ x , v ⟩ ∧ x ∊ A ∧ v ∊ B) ⟺ ∃ y ∃ v (z = ⟨ y , v ⟩ ∧ y ∊ A ∧ v ∊ (⟦ x / y ⟧ B)) $ by ex_alpha
+l2: $ clam x A B ≐ clam y A (⟦ x / y ⟧ B) $ by cab_congr [l1]
+
+cpi_alpha
+---------
+l1: $ clam x A (⋃ B) ≐ clam y A (⟦ x / y ⟧ (⋃ B)) $ by clam_alpha
+l2: $ f ≐ f $ by ceqt_refl
+l3: $ (f ⊆ clam x A (⋃ B)) ⟺ (f ⊆ clam y A (⋃ (⟦ x / y ⟧ B))) $ by subset_congr [l2, l1]
+l4: $ ∀ x (x ∊ A → ap f x ∈ B) ⟺ ∀ y (y ∊ A → ap f y ∈ (⟦ x / y ⟧ B)) $ by all_alpha
+l5: $ (f ⊆ clam x A (⋃ B) ∧ ∀ x (x ∊ A → ap f x ∈ B)) ⟺ (f ⊆ clam y A (⋃ (⟦ x / y ⟧ B)) ∧ ∀ y (y ∊ A → ap f y ∈ (⟦ x / y ⟧ B))) $ by and_congr [l3, l4]
+l6: $ cpi x A B ≐ cpi y A (⟦ x / y ⟧ B) $ by cab_congr [l5]
+
+cpi_intro_pts
+-------------
+l1: $ G , c ∊ f ⇒ ∀ c (c ∊ f → ∃ a ∃ b (a ∊ A ∧ c = ⟨ a , b ⟩)) $ by weaken [#1]
+l2: $ G , c ∊ f ⇒ c ∊ f → ∃ a ∃ b (a ∊ A ∧ c = ⟨ a , b ⟩) $ by all_elim [l1]
+l3: $ G , c ∊ f ⇒ c ∊ f $ by ax
+l4: $ G , c ∊ f ⇒ ∃ a ∃ b (a ∊ A ∧ c = ⟨ a , b ⟩) $ by imp_elim [l2, l3]
+k1: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ ⇒ a ∊ A ∧ c = ⟨ a , b ⟩ $ by ax
+k2: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ ⇒ a ∊ A $ by and_elim_l [k1]
+k3: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ ⇒ c = ⟨ a , b ⟩ $ by and_elim_r [k1]
+k4: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ ⇒ c ∊ f $ by ax
+k5: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ ⇒ ⟨ a , b ⟩ ∈ f $ by wcel_intro [k3, k4]
+k6: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ ⇒ b ∊ ap f a $ by ap_intro [k5]
+k7a: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ ⇒ ∀ x (x ∊ A → ap f x ∈ B) $ by weaken [#2]
+k7b: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ ⇒ a ∊ A → ap f a ∈ (⟦ x / a ⟧ B) $ by all_elim [k7a]
+k7: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ ⇒ ap f a ∈ (⟦ x / a ⟧ B) $ by imp_elim [k7b, k2]
+j1: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ , v = ap f a , v ∊ (⟦ x / a ⟧ B) ⇒ v = ap f a $ by ax
+j2: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ , v = ap f a , v ∊ (⟦ x / a ⟧ B) ⇒ ap f a = v $ by eq_sym [j1]
+j3: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ , v = ap f a , v ∊ (⟦ x / a ⟧ B) ⇒ b ∊ ap f a $ by weaken [k6]
+j4: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ , v = ap f a , v ∊ (⟦ x / a ⟧ B) ⇒ b ∊ v $ by welc_eq [j2, j3]
+j5: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ , v = ap f a , v ∊ (⟦ x / a ⟧ B) ⇒ v ∊ (⟦ x / a ⟧ B) $ by ax
+j6: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ , v = ap f a , v ∊ (⟦ x / a ⟧ B) ⇒ b ∊ ⋃ (⟦ x / a ⟧ B) $ by cuni_intro [j4, j5]
+k8: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ ⇒ b ∊ ⋃ (⟦ x / a ⟧ B) $ by wcel_elim [k7, j6]
+k9: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ ⇒ ⟨ a , b ⟩ ∈ clam x A (⋃ B) $ by clam_intro [k2, k8]
+k10: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ ⇒ ⟨ a , b ⟩ = c $ by eq_sym [k3]
+k11: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ ⇒ c ∈ clam x A (⋃ B) $ by wcel_eq_l [k10, k9]
+k12: $ G , c ∊ f , a ∊ A ∧ c = ⟨ a , b ⟩ ⇒ c ∊ clam x A (⋃ B) $ by wcel_welc [k11]
+ea1: $ G , c ∊ f , ∃ b (a ∊ A ∧ c = ⟨ a , b ⟩) ⇒ ∃ b (a ∊ A ∧ c = ⟨ a , b ⟩) $ by ax
+eb1: $ G , c ∊ f , ∃ b (a ∊ A ∧ c = ⟨ a , b ⟩) ⇒ c ∊ clam x A (⋃ B) $ by ex_elim [ea1, k12]
+ez: $ G , c ∊ f ⇒ c ∊ clam x A (⋃ B) $ by ex_elim [l4, eb1]
+m1: $ G ⇒ f ⊆ clam x A (⋃ B) $ by subset_intro [ez]
+m2: $ G ⇒ f ∊ cpi x A B $ by cpi_intro [m1, #2]
 
 lemma q0_cpi_dom_sub {x: set} (G: hyps x) (A C: class) (B: class x) (f: set):
   $ G ⇒ A = C $ > $ G ⇒ f ∊ cpi x A B $ > $ G ⇒ f ∊ cpi x C B $

@@ -202,6 +202,8 @@ theorem cres_congr (R S A B: class):
 theorem welc_cres_eq (G: hyps) (R S A B: class) (a: set): $ G ⇒ R = S $ > $ G ⇒ A = B $ > $ G ⇒ a ∊ cres R A $ > $ G ⇒ a ∊ cres S B $;
 theorem cres_eq (G: hyps) (R S A B: class):
   $ G ⇒ R = S $ > $ G ⇒ A = B $ > $ G ⇒ cres R A = cres S B $;
+--| The restriction to `∅` is empty.
+theorem cres_empty (G: hyps) (R: class): $ G ⇒ cres R ∅ = ∅ $;
 --| @rewrite
 theorem sb_c_cres {x: set} (t: set x) (R A: class x):
   $ (⟦ x / t ⟧ (cres R A)) ≐ cres (⟦ x / t ⟧ R) (⟦ x / t ⟧ A) $;
@@ -336,6 +338,12 @@ theorem cpi_set {x: set} (G: hyps x) (A: class) (B: class x):
 --| @congr
 theorem cpi_congr {x: set} (A C: class) (B D: class x):
   $ A ≐ C $ > $ B ≐ D $ > $ cpi x A B ≐ cpi x C D $;
+--| Renaming the bound variable of `clam` and `cpi` (the normalizer does not
+--| identify alpha-variants of these binders).
+theorem clam_alpha {x y: set} (A: class) (B: class x): $ clam x A B ≐ clam y A (⟦ x / y ⟧ B) $;
+theorem cpi_alpha {x y: set} (A: class) (B: class x): $ cpi x A B ≐ cpi y A (⟦ x / y ⟧ B) $;
+--| A set of pairs over `A` whose values are in `B` is in the space.
+theorem cpi_intro_pts {x c a b: set} (G: hyps x) (A: class) (B: class x) (f: set): $ G ⇒ ∀ c (c ∊ f → ∃ a ∃ b (a ∊ A ∧ c = ⟨ a , b ⟩)) $ > $ G ⇒ ∀ x (x ∊ A → ap f x ∈ B) $ > $ G ⇒ f ∊ cpi x A B $;
 theorem cpi_eq_dom {x: set} (G: hyps x) (A C: class) (B: class x):
   $ G ⇒ A = C $ > $ G ⇒ cpi x A B = cpi x C B $;
 --| @rewrite

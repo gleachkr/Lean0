@@ -42,7 +42,7 @@ theorem sb_c_nsc {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (nsc A)) ≐
 theorem nsc_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ nsc A = nsc B $;
 
 theorem nzr_set (G: hyps): $ G ⇒ isset nzr $;
-theorem nsc_set (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ isset (nsc A) $;
+theorem nsc_set (G: hyps) (A: class): $ G ⇒ isset (nsc A) $;
 --| The tuples are distinct, and `nsc` is injective.
 theorem nzr_ne_nsc (G: hyps) (y: set): $ G ⇒ ¬ nzr = nsc y $;
 theorem nsc_inj (G: hyps) (y y2: set): $ G ⇒ nsc y = nsc y2 $ > $ G ⇒ y = y2 $;
@@ -53,6 +53,8 @@ theorem nnf_zero (G: hyps): $ G ⇒ fv nnf ∅ = nzr $;
 theorem nnf_suc (G: hyps) (n: set): $ G ⇒ n ∊ ω $ > $ G ⇒ fv nnf (suc n) = nsc (fv nnf n) $;
 --| Nat's value: introduction, elimination, induction.
 theorem nnat_fv (G: hyps) (n: set): $ G ⇒ n ∊ ω $ > $ G ⇒ fv nnf n ∈ nnat $;
+--| Class form of `nnat_fv`.
+theorem nnat_fv_c (G: hyps) (A: class): $ G ⇒ A ∈ ω $ > $ G ⇒ fv nnf A ∈ nnat $;
 theorem nnat_zero (G: hyps): $ G ⇒ nzr ∈ nnat $;
 theorem nnat_suc (G: hyps) (y: set): $ G ⇒ y ∊ nnat $ > $ G ⇒ nsc y ∈ nnat $;
 theorem nnat_cases (G: hyps) {x: set} (y: set):
@@ -121,6 +123,8 @@ theorem nat_etel_F (G: hyps) (M W R: class) (u: set):
   $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ etel u (dnf u M) tn_F W R = csn ept0 $;
 theorem nat_etel_K0 (G: hyps) (M W R: class) (u: set):
   $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ etel u (dnf u M) tn_K0 W R = csn ept0 $;
+--| The one path of a telescope with no binders: elimination and introduction.
+theorem ept0_elim (G: hyps) (f g t a: set): $ G ⇒ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ csn ept0 $ > $ G ⇒ f = ∅ ∧ g = ∅ ∧ t = ∅ ∧ a = ∅ $;
 theorem nat_etel_K1 (G: hyps) (M W R: class) (u: set):
   $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ etel u (dnf u M) tn_K1 W R = nk1p u R $;
 
@@ -152,6 +156,7 @@ theorem nat_ictor1 {x: set} (G: hyps) (M: class) (u w: set):
 -- the motive at `y` into the motive at `nsc y`; the motives' valuation is
 -- `scons m ∅`, the minors' `scons ms (scons z ∅)` (minor 0 last).
 
+theorem ept0_intro (G: hyps) (e: set): $ G ⇒ e = ∅ $ > $ G ⇒ ⟨ e , ⟨ e , ⟨ e , e ⟩ ⟩ ⟩ ∈ csn ept0 $;
 --| The motive and the minors are in their spaces.
 theorem nat_imots {x: set} (G: hyps) (M V: class) (u w m: set):
   $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >

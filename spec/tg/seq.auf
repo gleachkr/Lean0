@@ -1041,6 +1041,32 @@ q7: $ G , ⟨ x , y ⟩ ∈ t ⇒ ⟨ x , y ⟩ ∈ s $ by s2_scons_inj_half [q5
 q8: $ G ⇒ s = t $ by rel_eq_intro [#1, #2, q3, q7]
 q9: $ G ⇒ a = b ∧ s = t $ by and_intro [l7, q8]
 
+scons2_inj
+----------
+l0: $ G ⇒ isset ∅ $ by ax_empty
+l1: $ G ⇒ isset (scons B ∅) $ by scons_set [l0]
+l2: $ G ⇒ isset (scons B2 ∅) $ by scons_set [l0]
+l3r: $ G ⇒ ∅ = ∅ $ by eq_refl
+l3: $ G ⇒ fv (scons A (scons B ∅)) ∅ = fv (scons A2 (scons B2 ∅)) ∅ $ by fv_eq [#5, l3r]
+l4: $ G ⇒ fv (scons A (scons B ∅)) ∅ = A $ by scons_fv_zero_c [#1, l1]
+l5: $ G ⇒ fv (scons A2 (scons B2 ∅)) ∅ = A2 $ by scons_fv_zero_c [#2, l2]
+l6a: $ G ⇒ A = fv (scons A (scons B ∅)) ∅ $ by eq_sym [l4]
+l6b: $ G ⇒ A = fv (scons A2 (scons B2 ∅)) ∅ $ by eq_trans [l6a, l3]
+l6: $ G ⇒ A = A2 $ by eq_trans [l6b, l5]
+k0: $ G ⇒ suc ∅ = suc ∅ $ by eq_refl
+k1: $ G ⇒ fv (scons A (scons B ∅)) (suc ∅) = fv (scons A2 (scons B2 ∅)) (suc ∅) $ by fv_eq [#5, k0]
+k2: $ G ⇒ fv (scons A (scons B ∅)) (suc ∅) = fv (scons B ∅) ∅ $ by scons_fv_suc_c [#1, l1, l0]
+k3: $ G ⇒ fv (scons A2 (scons B2 ∅)) (suc ∅) = fv (scons B2 ∅) ∅ $ by scons_fv_suc_c [#2, l2, l0]
+k4: $ G ⇒ fv (scons B ∅) ∅ = B $ by scons_fv_zero_c [#3, l0]
+k5: $ G ⇒ fv (scons B2 ∅) ∅ = B2 $ by scons_fv_zero_c [#4, l0]
+k6a: $ G ⇒ fv (scons B ∅) ∅ = fv (scons A (scons B ∅)) (suc ∅) $ by eq_sym [k2]
+k6b: $ G ⇒ B = fv (scons B ∅) ∅ $ by eq_sym [k4]
+k6c: $ G ⇒ B = fv (scons A (scons B ∅)) (suc ∅) $ by eq_trans [k6b, k6a]
+k6d: $ G ⇒ B = fv (scons A2 (scons B2 ∅)) (suc ∅) $ by eq_trans [k6c, k1]
+k6e: $ G ⇒ B = fv (scons B2 ∅) ∅ $ by eq_trans [k6d, k3]
+k6: $ G ⇒ B = B2 $ by eq_trans [k6e, k5]
+k7: $ G ⇒ A = A2 ∧ B = B2 $ by and_intro [l6, k6]
+
 scons_ne_empty
 --------------
 l1: $ G ⇒ isset a $ by isset_var
@@ -2688,6 +2714,30 @@ l16: $ G , o = ∅ ⇒ scat (scons x ∅) q = scons x (scat o q) $ by eq_trans [
 l17: $ G , o = ∅ ⇒ scat (scons x ∅) q = scons x q $ by eq_trans [l16, l13]
 l18: $ G ⇒ scat (scons x ∅) q = scons x q $ by isset_elim [l0, l17]
 
+scat_single
+-----------
+l0a: $ G ⇒ isset ∅ $ by ax_empty
+l0: $ G ⇒ isset (scons B ∅) $ by scons_set [l0a]
+m1: $ G , a = A , q = scons B ∅ ⇒ a = A $ by ax
+m2: $ G , a = A , q = scons B ∅ ⇒ q = scons B ∅ $ by ax
+m3i: $ G , a = A , q = scons B ∅ ⇒ isset B $ by weaken [#2]
+m3a: $ G , a = A , q = scons B ∅ ⇒ B ∈ cpr B B $ by cpr_intro_l_c [m3i]
+m3b: $ G , a = A , q = scons B ∅ ⇒ ∅ ∈ fseq (cpr B B) $ by fseq_empty
+m3c: $ G , a = A , q = scons B ∅ ⇒ scons B ∅ ∈ fseq (cpr B B) $ by scons_fseq_c [m3a, m3b]
+m3d: $ G , a = A , q = scons B ∅ ⇒ scons B ∅ = q $ by eq_sym [m2]
+m3e: $ G , a = A , q = scons B ∅ ⇒ q ∈ fseq (cpr B B) $ by wcel_eq_l [m3d, m3c]
+m3: $ G , a = A , q = scons B ∅ ⇒ q ∊ fseq (cpr B B) $ by wcel_welc [m3e]
+m4: $ G , a = A , q = scons B ∅ ⇒ scat (scons a ∅) q = scons a q $ by scat_scons_empty [m3]
+m5r: $ G , a = A , q = scons B ∅ ⇒ ∅ = ∅ $ by eq_refl
+m5b: $ G , a = A , q = scons B ∅ ⇒ A = a $ by eq_sym [m1]
+m5a: $ G , a = A , q = scons B ∅ ⇒ scons A ∅ = scons a ∅ $ by scons_eq [m5b, m5r]
+m6: $ G , a = A , q = scons B ∅ ⇒ scat (scons A ∅) (scons B ∅) = scat (scons a ∅) q $ by scat_eq [m5a, m3d]
+m7: $ G , a = A , q = scons B ∅ ⇒ scons a q = scons A (scons B ∅) $ by scons_eq [m1, m2]
+n1: $ G , a = A , q = scons B ∅ ⇒ scat (scons A ∅) (scons B ∅) = scons a q $ by eq_trans [m6, m4]
+n2: $ G , a = A , q = scons B ∅ ⇒ scat (scons A ∅) (scons B ∅) = scons A (scons B ∅) $ by eq_trans [n1, m7]
+n3: $ G , a = A ⇒ scat (scons A ∅) (scons B ∅) = scons A (scons B ∅) $ by isset_elim [l0, n2]
+n4: $ G ⇒ scat (scons A ∅) (scons B ∅) = scons A (scons B ∅) $ by isset_elim [#1, n3]
+
 scat_ssnoc
 ----------
 l1: $ G ⇒ cdm s ∈ ω $ by fseq_len [#1]
@@ -2939,6 +2989,28 @@ w3: $ G , k = cdm s , k ∊ ω ⇒ s ∪ s2_sh (scons a ∅) k = scat s (scons a
 w4: $ G , k = cdm s , k ∊ ω ⇒ ssnoc s a = scat s (scons a ∅) $ by eq_trans [w2, w3]
 w5: $ G ⇒ ssnoc s a = scat s (scons a ∅) $ by wcel_elim [l1, w4]
 
+ssnoc_empty
+-----------
+l1: $ G , e = ∅ ⇒ e = ∅ $ by ax
+l2: $ G , e = ∅ ⇒ ∅ ∈ fseq (csn x) $ by fseq_empty
+l2b: $ G , e = ∅ ⇒ ∅ = e $ by eq_sym [l1]
+l3: $ G , e = ∅ ⇒ e ∈ fseq (csn x) $ by wcel_eq_l [l2b, l2]
+l3b: $ G , e = ∅ ⇒ e ∊ fseq (csn x) $ by wcel_welc [l3]
+l4: $ G , e = ∅ ⇒ ssnoc e x = scat e (scons x ∅) $ by ssnoc_scat [l3b]
+l5a: $ G , e = ∅ ⇒ x ∊ csn x $ by csn_intro_var
+l5b: $ G , e = ∅ ⇒ x ∈ csn x $ by welc_wcel [l5a]
+l5: $ G , e = ∅ ⇒ scons x ∅ ∈ fseq (csn x) $ by scons_fseq_c [l5b, l2]
+l6: $ G , e = ∅ ⇒ scat ∅ (scons x ∅) = scons x ∅ $ by scat_empty_l_c [l5]
+l7a: $ G , e = ∅ ⇒ scons x ∅ = scons x ∅ $ by eq_refl
+l7: $ G , e = ∅ ⇒ scat e (scons x ∅) = scat ∅ (scons x ∅) $ by scat_eq [l1, l7a]
+l8a: $ G , e = ∅ ⇒ x = x $ by eq_refl
+l8: $ G , e = ∅ ⇒ ssnoc ∅ x = ssnoc e x $ by ssnoc_eq [l2b, l8a]
+l9: $ G , e = ∅ ⇒ ssnoc ∅ x = scat e (scons x ∅) $ by eq_trans [l8, l4]
+l10: $ G , e = ∅ ⇒ ssnoc ∅ x = scat ∅ (scons x ∅) $ by eq_trans [l9, l7]
+l11: $ G , e = ∅ ⇒ ssnoc ∅ x = scons x ∅ $ by eq_trans [l10, l6]
+l12: $ G ⇒ isset ∅ $ by ax_empty
+l13: $ G ⇒ ssnoc ∅ x = scons x ∅ $ by isset_elim [l12, l11]
+
 fv_ccom
 -------
 l1: $ G , b = fv s i , b ∊ cdm F ⇒ b = fv s i $ by ax
@@ -3171,6 +3243,33 @@ d4: $ G , k = cdm s , k ∊ ω , c = k × a , c ∊ U ⇒ s ⊆ c $ by subset_eq
 d5: $ G , k = cdm s , k ∊ ω , c = k × a , c ∊ U ⇒ s ∈ U $ by universe_subset [weaken [c7], d2, d4]
 c11: $ G , k = cdm s , k ∊ ω ⇒ s ∈ U $ by wcel_elim [c10, d5]
 c12: $ G ⇒ s ∈ U $ by wcel_elim [l4, c11]
+
+universe_fseq_elem_c
+--------------------
+k1: $ G , a = A , a ∊ U , d = S , d ∊ fseq A ⇒ d ∊ fseq A $ by ax
+k2: $ G , a = A , a ∊ U , d = S , d ∊ fseq A ⇒ a = A $ by ax
+k3: $ G , a = A , a ∊ U , d = S , d ∊ fseq A ⇒ A = a $ by eq_sym [k2]
+k4: $ G , a = A , a ∊ U , d = S , d ∊ fseq A ⇒ d ∊ fseq a $ by welc_fseq_eq [k3, k1]
+k5: $ G , a = A , a ∊ U , d = S , d ∊ fseq A ⇒ universe U $ by weaken [#1]
+k6: $ G , a = A , a ∊ U , d = S , d ∊ fseq A ⇒ a ∊ U $ by ax
+k7: $ G , a = A , a ∊ U , d = S , d ∊ fseq A ⇒ d ∈ U $ by universe_fseq_elem [k5, k6, k4]
+k8: $ G , a = A , a ∊ U , d = S , d ∊ fseq A ⇒ d = S $ by ax
+k9: $ G , a = A , a ∊ U , d = S , d ∊ fseq A ⇒ S ∈ U $ by wcel_eq_l [k8, k7]
+k10: $ G , a = A , a ∊ U ⇒ S ∈ fseq A $ by weaken [#3]
+k11: $ G , a = A , a ∊ U ⇒ S ∈ U $ by wcel_elim [k10, k9]
+k12: $ G ⇒ S ∈ U $ by wcel_elim [#2, k11]
+
+universe_scons2
+---------------
+l1: $ G ⇒ cpr A B ∈ U $ by universe_cpr_c [#1, #2, #3]
+l2: $ G ⇒ isset A $ by wcel_isset [#2]
+l3: $ G ⇒ isset B $ by wcel_isset [#3]
+l4: $ G ⇒ A ∈ cpr A B $ by cpr_intro_l_c [l2]
+l5: $ G ⇒ B ∈ cpr A B $ by cpr_intro_r_c [l3]
+l6: $ G ⇒ ∅ ∈ fseq (cpr A B) $ by fseq_empty
+l7: $ G ⇒ scons B ∅ ∈ fseq (cpr A B) $ by scons_fseq_c [l5, l6]
+l8: $ G ⇒ scons A (scons B ∅) ∈ fseq (cpr A B) $ by scons_fseq_c [l4, l7]
+l9: $ G ⇒ scons A (scons B ∅) ∈ U $ by universe_fseq_elem_c [#1, l1, l8]
 
 universe_fseq
 -------------

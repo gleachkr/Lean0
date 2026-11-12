@@ -742,6 +742,25 @@ l13: $ G , x = A , y = B ⇒ fv F A = B $ by eq_trans [l12, l2]
 l14: $ G , x = A ⇒ fv F A = B $ by isset_elim [#4, l13]
 l15: $ G ⇒ fv F A = B $ by isset_elim [#3, l14]
 
+fv_iff
+------
+a1: $ G , x ∊ ap F A ⇒ x ∊ ap F A $ by ax
+a2: $ G , x ∊ ap F A ⇒ ⟨ A , x ⟩ ∈ F $ by ap_elim [a1]
+a3: $ G , x ∊ ap F A ⇒ ∀ o (⟨ A , o ⟩ ∈ F ↔ o = B) $ by weaken [#1]
+a4: $ G , x ∊ ap F A ⇒ ⟨ A , x ⟩ ∈ F ↔ x = B $ by all_elim [a3]
+a5: $ G , x ∊ ap F A ⇒ x = B $ by bi_elim_l [a4, a2]
+a6: $ G , x ∊ ap F A ⇒ x ∊ csn B $ by csn_intro [a5]
+b1: $ G , x ∊ csn B ⇒ x ∊ csn B $ by ax
+b2: $ G , x ∊ csn B ⇒ x = B $ by csn_elim [b1]
+b3: $ G , x ∊ csn B ⇒ ∀ o (⟨ A , o ⟩ ∈ F ↔ o = B) $ by weaken [#1]
+b4: $ G , x ∊ csn B ⇒ ⟨ A , x ⟩ ∈ F ↔ x = B $ by all_elim [b3]
+b5: $ G , x ∊ csn B ⇒ ⟨ A , x ⟩ ∈ F $ by bi_elim_r [b4, b2]
+b6: $ G , x ∊ csn B ⇒ x ∊ ap F A $ by ap_intro [b5]
+c1: $ G ⇒ ap F A = csn B $ by eq_intro [a6, b6]
+c2: $ G ⇒ ⋃ (ap F A) = ⋃ (csn B) $ by cuni_eq [c1]
+c3: $ G ⇒ ⋃ (csn B) = B $ by cuni_csn [#2]
+c4: $ G ⇒ fv F A = B $ by eq_trans [c2, c3]
+
 lemma t0_csn_pair (G: hyps) (A B C D: class): $ G ⇒ isset C $ > $ G ⇒ isset D $ > $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ ⟨ C , D ⟩ ∈ csn ⟨ A , B ⟩ $ > $ G ⇒ D = B $
 ----
 c1: $ G , e = ⟨ C , D ⟩ , e ∊ csn ⟨ A , B ⟩ ⇒ e ∊ csn ⟨ A , B ⟩ $ by ax
