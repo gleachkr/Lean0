@@ -1056,6 +1056,14 @@ The rest of the model is not yet the spec's `deq`, so it changes nothing that is
   is the set of its tuples, an element of `U_1`; the family, the constructors' values and the
   fold are computed from the definitions above, not assumed. The rest file's axioms are
   unchanged: the general rules are layer E.
+- **Telescopes and positivity** (`model-tel.mm0`, 2026-11-12, layers D6 and E1): what the
+  schema's bookkeeping relations (`pis`, `lams`, `capp`, `spine`, `pargs`, `rehead`, `npis`,
+  `sinst`, `pinst`, `qinst`) do to the denotation, a telescope read over an outer valuation `s`
+  through the shifted table `dsh u M s` (`pis P b T` makes `T`'s value the curried `Π` of `P`
+  over `s` and `b`); and positivity: a positive field type's value grows with the entries for
+  the block's types, so for a block with `ind_wf` one step of the family is monotone at
+  candidates of the universe (`iop0_mono`) and the operator is that step there (`iop_iop0`).
+  Definitions and theorems only.
 
 **TG mode: a certificate verified against the library** (2026-11-09). The same certificate
 can be checked against the library instead of the spec:
