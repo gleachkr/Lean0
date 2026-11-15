@@ -47,8 +47,11 @@ theorem omega_inductive (G: hyps): $ G ⇒ inductive ω $;
 --| `ω` is a subclass of the inductive set given by infinity.
 theorem omega_set (G: hyps): $ G ⇒ isset ω $;
 --| Induction, for a class and for a formula.
-theorem omega_ind (G: hyps) {x: set} (P: class):
+theorem omega_ind {x: set} (G: hyps x) (P: class):
   $ G ⇒ ∅ ∈ P $ > $ G ⇒ ∀ x (x ∊ ω ∧ x ∊ P → suc x ∈ P) $ > $ G ⇒ ω ⊆ P $;
+--| @freshen G x
+--| @freshen G y
+--| @freshen p y
 theorem omega_ind_f (G: hyps) {x y: set} (p: fml x):
   $ G ⇒ ∅ ∈ {x | p} $ > $ G ⇒ ∀ y (y ∊ ω → [x/y] p → suc y ∈ {x | p}) $ >
   $ G ⇒ ∀ x (x ∊ ω → p) $;
@@ -71,7 +74,7 @@ theorem omega_elem_omega (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ a $ > $ G ⇒ b ∊ ω $;
 --| Class form of `omega_elem_omega`.
 theorem omega_elem_omega_c (G: hyps) (A B: class): $ G ⇒ A ∈ B $ > $ G ⇒ B ∈ ω $ > $ G ⇒ A ∈ ω $;
-theorem omega_cases (G: hyps) {y: set} (a: set):
+theorem omega_cases {y: set} (G: hyps y) (a: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ a = ∅ ∨ ∃ y (y ∊ ω ∧ a = suc y) $;
 theorem omega_suc_mono (G: hyps) (a b: set):
   $ G ⇒ b ∊ ω $ > $ G ⇒ a ∊ b $ > $ G ⇒ suc a ∈ suc b $;
@@ -160,6 +163,8 @@ theorem omapx_congr (A B F H: class): $ A ≐ B $ > $ F ≐ H $ > $ omapx A F �
 theorem omapx_eq (G: hyps) (A B F H: class):
   $ G ⇒ A = B $ > $ G ⇒ F = H $ > $ G ⇒ omapx A F = omapx B H $;
 
+--| @freshen H n
+--| @freshen c n
 theorem omapx_elim {n k: set} (G: hyps n k) (H: hyps k) (A F: class) (g: set) (c: fml k): $ G ⇒ g ∊ omapx A F $ > $ H , n ∊ ω , functional g , rel g , cdm g = suc n , fv g ∅ = A , ∀ k (k ∊ n → fv g (suc k) = fv F (fv g k)) ⇒ c $ > $ G , H ⇒ c $;
 theorem omega_suc_elem (G: hyps) (i w a: set): $ G ⇒ i ∊ ω $ > $ G ⇒ w ∊ suc i $ > $ G ⇒ a ∊ w $ > $ G ⇒ a ∊ i $;
 theorem omega_suc_elem_omega (G: hyps) (i a: set): $ G ⇒ i ∊ ω $ > $ G ⇒ a ∊ suc i $ > $ G ⇒ a ∊ ω $;
@@ -172,6 +177,7 @@ theorem cun_csn_opair_elim (G: hyps) (R: class) (a b s c: set): $ G ⇒ ⟨ a , 
 theorem fv_cun_csn_other (G: hyps) (R A: class) (s c: set): $ G ⇒ isset A $ > $ G ⇒ A = s → ⊥ $ > $ G ⇒ fv (R ∪ csn ⟨ s , c ⟩) A = fv R A $;
 theorem omapx_intro {g k: set} (G: hyps g k) (A F B: class) (i: set): $ G ⇒ isset B $ > $ G ⇒ i ∊ ω $ > $ G ⇒ functional B $ > $ G ⇒ rel B $ > $ G ⇒ cdm B = suc i $ > $ G ⇒ fv B ∅ = A $ > $ G ⇒ ∀ k (k ∊ i → fv B (suc k) = fv F (fv B k)) $ > $ G ⇒ ∃ g (g ∊ omapx A F ∧ cdm g = suc i) $;
 --| An approximation defined at `n` exists for every `n ∊ ω`.
+--| @freshen G g
 theorem omapx_exists (G: hyps) {g: set} (A F: class) (n: set):
   $ G ⇒ isset A $ > $ G ⇒ functional F $ > $ G ⇒ n ∊ ω $ >
   $ G ⇒ ∃ g (g ∊ omapx A F ∧ n ∊ cdm g) $;
@@ -181,7 +187,7 @@ theorem omapx_zero (G: hyps) (A F: class) (g: set): $ G ⇒ g ∊ omapx A F $ > 
 theorem omapx_cdm (G: hyps) (A F: class) (g a: set): $ G ⇒ g ∊ omapx A F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ a ∊ ω $;
 theorem omapx_step (G: hyps) (A F: class) (g m n: set): $ G ⇒ g ∊ omapx A F $ > $ G ⇒ m = suc n $ > $ G ⇒ m ∊ cdm g $ > $ G ⇒ n ∊ cdm g ∧ fv g (suc n) = fv F (fv g n) $;
 theorem omrec_intro (G: hyps) (A F: class) (g a b: set): $ G ⇒ g ∊ omapx A F $ > $ G ⇒ ⟨ a , b ⟩ ∈ g $ > $ G ⇒ ⟨ a , b ⟩ ∈ omrec A F $;
-theorem omrec_elim (G: hyps) {g: set} (A F: class) (a b: set): $ G ⇒ ⟨ a , b ⟩ ∈ omrec A F $ > $ G ⇒ ∃ g (g ∊ omapx A F ∧ ⟨ a , b ⟩ ∈ g) $;
+theorem omrec_elim {g: set} (G: hyps g) (A F: class) (a b: set): $ G ⇒ ⟨ a , b ⟩ ∈ omrec A F $ > $ G ⇒ ∃ g (g ∊ omapx A F ∧ ⟨ a , b ⟩ ∈ g) $;
 theorem omrec_functional (G: hyps) (A F: class): $ G ⇒ functional (omrec A F) $;
 theorem omrec_rel (G: hyps) (A F: class): $ G ⇒ rel (omrec A F) $;
 theorem omrec_cdm (G: hyps) (A F: class):
@@ -195,7 +201,7 @@ theorem omrec_suc (G: hyps) (A F: class) (n: set):
   $ G ⇒ isset A $ > $ G ⇒ functional F $ > $ G ⇒ n ∊ ω $ >
   $ G ⇒ fv (omrec A F) (suc n) = fv F (fv (omrec A F) n) $;
 --| Uniqueness: any function on `ω` satisfying the equations is `omrec A F`.
-theorem omrec_unique (G: hyps) {n: set} (A F: class) (h: set):
+theorem omrec_unique {n: set} (G: hyps n) (A F: class) (h: set):
   $ G ⇒ isset A $ > $ G ⇒ functional F $ > $ G ⇒ functional h $ > $ G ⇒ rel h $ >
   $ G ⇒ cdm h = ω $ > $ G ⇒ fv h ∅ = A $ >
   $ G ⇒ ∀ n (n ∊ ω → fv h (suc n) = fv F (fv h n)) $ > $ G ⇒ h = omrec A F $;

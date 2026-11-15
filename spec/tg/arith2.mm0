@@ -75,10 +75,19 @@ theorem sb_c_nshl {x: set} (t: set x) (A B: class x):
 -- --------------------------------------------------------------------------
 
 --| Course-of-values induction on `ω` (from `ord_ind_f`).
+--| @freshen G x
+--| @freshen G y
+--| @freshen p y
 theorem omega_sind_f (G: hyps) {x y: set} (p: fml x):
   $ G , x ∊ ω , ∀ y (y ∊ x → [x/y] p) ⇒ p $ > $ G ⇒ ∀ x (x ∊ ω → p) $;
 theorem two_omega (G: hyps): $ G ⇒ two ∈ ω $;
 --| Name `two`, `0` and `1` by set variables, with the facts about them.
+--| @freshen G t
+--| @freshen G e
+--| @freshen G o
+--| @freshen c t
+--| @freshen c e
+--| @freshen c o
 theorem two_names {t e o: set} (G: hyps) (c: fml):
   $ G , t = two , e = ∅ , o = suc e , t ∊ ω , e ∊ t , o ∊ t ⇒ c $ > $ G ⇒ c $;
 
@@ -87,7 +96,7 @@ theorem ndvd_intro (G: hyps) (a b c: set):
 --| Class form of `ndvd_intro`.
 theorem ndvd_intro_c (G: hyps) (A B C: class): $ G ⇒ C ∈ ω $ > $ G ⇒ B = nmul A C $ > $ G ⇒ ndvd A B $;
 --| Elimination of `ndvd`: name the cofactor.
-theorem ndvd_elim {u: set} (G: hyps) (A B: class): $ G ⇒ ndvd A B $ > $ G ⇒ ∃ u (u ∊ ω ∧ B = nmul A u) $;
+theorem ndvd_elim {u: set} (G: hyps u) (A B: class): $ G ⇒ ndvd A B $ > $ G ⇒ ∃ u (u ∊ ω ∧ B = nmul A u) $;
 theorem ndvd_refl (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ ndvd a a $;
 theorem ndvd_zero (G: hyps) (a: set): $ G ⇒ ndvd a ∅ $;
 theorem one_ndvd (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ ndvd (suc ∅) a $;
@@ -112,7 +121,7 @@ theorem ndvd_antisym (G: hyps) (a b: set):
 
 theorem ndiv_set (G: hyps) (a b: set): $ G ⇒ isset (ndiv a b) $;
 --| Euclid: a quotient and a remainder exist, and they are unique.
-theorem ndivmod_ex (G: hyps) {q r: set} (a b: set):
+theorem ndivmod_ex {q r: set} (G: hyps q r) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ ∅ ∈ b $ >
   $ G ⇒ ∃ q ∃ r (q ∊ ω ∧ r ∊ b ∧ nadd (nmul q b) r = a) $;
 theorem ndivmod_unique (G: hyps) (b q r c d: set):
@@ -127,6 +136,10 @@ theorem nmod_char (G: hyps) (a b q r: set):
   $ G ⇒ nmod a b = r $;
 --| Name the quotient `u` and the remainder `v` of `a` by `b > 0`, with their
 --| characterization (Euclid, `ndiv_char`, `nmod_char`).
+--| @freshen G u
+--| @freshen G v
+--| @freshen c u
+--| @freshen c v
 theorem ndivmod_elim {u v: set} (G: hyps) (a b: set) (c: fml): $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ ∅ ∈ b $ > $ G , u ∊ ω , v ∊ b , nadd (nmul u b) v = a , ndiv a b = u , nmod a b = v ⇒ c $ > $ G ⇒ c $;
 --| The facts behind `nat_div_lit0` and `nat_mod_lit0`.
 theorem ndiv_zero_r (G: hyps) (a: set): $ G ⇒ ndiv a ∅ = ∅ $;
@@ -173,7 +186,7 @@ theorem ndiv_dbl1_two (G: hyps) (a: set):
 theorem nmod_dbl1_two (G: hyps) (a: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ nmod (suc (ndbl a)) two = suc ∅ $;
 --| Every natural number is `2q` or `2q + 1`.
-theorem omega_parity (G: hyps) {q: set} (a: set):
+theorem omega_parity {q: set} (G: hyps q) (a: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ ∃ q (q ∊ ω ∧ (a = ndbl q ∨ a = suc (ndbl q))) $;
 theorem nmod_two_cases (G: hyps) (a: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ nmod a two = ∅ ∨ nmod a two = suc ∅ $;
@@ -185,10 +198,12 @@ theorem nmod_two_cases (G: hyps) (a: set):
 theorem ngcd_set (G: hyps) (a b: set): $ G ⇒ isset (ngcd a b) $;
 --| A common divisor that every common divisor divides exists (Euclid's
 --| algorithm, by strong induction on `a`).
+--| @freshen G g
+--| @freshen G d
 theorem ngcd_ex (G: hyps) {g d: set} (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ >
   $ G ⇒ ∃ g (g ∊ ω ∧ ndvd g a ∧ ndvd g b ∧ ∀ d (d ∊ ω → ndvd d a → ndvd d b → ndvd d g)) $;
-theorem ngcd_char (G: hyps) {d: set} (a b g: set):
+theorem ngcd_char {d: set} (G: hyps d) (a b g: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ g ∊ ω $ > $ G ⇒ ndvd g a $ > $ G ⇒ ndvd g b $ >
   $ G ⇒ ∀ d (d ∊ ω → ndvd d a → ndvd d b → ndvd d g) $ > $ G ⇒ ngcd a b = g $;
 theorem ngcd_omega (G: hyps) (a b: set):

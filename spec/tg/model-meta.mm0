@@ -51,19 +51,23 @@ theorem lrel_inst_out_r (G: hyps) (M W R: class) (u t1 t2 t3 t4: set):
 
 --| An expression closed below `k` has the same value at valuations that agree
 --| below `k`.
+--| @freshen G i
 theorem lrel_closed_sem (G: hyps) {i: set} (M: class) (u w t1 t2 r r2: set):
   $ G ⇒ ra_closed t1 t2 ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ r2 ∊ fseq u $ >
   $ G ⇒ ∀ i (i ∊ fv nvf t1 → fv r i = fv r2 i) $ >
   $ G ⇒ dt u M t2 w r = dt u M t2 w r2 $;
+--| @freshen G i
 theorem closed_den (G: hyps) {i: set} (M: class) (k: nat) (e: expr) (u w r r2: set):
   $ closed k e $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ r2 ∊ fseq u $ >
   $ G ⇒ ∀ i (i ∊ fv nvf (enc_nat k) → fv r i = fv r2 i) $ >
   $ G ⇒ dt u M (enc_expr e) w r = dt u M (enc_expr e) w r2 $;
 --| Class forms: the level valuation and the valuations as classes.
+--| @freshen G i
 theorem lrel_closed_sem_c (G: hyps) {i: set} (M W R R2: class) (u t1 t2: set):
   $ G ⇒ ra_closed t1 t2 ∈ lrel $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ R2 ∈ fseq u $ >
   $ G ⇒ ∀ i (i ∊ fv nvf t1 → fv R i = fv R2 i) $ >
   $ G ⇒ dt u M t2 W R = dt u M t2 W R2 $;
+--| @freshen G i
 theorem closed_den_c (G: hyps) {i: set} (M W R R2: class) (k: nat) (e: expr) (u: set):
   $ closed k e $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ R2 ∈ fseq u $ >
   $ G ⇒ ∀ i (i ∊ fv nvf (enc_nat k) → fv R i = fv R2 i) $ >
@@ -156,9 +160,11 @@ theorem lookup_den (H: hyps) (M: class) (G: ctx) (i: nat) (A: expr) (u w r: set)
   $ H ⇒ fv r (fv nvf (enc_nat i)) ∈ dt u M (enc_expr A) w r $;
 --| Extension: for a derivable `cext n G G2`, a valuation satisfying `G2` is
 --| `q ++ t` with `q` of length `n` and `t` satisfying `G`.
-theorem lrel_cext_sem (G: hyps) {q t: set} (M: class) (u w t1 t2 t3 r: set):
+theorem lrel_cext_sem {q t: set} (G: hyps q t) (M: class) (u w t1 t2 t3 r: set):
   $ G ⇒ ra_cext t1 t2 t3 ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ sat u M t3 w $ >
   $ G ⇒ ∃ q ∃ t (q ∊ fseq u ∧ cdm q = fv nvf t1 ∧ t ∊ sat u M t2 w ∧ r = scat q t) $;
+--| @freshen H q
+--| @freshen H t
 theorem cext_den (H: hyps) {q t: set} (M: class) (n: nat) (G G2: ctx) (u w r: set):
   $ cext n G G2 $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ r ∊ sat u M (enc_ctx G2) w $ >
   $ H ⇒ ∃ q ∃ t (q ∊ fseq u ∧ cdm q = fv nvf (enc_nat n) ∧ t ∊ sat u M (enc_ctx G) w ∧
@@ -167,12 +173,17 @@ theorem cext_den (H: hyps) {q t: set} (M: class) (n: nat) (G G2: ctx) (u w r: se
 --| of type `A0` in `G0`, a valuation satisfying `G` is `p ++ t` with `p` of
 --| length `k` and `t` satisfying `G0`, and `p ++ (x :: t)` satisfies `G1` for
 --| `x` the value of `a` at `t`.
+--| @freshen G p
+--| @freshen G t
+--| @freshen G v
 theorem lrel_cinst_sem (G: hyps) {p t v: set} (M: class) (u w t1 t2 t3 t4 t5 t6 r: set):
   $ G ⇒ ra_cinst t1 t2 t3 t4 t5 t6 ∈ lrel $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ ∀ v (v ∊ sat u M t2 w → dt u M t4 w v ∈ dt u M t3 w v ∧ dt u M t4 w v ∈ u) $ >
   $ G ⇒ r ∊ sat u M t6 w $ >
   $ G ⇒ ∃ p ∃ t (p ∊ fseq u ∧ cdm p = fv nvf t1 ∧ t ∊ sat u M t2 w ∧ r = scat p t ∧
       scat p (scons (dt u M t4 w t) t) ∈ sat u M t5 w) $;
+--| @freshen H p
+--| @freshen H t
 theorem cinst_den (H: hyps) {p t: set} (M: class) (k: nat) (G0 G1 G: ctx) (A0 a: expr) (u w r: set):
   $ mdeq M G0 a a A0 $ > $ cinst k G0 A0 a G1 G $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ >
   $ H ⇒ r ∊ sat u M (enc_ctx G) w $ >

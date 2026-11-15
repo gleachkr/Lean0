@@ -32,6 +32,18 @@ def cgr3 {k s v: set} (B: class k s v) (.w .y: set): class =
 --| Introduction for `cgr3`.
 theorem cgr3_intro {k s v: set} (G: hyps k s v) (B: class k s v) (a b c f: set): $ G ⇒ f = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ > $ G ⇒ ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ ∈ cgr3 k s v B $;
 --| Elimination for `cgr3`, with the components named in the statement's order.
+--| @freshen G i
+--| @freshen G j
+--| @freshen G u
+--| @freshen G g
+--| @freshen H i
+--| @freshen H j
+--| @freshen H u
+--| @freshen H g
+--| @freshen p i
+--| @freshen p j
+--| @freshen p u
+--| @freshen p g
 theorem cgr3_elim_mem {k s v i j u g: set} (G: hyps k s v) (H: hyps k s v) (B: class k s v) (z: set) (p: fml k s v): $ G ⇒ z ∊ cgr3 k s v B $ > $ H , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ p $ > $ G , H ⇒ p $;
 --| Elimination for a pair whose argument is a triple.
 theorem cgr3_elim {k s v: set} (G: hyps k s v) (B: class k s v) (a b c f: set): $ G ⇒ ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ ∈ cgr3 k s v B $ > $ G ⇒ f = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $;
@@ -44,6 +56,9 @@ theorem fv_cgr3 {k s v: set} (G: hyps k s v) (B: class k s v) (a b c: set):
 theorem cgr3_congr {k s v: set} (B D: class k s v): $ B ≐ D $ > $ cgr3 k s v B ≐ cgr3 k s v D $;
 --| Equal bodies under hypotheses give equal graphs (the quantifiers in the order
 --| `cgr3_intro` substitutes: the last variable first).
+--| @freshen G k
+--| @freshen G s
+--| @freshen G v
 theorem cgr3_eq {k s v: set} (G: hyps) (B D: class k s v):
   $ G ⇒ ∀ v ∀ s ∀ k (B = D) $ > $ G ⇒ cgr3 k s v B = cgr3 k s v D $;
 --| @rewrite
@@ -73,7 +88,7 @@ theorem trees_fix (G: hyps) (l: set): $ G ⇒ l × fseq (trees l) = trees l $;
 theorem trees_fix_c (G: hyps) (L: class): $ G ⇒ isset L $ > $ G ⇒ L × fseq (trees L) = trees L $;
 theorem trees_intro (G: hyps) (l k s: set):
   $ G ⇒ k ∊ l $ > $ G ⇒ s ∊ fseq (trees l) $ > $ G ⇒ ⟨ k , s ⟩ ∈ trees l $;
-theorem trees_elim (G: hyps) {k s: set} (l t: set):
+theorem trees_elim {k s: set} (G: hyps k s) (l t: set):
   $ G ⇒ t ∊ trees l $ > $ G ⇒ ∃ k ∃ s (k ∊ l ∧ s ∊ fseq (trees l) ∧ t = ⟨ k , s ⟩) $;
 theorem trees_node (G: hyps) (l k s: set):
   $ G ⇒ ⟨ k , s ⟩ ∈ trees l $ > $ G ⇒ k ∊ l ∧ s ∊ fseq (trees l) $;
@@ -111,10 +126,12 @@ theorem node1_inj_c (G: hyps) (K A: class) (o: set): $ G ⇒ isset K $ > $ G ⇒
 theorem node2_inj_c (G: hyps) (K A B: class) (o p: set): $ G ⇒ isset K $ > $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ ⟨ K , scons A (scons B ∅) ⟩ = ⟨ K , scons o (scons p ∅) ⟩ $ > $ G ⇒ A = o ∧ B = p $;
 theorem node3_inj_c (G: hyps) (K A B C: class) (o p q: set): $ G ⇒ isset K $ > $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ isset C $ > $ G ⇒ ⟨ K , scons A (scons B (scons C ∅)) ⟩ = ⟨ K , scons o (scons p (scons q ∅)) ⟩ $ > $ G ⇒ A = o ∧ B = p ∧ C = q $;
 --| Induction over the children.
-theorem trees_ind (G: hyps) {k s: set} (l: set) (P: class):
+theorem trees_ind {k s: set} (G: hyps k s) (l: set) (P: class):
   $ G ⇒ ∀ k ∀ s (k ∊ l → s ∊ fseq (trees l) → crn s ⊆ P → ⟨ k , s ⟩ ∈ P) $ >
   $ G ⇒ trees l ⊆ P $;
 --| Class form of `trees_ind`.
+--| @freshen G k
+--| @freshen G s
 theorem trees_ind_c (G: hyps) {k s: set} (L P: class):
   $ G ⇒ isset L $ >
   $ G ⇒ ∀ k ∀ s (k ∊ L → s ∊ fseq (trees L) → crn s ⊆ P → ⟨ k , s ⟩ ∈ P) $ >
@@ -123,8 +140,16 @@ theorem trees_ind_c (G: hyps) {k s: set} (L P: class):
 --| the `cuni_elim` style), and induction with the step as a sequent.
 theorem trees_omega_intro (G: hyps) (k j z: set):
   $ G ⇒ k ∊ ω $ > $ G ⇒ j ∊ fseq (trees ω) $ > $ G ⇒ z = ⟨ k , j ⟩ $ > $ G ⇒ z ∊ trees ω $;
+--| @freshen G k
+--| @freshen G j
+--| @freshen H k
+--| @freshen H j
+--| @freshen c k
+--| @freshen c j
 theorem trees_omega_elim {k j: set} (G H: hyps) (T: class) (c: fml):
   $ G ⇒ T ∈ trees ω $ > $ H , k ∊ ω , j ∊ fseq (trees ω) , T = ⟨ k , j ⟩ ⇒ c $ > $ G , H ⇒ c $;
+--| @freshen G k
+--| @freshen G j
 theorem trees_omega_ind {k j: set} (G: hyps) (P: class):
   $ G , k ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ P ⇒ ⟨ k , j ⟩ ∈ P $ > $ G ⇒ trees ω ⊆ P $;
 --| The children of a node named twice: the inductive hypothesis on `j` moves
@@ -156,7 +181,7 @@ theorem sb_c_tstep {x: set} (t: set x) (A B C: class x):
 theorem tstep_mem (G: hyps) (L F H: class) (k s: set):
   $ G ⇒ k ∊ L $ > $ G ⇒ s ∊ fseq (cdm H) $ >
   $ G ⇒ ⟨ ⟨ k , s ⟩ , fv F ⟨ k , ⟨ s , ccom H s ⟩ ⟩ ⟩ ∈ tstep L F H $;
-theorem tstep_elim (G: hyps) {k s: set} (L F H: class) (z: set):
+theorem tstep_elim {k s: set} (G: hyps k s) (L F H: class) (z: set):
   $ G ⇒ z ∊ tstep L F H $ >
   $ G ⇒ ∃ k ∃ s (z = ⟨ ⟨ k , s ⟩ , fv F ⟨ k , ⟨ s , ccom H s ⟩ ⟩ ⟩ ∧ k ∊ L ∧ s ∊ fseq (cdm H)) $;
 theorem tstep_functional (G: hyps) (L F H: class): $ G ⇒ functional (tstep L F H) $;
@@ -196,7 +221,7 @@ theorem tstg_functional (G: hyps) (L F: class): $ G ⇒ functional (tstg L F) $;
 theorem tstg_set (G: hyps) (L F: class) (a: set): $ G ⇒ isset (fv (tstg L F) a) $;
 theorem tstgb_intro (G: hyps) (L F: class) (a b c: set):
   $ G ⇒ ord a $ > $ G ⇒ b ∊ a $ > $ G ⇒ c ∊ fv (tstg L F) b $ > $ G ⇒ c ∊ tstgb L F a $;
-theorem tstgb_elim (G: hyps) {b: set} (L F: class) (a c: set):
+theorem tstgb_elim {b: set} (G: hyps b) (L F: class) (a c: set):
   $ G ⇒ c ∊ tstgb L F a $ > $ G ⇒ ∃ b (b ∊ a ∧ c ∊ fv (tstg L F) b) $;
 theorem tstep_eq_arg (G: hyps) (L F H K: class): $ G ⇒ H = K $ > $ G ⇒ tstep L F H = tstep L F K $;
 --| The recursion equation of the stages.
@@ -211,7 +236,7 @@ theorem tstg_val_chain (G: hyps) (F: class) (l a b: set):
   $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ ord b $ > $ G ⇒ a ⊆ b $ >
   $ G ⇒ fv (tstg l F) a ⊆ fv (tstg l F) b $;
 --| The domain of a stage is the stage of the trees.
-theorem tstg_val_cdm (G: hyps) {x: set} (F: class) (l a: set):
+theorem tstg_val_cdm {x: set} (G: hyps x) (F: class) (l a: set):
   $ G ⇒ functional F $ > $ G ⇒ ord a $ >
   $ G ⇒ cdm (fv (tstg l F) a) = fv (stg x (l × fseq x)) a $;
 
@@ -231,7 +256,7 @@ theorem sb_c_trc {x: set} (t: set x) (A B: class x):
   $ (⟦ x / t ⟧ (trc A B)) ≐ trc (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
 theorem trc_intro (G: hyps) (L F: class) (a c: set):
   $ G ⇒ ord a $ > $ G ⇒ c ∊ fv (tstg L F) a $ > $ G ⇒ c ∊ trc L F $;
-theorem trc_elim (G: hyps) {a: set} (L F: class) (c: set):
+theorem trc_elim {a: set} (G: hyps a) (L F: class) (c: set):
   $ G ⇒ c ∊ trc L F $ > $ G ⇒ ∃ a (ord a ∧ c ∊ fv (tstg L F) a) $;
 theorem tstg_subset_trc (G: hyps) (L F: class) (a: set): $ G ⇒ ord a $ > $ G ⇒ fv (tstg L F) a ⊆ trc L F $;
 theorem trc_functional (G: hyps) (F: class) (l: set):
@@ -259,8 +284,11 @@ theorem trc_node (G: hyps) (F: class) (l k s: set):
 theorem trc_node_c (G: hyps) (F L: class) (k s: set):
   $ G ⇒ isset L $ > $ G ⇒ functional F $ > $ G ⇒ k ∊ L $ > $ G ⇒ s ∊ fseq (trees L) $ >
   $ G ⇒ fv (trc L F) ⟨ k , s ⟩ = fv F ⟨ k , ⟨ s , ccom (trc L F) s ⟩ ⟩ $;
+--| @freshen G y
 theorem ccom_eq_vals (G: hyps) {y: set} (H K: class) (f: set): $ G ⇒ functional H $ > $ G ⇒ functional K $ > $ G ⇒ crn f ⊆ cdm H $ > $ G ⇒ crn f ⊆ cdm K $ > $ G ⇒ ∀ y (y ∊ crn f → fv H y = fv K y) $ > $ G ⇒ ccom H f = ccom K f $;
 --| Any function on the trees satisfying the recursion equation is `trc l F`.
+--| @freshen G k
+--| @freshen G s
 theorem trc_unique (G: hyps) {k s: set} (F: class) (l h: set):
   $ G ⇒ functional F $ > $ G ⇒ functional h $ > $ G ⇒ rel h $ > $ G ⇒ cdm h = trees l $ >
   $ G ⇒ ∀ k ∀ s (k ∊ l → s ∊ fseq (trees l) → fv h ⟨ k , s ⟩ = fv F ⟨ k , ⟨ s , ccom h s ⟩ ⟩) $ >

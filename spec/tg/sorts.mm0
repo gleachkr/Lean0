@@ -50,6 +50,7 @@ theorem sb_c_szip {x: set} (t: set x) (A B: class x):
   $ (⟦ x / t ⟧ (szip A B)) ≐ szip (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
 theorem szip_intro (G: hyps) (A S: class) (i: set):
   $ G ⇒ i ∊ cdm A $ > $ G ⇒ ⟨ fv A i , fv S i ⟩ ∈ szip A S $;
+--| @freshen G i
 theorem szip_elim (G: hyps) {i: set} (A S: class) (z: set):
   $ G ⇒ z ∊ szip A S $ > $ G ⇒ ∃ i (i ∊ cdm A ∧ z = ⟨ fv A i , fv S i ⟩) $;
 theorem szip_empty (G: hyps) (S: class): $ G ⇒ szip ∅ S = ∅ $;
@@ -95,6 +96,11 @@ theorem sgstep_node (G: hyps) (T O X: class) (c k a s: set):
   $ G ⇒ szip a s ⊆ X $ > $ G ⇒ ⟨ k , ⟨ c , s ⟩ ⟩ ∈ sgstep T O X $;
 theorem sgstep_leaf (G: hyps) (T O X: class) (k n: set):
   $ G ⇒ k ∊ O $ > $ G ⇒ n ∊ ω $ > $ G ⇒ ⟨ k , ⟨ n , ∅ ⟩ ⟩ ∈ sgstep T O X $;
+--| @freshen G c
+--| @freshen G k
+--| @freshen G a
+--| @freshen G s
+--| @freshen G n
 theorem sgstep_elim (G: hyps) {c k a s n: set} (T O X: class) (z: set):
   $ G ⇒ z ∊ sgstep T O X $ >
   $ G ⇒ ∃ c ∃ k ∃ a ∃ s (⟨ c , ⟨ k , a ⟩ ⟩ ∈ T ∧ s ∊ fseq (crn X) ∧ cdm s = cdm a ∧
@@ -130,12 +136,21 @@ theorem sorted_node (G: hyps) (T O: class) (c k a s: set):
 theorem sorted_leaf (G: hyps) (T O: class) (k n: set):
   $ G ⇒ sig T O $ > $ G ⇒ k ∊ O $ > $ G ⇒ n ∊ ω $ > $ G ⇒ ⟨ k , ⟨ n , ∅ ⟩ ⟩ ∈ sorted T O $;
 --| Inversion: a sorted tree is a constructor node or a leaf of an open sort.
+--| @freshen G c
+--| @freshen G a
+--| @freshen G s
+--| @freshen G n
 theorem sorted_elim (G: hyps) {c a s n: set} (T O: class) (k t: set):
   $ G ⇒ sig T O $ > $ G ⇒ ⟨ k , t ⟩ ∈ sorted T O $ >
   $ G ⇒ ∃ c ∃ a ∃ s (⟨ c , ⟨ k , a ⟩ ⟩ ∈ T ∧ s ∊ fseq (trees ω) ∧ cdm s = cdm a ∧
            szip a s ⊆ sorted T O ∧ t = ⟨ c , s ⟩) ∨
          (k ∊ O ∧ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩)) $;
 --| Induction over the sorted trees.
+--| @freshen G c
+--| @freshen G k
+--| @freshen G a
+--| @freshen G s
+--| @freshen G n
 theorem sorted_ind (G: hyps) {c k a s n: set} (T O P: class):
   $ G ⇒ sig T O $ >
   $ G ⇒ ∀ c ∀ k ∀ a ∀ s (⟨ c , ⟨ k , a ⟩ ⟩ ∈ T → s ∊ fseq (trees ω) → cdm s = cdm a →
@@ -198,20 +213,20 @@ theorem ofsort_node4 (G: hyps) (T O C K K1 K2 K3 K4 A1 A2 A3 A4: class):
 --| signature's business: lean-tg.mm0 states the cases per sort.)
 theorem szip_args0 (G: hyps) (s: set):
   $ G ⇒ s ∊ fseq (trees ω) $ > $ G ⇒ cdm s = cdm ∅ $ > $ G ⇒ s = ∅ $;
-theorem szip_args1 (G: hyps) {x: set} (X K1: class) (s: set):
+theorem szip_args1 {x: set} (G: hyps x) (X K1: class) (s: set):
   $ G ⇒ isset K1 $ > $ G ⇒ s ∊ fseq (trees ω) $ > $ G ⇒ cdm s = cdm (scons K1 ∅) $ >
   $ G ⇒ szip (scons K1 ∅) s ⊆ X $ > $ G ⇒ ∃ x (s = scons x ∅ ∧ ⟨ K1 , x ⟩ ∈ X) $;
-theorem szip_args2 (G: hyps) {x y: set} (X K1 K2: class) (s: set):
+theorem szip_args2 {x y: set} (G: hyps x y) (X K1 K2: class) (s: set):
   $ G ⇒ isset K1 $ > $ G ⇒ isset K2 $ > $ G ⇒ s ∊ fseq (trees ω) $ >
   $ G ⇒ cdm s = cdm (scons K1 (scons K2 ∅)) $ > $ G ⇒ szip (scons K1 (scons K2 ∅)) s ⊆ X $ >
   $ G ⇒ ∃ x ∃ y (s = scons x (scons y ∅) ∧ ⟨ K1 , x ⟩ ∈ X ∧ ⟨ K2 , y ⟩ ∈ X) $;
-theorem szip_args3 (G: hyps) {x y z: set} (X K1 K2 K3: class) (s: set):
+theorem szip_args3 {x y z: set} (G: hyps x y z) (X K1 K2 K3: class) (s: set):
   $ G ⇒ isset K1 $ > $ G ⇒ isset K2 $ > $ G ⇒ isset K3 $ > $ G ⇒ s ∊ fseq (trees ω) $ >
   $ G ⇒ cdm s = cdm (scons K1 (scons K2 (scons K3 ∅))) $ >
   $ G ⇒ szip (scons K1 (scons K2 (scons K3 ∅))) s ⊆ X $ >
   $ G ⇒ ∃ x ∃ y ∃ z (s = scons x (scons y (scons z ∅)) ∧ ⟨ K1 , x ⟩ ∈ X ∧ ⟨ K2 , y ⟩ ∈ X ∧
          ⟨ K3 , z ⟩ ∈ X) $;
-theorem szip_args4 (G: hyps) {x y z w: set} (X K1 K2 K3 K4: class) (s: set):
+theorem szip_args4 {x y z w: set} (G: hyps x y z w) (X K1 K2 K3 K4: class) (s: set):
   $ G ⇒ isset K1 $ > $ G ⇒ isset K2 $ > $ G ⇒ isset K3 $ > $ G ⇒ isset K4 $ >
   $ G ⇒ s ∊ fseq (trees ω) $ > $ G ⇒ cdm s = cdm (scons K1 (scons K2 (scons K3 (scons K4 ∅)))) $ >
   $ G ⇒ szip (scons K1 (scons K2 (scons K3 (scons K4 ∅)))) s ⊆ X $ >

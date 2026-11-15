@@ -114,11 +114,15 @@ theorem ilam_eq (G: hyps) (U E P P2 F F2 W W2: class):
 --| One binder moves out of the telescope for any table: the curried `Π` of
 --| `A :: P` and `B` is that of `P` and a body `Q` whose values are the `Π`s
 --| of `A` and `B`; likewise `λ`.
+--| @freshen G y
+--| @freshen G q
 theorem ipi_cons {y q: set} (G: hyps) (E A P B Q: class) (u w: set):
   $ G ⇒ universe u $ > $ G ⇒ A ∈ trees ω $ > $ G ⇒ P ∈ trees ω $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ ∀ q (q ∊ esat u E P w → da (fv E A) w q ∈ u) $ >
   $ G ⇒ ∀ q (q ∊ esat u E P w → da (fv E Q) w q = cpi y (da (fv E A) w q) (da (fv E B) w (scons y q))) $ >
   $ G ⇒ ipi u E ⟨ kc_cons , scons A (scons P ∅) ⟩ B w = ipi u E P Q w $;
+--| @freshen G y
+--| @freshen G q
 theorem ilam_cons {y q: set} (G: hyps) (E A P B Q: class) (u w: set):
   $ G ⇒ universe u $ > $ G ⇒ A ∈ trees ω $ > $ G ⇒ P ∈ trees ω $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ ∀ q (q ∊ esat u E P w → da (fv E A) w q ∈ u) $ >
@@ -154,7 +158,7 @@ theorem lams_den (G: hyps) (M: class) (P: ctx) (b T: expr) (u w s: set):
   $ G ⇒ dt u M (enc_expr T) w s = ilam u (dsh u M s) (enc_ctx P) (enc_expr b) w $;
 --| `capp P G G2`: a valuation satisfying `G2 = P ++ G` is `p ++ g`, `g`
 --| satisfying `G` and `p` a valuation of `P` over `g`.
-theorem lrel_capp_sem (G: hyps) {y g p: set} (M: class) (u w t1 t2 t3: set):
+theorem lrel_capp_sem {y g p: set} (G: hyps y g p) (M: class) (u w t1 t2 t3: set):
   $ G ⇒ ra_capp t1 t2 t3 ∈ lrel $ > $ G ⇒ t1 ∊ trees ω $ > $ G ⇒ t2 ∊ trees ω $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ sat u M t3 w = {y | ∃ g ∃ p (g ∊ sat u M t2 w ∧ p ∊ esat u (dsh u M g) t1 w ∧ y = scat p g)} $;
 --| A valuation of a telescope has the telescope's length.
@@ -187,6 +191,7 @@ theorem swin_fseq (G: hyps) (D N: class) (u r: set):
 --| `swin` under equal arguments, and at valuations that agree on the window.
 theorem swin_eq (G: hyps) (A B C D E F: class):
   $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ E = F $ > $ G ⇒ swin A C E = swin B D F $;
+--| @freshen G i
 theorem swin_agree (G: hyps) {i: set} (D N: class) (r r2: set):
   $ G ⇒ D ∈ ω $ > $ G ⇒ N ∈ ω $ > $ G ⇒ ∀ i (i ∊ nadd D N → fv r i = fv r2 i) $ > $ G ⇒ swin r D N = swin r2 D N $;
 --| `spine h e k` with `h` not an application or a `Π`: `e` has one path, with
@@ -230,7 +235,7 @@ theorem lrel_npis_sem (G: hyps) (E: class) (u w r t1 t2 f g t a: set):
 
 --| `sinst D j n k e e2`: `e2` at `p ++ s` (`p` of length `k`) is `e` at
 --| `p ++ v ++ s`, for `v` the values of the block's types `j`, .., `n - 1`.
-theorem lrel_sinst_sem (G: hyps) {i b: set} (M: class) (u w t1 t2 t3 t4 t5 t6 p s v: set):
+theorem lrel_sinst_sem {i b: set} (G: hyps i b) (M: class) (u w t1 t2 t3 t4 t5 t6 p s v: set):
   $ G ⇒ ra_sinst t1 t2 t3 t4 t5 t6 ∈ lrel $ > $ G ⇒ uadm u $ > $ G ⇒ t1 ∊ trees ω $ > $ G ⇒ t2 ∊ trees ω $ >
   $ G ⇒ w ∊ lvals $ > $ G ⇒ p ∊ fseq u $ > $ G ⇒ cdm p = fv nvf t4 $ > $ G ⇒ s ∊ fseq u $ >
   $ G ⇒ v ∊ fseq u $ > $ G ⇒ nadd (fv nvf t2) (cdm v) = fv nvf t3 $ >
@@ -246,7 +251,7 @@ theorem lrel_pinst_sem (G: hyps) (M: class) (u w t1 t2 t3 t4 q s: set):
   $ G ⇒ dt u M t4 w (scat q s) = dt u M t3 w (scat q (scat (sarg u (dnf u M) t2 w s) s)) $;
 --| `qinst b e k j A R`: `R` at `s` is `A` at `v ++ s`, for `v` the values of
 --| the projections `j`, .., `j + k - 1` of `e` (field `j` at `k - 1`).
-theorem lrel_qinst_sem (G: hyps) {i b: set} (M: class) (u w t1 t2 t3 t4 t5 t6 s v: set):
+theorem lrel_qinst_sem {i b: set} (G: hyps i b) (M: class) (u w t1 t2 t3 t4 t5 t6 s v: set):
   $ G ⇒ ra_qinst t1 t2 t3 t4 t5 t6 ∈ lrel $ > $ G ⇒ uadm u $ > $ G ⇒ t4 ∊ trees ω $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ s ∊ fseq u $ > $ G ⇒ v ∊ fseq u $ > $ G ⇒ cdm v = fv nvf t3 $ >
   $ G ⇒ ∀ i ∀ b (i ∊ cdm v → b ∊ trees ω → nadd (fv nvf b) (suc i) = nadd (fv nvf t4) (fv nvf t3) →
@@ -271,18 +276,19 @@ theorem sb_f_icwf {x: set} (t: set x) (A B: class x):
 
 --| D3 for paths: a tree closed below `k` has the same paths at valuations
 --| that agree below `k`.
+--| @freshen G i
 theorem lrel_closed_etel (G: hyps) {i: set} (M: class) (u w t1 t2 r r2: set):
   $ G ⇒ ra_closed t1 t2 ∈ lrel $ > $ G ⇒ t2 ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ r2 ∊ fseq u $ > $ G ⇒ ∀ i (i ∊ fv nvf t1 → fv r i = fv r2 i) $ >
   $ G ⇒ etel u (dnf u M) t2 w r = etel u (dnf u M) t2 w r2 $;
 --| `iargs k m X A`: the arguments are closed below `k`, so `A`'s paths and
 --| value follow `X`'s at valuations that agree below `k`.
-theorem lrel_iargs_etel (G: hyps) {i: set} (M: class) (u w r r2 t1 t2 t3 t4: set):
+theorem lrel_iargs_etel {i: set} (G: hyps i) (M: class) (u w r r2 t1 t2 t3 t4: set):
   $ G ⇒ ra_iargs t1 t2 t3 t4 ∈ lrel $ > $ G ⇒ t4 ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ r2 ∊ fseq u $ > $ G ⇒ ∀ i (i ∊ fv nvf t1 → fv r i = fv r2 i) $ >
   $ G ⇒ etel u (dnf u M) t3 w r = etel u (dnf u M) t3 w r2 $ >
   $ G ⇒ etel u (dnf u M) t4 w r = etel u (dnf u M) t4 w r2 $;
-theorem lrel_iargs_mono (G: hyps) {i: set} (M: class) (u w r r2 t1 t2 t3 t4: set):
+theorem lrel_iargs_mono {i: set} (G: hyps i) (M: class) (u w r r2 t1 t2 t3 t4: set):
   $ G ⇒ ra_iargs t1 t2 t3 t4 ∈ lrel $ > $ G ⇒ t4 ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ r2 ∊ fseq u $ > $ G ⇒ ∀ i (i ∊ fv nvf t1 → fv r i = fv r2 i) $ >
   $ G ⇒ dt u M t3 w r ⊆ dt u M t3 w r2 $ > $ G ⇒ dt u M t4 w r ⊆ dt u M t4 w r2 $;
@@ -293,16 +299,19 @@ theorem lrel_indapp_sem (G: hyps) (M: class) (u w r t1 t2 t3 t4 t5 t6: set):
   $ G ⇒ ra_indapp t1 t2 t3 t4 t5 t6 ∈ lrel $ > $ G ⇒ t5 ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ etel u (dnf u M) t5 w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , sarg u (dnf u M) t5 w r ⟩ ⟩ ⟩ ∧
       dt u M t5 w r = apn (fv r (nadd (nadd (fv nvf t4) (fv nvf t3)) (fv nvf t6))) (sarg u (dnf u M) t5 w r) $;
+--| @freshen G i
 theorem lrel_indapp_etel (G: hyps) {i: set} (M: class) (u w r r2 t1 t2 t3 t4 t5 t6: set):
   $ G ⇒ ra_indapp t1 t2 t3 t4 t5 t6 ∈ lrel $ > $ G ⇒ t5 ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ r2 ∊ fseq u $ > $ G ⇒ ∀ i (i ∊ nadd (fv nvf t4) (fv nvf t3) → fv r i = fv r2 i) $ >
   $ G ⇒ etel u (dnf u M) t5 w r = etel u (dnf u M) t5 w r2 $;
+--| @freshen G i
 theorem lrel_indapp_mono (G: hyps) {i: set} (M: class) (u w r r2 t1 t2 t3 t4 t5 t6: set):
   $ G ⇒ ra_indapp t1 t2 t3 t4 t5 t6 ∈ lrel $ > $ G ⇒ t5 ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ r2 ∊ fseq u $ > $ G ⇒ ∀ i (i ∊ nadd (fv nvf t4) (fv nvf t3) → fv r i = fv r2 i) $ >
   $ G ⇒ ∀ i (fv r i ⊆ fv r2 i) $ > $ G ⇒ dt u M t5 w r ⊆ dt u M t5 w r2 $;
 --| `ipos D n np d A`: likewise for a positive field type (by inversion of
 --| `ipos`; `cpi` is monotone in its codomain).
+--| @freshen G i
 theorem lrel_ipos_etel (G: hyps) {i: set} (M: class) (u w r r2 t1 t2 t3 t4 t5: set):
   $ G ⇒ ra_ipos t1 t2 t3 t4 t5 ∈ lrel $ > $ G ⇒ t4 ∊ trees ω $ > $ G ⇒ t5 ∊ trees ω $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ r ∊ fseq u $ > $ G ⇒ r2 ∊ fseq u $ > $ G ⇒ ∀ i (i ∊ nadd (fv nvf t4) (fv nvf t3) → fv r i = fv r2 i) $ >
@@ -323,11 +332,13 @@ theorem lrel_ipos_out (G: hyps) (M W R: class) (u t1 t2 t3 t4 t5: set):
 theorem lrel_ipos_out_c (G: hyps) (M W R T: class) (u t1 t2 t3 t5: set):
   $ G ⇒ ra_ipos t1 t2 t3 T t5 ∈ lrel $ > $ G ⇒ isset T $ > $ G ⇒ t5 ∊ trees ω $ > $ G ⇒ ¬ R ∈ fseq u $ >
   $ G ⇒ dt u M t5 W R = ∅ $;
+--| @freshen G i
 theorem lrel_ipos_mono (G: hyps) {i: set} (M: class) (u w r r2 t1 t2 t3 t4 t5: set):
   $ G ⇒ ra_ipos t1 t2 t3 t4 t5 ∈ lrel $ > $ G ⇒ t4 ∊ trees ω $ > $ G ⇒ t5 ∊ trees ω $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ r ∊ fseq u $ > $ G ⇒ r2 ∊ fseq u $ > $ G ⇒ ∀ i (i ∊ nadd (fv nvf t4) (fv nvf t3) → fv r i = fv r2 i) $ >
   $ G ⇒ ∀ i (fv r i ⊆ fv r2 i) $ > $ G ⇒ dt u M t5 w r ⊆ dt u M t5 w r2 $;
 --| `cwf D n np l i Ctx d K`: `K`'s paths grow with the entries from `d + np` on.
+--| @freshen G i
 theorem lrel_cwf_mono (G: hyps) {i: set} (J M: class) (u w r r2 t1 t2 t3 t4 t5 t6 t7 t8: set):
   $ G ⇒ ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ∈ lrel3 J $ > $ G ⇒ t7 ∊ trees ω $ > $ G ⇒ t8 ∊ trees ω $ >
   $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ r2 ∊ fseq u $ >
@@ -335,6 +346,7 @@ theorem lrel_cwf_mono (G: hyps) {i: set} (J M: class) (u w r r2 t1 t2 t3 t4 t5 t
   $ G ⇒ etel u (dnf u M) t8 w r ⊆ etel u (dnf u M) t8 w r2 $;
 --| A well-formed block's constructors: `tys_wf` gives `ctors_wf` at each type
 --| (at its number past the first), `ctors_wf` gives `cwf` at each constructor.
+--| @freshen G i
 theorem lrel3_tys_wf_nth (G: hyps) {i: set} (J: class) (t1 t2 t3 t4 t5 t6 t7 n f e: set):
   $ G ⇒ ra_tys_wf t1 t2 t3 t4 t5 t6 t7 ∈ lrel3 J $ > $ G ⇒ ra_nth_ty t7 n f e ∈ lrel $ > $ G ⇒ t5 ∊ trees ω $ >
   $ G ⇒ ∃ i (fv nvf i = nadd (fv nvf t5) (fv nvf n) ∧ ra_ctors_wf t1 t2 t3 t4 i t6 e ∈ lrel3 J) $;
@@ -345,6 +357,7 @@ theorem lrel3_ctors_wf_nth (G: hyps) (J: class) (t1 t2 t3 t4 t5 t6 t7 m k: set):
 theorem intys_omega (G: hyps) (D: class): $ G ⇒ intys D ∈ ω $;
 theorem ind_wf_icwf (G: hyps) (J: class) (t1 t2: set): $ G ⇒ ra_ind_wf t1 t2 ∈ lrel3 J $ > $ G ⇒ icwf J t2 $;
 --| Class form of `lrel_cwf_mono`.
+--| @freshen G i
 theorem lrel_cwf_mono_c {i: set} (G: hyps) (J M T1 T7 W R R2: class) (u t2 t3 t4 t5 t6 t8: set):
   $ G ⇒ ra_cwf T1 t2 t3 t4 t5 t6 T7 t8 ∈ lrel3 J $ > $ G ⇒ T1 ∈ trees ω $ > $ G ⇒ T7 ∈ trees ω $ >
   $ G ⇒ t8 ∊ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ R2 ∈ fseq u $ >

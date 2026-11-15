@@ -43,13 +43,14 @@ theorem clord_empty (G: hyps) (a: set): $ G ⇒ ∅ ∈ clord a $;
 theorem clord_suc (G: hyps) (a b: set): $ G ⇒ b ∊ clord a $ > $ G ⇒ suc b ∈ clord a $;
 --| A family of ordinals below `clord a` indexed by a subset of `a` is
 --| bounded below `clord a` (`hartogs_bound` at `suc a`).
+--| @freshen G x
 theorem clord_bound (G: hyps) {x: set} (a f: set):
   $ G ⇒ functional f $ > $ G ⇒ cdm f ⊆ a $ > $ G ⇒ ∀ x (x ∊ cdm f → fv f x ∈ clord a) $ >
   $ G ⇒ ⋃ (crn f) ∈ clord a $;
 theorem clord_universe (G: hyps) (U: class) (a: set):
   $ G ⇒ universe U $ > $ G ⇒ ω ∈ U $ > $ G ⇒ a ∊ U $ > $ G ⇒ clord a ∈ U $;
 --| The least element of a nonempty class of ordinals is its intersection.
-theorem ord_cint (G: hyps) {y: set} (P: class) (a: set):
+theorem ord_cint {y: set} (G: hyps y) (P: class) (a: set):
   $ G ⇒ a ∊ P $ > $ G ⇒ ∀ y (y ∊ P → ord y) $ > $ G ⇒ cint P ∈ P $;
 
 -- --------------------------------------------------------------------------
@@ -69,10 +70,10 @@ theorem sb_f_cont {x y: set} (t: set y) (B: class x y) (A: class y):
   $ [y/t] (cont x B A) ⟺ cont x (⟦ y / t ⟧ B) (⟦ y / t ⟧ A) $;
 --| @freshen G u
 --| @freshen G z
-theorem cont_intro {x: set} (G: hyps x) {u z f: set} (B: class x) (A: class):
+theorem cont_intro {x u z f: set} (G: hyps x f) (B: class x) (A: class):
   $ G , z ∊ (⟦ x / u ⟧ B) ⇒ ∃ f (functional f ∧ cdm f ⊆ A ∧ crn f ⊆ u ∧ z ∊ cap x B (crn f)) $ >
   $ G ⇒ cont x B A $;
-theorem cont_elim {x: set} (G: hyps x) {f: set} (B: class x) (A: class) (u z: set):
+theorem cont_elim {x f: set} (G: hyps x f) (B: class x) (A: class) (u z: set):
   $ G ⇒ cont x B A $ > $ G ⇒ z ∊ (⟦ x / u ⟧ B) $ >
   $ G ⇒ ∃ f (functional f ∧ cdm f ⊆ A ∧ crn f ⊆ u ∧ z ∊ cap x B (crn f)) $;
 theorem cont_mono_index {x: set} (G: hyps x) (B: class x) (A C: class):
@@ -98,18 +99,21 @@ theorem lfp_cont_fix {x: set} (G: hyps x) (B: class x) (a: set):
 theorem lfp_cont_set {x: set} (G: hyps x) (B: class x) (a: set):
   $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ cont x B a $ > $ G ⇒ isset (lfp x B) $;
 --| Induction (`lfp_ind` with the fixed point itself as the carrier).
+--| @freshen G u
+--| @freshen p x
+--| @freshen p u
 theorem lfp_cont_ind {x y u: set} (G: hyps x y) (B: class x) (a: set) (p: fml y):
   $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ cont x B a $ >
   $ G ⇒ ∀ u (u ⊆ lfp x B → u ⊆ {y | p} → (⟦ x / u ⟧ B) ⊆ {y | p}) $ >
   $ G ⇒ lfp x B ⊆ {y | p} $;
 --| The stages at ordinals of a universe are in the universe, when the
 --| operator maps its elements to elements.
-theorem stg_universe {x u: set} (G: hyps x) (B: class x) (U: class) (b: set):
+theorem stg_universe {x u: set} (G: hyps x u) (B: class x) (U: class) (b: set):
   $ G ⇒ universe U $ > $ G ⇒ setop x B $ > $ G ⇒ ∀ u (u ∊ U → (⟦ x / u ⟧ B) ∈ U) $ >
   $ G ⇒ ord b $ > $ G ⇒ b ∊ U $ > $ G ⇒ fv (stg x B) b ∈ U $;
 --| The pilot: the least fixed point of a continuous operator on a universe
 --| is in the universe.
-theorem lfp_universe {x u: set} (G: hyps x) (B: class x) (U: class) (a: set):
+theorem lfp_universe {x u: set} (G: hyps x u) (B: class x) (U: class) (a: set):
   $ G ⇒ universe U $ > $ G ⇒ ω ∈ U $ > $ G ⇒ a ∊ U $ >
   $ G ⇒ mono x B $ > $ G ⇒ setop x B $ > $ G ⇒ cont x B a $ >
   $ G ⇒ ∀ u (u ∊ U → (⟦ x / u ⟧ B) ∈ U) $ > $ G ⇒ lfp x B ∈ U $;

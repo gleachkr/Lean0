@@ -84,7 +84,7 @@ theorem fseq_mono (G: hyps) (A B: class): $ G ⇒ A ⊆ B $ > $ G ⇒ fseq A ⊆
 --| `fseq A ⊆ 𝒫 (ω × A)`.
 theorem fseq_set (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ isset (fseq A) $;
 --| Two sequences of the same length with the same components are equal.
-theorem fseq_ext (G: hyps) {i: set} (A B: class) (s t: set):
+theorem fseq_ext {i: set} (G: hyps i) (A B: class) (s t: set):
   $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq B $ > $ G ⇒ cdm s = cdm t $ >
   $ G ⇒ ∀ i (i ∊ cdm s → fv s i = fv t i) $ > $ G ⇒ s = t $;
 theorem fseq_empty (G: hyps) (A: class): $ G ⇒ ∅ ∈ fseq A $;
@@ -97,7 +97,7 @@ theorem fseq_len_zero (G: hyps) (A: class) (s: set):
 -- In front, at the end, and concatenation
 -- --------------------------------------------------------------------------
 
-theorem scons_pair (G: hyps) {i: set} (U A S: class) (v: set): $ G ⇒ ⟨ U , v ⟩ ∈ scons A S $ > $ G ⇒ isset U $ > $ G ⇒ isset A $ > $ G ⇒ (U = ∅ ∧ v = A) ∨ ∃ i (U = suc i ∧ ⟨ i , v ⟩ ∈ S) $;
+theorem scons_pair {i: set} (G: hyps i) (U A S: class) (v: set): $ G ⇒ ⟨ U , v ⟩ ∈ scons A S $ > $ G ⇒ isset U $ > $ G ⇒ isset A $ > $ G ⇒ (U = ∅ ∧ v = A) ∨ ∃ i (U = suc i ∧ ⟨ i , v ⟩ ∈ S) $;
 theorem scons_fseq (G: hyps) (A: class) (a s: set):
   $ G ⇒ a ∊ A $ > $ G ⇒ s ∊ fseq A $ > $ G ⇒ scons a s ∈ fseq A $;
 --| Class form of `scons_fseq`.
@@ -118,6 +118,7 @@ theorem scons_fv_suc (G: hyps) (a s i: set): $ G ⇒ fv (scons a s) (suc i) = fv
 theorem scons_fv_suc_c (G: hyps) (A S I: class):
   $ G ⇒ isset A $ > $ G ⇒ isset S $ > $ G ⇒ isset I $ > $ G ⇒ fv (scons A S) (suc I) = fv S I $;
 --| Entrywise inclusion of two sequences survives a common head.
+--| @freshen G i
 theorem scons_fv_sub {i: set} (G: hyps) (x a b: set):
   $ G ⇒ ∀ i (fv a i ⊆ fv b i) $ > $ G ⇒ ∀ i (fv (scons x a) i ⊆ fv (scons x b) i) $;
 theorem scons_inj (G: hyps) (a b s t: set):
@@ -137,13 +138,13 @@ theorem crn_scons_head (G: hyps) (A S X: class):
 theorem crn_scons_tail (G: hyps) (A S X: class):
   $ G ⇒ crn (scons A S) ⊆ X $ > $ G ⇒ crn S ⊆ X $;
 --| A sequence is empty or a `scons`.
-theorem fseq_cases (G: hyps) {x y: set} (A: class) (s: set):
+theorem fseq_cases {x y: set} (G: hyps x y) (A: class) (s: set):
   $ G ⇒ s ∊ fseq A $ > $ G ⇒ s = ∅ ∨ ∃ x ∃ y (x ∊ A ∧ y ∊ fseq A ∧ s = scons x y) $;
 --| A sequence of length `suc k` is an element in front of a sequence of length `k`.
-theorem fseq_suc {e f: set} (G: hyps) (A: class) (s k: set):
+theorem fseq_suc {e f: set} (G: hyps e f) (A: class) (s k: set):
   $ G ⇒ s ∊ fseq A $ > $ G ⇒ cdm s = suc k $ > $ G ⇒ ∃ e ∃ f (f ∊ fseq A ∧ cdm f = k ∧ s = scons e f) $;
 --| Induction on sequences.
-theorem fseq_ind (G: hyps) {x y: set} (A P: class):
+theorem fseq_ind {x y: set} (G: hyps x y) (A P: class):
   $ G ⇒ ∅ ∈ P $ > $ G ⇒ ∀ x ∀ y (x ∊ A → y ∊ fseq A → y ∊ P → scons x y ∈ P) $ >
   $ G ⇒ fseq A ⊆ P $;
 
@@ -194,10 +195,11 @@ theorem scat_inj_c (G: hyps) (A S S2 T T2: class):
   $ G ⇒ cdm S = cdm S2 $ > $ G ⇒ cdm T = cdm T2 $ > $ G ⇒ scat S T = scat S2 T2 $ > $ G ⇒ S = S2 ∧ T = T2 $;
 --| Sequences that agree below `cdm p` after a common prefix `p`, and below `suc K`
 --| after a common head.
+--| @freshen G i
 theorem scat_agree {i: set} (G: hyps) (A: class) (p s s2: set):
   $ G ⇒ p ∊ fseq A $ > $ G ⇒ s ∊ fseq A $ > $ G ⇒ s2 ∊ fseq A $ >
   $ G ⇒ ∀ i (i ∊ cdm p → fv (scat p s) i = fv (scat p s2) i) $;
-theorem scons_agree {i: set} (G: hyps) (K: class) (x s s2: set):
+theorem scons_agree {i: set} (G: hyps i) (K: class) (x s s2: set):
   $ G ⇒ K ∈ ω $ > $ G ⇒ ∀ i (i ∊ K → fv s i = fv s2 i) $ >
   $ G ⇒ ∀ i (i ∊ suc K → fv (scons x s) i = fv (scons x s2) i) $;
 theorem scat_scons (G: hyps) (A: class) (a s t: set):
@@ -222,7 +224,7 @@ theorem ssnoc_empty (G: hyps) (x: set): $ G ⇒ ssnoc ∅ x = scons x ∅ $;
 theorem scat_ssnoc_scons (G: hyps) (A: class) (e x s: set):
   $ G ⇒ e ∊ fseq A $ > $ G ⇒ x ∊ A $ > $ G ⇒ s ∊ fseq A $ > $ G ⇒ scat (ssnoc e x) s = scat e (scons x s) $;
 --| A sequence is empty or ends in an entry.
-theorem fseq_cases_snoc {e f: set} (G: hyps) (A: class) (v: set):
+theorem fseq_cases_snoc {e f: set} (G: hyps e f) (A: class) (v: set):
   $ G ⇒ v ∊ fseq A $ > $ G ⇒ v = ∅ ∨ ∃ e ∃ f (e ∊ fseq A ∧ f ∊ A ∧ v = ssnoc e f) $;
 
 -- --------------------------------------------------------------------------

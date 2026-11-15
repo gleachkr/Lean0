@@ -81,7 +81,7 @@ theorem injects_ccnv_fv (G: hyps) (F A B: class) (a: set):
 theorem injects_ccnv_fv_pair (G: hyps) (F A B: class) (k z: set):
   $ G ⇒ injects F A B $ > $ G ⇒ z ∊ A $ > $ G ⇒ ⟨ z , k ⟩ ∈ F $ > $ G ⇒ fv (ccnv (cres F A)) k = z $;
 --| The identity on `A` and the composite of two injections.
-theorem injects_id (G: hyps) {x: set} (A B: class):
+theorem injects_id {x: set} (G: hyps x) (A B: class):
   $ G ⇒ A ⊆ B $ > $ G ⇒ injects (cres (cgr x x) A) A B $;
 theorem injects_ccom (G: hyps) (F H A B C: class):
   $ G ⇒ injects F A B $ > $ G ⇒ injects H B C $ > $ G ⇒ injects (ccom H F) A C $;
@@ -134,7 +134,7 @@ theorem injs_elim_sub (G: hyps) (A B: class) (f: set): $ G ⇒ f ∊ injs A B $ 
 theorem injs_set (G: hyps) (A B: class):
   $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ isset (injs A B) $;
 --| Restricting an injection gives a member of `injs`.
-theorem injs_nonempty (G: hyps) {u: set} (A B: class):
+theorem injs_nonempty {u: set} (G: hyps u) (A B: class):
   $ G ⇒ inj_into A B $ > $ G ⇒ ∃ u (u ∊ injs A B) $;
 --| @congr
 theorem injs_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ injs A C ≐ injs B D $;
@@ -171,7 +171,7 @@ theorem sb_c_hartogs {x: set} (t: set x) (A: class x):
 --| An ordinal that injects into an element of a universe is in the universe
 --| (transfinite induction: `a` is the union of the family `suc x`, `x ∊ a`,
 --| indexed through the injection by the image of `a`, an element).
-theorem ord_cuni_suc (G: hyps) {x: set} (a: set):
+theorem ord_cuni_suc {x: set} (G: hyps x) (a: set):
   $ G ⇒ ord a $ > $ G ⇒ ⋃ (img (cgr x (suc x)) a) = a $;
 theorem universe_ord_inj (G: hyps) (U: class) (a b: set):
   $ G ⇒ universe U $ > $ G ⇒ b ∊ U $ > $ G ⇒ ord a $ > $ G ⇒ inj_into a b $ > $ G ⇒ a ∊ U $;
@@ -210,6 +210,8 @@ theorem sb_c_erel {x: set} (t: set x) (F A: class x):
 --| Rigidity, the core: two injections of ordinals with the same induced
 --| relation agree in the sense that equal values have equal arguments
 --| (membership induction on the argument).
+--| @freshen G x
+--| @freshen G y
 theorem ord_rigid_core (G: hyps) {x y: set} (a b s g h: set):
   $ G ⇒ ord a $ > $ G ⇒ ord b $ > $ G ⇒ injects g a s $ > $ G ⇒ injects h b s $ >
   $ G ⇒ erel g a = erel h b $ >
@@ -227,7 +229,7 @@ theorem reps_elim {f: set} (G: hyps f) (H: hyps) (A S: class) (c: set) (d: fml):
   $ G ⇒ c ∊ reps A S $ > $ H , f ∊ injs A S , c = ⟨ img f A , erel f A ⟩ ⇒ d $ > $ G , H ⇒ d $;
 theorem reps_subset (G: hyps) (a s: set): $ G ⇒ reps a s ⊆ 𝒫 s × 𝒫 (s × s) $;
 theorem reps_set (G: hyps) (a s: set): $ G ⇒ isset (reps a s) $;
-theorem reps_nonempty (G: hyps) {w: set} (a s: set):
+theorem reps_nonempty {w: set} (G: hyps w) (a s: set):
   $ G ⇒ inj_into a s $ > $ G ⇒ ∃ w (w ∊ reps a s) $;
 --| Distinct ordinals have disjoint representations.
 theorem reps_disjoint (G: hyps) (a b s w: set):
@@ -238,7 +240,7 @@ theorem reps_congr (A B S T: class): $ A ≐ B $ > $ S ≐ T $ > $ reps A S ≐ 
 theorem sb_c_reps {x: set} (t: set x) (A S: class x):
   $ (⟦ x / t ⟧ (reps A S)) ≐ reps (⟦ x / t ⟧ A) (⟦ x / t ⟧ S) $;
 --| `a ↦ reps a s` injects the Hartogs number of `s` into `𝒫 (𝒫 s × 𝒫 (s × s))`.
-theorem hartogs_inj_into (G: hyps) {x: set} (s: set):
+theorem hartogs_inj_into {x: set} (G: hyps x) (s: set):
   $ G ⇒ injects (cres (cgr x (reps x s)) (hartogs s)) (hartogs s) (𝒫 (𝒫 s × 𝒫 (s × s))) $;
 theorem hartogs_universe (G: hyps) (U: class) (s: set):
   $ G ⇒ universe U $ > $ G ⇒ s ∊ U $ > $ G ⇒ hartogs s ∈ U $;
@@ -248,22 +250,29 @@ theorem hartogs_universe (G: hyps) (U: class) (s: set):
 -- --------------------------------------------------------------------------
 
 --| A choice function picks an element of each nonempty member.
+--| @freshen G y
 theorem chooses_fv (G: hyps) {y: set} (f a b: set):
   $ G ⇒ chooses f a $ > $ G ⇒ b ∊ a $ > $ G ⇒ ∃ y (y ∊ b) $ > $ G ⇒ fv f b ∈ b $;
 --| Class form of `chooses_fv`.
+--| @freshen G y
 theorem chooses_fv_c (G: hyps) {y: set} (f a: set) (B: class):
   $ G ⇒ chooses f a $ > $ G ⇒ B ∈ a $ > $ G ⇒ ∃ y (y ∊ B) $ > $ G ⇒ fv f B ∈ B $;
 --| A uniform choice of injections: when every member `fv f x`, `x ∊ a`,
 --| injects into `s`, some function `g` picks an injection `fv g x` for each.
+--| @freshen G x
+--| @freshen G g
 theorem choice_injs (G: hyps) {x g: set} (a s f: set):
   $ G ⇒ functional f $ > $ G ⇒ ∀ x (x ∊ a → inj_into (fv f x) s) $ >
   $ G ⇒ ∃ g (functional g ∧ ∀ x (x ∊ a → fv g x ∈ injs (fv f x) s)) $;
 --| A choice of index: some function `d` picks, for each element `y` of the
 --| union of the family, an index `fv d y ∊ a` with `y ∊ fv f (fv d y)`.
+--| @freshen G y
+--| @freshen G d
 theorem choice_index (G: hyps) {y d: set} (a f: set):
   $ G ⇒ functional f $ >
   $ G ⇒ ∃ d (functional d ∧ ∀ y (y ∊ ⋃ (img f a) → fv d y ∈ a ∧ y ∊ fv f (fv d y))) $;
 --| The union of a family of sets each injecting into `s` injects into `a × s`.
+--| @freshen G x
 theorem inj_into_cuni_fam (G: hyps) {x: set} (a s f: set):
   $ G ⇒ functional f $ > $ G ⇒ ∀ x (x ∊ a → inj_into (fv f x) s) $ >
   $ G ⇒ inj_into (⋃ (img f a)) (a × s) $;
@@ -278,7 +287,7 @@ def shift (A: class) (.i .u .w: set): class =
 
 theorem shiftp_intro (G: hyps) (X: class) (a b: set):
   $ G ⇒ ⟨ a , b ⟩ ∈ X $ > $ G ⇒ ⟨ a , suc b ⟩ ∈ shiftp X $;
-theorem shiftp_elim (G: hyps) {n: set} (X: class) (a c: set):
+theorem shiftp_elim {n: set} (G: hyps n) (X: class) (a c: set):
   $ G ⇒ ⟨ a , c ⟩ ∈ shiftp X $ > $ G ⇒ ∃ n (⟨ a , n ⟩ ∈ X ∧ c = suc n) $;
 theorem shiftp_rel (G: hyps) (X: class): $ G ⇒ rel (shiftp X) $;
 theorem shiftp_subset (G: hyps) (X: class) (a: set):
@@ -310,6 +319,7 @@ theorem sb_c_shift {x: set} (t: set x) (A: class x):
 
 --| The bounding lemma: an `a`-indexed family of ordinals below
 --| `hartogs (𝒫 (a × ω))` is bounded below it.
+--| @freshen G x
 theorem hartogs_bound (G: hyps) {x: set} (a f: set):
   $ G ⇒ functional f $ > $ G ⇒ ∀ x (x ∊ a → fv f x ∈ hartogs (𝒫 (a × ω))) $ >
   $ G ⇒ ⋃ (img f a) ∈ hartogs (𝒫 (a × ω)) $;

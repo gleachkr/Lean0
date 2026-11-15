@@ -41,7 +41,7 @@ def uadm (U: class) (.n: set): fml = $ universe U ∧ ∀ n (n ∊ ω → fv uni
 theorem uadm_congr (A B: class): $ A ≐ B $ > $ uadm A ⟺ uadm B $;
 --| @rewrite
 theorem sb_f_uadm {x: set} (t: set x) (A: class x): $ [x/t] (uadm A) ⟺ uadm (⟦ x / t ⟧ A) $;
-theorem uadm_intro (G: hyps) {n: set} (U: class):
+theorem uadm_intro {n: set} (G: hyps n) (U: class):
   $ G ⇒ universe U $ > $ G ⇒ ∀ n (n ∊ ω → fv uni n ∈ U) $ > $ G ⇒ uadm U $;
 theorem uadm_universe (G: hyps) (U: class): $ G ⇒ uadm U $ > $ G ⇒ universe U $;
 theorem uadm_uni (G: hyps) (U: class) (n: set): $ G ⇒ uadm U $ > $ G ⇒ n ∊ ω $ > $ G ⇒ fv uni n ∈ U $;
@@ -51,14 +51,16 @@ theorem uadm_omega (G: hyps) (U: class): $ G ⇒ uadm U $ > $ G ⇒ ω ∈ U $;
 theorem uadm_empty (G: hyps) (U: class): $ G ⇒ uadm U $ > $ G ⇒ ∅ ∈ U $;
 theorem uadm_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ uadm A $ > $ G ⇒ uadm B $;
 --| There is one: the least universe containing the set of the `U_n`.
-theorem uadm_exists (G: hyps) {u: set}: $ G ⇒ ∃ u (uadm u) $;
+theorem uadm_exists {u: set} (G: hyps u): $ G ⇒ ∃ u (uadm u) $;
 
 --| The sort of a `Π`: in `U_(imax m n)` when the domain is in `U_m` and the
 --| codomain in `U_n` (impredicative at `n = 0`).
+--| @freshen G x
 theorem cpi_uni_imax {x: set} (G: hyps) (A: class) (B: class x) (m n: set):
   $ G ⇒ m ∊ ω $ > $ G ⇒ n ∊ ω $ > $ G ⇒ A ∈ fv uni m $ > $ G ⇒ ∀ x (x ∊ A → B ∈ fv uni n) $ >
   $ G ⇒ cpi x A B ∈ fv uni (nimax m n) $;
 --| Class form of `cpi_uni_imax`.
+--| @freshen G x
 theorem cpi_uni_imax_c {x: set} (G: hyps) (A: class) (B: class x) (M N: class):
   $ G ⇒ M ∈ ω $ > $ G ⇒ N ∈ ω $ > $ G ⇒ A ∈ fv uni M $ > $ G ⇒ ∀ x (x ∊ A → B ∈ fv uni N) $ >
   $ G ⇒ cpi x A B ∈ fv uni (nimax M N) $;
@@ -68,9 +70,9 @@ theorem two_irrel (G: hyps) (a b c: set): $ G ⇒ a ∊ two $ > $ G ⇒ b ∊ a 
 theorem two_irrel_c (G: hyps) (A B C: class): $ G ⇒ A ∈ two $ > $ G ⇒ B ∈ A $ > $ G ⇒ C ∈ A $ > $ G ⇒ B = C $;
 --| Traces and function spaces are equal when their domains are and their
 --| bodies agree on them.
-theorem clam_eq_pt {x: set} (G: hyps) (A C: class) (B D: class x):
+theorem clam_eq_pt {x: set} (G: hyps x) (A C: class) (B D: class x):
   $ G ⇒ A = C $ > $ G ⇒ ∀ x (x ∊ A → B = D) $ > $ G ⇒ clam x A B = clam x C D $;
-theorem cpi_eq_pt {x: set} (G: hyps) (A C: class) (B D: class x):
+theorem cpi_eq_pt {x: set} (G: hyps x) (A C: class) (B D: class x):
   $ G ⇒ A = C $ > $ G ⇒ ∀ x (x ∊ A → B = D) $ > $ G ⇒ cpi x A B = cpi x C D $;
 
 -- --------------------------------------------------------------------------
@@ -209,9 +211,11 @@ theorem dt_srt (G: hyps) (M T: class) (u w r: set):
 theorem dt_app (G: hyps) (M T T2: class) (u w r: set):
   $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ dt u M ⟨ kc_app , scons T (scons T2 ∅) ⟩ w r = ap (dt u M T w r) (dt u M T2 w r) $;
+--| @freshen G x
 theorem dt_lam {x: set} (G: hyps) (M T T2: class) (u w r: set):
   $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ dt u M ⟨ kc_lam , scons T (scons T2 ∅) ⟩ w r = clam x (dt u M T w r) (dt u M T2 w (scons x r)) $;
+--| @freshen G x
 theorem dt_pi {x: set} (G: hyps) (M T T2: class) (u w r: set):
   $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ dt u M ⟨ kc_pi , scons T (scons T2 ∅) ⟩ w r = cpi x (dt u M T w r) (dt u M T2 w (scons x r)) $;
@@ -232,9 +236,11 @@ theorem dt_srt_c (G: hyps) (M T W R: class) (u: set):
 theorem dt_app_c (G: hyps) (M T T2 W R: class) (u: set):
   $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
   $ G ⇒ dt u M ⟨ kc_app , scons T (scons T2 ∅) ⟩ W R = ap (dt u M T W R) (dt u M T2 W R) $;
+--| @freshen G x
 theorem dt_lam_c {x: set} (G: hyps) (M T T2 W R: class) (u: set):
   $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
   $ G ⇒ dt u M ⟨ kc_lam , scons T (scons T2 ∅) ⟩ W R = clam x (dt u M T W R) (dt u M T2 W (scons x R)) $;
+--| @freshen G x
 theorem dt_pi_c {x: set} (G: hyps) (M T T2 W R: class) (u: set):
   $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
   $ G ⇒ dt u M ⟨ kc_pi , scons T (scons T2 ∅) ⟩ W R = cpi x (dt u M T W R) (dt u M T2 W (scons x R)) $;
@@ -304,6 +310,9 @@ theorem sat_eq (G: hyps) (U M T T2 W W2: class):
   $ G ⇒ T = T2 $ > $ G ⇒ W = W2 $ > $ G ⇒ sat U M T W = sat U M T2 W2 $;
 theorem sat_nil (G: hyps) (M: class) (u w: set): $ G ⇒ w ∊ lvals $ > $ G ⇒ sat u M ⟨ kc_nil , ∅ ⟩ w = csn ∅ $;
 --| The valuations satisfying a `cons` node.
+--| @freshen G r
+--| @freshen G x
+--| @freshen G q
 theorem sat_cons {r x q: set} (G: hyps) (M T T2: class) (u w: set):
   $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ sat u M ⟨ kc_cons , scons T (scons T2 ∅) ⟩ w =
@@ -312,6 +321,8 @@ theorem sat_cons_intro (G: hyps) (M T T2: class) (u w x q: set):
   $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ q ∊ sat u M T2 w $ > $ G ⇒ x ∊ dt u M T w q $ > $ G ⇒ x ∊ u $ >
   $ G ⇒ scons x q ∈ sat u M ⟨ kc_cons , scons T (scons T2 ∅) ⟩ w $;
+--| @freshen G x
+--| @freshen G q
 theorem sat_cons_elim (G: hyps) {x q: set} (M T T2: class) (u w r: set):
   $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ r ∊ sat u M ⟨ kc_cons , scons T (scons T2 ∅) ⟩ w $ >
@@ -353,7 +364,7 @@ theorem mdeq_mem_c (H: hyps) (M: class) (G: ctx) (e e2 A: expr) (u w: set) (R: c
 theorem minh_i {u w r x: set} (M: class) (G: ctx) (A: expr):
   $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w ⇒ ∃ x (x ∊ dt u M (enc_expr A) w r) $ >
   $ minh M G A $;
-theorem minh_e (H: hyps) {x: set} (M: class) (G: ctx) (A: expr) (u w r: set):
+theorem minh_e {x: set} (H: hyps x) (M: class) (G: ctx) (A: expr) (u w r: set):
   $ minh M G A $ > $ H ⇒ uadm u $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ r ∊ sat u M (enc_ctx G) w $ >
   $ H ⇒ ∃ x (x ∊ dt u M (enc_expr A) w r) $;
 

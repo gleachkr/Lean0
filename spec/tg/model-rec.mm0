@@ -45,6 +45,9 @@ def ivals {j: set} (U N: class) (A: class j) (.s: set): class =
 
 --| @congr
 theorem fpi_congr {q: set} (A B: class) (C D: class q): $ A ≐ B $ > $ C ≐ D $ > $ fpi q A C ≐ fpi q B D $;
+--| Renaming the bound variable (`@alpha`).
+--| @alpha q y
+theorem fpi_alpha {q y: set} (Q: class) (B: class q): $ fpi q Q B ≐ fpi y Q (⟦ q / y ⟧ B) $;
 --| @rewrite
 theorem sb_c_fpi {q x: set} (t: set x) (A: class x) (B: class q x):
   $ (⟦ x / t ⟧ (fpi q A B)) ≐ fpi q (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
@@ -56,6 +59,9 @@ theorem sb_c_vat {x: set} (t: set x) (A B C: class x):
 --| @congr
 theorem ivals_congr {j: set} (A B C D: class) (E F: class j):
   $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ ivals j A C E ≐ ivals j B D F $;
+--| Renaming the bound variable (`@alpha`).
+--| @alpha j y
+theorem ivals_alpha {j y: set} (U N: class) (A: class j): $ ivals j U N A ≐ ivals y U N (⟦ j / y ⟧ A) $;
 --| @rewrite
 theorem sb_c_ivals {j x: set} (t: set x) (A B: class x) (C: class j x):
   $ (⟦ x / t ⟧ (ivals j A B C)) ≐ ivals j (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
@@ -68,17 +74,18 @@ theorem fpi_ap {q: set} (G: hyps q) (Q: class) (B: class q) (g a: set):
 theorem fpi_pts {q y: set} (G: hyps q y) (Q: class) (B: class q) (g z: set):
   $ G ⇒ g ∊ fpi q Q B $ > $ G ⇒ z ∊ g $ > $ G ⇒ ∃ q ∃ y (q ∊ Q ∧ z = nest q y) $;
 --| Larger values give a larger space.
-theorem fpi_mono {q: set} (G: hyps) (Q: class) (B C: class q):
+theorem fpi_mono {q: set} (G: hyps q) (Q: class) (B C: class q):
   $ G ⇒ ∀ q (q ∊ Q → B ⊆ C) $ > $ G ⇒ fpi q Q B ⊆ fpi q Q C $;
 --| Extensionality: two traces of the space are equal when their values are.
+--| @freshen G q
 theorem fpi_ext {q: set} (G: hyps) (Q: class) (B: class q) (g h: set):
   $ G ⇒ g ∊ fpi q Q B $ > $ G ⇒ h ∊ fpi q Q B $ > $ G ⇒ ∀ q (q ∊ Q → apn g q = apn h q) $ > $ G ⇒ g = h $;
 --| Equal paths and larger values give a larger space.
-theorem fpi_sub {q: set} (G: hyps) (Q Q2: class) (B B2: class q):
+theorem fpi_sub {q: set} (G: hyps q) (Q Q2: class) (B B2: class q):
   $ G ⇒ Q = Q2 $ > $ G ⇒ ∀ q (q ∊ Q → B ⊆ B2) $ > $ G ⇒ fpi q Q B ⊆ fpi q Q2 B2 $;
 --| The trace of an operation on paths of one length is in the space when its
 --| values are.
-theorem fpi_tr {q y b: set} (G: hyps) (A Q: class) (B C: class q) (n: set):
+theorem fpi_tr {q y b: set} (G: hyps q y b) (A Q: class) (B C: class q) (n: set):
   $ G ⇒ Q ⊆ fseq A $ > $ G ⇒ ∀ q (q ∊ Q → cdm q = n) $ > $ G ⇒ ∀ q (q ∊ Q → C ∈ B) $ >
   $ G ⇒ isset {y | ∃ q ∃ b (q ∊ Q ∧ b ∊ C ∧ y = nest q b)} $ >
   $ G ⇒ {y | ∃ q ∃ b (q ∊ Q ∧ b ∊ C ∧ y = nest q b)} ∈ fpi q Q B $;
@@ -91,13 +98,13 @@ theorem ivals_elim {j: set} (G: hyps j) (U N: class) (A: class j) (s a: set):
 theorem ivals_fseq {j: set} (G: hyps j) (U N: class) (A: class j) (s: set):
   $ G ⇒ s ∊ ivals j U N A $ > $ G ⇒ s ∊ fseq U ∧ cdm s = N $;
 --| Larger spaces give more valuations.
-theorem ivals_mono {j: set} (G: hyps) (U N: class) (A A2: class j):
+theorem ivals_mono {j: set} (G: hyps j) (U N: class) (A A2: class j):
   $ G ⇒ ∀ j (j ∊ N → A ⊆ A2) $ > $ G ⇒ ivals j U N A ⊆ ivals j U N A2 $;
 --| `vat` under equal arguments.
 theorem vat_eq_args (G: hyps) (S S2 N N2 A A2: class):
   $ G ⇒ S = S2 $ > $ G ⇒ N = N2 $ > $ G ⇒ A = A2 $ > $ G ⇒ vat S N A = vat S2 N2 A2 $;
 --| An equal number of binders and larger spaces give more valuations.
-theorem ivals_sub {j: set} (G: hyps) (U N N2: class) (A A2: class j):
+theorem ivals_sub {j: set} (G: hyps j) (U N N2: class) (A A2: class j):
   $ G ⇒ N = N2 $ > $ G ⇒ ∀ j (j ∊ N → A ⊆ A2) $ > $ G ⇒ ivals j U N A ⊆ ivals j U N2 A2 $;
 
 -- --------------------------------------------------------------------------
@@ -229,9 +236,11 @@ theorem sb_c_ihv {x: set} (t: set x) (A B C D E F: class x):
       ihv (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) (⟦ x / t ⟧ F) $;
 
 --| The hypotheses' spaces are sets when `t` is and `L` has sets for values.
+--| @freshen G a
 theorem ihsp_set {a: set} (G: hyps) (L g t d j: class):
   $ G ⇒ isset t $ > $ G ⇒ ∀ a (isset (ap L a)) $ > $ G ⇒ isset (ihsp L g t d j) $;
 theorem ihv_zero (G: hyps) (D K L g t: class): $ G ⇒ ihv D K L g t ∅ = csn ∅ $;
+--| @freshen G i
 theorem ihv_suc_nr {i: set} (G: hyps) (D K L g t: class) (d: set):
   $ G ⇒ d ∊ ω $ > $ G ⇒ ¬ ∃ i (irf D K d i) $ > $ G ⇒ ihv D K L g t (suc d) = ihv D K L g t d $;
 --| A recursive field's type is a set; `irf` under equal types.
@@ -239,12 +248,17 @@ theorem irf_set (G: hyps) (D K d j: class): $ G ⇒ irf D K d j $ > $ G ⇒ isse
 theorem irf_eq_arg (G: hyps) (D K d j c: class): $ G ⇒ j = c $ > $ G ⇒ irf D K d j $ > $ G ⇒ irf D K d c $;
 --| The hypotheses' spaces and valuations under an equal last argument.
 theorem ihsp_eq_arg (G: hyps) (L g t d j j2: class): $ G ⇒ j = j2 $ > $ G ⇒ ihsp L g t d j = ihsp L g t d j2 $;
+--| @freshen G y
+--| @freshen G h
+--| @freshen G z
+--| @freshen G a
 theorem ihv_suc_rec {y h z a: set} (G: hyps) (D K L g t j: class) (d: set):
   $ G ⇒ isset t $ > $ G ⇒ ∀ a (isset (ap L a)) $ > $ G ⇒ d ∊ ω $ > $ G ⇒ irf D K d j $ >
   $ G ⇒ ihv D K L g t (suc d) = {y | ∃ h ∃ z (z ∊ ihv D K L g t d ∧ h ∊ ihsp L g t d j ∧ y = scons h z)} $;
 --| Larger relations give more valuations.
 theorem ihsp_mono (G: hyps) (L L2 g t d j: class): $ G ⇒ L ⊆ L2 $ > $ G ⇒ ihsp L g t d j ⊆ ihsp L2 g t d j $;
 theorem ihv_eq_arg (G: hyps) (D K L g t M N: class): $ G ⇒ M = N $ > $ G ⇒ ihv D K L g t M = ihv D K L g t N $;
+--| @freshen G a
 theorem ihv_mono {a: set} (G: hyps) (D K L L2 g t N: class):
   $ G ⇒ isset t $ > $ G ⇒ ∀ a (isset (ap L2 a)) $ > $ G ⇒ L ⊆ L2 $ > $ G ⇒ N ∈ ω $ > $ G ⇒ ihv D K L g t N ⊆ ihv D K L2 g t N $;
 theorem ihv_set (G: hyps) (D K L g t N: class): $ G ⇒ isset (ihv D K L g t N) $;
@@ -354,6 +368,8 @@ theorem imrel_ap (G: hyps) (D cv j a x: class):
   $ G ⇒ ap (imrel D cv) ⟨ j , ⟨ a , x ⟩ ⟩ = apn (vat cv (intys D) j) (scons x (cres a (inidx D j))) $;
 --| The motives as a relation have sets for values when the motives are a set
 --| and no entry has `∅` as a point (the premise of `ihv_suc_rec` at `imrel`).
+--| @freshen G e
+--| @freshen G k
 theorem imrel_set {e k: set} (G: hyps) (D cv: class):
   $ G ⇒ isset cv $ > $ G ⇒ ∀ k (¬ ∅ ∈ fv cv k) $ > $ G ⇒ ∀ e (isset (ap (imrel D cv) e)) $;
 
@@ -410,6 +426,33 @@ theorem sb_c_irc {x: set} (t: set x) (A B C D E F: class x):
       irc (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) (⟦ x / t ⟧ F) $;
 
 --| Cases of a point of one step of the fold.
+--| @freshen G j
+--| @freshen G c
+--| @freshen G o
+--| @freshen G f
+--| @freshen G g
+--| @freshen G t
+--| @freshen G a
+--| @freshen G h
+--| @freshen G k
+--| @freshen H j
+--| @freshen H c
+--| @freshen H o
+--| @freshen H f
+--| @freshen H g
+--| @freshen H t
+--| @freshen H a
+--| @freshen H h
+--| @freshen H k
+--| @freshen q j
+--| @freshen q c
+--| @freshen q o
+--| @freshen q f
+--| @freshen q g
+--| @freshen q t
+--| @freshen q a
+--| @freshen q h
+--| @freshen q k
 theorem ifold0_elim {j c o f g t a h k: set} (G H: hyps) (E D W S M R: class) (u z: set) (q: fml):
   $ G ⇒ z ∊ ifold0 u E D W S M R $ >
   $ H , ictk D j c o , ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E o W (scat S (ixs D W (ifam u E D W))) , ⟨ j , ⟨ a , scons c g ⟩ ⟩ ∈ ifam u E D W , h ∊ ihv D o R g t (cdm f) , iminx D j c k , apn (vat M (inmin D) k) (scat h f) ∈ u , z = ⟨ ⟨ j , ⟨ a , itup D j c g W ⟩ ⟩ , apn (vat M (inmin D) k) (scat h f) ⟩ ⇒ q $ >
@@ -434,7 +477,7 @@ theorem ifold0_mono {r: set} (G: hyps r) (E D W p mv: class) (u: set):
   $ G ⇒ mono r (ifold0 u E D W p mv r) $;
 theorem ifold0_setop {r: set} (G: hyps r) (E D W p mv: class) (u: set):
   $ G ⇒ setop r (ifold0 u E D W p mv r) $;
-theorem ifold_fix {r: set} (G: hyps) (E D W p mv: class) (u: set):
+theorem ifold_fix {r: set} (G: hyps r) (E D W p mv: class) (u: set):
   $ G ⇒ cap r (ifold0 u E D W p mv r) (ifold u E D W p mv) = ifold u E D W p mv $;
 theorem ifold_sub (G: hyps) (E D W p mv: class) (u: set):
   $ G ⇒ ifold u E D W p mv ⊆ (ω × (fseq u × fseq (ω ∪ u))) × u $;
@@ -445,12 +488,51 @@ theorem ifold_intro (G: hyps) (E D W p mv: class) (u z: set):
 theorem ifold_elim (G: hyps) (E D W p mv: class) (u z: set):
   $ G ⇒ z ∊ ifold u E D W p mv $ > $ G ⇒ z ∊ ifold0 u E D W p mv (ifold u E D W p mv) $;
 --| Induction over the fold.
+--| @freshen G r
+--| @freshen G y
+--| @freshen P r
 theorem ifold_ind {r y: set} (G: hyps) (E D W p mv: class) (P: fml y) (u: set):
   $ G ⇒ ∀ r (r ⊆ ifold u E D W p mv → r ⊆ {y | P} → ifold0 u E D W p mv r ⊆ {y | P}) $ >
   $ G ⇒ ifold u E D W p mv ⊆ {y | P} $;
 theorem ifold_local (G: hyps) (E E2 D W p mv: class) (u: set):
   $ G ⇒ D ∈ trees ω $ > $ G ⇒ eagr E E2 D $ > $ G ⇒ ifold u E D W p mv = ifold u E2 D W p mv $;
 --| Cases of a point of the recursor.
+--| @freshen G p
+--| @freshen G q
+--| @freshen G e
+--| @freshen G m
+--| @freshen G n
+--| @freshen G o
+--| @freshen G f
+--| @freshen G g
+--| @freshen G t
+--| @freshen G a
+--| @freshen G x
+--| @freshen G y
+--| @freshen H p
+--| @freshen H q
+--| @freshen H e
+--| @freshen H m
+--| @freshen H n
+--| @freshen H o
+--| @freshen H f
+--| @freshen H g
+--| @freshen H t
+--| @freshen H a
+--| @freshen H x
+--| @freshen H y
+--| @freshen c0 p
+--| @freshen c0 q
+--| @freshen c0 e
+--| @freshen c0 m
+--| @freshen c0 n
+--| @freshen c0 o
+--| @freshen c0 f
+--| @freshen c0 g
+--| @freshen c0 t
+--| @freshen c0 a
+--| @freshen c0 x
+--| @freshen c0 y
 theorem irc_elim {p q e m n o f g t a x y: set} (G H: hyps) (E D i v W: class) (u z: set) (c0: fml):
   $ G ⇒ z ∊ irc u E D i v W $ >
   $ H , iprt D q e , p ∊ esat u E q W , m ∊ imots u E D W p v , n ∊ imins u E D W p m , ityf D i o , ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E o W p , x ∊ apn (ity u E D i W) (scat f p) , y ∊ fv (ifold u E D W p n) ⟨ i , ⟨ scat f p , x ⟩ ⟩ , z = nest (scat (scons x f) (scat n (scat m p))) y ⇒ c0 $ >
@@ -463,6 +545,24 @@ theorem irc_intro (G: hyps) (E D i v W: class) (u z p2 q2 e2 m2 n2 o2 f2 g2 t2 a
   $ G ⇒ y2 ∊ fv (ifold u E D W p2 n2) ⟨ i , ⟨ scat f2 p2 , x2 ⟩ ⟩ $ >
   $ G ⇒ z = nest (scat (scons x2 f2) (scat n2 (scat m2 p2))) y2 $ > $ G ⇒ z ∊ irc u E D i v W $;
 --| Elimination and introduction for the motives' and minors' paths.
+--| @freshen G o
+--| @freshen G f
+--| @freshen G g
+--| @freshen G t
+--| @freshen G a
+--| @freshen G x
+--| @freshen H o
+--| @freshen H f
+--| @freshen H g
+--| @freshen H t
+--| @freshen H a
+--| @freshen H x
+--| @freshen c0 o
+--| @freshen c0 f
+--| @freshen c0 g
+--| @freshen c0 t
+--| @freshen c0 a
+--| @freshen c0 x
 theorem imq_elim {o f g t a x: set} (G H: hyps) (E D J W S: class) (u z: set) (c0: fml):
   $ G ⇒ z ∊ imq u E D J W S $ >
   $ H , ityf D J o , ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E o W S , x ∊ apn (ity u E D J W) (scat f S) , z = scons x f ⇒ c0 $ >
@@ -470,6 +570,24 @@ theorem imq_elim {o f g t a x: set} (G H: hyps) (E D J W S: class) (u z: set) (c
 theorem imq_intro (G: hyps) (E D J W S: class) (u z o2 f2 g2 t2 a2 x2: set):
   $ G ⇒ ityf D J o2 $ > $ G ⇒ ⟨ f2 , ⟨ g2 , ⟨ t2 , a2 ⟩ ⟩ ⟩ ∈ etel u E o2 W S $ >
   $ G ⇒ x2 ∊ apn (ity u E D J W) (scat f2 S) $ > $ G ⇒ z = scons x2 f2 $ > $ G ⇒ z ∊ imq u E D J W S $;
+--| @freshen G o
+--| @freshen G f
+--| @freshen G g
+--| @freshen G t
+--| @freshen G a
+--| @freshen G h
+--| @freshen H o
+--| @freshen H f
+--| @freshen H g
+--| @freshen H t
+--| @freshen H a
+--| @freshen H h
+--| @freshen c0 o
+--| @freshen c0 f
+--| @freshen c0 g
+--| @freshen c0 t
+--| @freshen c0 a
+--| @freshen c0 h
 theorem iminq_elim {o f g t a h: set} (G H: hyps) (E D I C W S M: class) (u z: set) (c0: fml):
   $ G ⇒ z ∊ iminq u E D I C W S M $ >
   $ H , ictk D I C o , ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E o W (scat S (ixs D W (ifam u E D W))) , h ∊ ihv D o (imrel D M) g t (cdm f) , z = scat h f ⇒ c0 $ >
@@ -481,8 +599,22 @@ theorem iminq_intro (G: hyps) (E D I C W S M: class) (u z o2 f2 g2 t2 a2 h2: set
   $ G ⇒ z ∊ iminq u E D I C W S M $;
 --| Elimination and introduction for the values of a minor's space at a path
 --| (the body of `imin`).
+--| @freshen H o
+--| @freshen H f
+--| @freshen H g
+--| @freshen H t
+--| @freshen H a
+--| @freshen H h
+--| @freshen H y
+--| @freshen c0 o
+--| @freshen c0 f
+--| @freshen c0 g
+--| @freshen c0 t
+--| @freshen c0 a
+--| @freshen c0 h
+--| @freshen c0 y
 theorem iminv_elim {o f g t a h y: set} (G: hyps o f g t a h y) (H: hyps) (E D I C W S M: class) (u q z: set) (c0: fml): $ G ⇒ z ∊ {y | ∃ o ∃ f ∃ g ∃ t ∃ a ∃ h (ictk D I C o ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E o W (scat S (ixs D W (ifam u E D W))) ∧ h ∊ ihv D o (imrel D M) g t (cdm f) ∧ q = scat h f ∧ y ∊ apn (vat M (intys D) I) (scons (itup D I C g W) (cres a (inidx D I))))} $ > $ H , ictk D I C o , ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E o W (scat S (ixs D W (ifam u E D W))) , h ∊ ihv D o (imrel D M) g t (cdm f) , q = scat h f , z ∊ apn (vat M (intys D) I) (scons (itup D I C g W) (cres a (inidx D I))) ⇒ c0 $ > $ G , H ⇒ c0 $;
-theorem iminv_intro {x1 x2 x3 x4 x5 x6 x7: set} (G: hyps) (E D I C W S M: class) (u q z o2 f2 g2 t2 a2 h2: set): $ G ⇒ ictk D I C o2 $ > $ G ⇒ ⟨ f2 , ⟨ g2 , ⟨ t2 , a2 ⟩ ⟩ ⟩ ∈ etel u E o2 W (scat S (ixs D W (ifam u E D W))) $ > $ G ⇒ h2 ∊ ihv D o2 (imrel D M) g2 t2 (cdm f2) $ > $ G ⇒ q = scat h2 f2 $ > $ G ⇒ z ∊ apn (vat M (intys D) I) (scons (itup D I C g2 W) (cres a2 (inidx D I))) $ > $ G ⇒ z ∊ {x7 | ∃ x1 ∃ x2 ∃ x3 ∃ x4 ∃ x5 ∃ x6 (ictk D I C x1 ∧ ⟨ x2 , ⟨ x3 , ⟨ x4 , x5 ⟩ ⟩ ⟩ ∈ etel u E x1 W (scat S (ixs D W (ifam u E D W))) ∧ x6 ∊ ihv D x1 (imrel D M) x3 x4 (cdm x2) ∧ q = scat x6 x2 ∧ x7 ∊ apn (vat M (intys D) I) (scons (itup D I C x3 W) (cres x5 (inidx D I))))} $;
+theorem iminv_intro {x1 x2 x3 x4 x5 x6 x7: set} (G: hyps x1 x2 x3 x4 x5 x6 x7) (E D I C W S M: class) (u q z o2 f2 g2 t2 a2 h2: set): $ G ⇒ ictk D I C o2 $ > $ G ⇒ ⟨ f2 , ⟨ g2 , ⟨ t2 , a2 ⟩ ⟩ ⟩ ∈ etel u E o2 W (scat S (ixs D W (ifam u E D W))) $ > $ G ⇒ h2 ∊ ihv D o2 (imrel D M) g2 t2 (cdm f2) $ > $ G ⇒ q = scat h2 f2 $ > $ G ⇒ z ∊ apn (vat M (intys D) I) (scons (itup D I C g2 W) (cres a2 (inidx D I))) $ > $ G ⇒ z ∊ {x7 | ∃ x1 ∃ x2 ∃ x3 ∃ x4 ∃ x5 ∃ x6 (ictk D I C x1 ∧ ⟨ x2 , ⟨ x3 , ⟨ x4 , x5 ⟩ ⟩ ⟩ ∈ etel u E x1 W (scat S (ixs D W (ifam u E D W))) ∧ x6 ∊ ihv D x1 (imrel D M) x3 x4 (cdm x2) ∧ q = scat x6 x2 ∧ x7 ∊ apn (vat M (intys D) I) (scons (itup D I C x3 W) (cres x5 (inidx D I))))} $;
 theorem irc_local (G: hyps) (E E2 D i v W: class) (u: set):
   $ G ⇒ D ∈ trees ω $ > $ G ⇒ eagr E E2 D $ > $ G ⇒ irc u E D i v W = irc u E2 D i v W $;
 --| The recursor's value at one of its paths: the fold's value at the major.

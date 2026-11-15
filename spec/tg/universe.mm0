@@ -55,7 +55,7 @@ theorem universe_opair (G: hyps) (U: class) (a b: set):
 theorem universe_opair_r (G: hyps) (U: class) (a b: set):
   $ G ⇒ universe U $ > $ G ⇒ ⟨ a , b ⟩ ∈ U $ > $ G ⇒ b ∊ U $;
 --| Any two sets are elements of a common universe.
-theorem universe_common {v: set} (G: hyps) (a b: set): $ G ⇒ ∃ v (a ∊ v ∧ b ∊ v ∧ universe v) $;
+theorem universe_common {v: set} (G: hyps v) (a b: set): $ G ⇒ ∃ v (a ∊ v ∧ b ∊ v ∧ universe v) $;
 theorem universe_empty (G: hyps) (U: class) (a: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ ∅ ∈ U $;
 --| The union of an element: the family indexed by it with the identity.
@@ -73,7 +73,7 @@ theorem universe_suc (G: hyps) (U: class) (a: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ suc a ∈ U $;
 theorem universe_cin (G: hyps) (U: class) (a b: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ a ∩ b ∈ U $;
-theorem universe_sep (G: hyps) {x: set} (U: class) (a: set) (p: fml x):
+theorem universe_sep {x: set} (G: hyps x) (U: class) (a: set) (p: fml x):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ {x | x ∊ a ∧ p} ∈ U $;
 theorem universe_cxp (G: hyps) (U: class) (a b: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ b ∊ U $ > $ G ⇒ a × b ∈ U $;
@@ -105,10 +105,10 @@ theorem universe_img_fn_c (G: hyps) (U F: class) (a: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ fn_into F a U $ > $ G ⇒ img F a ∈ U $;
 --| The same for a class operation `x ↦ B` with values in the universe: the
 --| family's image and its union are elements.
-theorem universe_img_op (G: hyps) {x: set} (U: class) (B: class x) (a: set):
+theorem universe_img_op {x: set} (G: hyps x) (U: class) (B: class x) (a: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ ∀ x (x ∊ a → B ∈ U) $ >
   $ G ⇒ img (cgr x B) a ∈ U $;
-theorem universe_cuni_op (G: hyps) {x: set} (U: class) (B: class x) (a: set):
+theorem universe_cuni_op {x: set} (G: hyps x) (U: class) (B: class x) (a: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ ∀ x (x ∊ a → B ∈ U) $ >
   $ G ⇒ ⋃ (img (cgr x B) a) ∈ U $;
 --| Traces and function spaces: `clam x A B` is the union over `x ∊ A` of
@@ -157,6 +157,7 @@ theorem univs_intro (G: hyps) (A: class) (u: set):
   $ G ⇒ universe u $ > $ G ⇒ A ∈ u $ > $ G ⇒ u ∊ univs A $;
 theorem univs_elim (G: hyps) (A: class) (u: set):
   $ G ⇒ u ∊ univs A $ > $ G ⇒ universe u ∧ A ∈ u $;
+--| @freshen G u
 theorem univs_nonempty (G: hyps) {u: set} (a: set): $ G ⇒ ∃ u (u ∊ univs a) $;
 --| @congr
 theorem univs_congr (A B: class): $ A ≐ B $ > $ univs A ≐ univs B $;
@@ -164,6 +165,7 @@ theorem univs_congr (A B: class): $ A ≐ B $ > $ univs A ≐ univs B $;
 theorem sb_c_univs {x: set} (t: set x) (A: class x):
   $ (⟦ x / t ⟧ (univs A)) ≐ univs (⟦ x / t ⟧ A) $;
 --| The intersection of a nonempty class of universes is a universe.
+--| @freshen G y
 theorem universe_cint (G: hyps) {y: set} (A: class) (b: set):
   $ G ⇒ b ∊ A $ > $ G ⇒ ∀ y (y ∊ A → universe y) $ > $ G ⇒ universe (cint A) $;
 --| The intersection of two universes is a universe.

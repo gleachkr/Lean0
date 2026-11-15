@@ -56,7 +56,7 @@ theorem sb_c_cxp {x: set} (t: set x) (A B: class x):
   $ (⟦ x / t ⟧ (A × B)) ≐ (⟦ x / t ⟧ A) × (⟦ x / t ⟧ B) $;
 
 --| @freshen G z
-theorem rel_intro (G: hyps) {x y z: set} (R: class):
+theorem rel_intro {x y: set} (G: hyps x y) {z: set} (R: class):
   $ G , z ∊ R ⇒ ∃ x ∃ y (z = ⟨ x , y ⟩) $ > $ G ⇒ rel R $;
 --| @freshen H x
 --| @freshen H y
@@ -219,7 +219,7 @@ theorem functional_subset (G: hyps) (F H: class):
 theorem functional_cres (G: hyps) (F A: class):
   $ G ⇒ functional F $ > $ G ⇒ functional (cres F A) $;
 --| @freshen G x
-theorem fn_into_intro (G: hyps) {x y: set} (F A B: class):
+theorem fn_into_intro {x y: set} (G: hyps y) (F A B: class):
   $ G ⇒ functional F $ > $ G , x ∊ A ⇒ ∃ y (y ∊ B ∧ ⟨ x , y ⟩ ∈ F) $ >
   $ G ⇒ fn_into F A B $;
 theorem fn_into_functional (G: hyps) (F A B: class):
@@ -289,6 +289,12 @@ theorem clam_elim {x: set} (G: hyps x) (A: class) (B: class x) (a b: set):
   $ G ⇒ ⟨ a , b ⟩ ∈ clam x A B $ > $ G ⇒ a ∊ A ∧ b ∊ (⟦ x / a ⟧ B) $;
 --| Elimination of membership in a trace: a member is a pair `⟨ u , v ⟩` with
 --| `u ∊ A` and `v ∊ ⟦ x / u ⟧ B`.
+--| @freshen G u
+--| @freshen G v
+--| @freshen H u
+--| @freshen H v
+--| @freshen d u
+--| @freshen d v
 theorem clam_elim_mem {x u v: set} (G: hyps x) (H: hyps x) (A: class) (B: class x) (c: set) (d: fml x): $ G ⇒ c ∊ clam x A B $ > $ H , c = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ d $ > $ G , H ⇒ d $;
 theorem clam_rel {x: set} (G: hyps x) (A: class) (B: class x): $ G ⇒ rel (clam x A B) $;
 theorem clam_cdm {x: set} (G: hyps x) (A: class) (B: class x):
@@ -338,14 +344,21 @@ theorem cpi_set {x: set} (G: hyps x) (A: class) (B: class x):
 theorem cpi_congr {x: set} (A C: class) (B D: class x):
   $ A ≐ C $ > $ B ≐ D $ > $ cpi x A B ≐ cpi x C D $;
 --| Renaming the bound variable of `clam` and `cpi` (the normalizer does not
---| identify alpha-variants of these binders).
+--| identify alpha-variants of these binders). `@alpha`: the `@freshen` repair renames
+--| through them.
+--| @alpha x y
 theorem clam_alpha {x y: set} (A: class) (B: class x): $ clam x A B ≐ clam y A (⟦ x / y ⟧ B) $;
+--| @alpha x y
 theorem cpi_alpha {x y: set} (A: class) (B: class x): $ cpi x A B ≐ cpi y A (⟦ x / y ⟧ B) $;
 --| A set of pairs over `A` whose values are in `B` is in the space.
+--| @freshen G c
+--| @freshen G a
+--| @freshen G b
 theorem cpi_intro_pts {x c a b: set} (G: hyps x) (A: class) (B: class x) (f: set): $ G ⇒ ∀ c (c ∊ f → ∃ a ∃ b (a ∊ A ∧ c = ⟨ a , b ⟩)) $ > $ G ⇒ ∀ x (x ∊ A → ap f x ∈ B) $ > $ G ⇒ f ∊ cpi x A B $;
 theorem cpi_eq_dom {x: set} (G: hyps x) (A C: class) (B: class x):
   $ G ⇒ A = C $ > $ G ⇒ cpi x A B = cpi x C B $;
 --| The function space grows with its codomain.
+--| @freshen G x
 theorem cpi_mono {x: set} (G: hyps) (A: class) (B C: class x):
   $ G ⇒ ∀ x (x ∊ A → B ⊆ C) $ > $ G ⇒ cpi x A B ⊆ cpi x A C $;
 --| @rewrite

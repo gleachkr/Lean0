@@ -57,8 +57,11 @@ theorem nnat_fv (G: hyps) (n: set): $ G ⇒ n ∊ ω $ > $ G ⇒ fv nnf n ∈ nn
 theorem nnat_fv_c (G: hyps) (A: class): $ G ⇒ A ∈ ω $ > $ G ⇒ fv nnf A ∈ nnat $;
 theorem nnat_zero (G: hyps): $ G ⇒ nzr ∈ nnat $;
 theorem nnat_suc (G: hyps) (y: set): $ G ⇒ y ∊ nnat $ > $ G ⇒ nsc y ∈ nnat $;
-theorem nnat_cases (G: hyps) {x: set} (y: set):
+theorem nnat_cases {x: set} (G: hyps x) (y: set):
   $ G ⇒ y ∊ nnat $ > $ G ⇒ y = nzr ∨ ∃ x (x ∊ nnat ∧ y = nsc x) $;
+--| @freshen G x
+--| @freshen G y
+--| @freshen p x
 theorem nnat_ind {x y: set} (G: hyps) (p: fml y):
   $ G ⇒ nzr ∈ {y | p} $ > $ G ⇒ ∀ x (x ∊ nnat → x ∊ {y | p} → nsc x ∈ {y | p}) $ >
   $ G ⇒ nnat ⊆ {y | p} $;
@@ -148,6 +151,7 @@ theorem nat_ityv (G: hyps) (M: class) (u w: set):
 --| The constructors' values: `nzr`, and the trace of `nsc`.
 theorem nat_ictor0 (G: hyps) (M: class) (u w: set):
   $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ ictor u (dnf u M) tr_nat_D ∅ ∅ w = nzr $;
+--| @freshen G x
 theorem nat_ictor1 {x: set} (G: hyps) (M: class) (u w: set):
   $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ ictor u (dnf u M) tr_nat_D ∅ (suc ∅) w = clam x nnat (nsc x) $;
@@ -163,34 +167,50 @@ theorem nat_ictor1 {x: set} (G: hyps) (M: class) (u w: set):
 
 theorem ept0_intro (G: hyps) (e: set): $ G ⇒ e = ∅ $ > $ G ⇒ ⟨ e , ⟨ e , ⟨ e , e ⟩ ⟩ ⟩ ∈ csn ept0 $;
 --| The motive and the minors are in their spaces.
+--| @freshen G x
 theorem nat_imots {x: set} (G: hyps) (M V: class) (u w m: set):
   $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
   $ G ⇒ scons m ∅ ∈ imots u (dnf u M) tr_nat_D w ∅ V $;
+--| @freshen G x
+--| @freshen G y
+--| @freshen G h
 theorem nat_imins {x y h: set} (G: hyps) (M V: class) (u w m z ms: set):
   $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
   $ G ⇒ z ∊ ap m nzr $ > $ G ⇒ ms ∊ cpi y nnat (cpi h (ap m y) (ap m (nsc y))) $ >
   $ G ⇒ scons ms (scons z ∅) ∈ imins u (dnf u M) tr_nat_D w ∅ (scons m ∅) $;
 --| The fold: in the motive, `z` at `nzr`, `ms` at `nsc y`.
+--| @freshen G x
+--| @freshen G h
 theorem nat_fold_mem {x h: set} (G: hyps) (M V: class) (u w m z ms y: set):
   $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
   $ G ⇒ z ∊ ap m nzr $ > $ G ⇒ ms ∊ cpi x nnat (cpi h (ap m x) (ap m (nsc x))) $ > $ G ⇒ y ∊ nnat $ >
   $ G ⇒ fv (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅))) ⟨ ∅ , ⟨ ∅ , y ⟩ ⟩ ∈ ap m y $;
-theorem nat_fold_zero {x h: set} (G: hyps) (M V: class) (u w m z ms: set):
+theorem nat_fold_zero {x h: set} (G: hyps x h) (M V: class) (u w m z ms: set):
   $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
   $ G ⇒ z ∊ ap m nzr $ > $ G ⇒ ms ∊ cpi x nnat (cpi h (ap m x) (ap m (nsc x))) $ >
   $ G ⇒ fv (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅))) ⟨ ∅ , ⟨ ∅ , nzr ⟩ ⟩ = z $;
+--| @freshen G x
+--| @freshen G h
 theorem nat_fold_succ {x h: set} (G: hyps) (M V: class) (u w m z ms y: set):
   $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
   $ G ⇒ z ∊ ap m nzr $ > $ G ⇒ ms ∊ cpi x nnat (cpi h (ap m x) (ap m (nsc x))) $ > $ G ⇒ y ∊ nnat $ >
   $ G ⇒ fv (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅))) ⟨ ∅ , ⟨ ∅ , nsc y ⟩ ⟩ =
       ap (ap ms y) (fv (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅))) ⟨ ∅ , ⟨ ∅ , y ⟩ ⟩) $;
 --| The recursor's value applied to the motive, the minors and a major.
+--| @freshen G x
+--| @freshen G h
 theorem nat_irc_ap {x h: set} (G: hyps) (M V: class) (u w m z ms y: set):
   $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
   $ G ⇒ z ∊ ap m nzr $ > $ G ⇒ ms ∊ cpi x nnat (cpi h (ap m x) (ap m (nsc x))) $ > $ G ⇒ y ∊ nnat $ >
   $ G ⇒ ap (ap (ap (ap (irc u (dnf u M) tr_nat_D ∅ V w) m) z) ms) y =
       fv (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅))) ⟨ ∅ , ⟨ ∅ , y ⟩ ⟩ $;
 --| The recursor's value is in its type's (`Nat.rec`'s type, as sets).
+--| @freshen G m
+--| @freshen G x
+--| @freshen G z
+--| @freshen G k
+--| @freshen G y
+--| @freshen G h
 theorem nat_irc_mem {m x z k y h: set} (G: hyps) (M V: class) (u w: set):
   $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ >
   $ G ⇒ irc u (dnf u M) tr_nat_D ∅ V w ∈
@@ -215,6 +235,7 @@ theorem dt_nat_ty (G: hyps) (H W R: class) (u: set):
 theorem dt_nat_zero (G: hyps) (H W R: class) (u: set):
   $ G ⇒ hind H $ > $ G ⇒ uadm u $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
   $ G ⇒ dt u (mcv H) (enc_expr nat_zero) W R = nzr $;
+--| @freshen G x
 theorem dt_nat_succ {x: set} (G: hyps) (H W R: class) (u: set):
   $ G ⇒ hind H $ > $ G ⇒ uadm u $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
   $ G ⇒ dt u (mcv H) (enc_expr nat_succ) W R = clam x nnat (nsc x) $;
@@ -223,6 +244,12 @@ theorem dt_nat_rec (G: hyps) (H W R: class) (v: lvl) (u: set):
   $ G ⇒ dt u (mcv H) (enc_expr (ind_rec nat_D nz v)) W R =
       irc u (dnf u (mcv H)) tr_nat_D ∅ (lv (enc_lvl v) W) W $;
 --| The value of `Nat.rec`'s type.
+--| @freshen G m
+--| @freshen G x
+--| @freshen G z
+--| @freshen G k
+--| @freshen G y
+--| @freshen G h
 theorem dt_nat_rec_ty {m x z k y h: set} (G: hyps) (H W R: class) (v: lvl) (u: set):
   $ G ⇒ hind H $ > $ G ⇒ uadm u $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
   $ G ⇒ dt u (mcv H) (enc_expr (pi (pi nat_ty (srt v)) (pi (app (bvar nz) nat_zero)

@@ -122,6 +122,9 @@ theorem tsub_node_c (G: hyps) (K S: class):
   $ G ⇒ fv tsub ⟨ K , S ⟩ = csn ⟨ K , S ⟩ ∪ psub S $;
 theorem tsub_self (G: hyps) (T: class): $ G ⇒ T ∈ trees ω $ > $ G ⇒ T ∈ fv tsub T $;
 --| Elimination and introduction for `psub`.
+--| @freshen G c
+--| @freshen H c
+--| @freshen d c
 theorem psub_elim {c: set} (G H: hyps) (S: class) (x: set) (d: fml):
   $ G ⇒ x ∊ psub S $ > $ H , c ∊ crn S , x ∊ fv tsub c ⇒ d $ > $ G , H ⇒ d $;
 theorem psub_intro (G: hyps) (S: class) (c x: set):
@@ -331,6 +334,9 @@ theorem esf_node (G: hyps) (M: class) (u k s: set):
   $ G ⇒ fv (esf u M) ⟨ k , s ⟩ = esb u M k s (ccom (esf u M) s) $;
 theorem esat_fseq (G: hyps) (E T W: class) (u: set): $ G ⇒ esat u E T W ⊆ fseq u $;
 theorem esat_nil (G: hyps) (E: class) (u w: set): $ G ⇒ w ∊ lvals $ > $ G ⇒ esat u E ⟨ kc_nil , ∅ ⟩ w = csn ∅ $;
+--| @freshen G r
+--| @freshen G x
+--| @freshen G q
 theorem esat_cons {r x q: set} (G: hyps) (E A T: class) (u w: set):
   $ G ⇒ A ∈ trees ω $ > $ G ⇒ T ∈ trees ω $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ esat u E ⟨ kc_cons , scons A (scons T ∅) ⟩ w =
@@ -340,6 +346,12 @@ theorem esat_cons {r x q: set} (G: hyps) (E A T: class) (u w: set):
 theorem esat_cons_intro (G: hyps) (E A P: class) (u w a c: set):
   $ G ⇒ A ∈ trees ω $ > $ G ⇒ P ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ c ∊ esat u E P w $ >
   $ G ⇒ a ∊ da (fv E A) w c $ > $ G ⇒ a ∊ u $ > $ G ⇒ scons a c ∈ esat u E ⟨ kc_cons , scons A (scons P ∅) ⟩ w $;
+--| @freshen G x
+--| @freshen G q
+--| @freshen H x
+--| @freshen H q
+--| @freshen d x
+--| @freshen d q
 theorem esat_cons_elim {x q: set} (G H: hyps) (E A P: class) (u w e: set) (d: fml):
   $ G ⇒ A ∈ trees ω $ > $ G ⇒ P ∈ trees ω $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ e ∊ esat u E ⟨ kc_cons , scons A (scons P ∅) ⟩ w $ >
@@ -357,12 +369,20 @@ theorem etf_node (G: hyps) (E: class) (u k s c: set):
   $ G ⇒ k ∊ ω $ > $ G ⇒ s ∊ fseq (trees ω) $ > $ G ⇒ c = ccom (etf u E) s $ >
   $ G ⇒ fv (etf u E) ⟨ k , s ⟩ = etb u E k s c $;
 theorem etf_cdm (G: hyps) (E: class) (u: set): $ G ⇒ cdm (etf u E) = trees ω $;
+--| @freshen G y
+--| @freshen G x
+--| @freshen G f
+--| @freshen G g
+--| @freshen G t
+--| @freshen G a
 theorem etel_pi {y x f g t a: set} (G: hyps) (E A B: class) (u w r: set):
   $ G ⇒ A ∈ trees ω $ > $ G ⇒ B ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ etel u E ⟨ kc_pi , scons A (scons B ∅) ⟩ w r =
       {y | ∃ x ∃ f ∃ g ∃ t ∃ a (x ∊ da (fv E A) w r ∧ x ∊ u ∧
          ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E B w (scons x r) ∧
          y = ⟨ ssnoc f x , ⟨ scons x g , ⟨ scons (etel u E A w r) t , a ⟩ ⟩ ⟩)} $;
+--| @freshen G y
+--| @freshen G a
 theorem etel_app {y a: set} (G: hyps) (E F A: class) (u w r: set):
   $ G ⇒ F ∈ trees ω $ > $ G ⇒ A ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ etel u E ⟨ kc_app , scons F (scons A ∅) ⟩ w r =
@@ -417,6 +437,7 @@ theorem etel_app_vals (G: hyps) (E F A: class) (u w r r2: set):
   $ G ⇒ F ∈ trees ω $ > $ G ⇒ A ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ r2 ∊ fseq u $ >
   $ G ⇒ etel u E F w r = etel u E F w r2 $ > $ G ⇒ da (fv E A) w r = da (fv E A) w r2 $ >
   $ G ⇒ etel u E ⟨ kc_app , scons F (scons A ∅) ⟩ w r = etel u E ⟨ kc_app , scons F (scons A ∅) ⟩ w r2 $;
+--| @freshen G x
 theorem etel_pi_vals {x: set} (G: hyps) (E A B: class) (u w r r2: set):
   $ G ⇒ A ∈ trees ω $ > $ G ⇒ B ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ r2 ∊ fseq u $ >
   $ G ⇒ da (fv E A) w r = da (fv E A) w r2 $ > $ G ⇒ etel u E A w r = etel u E A w r2 $ >
@@ -424,6 +445,7 @@ theorem etel_pi_vals {x: set} (G: hyps) (E A B: class) (u w r r2: set):
   $ G ⇒ etel u E ⟨ kc_pi , scons A (scons B ∅) ⟩ w r = etel u E ⟨ kc_pi , scons A (scons B ∅) ⟩ w r2 $;
 --| `etel_pi_vals` for inclusion: the paths grow when the domain's value grows,
 --| its paths are equal and the body's paths grow at every extension.
+--| @freshen G x
 theorem etel_pi_mono {x: set} (G: hyps) (E A B: class) (u w r s: set):
   $ G ⇒ A ∈ trees ω $ > $ G ⇒ B ∈ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ s ∊ fseq u $ >
   $ G ⇒ da (fv E A) w r ⊆ da (fv E A) w s $ > $ G ⇒ etel u E A w r = etel u E A w s $ >
@@ -505,6 +527,18 @@ theorem ictk_omega (G: hyps) (D j c K: class): $ G ⇒ ictk D j c K $ > $ G ⇒ 
 --| Introduction and elimination for `ityf`, `ictk` and `iprop`.
 theorem ityf_intro (G: hyps) (D j F: class) (p2 t2 n2 c2: set):
   $ G ⇒ iprt D p2 t2 $ > $ G ⇒ fv nvf n2 = j $ > $ G ⇒ ra_nth_ty t2 n2 F c2 ∈ lrel $ > $ G ⇒ ityf D j F $;
+--| @freshen G p
+--| @freshen G t
+--| @freshen G n
+--| @freshen G c
+--| @freshen H p
+--| @freshen H t
+--| @freshen H n
+--| @freshen H c
+--| @freshen c0 p
+--| @freshen c0 t
+--| @freshen c0 n
+--| @freshen c0 c
 theorem ityf_elim {p t n c: set} (G H: hyps) (D j F: class) (c0: fml):
   $ G ⇒ ityf D j F $ > $ H , iprt D p t , fv nvf n = j , ra_nth_ty t n F c ∈ lrel ⇒ c0 $ > $ G , H ⇒ c0 $;
 theorem ictk_intro (G: hyps) (D j c K: class) (p2 t2 n2 f2 e2 m2: set):
@@ -512,12 +546,39 @@ theorem ictk_intro (G: hyps) (D j c K: class) (p2 t2 n2 f2 e2 m2: set):
   $ G ⇒ fv nvf m2 = c $ > $ G ⇒ ra_nth_ctor e2 m2 K ∈ lrel $ > $ G ⇒ ictk D j c K $;
 --| `ictk` by cases. The parts stay one hypothesis: two `lrel` atoms that
 --| differ only in their labels make `ax` slow.
+--| @freshen G p
+--| @freshen G t
+--| @freshen G n
+--| @freshen G f
+--| @freshen G e
+--| @freshen G m
+--| @freshen H p
+--| @freshen H t
+--| @freshen H n
+--| @freshen H f
+--| @freshen H e
+--| @freshen H m
+--| @freshen c0 p
+--| @freshen c0 t
+--| @freshen c0 n
+--| @freshen c0 f
+--| @freshen c0 e
+--| @freshen c0 m
 theorem ictk_elim {p t n f e m: set} (G H: hyps) (D j c K: class) (c0: fml):
   $ G ⇒ ictk D j c K $ >
   $ H , iprt D p t ∧ fv nvf n = j ∧ ra_nth_ty t n f e ∈ lrel ∧ fv nvf m = c ∧ ra_nth_ctor e m K ∈ lrel ⇒ c0 $ >
   $ G , H ⇒ c0 $;
 theorem iprop_intro (G: hyps) (D j W: class) (f2 k2 l2: set):
   $ G ⇒ ityf D j f2 $ > $ G ⇒ ra_isort f2 k2 l2 ∈ lrel $ > $ G ⇒ lv l2 W = ∅ $ > $ G ⇒ iprop D j W $;
+--| @freshen G f
+--| @freshen G k
+--| @freshen G l
+--| @freshen H f
+--| @freshen H k
+--| @freshen H l
+--| @freshen c0 f
+--| @freshen c0 k
+--| @freshen c0 l
 theorem iprop_elim {f k l: set} (G H: hyps) (D j W: class) (c0: fml):
   $ G ⇒ iprop D j W $ > $ H , ityf D j f , ra_isort f k l ∈ lrel , lv l W = ∅ ⇒ c0 $ > $ G , H ⇒ c0 $;
 --| The reading predicates under equal arguments.
@@ -614,6 +675,7 @@ theorem ient_intro (G: hyps) (D W Z j: class) (a x: set):
 theorem ient_intro_prop (G: hyps) (D W Z j: class) (a x: set):
   $ G ⇒ ⟨ j , ⟨ a , x ⟩ ⟩ ∈ Z $ > $ G ⇒ iprop D j W $ > $ G ⇒ nest a ∅ ∈ ient D W Z j $;
 theorem ient_mono (G: hyps) (D W Z Z2 j: class): $ G ⇒ Z ⊆ Z2 $ > $ G ⇒ ient D W Z j ⊆ ient D W Z2 j $;
+--| @freshen G j
 theorem ixs_fseq {j: set} (G: hyps) (D W Z: class) (u: set):
   $ G ⇒ ∀ j (j ∊ intys D → ient D W Z j ∈ u) $ > $ G ⇒ intys D ∈ ω $ > $ G ⇒ ixs D W Z ∈ fseq u $;
 --| A candidate of a universe gives entries of it.
@@ -637,15 +699,18 @@ theorem iop_setop {y: set} (G: hyps y) (E D W: class) (u: set): $ G ⇒ setop y 
 theorem iop_bounded {y: set} (G: hyps y) (E D W: class) (u: set):
   $ G ⇒ bounded y (iop u E D W y) (ω × (fseq u × fseq (ω ∪ u))) $;
 --| The family is a fixed point, whatever the data.
-theorem ifam_fix {y: set} (G: hyps) (E D W: class) (u: set):
+theorem ifam_fix {y: set} (G: hyps y) (E D W: class) (u: set):
   $ G ⇒ cap y (iop u E D W y) (ifam u E D W) = ifam u E D W $;
 theorem ifam_sub (G: hyps) (E D W: class) (u: set): $ G ⇒ ifam u E D W ⊆ ω × (fseq u × fseq (ω ∪ u)) $;
 theorem ifam_set (G: hyps) (E D W: class) (u: set): $ G ⇒ isset (ifam u E D W) $;
 theorem ifam_intro (G: hyps) (E D W: class) (u x z: set):
   $ G ⇒ x ⊆ ifam u E D W $ > $ G ⇒ x ∊ u $ > $ G ⇒ z ∊ iop0 u E D W x $ > $ G ⇒ z ∊ ifam u E D W $;
-theorem ifam_elim {x: set} (G: hyps) (E D W: class) (u z: set):
+theorem ifam_elim {x: set} (G: hyps x) (E D W: class) (u z: set):
   $ G ⇒ z ∊ ifam u E D W $ > $ G ⇒ ∃ x (x ⊆ ifam u E D W ∧ x ∊ u ∧ z ∊ iop0 u E D W x) $;
 --| Induction over the family.
+--| @freshen G x
+--| @freshen G y
+--| @freshen p x
 theorem ifam_ind {x y: set} (G: hyps) (E D W: class) (p: fml y) (u: set):
   $ G ⇒ ∀ x (x ⊆ ifam u E D W → x ∊ u → x ⊆ {y | p} → iop0 u E D W x ⊆ {y | p}) $ >
   $ G ⇒ ifam u E D W ⊆ {y | p} $;
@@ -693,6 +758,36 @@ theorem ictor_prop (G: hyps) (E D j c W: class) (u: set):
 --| Introduction and elimination for the points of one step of the family.
 theorem iop0_intro (G: hyps) (E D W Z: class) (u z p2 q2 e2 j2 c2 k2 f2 g2 t2 a2: set):
   $ G ⇒ iprt D q2 e2 $ > $ G ⇒ p2 ∊ esat u E q2 W $ > $ G ⇒ ictk D j2 c2 k2 $ > $ G ⇒ ⟨ f2 , ⟨ g2 , ⟨ t2 , a2 ⟩ ⟩ ⟩ ∈ etel u E k2 W (scat p2 (ixs D W Z)) $ > $ G ⇒ a2 ∊ fseq u $ > $ G ⇒ z = ⟨ j2 , ⟨ a2 , scons c2 g2 ⟩ ⟩ $ > $ G ⇒ z ∊ iop0 u E D W Z $;
+--| @freshen G p
+--| @freshen G q
+--| @freshen G e
+--| @freshen G j
+--| @freshen G c
+--| @freshen G k
+--| @freshen G f
+--| @freshen G g
+--| @freshen G t
+--| @freshen G a
+--| @freshen H p
+--| @freshen H q
+--| @freshen H e
+--| @freshen H j
+--| @freshen H c
+--| @freshen H k
+--| @freshen H f
+--| @freshen H g
+--| @freshen H t
+--| @freshen H a
+--| @freshen c0 p
+--| @freshen c0 q
+--| @freshen c0 e
+--| @freshen c0 j
+--| @freshen c0 c
+--| @freshen c0 k
+--| @freshen c0 f
+--| @freshen c0 g
+--| @freshen c0 t
+--| @freshen c0 a
 theorem iop0_elim {p q e j c k f g t a: set} (G H: hyps) (E D W Z: class) (u z: set) (c0: fml):
   $ G ⇒ z ∊ iop0 u E D W Z $ >
   $ H , iprt D q e , p ∊ esat u E q W , ictk D j c k , ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E k W (scat p (ixs D W Z)) , a ∊ fseq u , z = ⟨ j , ⟨ a , scons c g ⟩ ⟩ ⇒ c0 $ >
@@ -775,6 +870,10 @@ theorem sb_c_ityv {x: set} (t: set x) (A B C D E: class x):
   $ (⟦ x / t ⟧ (ityv A B C D E)) ≐ ityv (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
 
 --| Membership of `ipi`, and its value at the empty telescope.
+--| @freshen G y
+--| @freshen G p
+--| @freshen G z
+--| @freshen G q
 theorem ipi_wcel {y p z q: set} (G: hyps) (U E P F W X: class):
   $ G ⇒ isset X $ >
   $ G ⇒ X ∈ ipi U E P F W ↔ (X ⊆ {y | ∃ p ∃ z (p ∊ esat U E P W ∧ y = nest p z)} ∧
@@ -801,6 +900,33 @@ theorem igate_local (G: hyps) (E E2 D J W: class) (u: set):
 theorem itc_intro (G: hyps) (U E D W J P T F Q X: class) (g s a: set):
   $ G ⇒ iprt D P T $ > $ G ⇒ ityf D J F $ > $ G ⇒ Q ∈ esat U E P W $ >
   $ G ⇒ ⟨ X , ⟨ g , ⟨ s , a ⟩ ⟩ ⟩ ∈ etel U E F W Q $ > $ G ⇒ ⟨ J , ⟨ scat X Q , scons ∅ ∅ ⟩ ⟩ ∈ itc U E D W $;
+--| @freshen G j
+--| @freshen G p
+--| @freshen G t
+--| @freshen G f
+--| @freshen G q
+--| @freshen G x
+--| @freshen G g
+--| @freshen G s
+--| @freshen G a
+--| @freshen H j
+--| @freshen H p
+--| @freshen H t
+--| @freshen H f
+--| @freshen H q
+--| @freshen H x
+--| @freshen H g
+--| @freshen H s
+--| @freshen H a
+--| @freshen c0 j
+--| @freshen c0 p
+--| @freshen c0 t
+--| @freshen c0 f
+--| @freshen c0 q
+--| @freshen c0 x
+--| @freshen c0 g
+--| @freshen c0 s
+--| @freshen c0 a
 theorem itc_elim {j p t f q x g s a: set} (G H: hyps) (U E D W: class) (z: set) (c0: fml):
   $ G ⇒ z ∊ itc U E D W $ >
   $ H , iprt D p t , ityf D j f , q ∊ esat U E p W , ⟨ x , ⟨ g , ⟨ s , a ⟩ ⟩ ⟩ ∈ etel U E f W q ,
