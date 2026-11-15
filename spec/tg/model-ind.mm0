@@ -31,9 +31,12 @@
 -- (layer E2), and then `ifam` is closed under `iop0` itself (`ifam_closed`).
 -- `ity` is type `j`'s entry; the value of `ind_ty D j` is `ityv`, which is
 -- `ity` when that lies in the curried `Π` (`ipi`) of the parameters and type
--- `j`'s type (`igate`) and `∅` otherwise: `ind_ty_ty` has only `tys_ok` as a
--- premise, so the value must have its type whatever the constructors, and an
--- illegal block's types are empty (for legal data the gate holds, layer E2).
+-- `j`'s type (`igate`) and the trivial family `itriv` otherwise (`{scons ∅ ∅}`
+-- at every argument valuation): `ind_ty_ty` has only `tys_ok` as a premise, so
+-- the value must have its type whatever the constructors (for legal data the
+-- gate holds, layer E2). The trivial family is inhabited at every argument
+-- valuation, so that a typing in a context with a field of an ungated type is
+-- not vacuous: E2 reads the field types' universes off such typings.
 -- `ictor` (of `ind_ctor D j c`) is the trace of `c :: g` over the parameters
 -- and the fields, `∅` for a proposition. The hook's parts `hty`, `hctor` give
 -- them at the trees `ind_ty D J`, `ind_ctor D J C` (`dt_ind_ty`,
@@ -724,8 +727,21 @@ def ipi (U E P F W: class) (.x .y .p .q .z: set): class =
 --| of the parameters and its type.
 def igate (U E D j W: class) (.p .t .f: set): fml =
   $ ∃ p ∃ t ∃ f (iprt D p t ∧ ityf D j f ∧ ity U E D j W ∈ ipi U E p f W) $;
---| The value of `ind_ty D j` at `W` (`IndTy`): type `j`'s entry if gated, else `∅`.
-def ityv (U E D j W: class) (.z: set): class = $ {z | igate U E D j W ∧ z ∈ ity U E D j W} $;
+--| The trivial candidate: the element `scons ∅ ∅` of every type `j` at every
+--| argument valuation, a valuation `q` of the parameters with a path `x` of
+--| type `j`'s type at `q` (its indices) in front.
+def itc (U E D W: class) (.j .p .t .f .q .x .g .s .a .z: set): class =
+  $ {z | ∃ j ∃ p ∃ t ∃ f ∃ q ∃ x ∃ g ∃ s ∃ a (iprt D p t ∧ ityf D j f ∧ q ∊ esat U E p W ∧
+      ⟨ x , ⟨ g , ⟨ s , a ⟩ ⟩ ⟩ ∈ etel U E f W q ∧ z = ⟨ j , ⟨ scat x q , scons ∅ ∅ ⟩ ⟩)} $;
+--| The trivial family of type `j` at `W`: the trivial candidate's entry, the
+--| value `{scons ∅ ∅}` at every argument valuation (`{∅}` for a proposition). Its
+--| element is not empty, so a function into it has its whole domain as its
+--| trace's domain, and a typing at the trivial family bounds the domains.
+def itriv (U E D j W: class): class = $ ient D W (itc U E D W) j $;
+--| The value of `ind_ty D j` at `W` (`IndTy`): type `j`'s entry if gated, else
+--| the trivial family.
+def ityv (U E D j W: class) (.z: set): class =
+  $ {z | (igate U E D j W ∧ z ∈ ity U E D j W) ∨ (¬ igate U E D j W ∧ z ∈ itriv U E D j W)} $;
 
 --| @congr
 theorem ipi_congr (A B C D E F H I J K: class):
@@ -739,6 +755,18 @@ theorem igate_congr (A B C D E F H I J K: class):
 --| @rewrite
 theorem sb_f_igate {x: set} (t: set x) (A B C D E: class x):
   $ [x/t] (igate A B C D E) ⟺ igate (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
+--| @congr
+theorem itc_congr (A B C D E F H I: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ itc A C E H ≐ itc B D F I $;
+--| @rewrite
+theorem sb_c_itc {x: set} (t: set x) (A B C D: class x):
+  $ (⟦ x / t ⟧ (itc A B C D)) ≐ itc (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) $;
+--| @congr
+theorem itriv_congr (A B C D E F H I J K: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ itriv A C E H J ≐ itriv B D F I K $;
+--| @rewrite
+theorem sb_c_itriv {x: set} (t: set x) (A B C D E: class x):
+  $ (⟦ x / t ⟧ (itriv A B C D E)) ≐ itriv (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
 --| @congr
 theorem ityv_congr (A B C D E F H I J K: class):
   $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ ityv A C E H J ≐ ityv B D F I K $;
@@ -769,9 +797,33 @@ theorem igate_ipi (G: hyps) (U E D J W P T F: class):
   $ G ⇒ ity U E D J W ∈ ipi U E P F W $;
 theorem igate_local (G: hyps) (E E2 D J W: class) (u: set):
   $ G ⇒ D ∈ trees ω $ > $ G ⇒ eagr E E2 D $ > $ G ⇒ igate u E D J W ↔ igate u E2 D J W $;
---| The value of `ind_ty`: `ity` under the gate, `∅` without it.
+--| Introduction and elimination for the trivial candidate's points.
+theorem itc_intro (G: hyps) (U E D W J P T F Q X: class) (g s a: set):
+  $ G ⇒ iprt D P T $ > $ G ⇒ ityf D J F $ > $ G ⇒ Q ∈ esat U E P W $ >
+  $ G ⇒ ⟨ X , ⟨ g , ⟨ s , a ⟩ ⟩ ⟩ ∈ etel U E F W Q $ > $ G ⇒ ⟨ J , ⟨ scat X Q , scons ∅ ∅ ⟩ ⟩ ∈ itc U E D W $;
+theorem itc_elim {j p t f q x g s a: set} (G H: hyps) (U E D W: class) (z: set) (c0: fml):
+  $ G ⇒ z ∊ itc U E D W $ >
+  $ H , iprt D p t , ityf D j f , q ∊ esat U E p W , ⟨ x , ⟨ g , ⟨ s , a ⟩ ⟩ ⟩ ∈ etel U E f W q ,
+      z = ⟨ j , ⟨ scat x q , scons ∅ ∅ ⟩ ⟩ ⇒ c0 $ >
+  $ G , H ⇒ c0 $;
+--| The trivial candidate is a set and a candidate, reads its table only at
+--| the block's subtrees, and is the same under equal arguments.
+theorem itc_set (G: hyps) (E D W: class) (u: set): $ G ⇒ isset (itc u E D W) $;
+theorem itc_sub (G: hyps) (E D W: class) (u: set): $ G ⇒ itc u E D W ⊆ ω × (fseq u × fseq (ω ∪ u)) $;
+theorem itc_local (G: hyps) (E E2 D W: class) (u: set):
+  $ G ⇒ D ∈ trees ω $ > $ G ⇒ eagr E E2 D $ > $ G ⇒ itc u E D W = itc u E2 D W $;
+theorem itc_eq (G: hyps) (U E D D2 W W2: class):
+  $ G ⇒ D = D2 $ > $ G ⇒ W = W2 $ > $ G ⇒ itc U E D W = itc U E D2 W2 $;
+--| Likewise the trivial family.
+theorem itriv_set (G: hyps) (E D J W: class) (u: set): $ G ⇒ isset (itriv u E D J W) $;
+theorem itriv_local (G: hyps) (E E2 D J W: class) (u: set):
+  $ G ⇒ D ∈ trees ω $ > $ G ⇒ eagr E E2 D $ > $ G ⇒ itriv u E D J W = itriv u E2 D J W $;
+theorem itriv_eq (G: hyps) (U E D D2 J J2 W W2: class):
+  $ G ⇒ D = D2 $ > $ G ⇒ J = J2 $ > $ G ⇒ W = W2 $ > $ G ⇒ itriv U E D J W = itriv U E D2 J2 W2 $;
+--| The value of `ind_ty`: `ity` under the gate, the trivial family without it.
 theorem ityv_gate (G: hyps) (U E D J W: class): $ G ⇒ igate U E D J W $ > $ G ⇒ ityv U E D J W = ity U E D J W $;
-theorem ityv_ngate (G: hyps) (U E D J W: class): $ G ⇒ ¬ igate U E D J W $ > $ G ⇒ ityv U E D J W = ∅ $;
+theorem ityv_ngate (G: hyps) (U E D J W: class):
+  $ G ⇒ ¬ igate U E D J W $ > $ G ⇒ ityv U E D J W = itriv U E D J W $;
 --| The family's entry and the value of `ind_ty` are sets.
 theorem ity_set (G: hyps) (E D J W: class) (u: set): $ G ⇒ isset (ity u E D J W) $;
 theorem ityv_set (G: hyps) (E D J W: class) (u: set): $ G ⇒ isset (ityv u E D J W) $;

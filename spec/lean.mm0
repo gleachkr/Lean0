@@ -940,21 +940,37 @@ axiom cseqv_cons (K K2: expr) (C C2: ctors): $ eeqv K K2 $ > $ cseqv C C2 $ > $ 
 --| `cwf D n np l i Ctx d K`: `K`, the rest of a constructor type of type `i`
 --| at depth `d`, is well formed in `Ctx` (the fields so far, with the block's
 --| types put in, over the parameters and `G`): each field type is a type of
---| an allowed level and positive, and the result is type `i` applied to the
---| parameters and indices, each argument typed at its binder's type in type
---| `i`'s type (`checkConstructors`, whose `checkType` of the whole constructor
---| type types the indices).
+--| an allowed level and positive, a recursive field (`cwf_pi_rec`) is not
+--| mentioned in the rest of the type, and the result is type `i` applied to
+--| the parameters and indices, each argument typed at its binder's type in
+--| type `i`'s type (`checkConstructors`, whose `checkType` of the whole
+--| constructor type types the indices). The kernel's typing implies that a
+--| recursive field is not mentioned later (a term mentioning a field of type
+--| `T` mentions `T`, which neither a positive field's domain nor an index may
+--| do); the model sees only that the typings hold, not that they are
+--| derivable, so the spec states it (`#0` does not occur in `B` when `B` is
+--| the lift of something: the `inst` premise only computes that).
 term cwf: ind > nat > nat > lvl > nat > ctx > nat > expr > wff;
 axiom cwf_pi (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (A B A2: expr) (u: lvl):
+  $ add d np k $ > $ closed k A $ > $ sinst D 0 n k A A2 $ > $ ⟨ Ctx ⊢ A2 : srt u ⟩ $ > $ ulevel l u $ >
+  $ cwf D n np l i (A2 :: Ctx) (s d) B $ > $ cwf D n np l i Ctx d (Π A. B) $;
+axiom cwf_pi_rec (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (A B A2 B2: expr) (u: lvl):
   $ add d np k $ > $ sinst D 0 n k A A2 $ > $ ⟨ Ctx ⊢ A2 : srt u ⟩ $ > $ ulevel l u $ > $ ipos D n np d A $ >
+  $ inst 0 B (srt lz) B2 $ > $ lift 1 0 B2 B $ >
   $ cwf D n np l i (A2 :: Ctx) (s d) B $ > $ cwf D n np l i Ctx d (Π A. B) $;
 axiom cwf_res (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (K K2: expr) (b: blk) (P: ctx)
     (T: tys) (F: expr) (C: ctors) (R R2 S: expr):
   $ indapp D n np d K i $ > $ add d np k $ > $ sinst D 0 n k K K2 $ > $ ind_data D b P T $ > $ nth_ty T i F C $ >
   $ pis P F R $ > $ lift k 0 R R2 $ > $ sty Ctx (ind_ty D i) R2 K2 S $ > $ cwf D n np l i Ctx d K $;
+--| `ctors_wf D n np l i Ctx C`: the constructors `C` of type `i` are well
+--| formed, and each is closed over the parameters and the types (`Π P. K`
+--| mentions only the `n` types: a constructor is a closed constant, as
+--| `tys_closed` for the types' types).
 term ctors_wf: ind > nat > nat > lvl > nat > ctx > ctors > wff;
 axiom ctors_wf_nil (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx): $ ctors_wf D n np l i Ctx cnil $;
-axiom ctors_wf_cons (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (K: expr) (C: ctors):
+axiom ctors_wf_cons (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (K: expr) (C: ctors) (b: blk) (P: ctx)
+    (T: tys) (R: expr):
+  $ ind_data D b P T $ > $ pis P K R $ > $ closed n R $ >
   $ cwf D n np l i Ctx 0 K $ > $ ctors_wf D n np l i Ctx C $ > $ ctors_wf D n np l i Ctx (ccons K C) $;
 --| `tys_wf D n np l i Ctx T`: the types `i`.. of `T`, in `Ctx = P ++ G`: each
 --| type's type is `Π indices. srt l` (all in the same universe `l`,
