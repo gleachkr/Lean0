@@ -14,26 +14,26 @@ l1: $ [x/t] (A ⊆ fseq B × B ∧ isset B) ⟺ ((⟦ x / t ⟧ A) ⊆ fseq (⟦
 
 hprog_intro
 -----------
-l1: $ G ⇒ hprog H V $ by and_intro [#1, #2]
+l1: $ … ⇒ hprog H V $ by and_intro [#1, #2]
 
 hprog_sub
 ---------
-l1: $ G ⇒ H ⊆ fseq V × V $ by and_elim_l [#1]
+l1: $ … ⇒ H ⊆ fseq V × V $ by and_elim_l [#1]
 
 hprog_set
 ---------
-l1: $ G ⇒ isset V $ by and_elim_r [#1]
+l1: $ … ⇒ isset V $ by and_elim_r [#1]
 
 hprog_cin
 ---------
 l1: $ G ⇒ H ∩ (fseq V × V) ⊆ fseq V × V $ by cin_subset_r
-l2: $ G ⇒ hprog (H ∩ (fseq V × V)) V $ by hprog_intro [l1, #1]
+l2: $ … ⇒ hprog (H ∩ (fseq V × V)) V $ by hprog_intro [l1, #1]
 
 hprog_clause
 ------------
-l1: $ G ⇒ H ⊆ fseq V × V $ by hprog_sub [#1]
-l2: $ G ⇒ ⟨ p , c ⟩ ∈ fseq V × V $ by wcel_subset [l1, #2]
-l3: $ G ⇒ p ∊ fseq V ∧ c ∊ V $ by cxp_elim_pair [l2]
+l1: $ … ⇒ H ⊆ fseq V × V $ by hprog_sub [#1]
+l2: $ … ⇒ ⟨ p , c ⟩ ∈ fseq V × V $ by wcel_subset [l1, #2]
+l3: $ … ⇒ p ∊ fseq V ∧ c ∊ V $ by cxp_elim_pair [l2]
 
 hstep_congr
 -----------
@@ -50,31 +50,31 @@ lemma w1_hstep_subset (G: hyps) (A B C D: class):
   $ G ⇒ A ⊆ B $ > $ G ⇒ C ⊆ D $ > $ G ⇒ hstep A C ⊆ hstep B D $
 ----
 l1: $ G , z ∊ hstep A C ⇒ z ∊ hstep A C $ by ax
-l2: $ G , z ∊ hstep A C ⇒ ∃ f (⟨ f , z ⟩ ∈ A ∧ crn f ⊆ C) $ by cab_elim [l1]
+l2: $ … ⇒ ∃ f (⟨ f , z ⟩ ∈ A ∧ crn f ⊆ C) $ by cab_elim [l1]
 k1: $ G , ⟨ f , z ⟩ ∈ A ∧ crn f ⊆ C ⇒ ⟨ f , z ⟩ ∈ A ∧ crn f ⊆ C $ by ax
-k2: $ G , ⟨ f , z ⟩ ∈ A ∧ crn f ⊆ C ⇒ ⟨ f , z ⟩ ∈ A $ by and_elim_l [k1]
-k3: $ G , ⟨ f , z ⟩ ∈ A ∧ crn f ⊆ C ⇒ crn f ⊆ C $ by and_elim_r [k1]
+k2: $ … ⇒ ⟨ f , z ⟩ ∈ A $ by and_elim_l [k1]
+k3: $ … ⇒ crn f ⊆ C $ by and_elim_r [k1]
 k4: $ G , ⟨ f , z ⟩ ∈ A ∧ crn f ⊆ C ⇒ A ⊆ B $ by weaken [#1]
-k5: $ G , ⟨ f , z ⟩ ∈ A ∧ crn f ⊆ C ⇒ ⟨ f , z ⟩ ∈ B $ by wcel_subset [k4, k2]
+k5: $ … ⇒ ⟨ f , z ⟩ ∈ B $ by wcel_subset [k4, k2]
 k6: $ G , ⟨ f , z ⟩ ∈ A ∧ crn f ⊆ C ⇒ C ⊆ D $ by weaken [#2]
-k7: $ G , ⟨ f , z ⟩ ∈ A ∧ crn f ⊆ C ⇒ crn f ⊆ D $ by subset_trans [k3, k6]
-k8: $ G , ⟨ f , z ⟩ ∈ A ∧ crn f ⊆ C ⇒ ⟨ f , z ⟩ ∈ B ∧ crn f ⊆ D $ by and_intro [k5, k7]
-k9: $ G , ⟨ f , z ⟩ ∈ A ∧ crn f ⊆ C ⇒ ∃ f (⟨ f , z ⟩ ∈ B ∧ crn f ⊆ D) $ by ex_intro [k8]
+k7: $ … ⇒ crn f ⊆ D $ by subset_trans [k3, k6]
+k8: $ … ⇒ ⟨ f , z ⟩ ∈ B ∧ crn f ⊆ D $ by and_intro [k5, k7]
+k9: $ … ⇒ ∃ f (⟨ f , z ⟩ ∈ B ∧ crn f ⊆ D) $ by ex_intro [k8]
 k10: $ G , ⟨ f , z ⟩ ∈ A ∧ crn f ⊆ C ⇒ z ∊ hstep B D $ by cab_intro [k9]
-l3: $ G , z ∊ hstep A C ⇒ z ∊ hstep B D $ by ex_elim [l2, k10]
-l4: $ G ⇒ hstep A C ⊆ hstep B D $ by subset_intro [l3]
+l3: $ … ⇒ z ∊ hstep B D $ by ex_elim [l2, k10]
+l4: $ … ⇒ hstep A C ⊆ hstep B D $ by subset_intro [l3]
 
 hstep_eq
 --------
-l1: $ G ⇒ A ⊆ B $ by eq_subset [#1]
-l2: $ G ⇒ C ⊆ D $ by eq_subset [#2]
-l3: $ G ⇒ hstep A C ⊆ hstep B D $ by w1_hstep_subset [l1, l2]
-l4: $ G ⇒ B = A $ by eq_sym [#1]
-l5: $ G ⇒ D = C $ by eq_sym [#2]
-l6: $ G ⇒ B ⊆ A $ by eq_subset [l4]
-l7: $ G ⇒ D ⊆ C $ by eq_subset [l5]
-l8: $ G ⇒ hstep B D ⊆ hstep A C $ by w1_hstep_subset [l6, l7]
-l9: $ G ⇒ hstep A C = hstep B D $ by subset_antisym [l3, l8]
+l1: $ … ⇒ A ⊆ B $ by eq_subset [#1]
+l2: $ … ⇒ C ⊆ D $ by eq_subset [#2]
+l3: $ … ⇒ hstep A C ⊆ hstep B D $ by w1_hstep_subset [l1, l2]
+l4: $ … ⇒ B = A $ by eq_sym [#1]
+l5: $ … ⇒ D = C $ by eq_sym [#2]
+l6: $ … ⇒ B ⊆ A $ by eq_subset [l4]
+l7: $ … ⇒ D ⊆ C $ by eq_subset [l5]
+l8: $ … ⇒ hstep B D ⊆ hstep A C $ by w1_hstep_subset [l6, l7]
+l9: $ … ⇒ hstep A C = hstep B D $ by subset_antisym [l3, l8]
 
 sb_c_hstep
 ----------
@@ -82,75 +82,75 @@ l1: $ (⟦ x / t ⟧ {z | ∃ f (⟨ f , z ⟩ ∈ A ∧ crn f ⊆ B)}) ≐ {z |
 
 hstep_intro
 -----------
-l1: $ G ⇒ ⟨ p , c ⟩ ∈ H ∧ crn p ⊆ X $ by and_intro [#1, #2]
-l2: $ G ⇒ ∃ f (⟨ f , c ⟩ ∈ H ∧ crn f ⊆ X) $ by ex_intro [l1]
+l1: $ … ⇒ ⟨ p , c ⟩ ∈ H ∧ crn p ⊆ X $ by and_intro [#1, #2]
+l2: $ … ⇒ ∃ f (⟨ f , c ⟩ ∈ H ∧ crn f ⊆ X) $ by ex_intro [l1]
 l3: $ G ⇒ c ∊ hstep H X $ by cab_intro [l2]
 
 hstep_elim
 ----------
-l1: $ G ⇒ ∃ p (⟨ p , c ⟩ ∈ H ∧ crn p ⊆ X) $ by cab_elim [#1]
+l1: $ … ⇒ ∃ p (⟨ p , c ⟩ ∈ H ∧ crn p ⊆ X) $ by cab_elim [#1]
 
 hstep_mono
 ----------
 l1: $ G , u ⊆ v ⇒ u ⊆ v $ by ax
 l2: $ G , u ⊆ v ⇒ H ⊆ H $ by subset_refl
-l3: $ G , u ⊆ v ⇒ hstep H u ⊆ hstep H v $ by w1_hstep_subset [l2, l1]
+l3: $ … ⇒ hstep H u ⊆ hstep H v $ by w1_hstep_subset [l2, l1]
 l4: $ G ⇒ mono x (hstep H x) $ by mono_intro [l3]
 
 hstep_sub
 ---------
 l1: $ G , z ∊ hstep H X ⇒ z ∊ hstep H X $ by ax
-l2: $ G , z ∊ hstep H X ⇒ ∃ f (⟨ f , z ⟩ ∈ H ∧ crn f ⊆ X) $ by hstep_elim [l1]
+l2: $ … ⇒ ∃ f (⟨ f , z ⟩ ∈ H ∧ crn f ⊆ X) $ by hstep_elim [l1]
 k1: $ G , ⟨ f , z ⟩ ∈ H ∧ crn f ⊆ X ⇒ ⟨ f , z ⟩ ∈ H ∧ crn f ⊆ X $ by ax
-k2: $ G , ⟨ f , z ⟩ ∈ H ∧ crn f ⊆ X ⇒ ⟨ f , z ⟩ ∈ H $ by and_elim_l [k1]
+k2: $ … ⇒ ⟨ f , z ⟩ ∈ H $ by and_elim_l [k1]
 k3: $ G , ⟨ f , z ⟩ ∈ H ∧ crn f ⊆ X ⇒ hprog H V $ by weaken [#1]
-k4: $ G , ⟨ f , z ⟩ ∈ H ∧ crn f ⊆ X ⇒ f ∊ fseq V ∧ z ∊ V $ by hprog_clause [k3, k2]
-k5: $ G , ⟨ f , z ⟩ ∈ H ∧ crn f ⊆ X ⇒ z ∊ V $ by and_elim_r [k4]
-l3: $ G , z ∊ hstep H X ⇒ z ∊ V $ by ex_elim [l2, k5]
-l4: $ G ⇒ hstep H X ⊆ V $ by subset_intro [l3]
+k4: $ … ⇒ f ∊ fseq V ∧ z ∊ V $ by hprog_clause [k3, k2]
+k5: $ … ⇒ z ∊ V $ by and_elim_r [k4]
+l3: $ … ⇒ z ∊ V $ by ex_elim [l2, k5]
+l4: $ … ⇒ hstep H X ⊆ V $ by subset_intro [l3]
 
 hstep_setop
 -----------
 s1: $ hprog H V ⇒ hprog H V $ by ax
-s2: $ hprog H V ⇒ hstep H x ⊆ V $ by hstep_sub [s1]
-s3: $ hprog H V ⇒ isset V $ by hprog_set [s1]
-s4: $ hprog H V ⇒ isset (hstep H x) $ by subset_isset [s3, s2]
-s5: $ hprog H V ⇒ setop x (hstep H x) $ by setop_intro [s4]
-s6: $ _ ⇒ hprog H V → setop x (hstep H x) $ by imp_intro [s5]
+s2: $ … ⇒ hstep H x ⊆ V $ by hstep_sub [s1]
+s3: $ … ⇒ isset V $ by hprog_set [s1]
+s4: $ … ⇒ isset (hstep H x) $ by subset_isset [s3, s2]
+s5: $ … ⇒ setop x (hstep H x) $ by setop_intro [s4]
+s6: $ … ⇒ hprog H V → setop x (hstep H x) $ by imp_intro [s5]
 s7: $ G ⇒ hprog H V → setop x (hstep H x) $ by weaken [s6]
-s8: $ G ⇒ setop x (hstep H x) $ by imp_elim [s7, #1]
+s8: $ … ⇒ setop x (hstep H x) $ by imp_elim [s7, #1]
 
 hstep_cont
 ----------
 k0: $ G , z ∊ hstep H u ⇒ z ∊ hstep H u $ by ax
-k1: $ G , z ∊ hstep H u ⇒ ∃ j (⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u) $ by hstep_elim [k0]
+k1: $ … ⇒ ∃ j (⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u) $ by hstep_elim [k0]
 n1: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u $ by ax
-n2: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ ⟨ j , z ⟩ ∈ H $ by and_elim_l [n1]
-n3: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ crn j ⊆ u $ by and_elim_r [n1]
+n2: $ … ⇒ ⟨ j , z ⟩ ∈ H $ by and_elim_l [n1]
+n3: $ … ⇒ crn j ⊆ u $ by and_elim_r [n1]
 n4: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ hprog H V $ by weaken [#1]
-n5: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ j ∊ fseq V ∧ z ∊ V $ by hprog_clause [n4, n2]
-n6: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ j ∊ fseq V $ by and_elim_l [n5]
-n7: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ functional j $ by fseq_functional [n6]
-n8: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ cdm j ∈ ω $ by fseq_len [n6]
+n5: $ … ⇒ j ∊ fseq V ∧ z ∊ V $ by hprog_clause [n4, n2]
+n6: $ … ⇒ j ∊ fseq V $ by and_elim_l [n5]
+n7: $ … ⇒ functional j $ by fseq_functional [n6]
+n8: $ … ⇒ cdm j ∈ ω $ by fseq_len [n6]
 g6: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , w = cdm j , w ∊ ω ⇒ w ∊ ω $ by ax
-g7: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , w = cdm j , w ∊ ω ⇒ w ⊆ ω $ by omega_elem_subset [g6]
+g7: $ … ⇒ w ⊆ ω $ by omega_elem_subset [g6]
 g8: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , w = cdm j , w ∊ ω ⇒ w = cdm j $ by ax
-g9: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , w = cdm j , w ∊ ω ⇒ cdm j ⊆ ω $ by subset_eq_l [g8, g7]
-n9: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ cdm j ⊆ ω $ by wcel_elim [n8, g9]
+g9: $ … ⇒ cdm j ⊆ ω $ by subset_eq_l [g8, g7]
+n9: $ … ⇒ cdm j ⊆ ω $ by wcel_elim [n8, g9]
 n10: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ isset j $ by isset_var
-n11: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ isset (crn j) $ by crn_set [n10]
+n11: $ … ⇒ isset (crn j) $ by crn_set [n10]
 v1: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , v = crn j ⇒ v = crn j $ by ax
-v2: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , v = crn j ⇒ crn j = v $ by eq_sym [v1]
-v3: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , v = crn j ⇒ crn j ⊆ v $ by eq_subset [v2]
+v2: $ … ⇒ crn j = v $ by eq_sym [v1]
+v3: $ … ⇒ crn j ⊆ v $ by eq_subset [v2]
 v4: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , v = crn j ⇒ ⟨ j , z ⟩ ∈ H $ by weaken [n2]
-v5: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , v = crn j ⇒ z ∊ hstep H v $ by hstep_intro [v4, v3]
+v5: $ … ⇒ z ∊ hstep H v $ by hstep_intro [v4, v3]
 v6: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , v = crn j ⇒ z ∊ cap x (hstep H x) (crn j) $ by cap_intro [v1, v5]
-n12: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ z ∊ cap x (hstep H x) (crn j) $ by isset_elim [n11, v6]
-n13: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ crn j ⊆ u ∧ z ∊ cap x (hstep H x) (crn j) $ by and_intro [n3, n12]
-n14: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ cdm j ⊆ ω ∧ crn j ⊆ u ∧ z ∊ cap x (hstep H x) (crn j) $ by and_intro [n9, n13]
-n15: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ functional j ∧ cdm j ⊆ ω ∧ crn j ⊆ u ∧ z ∊ cap x (hstep H x) (crn j) $ by and_intro [n7, n14]
-n16: $ G , z ∊ hstep H u , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ ∃ f (functional f ∧ cdm f ⊆ ω ∧ crn f ⊆ u ∧ z ∊ cap x (hstep H x) (crn f)) $ by ex_intro [n15]
-r1: $ G , z ∊ hstep H u ⇒ ∃ f (functional f ∧ cdm f ⊆ ω ∧ crn f ⊆ u ∧ z ∊ cap x (hstep H x) (crn f)) $ by ex_elim [k1, n16]
+n12: $ … ⇒ z ∊ cap x (hstep H x) (crn j) $ by isset_elim [n11, v6]
+n13: $ … ⇒ crn j ⊆ u ∧ z ∊ cap x (hstep H x) (crn j) $ by and_intro [n3, n12]
+n14: $ … ⇒ cdm j ⊆ ω ∧ crn j ⊆ u ∧ z ∊ cap x (hstep H x) (crn j) $ by and_intro [n9, n13]
+n15: $ … ⇒ functional j ∧ cdm j ⊆ ω ∧ crn j ⊆ u ∧ z ∊ cap x (hstep H x) (crn j) $ by and_intro [n7, n14]
+n16: $ … ⇒ ∃ f (functional f ∧ cdm f ⊆ ω ∧ crn f ⊆ u ∧ z ∊ cap x (hstep H x) (crn f)) $ by ex_intro [n15]
+r1: $ … ⇒ ∃ f (functional f ∧ cdm f ⊆ ω ∧ crn f ⊆ u ∧ z ∊ cap x (hstep H x) (crn f)) $ by ex_elim [k1, n16]
 r2: $ G ⇒ cont x (hstep H x) ω $ by cont_intro [r1]
 
 horn_congr
@@ -164,52 +164,52 @@ lemma w1_cap_hs_sub {x: set} (G: hyps) (A B Y: class) (y: set):
   $ G ⇒ A = B $ > $ G , y ∊ cap x (hstep A x) Y ⇒ y ∊ cap x (hstep B x) Y $
 ----
 c1: $ G , y ∊ cap x (hstep A x) Y ⇒ y ∊ cap x (hstep A x) Y $ by ax
-c2: $ G , y ∊ cap x (hstep A x) Y ⇒ isset Y $ by cap_elim_isset [c1]
+c2: $ … ⇒ isset Y $ by cap_elim_isset [c1]
 c3: $ G , y ∊ cap x (hstep A x) Y , u = Y ⇒ u = Y $ by ax
-c4: $ G , y ∊ cap x (hstep A x) Y , u = Y ⇒ cap x (hstep A x) Y = hstep A u $ by cap_eq [c3]
+c4: $ … ⇒ cap x (hstep A x) Y = hstep A u $ by cap_eq [c3]
 c5: $ G , y ∊ cap x (hstep A x) Y , u = Y ⇒ y ∊ cap x (hstep A x) Y $ by ax
-c6: $ G , y ∊ cap x (hstep A x) Y , u = Y ⇒ y ∊ hstep A u $ by welc_eq [c4, c5]
+c6: $ … ⇒ y ∊ hstep A u $ by welc_eq [c4, c5]
 c7: $ G , y ∊ cap x (hstep A x) Y , u = Y ⇒ A = B $ by weaken [#1]
 c9: $ G , y ∊ cap x (hstep A x) Y , u = Y ⇒ cv u = cv u $ by eq_refl
-c10: $ G , y ∊ cap x (hstep A x) Y , u = Y ⇒ hstep A u = hstep B u $ by hstep_eq [c7, c9]
-c11: $ G , y ∊ cap x (hstep A x) Y , u = Y ⇒ y ∊ hstep B u $ by welc_eq [c10, c6]
+c10: $ … ⇒ hstep A u = hstep B u $ by hstep_eq [c7, c9]
+c11: $ … ⇒ y ∊ hstep B u $ by welc_eq [c10, c6]
 c12: $ G , y ∊ cap x (hstep A x) Y , u = Y ⇒ y ∊ cap x (hstep B x) Y $ by cap_intro [c3, c11]
-c13: $ G , y ∊ cap x (hstep A x) Y ⇒ y ∊ cap x (hstep B x) Y $ by isset_elim [c2, c12]
+c13: $ … ⇒ y ∊ cap x (hstep B x) Y $ by isset_elim [c2, c12]
 
 lemma w1_cap_hs_eq {x: set} (G: hyps) (A B Y: class):
   $ G ⇒ A = B $ > $ G ⇒ cap x (hstep A x) Y = cap x (hstep B x) Y $
 ----
-d1: $ G , y ∊ cap x (hstep A x) Y ⇒ y ∊ cap x (hstep B x) Y $ by w1_cap_hs_sub [#1]
-d2: $ G ⇒ B = A $ by eq_sym [#1]
-d4: $ G , y ∊ cap x (hstep B x) Y ⇒ y ∊ cap x (hstep A x) Y $ by w1_cap_hs_sub [d2]
-d5: $ G ⇒ cap x (hstep A x) Y = cap x (hstep B x) Y $ by eq_intro [d1, d4]
+d1: $ … ⇒ y ∊ cap x (hstep B x) Y $ by w1_cap_hs_sub [#1]
+d2: $ … ⇒ B = A $ by eq_sym [#1]
+d4: $ … ⇒ y ∊ cap x (hstep A x) Y $ by w1_cap_hs_sub [d2]
+d5: $ … ⇒ cap x (hstep A x) Y = cap x (hstep B x) Y $ by eq_intro [d1, d4]
 
 --| `horn` at equal programs, elementwise.
 lemma w1_horn_sub (G: hyps) (A B: class) (y: set):
   $ G ⇒ A = B $ > $ G , y ∊ horn A ⇒ y ∊ horn B $
 ----
-s1: $ G ⇒ cap x (hstep A x) (⋃ (crn g)) = cap x (hstep B x) (⋃ (crn g)) $ by w1_cap_hs_eq [#1]
-s2: $ G ⇒ ∀ g (cap x (hstep A x) (⋃ (crn g)) = cap x (hstep B x) (⋃ (crn g))) $ by all_intro [s1]
-s3: $ G ⇒ cgr g (cap x (hstep A x) (⋃ (crn g))) = cgr g (cap x (hstep B x) (⋃ (crn g))) $ by cgr_eq [s2]
-s6: $ G ⇒ trec (cgr g (cap x (hstep A x) (⋃ (crn g)))) = trec (cgr g (cap x (hstep B x) (⋃ (crn g)))) $ by trec_eq_cong [s3]
+s1: $ … ⇒ cap x (hstep A x) (⋃ (crn g)) = cap x (hstep B x) (⋃ (crn g)) $ by w1_cap_hs_eq [#1]
+s2: $ … ⇒ ∀ g (cap x (hstep A x) (⋃ (crn g)) = cap x (hstep B x) (⋃ (crn g))) $ by all_intro [s1]
+s3: $ … ⇒ cgr g (cap x (hstep A x) (⋃ (crn g))) = cgr g (cap x (hstep B x) (⋃ (crn g))) $ by cgr_eq [s2]
+s6: $ … ⇒ trec (cgr g (cap x (hstep A x) (⋃ (crn g)))) = trec (cgr g (cap x (hstep B x) (⋃ (crn g)))) $ by trec_eq_cong [s3]
 t1: $ G , y ∊ lfp x (hstep A x) ⇒ y ∊ lfp x (hstep A x) $ by ax
-t2: $ G , y ∊ lfp x (hstep A x) ⇒ ∃ a (ord a ∧ y ∊ fv (stg x (hstep A x)) a) $ by lfp_elim [t1]
+t2: $ … ⇒ ∃ a (ord a ∧ y ∊ fv (stg x (hstep A x)) a) $ by lfp_elim [t1]
 t3: $ G , ord a ∧ y ∊ fv (stg x (hstep A x)) a ⇒ ord a ∧ y ∊ fv (stg x (hstep A x)) a $ by ax
-t4: $ G , ord a ∧ y ∊ fv (stg x (hstep A x)) a ⇒ ord a $ by and_elim_l [t3]
-t5: $ G , ord a ∧ y ∊ fv (stg x (hstep A x)) a ⇒ y ∊ fv (stg x (hstep A x)) a $ by and_elim_r [t3]
+t4: $ … ⇒ ord a $ by and_elim_l [t3]
+t5: $ … ⇒ y ∊ fv (stg x (hstep A x)) a $ by and_elim_r [t3]
 t6: $ G , ord a ∧ y ∊ fv (stg x (hstep A x)) a ⇒ stg x (hstep A x) = stg x (hstep B x) $ by weaken [s6]
 t7: $ G , ord a ∧ y ∊ fv (stg x (hstep A x)) a ⇒ a = a $ by eq_refl
-t8: $ G , ord a ∧ y ∊ fv (stg x (hstep A x)) a ⇒ fv (stg x (hstep A x)) a = fv (stg x (hstep B x)) a $ by fv_eq [t6, t7]
-t9: $ G , ord a ∧ y ∊ fv (stg x (hstep A x)) a ⇒ y ∊ fv (stg x (hstep B x)) a $ by welc_eq [t8, t5]
-t10: $ G , ord a ∧ y ∊ fv (stg x (hstep A x)) a ⇒ y ∊ lfp x (hstep B x) $ by lfp_intro [t4, t9]
-t11: $ G , y ∊ lfp x (hstep A x) ⇒ y ∊ lfp x (hstep B x) $ by ex_elim [t2, t10]
+t8: $ … ⇒ fv (stg x (hstep A x)) a = fv (stg x (hstep B x)) a $ by fv_eq [t6, t7]
+t9: $ … ⇒ y ∊ fv (stg x (hstep B x)) a $ by welc_eq [t8, t5]
+t10: $ … ⇒ y ∊ lfp x (hstep B x) $ by lfp_intro [t4, t9]
+t11: $ … ⇒ y ∊ lfp x (hstep B x) $ by ex_elim [t2, t10]
 
 horn_eq
 -------
-l1: $ G , y ∊ horn A ⇒ y ∊ horn B $ by w1_horn_sub [#1]
-l2: $ G ⇒ B = A $ by eq_sym [#1]
-l4: $ G , y ∊ horn B ⇒ y ∊ horn A $ by w1_horn_sub [l2]
-l5: $ G ⇒ horn A = horn B $ by eq_intro [l1, l4]
+l1: $ … ⇒ y ∊ horn B $ by w1_horn_sub [#1]
+l2: $ … ⇒ B = A $ by eq_sym [#1]
+l4: $ … ⇒ y ∊ horn A $ by w1_horn_sub [l2]
+l5: $ … ⇒ horn A = horn B $ by eq_intro [l1, l4]
 
 sb_c_horn
 ---------
@@ -219,153 +219,153 @@ l1: $ (⟦ x / t ⟧ (lfp y (hstep A y))) ≐ lfp y (hstep (⟦ x / t ⟧ A) y) 
 lemma w1_hs_cont {x: set} (G: hyps x) (H V: class) (w: set):
   $ G ⇒ hprog H V $ > $ G ⇒ w = ω $ > $ G ⇒ cont x (hstep H x) w $
 ----
-f3: $ G ⇒ cont x (hstep H x) ω $ by hstep_cont [#1]
-f6: $ G ⇒ ω = w $ by eq_sym [#2]
-f7: $ G ⇒ ω ⊆ w $ by eq_subset [f6]
-f8: $ G ⇒ cont x (hstep H x) w $ by cont_mono_index [f3, f7]
+f3: $ … ⇒ cont x (hstep H x) ω $ by hstep_cont [#1]
+f6: $ … ⇒ ω = w $ by eq_sym [#2]
+f7: $ … ⇒ ω ⊆ w $ by eq_subset [f6]
+f8: $ … ⇒ cont x (hstep H x) w $ by cont_mono_index [f3, f7]
 
 horn_fix
 --------
 f0: $ G , w = ω ⇒ hprog H V $ by weaken [#1]
 f1: $ G , w = ω ⇒ mono x (hstep H x) $ by hstep_mono
-f2: $ G , w = ω ⇒ setop x (hstep H x) $ by hstep_setop [f0]
+f2: $ … ⇒ setop x (hstep H x) $ by hstep_setop [f0]
 f5: $ G , w = ω ⇒ w = ω $ by ax
-f8: $ G , w = ω ⇒ cont x (hstep H x) w $ by w1_hs_cont [f0, f5]
-f9: $ G , w = ω ⇒ cap x (hstep H x) (horn H) = horn H $ by lfp_cont_fix [f1, f2, f8]
-f10: $ G , w = ω ⇒ isset (horn H) $ by lfp_cont_set [f1, f2, f8]
+f8: $ … ⇒ cont x (hstep H x) w $ by w1_hs_cont [f0, f5]
+f9: $ … ⇒ cap x (hstep H x) (horn H) = horn H $ by lfp_cont_fix [f1, f2, f8]
+f10: $ … ⇒ isset (horn H) $ by lfp_cont_set [f1, f2, f8]
 g1: $ G , w = ω , a = horn H ⇒ a = horn H $ by ax
-g2: $ G , w = ω , a = horn H ⇒ cap x (hstep H x) (horn H) = hstep H a $ by cap_eq [g1]
-g3: $ G , w = ω , a = horn H ⇒ hstep H a = cap x (hstep H x) (horn H) $ by eq_sym [g2]
+g2: $ … ⇒ cap x (hstep H x) (horn H) = hstep H a $ by cap_eq [g1]
+g3: $ … ⇒ hstep H a = cap x (hstep H x) (horn H) $ by eq_sym [g2]
 g4: $ G , w = ω , a = horn H ⇒ cap x (hstep H x) (horn H) = horn H $ by weaken [f9]
-g5: $ G , w = ω , a = horn H ⇒ hstep H a = horn H $ by eq_trans [g3, g4]
-g6: $ G , w = ω , a = horn H ⇒ horn H = a $ by eq_sym [g1]
+g5: $ … ⇒ hstep H a = horn H $ by eq_trans [g3, g4]
+g6: $ … ⇒ horn H = a $ by eq_sym [g1]
 g7: $ G , w = ω , a = horn H ⇒ H = H $ by eq_refl
-g9: $ G , w = ω , a = horn H ⇒ hstep H (horn H) = hstep H a $ by hstep_eq [g7, g6]
-g10: $ G , w = ω , a = horn H ⇒ hstep H (horn H) = horn H $ by eq_trans [g9, g5]
-g11: $ G , w = ω ⇒ hstep H (horn H) = horn H $ by isset_elim [f10, g10]
+g9: $ … ⇒ hstep H (horn H) = hstep H a $ by hstep_eq [g7, g6]
+g10: $ … ⇒ hstep H (horn H) = horn H $ by eq_trans [g9, g5]
+g11: $ … ⇒ hstep H (horn H) = horn H $ by isset_elim [f10, g10]
 f4: $ G ⇒ isset ω $ by omega_set
-g12: $ G ⇒ hstep H (horn H) = horn H $ by isset_elim [f4, g11]
+g12: $ … ⇒ hstep H (horn H) = horn H $ by isset_elim [f4, g11]
 
 horn_set
 --------
 f0: $ G , w = ω ⇒ hprog H V $ by weaken [#1]
 f1: $ G , w = ω ⇒ mono x (hstep H x) $ by hstep_mono
-f2: $ G , w = ω ⇒ setop x (hstep H x) $ by hstep_setop [f0]
+f2: $ … ⇒ setop x (hstep H x) $ by hstep_setop [f0]
 f5: $ G , w = ω ⇒ w = ω $ by ax
-f8: $ G , w = ω ⇒ cont x (hstep H x) w $ by w1_hs_cont [f0, f5]
-f10: $ G , w = ω ⇒ isset (horn H) $ by lfp_cont_set [f1, f2, f8]
+f8: $ … ⇒ cont x (hstep H x) w $ by w1_hs_cont [f0, f5]
+f10: $ … ⇒ isset (horn H) $ by lfp_cont_set [f1, f2, f8]
 f4: $ G ⇒ isset ω $ by omega_set
-f11: $ G ⇒ isset (horn H) $ by isset_elim [f4, f10]
+f11: $ … ⇒ isset (horn H) $ by isset_elim [f4, f10]
 
 horn_sub
 --------
 b0: $ G , u ⊆ V ⇒ hprog H V $ by weaken [#1]
-b2: $ G , u ⊆ V ⇒ hstep H u ⊆ V $ by hstep_sub [b0]
+b2: $ … ⇒ hstep H u ⊆ V $ by hstep_sub [b0]
 b3: $ G ⇒ bounded x (hstep H x) V $ by bounded_intro [b2]
-b4: $ G ⇒ setop x (hstep H x) $ by hstep_setop [#1]
-b5: $ G ⇒ horn H ⊆ V $ by lfp_bounded [b3, b4]
+b4: $ … ⇒ setop x (hstep H x) $ by hstep_setop [#1]
+b5: $ … ⇒ horn H ⊆ V $ by lfp_bounded [b3, b4]
 
 horn_intro
 ----------
-l1: $ G ⇒ c ∊ hstep H (horn H) $ by hstep_intro [#2, #3]
-l2: $ G ⇒ hstep H (horn H) = horn H $ by horn_fix [#1]
-l3: $ G ⇒ c ∊ horn H $ by welc_eq [l2, l1]
+l1: $ … ⇒ c ∊ hstep H (horn H) $ by hstep_intro [#2, #3]
+l2: $ … ⇒ hstep H (horn H) = horn H $ by horn_fix [#1]
+l3: $ … ⇒ c ∊ horn H $ by welc_eq [l2, l1]
 
 horn_intro_c
 ------------
 m1: $ G , f = P , c = C ⇒ f = P $ by ax
 m2: $ G , f = P , c = C ⇒ c = C $ by ax
-m3: $ G , f = P , c = C ⇒ P = f $ by eq_sym [m1]
-m4: $ G , f = P , c = C ⇒ C = c $ by eq_sym [m2]
-m5: $ G , f = P , c = C ⇒ ⟨ P , C ⟩ = ⟨ f , c ⟩ $ by opair_eq [m3, m4]
+m3: $ … ⇒ P = f $ by eq_sym [m1]
+m4: $ … ⇒ C = c $ by eq_sym [m2]
+m5: $ … ⇒ ⟨ P , C ⟩ = ⟨ f , c ⟩ $ by opair_eq [m3, m4]
 m6: $ G , f = P , c = C ⇒ ⟨ P , C ⟩ ∈ H $ by weaken [#2]
-m7: $ G , f = P , c = C ⇒ ⟨ f , c ⟩ ∈ H $ by wcel_eq_l [m5, m6]
-m8: $ G , f = P , c = C ⇒ crn P = crn f $ by crn_eq [m3]
+m7: $ … ⇒ ⟨ f , c ⟩ ∈ H $ by wcel_eq_l [m5, m6]
+m8: $ … ⇒ crn P = crn f $ by crn_eq [m3]
 m9: $ G , f = P , c = C ⇒ crn P ⊆ horn H $ by weaken [#5]
-m10: $ G , f = P , c = C ⇒ crn f ⊆ horn H $ by subset_eq_l [m8, m9]
+m10: $ … ⇒ crn f ⊆ horn H $ by subset_eq_l [m8, m9]
 m11: $ G , f = P , c = C ⇒ hprog H V $ by weaken [#1]
-m12: $ G , f = P , c = C ⇒ c ∊ horn H $ by horn_intro [m11, m7, m10]
-m13: $ G , f = P , c = C ⇒ C ∈ horn H $ by wcel_intro [m2, m12]
-m14: $ G , f = P ⇒ C ∈ horn H $ by isset_elim [#4, m13]
-m15: $ G ⇒ C ∈ horn H $ by isset_elim [#3, m14]
+m12: $ … ⇒ c ∊ horn H $ by horn_intro [m11, m7, m10]
+m13: $ … ⇒ C ∈ horn H $ by wcel_intro [m2, m12]
+m14: $ … ⇒ C ∈ horn H $ by isset_elim [#4, m13]
+m15: $ … ⇒ C ∈ horn H $ by isset_elim [#3, m14]
 
 horn_elim
 ---------
-l1: $ G ⇒ hstep H (horn H) = horn H $ by horn_fix [#1]
-l2: $ G ⇒ horn H = hstep H (horn H) $ by eq_sym [l1]
-l3: $ G ⇒ c ∊ hstep H (horn H) $ by welc_eq [l2, #2]
-l4: $ G ⇒ ∃ p (⟨ p , c ⟩ ∈ H ∧ crn p ⊆ horn H) $ by hstep_elim [l3]
+l1: $ … ⇒ hstep H (horn H) = horn H $ by horn_fix [#1]
+l2: $ … ⇒ horn H = hstep H (horn H) $ by eq_sym [l1]
+l3: $ … ⇒ c ∊ hstep H (horn H) $ by welc_eq [l2, #2]
+l4: $ … ⇒ ∃ p (⟨ p , c ⟩ ∈ H ∧ crn p ⊆ horn H) $ by hstep_elim [l3]
 
 --| The abstraction of membership in a class is included in it.
 lemma w1_cab_welc_subset {y: set} (G: hyps y) (P: class): $ G ⇒ {y | y ∊ P} ⊆ P $
 ----
 l1: $ G , c ∊ {y | y ∊ P} ⇒ c ∊ {y | y ∊ P} $ by ax
-l2: $ G , c ∊ {y | y ∊ P} ⇒ c ∊ P $ by cab_elim [l1]
-l3: $ G ⇒ {y | y ∊ P} ⊆ P $ by subset_intro [l2]
+l2: $ … ⇒ c ∊ P $ by cab_elim [l1]
+l3: $ … ⇒ {y | y ∊ P} ⊆ P $ by subset_intro [l2]
 
 horn_ind
 --------
 e4: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , z ∊ hstep H u ⇒ z ∊ hstep H u $ by ax
-e5: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , z ∊ hstep H u ⇒ ∃ j (⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u) $ by hstep_elim [e4]
+e5: $ … ⇒ ∃ j (⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u) $ by hstep_elim [e4]
 k1: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u $ by ax
-k2: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ ⟨ j , z ⟩ ∈ H $ by and_elim_l [k1]
-k3: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ crn j ⊆ u $ by and_elim_r [k1]
+k2: $ … ⇒ ⟨ j , z ⟩ ∈ H $ by and_elim_l [k1]
+k3: $ … ⇒ crn j ⊆ u $ by and_elim_r [k1]
 q1: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , b ∊ u ⇒ b ∊ u $ by ax
 q2: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , b ∊ u ⇒ u ⊆ horn H $ by ax
-q3: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , b ∊ u ⇒ b ∊ horn H $ by subset_elim [q2, q1]
+q3: $ … ⇒ b ∊ horn H $ by subset_elim [q2, q1]
 q4: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , b ∊ u ⇒ u ⊆ {y | y ∊ P} $ by ax
 q4b: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , b ∊ u ⇒ {y | y ∊ P} ⊆ P $ by w1_cab_welc_subset
-q5: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , b ∊ u ⇒ u ⊆ P $ by subset_trans [q4, q4b]
-q6: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , b ∊ u ⇒ b ∊ P $ by subset_elim [q5, q1]
-q7: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u , b ∊ u ⇒ b ∊ horn H ∩ P $ by cin_intro [q3, q6]
-q8: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ u ⊆ horn H ∩ P $ by subset_intro [q7]
-q9: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ crn j ⊆ horn H ∩ P $ by subset_trans [k3, q8]
+q5: $ … ⇒ u ⊆ P $ by subset_trans [q4, q4b]
+q6: $ … ⇒ b ∊ P $ by subset_elim [q5, q1]
+q7: $ … ⇒ b ∊ horn H ∩ P $ by cin_intro [q3, q6]
+q8: $ … ⇒ u ⊆ horn H ∩ P $ by subset_intro [q7]
+q9: $ … ⇒ crn j ⊆ horn H ∩ P $ by subset_trans [k3, q8]
 q10: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ ∀ p ∀ c (⟨ p , c ⟩ ∈ H → crn p ⊆ horn H ∩ P → c ∊ P) $ by weaken [#2]
-q11: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ ∀ c (⟨ j , c ⟩ ∈ H → crn j ⊆ horn H ∩ P → c ∊ P) $ by all_elim [q10]
-q12: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ ⟨ j , z ⟩ ∈ H → crn j ⊆ horn H ∩ P → z ∊ P $ by all_elim [q11]
-q13: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ crn j ⊆ horn H ∩ P → z ∊ P $ by imp_elim [q12, k2]
-q14: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , ⟨ j , z ⟩ ∈ H ∧ crn j ⊆ u ⇒ z ∊ P $ by imp_elim [q13, q9]
-e6: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , z ∊ hstep H u ⇒ z ∊ P $ by ex_elim [e5, q14]
-e7: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} , z ∊ hstep H u ⇒ z ∊ {y | y ∊ P} $ by cab_intro [e6]
-r3: $ G , u ⊆ horn H , u ⊆ {y | y ∊ P} ⇒ hstep H u ⊆ {y | y ∊ P} $ by subset_intro [e7]
-r4: $ G , u ⊆ horn H ⇒ u ⊆ {y | y ∊ P} → hstep H u ⊆ {y | y ∊ P} $ by imp_intro [r3]
-r5: $ G ⇒ u ⊆ horn H → u ⊆ {y | y ∊ P} → hstep H u ⊆ {y | y ∊ P} $ by imp_intro [r4]
-r6: $ G ⇒ ∀ u (u ⊆ horn H → u ⊆ {y | y ∊ P} → hstep H u ⊆ {y | y ∊ P}) $ by all_intro [r5]
+q11: $ … ⇒ ∀ c (⟨ j , c ⟩ ∈ H → crn j ⊆ horn H ∩ P → c ∊ P) $ by all_elim [q10]
+q12: $ … ⇒ ⟨ j , z ⟩ ∈ H → crn j ⊆ horn H ∩ P → z ∊ P $ by all_elim [q11]
+q13: $ … ⇒ crn j ⊆ horn H ∩ P → z ∊ P $ by imp_elim [q12, k2]
+q14: $ … ⇒ z ∊ P $ by imp_elim [q13, q9]
+e6: $ … ⇒ z ∊ P $ by ex_elim [e5, q14]
+e7: $ … ⇒ z ∊ {y | y ∊ P} $ by cab_intro [e6]
+r3: $ … ⇒ hstep H u ⊆ {y | y ∊ P} $ by subset_intro [e7]
+r4: $ … ⇒ u ⊆ {y | y ∊ P} → hstep H u ⊆ {y | y ∊ P} $ by imp_intro [r3]
+r5: $ … ⇒ u ⊆ horn H → u ⊆ {y | y ∊ P} → hstep H u ⊆ {y | y ∊ P} $ by imp_intro [r4]
+r6: $ … ⇒ ∀ u (u ⊆ horn H → u ⊆ {y | y ∊ P} → hstep H u ⊆ {y | y ∊ P}) $ by all_intro [r5]
 r6w: $ G , w = ω ⇒ ∀ u (u ⊆ horn H → u ⊆ {y | y ∊ P} → hstep H u ⊆ {y | y ∊ P}) $ by weaken [r6]
 f0: $ G , w = ω ⇒ hprog H V $ by weaken [#1]
 f1: $ G , w = ω ⇒ mono x (hstep H x) $ by hstep_mono
-f2: $ G , w = ω ⇒ setop x (hstep H x) $ by hstep_setop [f0]
+f2: $ … ⇒ setop x (hstep H x) $ by hstep_setop [f0]
 f5: $ G , w = ω ⇒ w = ω $ by ax
-f8: $ G , w = ω ⇒ cont x (hstep H x) w $ by w1_hs_cont [f0, f5]
-r7: $ G , w = ω ⇒ horn H ⊆ {y | y ∊ P} $ by lfp_cont_ind [f1, f2, f8, r6w]
+f8: $ … ⇒ cont x (hstep H x) w $ by w1_hs_cont [f0, f5]
+r7: $ … ⇒ horn H ⊆ {y | y ∊ P} $ by lfp_cont_ind [f1, f2, f8, r6w]
 r8: $ G , w = ω ⇒ {y | y ∊ P} ⊆ P $ by w1_cab_welc_subset
-r9: $ G , w = ω ⇒ horn H ⊆ P $ by subset_trans [r7, r8]
+r9: $ … ⇒ horn H ⊆ P $ by subset_trans [r7, r8]
 f4: $ G ⇒ isset ω $ by omega_set
-r10: $ G ⇒ horn H ⊆ P $ by isset_elim [f4, r9]
+r10: $ … ⇒ horn H ⊆ P $ by isset_elim [f4, r9]
 
 horn_mono
 ---------
-k0: $ G ⇒ isset (horn K) $ by horn_set [#2]
+k0: $ … ⇒ isset (horn K) $ by horn_set [#2]
 a1: $ G , a = horn K ⇒ a = horn K $ by ax
-a2: $ G , a = horn K ⇒ horn K = a $ by eq_sym [a1]
+a2: $ … ⇒ horn K = a $ by eq_sym [a1]
 a3: $ G , a = horn K ⇒ mono x (hstep H x) $ by hstep_mono
 a4: $ G , a = horn K ⇒ hprog H V $ by weaken [#1]
-a5: $ G , a = horn K ⇒ setop x (hstep H x) $ by hstep_setop [a4]
+a5: $ … ⇒ setop x (hstep H x) $ by hstep_setop [a4]
 a6: $ G , a = horn K ⇒ H ⊆ K $ by weaken [#3]
 a7: $ G , a = horn K ⇒ cv a ⊆ cv a $ by subset_refl
-a8: $ G , a = horn K ⇒ hstep H a ⊆ hstep K a $ by w1_hstep_subset [a6, a7]
+a8: $ … ⇒ hstep H a ⊆ hstep K a $ by w1_hstep_subset [a6, a7]
 a9: $ G , a = horn K ⇒ K = K $ by eq_refl
-a10: $ G , a = horn K ⇒ hstep K a = hstep K (horn K) $ by hstep_eq [a9, a1]
+a10: $ … ⇒ hstep K a = hstep K (horn K) $ by hstep_eq [a9, a1]
 a11: $ G , a = horn K ⇒ hprog K W $ by weaken [#2]
-a12: $ G , a = horn K ⇒ hstep K (horn K) = horn K $ by horn_fix [a11]
-a13: $ G , a = horn K ⇒ hstep K a = horn K $ by eq_trans [a10, a12]
-a14: $ G , a = horn K ⇒ hstep K a = a $ by eq_trans [a13, a2]
-a15: $ G , a = horn K ⇒ hstep H a ⊆ a $ by subset_eq_r [a14, a8]
-a16: $ G , a = horn K ⇒ lfp x (hstep H x) ⊆ a $ by lfp_least [a3, a5, a15]
-a17: $ G , a = horn K ⇒ horn H ⊆ horn K $ by subset_eq_r [a1, a16]
-a18: $ G ⇒ horn H ⊆ horn K $ by isset_elim [k0, a17]
+a12: $ … ⇒ hstep K (horn K) = horn K $ by horn_fix [a11]
+a13: $ … ⇒ hstep K a = horn K $ by eq_trans [a10, a12]
+a14: $ … ⇒ hstep K a = a $ by eq_trans [a13, a2]
+a15: $ … ⇒ hstep H a ⊆ a $ by subset_eq_r [a14, a8]
+a16: $ … ⇒ lfp x (hstep H x) ⊆ a $ by lfp_least [a3, a5, a15]
+a17: $ … ⇒ horn H ⊆ horn K $ by subset_eq_r [a1, a16]
+a18: $ … ⇒ horn H ⊆ horn K $ by isset_elim [k0, a17]
 
 horn_universe
 -------------
-l1: $ G ⇒ horn H ⊆ V $ by horn_sub [#1]
-l2: $ G ⇒ horn H ∈ U $ by universe_subset_c [#2, #3, l1]
+l1: $ … ⇒ horn H ⊆ V $ by horn_sub [#1]
+l2: $ … ⇒ horn H ∈ U $ by universe_subset_c [#2, #3, l1]
