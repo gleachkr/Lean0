@@ -1068,6 +1068,13 @@ The rest of the model is not yet the spec's `deq`, so it changes nothing that is
   the block's types, so for a block with `ind_wf` one step of the family is monotone at
   candidates of the universe (`iop0_mono`) and the operator is that step there (`iop_iop0`).
   Definitions and theorems only.
+- **The family in the universe, and the gate** (`model-wf.mm0`, 2026-11-14, layer E2; four
+  theorems still admitted): for a block well formed over atoms that hold in the model (`iwf`),
+  the family is an element of `u` and each type's value is its entry (`ind_wf_igate`), by a bound
+  on the elements over each parameters' valuation (the least fixed point of a continuous operator,
+  `lfp_universe`). When the gate fails the value is the trivial family `itriv` (model-ind), which
+  has its type (`ityv_ipi`), so `ind_ty_ty` needs no legality. It relies on the two premises added
+  to the spec's `cwf`/`ctors_wf` (§4).
 
 **TG mode: a certificate verified against the library** (2026-11-09). The same certificate
 can be checked against the library instead of the spec:

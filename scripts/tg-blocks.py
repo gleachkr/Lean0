@@ -13,6 +13,18 @@
       List the theorems whose blocks still contain `sorry!`.
   tg-blocks.py names FILE.mm0
       List the theorems of FILE.mm0 in declaration order.
+  tg-blocks.py freeze FILE.auf
+      Print FILE.auf with every theorem and lemma block admitted (its proof
+      replaced by one `sorry!` line stating its conclusion), so that a file
+      with long proofs compiles in seconds while one works on new blocks.
+  tg-blocks.py thaw FILE.auf ORIGINAL.auf
+      Undo `freeze`: print FILE.auf with every block that is one `sorry!`
+      line replaced by ORIGINAL.auf's block of that name, if it has one.
+  tg-blocks.py graft TARGET.auf SOURCE.auf PREFIX NAME [MORE...]
+      For an agent that proved the admitted lemma NAME in a (frozen) copy:
+      print TARGET.auf with its block NAME replaced by SOURCE.auf's items
+      whose names start with PREFIX (the agent's new lemmas and defs), then
+      SOURCE's block NAME; each block of MORE is replaced by SOURCE's too.
   tg-blocks.py format FILE.auf
       Print FILE.auf with one blank line between blocks.
   tg-blocks.py promote FILE.mm0 FILE.auf OLD NEW
@@ -131,6 +143,43 @@ def cmd_sorries(auf):
             print(name)
 
 
+def frozen(c):
+    """Whether a theorem or lemma chunk's proof is a single `sorry!` line."""
+    body = [l for l in c[2] if re.match(r"^\w+:\s*\$", l)]
+    return c[0] in ("theorem", "lemma") and len(body) == 1 and body[0].rstrip().endswith("by sorry!")
+
+
+def cmd_freeze(auf):
+    out = []
+    for c in chunks(auf):
+        kind, name, lines = c
+        body = [i for i, l in enumerate(lines) if re.match(r"^\w+:\s*\$", l)]
+        if kind in ("theorem", "lemma") and body and not frozen(c):
+            concl = STMT_RE.search(lines[body[-1]]).group(1).strip()
+            lines = lines[:body[0]] + [f"l1: $ {concl} $ by sorry!"]
+        out.append((kind, name, lines))
+    sys.stdout.write(render(out))
+
+
+def cmd_thaw(auf, original):
+    orig = {(c[0], c[1]): c for c in chunks(original)}
+    sys.stdout.write(render([orig.get((c[0], c[1]), c) if frozen(c) else c for c in chunks(auf)]))
+
+
+def cmd_graft(target, source, prefix, name, *more):
+    s = chunks(source)
+    by_name = {c[1]: c for c in s}
+    new = [c for c in s if c[1] and c[1].startswith(prefix)] + [by_name[name]]
+    t = chunks(target)
+    clash = {c[1] for c in t} & {c[1] for c in new[:-1]}
+    if clash or frozen(by_name[name]) or sum(c[1] == name for c in t) != 1:
+        sys.exit(f"graft: {name}: still admitted, not in the target once, or names clash {sorted(clash)}")
+    out = []
+    for c in t:
+        out += new if c[1] == name else [by_name[c[1]]] if c[1] in more else [c]
+    sys.stdout.write(render(out))
+
+
 def cmd_names(mm0):
     for name, _ in mm0_theorems(mm0):
         print(name)
@@ -189,5 +238,11 @@ if __name__ == "__main__":
         cmd_promote(*a[1:])
     elif a[0] == "names" and len(a) == 2:
         cmd_names(a[1])
+    elif a[0] == "graft" and len(a) >= 5:
+        cmd_graft(*a[1:])
+    elif a[0] == "freeze" and len(a) == 2:
+        cmd_freeze(a[1])
+    elif a[0] == "thaw" and len(a) == 3:
+        cmd_thaw(*a[1:])
     else:
         sys.exit(__doc__)
