@@ -251,6 +251,10 @@ theorem lrel3_sty_sem {g t a: set} (G: hyps g t a) (J M K S: class) (u w c r t3 
   $ G ⇒ ∃ g ∃ t ∃ a (⟨ scat f2 (sarg u (dnf u M) t4 w r) , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u (dnf u M) t3 w r) $;
 --| The typings' support is part of the trivial candidate, a set of `u`.
 theorem ijs_sub (G: hyps) (E D W: class) (u: set): $ G ⇒ ijs u E D W ⊆ itc u E D W $;
+--| The parameters' telescope of a block with closed types does not read the outer valuation.
+theorem esat_dsh_tys_closed (G: hyps) (M: class) (u w tP tT t2 t3 t4 tnp tr: set): $ G ⇒ ra_tys_closed tP tT ∈ lrel $ > $ G ⇒ ra_nth_ty tT t2 t3 t4 ∈ lrel $ > $ G ⇒ ra_clen tP tnp ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ tr ∊ fseq u $ > $ G ⇒ esat u (dsh u M tr) tP w = esat u (dnf u M) tP w $;
+--| `lrel_capp_sem` as an introduction: a valuation of the parameters before one of `G` satisfies `G ++ P`.
+theorem sat_capp_intro (G: hyps) (M: class) (u w tc tr tP tG2 tp: set): $ G ⇒ ra_capp tP tc tG2 ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ tr ∊ sat u M tc w $ > $ G ⇒ tp ∊ esat u (dnf u M) tP w $ > $ G ⇒ esat u (dsh u M tr) tP w = esat u (dnf u M) tP w $ > $ G ⇒ scat tp tr ∈ sat u M tG2 w $;
 --| Every point of the family has a valid argument valuation: its support is
 --| part of the trivial candidate, and of the typings' support.
 theorem ifam_supp (G: hyps) (H J C D W R: class) (u: set):
@@ -327,6 +331,8 @@ theorem iphi_iphi0 (G: hyps) (J M D W Z Q Y: class) (u: set):
   $ G ⇒ icwf J D $ > $ G ⇒ uadm u $ > $ G ⇒ D ∈ trees ω $ > $ G ⇒ W ∈ lvals $ >
   $ G ⇒ Z ∈ u $ > $ G ⇒ Z ⊆ ω × (fseq u × fseq (ω ∪ u)) $ > $ G ⇒ Y ∈ u $ >
   $ G ⇒ iphi u (dnf u M) D W Z Q Y = iphi0 u (dnf u M) D W Z Q Y $;
+--| An element of a fiber of `ixs D W Z` is an entry at a type of the block.
+theorem ixs_fv_elim_c (G: hyps) (D W Z Y: class) (u j: set): $ G ⇒ universe u $ > $ G ⇒ Z ∈ u $ > $ G ⇒ Z ⊆ ω × (fseq u × u) $ > $ G ⇒ Y ∈ fv (ixs D W Z) j $ > $ G ⇒ j ∊ intys D ∧ Y ∈ ient D W Z j $;
 --| The operator is continuous with the positions as index set: an element
 --| depends on the elements its recursive fields reach, one per position.
 theorem iphi_cont {y: set} (G: hyps y) (J M D W Z P T Q: class) (u: set):
@@ -355,6 +361,40 @@ theorem iphi0_universe (G: hyps) (M D W Z Q S: class) (u: set):
 theorem iax_universe (G: hyps) (M D W Z Q: class) (u: set):
   $ G ⇒ uadm u $ > $ G ⇒ D ∈ ofsort lsig lopen ks_ind $ > $ G ⇒ W ∈ lvals $ >
   $ G ⇒ Z ∈ u $ > $ G ⇒ Q ∈ fseq u $ > $ G ⇒ iax u (dnf u M) D W Z Q ∈ u $;
+--| The window of `scat p X` over `p`'s domain is `p`.
+theorem swin_scat_head (G: hyps) (X: class) (u tp: set): $ G ⇒ scat tp X ∈ fseq u $ > $ G ⇒ tp ∊ fseq u $ > $ G ⇒ swin (scat tp X) ∅ (cdm tp) = tp $;
+--| Class form of `ind_wf_icwf`.
+theorem ind_wf_icwf_c (G: hyps) (J C: class) (d: set): $ G ⇒ ra_ind_wf C d ∈ lrel3 J $ > $ G ⇒ icwf J d $;
+--| Class form of `sat_cons_intro`.
+theorem sat_cons_intro_c (G: hyps) (M W H T T2: class) (u y0: set): $ G ⇒ T ∈ trees ω $ > $ G ⇒ T2 ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ H ∈ sat u M T2 W $ > $ G ⇒ y0 ∊ dt u M T W H $ > $ G ⇒ y0 ∊ u $ > $ G ⇒ scons y0 H ∈ sat u M ⟨ kc_cons , scons T (scons T2 ∅) ⟩ W $;
+--| `ulevel l l2` at a nonzero level: `l2` is a tree and its universe lies within `l`'s.
+theorem ulevel_uni_subset (G: hyps) (W: class) (t4 t14: set): $ G ⇒ ra_ulevel t4 t14 ∈ lrel2 $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ ¬ lv t4 W = ∅ $ > $ G ⇒ t14 ∈ trees ω ∧ fv uni (lv t14 W) ⊆ fv uni (lv t4 W) $;
+--| An element of `cpi` can be changed at one argument: every member of the fiber's elements is a value there.
+theorem cpi_modify {x k: set} (G: hyps x) (C: class) (B: class x) (h a e y: set): $ G ⇒ isset C $ > $ G ⇒ h ∊ cpi x C B $ > $ G ⇒ a ∊ C $ > $ G ⇒ e ∊ (⟦ x / a ⟧ B) $ > $ G ⇒ y ∊ e $ > $ G ⇒ ∃ k (k ∊ cpi x C B ∧ ⟨ a , y ⟩ ∈ k) $;
+--| Transfer of `⊆ {∅}` from the fibers `B` to `A` through `cpi`, when `cpi` of `A` inhabited gives `cpi` of `B` inhabited.
+theorem cpi_csn_transfer {x v: set} (G: hyps x) (C: class) (A B: class x): $ G ⇒ isset C $ > $ G ⇒ (∃ v (v ∊ cpi x C A)) → ∃ v (v ∊ cpi x C B) $ > $ G ⇒ ∀ x (x ∊ C → B ⊆ csn ∅ → A ⊆ csn ∅) $ > $ G ⇒ cpi x C B ⊆ csn ∅ → cpi x C A ⊆ csn ∅ $;
+--| Class form of `cuni_intro`.
+theorem wcel_cuni_intro (G: hyps) (P X: class) (h: set): $ G ⇒ X ∈ h $ > $ G ⇒ h ∊ P $ > $ G ⇒ X ∈ ⋃ P $;
+--| Transfer of membership in a universe from the fibers `B` to `A` through `cpi`.
+theorem cpi_universe_transfer {x v: set} (G: hyps) (N C: class) (A B: class x): $ G ⇒ universe N $ > $ G ⇒ isset C $ > $ G ⇒ (∃ v (v ∊ cpi x C A)) → ∃ v (v ∊ cpi x C B) $ > $ G ⇒ ∀ x (x ∊ C → B ⊆ csn ∅ → A ⊆ csn ∅) $ > $ G ⇒ ∀ x (x ∊ C → B ∈ N → A ∈ N) $ > $ G ⇒ cpi x C B ∈ N → cpi x C A ∈ N $;
+--| Class form of `scat_assoc`.
+theorem scat_assoc_c (G: hyps) (A S T U: class): $ G ⇒ S ∈ fseq A $ > $ G ⇒ T ∈ fseq A $ > $ G ⇒ U ∈ fseq A $ > $ G ⇒ scat (scat S T) U = scat S (scat T U) $;
+--| The telescope of a term lifted by one does not read the valuation's head.
+theorem etel_lift1_head (G: hyps) (M W R: class) (u t3 t4 x y: set): $ G ⇒ ra_lift ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ⟨ kc_nz , ∅ ⟩ t3 t4 ∈ lrel $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ x ∊ u $ > $ G ⇒ y ∊ u $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ etel u (dnf u M) t4 W (scons x R) = etel u (dnf u M) t4 W (scons y R) $;
+--| The number of types of a block, from `ntys`.
+theorem intys_ntys_c (G: hyps) (D: class) (tb tP tT tn tm0: set): $ G ⇒ ra_ind_data D tb tP tT ∈ lrel $ > $ G ⇒ ra_ntys tT tn tm0 ∈ lrel $ > $ G ⇒ intys D = fv nvf tn $;
+--| The gated values of a block's types form a sequence over `intys D`.
+theorem ityv_vals_ex {v i: set} (G: hyps) (M D W: class) (u: set): $ G ⇒ uadm u $ > $ G ⇒ D ∈ ofsort lsig lopen ks_ind $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ ∃ v (v ∊ fseq u ∧ cdm v = intys D ∧ ∀ i (i ∊ intys D → fv v i = ityv u (dnf u M) D i W)) $;
+--| The index of a block's type is below the number of types.
+theorem nth_ty_lt_ntys (G: hyps) (tT ti tf te tn tm0: set): $ G ⇒ ra_nth_ty tT ti tf te ∈ lrel $ > $ G ⇒ ra_ntys tT tn tm0 ∈ lrel $ > $ G ⇒ fv nvf ti ∈ fv nvf tn $;
+--| `tys_wf` at a nonempty list: the head type has a sort at the block's level.
+theorem tys_wf_head {kk ll: set} (G: hyps kk ll) (J: class) (dd nv np lv iv cx bb ff y1 y2 y3: set): $ G ⇒ ra_tys_wf dd nv np lv iv cx bb ∈ lrel3 J $ > $ G ⇒ bb = ⟨ kc_tcons , scons y1 (scons y2 (scons y3 ∅)) ⟩ $ > $ G ⇒ ff = y1 $ > $ G ⇒ ∃ kk ∃ ll (ra_isort ff kk ll ∈ lrel ∧ lveq ll lv) $;
+--| `tys_wf` at a nonempty list: the tail is well-formed at the next index.
+theorem tys_wf_tail (G: hyps) (J: class) (dd nv np lv iv cx bb y1 y2 y3: set): $ G ⇒ ra_tys_wf dd nv np lv iv cx bb ∈ lrel3 J $ > $ G ⇒ bb = ⟨ kc_tcons , scons y1 (scons y2 (scons y3 ∅)) ⟩ $ > $ G ⇒ ra_tys_wf dd nv np lv ⟨ kc_s , scons iv ∅ ⟩ cx y3 ∈ lrel3 J $;
+--| Every type of a `tys_wf` list has a sort at the block's level.
+theorem tys_wf_nth_lv {kk ll: set} (G: hyps) (J: class) (dd nv np lv iv cx bb jj ff ee: set): $ G ⇒ ra_tys_wf dd nv np lv iv cx bb ∈ lrel3 J $ > $ G ⇒ ra_nth_ty bb jj ff ee ∈ lrel $ > $ G ⇒ ∃ kk ∃ ll (ra_isort ff kk ll ∈ lrel ∧ lveq ll lv) $;
+--| No type of a block is a proposition when the block's level is not 0.
+theorem tys_wf_not_iprop (G: hyps) (J D W K: class) (tb tP tT tn tnp tl tG2: set): $ G ⇒ D ∈ ofsort lsig lopen ks_ind $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ ra_ind_data D tb tP tT ∈ lrel $ > $ G ⇒ ra_tys_wf D tn tnp tl ⟨ kc_nz , ∅ ⟩ tG2 tT ∈ lrel3 J $ > $ G ⇒ ¬ lv tl W = ∅ $ > $ G ⇒ ¬ iprop D K W $;
 --| Over `U_n`, for a block whose level `n` is not zero at `W`: the typings
 --| put the fields' types and the positive domains in `U_n`, so one step at the
 --| typings' support maps elements of `U_n` to elements of `U_n`, and the
