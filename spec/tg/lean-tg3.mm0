@@ -449,8 +449,8 @@ def cl_ctx_wf_cons (J: class) (.G .P .G2 .A .u .w: set): class =
   $ {w | ∃ G ∃ P ∃ G2 ∃ A ∃ u (w = ⟨ scons (ra_ctx_wf G P) ∅ , ra_ctx_wf G ⟨ kc_cons , scons A (scons P ∅) ⟩ ⟩ ∧ ra_capp P G G2 ∈ lrel ∧ ra_deq G2 A A ⟨ kc_srt , scons u ∅ ⟩ ∈ J)} $;
 def cl_tys_ty_nil (.Ctx .w: set): class =
   $ {w | ∃ Ctx (w = ⟨ ∅ , ra_tys_ty Ctx ⟨ kc_tnil , ∅ ⟩ ⟩)} $;
-def cl_tys_ty_cons (J: class) (.Ctx .F .C .T .u .w: set): class =
-  $ {w | ∃ Ctx ∃ F ∃ C ∃ T ∃ u (w = ⟨ scons (ra_tys_ty Ctx T) ∅ , ra_tys_ty Ctx ⟨ kc_tcons , scons F (scons C (scons T ∅)) ⟩ ⟩ ∧ ra_deq Ctx F F ⟨ kc_srt , scons u ∅ ⟩ ∈ J)} $;
+def cl_tys_ty_cons (J: class) (.Ctx .F .C .T .u .l .k .w: set): class =
+  $ {w | ∃ Ctx ∃ F ∃ C ∃ T ∃ u ∃ l ∃ k (w = ⟨ scons (ra_tys_ty Ctx T) ∅ , ra_tys_ty Ctx ⟨ kc_tcons , scons F (scons C (scons T ∅)) ⟩ ⟩ ∧ ra_isort F k l ∈ lrel ∧ ra_deq Ctx F F ⟨ kc_srt , scons u ∅ ⟩ ∈ J)} $;
 def cl_tys_ok_i (.G .G2 .D .b .P .T .w: set): class =
   $ {w | ∃ G ∃ G2 ∃ D ∃ b ∃ P ∃ T (w = ⟨ scons (ra_ctx_wf G P) (scons (ra_tys_ty G2 T) ∅) , ra_tys_ok G D ⟩ ∧ ra_ind_data D b P T ∈ lrel ∧ ra_tys_closed P T ∈ lrel ∧ ra_capp P G G2 ∈ lrel)} $;
 def cl_ind_wf_i (.G .G2 .D .b .P .N .T .np .n .m .k .n0 .l .F .C .w: set): class =
@@ -708,10 +708,11 @@ theorem lrel3_ctx_wf_cons (G: hyps) (J A1 A2 A3 A4 A5: class):
 theorem lrel3_tys_ty_nil (G: hyps) (J A1: class):
   $ G ⇒ A1 ∈ trees ω $ >
   $ G ⇒ ra_tys_ty A1 ⟨ kc_tnil , ∅ ⟩ ∈ lrel3 J $;
-theorem lrel3_tys_ty_cons (G: hyps) (J A1 A2 A3 A4 A5: class):
+theorem lrel3_tys_ty_cons (G: hyps) (J A1 A2 A3 A4 A5 A6 A7: class):
   $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
-  $ G ⇒ A5 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ >
   $ G ⇒ ra_tys_ty A1 A4 ∈ lrel3 J $ >
+  $ G ⇒ ra_isort A2 A7 A6 ∈ lrel $ >
   $ G ⇒ ra_deq A1 A2 A2 ⟨ kc_srt , scons A5 ∅ ⟩ ∈ J $ >
   $ G ⇒ ra_tys_ty A1 ⟨ kc_tcons , scons A2 (scons A3 (scons A4 ∅)) ⟩ ∈ lrel3 J $;
 theorem lrel3_tys_ok_i (G: hyps) (J A1 A2 A3 A4 A5 A6: class):
@@ -1080,7 +1081,7 @@ theorem tys_wf_cons_j (J: class) (D: ind) (n np: nat) (l l2: lvl) (i k: nat) (Ct
 theorem ctx_wf_nil_j (J: class) (G: ctx): $ ctx_wf_j J G nil $;
 theorem ctx_wf_cons_j (J: class) (G P G2: ctx) (A: expr) (u: lvl): $ ctx_wf_j J G P $ > $ capp P G G2 $ > $ ty_j J G2 A (srt u) $ > $ ctx_wf_j J G (cons A P) $;
 theorem tys_ty_nil_j (J: class) (Ctx: ctx): $ tys_ty_j J Ctx tnil $;
-theorem tys_ty_cons_j (J: class) (Ctx: ctx) (F: expr) (C: ctors) (T: tys) (u: lvl): $ ty_j J Ctx F (srt u) $ > $ tys_ty_j J Ctx T $ > $ tys_ty_j J Ctx (tcons F C T) $;
+theorem tys_ty_cons_j (J: class) (Ctx: ctx) (F: expr) (C: ctors) (T: tys) (u l: lvl) (k: nat): $ isort F k l $ > $ ty_j J Ctx F (srt u) $ > $ tys_ty_j J Ctx T $ > $ tys_ty_j J Ctx (tcons F C T) $;
 theorem tys_ok_i_j (J: class) (G G2: ctx) (D: ind) (b: blk) (P: ctx) (T: tys): $ ind_data D b P T $ > $ tys_closed P T $ > $ ctx_wf_j J G P $ > $ capp P G G2 $ > $ tys_ty_j J G2 T $ > $ tys_ok_j J G D $;
 theorem ind_wf_i_j (J: class) (G G2: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (np n m k n0: nat) (l: lvl) (F: expr) (C: ctors): $ tys_ok_j J G D $ > $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ capp P G G2 $ > $ nth_ty T nz F C $ > $ isort F k l $ > $ tys_wf_j J D n np l nz G2 T $ > $ ind_nested D N $ > $ ndecl N n n0 $ > $ nst_ok_j J G D n0 N $ > $ ind_wf_j J G D $;
 theorem nst_ok_nil_j (J: class) (G: ctx) (D: ind) (j: nat): $ nst_ok_j J G D j nil $;
@@ -1312,10 +1313,10 @@ theorem lrel3_ctx_wf_cases (G: hyps) (J: class) {G_v P G2 A u_v: set} (t1 t2: se
   $ G ⇒ ra_ctx_wf t1 t2 ∈ lrel3 J $ >
   $ G ⇒ ∃ G_v (t1 = G_v ∧ t2 = ⟨ kc_nil , ∅ ⟩) ∨
       ∃ G_v ∃ P ∃ G2 ∃ A ∃ u_v (t1 = G_v ∧ t2 = ⟨ kc_cons , scons A (scons P ∅) ⟩ ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_deq G2 A A ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J) $;
-theorem lrel3_tys_ty_cases (G: hyps) (J: class) {Ctx F C T u_v: set} (t1 t2: set):
+theorem lrel3_tys_ty_cases (G: hyps) (J: class) {Ctx F C T u_v l_v k_v: set} (t1 t2: set):
   $ G ⇒ ra_tys_ty t1 t2 ∈ lrel3 J $ >
   $ G ⇒ ∃ Ctx (t1 = Ctx ∧ t2 = ⟨ kc_tnil , ∅ ⟩) ∨
-      ∃ Ctx ∃ F ∃ C ∃ T ∃ u_v (t1 = Ctx ∧ t2 = ⟨ kc_tcons , scons F (scons C (scons T ∅)) ⟩ ∧ ra_deq Ctx F F ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_tys_ty Ctx T ∈ lrel3 J) $;
+      ∃ Ctx ∃ F ∃ C ∃ T ∃ u_v ∃ l_v ∃ k_v (t1 = Ctx ∧ t2 = ⟨ kc_tcons , scons F (scons C (scons T ∅)) ⟩ ∧ ra_isort F k_v l_v ∈ lrel ∧ ra_deq Ctx F F ⟨ kc_srt , scons u_v ∅ ⟩ ∈ J ∧ ra_tys_ty Ctx T ∈ lrel3 J) $;
 theorem lrel3_tys_ok_cases (G: hyps) (J: class) {G_v G2 D b_v P T: set} (t1 t2: set):
   $ G ⇒ ra_tys_ok t1 t2 ∈ lrel3 J $ >
   $ G ⇒ ∃ G_v ∃ G2 ∃ D ∃ b_v ∃ P ∃ T (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_tys_closed P T ∈ lrel ∧ ra_ctx_wf G_v P ∈ lrel3 J ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_tys_ty G2 T ∈ lrel3 J) $;
