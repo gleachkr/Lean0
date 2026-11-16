@@ -519,3 +519,303 @@ theorem ifold_zero {j a o: set} (G: hyps) (H J C R: class) (u w p cv mv td tb tp
   $ G ⇒ ra_clen tp te ∈ lrel $ > $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ >
   $ G ⇒ cv ∊ imots u (dnf u (mcv H)) td w p ∅ $ > $ G ⇒ mv ∊ imins u (dnf u (mcv H)) td w p cv $ >
   $ G ⇒ ∀ j ∀ a ∀ o (iprop td j w → ⟨ ⟨ j , ⟨ a , ∅ ⟩ ⟩ , o ⟩ ∈ ifold u (dnf u (mcv H)) td w p mv → o = ∅) $;
+
+-- --------------------------------------------------------------------------
+-- Large elimination: a proposition's paths with the same arguments (E9)
+-- --------------------------------------------------------------------------
+
+--| A path of an application: no fields, and the argument's value first among
+--| the arguments of a path of the function (`b` names the empty set).
+--| @freshen G a
+--| @freshen G b
+theorem etel_app_elim {a b: set} (G: hyps) (E: class) (u w r ta tb q1 q2 q3 q4: set):
+  $ G ⇒ ta ∊ trees ω $ > $ G ⇒ tb ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ ⟨ q1 , ⟨ q2 , ⟨ q3 , q4 ⟩ ⟩ ⟩ ∈ etel u E ⟨ kc_app , scons ta (scons tb ∅) ⟩ w r $ >
+  $ G ⇒ ∃ a ∃ b (b = ∅ ∧ ⟨ b , ⟨ b , ⟨ b , a ⟩ ⟩ ⟩ ∈ etel u E ta w r ∧ q2 = b ∧ q4 = scons (da (fv E tb) w r) a) $;
+
+--| An argument of an application has the same value at two valuations when the
+--| paths there have the same arguments.
+--| @freshen G x0
+theorem has_arg_val {x0: set} (G: hyps) (M: class) (u w r1 r2 t1 t2 o1 o2 p1 p2 p3 q1 q2 q3: set):
+  $ G ⇒ w ∊ lvals $ > $ G ⇒ r1 ∊ fseq u $ > $ G ⇒ r2 ∊ fseq u $ > $ G ⇒ ra_has_arg t1 t2 ∈ lrel $ > $ G ⇒ ⟨ p1 , ⟨ p2 , ⟨ p3 , o1 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) t1 w r1 $ > $ G ⇒ ⟨ q1 , ⟨ q2 , ⟨ q3 , o2 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) t1 w r2 $ > $ G ⇒ ∀ x0 (fv o1 x0 = fv o2 x0) $ >
+  $ G ⇒ dt u M t2 w r1 = dt u M t2 w r2 $;
+
+--| An element of a truth value is the empty set.
+theorem two_mem_empty (G: hyps) (A: class) (x: set): $ G ⇒ A ∈ two $ > $ G ⇒ x ∊ A $ > $ G ⇒ x = ∅ $;
+
+--| The value of a term closed at a depth does not read the valuation past that depth (`closed_etel_scat` for values).
+theorem closed_dt_scat (G: hyps) (M: class) (u w k e q v r: set):
+  $ G ⇒ ra_closed k e ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ q ∊ fseq u $ > $ G ⇒ v ∊ fseq u $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ fv nvf k = nadd (cdm q) (cdm v) $ > $ G ⇒ dt u M e w (scat q (scat v r)) = dt u M e w (scat q v) $;
+
+--| A variable among the leaf's arguments of `Π A. B` is its successor among those of `B`.
+theorem leaf_has_pi_inv (G: hyps) (t1 t2 ta tb: set):
+  $ G ⇒ ra_leaf_has t1 t2 ∈ lrel $ > $ G ⇒ t2 = ⟨ kc_pi , scons ta (scons tb ∅) ⟩ $ > $ G ⇒ ra_leaf_has ⟨ kc_s , scons t1 ∅ ⟩ tb ∈ lrel $;
+
+--| A variable among the leaf's arguments of a term with a path without fields is an
+--| argument of the term (`z` names the variable).
+--| @freshen G z
+theorem leaf_has_nopi {z: set} (G: hyps) (E: class) (u w r t1 t2 q1 q2 q3 q4: set):
+  $ G ⇒ ra_leaf_has t1 t2 ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ ⟨ q1 , ⟨ q2 , ⟨ q3 , q4 ⟩ ⟩ ⟩ ∈ etel u E t2 w r $ > $ G ⇒ q2 = ∅ $ > $ G ⇒ ∃ z (z = ⟨ kc_bvar , scons t1 ∅ ⟩ ∧ ra_has_arg t2 z ∈ lrel) $;
+
+--| The walk over `fir`: two paths of the rest `t0` of a constructor's type with the
+--| same arguments `o0`, at valuations `q0`, `r0` of the earlier fields and the
+--| parameters (followed by the types' values `v` for the paths, by the context's
+--| valuation `s` for the typings), have the same fields, and the valuations agree
+--| at the variables among the result's arguments. `tz`, `ts` name `0` and `1`.
+--| @freshen G x3
+--| @freshen G x4
+--| @freshen G x5
+theorem fir_fields {x3 x4 x5: set} (G: hyps) (J M: class) (u w v s t1 t3 tz ts: set) (t0 c0 d0 n0 q0 r0 e0 g0 p1 p2 p3 p5 p6 p7 o0: set):
+  $ G ⇒ jval u M J $ >
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ v ∊ fseq u $ >
+  $ G ⇒ s ∊ fseq u $ >
+  $ G ⇒ t1 ∊ trees ω $ >
+  $ G ⇒ tz = ⟨ kc_nz , ∅ ⟩ $ >
+  $ G ⇒ ts = ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ $ >
+  $ G ⇒ nadd (fv nvf tz) (cdm v) = fv nvf ts $ >
+  $ G ⇒ ∀ x4 ∀ x5 (x4 ∊ cdm v → x5 ∊ trees ω → fv nvf x5 = nadd (fv nvf tz) x4 → dt u M ⟨ kc_ind_ty , scons t1 (scons x5 ∅) ⟩ w ∅ = fv v x4) $ >
+  $ G ⇒ ra_fir t1 t3 c0 d0 t0 ∈ lrel3 J $ >
+  $ G ⇒ c0 ∊ trees ω $ >
+  $ G ⇒ ra_closed n0 t0 ∈ lrel $ >
+  $ G ⇒ q0 ∊ fseq u $ >
+  $ G ⇒ r0 ∊ fseq u $ >
+  $ G ⇒ cdm q0 = nadd (fv nvf d0) (fv nvf t3) $ >
+  $ G ⇒ cdm r0 = cdm q0 $ >
+  $ G ⇒ fv nvf n0 = nadd (cdm q0) (cdm v) $ >
+  $ G ⇒ scat q0 s ∈ sat u M c0 w $ >
+  $ G ⇒ scat r0 s ∈ sat u M c0 w $ >
+  $ G ⇒ e0 = scat q0 v $ >
+  $ G ⇒ g0 = scat r0 v $ >
+  $ G ⇒ ⟨ p1 , ⟨ p2 , ⟨ p3 , o0 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) t0 w e0 $ >
+  $ G ⇒ ⟨ p5 , ⟨ p6 , ⟨ p7 , o0 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) t0 w g0 $ >
+  $ G ⇒ p2 = p6 ∧ ∀ x3 (ra_leaf_has x3 t0 ∈ lrel → fv e0 (fv nvf x3) = fv g0 (fv nvf x3)) $;
+
+--| The value of a block's type is its entry in the family's valuation `v` (the
+--| hypothesis of `lrel_sinst_sem` at the family; `tz` names `0`).
+theorem ixs_ind_ty {x4 x5: set} (G: hyps) (H J C R: class) (u w td v tz: set):
+  $ G ⇒ iwf u H J C td w R $ > $ G ⇒ v = ixs td w (ifam u (dnf u (mcv H)) td w) $ > $ G ⇒ tz = ⟨ kc_nz , ∅ ⟩ $ >
+  $ G ⇒ ∀ x4 ∀ x5 (x4 ∊ cdm v → x5 ∊ trees ω → fv nvf x5 = nadd (fv nvf tz) x4 → dt u (mcv H) ⟨ kc_ind_ty , scons td (scons x5 ∅) ⟩ w ∅ = fv v x4) $;
+
+--| The types of a block with one type.
+theorem nth_ty_single (G: hyps) (TF TC: class) (t n f e: set):
+  $ G ⇒ ra_nth_ty t n f e ∈ lrel $ > $ G ⇒ t = ⟨ kc_tcons , scons TF (scons TC (scons ⟨ kc_tnil , ∅ ⟩ ∅)) ⟩ $ > $ G ⇒ isset TF $ > $ G ⇒ isset TC $ > $ G ⇒ n = ⟨ kc_nz , ∅ ⟩ ∧ f = TF ∧ e = TC $;
+
+--| No constructor in an empty list.
+theorem nth_ctor_nil (G: hyps) (e m k: set): $ G ⇒ ra_nth_ctor e m k ∈ lrel $ > $ G ⇒ e = ⟨ kc_cnil , ∅ ⟩ $ > $ G ⇒ ⊥ $;
+
+--| The constructor of a one-constructor list.
+theorem nth_ctor_single (G: hyps) (TK: class) (e m k: set):
+  $ G ⇒ ra_nth_ctor e m k ∈ lrel $ > $ G ⇒ e = ⟨ kc_ccons , scons TK (scons ⟨ kc_cnil , ∅ ⟩ ∅) ⟩ $ > $ G ⇒ isset TK $ > $ G ⇒ m = ⟨ kc_nz , ∅ ⟩ ∧ k = TK $;
+
+--| A block with one type has one type.
+theorem ntys_single (G: hyps) (TF TC: class) (t n k: set):
+  $ G ⇒ ra_ntys t n k ∈ lrel $ > $ G ⇒ t = ⟨ kc_tcons , scons TF (scons TC (scons ⟨ kc_tnil , ∅ ⟩ ∅)) ⟩ $ > $ G ⇒ isset TF $ > $ G ⇒ isset TC $ > $ G ⇒ n = ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ $;
+
+--| The constructors of a block with one type and one constructor.
+theorem single_ictk (G: hyps) (td tb tp tt tf tk j c k: set):
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ tt = ⟨ kc_tcons , scons tf (scons ⟨ kc_ccons , scons tk (scons ⟨ kc_cnil , ∅ ⟩ ∅) ⟩ (scons ⟨ kc_tnil , ∅ ⟩ ∅)) ⟩ $ > $ G ⇒ ictk td j c k $ > $ G ⇒ c = ∅ ∧ k = tk $;
+
+--| A block with one type and no constructor has no constructor.
+theorem empty_ictk (G: hyps) (td tb tp tt tf j c k: set):
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ tt = ⟨ kc_tcons , scons tf (scons ⟨ kc_cnil , ∅ ⟩ (scons ⟨ kc_tnil , ∅ ⟩ ∅)) ⟩ $ > $ G ⇒ ictk td j c k $ > $ G ⇒ ⊥ $;
+
+--| A level that absorbs `1` is not `0` at any valuation.
+theorem large_nz_level (G: hyps) (w tl: set):
+  $ G ⇒ w ∊ lvals $ > $ G ⇒ tl ∊ trees ω $ > $ G ⇒ lveq ⟨ kc_lmax , scons ⟨ kc_ls , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ (scons tl ∅) ⟩ tl $ > $ G ⇒ ¬ lv tl w = ∅ $;
+
+--| The constructor's type of a well-formed block with one type and one constructor
+--| is closed past the parameters and the types.
+--| @freshen G x
+theorem tys_wf_single_closed {x: set} (G: hyps) (J: class) (td tn tm tl ta tc tt tf tk tb tp te: set):
+  $ G ⇒ ra_tys_wf td tn tm tl ta tc tt ∈ lrel3 J $ > $ G ⇒ tt = ⟨ kc_tcons , scons tf (scons ⟨ kc_ccons , scons tk (scons ⟨ kc_cnil , ∅ ⟩ ∅) ⟩ (scons ⟨ kc_tnil , ∅ ⟩ ∅)) ⟩ $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_clen tp te ∈ lrel $ >
+  $ G ⇒ ∃ x (ra_closed x tk ∈ lrel ∧ fv nvf x = nadd (fv nvf te) (fv nvf tn)) $;
+
+--| A well-formed block with one type and one constructor: the constructor's type is
+--| closed past the parameters and the type, there is one type, and the parameters'
+--| telescope does not read the outer valuation.
+--| @freshen G x
+--| @freshen G z
+theorem single_block {x z: set} (G: hyps) (H J R: class) (u w tc td tb tp tt tf tk te: set):
+  $ G ⇒ iwf u H J tc td w R $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ tt = ⟨ kc_tcons , scons tf (scons ⟨ kc_ccons , scons tk (scons ⟨ kc_cnil , ∅ ⟩ ∅) ⟩ (scons ⟨ kc_tnil , ∅ ⟩ ∅)) ⟩ $ > $ G ⇒ ra_clen tp te ∈ lrel $ >
+  $ G ⇒ (∃ x (ra_closed x tk ∈ lrel ∧ fv nvf x = nadd (fv nvf te) (suc ∅))) ∧ intys td = suc ∅ ∧ ∀ z (z ∊ fseq u → esat u (dsh u (mcv H) z) tp w = esat u (dnf u (mcv H)) tp w) $;
+
+--| No type of a well-formed block is a proposition when the first type's level absorbs `1`
+--| (`tz` names `0`).
+theorem large_nz_noprop (G: hyps) (H J R K: class) (u w tc td tb tp tt tz tf tq tk tl: set):
+  $ G ⇒ iwf u H J tc td w R $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_nth_ty tt tz tf tq ∈ lrel $ > $ G ⇒ tz = ⟨ kc_nz , ∅ ⟩ $ >
+  $ G ⇒ ra_isort tf tk tl ∈ lrel $ > $ G ⇒ lveq ⟨ kc_lmax , scons ⟨ kc_ls , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ (scons tl ∅) ⟩ tl $ > $ G ⇒ ¬ iprop td K w $;
+
+--| Large elimination for one type with one constructor (`fir`): two paths of the
+--| constructor over the parameters `p` with the same arguments have the same fields.
+--| @freshen G j
+--| @freshen G a
+--| @freshen G b
+--| @freshen G k
+--| @freshen G h
+--| @freshen G x
+--| @freshen G y
+--| @freshen G v
+--| @freshen G e
+--| @freshen G i
+--| @freshen G m
+--| @freshen G o
+theorem large_single_paths {j a b k h x y v e i m o: set} (G: hyps) (H J R: class) (u w p tc td tb tp tt tf tk te tg: set):
+  $ G ⇒ iwf u H J tc td w R $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ tt = ⟨ kc_tcons , scons tf (scons ⟨ kc_ccons , scons tk (scons ⟨ kc_cnil , ∅ ⟩ ∅) ⟩ (scons ⟨ kc_tnil , ∅ ⟩ ∅)) ⟩ $ > $ G ⇒ ra_clen tp te ∈ lrel $ > $ G ⇒ ra_capp tp tc tg ∈ lrel $ > $ G ⇒ ra_fir td te tg ⟨ kc_nz , ∅ ⟩ tk ∈ lrel3 J $ > $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ >
+  $ G ⇒ ∀ j ∀ a ∀ b ∀ k ∀ h ∀ x ∀ y ∀ v ∀ e ∀ i ∀ m ∀ o (iprop td j w → ictk td j a k → ictk td j b h → ⟨ x , ⟨ y , ⟨ v , e ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) k w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) → ⟨ i , ⟨ m , ⟨ o , e ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) h w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) → a = b ∧ y = m) $;
+
+--| Large elimination (`large`): at a proposition, two constructor paths over the
+--| parameters `p` with the same arguments have the same constructor and fields
+--| (no type is a proposition, or there is no constructor, or one whose fields are
+--| propositions or arguments of its result).
+--| @freshen G j
+--| @freshen G a
+--| @freshen G b
+--| @freshen G k
+--| @freshen G h
+--| @freshen G x
+--| @freshen G y
+--| @freshen G v
+--| @freshen G e
+--| @freshen G i
+--| @freshen G m
+--| @freshen G o
+theorem large_paths {j a b k h x y v e i m o: set} (G: hyps) (H J R: class) (u w p tc td tb tp tt te: set):
+  $ G ⇒ iwf u H J tc td w R $ > $ G ⇒ ra_large tc td ∈ lrel3 J $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_clen tp te ∈ lrel $ > $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ >
+  $ G ⇒ ∀ j ∀ a ∀ b ∀ k ∀ h ∀ x ∀ y ∀ v ∀ e ∀ i ∀ m ∀ o (iprop td j w → ictk td j a k → ictk td j b h → ⟨ x , ⟨ y , ⟨ v , e ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) k w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) → ⟨ i , ⟨ m , ⟨ o , e ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) h w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) → a = b ∧ y = m) $;
+
+--| `elim_ok` gives `ifold_fn`'s elimination hypothesis: the motives are at level `0`
+--| (every value of the fold at a proposition is `∅`), or the block eliminates into
+--| every sort (`large_paths`).
+--| @freshen G j
+--| @freshen G a
+--| @freshen G b
+--| @freshen G k
+--| @freshen G h
+--| @freshen G x
+--| @freshen G y
+--| @freshen G v
+--| @freshen G e
+--| @freshen G i
+--| @freshen G m
+--| @freshen G o
+theorem ifold_elim_ok {j a b k h x y v e i m o: set} (G: hyps) (H J R: class) (u w p cv mv tc td tb tp tt tn tm te tv: set):
+  $ G ⇒ iwf u H J tc td w R $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_clen tp te ∈ lrel $ >
+  $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ >
+  $ G ⇒ cv ∊ imots u (dnf u (mcv H)) td w p (lv tv w) $ >
+  $ G ⇒ mv ∊ imins u (dnf u (mcv H)) td w p cv $ >
+  $ G ⇒ ra_elim_ok tc td tv ∈ lrel3 J $ >
+  $ G ⇒ (∀ j ∀ a ∀ o (iprop td j w → ⟨ ⟨ j , ⟨ a , ∅ ⟩ ⟩ , o ⟩ ∈ ifold u (dnf u (mcv H)) td w p mv → o = ∅)) ∨ ∀ j ∀ a ∀ b ∀ k ∀ h ∀ x ∀ y ∀ v ∀ e ∀ i ∀ m ∀ o (iprop td j w → ictk td j a k → ictk td j b h → ⟨ x , ⟨ y , ⟨ v , e ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) k w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) → ⟨ i , ⟨ m , ⟨ o , e ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) h w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) → a = b ∧ y = m) $;
+
+-- --------------------------------------------------------------------------
+-- The recursor's value in its type, semantically (E5)
+-- --------------------------------------------------------------------------
+
+--| The fold's value at a major premise `sx` of type `ti` at the indices `sf` (a path
+--| of the type's type over the parameters `p`) is an element of the motive there:
+--| the recursor's value lies in its motive, for motives `cv` at the level of `tv`
+--| and minors `mv`, when the block eliminates into that level (`elim_ok`).
+theorem irc_val (G: hyps) (H J R: class) (u w p cv mv tc td tb tp tt tn tm te tv ti tf tq tk tl sf sg st sa sx: set):
+  $ G ⇒ iwf u H J tc td w R $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_clen tp te ∈ lrel $ >
+  $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ >
+  $ G ⇒ cv ∊ imots u (dnf u (mcv H)) td w p (lv tv w) $ >
+  $ G ⇒ mv ∊ imins u (dnf u (mcv H)) td w p cv $ >
+  $ G ⇒ ra_elim_ok tc td tv ∈ lrel3 J $ >
+  $ G ⇒ ra_nth_ty tt ti tf tq ∈ lrel $ >
+  $ G ⇒ ra_isort tf tk tl ∈ lrel $ >
+  $ G ⇒ ⟨ sf , ⟨ sg , ⟨ st , sa ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) tf w p $ >
+  $ G ⇒ sx ∊ apn (ity u (dnf u (mcv H)) td (fv nvf ti) w) (scat sf p) $ >
+  $ G ⇒ fv (ifold u (dnf u (mcv H)) td w p mv) ⟨ fv nvf ti , ⟨ scat sf p , sx ⟩ ⟩ ∈ apn (vat cv (intys td) (fv nvf ti)) (scons sx sf) $;
+
+-- --------------------------------------------------------------------------
+-- Trace spaces of `Π` chains (D6 for the recursor's type)
+-- --------------------------------------------------------------------------
+
+--| One `Π` step of a curried trace, into the flat space: a function on `A` whose value
+--| at `a` is a trace over the paths `q` with `ssnoc q a` in `S`, valued in `T`'s values
+--| at `ssnoc q a`, is a trace over `S` valued in `T`'s values.
+--| @freshen G a
+--| @freshen G q
+--| @freshen G s
+--| @freshen G x
+--| @freshen G b
+--| @freshen G c
+theorem cpi_fpi {a q s x b c: set} (G: hyps) (A S T V: class) (h: set):
+  $ G ⇒ h ∊ cpi a A (fpi q {x | x ∊ fseq V ∧ ssnoc x a ∈ S} (ap T (ssnoc q a))) $ > $ G ⇒ ∀ s (s ∊ S → ∃ c ∃ b (b ∊ A ∧ c ∊ fseq V ∧ s = ssnoc c b)) $ >
+  $ G ⇒ h ∊ fpi s S (ap T s) $;
+
+--| One `Π` step of a curried trace, from the flat space: the converse of `cpi_fpi`.
+--| @freshen G a
+--| @freshen G q
+--| @freshen G s
+--| @freshen G x
+--| @freshen G b
+--| @freshen G c
+theorem fpi_cpi {a q s x b c: set} (G: hyps) (A S T V: class) (h: set):
+  $ G ⇒ h ∊ fpi s S (ap T s) $ > $ G ⇒ ∀ s (s ∊ S → ∃ c ∃ b (b ∊ A ∧ c ∊ fseq V ∧ s = ssnoc c b)) $ >
+  $ G ⇒ h ∊ cpi a A (fpi q {x | x ∊ fseq V ∧ ssnoc x a ∈ S} (ap T (ssnoc q a))) $;
+
+--| The last binder of a `Π` chain: a function on `A` valued in `T`'s values at the
+--| one-entry valuations is a trace over them.
+--| @freshen G a
+--| @freshen G s
+--| @freshen G x
+--| @freshen G b
+theorem cpi_fpi1 {a s x b: set} (G: hyps) (A T: class) (h: set):
+  $ G ⇒ h ∊ cpi a A (ap T (scons a ∅)) $ > $ G ⇒ h ∊ fpi s {x | ∃ b (b ∊ A ∧ x = scons b ∅)} (ap T s) $;
+
+--| The converse of `cpi_fpi1`.
+--| @freshen G a
+--| @freshen G s
+--| @freshen G x
+--| @freshen G b
+theorem fpi_cpi1 {a s x b: set} (G: hyps) (A T: class) (h: set):
+  $ G ⇒ h ∊ fpi s {x | ∃ b (b ∊ A ∧ x = scons b ∅)} (ap T s) $ > $ G ⇒ h ∊ cpi a A (ap T (scons a ∅)) $;
+
+--| An entry appended after one put in front.
+theorem ssnoc_scons (G: hyps) (A: class) (x f a: set):
+  $ G ⇒ f ∊ fseq A $ > $ G ⇒ x ∊ A $ > $ G ⇒ a ∊ A $ > $ G ⇒ ssnoc (scons x f) a = scons x (ssnoc f a) $;
+
+--| Appending an entry is injective.
+theorem ssnoc_inj (G: hyps) (A: class) (s t a b: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq A $ > $ G ⇒ a ∊ A $ > $ G ⇒ b ∊ A $ > $ G ⇒ ssnoc s a = ssnoc t b $ >
+  $ G ⇒ s = t ∧ a = b $;
+
+--| The paths with a major (the fields `c` of a path of `K` at `r`, then `m` in the
+--| table `Y`'s value at `c`), at a `Π` node: a sequence `s` whose extension by `a` is
+--| such a path of `Π A. B` is one of `B` at `scons a r`, for the table shifted by `a`.
+--| @freshen G z
+--| @freshen G c
+--| @freshen G d
+--| @freshen G h
+--| @freshen G o
+--| @freshen G m
+--| @freshen G v
+--| @freshen G q
+--| @freshen G y
+theorem mpth_pi_out {z c d h o m v q y: set} (G: hyps) (M Y V: class) (u w r ta tb a s: set):
+  $ G ⇒ ta ∊ trees ω $ > $ G ⇒ tb ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ u ⊆ V $ > $ G ⇒ a ∊ V $ > $ G ⇒ s ∊ fseq V $ > $ G ⇒ ssnoc s a ∈ {z | ∃ c ∃ d ∃ h ∃ o ∃ m (⟨ c , ⟨ d , ⟨ h , o ⟩ ⟩ ⟩ ∈ etel u (dnf u M) ⟨ kc_pi , scons ta (scons tb ∅) ⟩ w r ∧ m ∊ ap (Y) c ∧ m ∊ V ∧ z = scons m c)} $ >
+  $ G ⇒ s ∊ {z | ∃ c ∃ d ∃ h ∃ o ∃ m (⟨ c , ⟨ d , ⟨ h , o ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tb w (scons a r) ∧ m ∊ ap ({v | ∃ q ∃ y (q ∊ fseq V ∧ v = ⟨ q , y ⟩ ∧ ⟨ ssnoc q a , y ⟩ ∈ Y)}) c ∧ m ∊ V ∧ z = scons m c)} $;
+
+--| The converse of `mpth_pi_out`, for `a` in the value of `A`.
+--| @freshen G z
+--| @freshen G c
+--| @freshen G d
+--| @freshen G h
+--| @freshen G o
+--| @freshen G m
+--| @freshen G v
+--| @freshen G q
+--| @freshen G y
+theorem mpth_pi_in {z c d h o m v q y: set} (G: hyps) (M Y V: class) (u w r ta tb a s: set):
+  $ G ⇒ ta ∊ trees ω $ > $ G ⇒ tb ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ u ⊆ V $ > $ G ⇒ a ∊ dt u M ta w r $ > $ G ⇒ a ∊ u $ > $ G ⇒ s ∊ {z | ∃ c ∃ d ∃ h ∃ o ∃ m (⟨ c , ⟨ d , ⟨ h , o ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tb w (scons a r) ∧ m ∊ ap ({v | ∃ q ∃ y (q ∊ fseq V ∧ v = ⟨ q , y ⟩ ∧ ⟨ ssnoc q a , y ⟩ ∈ Y)}) c ∧ m ∊ V ∧ z = scons m c)} $ >
+  $ G ⇒ s ∊ fseq V ∧ ssnoc s a ∈ {z | ∃ c ∃ d ∃ h ∃ o ∃ m (⟨ c , ⟨ d , ⟨ h , o ⟩ ⟩ ⟩ ∈ etel u (dnf u M) ⟨ kc_pi , scons ta (scons tb ∅) ⟩ w r ∧ m ∊ ap (Y) c ∧ m ∊ V ∧ z = scons m c)} $;
