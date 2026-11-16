@@ -1068,13 +1068,25 @@ The rest of the model is not yet the spec's `deq`, so it changes nothing that is
   the block's types, so for a block with `ind_wf` one step of the family is monotone at
   candidates of the universe (`iop0_mono`) and the operator is that step there (`iop_iop0`).
   Definitions and theorems only.
-- **The family in the universe, and the gate** (`model-wf.mm0`, 2026-11-14, layer E2; four
-  theorems still admitted): for a block well formed over atoms that hold in the model (`iwf`),
+- **The family in the universe, and the gate** (`model-wf.mm0`, 2026-11-14, layer E2): for a block well formed over atoms that hold in the model (`iwf`),
   the family is an element of `u` and each type's value is its entry (`ind_wf_igate`), by a bound
   on the elements over each parameters' valuation (the least fixed point of a continuous operator,
   `lfp_universe`). When the gate fails the value is the trivial family `itriv` (model-ind), which
   has its type (`ityv_ipi`), so `ind_ty_ty` needs no legality. It relies on the two premises added
   to the spec's `cwf`/`ctors_wf` (§4).
+- **The types' and the constructors' typings** (`model-ctor.mm0`, 2026-11-15, layers E3 and
+  E4): the value of `ind_ty D i` is an element of the value of `Π P. F` (`ind_ty_ty_sem`, for
+  `F` binders over a sort), and for a well-formed block the value of `ind_ctor D i c` is an
+  element of the value of `Π P. K2`, `K2` the constructor's type with the block's types put in
+  (`ind_ctor_ty_wf`; without nested occurrences). The second reads the closedness of `Π P. K`
+  off `ctors_wf` and uses the block's own valuation of its types as the instance.
+- **Invariance under `eeqv`** (`model-inv.mm0`, 2026-11-15, layer D4, in part): a hook is
+  invariant (`minv`, which `meeqv_df` assumes) when each node it interprets is, given that the
+  node's proper subtrees are (`minv_intro`); and the hook of the inductive types is so at
+  `ind_ty` and `ind_ctor` nodes: blocks related by `ind_eqv` have the same types' and
+  constructors' values (`mcv_inv_ind_ty`, `mcv_inv_ind_ctor`; as the step of `minv_intro`:
+  `mcv_inv_node_ind_ty`, `mcv_inv_node_ind_ctor`). The recursors' and the other
+  constants' nodes are not done.
 
 **TG mode: a certificate verified against the library** (2026-11-09). The same certificate
 can be checked against the library instead of the spec:

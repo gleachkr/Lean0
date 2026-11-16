@@ -1,0 +1,100 @@
+-- model-ctor.mm0: the types' and the constructors' typings in the model
+-- (layers E3 and E4 of the reduction, audit §11): the values of `ind_ty D i`
+-- and `ind_ctor D i c` lie in the values of the types the spec's rules
+-- `ind_ty_ty` and `ind_ctor_ty` give them, with the rules' premises read as
+-- atoms of the programs (the judgment's atoms `J` true in the model, as in
+-- model-wf.mm0). Imports model-wf.mm0; proofs in model-ctor.auf.
+
+import "model-wf.mm0";
+
+-- --------------------------------------------------------------------------
+-- `ind_ty_ty` (E3)
+-- --------------------------------------------------------------------------
+
+--| Every type of a block with closed types: `Π P. F` is closed.
+theorem tys_closed_nth {r: set} (G: hyps) (t1 t2 t3 t4 t5: set):
+  $ G ⇒ ra_tys_closed t1 t2 ∈ lrel $ > $ G ⇒ ra_nth_ty t2 t3 t4 t5 ∈ lrel $ >
+  $ G ⇒ ∃ r (ra_pis t1 t4 r ∈ lrel ∧ ra_closed ⟨ kc_nz , ∅ ⟩ r ∈ lrel) $;
+--| The table shifted by the empty valuation is the denotation.
+theorem eagv_dsh_empty (G: hyps) (M: class) (u o: set):
+  $ G ⇒ o = ∅ $ > $ G ⇒ eagv u (dsh u M o) (dnf u M) $;
+--| `ind_ty_ty` in the model, for a hook with the types' part: the value of
+--| `ind_ty D i` lies in the value of `Π P. F`, for a block whose types' types
+--| are closed (`tys_closed`) and `F` binders over a sort (`isort`; without it
+--| the rule fails: the trivial family is not an element of an arbitrary type).
+theorem ind_ty_ty_sem (G: hyps) (H: class) (u w r td tb tp tt ti tf te tk tl tr: set):
+  $ G ⇒ uadm u $ > $ G ⇒ hty ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ td ∊ ofsort lsig lopen ks_ind $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_tys_closed tp tt ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tf te ∈ lrel $ > $ G ⇒ ra_isort tf tk tl ∈ lrel $ > $ G ⇒ ra_pis tp tf tr ∈ lrel $ >
+  $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ w r ∈ dt u (mcv H) tr w r $;
+
+-- --------------------------------------------------------------------------
+-- `ind_ctor_ty` (E4)
+-- --------------------------------------------------------------------------
+
+--| The shape of a well-formed constructor type at depth `d`: a `Π` whose body
+--| is well formed at depth `d + 1` (in some context `c`), or the result, type
+--| `i` applied to the parameters and indices.
+theorem lrel3_cwf_shape {a b c d: set} (G: hyps) (J: class) (t1 t2 t3 t4 t5 t6 t7 t8: set):
+  $ G ⇒ ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ∈ lrel3 J $ >
+  $ G ⇒ ∃ a ∃ b ∃ c ∃ d (t8 = ⟨ kc_pi , scons a (scons b ∅) ⟩ ∧ d = ⟨ kc_s , scons t7 ∅ ⟩ ∧
+        ra_cwf t1 t2 t3 t4 t5 c d b ∈ lrel3 J) ∨
+      ra_indapp t1 t2 t3 t7 t8 t5 ∈ lrel $;
+--| The children of a `Π` are expressions.
+theorem ofsort_pi_kids (G: hyps) (ta tb: set):
+  $ G ⇒ ⟨ kc_pi , scons ta (scons tb ∅) ⟩ ∈ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ta ∊ ofsort lsig lopen ks_expr ∧ tb ∊ ofsort lsig lopen ks_expr $;
+--| The arguments of the result of a constructor type (`indapp`) are a
+--| valuation over `u`.
+theorem lrel_indapp_fseq (G: hyps) (M: class) (u w r t1 t2 t3 t4 t5 t6: set):
+  $ G ⇒ ra_indapp t1 t2 t3 t4 t5 t6 ∈ lrel $ > $ G ⇒ uadm u $ > $ G ⇒ t5 ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ sarg u (dnf u M) t5 w r ∈ fseq u $;
+--| A set of points over the paths of a well-formed constructor type, whose
+--| value at each path is an element of the result's value there (type `i` of
+--| the valuation at the path's arguments), is an element of the type's
+--| value: the curried trace of a function on the fields into the type. The
+--| second hypothesis may assume the path's arguments are a sequence over `u`.
+theorem lrel3_cwf_trace {z f g t a v: set} (G: hyps) (J M: class) (u w r x t1 t2 t3 t4 t5 t6 t7 t8: set):
+  $ G ⇒ ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ∈ lrel3 J $ > $ G ⇒ uadm u $ >
+  $ G ⇒ t8 ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ t7 ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ ∀ z (z ∊ x → ∃ f ∃ g ∃ t ∃ a ∃ v (⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u (dnf u M) t8 w r ∧ z = nest f v)) $ >
+  $ G ⇒ ∀ f ∀ g ∀ t ∀ a (⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u (dnf u M) t8 w r → a ∊ fseq u →
+      apn x f ∈ apn (fv r (nadd (nadd (fv nvf t7) (fv nvf t3)) (fv nvf t5))) a) $ >
+  $ G ⇒ x ∈ dt u M t8 w r $;
+
+--| The constructor's rule in the model (E4), without nested occurrences
+--| (`K2` under the parameters is the type): for a well-formed block (`iwf`)
+--| and a hook with the constructors' part, the value of `ind_ctor D i c` lies
+--| in the value of `Π P. K2`. The parameters' types are closed
+--| (`tys_closed`) and so is the constructor's type `K` past the types and
+--| the parameters; both follow from `ind_wf`.
+theorem ind_ctor_ty_sem (G: hyps) (H J: class) (u w r tg td tb tp tt ti tf te tc tk tk2 tn tm tnp tx tr: set):
+  $ G ⇒ iwf u H J tg td w r $ > $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_nth_ty tt ti tf te ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor te tc tk ∈ lrel $ > $ G ⇒ ra_clen tp tnp ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tk tk2 ∈ lrel $ > $ G ⇒ ra_pis tp tk2 tr ∈ lrel $ >
+  $ G ⇒ ra_tys_closed tp tt ∈ lrel $ > $ G ⇒ ra_closed tx tk ∈ lrel $ >
+  $ G ⇒ fv nvf tx = nadd (fv nvf tnp) (fv nvf tn) $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ w r ∈ dt u (mcv H) tr w r $;
+
+--| When `Π P. K` (`t3`) is closed at `k`, `K` (`t2`) is closed past the
+--| telescope's variables too.
+theorem lrel_pis_closed {x: set} (G: hyps) (t1 t2 t3 k q: set):
+  $ G ⇒ ra_pis t1 t2 t3 ∈ lrel $ > $ G ⇒ ra_closed k t3 ∈ lrel $ > $ G ⇒ ra_clen t1 q ∈ lrel $ >
+  $ G ⇒ ∃ x (ra_closed x t2 ∈ lrel ∧ fv nvf x = nadd (fv nvf q) (fv nvf k)) $;
+
+--| Each constructor type of a well-formed list is closed under the block's
+--| parameters, at the number of the block's types (`ctors_wf_cons`'s premises).
+theorem lrel3_ctors_wf_nth_closed {b p t r: set} (G: hyps) (J: class) (t1 t2 t3 t4 t5 t6 t7 m k: set):
+  $ G ⇒ ra_ctors_wf t1 t2 t3 t4 t5 t6 t7 ∈ lrel3 J $ > $ G ⇒ ra_nth_ctor t7 m k ∈ lrel $ >
+  $ G ⇒ ∃ b ∃ p ∃ t ∃ r (ra_ind_data t1 b p t ∈ lrel ∧ ra_pis p k r ∈ lrel ∧ ra_closed t2 r ∈ lrel) $;
+
+--| The constructor's rule in the model from the rule's own premises: what
+--| `ind_ctor_ty_sem` assumes besides follows from the block's well-formedness.
+theorem ind_ctor_ty_wf (G: hyps) (H J: class) (u w r tg td tb tp tt ti tf te tc tk tk2 tn tm tnp tr: set):
+  $ G ⇒ iwf u H J tg td w r $ > $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_nth_ty tt ti tf te ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor te tc tk ∈ lrel $ > $ G ⇒ ra_clen tp tnp ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tk tk2 ∈ lrel $ > $ G ⇒ ra_pis tp tk2 tr ∈ lrel $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ w r ∈ dt u (mcv H) tr w r $;

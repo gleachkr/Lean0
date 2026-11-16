@@ -35916,3 +35916,56 @@ ind_wf_ityv
 -----------
 l1: $ … ⇒ igate u (dnf u (mcv H)) D K W $ by ind_wf_igate [#1, #2]
 l2: $ … ⇒ ityv u (dnf u (mcv H)) D K W = ity u (dnf u (mcv H)) D K W $ by ityv_gate [l1]
+
+apn_fseq_set
+------------
+l1: $ … ⇒ isset (apn F s) $ by b3_apn_set [#1, #2]
+
+ixs_pair
+--------
+a1: $ … ⇒ ient D W Z j ∈ u $ by ient_universe [#1, #2, #3]
+a2: $ … ⇒ isset (ient D W Z j) $ by wcel_isset [a1]
+b2: $ G , v = ient D W Z j ⇒ isset ⟨ j , v ⟩ $ by opair_isset
+c1: $ G , v = ient D W Z j , c = ⟨ j , v ⟩ ⇒ c = ⟨ j , v ⟩ $ by ax
+c2a: $ G , v = ient D W Z j , c = ⟨ j , v ⟩ ⇒ j = j $ by eq_refl
+c2b: $ G , v = ient D W Z j , c = ⟨ j , v ⟩ ⇒ v = ient D W Z j $ by ax
+c2: $ … ⇒ ⟨ j , v ⟩ = ⟨ j , ient D W Z j ⟩ $ by opair_eq [c2a, c2b]
+c3: $ … ⇒ c = ⟨ j , ient D W Z j ⟩ $ by eq_trans [c1, c2]
+c4: $ G , v = ient D W Z j , c = ⟨ j , v ⟩ ⇒ j ∊ intys D $ by weaken [#4]
+c5: $ … ⇒ j ∊ intys D ∧ c = ⟨ j , ient D W Z j ⟩ $ by and_intro [c4, c3]
+c6: $ … ⇒ ∃ k (k ∊ intys D ∧ c = ⟨ k , ient D W Z k ⟩) $ by ex_intro [c5]
+b3: $ G , v = ient D W Z j ⇒ ⟨ j , v ⟩ ∈ ixs D W Z $ by wcel_cab_intro [b2, c6]
+b4a: $ G , v = ient D W Z j ⇒ j = j $ by eq_refl
+b4b: $ G , v = ient D W Z j ⇒ v = ient D W Z j $ by ax
+b4: $ … ⇒ ⟨ j , ient D W Z j ⟩ ∈ ixs D W Z $ by wcel_eq_l [opair_eq [b4a, b4b], b3]
+b5: $ G ⇒ ⟨ j , ient D W Z j ⟩ ∈ ixs D W Z $ by isset_elim [a2, b4]
+
+ixs_fv
+------
+a1: $ G , x ∊ fv (ixs D W Z) j ⇒ x ∊ fv (ixs D W Z) j $ by ax
+a2: $ G , x ∊ fv (ixs D W Z) j ⇒ universe u $ by weaken [#1]
+a3: $ G , x ∊ fv (ixs D W Z) j ⇒ Z ∈ u $ by weaken [#2]
+a4: $ G , x ∊ fv (ixs D W Z) j ⇒ Z ⊆ ω × (fseq u × fseq (ω ∪ u)) $ by weaken [#3]
+a5: $ … ⇒ j ∊ intys D ∧ x ∈ ient D W Z j $ by b7_ixs_fv_in [a2, a3, a4, welc_wcel [a1]]
+a6: $ … ⇒ x ∊ ient D W Z j $ by wcel_welc [and_elim_r [a5]]
+a7: $ G ⇒ fv (ixs D W Z) j ⊆ ient D W Z j $ by subset_intro [a6]
+b1: $ G , x ∊ ient D W Z j ⇒ x ∊ ient D W Z j $ by ax
+b2: $ G , x ∊ ient D W Z j ⇒ universe u $ by weaken [#1]
+b3: $ G , x ∊ ient D W Z j ⇒ Z ∈ u $ by weaken [#2]
+b4: $ G , x ∊ ient D W Z j ⇒ Z ⊆ ω × (fseq u × fseq (ω ∪ u)) $ by weaken [#3]
+b5: $ G , x ∊ ient D W Z j ⇒ j ∊ intys D $ by weaken [#4]
+b6: $ … ⇒ x ∊ fv (ixs D W Z) j $ by b7_ixs_fv_out [b2, b3, b4, b5, welc_wcel [b1]]
+b7: $ G ⇒ ient D W Z j ⊆ fv (ixs D W Z) j $ by subset_intro [b6]
+b8: $ … ⇒ fv (ixs D W Z) j = ient D W Z j $ by subset_antisym [a7, b7]
+
+lrel_sinst_sort
+---------------
+l1: $ … ⇒ f ∊ ofsort lsig lopen ks_expr $ by b6_sinst_sort [#1, #2, #3]
+
+lrel_closed_pi_inv
+------------------
+l1: $ … ⇒ ra_closed k a ∈ lrel ∧ ra_closed ⟨ kc_s , scons k ∅ ⟩ b ∈ lrel $ by b6_closed_pi [#1, #2]
+
+ind_wf_data
+-----------
+l1: $ … ⇒ ∃ b ∃ p ∃ t ∃ m ∃ n ∃ k ∃ c ∃ l ∃ f ∃ e ∃ x (ra_ind_data td b p t ∈ lrel ∧ ra_tys_closed p t ∈ lrel ∧ ra_clen p m ∈ lrel ∧ ra_ntys t n k ∈ lrel ∧ ra_capp p tc c ∈ lrel ∧ ra_nth_ty t ⟨ kc_nz , ∅ ⟩ f e ∈ lrel ∧ ra_isort f x l ∈ lrel ∧ ra_tys_wf td n m l ⟨ kc_nz , ∅ ⟩ c t ∈ lrel3 J) $ by b15_inv [#1]

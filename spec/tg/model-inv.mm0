@@ -1,0 +1,90 @@
+-- model-inv.mm0: the hook of the inductive types is invariant under `eeqv`
+-- (layer D4 of the reduction, audit §11). `minv_intro` proves `minv` from the
+-- invariance of each node the hook interprets, given that of the node's
+-- proper subtrees. Imports model-ctor.mm0; proofs in model-inv.auf.
+
+import "model-ctor.mm0";
+
+--| A hook is invariant under `eeqv` when every node it interprets is, given
+--| that the node's proper subtrees are (`einv`): the induction on trees with
+--| `lrel2_eeqv_node` at each node.
+theorem minv_intro {u k s w t r: set} (G: hyps) (M: class):
+  $ G ⇒ ∀ u ∀ k ∀ s ∀ w (uadm u → w ∊ lvals → k ∈ kexa → ⟨ k , s ⟩ ∈ trees ω → psub s ⊆ einv u M w →
+      ∀ t ∀ r (ra_eeqv ⟨ k , s ⟩ t ∈ lrel2 → r ∊ fseq u → dt u M ⟨ k , s ⟩ w r = dt u M t w r)) $ >
+  $ G ⇒ minv M $;
+
+--| Equivalent telescopes (`ceqv`) have the same valuations, when the
+--| subtrees of the first are invariant.
+theorem ceqv_esat (G: hyps) (M: class) (u w t1 t2: set):
+  $ G ⇒ ra_ceqv t1 t2 ∈ lrel2 $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ fv tsub t1 ⊆ einv u M w $ >
+  $ G ⇒ esat u (dnf u M) t1 w = esat u (dnf u M) t2 w $;
+
+--| Equivalent types (`eeqv`) have the same paths at every valuation, when
+--| the subtrees of the first are invariant.
+theorem eeqv_etel (G: hyps) (M R: class) (u w t1 t2: set):
+  $ G ⇒ ra_eeqv t1 t2 ∈ lrel2 $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ fv tsub t1 ⊆ einv u M w $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ etel u (dnf u M) t1 w R = etel u (dnf u M) t2 w R $;
+
+--| Equivalent lists of types (`teqv`) and of constructors (`cseqv`) have
+--| corresponding entries at each index, from the left list to the right
+--| (`_l`) and back (`_r`).
+theorem teqv_nth_ty_l {p q: set} (G: hyps) (t1 t2 i f e: set):
+  $ G ⇒ ra_teqv t1 t2 ∈ lrel2 $ > $ G ⇒ ra_nth_ty t1 i f e ∈ lrel $ >
+  $ G ⇒ ∃ p ∃ q (ra_nth_ty t2 i p q ∈ lrel ∧ ra_eeqv f p ∈ lrel2 ∧ ra_cseqv e q ∈ lrel2) $;
+theorem teqv_nth_ty_r {p q: set} (G: hyps) (t1 t2 i f e: set):
+  $ G ⇒ ra_teqv t1 t2 ∈ lrel2 $ > $ G ⇒ ra_nth_ty t2 i f e ∈ lrel $ >
+  $ G ⇒ ∃ p ∃ q (ra_nth_ty t1 i p q ∈ lrel ∧ ra_eeqv p f ∈ lrel2 ∧ ra_cseqv q e ∈ lrel2) $;
+theorem cseqv_nth_ctor_l {p: set} (G: hyps) (t1 t2 i f: set):
+  $ G ⇒ ra_cseqv t1 t2 ∈ lrel2 $ > $ G ⇒ ra_nth_ctor t1 i f ∈ lrel $ >
+  $ G ⇒ ∃ p (ra_nth_ctor t2 i p ∈ lrel ∧ ra_eeqv f p ∈ lrel2) $;
+theorem cseqv_nth_ctor_r {p: set} (G: hyps) (t1 t2 i f: set):
+  $ G ⇒ ra_cseqv t1 t2 ∈ lrel2 $ > $ G ⇒ ra_nth_ctor t2 i f ∈ lrel $ >
+  $ G ⇒ ∃ p (ra_nth_ctor t1 i p ∈ lrel ∧ ra_eeqv p f ∈ lrel2) $;
+
+--| Equivalent types are binders over sorts together, with the same number of
+--| binders and equivalent levels, from the left type to the right (`_l`) and
+--| back (`_r`).
+theorem eeqv_isort_l {x: set} (G: hyps) (t1 t2 k l: set):
+  $ G ⇒ ra_eeqv t1 t2 ∈ lrel2 $ > $ G ⇒ ra_isort t1 k l ∈ lrel $ >
+  $ G ⇒ ∃ x (ra_isort t2 k x ∈ lrel ∧ lveq l x) $;
+theorem eeqv_isort_r {x: set} (G: hyps) (t1 t2 k l: set):
+  $ G ⇒ ra_eeqv t1 t2 ∈ lrel2 $ > $ G ⇒ ra_isort t2 k l ∈ lrel $ >
+  $ G ⇒ ∃ x (ra_isort t1 k x ∈ lrel ∧ lveq x l) $;
+
+--| Equivalent lists have the same lengths: the constructors' number
+--| (`clen_c`) and the types' numbers (`ntys`), each way.
+theorem cseqv_clen_c_l (G: hyps) (t1 t2 n: set):
+  $ G ⇒ ra_cseqv t1 t2 ∈ lrel2 $ > $ G ⇒ ra_clen_c t1 n ∈ lrel $ > $ G ⇒ ra_clen_c t2 n ∈ lrel $;
+theorem cseqv_clen_c_r (G: hyps) (t1 t2 n: set):
+  $ G ⇒ ra_cseqv t1 t2 ∈ lrel2 $ > $ G ⇒ ra_clen_c t2 n ∈ lrel $ > $ G ⇒ ra_clen_c t1 n ∈ lrel $;
+theorem teqv_ntys_l (G: hyps) (t1 t2 n m: set):
+  $ G ⇒ ra_teqv t1 t2 ∈ lrel2 $ > $ G ⇒ ra_ntys t1 n m ∈ lrel $ > $ G ⇒ ra_ntys t2 n m ∈ lrel $;
+theorem teqv_ntys_r (G: hyps) (t1 t2 n m: set):
+  $ G ⇒ ra_teqv t1 t2 ∈ lrel2 $ > $ G ⇒ ra_ntys t2 n m ∈ lrel $ > $ G ⇒ ra_ntys t1 n m ∈ lrel $;
+
+--| The types' part of the hook is invariant at `ind_ty` nodes: equivalent
+--| blocks (`ind_eqv`) have the same types' values, when the subtrees of the
+--| first are invariant (`minv_intro`'s hypothesis at these nodes).
+theorem mcv_inv_ind_ty (G: hyps) (H: class) (u w r d e i: set):
+  $ G ⇒ uadm u $ > $ G ⇒ hty ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ ra_ind_eqv d e ∈ lrel2 $ > $ G ⇒ fv tsub d ⊆ einv u (mcv H) w $ > $ G ⇒ i ∊ trees ω $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons d (scons i ∅) ⟩ w r = dt u (mcv H) ⟨ kc_ind_ty , scons e (scons i ∅) ⟩ w r $;
+
+--| The constructors' part of the hook is invariant at `ind_ctor` nodes.
+theorem mcv_inv_ind_ctor (G: hyps) (H: class) (u w r d e i c: set):
+  $ G ⇒ uadm u $ > $ G ⇒ hctor ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ ra_ind_eqv d e ∈ lrel2 $ > $ G ⇒ fv tsub d ⊆ einv u (mcv H) w $ > $ G ⇒ i ∊ trees ω $ >
+  $ G ⇒ c ∊ trees ω $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ctor , scons d (scons i (scons c ∅)) ⟩ w r = dt u (mcv H) ⟨ kc_ind_ctor , scons e (scons i (scons c ∅)) ⟩ w r $;
+
+--| `minv_intro`'s step for the hook of the inductive types at the nodes
+--| `ind_ty` and `ind_ctor`: a node whose proper subtrees are invariant is
+--| invariant.
+theorem mcv_inv_node_ind_ty (G: hyps) (H: class) (u w r z y t: set):
+  $ G ⇒ uadm u $ > $ G ⇒ hty ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ z = ⟨ kc_ind_ty , y ⟩ $ > $ G ⇒ psub y ⊆ einv u (mcv H) w $ > $ G ⇒ ra_eeqv z t ∈ lrel2 $ >
+  $ G ⇒ dt u (mcv H) z w r = dt u (mcv H) t w r $;
+theorem mcv_inv_node_ind_ctor (G: hyps) (H: class) (u w r z y t: set):
+  $ G ⇒ uadm u $ > $ G ⇒ hctor ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ z = ⟨ kc_ind_ctor , y ⟩ $ > $ G ⇒ psub y ⊆ einv u (mcv H) w $ > $ G ⇒ ra_eeqv z t ∈ lrel2 $ >
+  $ G ⇒ dt u (mcv H) z w r = dt u (mcv H) t w r $;

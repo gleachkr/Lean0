@@ -32,6 +32,41 @@ theorem mweakDF (M: class) (n: nat) (G G2: ctx) (e e2 A r r2 R: expr):
 def minv (M: class) (.u .k .s .t .w .r: set): fml =
   $ ∀ u ∀ k ∀ s ∀ t ∀ w ∀ r (uadm u → k ∈ kexa → ra_eeqv ⟨ k , s ⟩ t ∈ lrel2 →
       w ∊ lvals → r ∊ fseq u → dt u M ⟨ k , s ⟩ w r = dt u M t w r) $;
+--| The trees invariant under `eeqv` at the universe `U` and the level
+--| valuation `W`.
+def einv (U M W: class) (.y .t .r: set): class =
+  $ {y | ∀ t ∀ r (ra_eeqv y t ∈ lrel2 → dt U M y W r = dt U M t W r)} $;
+--| @congr
+theorem einv_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ einv A C E ≐ einv B D F $;
+--| @rewrite
+theorem sb_c_einv {x: set} (t: set x) (A B C: class x):
+  $ (⟦ x / t ⟧ (einv A B C)) ≐ einv (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+--| The tree `Z`, if it is a node the hook interprets, is invariant at `U`
+--| and `W`.
+def minvh (M U W Z: class) (.k .s .t .r: set): fml =
+  $ ∀ k ∀ s ∀ t ∀ r (Z = ⟨ k , s ⟩ → k ∈ kexa → ra_eeqv Z t ∈ lrel2 → r ∊ fseq U →
+      dt U M Z W r = dt U M t W r) $;
+--| @congr
+theorem minvh_congr (A B C D E F H I: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ minvh A C E H ⟺ minvh B D F I $;
+--| @rewrite
+theorem sb_f_minvh {x: set} (t: set x) (A B C D: class x):
+  $ [x/t] (minvh A B C D) ⟺ minvh (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) $;
+--| One node of the induction for `lrel2_eeqv_dt`: a tree whose children are
+--| invariant is invariant, when it is so in case the hook interprets it.
+theorem lrel2_eeqv_node (G: hyps) (M: class) (u w r z k j t: set):
+  $ G ⇒ minvh M u w z $ > $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ crn j ⊆ einv u M w $ >
+  $ G ⇒ z = ⟨ k , j ⟩ $ > $ G ⇒ z ∊ trees ω $ > $ G ⇒ ra_eeqv z t ∈ lrel2 $ >
+  $ G ⇒ dt u M z w r = dt u M t w r $;
+--| Introduction and elimination for `einv`.
+theorem einv_intro {t r: set} (G: hyps) (M: class) (u w x: set):
+  $ G , ra_eeqv x t ∈ lrel2 ⇒ dt u M x w r = dt u M t w r $ > $ G ⇒ x ∊ einv u M w $;
+theorem einv_elim (G: hyps) (M R: class) (u w x c: set):
+  $ G ⇒ x ∊ einv u M w $ > $ G ⇒ ra_eeqv x c ∈ lrel2 $ > $ G ⇒ isset R $ >
+  $ G ⇒ dt u M x w R = dt u M c w R $;
+--| The two sides of an `eeqv` atom are trees.
+theorem lrel2_eeqv_trees (G: hyps) (a b: set):
+  $ G ⇒ ra_eeqv a b ∈ lrel2 $ > $ G ⇒ a ∊ trees ω ∧ b ∊ trees ω $;
 --| Trees that are `eeqv` denote the same, for an invariant hook (by induction
 --| on the trees of sort `expr`, with `lrel2_eeqv_cases`).
 theorem lrel2_eeqv_dt (G: hyps) (M: class) (u t t2 w r: set):

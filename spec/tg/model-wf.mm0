@@ -417,3 +417,27 @@ theorem ind_wf_igate (G: hyps) (H J C D W R K: class) (u: set):
 theorem ind_wf_ityv (G: hyps) (H J C D W R K: class) (u: set):
   $ G ⇒ iwf u H J C D W R $ > $ G ⇒ K ∈ intys D $ >
   $ G ⇒ ityv u (dnf u (mcv H)) D K W = ity u (dnf u (mcv H)) D K W $;
+--| A curried trace's value at a sequence is a set when the trace is.
+theorem apn_fseq_set (G: hyps) (F A: class) (s: set): $ G ⇒ isset F $ > $ G ⇒ s ∊ fseq A $ > $ G ⇒ isset (apn F s) $;
+--| The types' valuation has type `j`'s entry at `j`.
+theorem ixs_pair (G: hyps) (D W Z: class) (u j: set):
+  $ G ⇒ universe u $ > $ G ⇒ Z ∈ u $ > $ G ⇒ Z ⊆ ω × (fseq u × fseq (ω ∪ u)) $ > $ G ⇒ j ∊ intys D $ >
+  $ G ⇒ ⟨ j , ient D W Z j ⟩ ∈ ixs D W Z $;
+theorem ixs_fv (G: hyps) (D W Z: class) (u j: set):
+  $ G ⇒ universe u $ > $ G ⇒ Z ∈ u $ > $ G ⇒ Z ⊆ ω × (fseq u × fseq (ω ∪ u)) $ > $ G ⇒ j ∊ intys D $ >
+  $ G ⇒ fv (ixs D W Z) j = ient D W Z j $;
+--| `sinst` at depth 0 keeps expressions expressions.
+theorem lrel_sinst_sort (G: hyps) (d n k e f: set):
+  $ G ⇒ ra_sinst d ⟨ kc_nz , ∅ ⟩ n k e f ∈ lrel $ > $ G ⇒ d ∈ ofsort lsig lopen ks_ind $ >
+  $ G ⇒ e ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ f ∊ ofsort lsig lopen ks_expr $;
+--| A closed `Π`: its domain is closed and its body closed one deeper.
+theorem lrel_closed_pi_inv (G: hyps) (k a b z: set):
+  $ G ⇒ ra_closed k z ∈ lrel $ > $ G ⇒ z = ⟨ kc_pi , scons a (scons b ∅) ⟩ $ >
+  $ G ⇒ ra_closed k a ∈ lrel ∧ ra_closed ⟨ kc_s , scons k ∅ ⟩ b ∈ lrel $;
+--| What `ind_wf` holds of a block: its data, the closed parameter telescopes,
+--| the numbers of parameters and types, and `tys_wf` at the first type's level.
+theorem ind_wf_data {b p t m n k c l f e x: set} (G: hyps) (J: class) (tc td: set):
+  $ G ⇒ ra_ind_wf tc td ∈ lrel3 J $ >
+  $ G ⇒ ∃ b ∃ p ∃ t ∃ m ∃ n ∃ k ∃ c ∃ l ∃ f ∃ e ∃ x (ra_ind_data td b p t ∈ lrel ∧ ra_tys_closed p t ∈ lrel ∧
+      ra_clen p m ∈ lrel ∧ ra_ntys t n k ∈ lrel ∧ ra_capp p tc c ∈ lrel ∧ ra_nth_ty t ⟨ kc_nz , ∅ ⟩ f e ∈ lrel ∧
+      ra_isort f x l ∈ lrel ∧ ra_tys_wf td n m l ⟨ kc_nz , ∅ ⟩ c t ∈ lrel3 J) $;
