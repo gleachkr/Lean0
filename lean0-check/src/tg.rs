@@ -41,6 +41,7 @@ const FILES: &[(&str, &str)] = &[
     ("model-wf.mm0", include_str!("../../spec/tg/model-wf.mm0")),
     ("model-ctor.mm0", include_str!("../../spec/tg/model-ctor.mm0")),
     ("model-inv.mm0", include_str!("../../spec/tg/model-inv.mm0")),
+    ("model-fold.mm0", include_str!("../../spec/tg/model-fold.mm0")),
     ("model.mm0", include_str!("../../spec/tg/model.mm0")),
     ("lean-tg-rest.mm0", include_str!("../../spec/tg/lean-tg-rest.mm0")),
 ];

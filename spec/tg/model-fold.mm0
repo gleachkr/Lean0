@@ -1,0 +1,57 @@
+-- model-fold.mm0: the fold of an inductive block in general (layer E5 of the
+-- reduction, audit §11): the fold's values lie in the motives. Imports
+-- model-inv.mm0; proofs in model-fold.auf.
+
+import "model-inv.mm0";
+
+-- --------------------------------------------------------------------------
+-- The motives as a relation
+-- --------------------------------------------------------------------------
+
+--| A point of a curried trace is not empty when its value is not.
+theorem nest_nempty (G: hyps) (A Y: class) (s: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ isset Y $ > $ G ⇒ ¬ Y = ∅ $ > $ G ⇒ ¬ nest s Y = ∅ $;
+
+--| No entry of the motives has `∅` among its points: each point is over a
+--| path with the major in front.
+theorem imots_pts (G: hyps) (E D V: class) (u w p cv k: set):
+  $ G ⇒ cv ∊ imots u E D w p V $ > $ G ⇒ ¬ ∅ ∈ fv cv k $;
+
+--| So the motives as a relation have sets for values (`imrel_set`).
+theorem imots_imrel_set {e: set} (G: hyps) (E D V: class) (u w p cv: set):
+  $ G ⇒ cv ∊ imots u E D w p V $ > $ G ⇒ ∀ e (isset (ap (imrel D cv) e)) $;
+
+-- --------------------------------------------------------------------------
+-- The minor of a constructor
+-- --------------------------------------------------------------------------
+
+--| The minor of a constructor of a list of types is below the number of the
+--| list's constructors (the numerals of the type and the constructor up to their values).
+theorem minor_idx_lt (G: hyps) (tf te tc tc2 tK ty ti tj tk tn tm: set):
+  $ G ⇒ ra_nth_ty ty ti tf te ∈ lrel $ > $ G ⇒ ra_minor_idx ty tj tc2 tk ∈ lrel $ > $ G ⇒ fv nvf ti = fv nvf tj $ >
+  $ G ⇒ ra_ntys ty tn tm ∈ lrel $ > $ G ⇒ ra_nth_ctor te tc tK ∈ lrel $ > $ G ⇒ fv nvf tc = fv nvf tc2 $ >
+  $ G ⇒ fv nvf tk ∈ fv nvf tm $;
+
+--| The number of constructors of a block, from `ntys`.
+theorem inmin_ntys_c (G: hyps) (D: class) (tb tp tt tn tm: set):
+  $ G ⇒ ra_ind_data D tb tp tt ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ > $ G ⇒ inmin D = fv nvf tm $;
+
+--| The minor of a constructor of a block is below the number of its constructors.
+theorem iminx_lt (G: hyps) (D j c k K: class) (tb tp tt tn tm: set):
+  $ G ⇒ ra_ind_data D tb tp tt ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ > $ G ⇒ ictk D j c K $ > $ G ⇒ iminx D j c k $ >
+  $ G ⇒ k ∈ inmin D $;
+
+-- --------------------------------------------------------------------------
+-- The fold's values lie in the motives
+-- --------------------------------------------------------------------------
+
+--| A constructor's type is a tree.
+theorem ictk_tree (G: hyps) (D I C K: class): $ G ⇒ ictk D I C K $ > $ G ⇒ K ∈ trees ω $;
+
+--| The fold relates each point to an element of its motive there: the fold
+--| is a subclass of the motives as a relation. The block has its numbers of
+--| types and constructors (`ntys`), and the valuations are sequences.
+theorem ifold_imrel (G: hyps) (E D V: class) (u w p cv mv tb tp tt tn tm: set):
+  $ G ⇒ ra_ind_data D tb tp tt ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ > $ G ⇒ p ∊ fseq u $ >
+  $ G ⇒ ixs D w (ifam u E D w) ∈ fseq u $ > $ G ⇒ cv ∊ imots u E D w p V $ > $ G ⇒ mv ∊ imins u E D w p cv $ >
+  $ G ⇒ ifold u E D w p mv ⊆ imrel D cv $;

@@ -4688,6 +4688,16 @@ sb_c_imin
 ---------
 l1: $ (⟦ x / t ⟧ fpi q ((iminq A B C D E F H I)) ({y | ∃ o (∃ f (∃ g (∃ r (∃ a (∃ h (((ictk C D E o) ∧ ((⟨ f , ⟨ g , ⟨ r , a ⟩ ⟩ ⟩ ∈ (etel A B o F (scat H (ixs C F (ifam A B C F))))) ∧ ((h ∊ (ihv C o (imrel C I) g r (cdm f))) ∧ ((q = (scat h f)) ∧ (y ∊ (apn (vat I (intys C) D) (scons (itup C D E g F) (cres a (inidx C D)))))))))))))))})) ≐ fpi q ((iminq (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) (⟦ x / t ⟧ F) (⟦ x / t ⟧ H) (⟦ x / t ⟧ I))) ({y | ∃ o (∃ f (∃ g (∃ r (∃ a (∃ h (((ictk (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) o) ∧ ((⟨ f , ⟨ g , ⟨ r , a ⟩ ⟩ ⟩ ∈ (etel (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) o (⟦ x / t ⟧ F) (scat (⟦ x / t ⟧ H) (ixs (⟦ x / t ⟧ C) (⟦ x / t ⟧ F) (ifam (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ F)))))) ∧ ((h ∊ (ihv (⟦ x / t ⟧ C) o (imrel (⟦ x / t ⟧ C) (⟦ x / t ⟧ I)) g r (cdm f))) ∧ ((q = (scat h f)) ∧ (y ∊ (apn (vat (⟦ x / t ⟧ I) (intys (⟦ x / t ⟧ C)) (⟦ x / t ⟧ D)) (scons (itup (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) g (⟦ x / t ⟧ F)) (cres a (inidx (⟦ x / t ⟧ C) (⟦ x / t ⟧ D))))))))))))))))}) $ by ceqt_refl
 
+ihasc_congr
+-----------
+g1: $ (o) ≐ (o) $ by ceqt_refl
+g2: $ ((ictk A C E o)) ⟺ ((ictk B D F o)) $ by ictk_congr [#1, #2, #3, g1]
+g3: $ ihasc A C E ⟺ ihasc B D F $ by ex_congr [g2]
+
+sb_f_ihasc
+----------
+l1: $ [x/t] (∃ o (ictk A B C o)) ⟺ ∃ o (ictk (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) o) $ by iff_refl
+
 imins_congr
 -----------
 g1: $ ((inmin E)) ≐ ((inmin F)) $ by inmin_congr [#3]
@@ -4698,15 +4708,45 @@ g5: $ ((iminx E i c k)) ⟺ ((iminx F i c k)) $ by iminx_congr [#3, g2, g3, g4]
 g6: $ seqt y y $ by seqt_refl
 g7: $ ((imin A C E i c H J L)) ≐ ((imin B D F i c I K N)) $ by imin_congr [#1, #2, #3, g2, g3, #4, #5, #6]
 g8: $ ((y ∊ (imin A C E i c H J L))) ⟺ ((y ∊ (imin B D F i c I K N))) $ by welc_congr [g6, g7]
-g9: $ (((iminx E i c k) ∧ (y ∊ (imin A C E i c H J L)))) ⟺ (((iminx F i c k) ∧ (y ∊ (imin B D F i c I K N)))) $ by and_congr [g5, g8]
-g10: $ (∃ c (((iminx E i c k) ∧ (y ∊ (imin A C E i c H J L))))) ⟺ (∃ c (((iminx F i c k) ∧ (y ∊ (imin B D F i c I K N))))) $ by ex_congr [g9]
-g11: $ (∃ i (∃ c (((iminx E i c k) ∧ (y ∊ (imin A C E i c H J L)))))) ⟺ (∃ i (∃ c (((iminx F i c k) ∧ (y ∊ (imin B D F i c I K N)))))) $ by ex_congr [g10]
-g12: $ ({y | ∃ i (∃ c (((iminx E i c k) ∧ (y ∊ (imin A C E i c H J L)))))}) ≐ ({y | ∃ i (∃ c (((iminx F i c k) ∧ (y ∊ (imin B D F i c I K N)))))}) $ by cab_congr [g11]
+g8h: $ ((ihasc E i c)) ⟺ ((ihasc F i c)) $ by ihasc_congr [#3, g2, g3]
+g8a: $ (((y ∊ (imin A C E i c H J L)) ∧ (ihasc E i c))) ⟺ (((y ∊ (imin B D F i c I K N)) ∧ (ihasc F i c))) $ by and_congr [g8, g8h]
+g9: $ (((iminx E i c k) ∧ ((y ∊ (imin A C E i c H J L)) ∧ (ihasc E i c)))) ⟺ (((iminx F i c k) ∧ ((y ∊ (imin B D F i c I K N)) ∧ (ihasc F i c)))) $ by and_congr [g5, g8a]
+g10: $ (∃ c (((iminx E i c k) ∧ ((y ∊ (imin A C E i c H J L)) ∧ (ihasc E i c))))) ⟺ (∃ c (((iminx F i c k) ∧ ((y ∊ (imin B D F i c I K N)) ∧ (ihasc F i c))))) $ by ex_congr [g9]
+g11: $ (∃ i (∃ c (((iminx E i c k) ∧ ((y ∊ (imin A C E i c H J L)) ∧ (ihasc E i c)))))) ⟺ (∃ i (∃ c (((iminx F i c k) ∧ ((y ∊ (imin B D F i c I K N)) ∧ (ihasc F i c)))))) $ by ex_congr [g10]
+g12: $ ({y | ∃ i (∃ c (((iminx E i c k) ∧ ((y ∊ (imin A C E i c H J L)) ∧ (ihasc E i c)))))}) ≐ ({y | ∃ i (∃ c (((iminx F i c k) ∧ ((y ∊ (imin B D F i c I K N)) ∧ (ihasc F i c)))))}) $ by cab_congr [g11]
 g13: $ imins A C E H J L ≐ imins B D F I K N $ by ivals_congr [#1, g1, g12]
 
 sb_c_imins
 ----------
-l1: $ (⟦ x / t ⟧ ivals k (A) ((inmin C)) ({y | ∃ i (∃ c (((iminx C i c k) ∧ (y ∊ (imin A B C i c D E F)))))})) ≐ ivals k ((⟦ x / t ⟧ A)) ((inmin (⟦ x / t ⟧ C))) ({y | ∃ i (∃ c (((iminx (⟦ x / t ⟧ C) i c k) ∧ (y ∊ (imin (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) i c (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) (⟦ x / t ⟧ F))))))}) $ by ceqt_refl
+l1: $ (⟦ x / t ⟧ ivals k (A) ((inmin C)) ({y | ∃ i (∃ c (((iminx C i c k) ∧ ((y ∊ (imin A B C i c D E F)) ∧ (ihasc C i c)))))})) ≐ ivals k ((⟦ x / t ⟧ A)) ((inmin (⟦ x / t ⟧ C))) ({y | ∃ i (∃ c (((iminx (⟦ x / t ⟧ C) i c k) ∧ ((y ∊ (imin (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) i c (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) (⟦ x / t ⟧ F))) ∧ (ihasc (⟦ x / t ⟧ C) i c)))))}) $ by ceqt_refl
+
+ihasc_intro
+-----------
+b0: $ G , iprt D p t ∧ fv nvf n = I ∧ ra_nth_ty t n f e ∈ lrel ∧ fv nvf m = C ∧ ra_nth_ctor e m K ∈ lrel ⇒ iprt D p t ∧ fv nvf n = I ∧ ra_nth_ty t n f e ∈ lrel ∧ fv nvf m = C ∧ ra_nth_ctor e m K ∈ lrel $ by ax
+b1: $ … ⇒ ra_nth_ctor e m K ∈ lrel $ by and_elim_r [and_elim_r [and_elim_r [and_elim_r [b0]]]]
+b2: $ G , iprt D p t ∧ fv nvf n = I ∧ ra_nth_ty t n f e ∈ lrel ∧ fv nvf m = C ∧ ra_nth_ctor e m K ∈ lrel ⇒ kr_nth_ctor ∈ ω $ by kr_nth_ctor_omega
+b3: $ … ⇒ e ∈ trees ω ∧ m ∈ trees ω ∧ K ∈ trees ω $ by lrel_args3_c [b1, wcel_isset [b2]]
+b4: $ … ⇒ isset K $ by wcel_isset [and_elim_r [and_elim_r [b3]]]
+c0: $ G , iprt D p t ∧ fv nvf n = I ∧ ra_nth_ty t n f e ∈ lrel ∧ fv nvf m = C ∧ ra_nth_ctor e m K ∈ lrel , o = K ⇒ o = K $ by ax
+c1: $ G , iprt D p t ∧ fv nvf n = I ∧ ra_nth_ty t n f e ∈ lrel ∧ fv nvf m = C ∧ ra_nth_ctor e m K ∈ lrel , o = K ⇒ ictk D I C K $ by weaken [#1]
+c2: $ G , iprt D p t ∧ fv nvf n = I ∧ ra_nth_ty t n f e ∈ lrel ∧ fv nvf m = C ∧ ra_nth_ctor e m K ∈ lrel , o = K ⇒ D = D $ by eq_refl
+c3: $ G , iprt D p t ∧ fv nvf n = I ∧ ra_nth_ty t n f e ∈ lrel ∧ fv nvf m = C ∧ ra_nth_ctor e m K ∈ lrel , o = K ⇒ I = I $ by eq_refl
+c4: $ G , iprt D p t ∧ fv nvf n = I ∧ ra_nth_ty t n f e ∈ lrel ∧ fv nvf m = C ∧ ra_nth_ctor e m K ∈ lrel , o = K ⇒ C = C $ by eq_refl
+c5: $ … ⇒ ictk D I C o $ by ictk_eq [c2, c3, c4, eq_sym [c0], c1]
+c6: $ … ⇒ ∃ o (ictk D I C o) $ by ex_intro [c5]
+b5: $ G , iprt D p t ∧ fv nvf n = I ∧ ra_nth_ty t n f e ∈ lrel ∧ fv nvf m = C ∧ ra_nth_ctor e m K ∈ lrel ⇒ ∃ o (ictk D I C o) $ by isset_elim [b4, c6]
+fin: $ G ⇒ ∃ o (ictk D I C o) $ by ictk_elim [#1, b5]
+
+ihasc_eq
+--------
+a0: $ G , ictk D I C o ⇒ ictk D I C o $ by ax
+a1: $ G , ictk D I C o ⇒ D = D2 $ by weaken [#1]
+a2: $ G , ictk D I C o ⇒ I = I2 $ by weaken [#2]
+a3: $ G , ictk D I C o ⇒ C = C2 $ by weaken [#3]
+a4: $ G , ictk D I C o ⇒ o = o $ by eq_refl
+a5: $ … ⇒ ictk D2 I2 C2 o $ by ictk_eq [a1, a2, a3, a4, a0]
+a6: $ … ⇒ ∃ o (ictk D2 I2 C2 o) $ by ex_intro [a5]
+a7: $ … ⇒ ∃ o (ictk D2 I2 C2 o) $ by ex_elim [#4, a6]
 
 lemma d2_vat_sub (G: hyps) (S N A B: class): $ G ⇒ A = B $ > $ G ⇒ vat S N A ⊆ vat S N B $
 ----
@@ -5828,33 +5868,33 @@ l8: $ … ⇒ fpi q (iminq u E D I C W S M) {y | ∃ o ∃ f ∃ g ∃ t ∃ a �
 lemma d3_imins_sub (G: hyps) (E E2 D W S M: class) (u: set):
   $ G ⇒ D ∈ trees ω $ > $ G ⇒ eagr E E2 D $ > $ G ⇒ imins u E D W S M ⊆ imins u E2 D W S M $
 ----
-a0: $ G , z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} ⇒ z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} $ by ax
-a1: $ … ⇒ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E D i c W S M) $ by cab_elim [a0]
-c1: $ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E D i c W S M) ⟺ ∃ a ∃ c (iminx D a c k ∧ z ∊ imin u E D a c W S M) $ by ex_alpha
-c2: $ ∃ c (iminx D a c k ∧ z ∊ imin u E D a c W S M) ⟺ ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M) $ by ex_alpha
-c3: $ ∃ a ∃ c (iminx D a c k ∧ z ∊ imin u E D a c W S M) ⟺ ∃ a ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M) $ by ex_congr [c2]
-c4: $ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E D i c W S M) ⟺ ∃ a ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M) $ by iff_trans [c1, c3]
-c5: $ G , z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} ⇒ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E D i c W S M) ↔ ∃ a ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M) $ by weaken [c4]
-a2: $ … ⇒ ∃ a ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M) $ by bi_elim_l [c5, a1]
-b1: $ G , z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} , iminx D a b k ∧ z ∊ imin u E D a b W S M ⇒ iminx D a b k ∧ z ∊ imin u E D a b W S M $ by ax
+a0: $ G , z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} ⇒ z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} $ by ax
+a1: $ … ⇒ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E D i c W S M ∧ ihasc D i c) $ by cab_elim [a0]
+c1: $ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E D i c W S M ∧ ihasc D i c) ⟺ ∃ a ∃ c (iminx D a c k ∧ z ∊ imin u E D a c W S M ∧ ihasc D a c) $ by ex_alpha
+c2: $ ∃ c (iminx D a c k ∧ z ∊ imin u E D a c W S M ∧ ihasc D a c) ⟺ ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b) $ by ex_alpha
+c3: $ ∃ a ∃ c (iminx D a c k ∧ z ∊ imin u E D a c W S M ∧ ihasc D a c) ⟺ ∃ a ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b) $ by ex_congr [c2]
+c4: $ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E D i c W S M ∧ ihasc D i c) ⟺ ∃ a ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b) $ by iff_trans [c1, c3]
+c5: $ G , z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} ⇒ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E D i c W S M ∧ ihasc D i c) ↔ ∃ a ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b) $ by weaken [c4]
+a2: $ … ⇒ ∃ a ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b) $ by bi_elim_l [c5, a1]
+b1: $ G , z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} , iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b ⇒ iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b $ by ax
 b2: $ … ⇒ iminx D a b k $ by and_elim_l [b1]
-b3: $ … ⇒ z ∊ imin u E D a b W S M $ by and_elim_r [b1]
-b4: $ G , z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} , iminx D a b k ∧ z ∊ imin u E D a b W S M ⇒ D ∈ trees ω $ by weaken [#1]
-b5: $ G , z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} , iminx D a b k ∧ z ∊ imin u E D a b W S M ⇒ eagr E E2 D $ by weaken [#2]
+b3: $ … ⇒ z ∊ imin u E D a b W S M $ by and_elim_l [and_elim_r [b1]]
+b4: $ G , z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} , iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b ⇒ D ∈ trees ω $ by weaken [#1]
+b5: $ G , z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} , iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b ⇒ eagr E E2 D $ by weaken [#2]
 b6: $ … ⇒ imin u E D a b W S M ⊆ imin u E2 D a b W S M $ by d3_imin_sub [b4, b5]
 b7: $ … ⇒ z ∊ imin u E2 D a b W S M $ by subset_elim [b6, b3]
-b8: $ … ⇒ iminx D a b k ∧ z ∊ imin u E2 D a b W S M $ by and_intro [b2, b7]
-b9: $ … ⇒ ∃ c (iminx D a c k ∧ z ∊ imin u E2 D a c W S M) $ by ex_intro [b8]
-b10: $ … ⇒ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E2 D i c W S M) $ by ex_intro [b9]
-b11: $ … ⇒ z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E2 D i c W S M)} $ by cab_intro [b10]
-d1: $ G , z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} , ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M) ⇒ ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M) $ by ax
-d2: $ … ⇒ z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E2 D i c W S M)} $ by ex_elim [d1, b11]
-d3: $ … ⇒ z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E2 D i c W S M)} $ by ex_elim [a2, d2]
-d4: $ … ⇒ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} ⊆ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E2 D i c W S M)} $ by subset_intro [d3]
-d5: $ G , k ∊ inmin D ⇒ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} ⊆ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E2 D i c W S M)} $ by weaken [d4]
-d6: $ … ⇒ k ∊ inmin D → {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} ⊆ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E2 D i c W S M)} $ by imp_intro [d5]
-d7: $ … ⇒ ∀ k (k ∊ inmin D → {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} ⊆ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E2 D i c W S M)}) $ by all_intro [d6]
-d8: $ … ⇒ ivals k u (inmin D) {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} ⊆ ivals k u (inmin D) {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E2 D i c W S M)} $ by ivals_mono [d7]
+b8: $ … ⇒ iminx D a b k ∧ z ∊ imin u E2 D a b W S M ∧ ihasc D a b $ by and_intro [b2, and_intro [b7, and_elim_r [and_elim_r [b1]]]]
+b9: $ … ⇒ ∃ c (iminx D a c k ∧ z ∊ imin u E2 D a c W S M ∧ ihasc D a c) $ by ex_intro [b8]
+b10: $ … ⇒ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E2 D i c W S M ∧ ihasc D i c) $ by ex_intro [b9]
+b11: $ … ⇒ z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E2 D i c W S M ∧ ihasc D i c)} $ by cab_intro [b10]
+d1: $ G , z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} , ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b) ⇒ ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b) $ by ax
+d2: $ … ⇒ z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E2 D i c W S M ∧ ihasc D i c)} $ by ex_elim [d1, b11]
+d3: $ … ⇒ z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E2 D i c W S M ∧ ihasc D i c)} $ by ex_elim [a2, d2]
+d4: $ … ⇒ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} ⊆ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E2 D i c W S M ∧ ihasc D i c)} $ by subset_intro [d3]
+d5: $ G , k ∊ inmin D ⇒ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} ⊆ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E2 D i c W S M ∧ ihasc D i c)} $ by weaken [d4]
+d6: $ … ⇒ k ∊ inmin D → {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} ⊆ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E2 D i c W S M ∧ ihasc D i c)} $ by imp_intro [d5]
+d7: $ … ⇒ ∀ k (k ∊ inmin D → {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} ⊆ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E2 D i c W S M ∧ ihasc D i c)}) $ by all_intro [d6]
+d8: $ … ⇒ ivals k u (inmin D) {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} ⊆ ivals k u (inmin D) {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E2 D i c W S M ∧ ihasc D i c)} $ by ivals_mono [d7]
 
 lemma d3_irc_sub (G: hyps) (E E2 D I V W: class) (u: set):
   $ G ⇒ D ∈ trees ω $ > $ G ⇒ eagr E E2 D $ > $ G ⇒ irc u E D I V W ⊆ irc u E2 D I V W $
@@ -6346,40 +6386,40 @@ q3: $ … ⇒ imin u E D I C W S M = imin u E D2 I2 C2 W2 S2 M2 $ by subset_anti
 
 lemma i0_imins_sub (G: hyps) (E D D2 W W2 S S2 M M2: class) (u: set): $ G ⇒ D = D2 $ > $ G ⇒ W = W2 $ > $ G ⇒ S = S2 $ > $ G ⇒ M = M2 $ > $ G ⇒ imins u E D W S M ⊆ imins u E D2 W2 S2 M2 $
 ----
-a0: $ G , z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} ⇒ z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} $ by ax
-a1: $ … ⇒ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E D i c W S M) $ by cab_elim [a0]
-c1: $ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E D i c W S M) ⟺ ∃ a ∃ c (iminx D a c k ∧ z ∊ imin u E D a c W S M) $ by ex_alpha
-c2: $ ∃ c (iminx D a c k ∧ z ∊ imin u E D a c W S M) ⟺ ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M) $ by ex_alpha
-c3: $ ∃ a ∃ c (iminx D a c k ∧ z ∊ imin u E D a c W S M) ⟺ ∃ a ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M) $ by ex_congr [c2]
-c4: $ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E D i c W S M) ⟺ ∃ a ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M) $ by iff_trans [c1, c3]
-c5: $ G , z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} ⇒ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E D i c W S M) ↔ ∃ a ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M) $ by weaken [c4]
-a2: $ … ⇒ ∃ a ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M) $ by bi_elim_l [c5, a1]
-b1: $ G , iminx D a b k ∧ z ∊ imin u E D a b W S M ⇒ iminx D a b k ∧ z ∊ imin u E D a b W S M $ by ax
+a0: $ G , z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} ⇒ z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} $ by ax
+a1: $ … ⇒ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E D i c W S M ∧ ihasc D i c) $ by cab_elim [a0]
+c1: $ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E D i c W S M ∧ ihasc D i c) ⟺ ∃ a ∃ c (iminx D a c k ∧ z ∊ imin u E D a c W S M ∧ ihasc D a c) $ by ex_alpha
+c2: $ ∃ c (iminx D a c k ∧ z ∊ imin u E D a c W S M ∧ ihasc D a c) ⟺ ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b) $ by ex_alpha
+c3: $ ∃ a ∃ c (iminx D a c k ∧ z ∊ imin u E D a c W S M ∧ ihasc D a c) ⟺ ∃ a ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b) $ by ex_congr [c2]
+c4: $ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E D i c W S M ∧ ihasc D i c) ⟺ ∃ a ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b) $ by iff_trans [c1, c3]
+c5: $ G , z ∊ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} ⇒ ∃ i ∃ c (iminx D i c k ∧ z ∊ imin u E D i c W S M ∧ ihasc D i c) ↔ ∃ a ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b) $ by weaken [c4]
+a2: $ … ⇒ ∃ a ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b) $ by bi_elim_l [c5, a1]
+b1: $ G , iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b ⇒ iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b $ by ax
 b2: $ … ⇒ iminx D a b k $ by and_elim_l [b1]
-b3: $ … ⇒ z ∊ imin u E D a b W S M $ by and_elim_r [b1]
-bw1: $ G , iminx D a b k ∧ z ∊ imin u E D a b W S M ⇒ D = D2 $ by weaken [#1]
-bw2: $ G , iminx D a b k ∧ z ∊ imin u E D a b W S M ⇒ W = W2 $ by weaken [#2]
-bw3: $ G , iminx D a b k ∧ z ∊ imin u E D a b W S M ⇒ S = S2 $ by weaken [#3]
-bw4: $ G , iminx D a b k ∧ z ∊ imin u E D a b W S M ⇒ M = M2 $ by weaken [#4]
-ba: $ G , iminx D a b k ∧ z ∊ imin u E D a b W S M ⇒ a = a $ by eq_refl
-bb: $ G , iminx D a b k ∧ z ∊ imin u E D a b W S M ⇒ b = b $ by eq_refl
-bk: $ G , iminx D a b k ∧ z ∊ imin u E D a b W S M ⇒ k = k $ by eq_refl
+b3: $ … ⇒ z ∊ imin u E D a b W S M $ by and_elim_l [and_elim_r [b1]]
+bw1: $ G , iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b ⇒ D = D2 $ by weaken [#1]
+bw2: $ G , iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b ⇒ W = W2 $ by weaken [#2]
+bw3: $ G , iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b ⇒ S = S2 $ by weaken [#3]
+bw4: $ G , iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b ⇒ M = M2 $ by weaken [#4]
+ba: $ G , iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b ⇒ a = a $ by eq_refl
+bb: $ G , iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b ⇒ b = b $ by eq_refl
+bk: $ G , iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b ⇒ k = k $ by eq_refl
 b6: $ … ⇒ imin u E D a b W S M ⊆ imin u E D2 a b W2 S2 M2 $ by i0_imin_sub [bw1, ba, bb, bw2, bw3, bw4]
 b7: $ … ⇒ z ∊ imin u E D2 a b W2 S2 M2 $ by subset_elim [b6, b3]
 b2b: $ … ⇒ iminx D2 a b k $ by iminx_eq [bw1, ba, bb, bk, b2]
-b8: $ … ⇒ iminx D2 a b k ∧ z ∊ imin u E D2 a b W2 S2 M2 $ by and_intro [b2b, b7]
-b9: $ … ⇒ ∃ c (iminx D2 a c k ∧ z ∊ imin u E D2 a c W2 S2 M2) $ by ex_intro [b8]
-b10: $ … ⇒ ∃ i ∃ c (iminx D2 i c k ∧ z ∊ imin u E D2 i c W2 S2 M2) $ by ex_intro [b9]
-b11: $ … ⇒ z ∊ {y | ∃ i ∃ c (iminx D2 i c k ∧ y ∊ imin u E D2 i c W2 S2 M2)} $ by cab_intro [b10]
-d1: $ G , ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M) ⇒ ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M) $ by ax
-d2: $ … ⇒ z ∊ {y | ∃ i ∃ c (iminx D2 i c k ∧ y ∊ imin u E D2 i c W2 S2 M2)} $ by ex_elim [d1, b11]
-d3: $ … ⇒ z ∊ {y | ∃ i ∃ c (iminx D2 i c k ∧ y ∊ imin u E D2 i c W2 S2 M2)} $ by ex_elim [a2, d2]
-d4: $ … ⇒ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} ⊆ {y | ∃ i ∃ c (iminx D2 i c k ∧ y ∊ imin u E D2 i c W2 S2 M2)} $ by subset_intro [d3]
-d5: $ G , k ∊ inmin D ⇒ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} ⊆ {y | ∃ i ∃ c (iminx D2 i c k ∧ y ∊ imin u E D2 i c W2 S2 M2)} $ by weaken [d4]
-d6: $ … ⇒ k ∊ inmin D → {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} ⊆ {y | ∃ i ∃ c (iminx D2 i c k ∧ y ∊ imin u E D2 i c W2 S2 M2)} $ by imp_intro [d5]
-d7: $ … ⇒ ∀ k (k ∊ inmin D → {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} ⊆ {y | ∃ i ∃ c (iminx D2 i c k ∧ y ∊ imin u E D2 i c W2 S2 M2)}) $ by all_intro [d6]
+b8: $ … ⇒ iminx D2 a b k ∧ z ∊ imin u E D2 a b W2 S2 M2 ∧ ihasc D2 a b $ by and_intro [b2b, and_intro [b7, ihasc_eq [bw1, ba, bb, and_elim_r [and_elim_r [b1]]]]]
+b9: $ … ⇒ ∃ c (iminx D2 a c k ∧ z ∊ imin u E D2 a c W2 S2 M2 ∧ ihasc D2 a c) $ by ex_intro [b8]
+b10: $ … ⇒ ∃ i ∃ c (iminx D2 i c k ∧ z ∊ imin u E D2 i c W2 S2 M2 ∧ ihasc D2 i c) $ by ex_intro [b9]
+b11: $ … ⇒ z ∊ {y | ∃ i ∃ c (iminx D2 i c k ∧ y ∊ imin u E D2 i c W2 S2 M2 ∧ ihasc D2 i c)} $ by cab_intro [b10]
+d1: $ G , ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b) ⇒ ∃ b (iminx D a b k ∧ z ∊ imin u E D a b W S M ∧ ihasc D a b) $ by ax
+d2: $ … ⇒ z ∊ {y | ∃ i ∃ c (iminx D2 i c k ∧ y ∊ imin u E D2 i c W2 S2 M2 ∧ ihasc D2 i c)} $ by ex_elim [d1, b11]
+d3: $ … ⇒ z ∊ {y | ∃ i ∃ c (iminx D2 i c k ∧ y ∊ imin u E D2 i c W2 S2 M2 ∧ ihasc D2 i c)} $ by ex_elim [a2, d2]
+d4: $ … ⇒ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} ⊆ {y | ∃ i ∃ c (iminx D2 i c k ∧ y ∊ imin u E D2 i c W2 S2 M2 ∧ ihasc D2 i c)} $ by subset_intro [d3]
+d5: $ G , k ∊ inmin D ⇒ {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} ⊆ {y | ∃ i ∃ c (iminx D2 i c k ∧ y ∊ imin u E D2 i c W2 S2 M2 ∧ ihasc D2 i c)} $ by weaken [d4]
+d6: $ … ⇒ k ∊ inmin D → {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} ⊆ {y | ∃ i ∃ c (iminx D2 i c k ∧ y ∊ imin u E D2 i c W2 S2 M2 ∧ ihasc D2 i c)} $ by imp_intro [d5]
+d7: $ … ⇒ ∀ k (k ∊ inmin D → {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} ⊆ {y | ∃ i ∃ c (iminx D2 i c k ∧ y ∊ imin u E D2 i c W2 S2 M2 ∧ ihasc D2 i c)}) $ by all_intro [d6]
 d9: $ … ⇒ inmin D = inmin D2 $ by inmin_eq [#1]
-d11: $ … ⇒ ivals k u (inmin D) {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M)} ⊆ ivals k u (inmin D2) {y | ∃ i ∃ c (iminx D2 i c k ∧ y ∊ imin u E D2 i c W2 S2 M2)} $ by ivals_sub [d9, d7]
+d11: $ … ⇒ ivals k u (inmin D) {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin u E D i c W S M ∧ ihasc D i c)} ⊆ ivals k u (inmin D2) {y | ∃ i ∃ c (iminx D2 i c k ∧ y ∊ imin u E D2 i c W2 S2 M2 ∧ ihasc D2 i c)} $ by ivals_sub [d9, d7]
 
 imins_eq
 --------

@@ -301,9 +301,13 @@ def imin (U E D i c W p cv: class) (.q .K .f .g .t .a .h .y: set): class =
       ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel U E K W (scat p (ixs D W (ifam U E D W))) ∧
       h ∊ ihv D K (imrel D cv) g t (cdm f) ∧ q = scat h f ∧
       y ∊ apn (vat cv (intys D) i) (scons (itup D i c g W) (cres a (inidx D i))))} $;
---| The minors' valuations at `p` and the motives `cv`.
+--| Type `i` of `D` has a constructor `c`.
+def ihasc (D i c: class) (.o: set): fml = $ ∃ o (ictk D i c o) $;
+--| The minors' valuations at `p` and the motives `cv`. The constructor must
+--| exist: `minor_idx` gives a minor to every number `c` at the first type, and
+--| a minor without a constructor has the space `{∅}`.
 def imins (U E D W p cv: class) (.k .i .c .y: set): class =
-  $ ivals k U (inmin D) {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin U E D i c W p cv)} $;
+  $ ivals k U (inmin D) {y | ∃ i ∃ c (iminx D i c k ∧ y ∊ imin U E D i c W p cv ∧ ihasc D i c)} $;
 
 --| @congr
 theorem imq_congr (A B C D E F H I J K L N: class):
@@ -351,6 +355,11 @@ theorem sb_c_imin {x: set} (t: set x) (A B C D E F H I: class x):
   $ (⟦ x / t ⟧ (imin A B C D E F H I)) ≐ imin (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C)
       (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) (⟦ x / t ⟧ F) (⟦ x / t ⟧ H) (⟦ x / t ⟧ I) $;
 --| @congr
+theorem ihasc_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ ihasc A C E ⟺ ihasc B D F $;
+--| @rewrite
+theorem sb_f_ihasc {x: set} (t: set x) (A B C: class x):
+  $ [x/t] (ihasc A B C) ⟺ ihasc (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+--| @congr
 theorem imins_congr (A B C D E F H I J K L N: class):
   $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ L ≐ N $ >
   $ imins A C E H J L ≐ imins B D F I K N $;
@@ -359,6 +368,10 @@ theorem sb_c_imins {x: set} (t: set x) (A B C D E F: class x):
   $ (⟦ x / t ⟧ (imins A B C D E F)) ≐
       imins (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) (⟦ x / t ⟧ F) $;
 
+--| A constructor's type gives `ihasc`; `ihasc` under equal arguments.
+theorem ihasc_intro (G: hyps) (D I C K: class): $ G ⇒ ictk D I C K $ > $ G ⇒ ihasc D I C $;
+theorem ihasc_eq (G: hyps) (D D2 I I2 C C2: class):
+  $ G ⇒ D = D2 $ > $ G ⇒ I = I2 $ > $ G ⇒ C = C2 $ > $ G ⇒ ihasc D I C $ > $ G ⇒ ihasc D2 I2 C2 $;
 --| `vat` and `inidx` under an equal last argument.
 theorem vat_eq_arg (G: hyps) (S N A B: class): $ G ⇒ A = B $ > $ G ⇒ vat S N A = vat S N B $;
 theorem inidx_eq_arg (G: hyps) (D A B: class): $ G ⇒ A = B $ > $ G ⇒ inidx D A = inidx D B $;

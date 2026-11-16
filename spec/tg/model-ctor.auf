@@ -2298,3 +2298,188 @@ e9_x1: $ G , ∃ x2 ∃ x3 ∃ x4 ∃ x5 ∃ x6 ∃ x7 ∃ x8 ∃ x9 ∃ x0 ∃ 
 e9_y1: $ … ⇒ dt u (mcv H) ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ w r ∈ dt u (mcv H) tr w r $ by ex_elim [e9_x1, e9_y2]
 e9: $ … ⇒ dt u (mcv H) ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ w r ∈ dt u (mcv H) tr w r $ by ex_elim [w2, e9_y1]
 
+
+lemma e3_tc {k l: set} (G: hyps) (J: class) (tc tz ta te tb: set): $ G ⇒ ra_tys_ty tc tz ∈ lrel3 J $ > $ G ⇒ tz = ⟨ kc_tcons , scons ta (scons te (scons tb ∅)) ⟩ $ > $ G ⇒ (∃ k ∃ l (ra_isort ta k l ∈ lrel)) ∧ ra_tys_ty tc tb ∈ lrel3 J $
+----
+s0: $ … ⇒ ∃ x1 (tc = x1 ∧ tz = ⟨ kc_tnil , ∅ ⟩) ∨ ∃ x1 ∃ x2 ∃ x3 ∃ x4 ∃ x5 ∃ x6 ∃ x7 (tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J) $ by lrel3_tys_ty_cases [#1]
+a0: $ G , tc = x1 ∧ tz = ⟨ kc_tnil , ∅ ⟩ ⇒ tc = x1 ∧ tz = ⟨ kc_tnil , ∅ ⟩ $ by ax
+a1: $ G , tc = x1 ∧ tz = ⟨ kc_tnil , ∅ ⟩ ⇒ tz = ⟨ kc_tcons , scons ta (scons te (scons tb ∅)) ⟩ $ by weaken [#2]
+a2: $ … ⇒ ⟨ kc_tnil , ∅ ⟩ = ⟨ kc_tcons , scons ta (scons te (scons tb ∅)) ⟩ $ by eq_trans [eq_sym [and_elim_r [a0]], a1]
+a3: $ G , tc = x1 ∧ tz = ⟨ kc_tnil , ∅ ⟩ ⇒ kc_tnil ∈ ω $ by kc_tnil_omega
+a4: $ G , tc = x1 ∧ tz = ⟨ kc_tnil , ∅ ⟩ ⇒ kc_tcons ∈ ω $ by kc_tcons_omega
+a5: $ … ⇒ kc_tnil = kc_tcons $ by opair_inj_l_c [a2, wcel_isset [a3], wcel_isset [a4]]
+a6: $ G , tc = x1 ∧ tz = ⟨ kc_tnil , ∅ ⟩ ⇒ ¬ kc_tnil = kc_tcons $ by kc_tnil_ne_tcons
+a7: $ … ⇒ (∃ k ∃ l (ra_isort ta k l ∈ lrel)) ∧ ra_tys_ty tc tb ∈ lrel3 J $ by bot_elim [not_elim [a6, a5]]
+a8_x0: $ G , ∃ x1 (tc = x1 ∧ tz = ⟨ kc_tnil , ∅ ⟩) ⇒ ∃ x1 (tc = x1 ∧ tz = ⟨ kc_tnil , ∅ ⟩) $ by ax
+a8_y0: $ … ⇒ (∃ k ∃ l (ra_isort ta k l ∈ lrel)) ∧ ra_tys_ty tc tb ∈ lrel3 J $ by ex_elim [a8_x0, a7]
+b0: $ G , tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J ⇒ tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J $ by ax
+bn1: $ … ⇒ tc = x1 $ by and_elim_l [b0]
+bn2: $ … ⇒ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ $ by and_elim_l [and_elim_r [b0]]
+bn3: $ … ⇒ ra_isort x2 x7 x6 ∈ lrel $ by and_elim_l [and_elim_r [and_elim_r [b0]]]
+bn5: $ … ⇒ ra_tys_ty x1 x4 ∈ lrel3 J $ by and_elim_r [and_elim_r [and_elim_r [and_elim_r [b0]]]]
+b1: $ G , tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J ⇒ tz = ⟨ kc_tcons , scons ta (scons te (scons tb ∅)) ⟩ $ by weaken [#2]
+b2: $ … ⇒ ⟨ kc_tcons , scons ta (scons te (scons tb ∅)) ⟩ = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ $ by eq_trans [eq_sym [b1], bn2]
+b3a: $ G , tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J ⇒ kc_tcons ∈ ω $ by kc_tcons_omega
+b3: $ … ⇒ ta = x2 ∧ te = x3 ∧ tb = x4 $ by node3_inj [wcel_isset [b3a], b2]
+r6: $ G , tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J ⇒ x6 = x6 $ by eq_refl
+r7: $ G , tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J ⇒ x7 = x7 $ by eq_refl
+b4: $ … ⇒ ra_isort ta x7 x6 ∈ lrel $ by wcel_eq_l [ra_isort_eq [eq_sym [and_elim_l [b3]], r7, r6], bn3]
+b5: $ … ⇒ ∃ l (ra_isort ta x7 l ∈ lrel) $ by ex_intro [b4]
+b6: $ … ⇒ ∃ k ∃ l (ra_isort ta k l ∈ lrel) $ by ex_intro [b5]
+b7: $ … ⇒ ra_tys_ty tc tb ∈ lrel3 J $ by wcel_eq_l [ra_tys_ty_eq [eq_sym [bn1], eq_sym [and_elim_r [and_elim_r [b3]]]], bn5]
+b8: $ … ⇒ (∃ k ∃ l (ra_isort ta k l ∈ lrel)) ∧ ra_tys_ty tc tb ∈ lrel3 J $ by and_intro [b6, b7]
+b9_x6: $ G , ∃ x7 (tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J) ⇒ ∃ x7 (tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J) $ by ax
+b9_y6: $ … ⇒ (∃ k ∃ l (ra_isort ta k l ∈ lrel)) ∧ ra_tys_ty tc tb ∈ lrel3 J $ by ex_elim [b9_x6, b8]
+b9_x5: $ G , ∃ x6 ∃ x7 (tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J) ⇒ ∃ x6 ∃ x7 (tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J) $ by ax
+b9_y5: $ … ⇒ (∃ k ∃ l (ra_isort ta k l ∈ lrel)) ∧ ra_tys_ty tc tb ∈ lrel3 J $ by ex_elim [b9_x5, b9_y6]
+b9_x4: $ G , ∃ x5 ∃ x6 ∃ x7 (tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J) ⇒ ∃ x5 ∃ x6 ∃ x7 (tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J) $ by ax
+b9_y4: $ … ⇒ (∃ k ∃ l (ra_isort ta k l ∈ lrel)) ∧ ra_tys_ty tc tb ∈ lrel3 J $ by ex_elim [b9_x4, b9_y5]
+b9_x3: $ G , ∃ x4 ∃ x5 ∃ x6 ∃ x7 (tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J) ⇒ ∃ x4 ∃ x5 ∃ x6 ∃ x7 (tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J) $ by ax
+b9_y3: $ … ⇒ (∃ k ∃ l (ra_isort ta k l ∈ lrel)) ∧ ra_tys_ty tc tb ∈ lrel3 J $ by ex_elim [b9_x3, b9_y4]
+b9_x2: $ G , ∃ x3 ∃ x4 ∃ x5 ∃ x6 ∃ x7 (tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J) ⇒ ∃ x3 ∃ x4 ∃ x5 ∃ x6 ∃ x7 (tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J) $ by ax
+b9_y2: $ … ⇒ (∃ k ∃ l (ra_isort ta k l ∈ lrel)) ∧ ra_tys_ty tc tb ∈ lrel3 J $ by ex_elim [b9_x2, b9_y3]
+b9_x1: $ G , ∃ x2 ∃ x3 ∃ x4 ∃ x5 ∃ x6 ∃ x7 (tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J) ⇒ ∃ x2 ∃ x3 ∃ x4 ∃ x5 ∃ x6 ∃ x7 (tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J) $ by ax
+b9_y1: $ … ⇒ (∃ k ∃ l (ra_isort ta k l ∈ lrel)) ∧ ra_tys_ty tc tb ∈ lrel3 J $ by ex_elim [b9_x1, b9_y2]
+b9_x0: $ G , ∃ x1 ∃ x2 ∃ x3 ∃ x4 ∃ x5 ∃ x6 ∃ x7 (tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J) ⇒ ∃ x1 ∃ x2 ∃ x3 ∃ x4 ∃ x5 ∃ x6 ∃ x7 (tc = x1 ∧ tz = ⟨ kc_tcons , scons x2 (scons x3 (scons x4 ∅)) ⟩ ∧ ra_isort x2 x7 x6 ∈ lrel ∧ ra_deq x1 x2 x2 ⟨ kc_srt , scons x5 ∅ ⟩ ∈ J ∧ ra_tys_ty x1 x4 ∈ lrel3 J) $ by ax
+b9_y0: $ … ⇒ (∃ k ∃ l (ra_isort ta k l ∈ lrel)) ∧ ra_tys_ty tc tb ∈ lrel3 J $ by ex_elim [b9_x0, b9_y1]
+fin: $ … ⇒ (∃ k ∃ l (ra_isort ta k l ∈ lrel)) ∧ ra_tys_ty tc tb ∈ lrel3 J $ by or_elim [s0, a8_y0, b9_y0]
+
+def e3_tq (J C F E: class) (.y .m .k .l: set): class = $ {y | ∀ m (ra_tys_ty C y ∈ lrel3 J → ra_nth_ty y m F E ∈ lrel → ∃ k ∃ l (ra_isort F k l ∈ lrel))} $
+
+lemma e3_tq_e {k l: set} (G: hyps) (J: class) (tc tf te ty tm: set): $ G ⇒ ty ∊ e3_tq J tc tf te $ > $ G ⇒ ra_tys_ty tc ty ∈ lrel3 J $ > $ G ⇒ ra_nth_ty ty tm tf te ∈ lrel $ > $ G ⇒ ∃ k ∃ l (ra_isort tf k l ∈ lrel) $
+----
+l1: $ … ⇒ ∀ m (ra_tys_ty tc ty ∈ lrel3 J → ra_nth_ty ty m tf te ∈ lrel → ∃ k ∃ l (ra_isort tf k l ∈ lrel)) $ by cab_elim [#1]
+l2: $ … ⇒ ra_tys_ty tc ty ∈ lrel3 J → ra_nth_ty ty tm tf te ∈ lrel → ∃ k ∃ l (ra_isort tf k l ∈ lrel) $ by all_elim [l1]
+l3: $ … ⇒ ∃ k ∃ l (ra_isort tf k l ∈ lrel) $ by imp_elim [imp_elim [l2, #2], #3]
+
+lemma e3_tq_node {k l: set} (G: hyps) (J: class) (tc tf te ty tm k1 j1: set): $ G ⇒ crn j1 ⊆ e3_tq J tc tf te $ > $ G ⇒ ty = ⟨ k1 , j1 ⟩ $ > $ G ⇒ ra_tys_ty tc ty ∈ lrel3 J $ > $ G ⇒ ra_nth_ty ty tm tf te ∈ lrel $ > $ G ⇒ ∃ k ∃ l (ra_isort tf k l ∈ lrel) $
+----
+s0: $ … ⇒ ∃ x1 ∃ x2 ∃ x3 (ty = ⟨ kc_tcons , scons x1 (scons x2 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_nz , ∅ ⟩ ∧ tf = x1 ∧ te = x2) ∨ ∃ x1 ∃ x4 ∃ x2 ∃ x5 ∃ x3 ∃ x6 (ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel) $ by lrel_nth_ty_cases [#4]
+a0: $ G , ty = ⟨ kc_tcons , scons x1 (scons x2 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_nz , ∅ ⟩ ∧ tf = x1 ∧ te = x2 ⇒ ty = ⟨ kc_tcons , scons x1 (scons x2 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_nz , ∅ ⟩ ∧ tf = x1 ∧ te = x2 $ by ax
+an1: $ … ⇒ ty = ⟨ kc_tcons , scons x1 (scons x2 (scons x3 ∅)) ⟩ $ by and_elim_l [a0]
+an3: $ … ⇒ tf = x1 $ by and_elim_l [and_elim_r [and_elim_r [a0]]]
+a1: $ G , ty = ⟨ kc_tcons , scons x1 (scons x2 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_nz , ∅ ⟩ ∧ tf = x1 ∧ te = x2 ⇒ ra_tys_ty tc ty ∈ lrel3 J $ by weaken [#3]
+ar2: $ G , ty = ⟨ kc_tcons , scons x1 (scons x2 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_nz , ∅ ⟩ ∧ tf = x1 ∧ te = x2 ⇒ x2 = x2 $ by eq_refl
+ar3: $ G , ty = ⟨ kc_tcons , scons x1 (scons x2 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_nz , ∅ ⟩ ∧ tf = x1 ∧ te = x2 ⇒ x3 = x3 $ by eq_refl
+ark: $ G , ty = ⟨ kc_tcons , scons x1 (scons x2 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_nz , ∅ ⟩ ∧ tf = x1 ∧ te = x2 ⇒ kc_tcons = kc_tcons $ by eq_refl
+are: $ G , ty = ⟨ kc_tcons , scons x1 (scons x2 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_nz , ∅ ⟩ ∧ tf = x1 ∧ te = x2 ⇒ ∅ = ∅ $ by eq_refl
+a2: $ … ⇒ ⟨ kc_tcons , scons x1 (scons x2 (scons x3 ∅)) ⟩ = ⟨ kc_tcons , scons tf (scons x2 (scons x3 ∅)) ⟩ $ by opair_eq [ark, scons_eq [eq_sym [an3], scons_eq [ar2, scons_eq [ar3, are]]]]
+a3: $ … ⇒ ty = ⟨ kc_tcons , scons tf (scons x2 (scons x3 ∅)) ⟩ $ by eq_trans [an1, a2]
+a4: $ … ⇒ (∃ k ∃ l (ra_isort tf k l ∈ lrel)) ∧ ra_tys_ty tc x3 ∈ lrel3 J $ by e3_tc [a1, a3]
+a5: $ … ⇒ ∃ k ∃ l (ra_isort tf k l ∈ lrel) $ by and_elim_l [a4]
+a6_x2: $ G , ∃ x3 (ty = ⟨ kc_tcons , scons x1 (scons x2 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_nz , ∅ ⟩ ∧ tf = x1 ∧ te = x2) ⇒ ∃ x3 (ty = ⟨ kc_tcons , scons x1 (scons x2 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_nz , ∅ ⟩ ∧ tf = x1 ∧ te = x2) $ by ax
+a6_y2: $ … ⇒ ∃ k ∃ l (ra_isort tf k l ∈ lrel) $ by ex_elim [a6_x2, a5]
+a6_x1: $ G , ∃ x2 ∃ x3 (ty = ⟨ kc_tcons , scons x1 (scons x2 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_nz , ∅ ⟩ ∧ tf = x1 ∧ te = x2) ⇒ ∃ x2 ∃ x3 (ty = ⟨ kc_tcons , scons x1 (scons x2 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_nz , ∅ ⟩ ∧ tf = x1 ∧ te = x2) $ by ax
+a6_y1: $ … ⇒ ∃ k ∃ l (ra_isort tf k l ∈ lrel) $ by ex_elim [a6_x1, a6_y2]
+a6_x0: $ G , ∃ x1 ∃ x2 ∃ x3 (ty = ⟨ kc_tcons , scons x1 (scons x2 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_nz , ∅ ⟩ ∧ tf = x1 ∧ te = x2) ⇒ ∃ x1 ∃ x2 ∃ x3 (ty = ⟨ kc_tcons , scons x1 (scons x2 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_nz , ∅ ⟩ ∧ tf = x1 ∧ te = x2) $ by ax
+a6_y0: $ … ⇒ ∃ k ∃ l (ra_isort tf k l ∈ lrel) $ by ex_elim [a6_x0, a6_y1]
+b0: $ G , ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel ⇒ ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel $ by ax
+bn1: $ … ⇒ ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ $ by and_elim_l [b0]
+bn3: $ … ⇒ tf = x1 $ by and_elim_l [and_elim_r [and_elim_r [b0]]]
+bn4: $ … ⇒ te = x2 $ by and_elim_l [and_elim_r [and_elim_r [and_elim_r [b0]]]]
+bn5: $ … ⇒ ra_nth_ty x3 x6 x1 x2 ∈ lrel $ by and_elim_r [and_elim_r [and_elim_r [and_elim_r [b0]]]]
+b1: $ G , ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel ⇒ ra_tys_ty tc ty ∈ lrel3 J $ by weaken [#3]
+b2: $ G , ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel ⇒ crn j1 ⊆ e3_tq J tc tf te $ by weaken [#1]
+b3: $ G , ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel ⇒ ty = ⟨ k1 , j1 ⟩ $ by weaken [#2]
+b4: $ … ⇒ (∃ k ∃ l (ra_isort x4 k l ∈ lrel)) ∧ ra_tys_ty tc x3 ∈ lrel3 J $ by e3_tc [b1, bn1]
+b5: $ … ⇒ ⟨ k1 , j1 ⟩ = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ $ by eq_trans [eq_sym [b3], bn1]
+is_k1: $ G , ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel ⇒ isset k1 $ by isset_var
+is_j1: $ G , ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel ⇒ isset j1 $ by isset_var
+is_x3: $ G , ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel ⇒ isset x3 $ by isset_var
+b6a: $ G , ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel ⇒ kc_tcons ∈ ω $ by kc_tcons_omega
+b6b: $ G , ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel ⇒ isset ∅ $ by ax_empty
+b6: $ … ⇒ k1 = kc_tcons ∧ j1 = scons x4 (scons x5 (scons x3 ∅)) $ by opair_inj_c [b5, is_k1, is_j1, wcel_isset [b6a], scons_set [scons_set [scons_set [b6b]]]]
+b7: $ … ⇒ crn (scons x4 (scons x5 (scons x3 ∅))) ⊆ e3_tq J tc tf te $ by subset_eq_l [crn_eq [and_elim_r [b6]], b2]
+b8: $ … ⇒ x3 ∈ e3_tq J tc tf te $ by crn_scons_head [is_x3, crn_scons_tail [crn_scons_tail [b7]]]
+br3: $ G , ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel ⇒ x3 = x3 $ by eq_refl
+br6: $ G , ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel ⇒ x6 = x6 $ by eq_refl
+b9: $ … ⇒ ra_nth_ty x3 x6 tf te ∈ lrel $ by wcel_eq_l [ra_nth_ty_eq [br3, br6, eq_sym [bn3], eq_sym [bn4]], bn5]
+b10: $ … ⇒ ∃ k ∃ l (ra_isort tf k l ∈ lrel) $ by e3_tq_e [wcel_welc [b8], and_elim_r [b4], b9]
+b11_x5: $ G , ∃ x6 (ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel) ⇒ ∃ x6 (ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel) $ by ax
+b11_y5: $ … ⇒ ∃ k ∃ l (ra_isort tf k l ∈ lrel) $ by ex_elim [b11_x5, b10]
+b11_x4: $ G , ∃ x3 ∃ x6 (ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel) ⇒ ∃ x3 ∃ x6 (ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel) $ by ax
+b11_y4: $ … ⇒ ∃ k ∃ l (ra_isort tf k l ∈ lrel) $ by ex_elim [b11_x4, b11_y5]
+b11_x3: $ G , ∃ x5 ∃ x3 ∃ x6 (ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel) ⇒ ∃ x5 ∃ x3 ∃ x6 (ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel) $ by ax
+b11_y3: $ … ⇒ ∃ k ∃ l (ra_isort tf k l ∈ lrel) $ by ex_elim [b11_x3, b11_y4]
+b11_x2: $ G , ∃ x2 ∃ x5 ∃ x3 ∃ x6 (ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel) ⇒ ∃ x2 ∃ x5 ∃ x3 ∃ x6 (ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel) $ by ax
+b11_y2: $ … ⇒ ∃ k ∃ l (ra_isort tf k l ∈ lrel) $ by ex_elim [b11_x2, b11_y3]
+b11_x1: $ G , ∃ x4 ∃ x2 ∃ x5 ∃ x3 ∃ x6 (ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel) ⇒ ∃ x4 ∃ x2 ∃ x5 ∃ x3 ∃ x6 (ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel) $ by ax
+b11_y1: $ … ⇒ ∃ k ∃ l (ra_isort tf k l ∈ lrel) $ by ex_elim [b11_x1, b11_y2]
+b11_x0: $ G , ∃ x1 ∃ x4 ∃ x2 ∃ x5 ∃ x3 ∃ x6 (ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel) ⇒ ∃ x1 ∃ x4 ∃ x2 ∃ x5 ∃ x3 ∃ x6 (ty = ⟨ kc_tcons , scons x4 (scons x5 (scons x3 ∅)) ⟩ ∧ tm = ⟨ kc_s , scons x6 ∅ ⟩ ∧ tf = x1 ∧ te = x2 ∧ ra_nth_ty x3 x6 x1 x2 ∈ lrel) $ by ax
+b11_y0: $ … ⇒ ∃ k ∃ l (ra_isort tf k l ∈ lrel) $ by ex_elim [b11_x0, b11_y1]
+fin: $ … ⇒ ∃ k ∃ l (ra_isort tf k l ∈ lrel) $ by or_elim [s0, a6_y0, b11_y0]
+
+lemma e3_tq_all (G: hyps) (J: class) (tc tf te: set): $ G ⇒ trees ω ⊆ e3_tq J tc tf te $
+----
+a3: $ G , i ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ e3_tq J tc tf te , y = ⟨ i , j ⟩ , ra_tys_ty tc y ∈ lrel3 J , ra_nth_ty y m tf te ∈ lrel ⇒ crn j ⊆ e3_tq J tc tf te $ by ax
+a4: $ G , i ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ e3_tq J tc tf te , y = ⟨ i , j ⟩ , ra_tys_ty tc y ∈ lrel3 J , ra_nth_ty y m tf te ∈ lrel ⇒ y = ⟨ i , j ⟩ $ by ax
+a5: $ G , i ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ e3_tq J tc tf te , y = ⟨ i , j ⟩ , ra_tys_ty tc y ∈ lrel3 J , ra_nth_ty y m tf te ∈ lrel ⇒ ra_tys_ty tc y ∈ lrel3 J $ by ax
+a6: $ G , i ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ e3_tq J tc tf te , y = ⟨ i , j ⟩ , ra_tys_ty tc y ∈ lrel3 J , ra_nth_ty y m tf te ∈ lrel ⇒ ra_nth_ty y m tf te ∈ lrel $ by ax
+n1: $ … ⇒ ∃ k ∃ l (ra_isort tf k l ∈ lrel) $ by e3_tq_node [a3, a4, a5, a6]
+n2: $ … ⇒ ra_tys_ty tc y ∈ lrel3 J → ra_nth_ty y m tf te ∈ lrel → ∃ k ∃ l (ra_isort tf k l ∈ lrel) $ by imp_intro [imp_intro [n1]]
+n3: $ … ⇒ ∀ m (ra_tys_ty tc y ∈ lrel3 J → ra_nth_ty y m tf te ∈ lrel → ∃ k ∃ l (ra_isort tf k l ∈ lrel)) $ by all_intro [n2]
+n4: $ G , i ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ e3_tq J tc tf te , y = ⟨ i , j ⟩ ⇒ y ∊ e3_tq J tc tf te $ by cab_intro [n3]
+n5: $ G , i ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ e3_tq J tc tf te , y = ⟨ i , j ⟩ ⇒ y = ⟨ i , j ⟩ $ by ax
+n6: $ … ⇒ ⟨ i , j ⟩ ∈ e3_tq J tc tf te $ by wcel_intro [n5, n4]
+n7: $ G , i ∊ ω , j ∊ fseq (trees ω) , crn j ⊆ e3_tq J tc tf te ⇒ isset ⟨ i , j ⟩ $ by opair_isset
+n8: $ … ⇒ ⟨ i , j ⟩ ∈ e3_tq J tc tf te $ by isset_elim [n7, n6]
+n9: $ … ⇒ i ∊ ω → j ∊ fseq (trees ω) → crn j ⊆ e3_tq J tc tf te → ⟨ i , j ⟩ ∈ e3_tq J tc tf te $ by imp_intro [imp_intro [imp_intro [n8]]]
+n10: $ … ⇒ ∀ i ∀ j (i ∊ ω → j ∊ fseq (trees ω) → crn j ⊆ e3_tq J tc tf te → ⟨ i , j ⟩ ∈ e3_tq J tc tf te) $ by all_intro [all_intro [n9]]
+n11: $ G ⇒ isset ω $ by omega_set
+n12: $ … ⇒ trees ω ⊆ e3_tq J tc tf te $ by trees_ind_c [n11, n10]
+
+lrel3_tys_ty_nth_isort
+----
+l1: $ G ⇒ trees ω ⊆ e3_tq J c f e $ by e3_tq_all
+l2a: $ G ⇒ kr_nth_ty ∈ ω $ by kr_nth_ty_omega
+l2: $ … ⇒ t ∊ trees ω ∧ i ∊ trees ω ∧ f ∊ trees ω ∧ e ∊ trees ω $ by lrel_args4 [#2, wcel_isset [l2a]]
+l3: $ … ⇒ t ∊ e3_tq J c f e $ by subset_elim [l1, and_elim_l [l2]]
+l4: $ … ⇒ ∃ k ∃ l (ra_isort f k l ∈ lrel) $ by e3_tq_e [l3, #1, #2]
+
+ind_ty_ty_wf
+----
+s0: $ … ⇒ ∃ x1 ∃ x2 ∃ x3 ∃ x4 ∃ x5 ∃ x6 (tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J) $ by lrel3_tys_ok_cases [#5]
+b0: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J ⇒ tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J $ by ax
+bn2: $ … ⇒ td = x3 $ by and_elim_l [and_elim_r [b0]]
+bn3: $ … ⇒ ra_ind_data x3 x4 x5 x6 ∈ lrel $ by and_elim_l [and_elim_r [and_elim_r [b0]]]
+bn4: $ … ⇒ ra_tys_closed x5 x6 ∈ lrel $ by and_elim_l [and_elim_r [and_elim_r [and_elim_r [b0]]]]
+bn7: $ … ⇒ ra_tys_ty x2 x6 ∈ lrel3 J $ by and_elim_r [and_elim_r [and_elim_r [and_elim_r [and_elim_r [and_elim_r [b0]]]]]]
+r2: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J ⇒ x2 = x2 $ by eq_refl
+r4: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J ⇒ x4 = x4 $ by eq_refl
+r5: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J ⇒ x5 = x5 $ by eq_refl
+r6: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J ⇒ x6 = x6 $ by eq_refl
+c1: $ … ⇒ ra_ind_data td x4 x5 x6 ∈ lrel $ by wcel_eq_l [ra_ind_data_eq [eq_sym [bn2], r4, r5, r6], bn3]
+c2: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J ⇒ ra_ind_data td tb tp tt ∈ lrel $ by weaken [#6]
+c3: $ … ⇒ tb = x4 ∧ tp = x5 ∧ tt = x6 $ by lrel_ind_data_det [c2, c1]
+e5: $ … ⇒ x5 = tp $ by eq_sym [and_elim_l [and_elim_r [c3]]]
+e6: $ … ⇒ x6 = tt $ by eq_sym [and_elim_r [and_elim_r [c3]]]
+c4: $ … ⇒ ra_tys_closed tp tt ∈ lrel $ by wcel_eq_l [ra_tys_closed_eq [e5, e6], bn4]
+c5: $ … ⇒ ra_tys_ty x2 tt ∈ lrel3 J $ by wcel_eq_l [ra_tys_ty_eq [r2, e6], bn7]
+c7: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J ⇒ ra_nth_ty tt ti tf te ∈ lrel $ by weaken [#7]
+c6: $ … ⇒ ∃ k ∃ l (ra_isort tf k l ∈ lrel) $ by lrel3_tys_ty_nth_isort [c5, c7]
+d1: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J , ra_isort tf k l ∈ lrel ⇒ uadm u $ by weaken [#1]
+d2: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J , ra_isort tf k l ∈ lrel ⇒ hty ⊆ H $ by weaken [#2]
+d3: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J , ra_isort tf k l ∈ lrel ⇒ functional H $ by weaken [#3]
+d4: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J , ra_isort tf k l ∈ lrel ⇒ td ∊ ofsort lsig lopen ks_ind $ by weaken [#4]
+d6: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J , ra_isort tf k l ∈ lrel ⇒ ra_ind_data td tb tp tt ∈ lrel $ by weaken [#6]
+d7: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J , ra_isort tf k l ∈ lrel ⇒ ra_nth_ty tt ti tf te ∈ lrel $ by weaken [#7]
+d8: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J , ra_isort tf k l ∈ lrel ⇒ ra_pis tp tf tr ∈ lrel $ by weaken [#8]
+d9: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J , ra_isort tf k l ∈ lrel ⇒ w ∊ lvals $ by weaken [#9]
+d10: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J , ra_isort tf k l ∈ lrel ⇒ r ∊ fseq u $ by weaken [#10]
+dc: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J , ra_isort tf k l ∈ lrel ⇒ ra_tys_closed tp tt ∈ lrel $ by weaken [c4]
+da: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J , ra_isort tf k l ∈ lrel ⇒ ra_isort tf k l ∈ lrel $ by ax
+dg: $ … ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ w r ∈ dt u (mcv H) tr w r $ by ind_ty_ty_sem [d1, d2, d3, d4, d6, dc, d7, da, d8, d9, d10]
+dx1: $ G , tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J , ∃ l (ra_isort tf k l ∈ lrel) ⇒ ∃ l (ra_isort tf k l ∈ lrel) $ by ax
+dy1: $ … ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ w r ∈ dt u (mcv H) tr w r $ by ex_elim [dx1, dg]
+dy0: $ … ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ w r ∈ dt u (mcv H) tr w r $ by ex_elim [c6, dy1]
+f_x5: $ G , ∃ x6 (tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J) ⇒ ∃ x6 (tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J) $ by ax
+f_y5: $ … ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ w r ∈ dt u (mcv H) tr w r $ by ex_elim [f_x5, dy0]
+f_x4: $ G , ∃ x5 ∃ x6 (tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J) ⇒ ∃ x5 ∃ x6 (tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J) $ by ax
+f_y4: $ … ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ w r ∈ dt u (mcv H) tr w r $ by ex_elim [f_x4, f_y5]
+f_x3: $ G , ∃ x4 ∃ x5 ∃ x6 (tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J) ⇒ ∃ x4 ∃ x5 ∃ x6 (tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J) $ by ax
+f_y3: $ … ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ w r ∈ dt u (mcv H) tr w r $ by ex_elim [f_x3, f_y4]
+f_x2: $ G , ∃ x3 ∃ x4 ∃ x5 ∃ x6 (tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J) ⇒ ∃ x3 ∃ x4 ∃ x5 ∃ x6 (tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J) $ by ax
+f_y2: $ … ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ w r ∈ dt u (mcv H) tr w r $ by ex_elim [f_x2, f_y3]
+f_x1: $ G , ∃ x2 ∃ x3 ∃ x4 ∃ x5 ∃ x6 (tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J) ⇒ ∃ x2 ∃ x3 ∃ x4 ∃ x5 ∃ x6 (tg = x1 ∧ td = x3 ∧ ra_ind_data x3 x4 x5 x6 ∈ lrel ∧ ra_tys_closed x5 x6 ∈ lrel ∧ ra_ctx_wf x1 x5 ∈ lrel3 J ∧ ra_capp x5 x1 x2 ∈ lrel ∧ ra_tys_ty x2 x6 ∈ lrel3 J) $ by ax
+f_y1: $ … ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ w r ∈ dt u (mcv H) tr w r $ by ex_elim [f_x1, f_y2]
+fin: $ … ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ w r ∈ dt u (mcv H) tr w r $ by ex_elim [s0, f_y1]

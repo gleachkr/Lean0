@@ -116,3 +116,18 @@ theorem ind_ctor_ty_wf (G: hyps) (H J: class) (u w r tg td tb tp tt ti tf te tc 
   $ G ⇒ ra_nth_ctor te tc tk ∈ lrel $ > $ G ⇒ ra_clen tp tnp ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
   $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tk tk2 ∈ lrel $ > $ G ⇒ ra_pis tp tk2 tr ∈ lrel $ >
   $ G ⇒ dt u (mcv H) ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ w r ∈ dt u (mcv H) tr w r $;
+
+--| Each type of a list accepted by `tys_ty` is binders over a sort
+--| (`tys_ty_cons`'s premise).
+theorem lrel3_tys_ty_nth_isort {k l: set} (G: hyps) (J: class) (c t i f e: set):
+  $ G ⇒ ra_tys_ty c t ∈ lrel3 J $ > $ G ⇒ ra_nth_ty t i f e ∈ lrel $ >
+  $ G ⇒ ∃ k ∃ l (ra_isort f k l ∈ lrel) $;
+
+--| The types' rule in the model from the rule's own premises: `tys_ok` gives
+--| what `ind_ty_ty_sem` assumes besides (`tys_closed`, `isort`).
+theorem ind_ty_ty_wf (G: hyps) (H J: class) (u w r tg td tb tp tt ti tf te tr: set):
+  $ G ⇒ uadm u $ > $ G ⇒ hty ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ td ∊ ofsort lsig lopen ks_ind $ >
+  $ G ⇒ ra_tys_ok tg td ∈ lrel3 J $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tf te ∈ lrel $ > $ G ⇒ ra_pis tp tf tr ∈ lrel $ >
+  $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ w r ∈ dt u (mcv H) tr w r $;

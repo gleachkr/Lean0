@@ -156,6 +156,11 @@ def cmd_freeze(auf):
         body = [i for i, l in enumerate(lines) if re.match(r"^\w+:\s*\$", l)]
         if kind in ("theorem", "lemma") and body and not frozen(c):
             concl = STMT_RE.search(lines[body[-1]]).group(1).strip()
+            if concl.startswith("…"):
+                # `sorry!` takes no hole: a lemma's header states its conclusion;
+                # a theorem's context is `G` by the library's convention
+                head = [m.group(1).strip() for l in lines[:body[0]] for m in STMT_RE.finditer(l)]
+                concl = head[-1] if kind == "lemma" and head else "G" + concl[1:]
             lines = lines[:body[0]] + [f"l1: $ {concl} $ by sorry!"]
         out.append((kind, name, lines))
     sys.stdout.write(render(out))
