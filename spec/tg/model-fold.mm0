@@ -136,3 +136,386 @@ theorem etel_tab {o: set} (G: hyps) (E: class) (u w r t1 t2 t3 p1 p2 p3 p4: set)
 theorem etel_det_g (G: hyps) (E: class) (u w r t1 t2 p1 p2 p3 p4 q1 q3 q4: set):
   $ G ⇒ ra_npis t1 t2 ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ ⟨ p1 , ⟨ p2 , ⟨ p3 , p4 ⟩ ⟩ ⟩ ∈ etel u E t1 w r $ > $ G ⇒ ⟨ q1 , ⟨ p2 , ⟨ q3 , q4 ⟩ ⟩ ⟩ ∈ etel u E t1 w r $ >
   $ G ⇒ p1 = q1 $;
+
+-- --------------------------------------------------------------------------
+-- The recursive fields' points
+-- --------------------------------------------------------------------------
+
+--| Two windows with the same entries are equal.
+--| @freshen G i
+theorem swin_sh {i: set} (G: hyps) (D D2 N R R2: class):
+  $ G ⇒ ∀ i (i ∊ N → fv R (nadd D i) = fv R2 (nadd D2 i)) $ > $ G ⇒ swin R D N = swin R2 D2 N $;
+
+--| A path of `Π A. B`, in full: `etel_pi_tab` with the head in `A`'s value and
+--| in the universe.
+--| @freshen G x
+--| @freshen G f
+--| @freshen G g
+--| @freshen G t
+theorem etel_pi_all {x f g t: set} (G: hyps) (E: class) (u w r ta tb q1 q2 q3 q4: set):
+  $ G ⇒ ta ∊ trees ω $ > $ G ⇒ tb ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ ⟨ q1 , ⟨ q2 , ⟨ q3 , q4 ⟩ ⟩ ⟩ ∈ etel u E ⟨ kc_pi , scons ta (scons tb ∅) ⟩ w r $ >
+  $ G ⇒ ∃ x ∃ f ∃ g ∃ t (x ∊ da (fv E ta) w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , q4 ⟩ ⟩ ⟩ ∈ etel u E tb w (scons x r) ∧ q1 = ssnoc f x ∧ q2 = scons x g ∧ q3 = scons (etel u E ta w r) t) $;
+
+--| A recursive field's value `v` at a path of its type: the value applied to
+--| the path's fields lies in the entry of the valuation that stands for type
+--| `t6`, at the path's arguments, which are the type's indices followed by
+--| the window of the parameters.
+--| @freshen G m
+--| @freshen G e
+--| @freshen G y
+theorem recfield_pt {m e y: set} (G: hyps) (M: class) (u w r v t1 t2 t3 t4 t5 t6 q1 q2 q3 q4: set):
+  $ G ⇒ ra_recfield t1 t2 t3 t4 t5 t6 ∈ lrel $ > $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ v ∊ dt u M t5 w r $ > $ G ⇒ ⟨ q1 , ⟨ q2 , ⟨ q3 , q4 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) t5 w r $ >
+  $ G ⇒ nest q4 (apn v q1) ∈ fv r (nadd (nadd (fv nvf t4) (fv nvf t3)) (fv nvf t6)) ∧ ∃ m ∃ e (ra_nidx t1 t6 m ∈ lrel ∧ e ∊ fseq {y | y = y} ∧ cdm e = fv nvf m ∧ q4 = scat e (swin r (fv nvf t4) (fv nvf t3)) ∧ cdm q4 = nadd (fv nvf m) (fv nvf t3)) $;
+
+--| Field `t2` of a path: the table has the paths of the field's type at a
+--| valuation `o`, the field's value lies in the type's value there, and `o` is
+--| the path's outer valuation after the earlier fields.
+--| @freshen G o
+--| @freshen G i
+theorem etel_field {o i: set} (G: hyps) (M: class) (u w r t1 t2 t3 p1 p2 p3 p4: set):
+  $ G ⇒ ra_nth_pi t1 t2 t3 ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ ⟨ p1 , ⟨ p2 , ⟨ p3 , p4 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) t1 w r $ >
+  $ G ⇒ ∃ o (o ∊ fseq u ∧ fv p3 (fv nvf t2) = etel u (dnf u M) t3 w o ∧ fv p2 (fv nvf t2) ∈ dt u M t3 w o ∧ ∀ i (i ∊ ω → fv o (nadd (fv nvf t2) i) = fv r i)) $;
+
+--| A point of type `ti`'s entry over a candidate inside the family: when the
+--| arguments `q4` have the length of the type's indices and the parameters,
+--| the candidate has a point at `q4` whose value, read as the type's elements,
+--| is `y0` (the empty set for a proposition).
+--| @freshen G x
+--| @freshen G y
+theorem ient_pt {x y: set} (G: hyps) (H J C R: class) (u w zc td tb tp tt te ti tf tc tm tl q4 y0: set):
+  $ G ⇒ iwf u H J C td w R $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_clen tp te ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tf tc ∈ lrel $ > $ G ⇒ ra_isort tf tm tl ∈ lrel $ >
+  $ G ⇒ zc ⊆ ifam u (dnf u (mcv H)) td w $ > $ G ⇒ q4 ∊ fseq {y | y = y} $ >
+  $ G ⇒ cdm q4 = nadd (fv nvf tm) (fv nvf te) $ > $ G ⇒ nest q4 y0 ∈ ient td w zc (fv nvf ti) $ >
+  $ G ⇒ ∃ x (⟨ fv nvf ti , ⟨ q4 , x ⟩ ⟩ ∈ zc ∧ y0 = {y | ¬ iprop td (fv nvf ti) w ∧ y ∊ x}) $;
+
+--| The point of a recursive field: for a path of a constructor's type over a
+--| candidate `zc` inside the family, a recursive field `th` on type `ti` and an
+--| entry of the field's paths, the candidate has a point of type `ti` at the
+--| entry's arguments whose value, read as the type's elements, is the field's
+--| value at the entry; the arguments are the type's indices followed by the
+--| parameters `p`.
+--| @freshen G x
+--| @freshen G m
+--| @freshen G e
+--| @freshen G y
+theorem ifold_rec_pt {x m e y: set} (G: hyps) (H J C R: class) (u w p zc td tb tp tt tn tm te tk th ta ti f g t a q1 q2 q3 q4: set):
+  $ G ⇒ iwf u H J C td w R $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_clen tp te ∈ lrel $ > $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ > $ G ⇒ zc ⊆ ifam u (dnf u (mcv H)) td w $ > $ G ⇒ zc ∊ u $ >
+  $ G ⇒ ra_nth_pi tk th ta ∈ lrel $ > $ G ⇒ ra_recfield td tn te th ta ti ∈ lrel $ >
+  $ G ⇒ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) tk w (scat p (ixs td w zc)) $ > $ G ⇒ ⟨ q1 , ⟨ q2 , ⟨ q3 , q4 ⟩ ⟩ ⟩ ∈ fv t (fv nvf th) $ >
+  $ G ⇒ ∃ x ∃ m ∃ e (⟨ fv nvf ti , ⟨ q4 , x ⟩ ⟩ ∈ zc ∧ apn (fv g (fv nvf th)) q1 = {y | ¬ iprop td (fv nvf ti) w ∧ y ∊ x} ∧ ra_nidx td ti m ∈ lrel ∧ e ∊ fseq {y | y = y} ∧ cdm e = fv nvf m ∧ q4 = scat e p) $;
+
+--| A universe has the values of its curried traces.
+theorem apn_universe (G: hyps) (U A: class) (v s: set):
+  $ G ⇒ universe U $ > $ G ⇒ v ∊ U $ > $ G ⇒ s ∊ fseq A $ > $ G ⇒ apn v s ∈ U $;
+
+--| The number of a type's indices depends on the type's number only.
+theorem nidx_nvf (G: hyps) (t1 t2 t3 t4 t5: set):
+  $ G ⇒ ra_nidx t1 t2 t3 ∈ lrel $ > $ G ⇒ ra_nidx t1 t4 t5 ∈ lrel $ > $ G ⇒ fv nvf t2 = fv nvf t4 $ > $ G ⇒ t3 = t5 $;
+
+--| A constructor type's paths over the parameters `p` and the types valued
+--| by a candidate are monotone in the candidate.
+theorem etel_ixs_mono (G: hyps) (J M Z Z2: class) (u w p td tn te tl ti tx tk: set):
+  $ G ⇒ ra_cwf td tn te tl ti tx ⟨ kc_nz , ∅ ⟩ tk ∈ lrel3 J $ > $ G ⇒ uadm u $ > $ G ⇒ td ∊ trees ω $ > $ G ⇒ tk ∊ trees ω $ >
+  $ G ⇒ w ∊ lvals $ > $ G ⇒ p ∊ fseq u $ > $ G ⇒ cdm p = fv nvf te $ > $ G ⇒ Z2 ∈ u $ > $ G ⇒ Z2 ⊆ ω × (fseq u × fseq (ω ∪ u)) $ > $ G ⇒ Z ⊆ Z2 $ >
+  $ G ⇒ etel u (dnf u M) tk w (scat p (ixs td w Z)) ⊆ etel u (dnf u M) tk w (scat p (ixs td w Z2)) $;
+
+--| A path of a constructor's type: its arguments are the indices of the
+--| constructor's type followed by the window of the parameters.
+--| @freshen G m
+--| @freshen G e
+--| @freshen G y
+theorem cwf_args {m e y: set} (G: hyps) (J M: class) (u w r t1 t2 t3 t4 t5 t6 t7 t8 q1 q2 q3 q4: set):
+  $ G ⇒ ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ∈ lrel3 J $ > $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ ⟨ q1 , ⟨ q2 , ⟨ q3 , q4 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) t8 w r $ > $ G ⇒ t8 ∊ trees ω $ > $ G ⇒ t7 ∊ trees ω $ >
+  $ G ⇒ ∃ m ∃ e (ra_nidx t1 t5 m ∈ lrel ∧ e ∊ fseq {y | y = y} ∧ cdm e = fv nvf m ∧ q4 = scat e (swin r (fv nvf t7) (fv nvf t3)) ∧ cdm q4 = nadd (fv nvf m) (fv nvf t3)) $;
+
+--| Two paths of a constructor's type at one valuation with the same fields in
+--| order have the same fields as a valuation (`etel_det_g` from `cwf`).
+theorem etel_det_cwf (G: hyps) (J M: class) (u w r t1 t2 t3 t4 t5 t6 t7 t8 p1 p2 p3 p4 q1 q3 q4: set):
+  $ G ⇒ ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ∈ lrel3 J $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ t8 ∊ trees ω $ >
+  $ G ⇒ ⟨ p1 , ⟨ p2 , ⟨ p3 , p4 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) t8 w r $ > $ G ⇒ ⟨ q1 , ⟨ p2 , ⟨ q3 , q4 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) t8 w r $ >
+  $ G ⇒ p1 = q1 $;
+
+-- --------------------------------------------------------------------------
+-- A minor for every constructor
+-- --------------------------------------------------------------------------
+
+--| Every natural number is the value of a numeral.
+--| @freshen G b
+theorem num_ex {b: set} (G: hyps) (n: set): $ G ⇒ n ∊ ω $ > $ G ⇒ ∃ b (b ∊ ofsort lsig lopen ks_nat ∧ fv nvf b = n) $;
+
+--| The number of a list of constructors is a numeral.
+theorem clen_c_nat (G: hyps) (t1 t2: set): $ G ⇒ ra_clen_c t1 t2 ∈ lrel $ > $ G ⇒ t2 ∊ ofsort lsig lopen ks_nat $;
+
+--| Addition is total on numerals.
+--| @freshen G c
+theorem add_total {c: set} (G: hyps) (t1 t2: set): $ G ⇒ t1 ∊ ofsort lsig lopen ks_nat $ > $ G ⇒ t2 ∊ ofsort lsig lopen ks_nat $ > $ G ⇒ ∃ c (ra_add t1 t2 c ∈ lrel ∧ c ∊ ofsort lsig lopen ks_nat) $;
+
+--| An existing type has a minor index for every numeral (taken as a
+--| constructor's number).
+--| @freshen G k
+theorem minor_idx_total {k: set} (G: hyps) (t1 t2 tf te tn tm tb: set):
+  $ G ⇒ ra_nth_ty t1 t2 tf te ∈ lrel $ > $ G ⇒ ra_ntys t1 tn tm ∈ lrel $ > $ G ⇒ tb ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ ∃ k (ra_minor_idx t1 t2 tb k ∈ lrel ∧ k ∊ ofsort lsig lopen ks_nat) $;
+
+--| Every existing constructor has a minor.
+--| @freshen G k
+theorem iminx_ex {k: set} (G: hyps) (j c K: class) (td tb tp tt tn tm: set):
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ > $ G ⇒ ictk td j c K $ >
+  $ G ⇒ ∃ k (iminx td j c k) $;
+
+-- --------------------------------------------------------------------------
+-- The fold's single value: the inductive hypotheses at a path
+-- --------------------------------------------------------------------------
+
+--| A single value at a point, at an equal point.
+--| @freshen G v
+--| @freshen G o
+theorem uval_eq {v o: set} (G: hyps) (A B L: class) (u: set):
+  $ G ⇒ A = B $ > $ G ⇒ ∃ v (v ∊ u ∧ ∀ o (⟨ A , o ⟩ ∈ L ↔ o = v)) $ > $ G ⇒ ∃ v (v ∊ u ∧ ∀ o (⟨ B , o ⟩ ∈ L ↔ o = v)) $;
+
+--| The fold's value at a recursive field's point: when a relation `L` has a
+--| single value at every point of the candidate over the parameters `p`, it
+--| has one at the point of each entry of a recursive field of a path.
+--| @freshen G i
+--| @freshen G a
+--| @freshen G x
+--| @freshen G e
+--| @freshen G m
+--| @freshen G v
+--| @freshen G o
+--| @freshen G y
+theorem ifold_rec_val {i a x e m v o y: set} (G: hyps) (H J C R L: class) (u w p zc td tb tp tt tn tm te tk th ta ti pf pg pt pa q1 q2 q3 q4: set):
+  $ G ⇒ iwf u H J C td w R $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_clen tp te ∈ lrel $ > $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ > $ G ⇒ zc ⊆ ifam u (dnf u (mcv H)) td w $ > $ G ⇒ zc ∊ u $ >
+  $ G ⇒ ra_nth_pi tk th ta ∈ lrel $ > $ G ⇒ ra_recfield td tn te th ta ti ∈ lrel $ >
+  $ G ⇒ ⟨ pf , ⟨ pg , ⟨ pt , pa ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) tk w (scat p (ixs td w zc)) $ > $ G ⇒ ⟨ q1 , ⟨ q2 , ⟨ q3 , q4 ⟩ ⟩ ⟩ ∈ fv pt (fv nvf th) $ >
+  $ G ⇒ ∀ i ∀ a ∀ x ∀ e ∀ m (⟨ fv nvf i , ⟨ a , x ⟩ ⟩ ∈ zc → a = scat e p → ra_nidx td i m ∈ lrel → e ∊ fseq {y | y = y} → cdm e = fv nvf m → ∃ v (v ∊ u ∧ ∀ o (⟨ ⟨ fv nvf i , ⟨ a , {y | ¬ iprop td (fv nvf i) w ∧ y ∊ x} ⟩ ⟩ , o ⟩ ∈ L ↔ o = v))) $ >
+  $ G ⇒ ∃ v (v ∊ u ∧ ∀ o (⟨ ⟨ fv nvf ti , ⟨ q4 , apn (fv pg (fv nvf th)) q1 ⟩ ⟩ , o ⟩ ∈ L ↔ o = v)) $;
+
+--| A recursive field's hypothesis at a path: under `ifold_rec_val`'s
+--| conditions it exists and is unique.
+--| @freshen G i
+--| @freshen G a
+--| @freshen G x
+--| @freshen G e
+--| @freshen G m
+--| @freshen G v
+--| @freshen G o
+--| @freshen G y
+--| @freshen G h
+--| @freshen G k
+theorem ifold_ihsp {i a x e m v o y h k: set} (G: hyps) (H J C R L: class) (u w p zc td tb tp tt tn tm te tk pf pg pt pa sd si: set):
+  $ G ⇒ iwf u H J C td w R $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_clen tp te ∈ lrel $ > $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ > $ G ⇒ zc ⊆ ifam u (dnf u (mcv H)) td w $ > $ G ⇒ zc ∊ u $ >
+  $ G ⇒ tk ∊ trees ω $ > $ G ⇒ ⟨ pf , ⟨ pg , ⟨ pt , pa ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) tk w (scat p (ixs td w zc)) $ >
+  $ G ⇒ ∀ i ∀ a ∀ x ∀ e ∀ m (⟨ fv nvf i , ⟨ a , x ⟩ ⟩ ∈ zc → a = scat e p → ra_nidx td i m ∈ lrel → e ∊ fseq {y | y = y} → cdm e = fv nvf m → ∃ v (v ∊ u ∧ ∀ o (⟨ ⟨ fv nvf i , ⟨ a , {y | ¬ iprop td (fv nvf i) w ∧ y ∊ x} ⟩ ⟩ , o ⟩ ∈ L ↔ o = v))) $ >
+  $ G ⇒ irf td tk sd si $ >
+  $ G ⇒ (∃ h (h ∊ ihsp L pg pt sd si)) ∧ ∀ h ∀ k (h ∊ ihsp L pg pt sd si → k ∊ ihsp L pg pt sd si → h = k) $;
+
+--| The inductive hypotheses' valuation at a path: under `ifold_rec_val`'s
+--| conditions it exists and is unique.
+--| @freshen G i
+--| @freshen G a
+--| @freshen G x
+--| @freshen G e
+--| @freshen G m
+--| @freshen G v
+--| @freshen G o
+--| @freshen G y
+--| @freshen G h
+--| @freshen G k
+--| @freshen G b
+theorem ifold_ihv {i a x e m v o y h k b: set} (G: hyps) (H J C R L: class) (u w p zc td tb tp tt tn tm te tk pf pg pt pa: set):
+  $ G ⇒ iwf u H J C td w R $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_clen tp te ∈ lrel $ > $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ > $ G ⇒ zc ⊆ ifam u (dnf u (mcv H)) td w $ > $ G ⇒ zc ∊ u $ >
+  $ G ⇒ tk ∊ trees ω $ > $ G ⇒ ⟨ pf , ⟨ pg , ⟨ pt , pa ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) tk w (scat p (ixs td w zc)) $ >
+  $ G ⇒ ∀ i ∀ a ∀ x ∀ e ∀ m (⟨ fv nvf i , ⟨ a , x ⟩ ⟩ ∈ zc → a = scat e p → ra_nidx td i m ∈ lrel → e ∊ fseq {y | y = y} → cdm e = fv nvf m → ∃ v (v ∊ u ∧ ∀ o (⟨ ⟨ fv nvf i , ⟨ a , {y | ¬ iprop td (fv nvf i) w ∧ y ∊ x} ⟩ ⟩ , o ⟩ ∈ L ↔ o = v))) $ >
+  $ G ⇒ ∀ b (isset (ap L b)) $ >
+  $ G ⇒ (∃ h (h ∊ ihv td tk L pg pt (cdm pf))) ∧ ∀ h ∀ k (h ∊ ihv td tk L pg pt (cdm pf) → k ∊ ihv td tk L pg pt (cdm pf) → h = k) $;
+
+--| A binder's value in a valuation over an admissible universe lies in it.
+theorem vat_universe (G: hyps) (U N j: class) (s: set):
+  $ G ⇒ uadm U $ > $ G ⇒ s ∊ fseq U $ > $ G ⇒ j ∈ N $ > $ G ⇒ N ∈ ω $ > $ G ⇒ vat s N j ∈ U $;
+
+--| The fiber: a constructor's path whose arguments are a type's indices
+--| followed by the parameters `p` is a path over `p`.
+--| @freshen G y
+theorem iop0_fiber {y: set} (G: hyps) (H J C R Z: class) (u w p p2 td tb tp tt te tk sj sc ti tq se pf pg pt pa: set):
+  $ G ⇒ iwf u H J C td w R $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_clen tp te ∈ lrel $ >
+  $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ > $ G ⇒ p2 ∊ esat u (dnf u (mcv H)) tp w $ > $ G ⇒ ictk td sj sc tk $ >
+  $ G ⇒ ⟨ pf , ⟨ pg , ⟨ pt , pa ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) tk w (scat p2 (ixs td w Z)) $ > $ G ⇒ pa = scat se p $ >
+  $ G ⇒ ra_nidx td ti tq ∈ lrel $ > $ G ⇒ fv nvf ti = sj $ > $ G ⇒ se ∊ fseq {y | y = y} $ > $ G ⇒ cdm se = fv nvf tq $ >
+  $ G ⇒ p2 = p $;
+
+--| The fold's step is single-valued: at the point of a constructor's path
+--| over the parameters, any value of the fold is the minor's value at the
+--| path and its hypotheses. For a proposition, either every value is empty or
+--| the point determines the constructor and its fields (the two forms of
+--| elimination).
+--| @freshen G i
+--| @freshen G a
+--| @freshen G x
+--| @freshen G e
+--| @freshen G m
+--| @freshen G v
+--| @freshen G o
+--| @freshen G y
+--| @freshen G h
+--| @freshen G k
+--| @freshen G b
+--| @freshen G j
+theorem ifold_step_uniq {i a x e m v o y h k b j: set} (G: hyps) (H J C R: class) (u w p zc mv td tb tp tt tn tm te tk sj sc k1 h1 y1 o1 pf pg pt pa: set):
+  $ G ⇒ iwf u H J C td w R $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_clen tp te ∈ lrel $ > $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ > $ G ⇒ zc ⊆ ifam u (dnf u (mcv H)) td w $ > $ G ⇒ zc ∊ u $ >
+  $ G ⇒ ∀ i ∀ a ∀ x ∀ e ∀ m (⟨ fv nvf i , ⟨ a , x ⟩ ⟩ ∈ zc → a = scat e p → ra_nidx td i m ∈ lrel → e ∊ fseq {y | y = y} → cdm e = fv nvf m → ∃ v (v ∊ u ∧ ∀ o (⟨ ⟨ fv nvf i , ⟨ a , {y | ¬ iprop td (fv nvf i) w ∧ y ∊ x} ⟩ ⟩ , o ⟩ ∈ ifold u (dnf u (mcv H)) td w p mv ↔ o = v))) $ >
+  $ G ⇒ (∀ j ∀ a ∀ o (iprop td j w → ⟨ ⟨ j , ⟨ a , ∅ ⟩ ⟩ , o ⟩ ∈ ifold u (dnf u (mcv H)) td w p mv → o = ∅)) ∨ ∀ j ∀ a ∀ b ∀ k ∀ h ∀ x ∀ y ∀ v ∀ e ∀ i ∀ m ∀ o (iprop td j w → ictk td j a k → ictk td j b h → ⟨ x , ⟨ y , ⟨ v , e ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) k w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) → ⟨ i , ⟨ m , ⟨ o , e ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) h w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) → a = b ∧ y = m) $ >
+  $ G ⇒ ictk td sj sc tk $ > $ G ⇒ ⟨ pf , ⟨ pg , ⟨ pt , pa ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) tk w (scat p (ixs td w zc)) $ >
+  $ G ⇒ h1 ∊ ihv td tk (ifold u (dnf u (mcv H)) td w p mv) pg pt (cdm pf) $ > $ G ⇒ iminx td sj sc k1 $ >
+  $ G ⇒ y1 = apn (vat mv (inmin td) k1) (scat h1 pf) $ >
+  $ G ⇒ ⟨ ⟨ sj , ⟨ pa , itup td sj sc pg w ⟩ ⟩ , y1 ⟩ ∈ ifold u (dnf u (mcv H)) td w p mv $ > $ G ⇒ ⟨ ⟨ sj , ⟨ pa , itup td sj sc pg w ⟩ ⟩ , o1 ⟩ ∈ ifold u (dnf u (mcv H)) td w p mv $ >
+  $ G ⇒ o1 = y1 $;
+
+--| The fold at the point of a constructor's path over the parameters has
+--| exactly one value, an element of the universe, when it has one at every
+--| point of the candidate over the parameters.
+--| @freshen G i
+--| @freshen G a
+--| @freshen G x
+--| @freshen G e
+--| @freshen G m
+--| @freshen G v
+--| @freshen G o
+--| @freshen G y
+--| @freshen G h
+--| @freshen G k
+--| @freshen G b
+--| @freshen G j
+theorem ifold_pt_val {i a x e m v o y h k b j: set} (G: hyps) (H J C R: class) (u w p zc mv td tb tp tt tn tm te tk sj sc pf pg pt pa: set):
+  $ G ⇒ iwf u H J C td w R $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_clen tp te ∈ lrel $ > $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ > $ G ⇒ zc ⊆ ifam u (dnf u (mcv H)) td w $ > $ G ⇒ zc ∊ u $ >
+  $ G ⇒ ∀ i ∀ a ∀ x ∀ e ∀ m (⟨ fv nvf i , ⟨ a , x ⟩ ⟩ ∈ zc → a = scat e p → ra_nidx td i m ∈ lrel → e ∊ fseq {y | y = y} → cdm e = fv nvf m → ∃ v (v ∊ u ∧ ∀ o (⟨ ⟨ fv nvf i , ⟨ a , {y | ¬ iprop td (fv nvf i) w ∧ y ∊ x} ⟩ ⟩ , o ⟩ ∈ ifold u (dnf u (mcv H)) td w p mv ↔ o = v))) $ >
+  $ G ⇒ (∀ j ∀ a ∀ o (iprop td j w → ⟨ ⟨ j , ⟨ a , ∅ ⟩ ⟩ , o ⟩ ∈ ifold u (dnf u (mcv H)) td w p mv → o = ∅)) ∨ ∀ j ∀ a ∀ b ∀ k ∀ h ∀ x ∀ y ∀ v ∀ e ∀ i ∀ m ∀ o (iprop td j w → ictk td j a k → ictk td j b h → ⟨ x , ⟨ y , ⟨ v , e ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) k w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) → ⟨ i , ⟨ m , ⟨ o , e ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) h w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) → a = b ∧ y = m) $ >
+  $ G ⇒ mv ∊ fseq u $ > $ G ⇒ ictk td sj sc tk $ >
+  $ G ⇒ ⟨ pf , ⟨ pg , ⟨ pt , pa ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) tk w (scat p (ixs td w zc)) $ > $ G ⇒ ⟨ sj , ⟨ pa , scons sc pg ⟩ ⟩ ∈ ifam u (dnf u (mcv H)) td w $ >
+  $ G ⇒ ∃ v (v ∊ u ∧ ∀ o (⟨ ⟨ sj , ⟨ pa , itup td sj sc pg w ⟩ ⟩ , o ⟩ ∈ ifold u (dnf u (mcv H)) td w p mv ↔ o = v)) $;
+
+--| The step of the fold's single value: a point of the operator's value at a
+--| candidate, over the parameters, has exactly one value under the fold when
+--| the candidate's points over the parameters do.
+--| @freshen G i
+--| @freshen G a
+--| @freshen G x
+--| @freshen G e
+--| @freshen G m
+--| @freshen G v
+--| @freshen G o
+--| @freshen G y
+--| @freshen G h
+--| @freshen G k
+--| @freshen G b
+--| @freshen G j
+theorem ifold_step {i a x e m v o y h k b j: set} (G: hyps) (H J C R: class) (u w p zc mv td tb tp tt tn tm te ti tq sk sa sx se: set):
+  $ G ⇒ iwf u H J C td w R $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_clen tp te ∈ lrel $ > $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ > $ G ⇒ zc ⊆ ifam u (dnf u (mcv H)) td w $ > $ G ⇒ zc ∊ u $ >
+  $ G ⇒ ∀ i ∀ a ∀ x ∀ e ∀ m (⟨ fv nvf i , ⟨ a , x ⟩ ⟩ ∈ zc → a = scat e p → ra_nidx td i m ∈ lrel → e ∊ fseq {y | y = y} → cdm e = fv nvf m → ∃ v (v ∊ u ∧ ∀ o (⟨ ⟨ fv nvf i , ⟨ a , {y | ¬ iprop td (fv nvf i) w ∧ y ∊ x} ⟩ ⟩ , o ⟩ ∈ ifold u (dnf u (mcv H)) td w p mv ↔ o = v))) $ >
+  $ G ⇒ (∀ j ∀ a ∀ o (iprop td j w → ⟨ ⟨ j , ⟨ a , ∅ ⟩ ⟩ , o ⟩ ∈ ifold u (dnf u (mcv H)) td w p mv → o = ∅)) ∨ ∀ j ∀ a ∀ b ∀ k ∀ h ∀ x ∀ y ∀ v ∀ e ∀ i ∀ m ∀ o (iprop td j w → ictk td j a k → ictk td j b h → ⟨ x , ⟨ y , ⟨ v , e ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) k w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) → ⟨ i , ⟨ m , ⟨ o , e ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) h w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) → a = b ∧ y = m) $ >
+  $ G ⇒ mv ∊ fseq u $ > $ G ⇒ sk ∊ iop0 u (dnf u (mcv H)) td w zc $ >
+  $ G ⇒ sk = ⟨ fv nvf ti , ⟨ sa , sx ⟩ ⟩ $ > $ G ⇒ sa = scat se p $ >
+  $ G ⇒ ra_nidx td ti tq ∈ lrel $ > $ G ⇒ se ∊ fseq {y | y = y} $ > $ G ⇒ cdm se = fv nvf tq $ >
+  $ G ⇒ ∃ v (v ∊ u ∧ ∀ o (⟨ ⟨ fv nvf ti , ⟨ sa , {y | ¬ iprop td (fv nvf ti) w ∧ y ∊ sx} ⟩ ⟩ , o ⟩ ∈ ifold u (dnf u (mcv H)) td w p mv ↔ o = v)) $;
+
+--| The fold is single-valued on the family over the parameters `p` (with
+--| values in the universe): at a point of type `i` whose arguments are the
+--| type's indices followed by `p`, read as the type's elements. For a
+--| proposition this needs one of the two forms of elimination: every value
+--| of the fold at a proposition's point is empty, or a proposition's point
+--| determines its constructor and fields.
+--| @freshen G i
+--| @freshen G a
+--| @freshen G x
+--| @freshen G e
+--| @freshen G m
+--| @freshen G v
+--| @freshen G o
+--| @freshen G y
+--| @freshen G h
+--| @freshen G k
+--| @freshen G b
+--| @freshen G j
+theorem ifold_fn {i a x e m v o y h k b j: set} (G: hyps) (H J C R: class) (u w p mv td tb tp tt tn tm te: set):
+  $ G ⇒ iwf u H J C td w R $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_clen tp te ∈ lrel $ > $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ > $ G ⇒ mv ∊ fseq u $ >
+  $ G ⇒ (∀ j ∀ a ∀ o (iprop td j w → ⟨ ⟨ j , ⟨ a , ∅ ⟩ ⟩ , o ⟩ ∈ ifold u (dnf u (mcv H)) td w p mv → o = ∅)) ∨ ∀ j ∀ a ∀ b ∀ k ∀ h ∀ x ∀ y ∀ v ∀ e ∀ i ∀ m ∀ o (iprop td j w → ictk td j a k → ictk td j b h → ⟨ x , ⟨ y , ⟨ v , e ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) k w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) → ⟨ i , ⟨ m , ⟨ o , e ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) h w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) → a = b ∧ y = m) $ >
+  $ G ⇒ ∀ i ∀ a ∀ x ∀ e ∀ m (⟨ fv nvf i , ⟨ a , x ⟩ ⟩ ∈ ifam u (dnf u (mcv H)) td w → a = scat e p → ra_nidx td i m ∈ lrel → e ∊ fseq {y | y = y} → cdm e = fv nvf m → ∃ v (v ∊ u ∧ ∀ o (⟨ ⟨ fv nvf i , ⟨ a , {y | ¬ iprop td (fv nvf i) w ∧ y ∊ x} ⟩ ⟩ , o ⟩ ∈ ifold u (dnf u (mcv H)) td w p mv ↔ o = v))) $;
+
+-- --------------------------------------------------------------------------
+-- The fold's values in the motives
+-- --------------------------------------------------------------------------
+
+--| A concatenation restricted to its first part's length is that part.
+theorem cres_scat_l (G: hyps) (A: class) (s t: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ t ∊ fseq A $ > $ G ⇒ cres (scat s t) (cdm s) = s $;
+
+--| The number of a type's indices, as a set.
+theorem inidx_val (G: hyps) (td ti tm: set):
+  $ G ⇒ ra_nidx td ti tm ∈ lrel $ > $ G ⇒ inidx td (fv nvf ti) = fv nvf tm $;
+
+--| A constructor's value is a set.
+theorem itup_set (G: hyps) (D i c g W: class): $ G ⇒ isset g $ > $ G ⇒ isset (itup D i c g W) $;
+
+--| A point of the family gives an element of its type at its arguments: the
+--| constructor's value.
+theorem ifam_pt_ity (G: hyps) (H: class) (u w td sj sa sc sg: set):
+  $ G ⇒ ⟨ sj , ⟨ sa , scons sc sg ⟩ ⟩ ∈ ifam u (dnf u (mcv H)) td w $ > $ G ⇒ itup td sj sc sg w ∈ apn (ity u (dnf u (mcv H)) td sj w) sa $;
+
+--| A point of the family over the parameters `p`: its indices are a path of
+--| the type's type at `p`.
+--| @freshen G g
+--| @freshen G t
+--| @freshen G a
+--| @freshen G y
+theorem ifam_pt_tel {g t a y: set} (G: hyps) (H J C R X: class) (u w p td tb tp tt te ti tf tc tq tl sj sa se: set):
+  $ G ⇒ iwf u H J C td w R $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_clen tp te ∈ lrel $ >
+  $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ > $ G ⇒ ⟨ sj , ⟨ sa , X ⟩ ⟩ ∈ ifam u (dnf u (mcv H)) td w $ > $ G ⇒ sa = scat se p $ >
+  $ G ⇒ ra_nth_ty tt ti tf tc ∈ lrel $ > $ G ⇒ fv nvf ti = sj $ > $ G ⇒ ra_isort tf tq tl ∈ lrel $ >
+  $ G ⇒ se ∊ fseq {y | y = y} $ > $ G ⇒ cdm se = fv nvf tq $ >
+  $ G ⇒ ∃ g ∃ t ∃ a (⟨ se , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) tf w p) $;
+
+--| A point with a value under the fold: a point of the family at a type's
+--| indices followed by the parameters, with a constructor's value.
+--| @freshen G i
+--| @freshen G m
+--| @freshen G e
+--| @freshen G c
+--| @freshen G g
+--| @freshen G y
+theorem ifold_pt_shape {i m e c g y: set} (G: hyps) (H J C R: class) (u w p mv td tb tp tt te sj sa sx so: set):
+  $ G ⇒ iwf u H J C td w R $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_clen tp te ∈ lrel $ >
+  $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ > $ G ⇒ ⟨ ⟨ sj , ⟨ sa , sx ⟩ ⟩ , so ⟩ ∈ ifold u (dnf u (mcv H)) td w p mv $ >
+  $ G ⇒ ∃ i ∃ m ∃ e ∃ c ∃ g (fv nvf i = sj ∧ ra_nidx td i m ∈ lrel ∧ e ∊ fseq {y | y = y} ∧ cdm e = fv nvf m ∧ sa = scat e p ∧ ⟨ sj , ⟨ sa , scons c g ⟩ ⟩ ∈ ifam u (dnf u (mcv H)) td w ∧ sx = itup td sj c g w) $;
+
+--| The fold's values lie in the motives: a value at a point is an element of
+--| the point's motive at the point's indices and value, and that motive's
+--| value is an element of the motives' universe.
+--| @freshen G e
+theorem ifold_motive {e: set} (G: hyps) (H J C R V: class) (u w p cv mv td tb tp tt tn tm te sj sa sx so: set):
+  $ G ⇒ iwf u H J C td w R $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_clen tp te ∈ lrel $ > $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ >
+  $ G ⇒ cv ∊ imots u (dnf u (mcv H)) td w p V $ > $ G ⇒ mv ∊ imins u (dnf u (mcv H)) td w p cv $ > $ G ⇒ ⟨ ⟨ sj , ⟨ sa , sx ⟩ ⟩ , so ⟩ ∈ ifold u (dnf u (mcv H)) td w p mv $ >
+  $ G ⇒ ∃ e (sa = scat e p ∧ so ∊ apn (vat cv (intys td) sj) (scons sx e) ∧ apn (vat cv (intys td) sj) (scons sx e) ∈ fv uni V) $;
+
+--| With motives at level `0`, every value of the fold is empty (the first form
+--| of elimination for `ifold_fn`).
+--| @freshen G j
+--| @freshen G a
+--| @freshen G o
+theorem ifold_zero {j a o: set} (G: hyps) (H J C R: class) (u w p cv mv td tb tp tt tn tm te: set):
+  $ G ⇒ iwf u H J C td w R $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_clen tp te ∈ lrel $ > $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ >
+  $ G ⇒ cv ∊ imots u (dnf u (mcv H)) td w p ∅ $ > $ G ⇒ mv ∊ imins u (dnf u (mcv H)) td w p cv $ >
+  $ G ⇒ ∀ j ∀ a ∀ o (iprop td j w → ⟨ ⟨ j , ⟨ a , ∅ ⟩ ⟩ , o ⟩ ∈ ifold u (dnf u (mcv H)) td w p mv → o = ∅) $;

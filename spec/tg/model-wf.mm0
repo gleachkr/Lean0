@@ -441,3 +441,29 @@ theorem ind_wf_data {b p t m n k c l f e x: set} (G: hyps) (J: class) (tc td: se
   $ G ⇒ ∃ b ∃ p ∃ t ∃ m ∃ n ∃ k ∃ c ∃ l ∃ f ∃ e ∃ x (ra_ind_data td b p t ∈ lrel ∧ ra_tys_closed p t ∈ lrel ∧
       ra_clen p m ∈ lrel ∧ ra_ntys t n k ∈ lrel ∧ ra_capp p tc c ∈ lrel ∧ ra_nth_ty t ⟨ kc_nz , ∅ ⟩ f e ∈ lrel ∧
       ra_isort f x l ∈ lrel ∧ ra_tys_wf td n m l ⟨ kc_nz , ∅ ⟩ c t ∈ lrel3 J) $;
+
+--| A path of `k` binders over a sort has `k` fields.
+theorem lrel_isort_fields (G: hyps) (E: class) (u w t1 t2 t3 t4 t5 t6 t7 t8: set):
+  $ G ⇒ ra_isort t1 t2 t3 ∈ lrel $ > $ G ⇒ ⟨ t5 , ⟨ t6 , ⟨ t7 , t8 ⟩ ⟩ ⟩ ∈ etel u E t1 w t4 $ > $ G ⇒ cdm t5 = fv nvf t2 $;
+--| An occurrence of type `t6` has as many arguments as the type's indices
+--| and the parameters.
+--| @freshen G m
+theorem lrel_indapp_cnt {m: set} (G: hyps) (M: class) (u w r t1 t2 t3 t4 t5 t6: set):
+  $ G ⇒ ra_indapp t1 t2 t3 t4 t5 t6 ∈ lrel $ > $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ ∃ m (ra_nidx t1 t6 m ∈ lrel ∧ cdm (sarg u (dnf u M) t5 w r) = nadd (fv nvf m) (fv nvf t3) ∧ isset (sarg u (dnf u M) t5 w r)) $;
+--| An occurrence's arguments: the indices, then the parameters (the window
+--| of the valuation at the occurrence's depth).
+--| @freshen G m
+--| @freshen G x
+--| @freshen G y
+theorem lrel_indapp_shape {m x y: set} (G: hyps) (M: class) (u w r t1 t2 t3 t4 t5 t6: set):
+  $ G ⇒ ra_indapp t1 t2 t3 t4 t5 t6 ∈ lrel $ > $ G ⇒ t5 ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ uadm u $ >
+  $ G ⇒ ∃ m ∃ x (ra_nidx t1 t6 m ∈ lrel ∧ x ∊ fseq {y | y = y} ∧ cdm x = fv nvf m ∧
+      sarg u (dnf u M) t5 w r = scat x (swin r (fv nvf t4) (fv nvf t3))) $;
+
+--| Zero is a numeral.
+theorem ofsort_nat_nz (G: hyps): $ G ⇒ ⟨ kc_nz , ∅ ⟩ ∈ ofsort lsig lopen ks_nat $;
+--| The successor of a numeral is a numeral.
+theorem ofsort_nat_s (G: hyps) (A: class):
+  $ G ⇒ A ∈ ofsort lsig lopen ks_nat $ > $ G ⇒ ⟨ kc_s , scons A ∅ ⟩ ∈ ofsort lsig lopen ks_nat $;
