@@ -55,3 +55,84 @@ theorem ifold_imrel (G: hyps) (E D V: class) (u w p cv mv tb tp tt tn tm: set):
   $ G ⇒ ra_ind_data D tb tp tt ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ > $ G ⇒ p ∊ fseq u $ >
   $ G ⇒ ixs D w (ifam u E D w) ∈ fseq u $ > $ G ⇒ cv ∊ imots u E D w p V $ > $ G ⇒ mv ∊ imins u E D w p cv $ >
   $ G ⇒ ifold u E D w p mv ⊆ imrel D cv $;
+
+-- --------------------------------------------------------------------------
+-- The inductive hypotheses' valuations: inhabited and unique
+-- --------------------------------------------------------------------------
+
+--| The hypotheses' valuations at `n` fields are inhabited when each recursive
+--| field's space below `n` is.
+--| @freshen G a
+--| @freshen G d
+--| @freshen G i
+--| @freshen G h
+--| @freshen G e
+theorem ihv_inh {a d i h e: set} (G: hyps) (D K L g t: class) (n: set):
+  $ G ⇒ isset t $ > $ G ⇒ ∀ a (isset (ap L a)) $ > $ G ⇒ n ∊ ω $ >
+  $ G ⇒ ∀ d ∀ i (d ∊ n → irf D K d i → ∃ h (h ∊ ihsp L g t d i)) $ >
+  $ G ⇒ ∃ e (e ∊ ihv D K L g t n) $;
+
+--| Two valuations of the hypotheses at `n` fields are equal when each recursive
+--| field's space below `n` has at most one element.
+--| @freshen G a
+--| @freshen G d
+--| @freshen G i
+--| @freshen G x0
+--| @freshen G x1
+theorem ihv_uniq {a d i x0 x1: set} (G: hyps) (D K L g t: class) (n h h2: set):
+  $ G ⇒ isset t $ > $ G ⇒ ∀ a (isset (ap L a)) $ > $ G ⇒ n ∊ ω $ >
+  $ G ⇒ ∀ d ∀ i ∀ x0 ∀ x1 (d ∊ n → irf D K d i → x0 ∊ ihsp L g t d i → x1 ∊ ihsp L g t d i → x0 = x1) $ >
+  $ G ⇒ h ∊ ihv D K L g t n $ > $ G ⇒ h2 ∊ ihv D K L g t n $ > $ G ⇒ h = h2 $;
+
+--| A recursive field's hypothesis space has at most one element when the relation
+--| has at most one value at each of the field's points (the field's telescopes
+--| `fv t d` the paths of a tree `A`).
+--| @freshen G q
+--| @freshen G b
+--| @freshen G c
+--| @freshen G e
+--| @freshen G x0
+--| @freshen G x1
+theorem ihsp_uniq {q b c e x0 x1: set} (G: hyps) (E L g t d j A: class) (u w r h h2: set):
+  $ G ⇒ A ∈ trees ω $ > $ G ⇒ fv t d = etel u E A w r $ >
+  $ G ⇒ ∀ q ∀ b ∀ c ∀ e ∀ x0 ∀ x1 (⟨ q , ⟨ b , ⟨ c , e ⟩ ⟩ ⟩ ∈ fv t d → ⟨ ⟨ j , ⟨ e , apn (fv g d) q ⟩ ⟩ , x0 ⟩ ∈ L → ⟨ ⟨ j , ⟨ e , apn (fv g d) q ⟩ ⟩ , x1 ⟩ ∈ L → x0 = x1) $ >
+  $ G ⇒ h ∊ ihsp L g t d j $ > $ G ⇒ h2 ∊ ihsp L g t d j $ > $ G ⇒ h = h2 $;
+
+--| A recursive field's hypothesis space has an element when the relation has
+--| exactly one value, an element of `u`, at each of the field's points.
+--| @freshen G q
+--| @freshen G b
+--| @freshen G c
+--| @freshen G e
+--| @freshen G y
+--| @freshen G o
+--| @freshen G h
+theorem ihsp_inh {q b c e y o h: set} (G: hyps) (E L g t d j A: class) (u w r: set):
+  $ G ⇒ universe u $ > $ G ⇒ A ∈ trees ω $ > $ G ⇒ fv t d = etel u E A w r $ >
+  $ G ⇒ ∀ q ∀ b ∀ c ∀ e (⟨ q , ⟨ b , ⟨ c , e ⟩ ⟩ ⟩ ∈ fv t d → ∃ y (y ∊ u ∧ ∀ o (⟨ ⟨ j , ⟨ e , apn (fv g d) q ⟩ ⟩ , o ⟩ ∈ L ↔ o = y))) $ >
+  $ G ⇒ ∃ h (h ∊ ihsp L g t d j) $;
+
+--| A path of `Π A. B`: a path of `B` over an extended valuation, with `A`'s
+--| paths at the head of the telescopes, the head `x` last among the fields as a
+--| valuation and first among the fields in order.
+--| @freshen G x
+--| @freshen G f
+--| @freshen G g
+--| @freshen G t
+theorem etel_pi_tab {x f g t: set} (G: hyps) (E: class) (u w r ta tb q1 q2 q3 q4: set):
+  $ G ⇒ ta ∊ trees ω $ > $ G ⇒ tb ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ ⟨ q1 , ⟨ q2 , ⟨ q3 , q4 ⟩ ⟩ ⟩ ∈ etel u E ⟨ kc_pi , scons ta (scons tb ∅) ⟩ w r $ >
+  $ G ⇒ ∃ x ∃ f ∃ g ∃ t (⟨ f , ⟨ g , ⟨ t , q4 ⟩ ⟩ ⟩ ∈ etel u E tb w (scons x r) ∧ q1 = ssnoc f x ∧ q2 = scons x g ∧ q3 = scons (etel u E ta w r) t) $;
+
+--| A path's telescope table has, at each field, the paths of the field's type
+--| at some valuation.
+--| @freshen G o
+theorem etel_tab {o: set} (G: hyps) (E: class) (u w r t1 t2 t3 p1 p2 p3 p4: set):
+  $ G ⇒ ra_nth_pi t1 t2 t3 ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ ⟨ p1 , ⟨ p2 , ⟨ p3 , p4 ⟩ ⟩ ⟩ ∈ etel u E t1 w r $ >
+  $ G ⇒ ∃ o (fv p3 (fv nvf t2) = etel u E t3 w o) $;
+
+--| A path of a type with `npis` (binders over an application or a variable) is
+--| determined by its fields in order.
+theorem etel_det_g (G: hyps) (E: class) (u w r t1 t2 p1 p2 p3 p4 q1 q3 q4: set):
+  $ G ⇒ ra_npis t1 t2 ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ ⟨ p1 , ⟨ p2 , ⟨ p3 , p4 ⟩ ⟩ ⟩ ∈ etel u E t1 w r $ > $ G ⇒ ⟨ q1 , ⟨ p2 , ⟨ q3 , q4 ⟩ ⟩ ⟩ ∈ etel u E t1 w r $ >
+  $ G ⇒ p1 = q1 $;
