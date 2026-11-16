@@ -50,6 +50,10 @@ theorem ofsort_pi_kids (G: hyps) (ta tb: set):
 theorem lrel_indapp_fseq (G: hyps) (M: class) (u w r t1 t2 t3 t4 t5 t6: set):
   $ G ⇒ ra_indapp t1 t2 t3 t4 t5 t6 ∈ lrel $ > $ G ⇒ uadm u $ > $ G ⇒ t5 ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ sarg u (dnf u M) t5 w r ∈ fseq u $;
+--| An element of the telescope of `Π A. B`: a head in `A`'s value and an element of `B`'s telescope over it.
+theorem etel_pi_elim {x f g t: set} (G: hyps) (M: class) (u w r ta tb q1 q2 q3 q4: set): $ G ⇒ ta ∊ trees ω $ > $ G ⇒ tb ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ ⟨ q1 , ⟨ q2 , ⟨ q3 , q4 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) ⟨ kc_pi , scons ta (scons tb ∅) ⟩ w r $ > $ G ⇒ ∃ x ∃ f ∃ g ∃ t (x ∊ dt u M ta w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , q4 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tb w (scons x r) ∧ q1 = ssnoc f x ∧ q2 = scons x g) $;
+--| An element of the telescope of `Π A. B` from a head in `A`'s value and an element of `B`'s telescope over it.
+theorem etel_pi_intro (G: hyps) (M: class) (u w r ta tb x1 f1 g1 s1 a1: set): $ G ⇒ ta ∊ trees ω $ > $ G ⇒ tb ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ x1 ∊ dt u M ta w r $ > $ G ⇒ x1 ∊ u $ > $ G ⇒ ⟨ f1 , ⟨ g1 , ⟨ s1 , a1 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tb w (scons x1 r) $ > $ G ⇒ ⟨ ssnoc f1 x1 , ⟨ scons x1 g1 , ⟨ scons (etel u (dnf u M) ta w r) s1 , a1 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) ⟨ kc_pi , scons ta (scons tb ∅) ⟩ w r $;
 --| A set of points over the paths of a well-formed constructor type, whose
 --| value at each path is an element of the result's value there (type `i` of
 --| the valuation at the path's arguments), is an element of the type's
@@ -62,6 +66,20 @@ theorem lrel3_cwf_trace {z f g t a v: set} (G: hyps) (J M: class) (u w r x t1 t2
   $ G ⇒ ∀ f ∀ g ∀ t ∀ a (⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u (dnf u M) t8 w r → a ∊ fseq u →
       apn x f ∈ apn (fv r (nadd (nadd (fv nvf t7) (fv nvf t3)) (fv nvf t5))) a) $ >
   $ G ⇒ x ∈ dt u M t8 w r $;
+--| The empty function applied along any sequence is empty.
+theorem apn_empty_fn (G: hyps) (S: class): $ G ⇒ apn ∅ S = ∅ $;
+--| An element of a constructor's value: parameters, then an element of the constructor type's telescope over them and the family.
+theorem ictor_elim_tel {p f g t a y: set} (G: hyps) (E: class) (u w td tp tt j c tk z: set): $ G ⇒ z ∊ (ictor u E td j c w) $ > $ G ⇒ iprt td tp tt $ > $ G ⇒ ictk td j c tk $ > $ G ⇒ tk ∊ trees ω $ > $ G ⇒ (ixs td w (ifam u E td w)) ∈ fseq u $ > $ G ⇒ ∃ p ∃ f ∃ g ∃ t ∃ a ∃ y (p ∊ esat u E tp w ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E tk w (scat p (ixs td w (ifam u E td w))) ∧ z = nest p (nest f y)) $;
+--| The telescope of a term closed at a depth does not read the valuation past that depth.
+theorem closed_etel_scat (G: hyps) (M: class) (u w k e q v r: set): $ G ⇒ ra_closed k e ∈ lrel $ > $ G ⇒ e ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ q ∊ fseq u $ > $ G ⇒ v ∊ fseq u $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ fv nvf k = nadd (cdm q) (cdm v) $ > $ G ⇒ etel u (dnf u M) e w (scat q (scat v r)) = etel u (dnf u M) e w (scat q v) $;
+--| An entry of the middle of three concatenated sequences.
+theorem scat_scat_fv_mid (G: hyps) (I: class) (u q v r: set): $ G ⇒ q ∊ fseq u $ > $ G ⇒ v ∊ fseq u $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ I ∈ cdm v $ > $ G ⇒ I ∈ ω $ > $ G ⇒ fv (scat q (scat v r)) (nadd (cdm q) I) = fv v I $;
+--| `lrel3_cwf_trace` at a constructor type over parameters, a valuation of the types and an outer valuation.
+theorem lrel3_cwf_fiber {z f g t a y: set} (G: hyps) (J M: class) (u w td tn tm tl ti tx t7 tk q v r o x: set): $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ ra_cwf td tn tm tl ti tx t7 tk ∈ lrel3 J $ > $ G ⇒ tk ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ t7 ∊ trees ω $ > $ G ⇒ fv nvf t7 = ∅ $ > $ G ⇒ q ∊ fseq u $ > $ G ⇒ cdm q = fv nvf tm $ > $ G ⇒ v ∊ fseq u $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ fv nvf ti ∈ cdm v $ > $ G ⇒ o = scat q (scat v r) $ > $ G ⇒ ∀ z (z ∊ x → ∃ f ∃ g ∃ t ∃ a ∃ y (⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tk w o ∧ z = nest f y)) $ > $ G ⇒ ∀ f ∀ g ∀ t ∀ a (⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tk w o → a ∊ fseq u → apn x f ∈ apn (fv v (fv nvf ti)) a) $ > $ G ⇒ x ∈ dt u M tk w o $;
+--| The values of a block's types over its family form a sequence in the universe, of length `intys`.
+theorem ixs_ifam_fseq (G: hyps) (E: class) (u w td: set): $ G ⇒ universe u $ > $ G ⇒ (ifam u E td w) ∈ u $ > $ G ⇒ (ixs td w (ifam u E td w)) ∈ fseq u ∧ cdm (ixs td w (ifam u E td w)) = intys td $;
+--| A constructor of a block with `icwf` satisfies `cwf` at its type's index.
+theorem icwf_ictk_cwf {i n m l x: set} (G: hyps) (J: class) (td tp tt j c tk: set): $ G ⇒ icwf J td $ > $ G ⇒ iprt td tp tt $ > $ G ⇒ ictk td j c tk $ > $ G ⇒ ∃ i ∃ n ∃ m ∃ l ∃ x (fv nvf i = j ∧ ra_clen tp m ∈ lrel ∧ ra_cwf td n m l i x ⟨ kc_nz , ∅ ⟩ tk ∈ lrel3 J) $;
 
 --| The constructor's rule in the model (E4), without nested occurrences
 --| (`K2` under the parameters is the type): for a well-formed block (`iwf`)

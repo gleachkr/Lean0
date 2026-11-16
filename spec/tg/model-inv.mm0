@@ -40,6 +40,8 @@ theorem cseqv_nth_ctor_l {p: set} (G: hyps) (t1 t2 i f: set):
 theorem cseqv_nth_ctor_r {p: set} (G: hyps) (t1 t2 i f: set):
   $ G ⇒ ra_cseqv t1 t2 ∈ lrel2 $ > $ G ⇒ ra_nth_ctor t2 i f ∈ lrel $ >
   $ G ⇒ ∃ p (ra_nth_ctor t1 i p ∈ lrel ∧ ra_eeqv p f ∈ lrel2) $;
+--| `lveq` is reflexive.
+theorem lveq_refl (G: hyps) (A: class): $ G ⇒ lveq A A $;
 
 --| Equivalent types are binders over sorts together, with the same number of
 --| binders and equivalent levels, from the left type to the right (`_l`) and
@@ -61,6 +63,28 @@ theorem teqv_ntys_l (G: hyps) (t1 t2 n m: set):
   $ G ⇒ ra_teqv t1 t2 ∈ lrel2 $ > $ G ⇒ ra_ntys t1 n m ∈ lrel $ > $ G ⇒ ra_ntys t2 n m ∈ lrel $;
 theorem teqv_ntys_r (G: hyps) (t1 t2 n m: set):
   $ G ⇒ ra_teqv t1 t2 ∈ lrel2 $ > $ G ⇒ ra_ntys t2 n m ∈ lrel $ > $ G ⇒ ra_ntys t1 n m ∈ lrel $;
+--| Blocks with `teqv` types have the same number of types.
+theorem intys_eqv (G: hyps) (d e p q t v: set): $ G ⇒ iprt d p t $ > $ G ⇒ iprt e q v $ > $ G ⇒ ra_teqv t v ∈ lrel2 $ > $ G ⇒ intys d = intys e $;
+--| Blocks with `teqv` types have the same entries.
+theorem ient_eqv (G: hyps) (J Z: class) (d e p q t v w: set): $ G ⇒ iprt d p t $ > $ G ⇒ iprt e q v $ > $ G ⇒ ra_teqv t v ∈ lrel2 $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ ient d w Z J = ient e w Z J $;
+--| Blocks with `teqv` types have the same sequence of values over a family.
+theorem ixs_eqv (G: hyps) (Z: class) (d e p q t v w: set): $ G ⇒ iprt d p t $ > $ G ⇒ iprt e q v $ > $ G ⇒ ra_teqv t v ∈ lrel2 $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ ixs d w Z = ixs e w Z $;
+--| A telescope with an element is over an outer valuation in `fseq u`.
+theorem etel_outer_fseq (G: hyps) (E R Q: class) (u w c: set): $ G ⇒ c ∊ trees ω $ > $ G ⇒ Q ∈ etel u E c w R $ > $ G ⇒ R ∈ fseq u $;
+--| Blocks with `ceqv` parameters and `teqv` types have the same family, when the hook is invariant at the first block's subtrees.
+theorem ifam_eqv (G: hyps) (M: class) (u d e p q t v w: set): $ G ⇒ iprt d p t $ > $ G ⇒ iprt e q v $ > $ G ⇒ ra_ceqv p q ∈ lrel2 $ > $ G ⇒ ra_teqv t v ∈ lrel2 $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ fv tsub d ⊆ einv u M w $ > $ G ⇒ d ∊ trees ω $ > $ G ⇒ ifam u (dnf u M) d w = ifam u (dnf u M) e w $;
+--| Likewise the same table of the types' values.
+theorem itc_eqv (G: hyps) (M: class) (u d e p q t v w: set): $ G ⇒ iprt d p t $ > $ G ⇒ iprt e q v $ > $ G ⇒ ra_ceqv p q ∈ lrel2 $ > $ G ⇒ ra_teqv t v ∈ lrel2 $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ fv tsub d ⊆ einv u M w $ > $ G ⇒ d ∊ trees ω $ > $ G ⇒ itc u (dnf u M) d w = itc u (dnf u M) e w $;
+--| Likewise the same failure value.
+theorem itriv_eqv (G: hyps) (M J: class) (u d e p q t v w: set): $ G ⇒ iprt d p t $ > $ G ⇒ iprt e q v $ > $ G ⇒ ra_ceqv p q ∈ lrel2 $ > $ G ⇒ ra_teqv t v ∈ lrel2 $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ fv tsub d ⊆ einv u M w $ > $ G ⇒ d ∊ trees ω $ > $ G ⇒ itriv u (dnf u M) d J w = itriv u (dnf u M) e J w $;
+--| Likewise the same value of a type.
+theorem ity_eqv (G: hyps) (M J: class) (u d e p q t v w: set): $ G ⇒ iprt d p t $ > $ G ⇒ iprt e q v $ > $ G ⇒ ra_ceqv p q ∈ lrel2 $ > $ G ⇒ ra_teqv t v ∈ lrel2 $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ fv tsub d ⊆ einv u M w $ > $ G ⇒ d ∊ trees ω $ > $ G ⇒ ity u (dnf u M) d J w = ity u (dnf u M) e J w $;
+--| `ipi` depends only on the telescope's valuations and the body's value at each.
+theorem ipi_eq_da {i: set} (G: hyps) (E: class) (u w a b c f: set): $ G ⇒ esat u E a w = esat u E b w $ > $ G ⇒ ∀ i (da (fv E c) w i = da (fv E f) w i) $ > $ G ⇒ ipi u E a c w = ipi u E b f w $;
+--| Likewise the same gated value of a type.
+theorem ityv_eqv (G: hyps) (M J: class) (u d e p q t v w: set): $ G ⇒ iprt d p t $ > $ G ⇒ iprt e q v $ > $ G ⇒ ra_ceqv p q ∈ lrel2 $ > $ G ⇒ ra_teqv t v ∈ lrel2 $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ fv tsub d ⊆ einv u M w $ > $ G ⇒ d ∊ trees ω $ > $ G ⇒ ityv u (dnf u M) d J w = ityv u (dnf u M) e J w $;
+--| The data of `ind_eqv` blocks: parameters `ceqv`, types `teqv`.
+theorem ind_eqv_iprt {p q t v: set} (G: hyps) (d e: set): $ G ⇒ ra_ind_eqv d e ∈ lrel2 $ > $ G ⇒ ∃ p ∃ q ∃ t ∃ v (iprt d p t ∧ iprt e q v ∧ ra_ceqv p q ∈ lrel2 ∧ ra_teqv t v ∈ lrel2) $;
 
 --| The types' part of the hook is invariant at `ind_ty` nodes: equivalent
 --| blocks (`ind_eqv`) have the same types' values, when the subtrees of the
@@ -69,6 +93,8 @@ theorem mcv_inv_ind_ty (G: hyps) (H: class) (u w r d e i: set):
   $ G ⇒ uadm u $ > $ G ⇒ hty ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ ra_ind_eqv d e ∈ lrel2 $ > $ G ⇒ fv tsub d ⊆ einv u (mcv H) w $ > $ G ⇒ i ∊ trees ω $ >
   $ G ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons d (scons i ∅) ⟩ w r = dt u (mcv H) ⟨ kc_ind_ty , scons e (scons i ∅) ⟩ w r $;
+--| Likewise the same value of a constructor.
+theorem ictor_eqv (G: hyps) (M J C: class) (u d e p q t v w: set): $ G ⇒ iprt d p t $ > $ G ⇒ iprt e q v $ > $ G ⇒ ra_ceqv p q ∈ lrel2 $ > $ G ⇒ ra_teqv t v ∈ lrel2 $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ fv tsub d ⊆ einv u M w $ > $ G ⇒ d ∊ trees ω $ > $ G ⇒ ictor u (dnf u M) d J C w = ictor u (dnf u M) e J C w $;
 
 --| The constructors' part of the hook is invariant at `ind_ctor` nodes.
 theorem mcv_inv_ind_ctor (G: hyps) (H: class) (u w r d e i c: set):

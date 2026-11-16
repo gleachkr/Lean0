@@ -3138,17 +3138,6 @@ c13: $ … ⇒ isset (scons x ∅) $ by scons_set [c12]
 c14: $ … ⇒ scat (ssnoc e x) s = scat e (scons x s) $ by isset_elim [c13, c11]
 
 
-lemma a0_exi {x: set} (G: hyps) (p: fml x) (c: fml): $ G ⇒ ∀ x (p → c) $ > $ G ⇒ (∃ x p) → c $
-----
-l1: $ G , ∃ x p ⇒ ∃ x p $ by ax
-l2: $ G , p ⇒ ∀ x (p → c) $ by weaken [#1]
-l3: $ … ⇒ p → c $ by all_elim [l2]
-l4: $ G , p ⇒ p $ by ax
-l5: $ … ⇒ c $ by imp_elim [l3, l4]
-l6: $ … ⇒ c $ by ex_elim [l1, l5]
-l7: $ … ⇒ (∃ x p) → c $ by imp_intro [l6]
-
-
 def a0_snp (A: class) (.c .e .f: set): class = $ {c | c = ∅ ∨ ∃ e ∃ f (e ∊ fseq A ∧ f ∊ A ∧ c = ssnoc e f)} $
 
 --| i7: one more entry in front of a sequence ending in `f`.
@@ -3252,9 +3241,9 @@ g2: $ G , x ∊ A , y ∊ fseq A , y ∊ a0_snp A , x7 ∊ fseq A ∧ x8 ∊ A �
 g4a: $ … ⇒ scons x y ∈ a0_snp A $ by a0_snoc_b [g2, gp0, gp1, gp2]
 g4: $ … ⇒ (x7 ∊ fseq A ∧ x8 ∊ A ∧ y = ssnoc x7 x8) → scons x y ∈ a0_snp A $ by imp_intro [g4a]
 ha1: $ … ⇒ ∀ x8 ((x7 ∊ fseq A ∧ x8 ∊ A ∧ y = ssnoc x7 x8) → scons x y ∈ a0_snp A) $ by all_intro [g4]
-hb1: $ … ⇒ (∃ x8 (x7 ∊ fseq A ∧ x8 ∊ A ∧ y = ssnoc x7 x8)) → scons x y ∈ a0_snp A $ by a0_exi [ha1]
+hb1: $ … ⇒ (∃ x8 (x7 ∊ fseq A ∧ x8 ∊ A ∧ y = ssnoc x7 x8)) → scons x y ∈ a0_snp A $ by ex_elim_imp [ha1]
 ha0: $ … ⇒ ∀ x7 ((∃ x8 (x7 ∊ fseq A ∧ x8 ∊ A ∧ y = ssnoc x7 x8)) → scons x y ∈ a0_snp A) $ by all_intro [hb1]
-hb0: $ … ⇒ (∃ x7 ∃ x8 (x7 ∊ fseq A ∧ x8 ∊ A ∧ y = ssnoc x7 x8)) → scons x y ∈ a0_snp A $ by a0_exi [ha0]
+hb0: $ … ⇒ (∃ x7 ∃ x8 (x7 ∊ fseq A ∧ x8 ∊ A ∧ y = ssnoc x7 x8)) → scons x y ∈ a0_snp A $ by ex_elim_imp [ha0]
 g9a: $ … ⇒ scons x y ∈ a0_snp A $ by imp_use [hb0]
 g9: $ … ⇒ scons x y ∈ a0_snp A $ by or_elim [b2, f4, g9a]
 k4: $ … ⇒ y ∊ a0_snp A → scons x y ∈ a0_snp A $ by imp_intro [g9]
