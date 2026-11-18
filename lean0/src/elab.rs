@@ -1539,7 +1539,37 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
             a.push(self.tr(x)?);
         }
         a.push(self.tr(t2)?);
-        let p2 = mm(self.g.env.thm(si.red[idx], &a, &[pt2]))?;
+        // `proj_ok`'s premises (as `proj_df_p`), then the constructor application's spine
+        // typed along the constructor's type as the schema has it
+        let lvls: Vec<E> = a[..a.len() - 1 - (ctor_args.len() - k)].to_vec();
+        let (mut th, needs_sort) = si.red[idx];
+        let mut hyps = Vec::new();
+        if needs_sort {
+            let l = self.g.env.subst(si.sort, &lvls);
+            let z = self.g.env.app_n("lz", &[]);
+            let one = self.g.env.app_n("ls", &[z]);
+            let m = self.g.env.app_n("lmax", &[one, l]);
+            let gg = &mut *self.g;
+            match (mm(gg.lv.equiv(&gg.lean, &mut gg.env, m, l)), &si.red_prop[idx], &si.df_prop[idx]) {
+                (Ok(p), _, _) => hyps.push(p),
+                (Err(_), Some(thp), Some((_, fls))) => {
+                    th = *thp;
+                    for &fl in fls {
+                        let fl = gg.env.subst(fl, &lvls);
+                        hyps.push(mm(gg.lv.equiv(&gg.lean, &mut gg.env, fl, z)).map_err(|e| format!("projection {idx} of {sname} from a proposition: {e}"))?);
+                    }
+                }
+                (Err(e), _, _) => return Err(format!("projection {idx} of {sname} from a proposition: {e}")),
+            }
+        }
+        let (cf, _) = self.tc.ctx.unfold_apps(s2);
+        let cty = self.infer(cf)?.0;
+        let cty = crate::induct::strip_pis(self, cty);
+        let (sty_t, p_sty) = self.sty_spine_at(cf, cty, &ctor_args[k..])?;
+        a.push(self.tr(sty_t)?);
+        hyps.push(p_sty);
+        hyps.push(pt2);
+        let p2 = mm(self.g.env.thm(th, &a, &hyps))?;
         let p1 = self.proj_cast(p1, f, tf)?;
         let p2 = self.cast(p2, t2, tf)?;
         let mut pf = mm(self.g.lean.trans(&mut self.g.env, p1, p2))?;
@@ -1632,7 +1662,6 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         } else {
             self.app_cong(lhs, lhs2)?.1
         };
-        let (tl2, pl2) = self.sty_spine(f, &args2)?;
         // the axiom's arguments
         let g = self.ctx();
         let mut a = vec![g];
@@ -1641,7 +1670,7 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         }
         let (mf, margs) = self.tc.ctx.unfold_apps(major2);
         let Expr::Const { name: cname, levels: clevels, .. } = self.read(mf) else { return Err("major premise is not a constructor application".into()) };
-        let th = if kind == Step::Quot {
+        let (th, hyps, tl2) = if kind == Step::Quot {
             for &x in &args[..major_idx] {
                 a.push(self.tr(x)?);
             }
@@ -1651,7 +1680,9 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
             for &x in &margs {
                 a.push(self.tr(x)?);
             }
-            self.g.quot_red[&fname]
+            let (tl2, pl2) = self.sty_spine(f, &args2)?;
+            a.push(self.tr(tl2)?);
+            (self.g.quot_red[&fname], vec![pl2], tl2)
         } else {
             let cl = self.g.lean_name(self.tc, cname);
             let Some(&th) = self.g.iota.get(&(fname.clone(), cl.clone())) else { return Err(format!("no iota rule {fname} {cl}")) };
@@ -1664,10 +1695,55 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
             for &x in &margs {
                 a.push(self.tr(x)?);
             }
-            th
+            // the recursor's arguments before the major premise, typed along its type
+            let (tpi, p_e4) = self.sty_spine(f, &args2[..major_idx])?;
+            let Expr::Pi { binder_type: ty_m, body: cbody, .. } = self.read(tpi) else {
+                return Err("iota: the recursor's type has no binder for the major premise".into())
+            };
+            let tl2 = self.tc.ctx.inst(cbody, &[major2]);
+            let c4 = self.g.env.concl(p_e4);
+            let fty = match self.g.env.head(c4) {
+                Some((_, &[_, _, _, _, fty])) => fty,
+                _ => return Err("iota: not an sty".into()),
+            };
+            let mm0kit::lean::View::Pi(tye, cbe) = self.g.lean.view(&self.g.env, fty) else { return Err("iota: the major premise's binder".into()) };
+            let mj = self.tr(major2)?;
+            let (tl2e, p_inst) = mm(self.g.lean.inst(&mut self.g.env, 0, cbe, mj))?;
+            // the constructor's arguments, typed along its type at the levels of the major
+            // premise's type; the arguments of the type that leaves are that type's
+            let (hty, targs) = self.tc.ctx.unfold_apps(ty_m);
+            let Expr::Const { levels: mlv, .. } = self.read(hty) else { return Err("iota: the major premise's type is not a constant's application".into()) };
+            let Some(cd) = self.tc.env.get_constructor(&cname).cloned() else { return Err(format!("iota: unknown constructor {cl}")) };
+            let cty = crate::induct::ctor_type_at(self, &cd, mlv);
+            let (t2m, p_m) = self.sty_spine_at(mf, cty, &margs)?;
+            let (h2, t2args) = self.tc.ctx.unfold_apps(t2m);
+            if h2 != hty || t2args.len() != targs.len() {
+                return Err(format!("iota: the type of the constructor application is not the major premise's ({fname} on {cl})"))
+            }
+            let mut fe = self.tr(h2)?;
+            let mut fe2 = fe;
+            let mut p_aeq = mm(self.g.env.thm_n("aeq_nil", &[g, fe], &[]))?;
+            for (&x, &y) in t2args.iter().zip(&targs) {
+                let q = self.defeq(x, y)?;
+                let (_, xe, ye, ae) = self.g.lean.deq_parts(&mut self.g.env, q);
+                p_aeq = mm(self.g.env.thm_n("aeq_app", &[g, fe, fe2, xe, ye, ae], &[p_aeq, q]))?;
+                fe = self.g.lean.app(&mut self.g.env, fe, xe);
+                fe2 = self.g.lean.app(&mut self.g.env, fe2, ye);
+            }
+            let mut hyps = Vec::new();
+            let (l1, l2) = (self.tc.ctx.read_levels(mlv).to_vec(), self.tc.ctx.read_levels(clevels).to_vec());
+            if l1.len() != l2.len() {
+                return Err(format!("iota: level counts differ ({fname} on {cl})"))
+            }
+            for (&x, &y) in l1.iter().zip(&l2) {
+                hyps.push(self.level_equiv(x, y)?);
+            }
+            hyps.extend([p_e4, p_inst, p_m, p_aeq]);
+            let t2e = self.tr(t2m)?;
+            a.extend([tl2e, tye, cbe, t2e]);
+            (th, hyps, tl2)
         };
-        a.push(self.tr(tl2)?);
-        let p2 = mm(self.g.env.thm(th, &a, &[pl2]))?;
+        let p2 = mm(self.g.env.thm(th, &a, &hyps))?;
         let p2 = self.cast(p2, tl2, tl)?;
         let mut pf = mm(self.g.lean.trans(&mut self.g.env, p1, p2))?;
         let mut ft = tl;

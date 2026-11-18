@@ -431,7 +431,8 @@ def kr_cminors: class = $ suc kr_mwalk $;
 def kr_minors: class = $ suc kr_cminors $;
 def kr_rtail: class = $ suc kr_minors $;
 def kr_rec_ty: class = $ suc kr_rtail $;
-def kr_ihval: class = $ suc kr_rec_ty $;
+def kr_ctor_ty: class = $ suc kr_rec_ty $;
+def kr_ihval: class = $ suc kr_ctor_ty $;
 def kr_rwalk: class = $ suc kr_ihval $;
 def kr_rec_rhs: class = $ suc kr_rwalk $;
 def kr_rec_rule: class = $ suc kr_rec_rhs $;
@@ -509,6 +510,7 @@ def ra_cminors (a1 a2 a3 a4 a5 a6 a7 a8: class): class = $ ⟨ kr_cminors , scon
 def ra_minors (a1 a2 a3 a4 a5 a6 a7: class): class = $ ⟨ kr_minors , scons a1 (scons a2 (scons a3 (scons a4 (scons a5 (scons a6 (scons a7 ∅)))))) ⟩ $;
 def ra_rtail (a1 a2 a3 a4 a5 a6 a7 a8: class): class = $ ⟨ kr_rtail , scons a1 (scons a2 (scons a3 (scons a4 (scons a5 (scons a6 (scons a7 (scons a8 ∅))))))) ⟩ $;
 def ra_rec_ty (a1 a2 a3 a4: class): class = $ ⟨ kr_rec_ty , scons a1 (scons a2 (scons a3 (scons a4 ∅))) ⟩ $;
+def ra_ctor_ty (a1 a2 a3 a4: class): class = $ ⟨ kr_ctor_ty , scons a1 (scons a2 (scons a3 (scons a4 ∅))) ⟩ $;
 def ra_ihval (a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11: class): class = $ ⟨ kr_ihval , scons a1 (scons a2 (scons a3 (scons a4 (scons a5 (scons a6 (scons a7 (scons a8 (scons a9 (scons a10 (scons a11 ∅)))))))))) ⟩ $;
 def ra_rwalk (a1 a2 a3 a4 a5 a6 a7 a8 a9 a10: class): class = $ ⟨ kr_rwalk , scons a1 (scons a2 (scons a3 (scons a4 (scons a5 (scons a6 (scons a7 (scons a8 (scons a9 (scons a10 ∅))))))))) ⟩ $;
 def ra_rec_rhs (a1 a2 a3 a4 a5: class): class = $ ⟨ kr_rec_rhs , scons a1 (scons a2 (scons a3 (scons a4 (scons a5 ∅)))) ⟩ $;
@@ -911,6 +913,8 @@ def cl_rtail_srt (.D .np .n .m .i .d .mn .dmn .mi .l .X .I .X2 .w: set): class =
   $ {w | ∃ D ∃ np ∃ n ∃ m ∃ i ∃ d ∃ mn ∃ dmn ∃ mi ∃ l ∃ X ∃ I ∃ X2 (w = ⟨ scons (ra_add m n mn) (scons (ra_add d mn dmn) (scons (ra_pargs ⟨ kc_ind_ty , scons D (scons i ∅) ⟩ dmn np X) (scons (ra_pargs X ⟨ kc_nz , ∅ ⟩ d I) (scons (ra_add mi i dmn) (scons (ra_pargs ⟨ kc_bvar , scons mi ∅ ⟩ ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ d X2) ∅))))) , ra_rtail D np n m i d ⟨ kc_srt , scons l ∅ ⟩ ⟨ kc_pi , scons I (scons ⟨ kc_app , scons X2 (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ⟩)} $;
 def cl_rec_ty_i (.D .b .P .T .v .i .np .n .m .mn .M .N .F .F2 .B .R1 .R2 .R .C .w: set): class =
   $ {w | ∃ D ∃ b ∃ P ∃ T ∃ v ∃ i ∃ np ∃ n ∃ m ∃ mn ∃ M ∃ N ∃ F ∃ F2 ∃ B ∃ R1 ∃ R2 ∃ R ∃ C (w = ⟨ scons (ra_ind_data D b P T) (scons (ra_clen P np) (scons (ra_ntys T n m) (scons (ra_motives D np v ⟨ kc_nz , ∅ ⟩ T M) (scons (ra_minors D np n ⟨ kc_nz , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ T N) (scons (ra_nth_ty T i F C) (scons (ra_add m n mn) (scons (ra_lift mn ⟨ kc_nz , ∅ ⟩ F F2) (scons (ra_rtail D np n m i ⟨ kc_nz , ∅ ⟩ F2 B) (scons (ra_pis N B R1) (scons (ra_pis M R1 R2) (scons (ra_pis P R2 R) ∅))))))))))) , ra_rec_ty D v i R ⟩)} $;
+def cl_ctor_ty_i (.D .b .P .N .T .i .c .np .n .m .F .K .K2 .K3 .R .C .w: set): class =
+  $ {w | ∃ D ∃ b ∃ P ∃ N ∃ T ∃ i ∃ c ∃ np ∃ n ∃ m ∃ F ∃ K ∃ K2 ∃ K3 ∃ R ∃ C (w = ⟨ scons (ra_ind_data D b P T) (scons (ra_nth_ty T i F C) (scons (ra_nth_ctor C c K) (scons (ra_clen P np) (scons (ra_ntys T n m) (scons (ra_sinst D ⟨ kc_nz , ∅ ⟩ n np K K2) (scons (ra_ind_nested D N) (scons (ra_rst D N K2 K3) (scons (ra_pis P K3 R) ∅)))))))) , ra_ctor_ty D i c R ⟩)} $;
 def cl_ihval_lam (.D .np .n .m .v .nf .fld .y .j .A .B .IH .w: set): class =
   $ {w | ∃ D ∃ np ∃ n ∃ m ∃ v ∃ nf ∃ fld ∃ y ∃ j ∃ A ∃ B ∃ IH (w = ⟨ scons (ra_ihval D np n m v nf fld ⟨ kc_s , scons y ∅ ⟩ j B IH) ∅ , ra_ihval D np n m v nf fld y j ⟨ kc_pi , scons A (scons B ∅) ⟩ ⟨ kc_lam , scons A (scons IH ∅) ⟩ ⟩)} $;
 def cl_ihval_app (.D .np .n .m .v .nf .fld .y .j .ni .k .a .mn .b .f .Y .X1 .X2 .X3 .U .A .w: set): class =
@@ -1010,6 +1014,7 @@ def pr_cminors: class = $ cl_cminors_nil ∪ cl_cminors_cons $;
 def pr_minors: class = $ cl_minors_nil ∪ cl_minors_cons $;
 def pr_rtail: class = $ cl_rtail_pi ∪ cl_rtail_srt $;
 def pr_rec_ty: class = $ cl_rec_ty_i $;
+def pr_ctor_ty: class = $ cl_ctor_ty_i $;
 def pr_ihval: class = $ cl_ihval_lam ∪ cl_ihval_app $;
 def pr_rwalk: class = $ cl_rwalk_pi_nr ∪ (cl_rwalk_pi_rec ∪ cl_rwalk_res) $;
 def pr_rec_rhs: class = $ cl_rec_rhs_i $;
@@ -1023,7 +1028,7 @@ def pr_projs: class = $ cl_projs_z ∪ cl_projs_s $;
 
 --| The program, at the atoms.
 def lprog: class =
-  $ ((((((pr_le ∪ pr_add) ∪ (pr_lnth ∪ pr_linst)) ∪ ((pr_lsubst ∪ pr_closed) ∪ (pr_lift ∪ (pr_inst ∪ pr_lookup)))) ∪ (((pr_cinst ∪ pr_cext) ∪ (pr_clen ∪ pr_cnth)) ∪ ((pr_capp ∪ pr_bsucc) ∪ (pr_bdbl ∪ (pr_badd ∪ pr_baddc))))) ∪ ((((pr_bmul ∪ pr_bpow) ∪ (pr_band ∪ pr_bor)) ∪ ((pr_bxor ∪ pr_ind_data) ∪ (pr_ind_nested ∪ (pr_nth_ty ∪ pr_nth_ctor)))) ∪ (((pr_clen_c ∪ pr_ntys) ∪ (pr_minor_idx ∪ (pr_npis ∪ pr_nth_pi))) ∪ ((pr_isort ∪ pr_ind_arity) ∪ (pr_nidx ∪ (pr_nfields ∪ pr_ndecl)))))) ∪ (((((pr_aux_of ∪ pr_pis) ∪ (pr_lams ∪ pr_tys_closed)) ∪ ((pr_pargs ∪ pr_spine) ∪ (pr_rehead ∪ (pr_has_arg ∪ pr_leaf_has)))) ∪ (((pr_pinst ∪ pr_sinst) ∪ (pr_iargs ∪ (pr_indapp ∪ pr_ipos))) ∪ ((pr_recfield ∪ pr_rst) ∪ (pr_nst_hit ∪ (pr_spz ∪ pr_spz_ctors))))) ∪ ((((pr_aux_data ∪ pr_mty) ∪ (pr_motives ∪ pr_ihty)) ∪ ((pr_mwalk ∪ pr_cminors) ∪ (pr_minors ∪ (pr_rtail ∪ pr_rec_ty)))) ∪ (((pr_ihval ∪ pr_rwalk) ∪ (pr_rec_rhs ∪ (pr_rec_rule ∪ pr_struct_like))) ∪ ((pr_field_ty ∪ pr_qinst) ∪ (pr_nonrec ∪ (pr_eta_ok ∪ pr_projs))))))) ∩
+  $ ((((((pr_le ∪ pr_add) ∪ (pr_lnth ∪ pr_linst)) ∪ ((pr_lsubst ∪ pr_closed) ∪ (pr_lift ∪ (pr_inst ∪ pr_lookup)))) ∪ (((pr_cinst ∪ pr_cext) ∪ (pr_clen ∪ (pr_cnth ∪ pr_capp))) ∪ ((pr_bsucc ∪ pr_bdbl) ∪ (pr_badd ∪ (pr_baddc ∪ pr_bmul))))) ∪ ((((pr_bpow ∪ pr_band) ∪ (pr_bor ∪ pr_bxor)) ∪ ((pr_ind_data ∪ pr_ind_nested) ∪ (pr_nth_ty ∪ (pr_nth_ctor ∪ pr_clen_c)))) ∪ (((pr_ntys ∪ pr_minor_idx) ∪ (pr_npis ∪ (pr_nth_pi ∪ pr_isort))) ∪ ((pr_ind_arity ∪ pr_nidx) ∪ (pr_nfields ∪ (pr_ndecl ∪ pr_aux_of)))))) ∪ (((((pr_pis ∪ pr_lams) ∪ (pr_tys_closed ∪ pr_pargs)) ∪ ((pr_spine ∪ pr_rehead) ∪ (pr_has_arg ∪ (pr_leaf_has ∪ pr_pinst)))) ∪ (((pr_sinst ∪ pr_iargs) ∪ (pr_indapp ∪ (pr_ipos ∪ pr_recfield))) ∪ ((pr_rst ∪ pr_nst_hit) ∪ (pr_spz ∪ (pr_spz_ctors ∪ pr_aux_data))))) ∪ ((((pr_mty ∪ pr_motives) ∪ (pr_ihty ∪ pr_mwalk)) ∪ ((pr_cminors ∪ pr_minors) ∪ (pr_rtail ∪ (pr_rec_ty ∪ pr_ctor_ty)))) ∪ (((pr_ihval ∪ pr_rwalk) ∪ (pr_rec_rhs ∪ (pr_rec_rule ∪ pr_struct_like))) ∪ ((pr_field_ty ∪ pr_qinst) ∪ (pr_nonrec ∪ (pr_eta_ok ∪ pr_projs))))))) ∩
     (fseq latoms × latoms) $;
 --| The derivable atoms.
 def lrel: class = $ horn lprog $;
@@ -1094,6 +1099,7 @@ def cminors (a1: ind) (a2: nat) (a3: nat) (a4: nat) (a5: nat) (a6: nat) (a7: cto
 def minors (a1: ind) (a2: nat) (a3: nat) (a4: nat) (a5: nat) (a6: tys) (a7: ctx): wff = $ _ ⇒ ra_minors (enc_ind a1) (enc_nat a2) (enc_nat a3) (enc_nat a4) (enc_nat a5) (enc_tys a6) (enc_ctx a7) ∈ lrel $;
 def rtail (a1: ind) (a2: nat) (a3: nat) (a4: nat) (a5: nat) (a6: nat) (a7: expr) (a8: expr): wff = $ _ ⇒ ra_rtail (enc_ind a1) (enc_nat a2) (enc_nat a3) (enc_nat a4) (enc_nat a5) (enc_nat a6) (enc_expr a7) (enc_expr a8) ∈ lrel $;
 def rec_ty (a1: ind) (a2: lvl) (a3: nat) (a4: expr): wff = $ _ ⇒ ra_rec_ty (enc_ind a1) (enc_lvl a2) (enc_nat a3) (enc_expr a4) ∈ lrel $;
+def ctor_ty (a1: ind) (a2: nat) (a3: nat) (a4: expr): wff = $ _ ⇒ ra_ctor_ty (enc_ind a1) (enc_nat a2) (enc_nat a3) (enc_expr a4) ∈ lrel $;
 def ihval (a1: ind) (a2: nat) (a3: nat) (a4: nat) (a5: lvl) (a6: nat) (a7: nat) (a8: nat) (a9: nat) (a10: expr) (a11: expr): wff = $ _ ⇒ ra_ihval (enc_ind a1) (enc_nat a2) (enc_nat a3) (enc_nat a4) (enc_lvl a5) (enc_nat a6) (enc_nat a7) (enc_nat a8) (enc_nat a9) (enc_expr a10) (enc_expr a11) ∈ lrel $;
 def rwalk (a1: ind) (a2: nat) (a3: nat) (a4: nat) (a5: lvl) (a6: nat) (a7: nat) (a8: expr) (a9: expr) (a10: expr): wff = $ _ ⇒ ra_rwalk (enc_ind a1) (enc_nat a2) (enc_nat a3) (enc_nat a4) (enc_lvl a5) (enc_nat a6) (enc_nat a7) (enc_expr a8) (enc_expr a9) (enc_expr a10) ∈ lrel $;
 def rec_rhs (a1: ind) (a2: lvl) (a3: nat) (a4: nat) (a5: expr): wff = $ _ ⇒ ra_rec_rhs (enc_ind a1) (enc_lvl a2) (enc_nat a3) (enc_nat a4) (enc_expr a5) ∈ lrel $;
@@ -2114,6 +2120,21 @@ theorem lrel_rec_ty_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 
   $ G ⇒ ra_pis A11 A16 A17 ∈ lrel $ >
   $ G ⇒ ra_pis A3 A17 A18 ∈ lrel $ >
   $ G ⇒ ra_rec_ty A1 A5 A6 A18 ∈ lrel $;
+theorem lrel_ctor_ty_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ ra_ind_data A1 A2 A3 A5 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A5 A6 A11 A16 ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor A16 A7 A12 ∈ lrel $ >
+  $ G ⇒ ra_clen A3 A8 ∈ lrel $ >
+  $ G ⇒ ra_ntys A5 A9 A10 ∈ lrel $ >
+  $ G ⇒ ra_sinst A1 ⟨ kc_nz , ∅ ⟩ A9 A8 A12 A13 ∈ lrel $ >
+  $ G ⇒ ra_ind_nested A1 A4 ∈ lrel $ >
+  $ G ⇒ ra_rst A1 A4 A13 A14 ∈ lrel $ >
+  $ G ⇒ ra_pis A3 A14 A15 ∈ lrel $ >
+  $ G ⇒ ra_ctor_ty A1 A6 A7 A15 ∈ lrel $;
 theorem lrel_ihval_lam (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12: class):
   $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
   $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
@@ -2458,6 +2479,7 @@ theorem minors_cons (D: ind) (np n k i nc k2: nat) (F: expr) (C: ctors) (T: tys)
 theorem rtail_pi (D: ind) (np n m i d: nat) (A B B2: expr): $ rtail D np n m i (s d) B B2 $ > $ rtail D np n m i d (pi A B) (pi A B2) $;
 theorem rtail_srt (D: ind) (np n m i d mn dmn mi: nat) (l: lvl) (X I X2: expr): $ add m n mn $ > $ add d mn dmn $ > $ pargs (ind_ty D i) dmn np X $ > $ pargs X nz d I $ > $ add mi i dmn $ > $ pargs (bvar mi) n1 d X2 $ > $ rtail D np n m i d (srt l) (pi I (app X2 (bvar nz))) $;
 theorem rec_ty_i (D: ind) (b: blk) (P: ctx) (T: tys) (v: lvl) (i np n m mn: nat) (M N: ctx) (F F2 B R1 R2 R: expr) (C: ctors): $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ motives D np v nz T M $ > $ minors D np n nz nz T N $ > $ nth_ty T i F C $ > $ add m n mn $ > $ lift mn nz F F2 $ > $ rtail D np n m i nz F2 B $ > $ pis N B R1 $ > $ pis M R1 R2 $ > $ pis P R2 R $ > $ rec_ty D v i R $;
+theorem ctor_ty_i (D: ind) (b: blk) (P N: ctx) (T: tys) (i c np n m: nat) (F K K2 K3 R: expr) (C: ctors): $ ind_data D b P T $ > $ nth_ty T i F C $ > $ nth_ctor C c K $ > $ clen P np $ > $ ntys T n m $ > $ sinst D nz n np K K2 $ > $ ind_nested D N $ > $ rst D N K2 K3 $ > $ pis P K3 R $ > $ ctor_ty D i c R $;
 theorem ihval_lam (D: ind) (np n m: nat) (v: lvl) (nf fld y j: nat) (A B IH: expr): $ ihval D np n m v nf fld (s y) j B IH $ > $ ihval D np n m v nf fld y j (pi A B) (lam A IH) $;
 theorem ihval_app (D: ind) (np n m: nat) (v: lvl) (nf fld y j ni k a mn b f: nat) (Y X1 X2 X3 U A: expr): $ spine (ind_ty D j) A k $ > $ nidx D j ni $ > $ add np ni k $ > $ rehead Y X2 ni A X3 $ > $ spine (ind_ty D j) Y np $ > $ add y nf a $ > $ add m n mn $ > $ add a mn b $ > $ pargs (ind_rec D j v) b np X1 $ > $ pargs X1 a mn X2 $ > $ add y fld f $ > $ pargs (bvar f) nz y U $ > $ ihval D np n m v nf fld y j A (app X3 U) $;
 theorem rwalk_pi_nr (D: ind) (np n m: nat) (v: lvl) (nf d dp mn: nat) (Acc A A3 B Val: expr): $ add d np dp $ > $ closed dp A $ > $ add m n mn $ > $ lift mn d A A3 $ > $ rwalk D np n m v nf (s d) Acc B Val $ > $ rwalk D np n m v nf d Acc (pi A B) (lam A3 Val) $;
@@ -2607,6 +2629,8 @@ theorem lprog_rtail_pr (G: hyps) (P A1 A2 A3 A4 A5 A6 A7 A8: class):
   $ G ⇒ ⟨ P , ra_rtail A1 A2 A3 A4 A5 A6 A7 A8 ⟩ ∈ lprog $ > $ G ⇒ ⟨ P , ra_rtail A1 A2 A3 A4 A5 A6 A7 A8 ⟩ ∈ pr_rtail $;
 theorem lprog_rec_ty_pr (G: hyps) (P A1 A2 A3 A4: class):
   $ G ⇒ ⟨ P , ra_rec_ty A1 A2 A3 A4 ⟩ ∈ lprog $ > $ G ⇒ ⟨ P , ra_rec_ty A1 A2 A3 A4 ⟩ ∈ pr_rec_ty $;
+theorem lprog_ctor_ty_pr (G: hyps) (P A1 A2 A3 A4: class):
+  $ G ⇒ ⟨ P , ra_ctor_ty A1 A2 A3 A4 ⟩ ∈ lprog $ > $ G ⇒ ⟨ P , ra_ctor_ty A1 A2 A3 A4 ⟩ ∈ pr_ctor_ty $;
 theorem lprog_ihval_pr (G: hyps) (P A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11: class):
   $ G ⇒ ⟨ P , ra_ihval A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 ⟩ ∈ lprog $ > $ G ⇒ ⟨ P , ra_ihval A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 ⟩ ∈ pr_ihval $;
 theorem lprog_rwalk_pr (G: hyps) (P A1 A2 A3 A4 A5 A6 A7 A8 A9 A10: class):
@@ -2956,6 +2980,9 @@ theorem lrel_rtail_cases (G: hyps) {D np n_v m_v i_v d_v A B B2 mn dmn mi l_v X 
 theorem lrel_rec_ty_cases (G: hyps) {D b_v P T v_v i_v np n_v m_v mn M N F F2 B R1 R2 R C: set} (t1 t2 t3 t4: set):
   $ G ⇒ ra_rec_ty t1 t2 t3 t4 ∈ lrel $ >
   $ G ⇒ ∃ D ∃ b_v ∃ P ∃ T ∃ v_v ∃ i_v ∃ np ∃ n_v ∃ m_v ∃ mn ∃ M ∃ N ∃ F ∃ F2 ∃ B ∃ R1 ∃ R2 ∃ R ∃ C (t1 = D ∧ t2 = v_v ∧ t3 = i_v ∧ t4 = R ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_clen P np ∈ lrel ∧ ra_ntys T n_v m_v ∈ lrel ∧ ra_motives D np v_v ⟨ kc_nz , ∅ ⟩ T M ∈ lrel ∧ ra_minors D np n_v ⟨ kc_nz , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ T N ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_add m_v n_v mn ∈ lrel ∧ ra_lift mn ⟨ kc_nz , ∅ ⟩ F F2 ∈ lrel ∧ ra_rtail D np n_v m_v i_v ⟨ kc_nz , ∅ ⟩ F2 B ∈ lrel ∧ ra_pis N B R1 ∈ lrel ∧ ra_pis M R1 R2 ∈ lrel ∧ ra_pis P R2 R ∈ lrel) $;
+theorem lrel_ctor_ty_cases (G: hyps) {D b_v P N T i_v c_v np n_v m_v F K K2 K3 R C: set} (t1 t2 t3 t4: set):
+  $ G ⇒ ra_ctor_ty t1 t2 t3 t4 ∈ lrel $ >
+  $ G ⇒ ∃ D ∃ b_v ∃ P ∃ N ∃ T ∃ i_v ∃ c_v ∃ np ∃ n_v ∃ m_v ∃ F ∃ K ∃ K2 ∃ K3 ∃ R ∃ C (t1 = D ∧ t2 = i_v ∧ t3 = c_v ∧ t4 = R ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T i_v F C ∈ lrel ∧ ra_nth_ctor C c_v K ∈ lrel ∧ ra_clen P np ∈ lrel ∧ ra_ntys T n_v m_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v np K K2 ∈ lrel ∧ ra_ind_nested D N ∈ lrel ∧ ra_rst D N K2 K3 ∈ lrel ∧ ra_pis P K3 R ∈ lrel) $;
 theorem lrel_ihval_cases (G: hyps) {D np n_v m_v v_v nf fld y_v j_v A B IH ni k_v a_v mn b_v f_v Y X1 X2 X3 U: set} (t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 t11: set):
   $ G ⇒ ra_ihval t1 t2 t3 t4 t5 t6 t7 t8 t9 t10 t11 ∈ lrel $ >
   $ G ⇒ ∃ D ∃ np ∃ n_v ∃ m_v ∃ v_v ∃ nf ∃ fld ∃ y_v ∃ j_v ∃ A ∃ B ∃ IH (t1 = D ∧ t2 = np ∧ t3 = n_v ∧ t4 = m_v ∧ t5 = v_v ∧ t6 = nf ∧ t7 = fld ∧ t8 = y_v ∧ t9 = j_v ∧ t10 = ⟨ kc_pi , scons A (scons B ∅) ⟩ ∧ t11 = ⟨ kc_lam , scons A (scons IH ∅) ⟩ ∧ ra_ihval D np n_v m_v v_v nf fld ⟨ kc_s , scons y_v ∅ ⟩ j_v B IH ∈ lrel) ∨
@@ -3174,6 +3201,7 @@ theorem kr_cminors_omega (G: hyps): $ G ⇒ kr_cminors ∈ ω $;
 theorem kr_minors_omega (G: hyps): $ G ⇒ kr_minors ∈ ω $;
 theorem kr_rtail_omega (G: hyps): $ G ⇒ kr_rtail ∈ ω $;
 theorem kr_rec_ty_omega (G: hyps): $ G ⇒ kr_rec_ty ∈ ω $;
+theorem kr_ctor_ty_omega (G: hyps): $ G ⇒ kr_ctor_ty ∈ ω $;
 theorem kr_ihval_omega (G: hyps): $ G ⇒ kr_ihval ∈ ω $;
 theorem kr_rwalk_omega (G: hyps): $ G ⇒ kr_rwalk ∈ ω $;
 theorem kr_rec_rhs_omega (G: hyps): $ G ⇒ kr_rec_rhs ∈ ω $;
@@ -4182,6 +4210,11 @@ theorem ra_rec_ty_congr (A1 B1 A2 B2 A3 B3 A4 B4: class): $ A1 ≐ B1 $ > $ A2 �
 theorem ra_rec_ty_eq (G: hyps) (A1 B1 A2 B2 A3 B3 A4 B4: class): $ G ⇒ A1 = B1 $ > $ G ⇒ A2 = B2 $ > $ G ⇒ A3 = B3 $ > $ G ⇒ A4 = B4 $ > $ G ⇒ ra_rec_ty A1 A2 A3 A4 = ra_rec_ty B1 B2 B3 B4 $;
 --| @rewrite
 theorem sb_c_ra_rec_ty {x: set} (t: set x) (A1 A2 A3 A4: class x): $ (⟦ x / t ⟧ (ra_rec_ty A1 A2 A3 A4)) ≐ ra_rec_ty (⟦ x / t ⟧ A1) (⟦ x / t ⟧ A2) (⟦ x / t ⟧ A3) (⟦ x / t ⟧ A4) $;
+--| @congr
+theorem ra_ctor_ty_congr (A1 B1 A2 B2 A3 B3 A4 B4: class): $ A1 ≐ B1 $ > $ A2 ≐ B2 $ > $ A3 ≐ B3 $ > $ A4 ≐ B4 $ > $ ra_ctor_ty A1 A2 A3 A4 ≐ ra_ctor_ty B1 B2 B3 B4 $;
+theorem ra_ctor_ty_eq (G: hyps) (A1 B1 A2 B2 A3 B3 A4 B4: class): $ G ⇒ A1 = B1 $ > $ G ⇒ A2 = B2 $ > $ G ⇒ A3 = B3 $ > $ G ⇒ A4 = B4 $ > $ G ⇒ ra_ctor_ty A1 A2 A3 A4 = ra_ctor_ty B1 B2 B3 B4 $;
+--| @rewrite
+theorem sb_c_ra_ctor_ty {x: set} (t: set x) (A1 A2 A3 A4: class x): $ (⟦ x / t ⟧ (ra_ctor_ty A1 A2 A3 A4)) ≐ ra_ctor_ty (⟦ x / t ⟧ A1) (⟦ x / t ⟧ A2) (⟦ x / t ⟧ A3) (⟦ x / t ⟧ A4) $;
 --| @congr
 theorem ra_ihval_congr (A1 B1 A2 B2 A3 B3 A4 B4 A5 B5 A6 B6 A7 B7 A8 B8 A9 B9 A10 B10 A11 B11: class): $ A1 ≐ B1 $ > $ A2 ≐ B2 $ > $ A3 ≐ B3 $ > $ A4 ≐ B4 $ > $ A5 ≐ B5 $ > $ A6 ≐ B6 $ > $ A7 ≐ B7 $ > $ A8 ≐ B8 $ > $ A9 ≐ B9 $ > $ A10 ≐ B10 $ > $ A11 ≐ B11 $ > $ ra_ihval A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 ≐ ra_ihval B1 B2 B3 B4 B5 B6 B7 B8 B9 B10 B11 $;
 theorem ra_ihval_eq (G: hyps) (A1 B1 A2 B2 A3 B3 A4 B4 A5 B5 A6 B6 A7 B7 A8 B8 A9 B9 A10 B10 A11 B11: class): $ G ⇒ A1 = B1 $ > $ G ⇒ A2 = B2 $ > $ G ⇒ A3 = B3 $ > $ G ⇒ A4 = B4 $ > $ G ⇒ A5 = B5 $ > $ G ⇒ A6 = B6 $ > $ G ⇒ A7 = B7 $ > $ G ⇒ A8 = B8 $ > $ G ⇒ A9 = B9 $ > $ G ⇒ A10 = B10 $ > $ G ⇒ A11 = B11 $ > $ G ⇒ ra_ihval A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 = ra_ihval B1 B2 B3 B4 B5 B6 B7 B8 B9 B10 B11 $;

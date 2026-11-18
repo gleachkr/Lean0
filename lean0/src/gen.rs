@@ -149,7 +149,11 @@ pub struct StructInfo {
     /// from a proposition, if the fields up to it can all be propositions, with the levels
     /// (over the level variables `1..`) that its premises equate to `lz`.
     pub df_prop: Vec<Option<(ThId, Vec<E>)>>,
-    pub red: Vec<ThId>,
+    /// Reduction lemma of each field (`proj_mk`), with `df`'s premises of `proj_ok`, then the
+    /// constructor application's `sty` and the projection's typing; `red_prop` as `df_prop`
+    /// (its levels are `df_prop`'s).
+    pub red: Vec<(ThId, bool)>,
+    pub red_prop: Vec<Option<ThId>>,
     pub eta: Option<ThId>,
     /// The structure's sort level, over the level variables `1..`.
     pub sort: E,
@@ -602,7 +606,9 @@ impl Gen {
                 };
                 opaque(&mut el, &sig, info.ty, "constructor")?;
                 if let Some(f) = fields {
-                    structure_axioms(&mut el, &sig, cd.inductive_name, f)?;
+                    let cty = crate::induct::strip_pis(&mut el, info.ty);
+                    let cty = el.tr(cty)?;
+                    structure_axioms(&mut el, &sig, cd.inductive_name, f, cty)?;
                 }
                 if sig.lean_name == "Nat.zero" || sig.lean_name == "Nat.succ" {
                     natlit::lit_axioms(&mut el, &sig.lean_name, info.ty)?;
@@ -842,6 +848,50 @@ impl Vars {
     }
 }
 
+/// The statement of the iota lemma of a recursor `sig` on the constructor `ctor_lean`
+/// (`ind_iota`'s premises, audit §4): the constructor's levels are those of the major
+/// premise's type up to `leqv` (`mls`, over the recursor's level variables), the arguments
+/// before the major premise are typed along the recursor's type `rty`, the constructor's
+/// along its type `cty` at the levels `mls`, and the arguments of the type that leaves are
+/// those of the major premise's binder (`aeq`). Variables: `G`, the recursor's levels, its
+/// arguments, the constructor's levels and arguments, then `T`, `TY`, `C`, `T2`.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn iota_statement(g: &mut Gen, sig: &Sig, counts: [usize; 4], ctor_lean: &str, ncl: usize, ncp: usize, nf: usize, def: TId, rty: E, mls: &[E], cty: E) -> R<(Vars, Vec<E>, E)> {
+    if mls.len() != ncl {
+        return Err(format!("iota of `{}` on `{ctor_lean}`: the major premise's type has {} levels, the constructor {ncl}", sig.lean_name, mls.len()))
+    }
+    let mut v = Vars::new();
+    let gv = v.add(&mut g.env, "G", "ctx");
+    let us = v.lvls(&mut g.env, &sig.lvl_names, "");
+    let ps = v.many(&mut g.env, "p", "expr", counts[0]);
+    let ms = v.many(&mut g.env, "m", "expr", counts[1]);
+    let mins = v.many(&mut g.env, "n", "expr", counts[2]);
+    let is = v.many(&mut g.env, "i", "expr", counts[3]);
+    let cls: Vec<E> = (0..ncl).map(|i| v.add(&mut g.env, &format!("v{}", i + 1), "lvl")).collect();
+    let cps = v.many(&mut g.env, "q", "expr", ncp);
+    let fs = v.many(&mut g.env, "f", "expr", nf);
+    let tv = v.add(&mut g.env, "T", "expr");
+    let ty = v.add(&mut g.env, "TY", "expr");
+    let cv = v.add(&mut g.env, "C", "expr");
+    let t2 = v.add(&mut g.env, "T2", "expr");
+    let c = g.const_term(ctor_lean, &cls).ok_or("constructor term")?;
+    let major = apps(g, c, &[cps, fs.clone()].concat());
+    let r = g.const_term(&sig.lean_name, &us).ok_or("recursor term")?;
+    let e4 = apps(g, r, &[ps.clone(), ms.clone(), mins.clone(), is].concat());
+    let lhs = g.lean.app(&mut g.env, e4, major);
+    let d = g.env.app(def, &us);
+    let rhs = apps(g, d, &[ps, ms, mins, fs].concat());
+    let mut hyps: Vec<E> = mls.iter().zip(&cls).map(|(&a, &b)| g.env.app_n("leqv", &[a, b])).collect();
+    let pi = g.env.app_n("pi", &[ty, cv]);
+    hyps.push(g.env.app_n("sty", &[gv, r, rty, e4, pi]));
+    let z = g.lean.nat(&mut g.env, 0);
+    hyps.push(g.env.app_n("inst", &[z, cv, major, tv]));
+    hyps.push(g.env.app_n("sty", &[gv, c, cty, major, t2]));
+    hyps.push(g.env.app_n("aeq", &[gv, t2, ty]));
+    let concl = g.lean.deq(&mut g.env, gv, lhs, rhs, tv);
+    Ok((v, hyps, concl))
+}
+
 pub(crate) fn apps(g: &mut Gen, f: E, args: &[E]) -> E {
     args.iter().fold(f, |f, &a| g.lean.app(&mut g.env, f, a))
 }
@@ -925,9 +975,13 @@ fn opaque<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::Ex
 /// typing premise forces them to agree.
 fn recursor_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &nanoda_lib::env::RecursorData<'t>, rhss: &[E]) -> R<()> {
     let rty = el.tr(rd.info.ty)?;
+    let mlv = crate::induct::major_levels(el, rd)?;
+    let mls: Vec<E> = el.tc.ctx.read_levels(mlv).to_vec().iter().map(|&l| el.trl(l)).collect::<R<_>>()?;
     for (rule, &rhs) in rd.rec_rules.iter().zip(rhss) {
         let ctor_lean = el.g.lean_name(el.tc, rule.ctor_name);
         let Some(cd) = el.tc.env.get_constructor(&rule.ctor_name).cloned() else { return Err(format!("unknown constructor {ctor_lean}")) };
+        let cty = crate::induct::ctor_type_at(el, &cd, mlv);
+        let cty = el.tr(cty)?;
         let nf = rule.ctor_telescope_size_wo_params as usize;
         let ncp = cd.num_params as usize;
         let ncl = el.tc.ctx.read_levels(cd.info.uparams).len();
@@ -944,27 +998,10 @@ fn recursor_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &nanoda_lib
         let def = add_term(&mut g.env, &def_name, lvl_args, expr_s, TermKind::Def { body: rhs0, public_body: true },
             &format!("The right-hand side of the iota rule of `{}` for `{ctor_lean}`.", sig.lean_name))?;
         // the axiom
-        let mut v = Vars::new();
-        let gv = v.add(&mut g.env, "G", "ctx");
-        let us = v.lvls(&mut g.env, &sig.lvl_names, "");
-        let ps = v.many(&mut g.env, "p", "expr", rd.num_params as usize);
-        let ms = v.many(&mut g.env, "m", "expr", rd.num_motives as usize);
-        let mins = v.many(&mut g.env, "n", "expr", rd.num_minors as usize);
-        let is = v.many(&mut g.env, "i", "expr", rd.num_indices as usize);
-        let cls: Vec<E> = (0..ncl).map(|i| v.add(&mut g.env, &format!("v{}", i + 1), "lvl")).collect();
-        let cps = v.many(&mut g.env, "q", "expr", ncp);
-        let fs = v.many(&mut g.env, "f", "expr", nf);
-        let tv = v.add(&mut g.env, "T", "expr");
-        let c = g.const_term(&ctor_lean, &cls).ok_or("constructor term")?;
-        let major = apps(g, c, &[cps.clone(), fs.clone()].concat());
-        let r = g.const_term(&sig.lean_name, &us).ok_or("recursor term")?;
-        let lhs = apps(g, r, &[ps.clone(), ms.clone(), mins.clone(), is, vec![major]].concat());
-        let d = g.env.app(def, &us);
-        let rhs = apps(g, d, &[ps, ms, mins, fs].concat());
-        let hyp = g.env.app_n("sty", &[gv, r, rty, lhs, tv]);
-        let concl = g.lean.deq(&mut g.env, gv, lhs, rhs, tv);
+        let counts = [rd.num_params as usize, rd.num_motives as usize, rd.num_minors as usize, rd.num_indices as usize];
+        let (v, hyps, concl) = iota_statement(g, sig, counts, &ctor_lean, ncl, ncp, nf, def, rty, &mls, cty)?;
         let name = g.thms.fresh(&format!("{def_name}_iota"));
-        let th = add_thm(&mut g.env, &name, v.args, vec![hyp], concl, true, false, None,
+        let th = add_thm(&mut g.env, &name, v.args, hyps, concl, true, false, None,
             &format!("Iota reduction of `{}` on `{ctor_lean}`.", sig.lean_name))?;
         g.iota.insert((sig.lean_name.clone(), ctor_lean), th);
     }
@@ -1133,7 +1170,7 @@ pub(crate) fn structure_fields<'t>(el: &mut Elab<'_, '_, 't, '_>, ind: NamePtr<'
     Ok(Fields { tys: field_tys, is_prop, levels, sort })
 }
 
-fn structure_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ind: NamePtr<'t>, fields: Fields) -> R<()> {
+fn structure_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ind: NamePtr<'t>, fields: Fields, cty: E) -> R<()> {
     let ind_data = el.tc.env.get_structure(&ind, true).cloned().unwrap();
     let eta_ok = el.tc.env.can_be_struct(&ind);
     let np = ind_data.num_params as usize;
@@ -1211,6 +1248,7 @@ fn structure_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ind: NamePtr<'
     }
     // reduction axioms
     let mut red = Vec::new();
+    let mut red_prop = Vec::new();
     for i in 0..nf {
         let mut v = Vars::new();
         let gv = v.add(&mut g.env, "G", "ctx");
@@ -1218,13 +1256,15 @@ fn structure_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ind: NamePtr<'
         let ps = v.many(&mut g.env, "p", "expr", np);
         let fs = v.many(&mut g.env, "f", "expr", nf);
         let tv = v.add(&mut g.env, "T", "expr");
-        let m = g.const_term(&sig.lean_name, &cls).ok_or("constructor term")?;
-        let m = apps(g, m, &[ps, fs.clone()].concat());
+        let sv = v.add(&mut g.env, "S", "expr");
+        let c = g.const_term(&sig.lean_name, &cls).ok_or("constructor term")?;
+        let m = apps(g, c, &[ps, fs.clone()].concat());
         let lhs = g.lean.proj(&mut g.env, proj, i, m);
-        let hyp = g.env.app_n("ty", &[gv, lhs, tv]);
+        let hyps = vec![g.env.app_n("sty", &[gv, c, cty, m, sv]), g.env.app_n("ty", &[gv, lhs, tv])];
         let concl = g.lean.deq(&mut g.env, gv, lhs, fs[i], tv);
         let name = g.thms.fresh(&format!("{proj_name}_{i}_mk"));
-        red.push(add_thm(&mut g.env, &name, v.args, vec![hyp], concl, true, false, None, &format!("Field {i} of a `{}` application.", sig.lean_name))?);
+        red.push((add_thm(&mut g.env, &name, v.args, hyps, concl, true, false, None, &format!("Field {i} of a `{}` application.", sig.lean_name))?, false));
+        red_prop.push(None);
     }
     // eta
     let eta = if eta_ok {
@@ -1245,7 +1285,7 @@ fn structure_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ind: NamePtr<'
     } else {
         None
     };
-    g.structs.insert(ind_lean, StructInfo { blk, np, nf, df, df_prop, red, eta, sort: lsort, field_tys });
+    g.structs.insert(ind_lean, StructInfo { blk, np, nf, df, df_prop, red, red_prop, eta, sort: lsort, field_tys });
     Ok(())
 }
 

@@ -234,7 +234,7 @@ pub(crate) fn consume_annots<'t>(el: &mut Elab<'_, '_, 't, '_>, mut e: ExprPtr<'
 /// dom.consumeTypeAnnotations`). The block's data is stated this way, so that the derived
 /// recursor types and rules are the kernel's; the types' and constructors' typing lemmas
 /// state the exported (annotated) types through a definitional cast.
-fn strip_pis<'t>(el: &mut Elab<'_, '_, 't, '_>, ty: ExprPtr<'t>) -> ExprPtr<'t> {
+pub(crate) fn strip_pis<'t>(el: &mut Elab<'_, '_, 't, '_>, ty: ExprPtr<'t>) -> ExprPtr<'t> {
     match el.tc.ctx.read_expr(ty) {
         Expr::Pi { binder_name, binder_style, binder_type, body, .. } => {
             let bt = consume_annots(el, binder_type);
@@ -243,6 +243,27 @@ fn strip_pis<'t>(el: &mut Elab<'_, '_, 't, '_>, ty: ExprPtr<'t>) -> ExprPtr<'t> 
         }
         _ => ty,
     }
+}
+
+/// The levels of the type of a recursor's major premise (its head constant's): the levels
+/// the major premise's constructor has, up to `leqv` (the iota lemmas' premises).
+pub(crate) fn major_levels<'t>(el: &mut Elab<'_, '_, 't, '_>, rd: &RecursorData<'t>) -> R<nanoda_lib::util::LevelsPtr<'t>> {
+    let mut ty = rd.info.ty;
+    let n = rd.num_params as usize + rd.num_motives as usize + rd.num_minors as usize + rd.num_indices as usize;
+    for _ in 0..n {
+        let Expr::Pi { body, .. } = el.tc.ctx.read_expr(ty) else { return Err("recursor type: fewer binders than arguments".into()) };
+        ty = body;
+    }
+    let Expr::Pi { binder_type, .. } = el.tc.ctx.read_expr(ty) else { return Err("recursor type: no major premise".into()) };
+    let (h, _) = el.tc.ctx.unfold_apps(binder_type);
+    let Expr::Const { levels, .. } = el.tc.ctx.read_expr(h) else { return Err("recursor type: the major premise's type is not a constant's application".into()) };
+    Ok(levels)
+}
+
+/// A constructor's type at `levels` as the schema has it (annotations consumed; `ctor_ty`).
+pub(crate) fn ctor_type_at<'t>(el: &mut Elab<'_, '_, 't, '_>, cd: &nanoda_lib::env::ConstructorData<'t>, levels: nanoda_lib::util::LevelsPtr<'t>) -> ExprPtr<'t> {
+    let ty = el.tc.ctx.subst_expr_levels(cd.info.ty, cd.info.uparams, levels);
+    strip_pis(el, ty)
 }
 
 /// Peel `np` parameter binders off `ty`, checking their types against `params` (translated
@@ -822,9 +843,10 @@ fn structure<'t>(el: &mut Elab<'_, '_, 't, '_>, pv: &mut Prover, sig: &Sig, bloc
     let crate::gen::Fields { tys: field_tys, is_prop, levels: field_lvls, sort: lsort } = fields;
     let nf = field_tys.len();
     // the facts: the fields' types (`proj_ok_prop`)
+    let ty_s = strip_pis(el, cd.info.ty);
+    let cty = el.tr(ty_s)?;
     if !el.g.replay {
         let mut facts = std::mem::take(&mut pv.facts);
-        let ty_s = strip_pis(el, cd.info.ty);
         with_binders(el, ty_s, np, None, &mut facts, |_, _, _| Ok(()))?;
         pv.facts = facts;
     }
@@ -894,21 +916,58 @@ fn structure<'t>(el: &mut Elab<'_, '_, 't, '_>, pv: &mut Prover, sig: &Sig, bloc
         }
     }
     let mut red = Vec::new();
+    let mut red_prop = Vec::new();
     for i in 0..nf {
-        let mut v = Vars::new();
-        let gv = v.add(&mut g.env, "G", "ctx");
-        let cls = v.lvls(&mut g.env, &sig.lvl_names, "");
-        let ps = v.many(&mut g.env, "p", "expr", np);
-        let fs = v.many(&mut g.env, "f", "expr", nf);
-        let tv = v.add(&mut g.env, "T", "expr");
-        let m = g.const_term(&sig.lean_name, &cls).unwrap();
-        let m = apps(g, m, &[ps, fs.clone()].concat());
-        let lhs = g.lean.proj(&mut g.env, proj, i, m);
-        let hyp = g.env.app_n("ty", &[gv, lhs, tv]);
-        let concl = g.lean.deq(&mut g.env, gv, lhs, fs[i], tv);
-        let name = g.thms.fresh(&format!("{proj_name}_{i}_mk"));
-        let proof = prove_lemma(g, pv, "proj_mk", &[hyp], concl)?;
-        red.push(add_thm(&mut g.env, &name, v.args, vec![hyp], concl, false, false, proof, &format!("Field {i} of a `{}` application.", sig.lean_name))?);
+        // `proj_ok`'s premises, as the typing lemmas'
+        let needs_sort = !sort_ok && !is_prop[..=i].iter().all(|&b| b);
+        let lvl_js: Vec<usize> = (0..=i).filter(|&j| !is_prop[j]).collect();
+        let prop_ok = needs_sort && lvl_js.iter().all(|&j| crate::gen::level_may_be_zero(g, field_lvls[j]));
+        let mut variants = vec![needs_sort];
+        if prop_ok {
+            variants.push(false);
+        }
+        for (vi, &sort_premise) in variants.iter().enumerate() {
+            let from_prop = vi == 1;
+            let mut v = Vars::new();
+            let gv = v.add(&mut g.env, "G", "ctx");
+            let cls = v.lvls(&mut g.env, &sig.lvl_names, "");
+            let ps = v.many(&mut g.env, "p", "expr", np);
+            let fs = v.many(&mut g.env, "f", "expr", nf);
+            let tv = v.add(&mut g.env, "T", "expr");
+            let sv = v.add(&mut g.env, "S", "expr");
+            let mut hyps = Vec::new();
+            let subst: Vec<E> = std::iter::once(gv).chain(cls.iter().copied()).collect();
+            let z = g.env.app_n("lz", &[]);
+            if sort_premise {
+                let lsort_here = g.env.subst(lsort, &subst);
+                let one = g.env.app_n("ls", &[z]);
+                let m = g.env.app_n("lmax", &[one, lsort_here]);
+                hyps.push(g.env.app_n("leqv", &[m, lsort_here]));
+            }
+            if from_prop {
+                for &j in &lvl_js {
+                    let l = g.env.subst(field_lvls[j], &subst);
+                    hyps.push(g.env.app_n("leqv", &[l, z]));
+                }
+            }
+            let c = g.const_term(&sig.lean_name, &cls).unwrap();
+            let m = apps(g, c, &[ps, fs.clone()].concat());
+            let lhs = g.lean.proj(&mut g.env, proj, i, m);
+            hyps.push(g.env.app_n("sty", &[gv, c, cty, m, sv]));
+            hyps.push(g.env.app_n("ty", &[gv, lhs, tv]));
+            let concl = g.lean.deq(&mut g.env, gv, lhs, fs[i], tv);
+            let name = g.thms.fresh(&format!("{proj_name}_{i}_mk{}", if from_prop { "p" } else { "" }));
+            let proof = prove_lemma(g, pv, "proj_mk", &hyps, concl)?;
+            let th = add_thm(&mut g.env, &name, v.args, hyps, concl, false, false, proof, &format!("Field {i} of a `{}` application.", sig.lean_name))?;
+            if from_prop {
+                red_prop.push(Some(th));
+            } else {
+                red.push((th, needs_sort));
+            }
+        }
+        if !prop_ok {
+            red_prop.push(None);
+        }
     }
     let eta = if eta_ok {
         let mut v = Vars::new();
@@ -929,7 +988,7 @@ fn structure<'t>(el: &mut Elab<'_, '_, 't, '_>, pv: &mut Prover, sig: &Sig, bloc
     } else {
         None
     };
-    g.structs.insert(ind_lean, StructInfo { blk, np, nf, df, df_prop, red, eta, sort: lsort, field_tys });
+    g.structs.insert(ind_lean, StructInfo { blk, np, nf, df, df_prop, red, red_prop, eta, sort: lsort, field_tys });
     Ok(())
 }
 
@@ -1012,9 +1071,13 @@ pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &Recurs
     // the recursor's type at its levels `us` (variables `1..`, after `G`), where the iota
     // lemmas' `sty` premise starts
     let rty = el.tr(rd.info.ty)?;
+    let mlv = major_levels(el, rd)?;
+    let mls: Vec<E> = el.tc.ctx.read_levels(mlv).to_vec().iter().map(|&l| el.trl(l)).collect::<R<_>>()?;
     for (rule, &rhs) in rd.rec_rules.iter().zip(&rhss) {
         let ctor_lean = el.g.lean_name(el.tc, rule.ctor_name);
         let Some(cd) = el.tc.env.get_constructor(&rule.ctor_name).cloned() else { return Err(format!("unknown constructor {ctor_lean}")) };
+        let cty = ctor_type_at(el, &cd, mlv);
+        let cty = el.tr(cty)?;
         let nf = rule.ctor_telescope_size_wo_params as usize;
         let c = cd.ctor_idx as usize;
         // an auxiliary type's recursor reduces on the constructors of the occurrence's block
@@ -1045,29 +1108,12 @@ pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &Recurs
         }
         let def = add_term(&mut g.env, &def_name, lvl_args, expr_s, TermKind::Def { body: rhs0, public_body: true },
             &format!("The right-hand side of the iota rule of `{}` for `{ctor_lean}`.", sig.lean_name))?;
-        let mut v = Vars::new();
-        let gv = v.add(&mut g.env, "G", "ctx");
-        let us = v.lvls(&mut g.env, &sig.lvl_names, "");
-        let ps = v.many(&mut g.env, "p", "expr", rd.num_params as usize);
-        let ms = v.many(&mut g.env, "m", "expr", rd.num_motives as usize);
-        let mins = v.many(&mut g.env, "n", "expr", rd.num_minors as usize);
-        let is = v.many(&mut g.env, "i", "expr", rd.num_indices as usize);
-        let cls: Vec<E> = (0..cnl).map(|i| v.add(&mut g.env, &format!("v{}", i + 1), "lvl")).collect();
-        let cps = v.many(&mut g.env, "q", "expr", cnp);
-        let fs = v.many(&mut g.env, "f", "expr", nf);
-        let tv = v.add(&mut g.env, "T", "expr");
-        let ct = g.const_term(&ctor_lean, &cls).unwrap();
-        let major = apps(g, ct, &[cps.clone(), fs.clone()].concat());
-        let r = g.const_term(&sig.lean_name, &us).unwrap();
-        let lhs = apps(g, r, &[ps.clone(), ms.clone(), mins.clone(), is, vec![major]].concat());
-        let dv = g.env.app(def, &us);
-        let rhs = apps(g, dv, &[ps, ms, mins, fs].concat());
-        let hyp = g.env.app_n("sty", &[gv, r, rty, lhs, tv]);
-        let concl = g.lean.deq(&mut g.env, gv, lhs, rhs, tv);
+        let counts = [rd.num_params as usize, rd.num_motives as usize, rd.num_minors as usize, rd.num_indices as usize];
+        let (v, hyps, concl) = crate::gen::iota_statement(g, sig, counts, &ctor_lean, cnl, cnp, nf, def, rty, &mls, cty)?;
         let name = g.thms.fresh(&format!("{def_name}_iota"));
         let rule_ax = if aux { "ind_iota_nst" } else { "ind_iota" };
-        let proof = prove_lemma(g, &mut pv, rule_ax, &[hyp], concl).map_err(|e| format!("iota of `{}` on `{ctor_lean}`: {e}", sig.lean_name))?;
-        let th = add_thm(&mut g.env, &name, v.args, vec![hyp], concl, false, false, proof,
+        let proof = prove_lemma(g, &mut pv, rule_ax, &hyps, concl).map_err(|e| format!("iota of `{}` on `{ctor_lean}`: {e}", sig.lean_name))?;
+        let th = add_thm(&mut g.env, &name, v.args, hyps, concl, false, false, proof,
             &format!("Iota reduction of `{}` on `{ctor_lean}`.", sig.lean_name))?;
         g.iota.insert((sig.lean_name.clone(), ctor_lean), th);
     }

@@ -127,6 +127,7 @@ pub const TABLE: &[(&str, Kind, &str)] = &[
     ("minors", Kind::Fn, "++++++-"),
     ("rtail", Kind::Fn, "+++++++-"),
     ("rec_ty", Kind::Fn, "+++-"),
+    ("ctor_ty", Kind::Fn, "+++-"),
     ("ihval", Kind::Fn, "++++++++++-"),
     ("rwalk", Kind::Fn, "+++++++++-"),
     ("rec_rhs", Kind::Fn, "++++-"),
@@ -143,6 +144,8 @@ pub const TABLE: &[(&str, Kind, &str)] = &[
     // typed application spines: the head given up to its head constructor (a head that is
     // itself an application would make `sty_nil` and `sty_app` overlap)
     ("sty", Kind::Fn, "+*++-"),
+    // spines with definitionally equal arguments
+    ("aeq", Kind::Check, ""),
     // level equivalence of expressions
     ("eeqv", Kind::Check, ""),
     ("lseqv", Kind::Check, ""),

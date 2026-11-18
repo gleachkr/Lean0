@@ -766,6 +766,13 @@ axiom rec_ty_i (D: ind) (b: blk) (P: ctx) (T: tys) (v: lvl) (i np n m mn: nat) (
   $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ motives D np v 0 T M $ > $ minors D np n 0 0 T N $ >
   $ nth_ty T i F C $ > $ add m n mn $ > $ lift mn 0 F F2 $ > $ rtail D np n m i 0 F2 B $ >
   $ pis N B R1 $ > $ pis M R1 R2 $ > $ pis P R2 R $ > $ rec_ty D v i R $;
+--| `ctor_ty D i c R`: the type of constructor `c` of type `i`: `Π params.` its
+--| data type with the block's types applied to the parameters for the type
+--| variables (`sinst`), restored (`rst`).
+term ctor_ty: ind > nat > nat > expr > wff;
+axiom ctor_ty_i (D: ind) (b: blk) (P N: ctx) (T: tys) (i c np n m: nat) (F K K2 K3 R: expr) (C: ctors):
+  $ ind_data D b P T $ > $ nth_ty T i F C $ > $ nth_ctor C c K $ > $ clen P np $ > $ ntys T n m $ >
+  $ sinst D 0 n np K K2 $ > $ ind_nested D N $ > $ rst D N K2 K3 $ > $ pis P K3 R $ > $ ctor_ty D i c R $;
 
 -- The recursor's rules (`mkRecRules`) --------------------------------------
 
@@ -887,6 +894,15 @@ term sty: ctx > expr > expr > expr > expr > wff;
 axiom sty_nil (G: ctx) (h A: expr): $ sty G h A h A $;
 axiom sty_app (G: ctx) (h A f a B C C2: expr):
   $ sty G h A f (Π B. C) $ > $ ⟨ G ⊢ a : B ⟩ $ > $ inst 0 C a C2 $ > $ sty G h A (f @ a) C2 $;
+--| `aeq G e e2`: `e` and `e2` are one head applied to arguments that are
+--| definitionally equal one by one. The iota rules compare the type of the
+--| major premise's constructor application with the recursor's this way: an
+--| equation of the two types as wholes would not give the arguments' (it is
+--| the injectivity of the type, which the rules do not assume; audit §4).
+term aeq: ctx > expr > expr > wff;
+axiom aeq_nil (G: ctx) (h: expr): $ aeq G h h $;
+axiom aeq_app (G: ctx) (f f2 a a2 A: expr):
+  $ aeq G f f2 $ > $ ⟦ G ⊢ a ≡ a2 : A ⟧ $ > $ aeq G (f @ a) (f2 @ a2) $;
 
 -- Level equivalence of expressions -----------------------------------------
 
@@ -1523,45 +1539,54 @@ axiom eeqv_df (G: ctx) (e e2 A: expr): $ ⟨ G ⊢ e : A ⟩ $ > $ eeqv e e2 $ >
 
 axiom ind_ty_ty (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (i: nat) (F R: expr) (C: ctors):
   $ tys_ok G D $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ pis P F R $ > $ ⟨ G ⊢ ind_ty D i : R ⟩ $;
-axiom ind_ctor_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (i c np n m: nat) (F K K2 K3 R: expr) (C: ctors):
-  $ ind_wf G D $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ nth_ctor C c K $ > $ clen P np $ > $ ntys T n m $ >
-  $ sinst D 0 n np K K2 $ > $ ind_nested D N $ > $ rst D N K2 K3 $ > $ pis P K3 R $ > $ ⟨ G ⊢ ind_ctor D i c : R ⟩ $;
+axiom ind_ctor_ty (G: ctx) (D: ind) (i c: nat) (R: expr):
+  $ ind_wf G D $ > $ ctor_ty D i c R $ > $ ⟨ G ⊢ ind_ctor D i c : R ⟩ $;
 axiom ind_rec_ty (G: ctx) (D: ind) (N: ctx) (i: nat) (v: lvl) (R0 R: expr):
   $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_ty D v i R0 $ > $ ind_nested D N $ > $ rst D N R0 R $ > $ ⟨ G ⊢ ind_rec D i v : R ⟩ $;
 --| Iota: `ind_rec D i v ps ms ns is (ind_ctor D2 i c qs fs) ≡ R ps ms ns fs`
---| whenever every argument has its binder's type in the recursor's type
---| (`sty`; this makes `D2` an instance of `D` at equivalent levels and `qs`,
---| `is` agree with the recursor's, as in nanoda's `reduce_rec`).
+--| when the recursor's arguments before the major premise have their binders'
+--| types in the recursor's type (`sty`, which leaves `Π TY. C`), the
+--| constructor is the block's up to its levels (`eeqv`), its arguments `qs fs`
+--| have their binders' types in its type at `D` (`sty`, which leaves `T2`),
+--| and the arguments of `T2` are those of `TY`, one by one (`aeq`: the
+--| parameters `qs` are the recursor's `ps`, the constructor's indices are `is`).
 axiom ind_iota (G: ctx) (D D2: ind) (N: ctx) (i c: nat) (v: lvl) (np n m a0 a ni k nf nq: nat)
-    (R e3 e4 Y maj rhs0 rhs R0 RT T: expr):
+    (R e3 e4 Y maj rhs0 rhs R0 RT TY C CT T2 T: expr):
   $ spine (ind_rec D i v) e4 k $ > $ spine (ind_ctor D2 i c) maj nq $ > $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_rule D v i c R $ >
   $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m a $ > $ nidx D i ni $ > $ add a ni k $ > $ nfields D i c nf $ >
   $ add np nf nq $ > $ rehead (ind_rec D i v) R a e3 rhs0 $ > $ spine e3 e4 ni $ > $ spine Y maj nf $ >
   $ rehead Y rhs0 nf maj rhs $ > $ rec_ty D v i R0 $ > $ ind_nested D N $ > $ rst D N R0 RT $ >
-  $ sty G (ind_rec D i v) RT (e4 @ maj) T $ > $ ⟦ G ⊢ e4 @ maj ≡ rhs : T ⟧ $;
+  $ sty G (ind_rec D i v) RT e4 (Π TY. C) $ > $ inst 0 C maj T $ >
+  $ eeqv (ind_ctor D i c) (ind_ctor D2 i c) $ > $ ctor_ty D i c CT $ > $ sty G (ind_ctor D2 i c) CT maj T2 $ > $ aeq G T2 TY $ >
+  $ ⟦ G ⊢ e4 @ maj ≡ rhs : T ⟧ $;
 --| Iota of the recursor of an auxiliary type `i` (the occurrence `I Ds`) on
 --| `I`'s constructor `c`: `ind_rec D i v ps ms ns is (ind_ctor I2 ii c qs fs)
---| ≡ R ps ms ns fs` when every argument has its binder's type (`sty`; this
---| makes `I2` an instance of `I` and `qs` the occurrence's arguments at
---| `ps`); the fields are the last `nf` arguments of the major premise, as in
---| `inductive_reduce_rec`.
+--| ≡ R ps ms ns fs`, with `ind_iota`'s typing premises at `I`'s constructor
+--| (`aeq` makes `qs` the occurrence's arguments at `ps`); the fields are the
+--| last `nf` arguments of the major premise, as in `inductive_reduce_rec`.
 axiom ind_iota_nst (G: ctx) (D I I2: ind) (N: ctx) (i ii c: nat) (v: lvl) (np n m a0 a ni k nf nq npi: nat)
-    (R e3 e4 X Y maj rhs0 rhs R0 RT T: expr):
+    (R e3 e4 X Y maj rhs0 rhs R0 RT TY C CT T2 T: expr):
   $ spine (ind_rec D i v) e4 k $ > $ spine (ind_ctor I2 ii c) maj nq $ > $ ind_wf G D $ > $ elim_ok G D v $ >
   $ ind_nested D N $ > $ aux_of D N i X $ > $ spine (ind_ty I ii) X npi $ > $ rec_rule D v i c R $ >
   $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m a $ > $ nidx D i ni $ > $ add a ni k $ > $ nfields D i c nf $ >
   $ add npi nf nq $ > $ rehead (ind_rec D i v) R a e3 rhs0 $ > $ spine e3 e4 ni $ > $ spine Y maj nf $ >
   $ rehead Y rhs0 nf maj rhs $ > $ rec_ty D v i R0 $ > $ rst D N R0 RT $ >
-  $ sty G (ind_rec D i v) RT (e4 @ maj) T $ > $ ⟦ G ⊢ e4 @ maj ≡ rhs : T ⟧ $;
+  $ sty G (ind_rec D i v) RT e4 (Π TY. C) $ > $ inst 0 C maj T $ >
+  $ eeqv (ind_ctor I ii c) (ind_ctor I2 ii c) $ > $ ctor_ty I ii c CT $ > $ sty G (ind_ctor I2 ii c) CT maj T2 $ > $ aeq G T2 TY $ >
+  $ ⟦ G ⊢ e4 @ maj ≡ rhs : T ⟧ $;
 axiom proj_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (j i np: nat) (e e2 S A A1 A2 R: expr):
   $ ⟦ G ⊢ e ≡ e2 : S ⟧ $ > $ spine (ind_ty D j) S np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ struct_like D j $ >
   $ proj_ok G D j i $ > $ clen P np $ > $ field_ty D j i A $ > $ ind_nested D N $ > $ rst D N A A2 $ > $ pinst i S A2 A1 $ >
   $ qinst b e i 0 A1 R $ >
   $ ⟦ G ⊢ proj b i e ≡ proj b i e2 : R ⟧ $;
---| `proj b i (ind_ctor D2 j nz qs fs) ≡ fs[i]` when well typed.
-axiom proj_mk (G: ctx) (D2: ind) (b: blk) (j i np n m nf nq ii: nat) (M Y f T: expr):
+--| `proj b i (ind_ctor D2 j nz qs fs) ≡ fs[i]` when the field may be projected
+--| (`proj_ok`) and the constructor's arguments have their binders' types in
+--| its type (`sty`).
+axiom proj_mk (G: ctx) (D2: ind) (b: blk) (j i np n m nf nq ii: nat) (M Y f T CT S: expr):
   $ spine (ind_ctor D2 j 0) M nq $ > $ ind_arity D2 np n m $ > $ nfields D2 j 0 nf $ > $ add np nf nq $ >
-  $ add ii (s i) nf $ > $ spine (Y @ f) M ii $ > $ ⟨ G ⊢ proj b i M : T ⟩ $ > $ ⟦ G ⊢ proj b i M ≡ f : T ⟧ $;
+  $ add ii (s i) nf $ > $ spine (Y @ f) M ii $ > $ ind_wf G D2 $ > $ proj_ok G D2 j i $ >
+  $ ctor_ty D2 j 0 CT $ > $ sty G (ind_ctor D2 j 0) CT M S $ >
+  $ ⟨ G ⊢ proj b i M : T ⟩ $ > $ ⟦ G ⊢ proj b i M ≡ f : T ⟧ $;
 axiom ind_eta (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (j np nf: nat) (e S Y M: expr):
   $ ⟨ G ⊢ e : S ⟩ $ > $ spine (ind_ty D j) S np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ eta_ok D j $ > $ clen P np $ >
   $ rehead (ind_ty D j) (ind_ctor D j 0) np S Y $ > $ nfields D j 0 nf $ > $ projs b e nf Y M $ > $ ⟦ G ⊢ e ≡ M : S ⟧ $;
