@@ -705,17 +705,17 @@ axiom motives_nil (D: ind) (np j: nat) (v: lvl): $ motives D np v j tnil [] $;
 axiom motives_cons (D: ind) (np j: nat) (v: lvl) (F F2 Mj: expr) (C: ctors) (T: tys) (Mr M: ctx):
   $ lift j 0 F F2 $ > $ mty D np j 0 v F2 Mj $ > $ motives D np v (s j) T Mr $ > $ capp Mr (Mj :: []) M $ >
   $ motives D np v j (tcons F C T) M $;
---| `ihty D np n mo fld y A IH`: the type of the inductive hypothesis for a
---| recursive field of type `A = Π ys. ind_ty D j params indices` (`A` already
+--| `ihty D np n mo fld y j A IH`: the type of the inductive hypothesis for a
+--| recursive field on type `j` (`recfield`'s), of type `A = Π ys. ind_ty D j params indices` (`A` already
 --| over the fields and the minors before it): `Π ys. motive_j indices (field
 --| ys)`, with the motives `mo` binders above depth 0 and the field at `#fld`.
-term ihty: ind > nat > nat > nat > nat > nat > expr > expr > wff;
-axiom ihty_pi (D: ind) (np n mo fld y: nat) (A B IH: expr):
-  $ ihty D np n mo fld (s y) B IH $ > $ ihty D np n mo fld y (Π A. B) (Π A. IH) $;
+term ihty: ind > nat > nat > nat > nat > nat > nat > expr > expr > wff;
+axiom ihty_pi (D: ind) (np n mo fld y j: nat) (A B IH: expr):
+  $ ihty D np n mo fld (s y) j B IH $ > $ ihty D np n mo fld y j (Π A. B) (Π A. IH) $;
 axiom ihty_app (D: ind) (np n mo fld y j ni k a b mj f: nat) (Y X U A: expr):
   $ spine (ind_ty D j) A k $ > $ nidx D j ni $ > $ add np ni k $ > $ rehead Y #mj ni A X $ > $ spine (ind_ty D j) Y np $ >
   $ add y mo a $ > $ add a n b $ > $ add mj (s j) b $ > $ add y fld f $ > $ pargs #f 0 y U $ >
-  $ ihty D np n mo fld y A (X @ U) $;
+  $ ihty D np n mo fld y j A (X @ U) $;
 --| `mwalk D np n k i c nf d r Ihs K Min`: `Min` is the rest of the type of
 --| minor `k` (for constructor `c` of type `i`, with `nf` fields), read off
 --| the constructor type `K` at depth `d`, after `r` recursive fields whose
@@ -729,7 +729,7 @@ axiom mwalk_pi_nr (D: ind) (np n k i c nf d r dp kn: nat) (Ihs: ctx) (A A3 B Min
 axiom mwalk_pi_rec (D: ind) (np n k i c nf d r dp kn j a sh fld mo: nat) (Ihs: ctx) (A A2 A3 A4 B IH Min: expr):
   $ add d np dp $ > $ recfield D n np d A j $ > $ sinst D 0 n dp A A2 $ > $ add k n kn $ > $ lift kn d A2 A3 $ >
   $ add r nf a $ > $ add sh d a $ > $ add fld 1 sh $ > $ add a k mo $ > $ lift sh 0 A3 A4 $ >
-  $ ihty D np n mo fld 0 A4 IH $ >
+  $ ihty D np n mo fld 0 j A4 IH $ >
   $ mwalk D np n k i c nf (s d) (s r) (IH :: Ihs) B Min $ > $ mwalk D np n k i c nf d r Ihs (Π A. B) (Π A3. Min) $;
 axiom mwalk_res (D: ind) (np n k i c d r dp kn h0 h1 h ni mi a b: nat) (Ihs: ctx) (K K2 K3 Y X Y1 Y2 Min: expr):
   $ add d np dp $ > $ add k n kn $ > $ add dp i h0 $ > $ add h0 kn h1 $ > $ add h1 r h $ >
@@ -769,16 +769,16 @@ axiom rec_ty_i (D: ind) (b: blk) (P: ctx) (T: tys) (v: lvl) (i np n m mn: nat) (
 
 -- The recursor's rules (`mkRecRules`) --------------------------------------
 
---| `ihval D np n m v nf fld y A IH`: the inductive hypothesis of a recursive
---| field: `λ ys. ind_rec D j v params motives minors indices (field ys)`, read
+--| `ihval D np n m v nf fld y j A IH`: the inductive hypothesis of a recursive
+--| field on type `j` (`recfield`'s): `λ ys. ind_rec D j v params motives minors indices (field ys)`, read
 --| off the field's type `A` (over all `nf` fields, the field at `#fld`).
-term ihval: ind > nat > nat > nat > lvl > nat > nat > nat > expr > expr > wff;
-axiom ihval_lam (D: ind) (np n m: nat) (v: lvl) (nf fld y: nat) (A B IH: expr):
-  $ ihval D np n m v nf fld (s y) B IH $ > $ ihval D np n m v nf fld y (Π A. B) (λ A. IH) $;
+term ihval: ind > nat > nat > nat > lvl > nat > nat > nat > nat > expr > expr > wff;
+axiom ihval_lam (D: ind) (np n m: nat) (v: lvl) (nf fld y j: nat) (A B IH: expr):
+  $ ihval D np n m v nf fld (s y) j B IH $ > $ ihval D np n m v nf fld y j (Π A. B) (λ A. IH) $;
 axiom ihval_app (D: ind) (np n m: nat) (v: lvl) (nf fld y j ni k a mn b f: nat) (Y X1 X2 X3 U A: expr):
   $ spine (ind_ty D j) A k $ > $ nidx D j ni $ > $ add np ni k $ > $ rehead Y X2 ni A X3 $ > $ spine (ind_ty D j) Y np $ >
   $ add y nf a $ > $ add m n mn $ > $ add a mn b $ > $ pargs (ind_rec D j v) b np X1 $ > $ pargs X1 a mn X2 $ >
-  $ add y fld f $ > $ pargs #f 0 y U $ > $ ihval D np n m v nf fld y A (X3 @ U) $;
+  $ add y fld f $ > $ pargs #f 0 y U $ > $ ihval D np n m v nf fld y j A (X3 @ U) $;
 --| `rwalk D np n m v nf d Acc K Val`: `Val = λ fields. Acc ihs`, read off the
 --| constructor type `K` at depth `d`, where `Acc` is the minor applied to
 --| the fields and `ihs` the inductive hypotheses of the recursive fields.
@@ -788,7 +788,7 @@ axiom rwalk_pi_nr (D: ind) (np n m: nat) (v: lvl) (nf d dp mn: nat) (Acc A A3 B 
   $ rwalk D np n m v nf (s d) Acc B Val $ > $ rwalk D np n m v nf d Acc (Π A. B) (λ A3. Val) $;
 axiom rwalk_pi_rec (D: ind) (np n m: nat) (v: lvl) (nf d dp mn j sh fld: nat) (Acc A A2 A3 A4 B IH Val: expr):
   $ add d np dp $ > $ recfield D n np d A j $ > $ sinst D 0 n dp A A2 $ > $ add m n mn $ > $ lift mn d A2 A3 $ >
-  $ add sh d nf $ > $ add fld 1 sh $ > $ lift sh 0 A3 A4 $ > $ ihval D np n m v nf fld 0 A4 IH $ >
+  $ add sh d nf $ > $ add fld 1 sh $ > $ lift sh 0 A3 A4 $ > $ ihval D np n m v nf fld 0 j A4 IH $ >
   $ rwalk D np n m v nf (s d) (Acc @ IH) B Val $ > $ rwalk D np n m v nf d Acc (Π A. B) (λ A3. Val) $;
 axiom rwalk_res (D: ind) (np n m: nat) (v: lvl) (d: nat) (Acc K: expr):
   $ npis K 0 $ > $ rwalk D np n m v d d Acc K Acc $;
