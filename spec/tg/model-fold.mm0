@@ -819,3 +819,1324 @@ theorem mpth_pi_out {z c d h o m v q y: set} (G: hyps) (M Y V: class) (u w r ta 
 theorem mpth_pi_in {z c d h o m v q y: set} (G: hyps) (M Y V: class) (u w r ta tb a s: set):
   $ G ⇒ ta ∊ trees ω $ > $ G ⇒ tb ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ u ⊆ V $ > $ G ⇒ a ∊ dt u M ta w r $ > $ G ⇒ a ∊ u $ > $ G ⇒ s ∊ {z | ∃ c ∃ d ∃ h ∃ o ∃ m (⟨ c , ⟨ d , ⟨ h , o ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tb w (scons a r) ∧ m ∊ ap ({v | ∃ q ∃ y (q ∊ fseq V ∧ v = ⟨ q , y ⟩ ∧ ⟨ ssnoc q a , y ⟩ ∈ Y)}) c ∧ m ∊ V ∧ z = scons m c)} $ >
   $ G ⇒ s ∊ fseq V ∧ ssnoc s a ∈ {z | ∃ c ∃ d ∃ h ∃ o ∃ m (⟨ c , ⟨ d , ⟨ h , o ⟩ ⟩ ⟩ ∈ etel u (dnf u M) ⟨ kc_pi , scons ta (scons tb ∅) ⟩ w r ∧ m ∊ ap (Y) c ∧ m ∊ V ∧ z = scons m c)} $;
+
+-- --------------------------------------------------------------------------
+-- The generic `Π` step and the leaf of a walk (D6 for the recursor's type)
+-- --------------------------------------------------------------------------
+
+--| The paths with a major of `K` at `R`: the fields `c` of a path, then an
+--| element `m` of the universe in the table `Y`'s value at `c`.
+def mpth (U E K W R Y: class) (.c .d .h .o .m .z: set): class =
+  $ {z | ∃ c ∃ d ∃ h ∃ o ∃ m (⟨ c , ⟨ d , ⟨ h , o ⟩ ⟩ ⟩ ∈ etel U E K W R ∧ m ∊ ap Y c ∧ m ∊ U ∧ z = scons m c)} $;
+--| @congr
+theorem mpth_congr (A B C D E F H I J K L N: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ L ≐ N $ > $ mpth A C E H J L ≐ mpth B D F I K N $;
+--| @rewrite
+theorem sb_c_mpth {x: set} (t: set x) (A B C D E F: class x):
+  $ (⟦ x / t ⟧ (mpth A B C D E F)) ≐ mpth (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) (⟦ x / t ⟧ F) $;
+
+--| The paths with a major of the body of a `Π` node at `scons a r`, for a table `Y2` whose
+--| values are `Y`'s at the sequences extended by `a`: the sequences whose extension by `a`
+--| is such a path of the node (`mpth_pi_out`, `mpth_pi_in` without the shifted table).
+--| @freshen G q
+--| @freshen G x
+theorem mpth_pi_dom {q x: set} (G: hyps) (M Y Y2: class) (u w r ta tb a: set):
+  $ G ⇒ ta ∊ trees ω $ > $ G ⇒ tb ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ a ∊ dt u M ta w r $ > $ G ⇒ a ∊ u $ > $ G ⇒ ∀ q (q ∊ fseq u → ap (Y2) q = ap (Y) (ssnoc q a)) $ >
+  $ G ⇒ mpth u (dnf u M) tb w (scons a r) (Y2) = {x | x ∊ fseq u ∧ ssnoc x a ∈ mpth u (dnf u M) ⟨ kc_pi , scons ta (scons tb ∅) ⟩ w r (Y)} $;
+
+--| The generic `Π` step of a walk over a type `Π A. B` whose value is a space of traces
+--| over the paths with a major: if the body's value at `scons a r`, for every `a` in `A`'s
+--| value, is the space over the body's paths there with the tables `Y2`, `T2`, whose values
+--| are those of `Y`, `T` at the sequences extended by `a`, then the node's value is the
+--| space over the node's paths with `Y`, `T`.
+--| @freshen G s
+--| @freshen G a
+--| @freshen G q
+theorem dpi_step {s a q: set} (G: hyps) (M Y T: class) (Y2 T2: class a) (u w r ta tb tm: set):
+  $ G ⇒ ta ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tb ∊ trees ω $ >
+  $ G ⇒ tm ∊ trees ω $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ uadm u $ >
+  $ G ⇒ ∀ a (a ∊ dt u M ta w r → dt u M tm w (scons a r) = fpi s (mpth u (dnf u M) tb w (scons a r) (Y2)) (ap (T2) s)) $ >
+  $ G ⇒ ∀ a (a ∊ dt u M ta w r → ∀ q (q ∊ fseq u → ap (Y2) q = ap (Y) (ssnoc q a))) $ >
+  $ G ⇒ ∀ a (a ∊ dt u M ta w r → ∀ q (q ∊ fseq u → ap (T2) q = ap (T) (ssnoc q a))) $ >
+  $ G ⇒ dt u M ⟨ kc_pi , scons ta (scons tm ∅) ⟩ w r = fpi s (mpth u (dnf u M) ⟨ kc_pi , scons ta (scons tb ∅) ⟩ w r (Y)) (ap (T) s) $;
+
+--| The leaf of a walk: over a type `B` with the one path of nothing, the value of `Π I. X`
+--| for `I`'s value the table `Y`'s at `∅` and `X`'s value at each `a` the table `T`'s at the
+--| one-entry sequence, is the space over `B`'s paths with a major.
+--| @freshen G s
+--| @freshen G a
+theorem dpi_leaf {s a: set} (G: hyps) (M Y T: class) (u w r ti tx tb: set):
+  $ G ⇒ ti ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tx ∊ trees ω $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ uadm u $ >
+  $ G ⇒ etel u (dnf u M) tb w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩ $ >
+  $ G ⇒ dt u M ti w r = ap (Y) ∅ $ >
+  $ G ⇒ ∀ a (a ∊ dt u M ti w r → dt u M tx w (scons a r) = ap (T) (scons a ∅)) $ >
+  $ G ⇒ dt u M ⟨ kc_pi , scons ti (scons tx ∅) ⟩ w r = fpi s (mpth u (dnf u M) tb w r (Y)) (ap (T) s) $;
+
+--| Trace spaces over equal paths with equal values at each path are equal.
+--| @freshen G q
+theorem fpi_eq_pt {q: set} (G: hyps) (Q Q2: class) (B B2: class q):
+  $ G ⇒ Q = Q2 $ > $ G ⇒ ∀ q (q ∊ Q → B = B2) $ > $ G ⇒ fpi q Q B = fpi q Q2 B2 $;
+
+--| The paths with a major at equal trees and valuations, for tables with the same values
+--| at every sequence over the universe.
+--| @freshen G q
+theorem mpth_eq {q: set} (G: hyps) (E K K2 Y Y2 R R2: class) (u w: set):
+  $ G ⇒ K ∈ trees ω $ > $ G ⇒ K = K2 $ > $ G ⇒ R = R2 $ > $ G ⇒ isset R $ > $ G ⇒ ∀ q (q ∊ fseq u → ap (Y) q = ap (Y2) q) $ >
+  $ G ⇒ mpth u E K w R (Y) = mpth u E K2 w R2 (Y2) $;
+
+--| A window on the middle of three concatenated sequences.
+theorem swin_scat_mid (G: hyps) (u a p x: set):
+  $ G ⇒ a ∊ fseq u $ > $ G ⇒ p ∊ fseq u $ > $ G ⇒ x ∊ fseq u $ > $ G ⇒ swin (scat a (scat p x)) (cdm a) (cdm p) = p $;
+
+--| The value of a head `n0` applied to the parameters and then to the binders passed so
+--| far (`pargs` twice, as in `mty_srt` and `rtail_srt`), at a valuation `e` of those binders
+--| in front of `c0` and the parameters `p`: the head's value `Z` at `scat e p`.
+theorem pargs_ind_val (G: hyps) (M Z: class) (u w n0 k tnp tz d x i e c0 p rr r: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ e ∊ fseq u $ >
+  $ G ⇒ c0 ∊ fseq u $ >
+  $ G ⇒ p ∊ fseq u $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ r = scat e (scat c0 (scat p rr)) $ >
+  $ G ⇒ fv nvf k = nadd (cdm e) (cdm c0) $ >
+  $ G ⇒ cdm p = fv nvf tnp $ >
+  $ G ⇒ cdm e = fv nvf d $ >
+  $ G ⇒ fv nvf tz = ∅ $ >
+  $ G ⇒ etel u (dnf u M) n0 w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩ $ >
+  $ G ⇒ dt u M n0 w r = Z $ >
+  $ G ⇒ ra_pargs n0 k tnp x ∈ lrel $ >
+  $ G ⇒ ra_pargs x tz d i ∈ lrel $ >
+  $ G ⇒ dt u M i w r = apn (Z) (scat e p) $;
+
+--| The value of a motive's type, read off the type's type `t1` by `mty` at depth `td0`, at a
+--| valuation `e` of the binders passed so far in front of `c0` (the earlier motives) and the
+--| parameters `p`: the traces over `t1`'s paths with a major in `Z` (the value of `n0`, the
+--| type itself) at the indices and parameters, valued in the motives' universe.
+--| @freshen G x
+--| @freshen G t
+--| @freshen G f
+theorem mty_sem {x t f: set} (G: hyps) (M Z: class) (u w td tj tnp tv p c0 rr n0 t1 td0 tm e r: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ p ∊ fseq u $ >
+  $ G ⇒ cdm p = fv nvf tnp $ >
+  $ G ⇒ c0 ∊ fseq u $ >
+  $ G ⇒ cdm c0 = fv nvf tj $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ n0 = ⟨ kc_ind_ty , scons td (scons tj ∅) ⟩ $ >
+  $ G ⇒ n0 ∊ trees ω $ >
+  $ G ⇒ ∀ x (x ∊ fseq u → dt u M n0 w x = Z) $ >
+  $ G ⇒ tv ∊ trees ω $ >
+  $ G ⇒ ra_mty td tnp tj td0 tv t1 tm ∈ lrel $ >
+  $ G ⇒ t1 ∊ trees ω $ >
+  $ G ⇒ tm ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ td0 ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ e ∊ fseq u $ >
+  $ G ⇒ cdm e = fv nvf td0 $ >
+  $ G ⇒ r = scat e (scat c0 (scat p rr)) $ >
+  $ G ⇒ dt u M tm w r = fpi t (mpth u (dnf u M) t1 w r (clam f (fseq u) (apn (Z) (scat f (scat e p))))) (ap (clam f (fseq u) (fv uni (lv tv w))) t) $;
+
+-- --------------------------------------------------------------------------
+-- Sorts of telescopes (`pis`, `capp`)
+-- --------------------------------------------------------------------------
+
+--| The empty context and a context extended by a type are of the sort of contexts.
+theorem ofsort_ctx_nil (G: hyps): $ G ⇒ ⟨ kc_nil , ∅ ⟩ ∈ ofsort lsig lopen ks_ctx $;
+
+theorem ofsort_ctx_cons (G: hyps) (A B: class):
+  $ G ⇒ A ∈ ofsort lsig lopen ks_expr $ > $ G ⇒ B ∈ ofsort lsig lopen ks_ctx $ > $ G ⇒ ⟨ kc_cons , scons A (scons B ∅) ⟩ ∈ ofsort lsig lopen ks_ctx $;
+
+--| `pis P b T` for an expression `T`: `P` is a context and `b` an expression.
+theorem pis_sort (G: hyps) (t1 t2 t3: set):
+  $ G ⇒ ra_pis t1 t2 t3 ∈ lrel $ > $ G ⇒ t3 ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ t1 ∊ ofsort lsig lopen ks_ctx ∧ t2 ∊ ofsort lsig lopen ks_expr $;
+
+--| `capp P G T` for a context `T`: `P` and `G` are contexts.
+theorem capp_sort (G: hyps) (t1 t2 t3: set):
+  $ G ⇒ ra_capp t1 t2 t3 ∈ lrel $ > $ G ⇒ t3 ∊ ofsort lsig lopen ks_ctx $ > $ G ⇒ t1 ∊ ofsort lsig lopen ks_ctx ∧ t2 ∊ ofsort lsig lopen ks_ctx $;
+
+-- --------------------------------------------------------------------------
+-- Appended telescopes; the motives (D6 for the recursor's type)
+-- --------------------------------------------------------------------------
+
+--| The valuations of an appended telescope `G ++ P` over the table shifted by `s`: a
+--| valuation `g` of `G`, then one of `P` over the table shifted by `g` too.
+--| @freshen G x
+--| @freshen G g
+--| @freshen G q
+theorem esat_capp_dsh {x g q: set} (G: hyps) (M: class) (u w s t1 t2 t3: set):
+  $ G ⇒ w ∊ lvals $ > $ G ⇒ s ∊ fseq u $ > $ G ⇒ ra_capp t1 t2 t3 ∈ lrel $ >
+  $ G ⇒ esat u (dsh u M s) t3 w = {x | ∃ g ∃ q (g ∊ esat u (dsh u M s) t2 w ∧ q ∊ esat u (dsh u M (scat g s)) t1 w ∧ x = scat q g)} $;
+
+--| A path with a major is a sequence over the universe.
+theorem mpth_fseq (G: hyps) (E K R Y: class) (u w: set):
+  $ G ⇒ K ∈ trees ω $ > $ G ⇒ isset R $ > $ G ⇒ mpth u E K w R (Y) ⊆ fseq u $;
+
+--| The type of motive `tj` (`mty` on the type's type `tf` lifted over the `tj` earlier
+--| motives), at a valuation `c0` of those motives in front of the parameters `p`: its value
+--| is the motive's space, for the type's value `ity` the value of `n0`.
+--| @freshen G x
+theorem mot_val {x: set} (G: hyps) (M: class) (u w td tj tnp tv tz tf tf2 tm p c0 rr n0 r: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ p ∊ fseq u $ >
+  $ G ⇒ cdm p = fv nvf tnp $ >
+  $ G ⇒ c0 ∊ fseq u $ >
+  $ G ⇒ cdm c0 = fv nvf tj $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ n0 = ⟨ kc_ind_ty , scons td (scons tj ∅) ⟩ $ >
+  $ G ⇒ n0 ∊ trees ω $ >
+  $ G ⇒ ∀ x (x ∊ fseq u → dt u M n0 w x = ity u (dnf u M) td (fv nvf tj) w) $ >
+  $ G ⇒ tv ∊ trees ω $ >
+  $ G ⇒ tz = ⟨ kc_nz , ∅ ⟩ $ >
+  $ G ⇒ ra_lift tj tz tf tf2 ∈ lrel $ >
+  $ G ⇒ ra_mty td tnp tj tz tv tf2 tm ∈ lrel $ >
+  $ G ⇒ tm ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ityf td (fv nvf tj) tf $ >
+  $ G ⇒ ra_closed tnp tf ∈ lrel $ >
+  $ G ⇒ ity u (dnf u M) td (fv nvf tj) w ∈ u $ >
+  $ G ⇒ r = scat c0 (scat p rr) $ >
+  $ G ⇒ dt u M tm w r = imot u (dnf u M) td (fv nvf tj) w p (lv tv w) $;
+
+-- --------------------------------------------------------------------------
+-- The motives' telescope (D6 for the recursor's type)
+-- --------------------------------------------------------------------------
+
+--| Satisfaction over tables shifted by equal valuations.
+theorem esat_dsh_eq (G: hyps) (M S S2 T W: class) (u: set):
+  $ G ⇒ T ∈ trees ω $ > $ G ⇒ S ∈ fseq u $ > $ G ⇒ S = S2 $ > $ G ⇒ esat u (dsh u M S) T W = esat u (dsh u M S2) T W $;
+
+--| The motives' telescope: for the types `tt` of a block from the number `tj` on (`tk` of
+--| them, `nadd` to the block's `tn`), each with its type by `ityf` and closed over the
+--| parameters, the valuations of `motives`'s output over `c0` (the earlier motives) and the
+--| parameters `p` are the sequences of `tk` motives, the motive of type `i` in the space `imot`.
+--| @freshen G a
+--| @freshen G b
+--| @freshen G x
+--| @freshen G f
+--| @freshen G l
+--| @freshen G i
+theorem motives_sem {a b x f l i: set} (G: hyps) (M: class) (u w td tnp tv tn p rr tt tj tm c0 r tk to: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ p ∊ fseq u $ >
+  $ G ⇒ cdm p = fv nvf tnp $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ tv ∊ trees ω $ >
+  $ G ⇒ ∀ a ∀ b ∀ x (a ∊ ofsort lsig lopen ks_nat → fv nvf a ∈ fv nvf tn → b = ⟨ kc_ind_ty , scons td (scons a ∅) ⟩ → x ∊ fseq u → dt u M b w x = ity u (dnf u M) td (fv nvf a) w) $ >
+  $ G ⇒ ∀ a (a ∊ ofsort lsig lopen ks_nat → fv nvf a ∈ fv nvf tn → ity u (dnf u M) td (fv nvf a) w ∈ u) $ >
+  $ G ⇒ ra_motives td tnp tv tj tt tm ∈ lrel $ >
+  $ G ⇒ tm ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ tj ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ ra_ntys tt tk to ∈ lrel $ >
+  $ G ⇒ nadd (fv nvf tj) (fv nvf tk) = fv nvf tn $ >
+  $ G ⇒ ∀ a ∀ f ∀ b (ra_nth_ty tt a f b ∈ lrel → ityf td (nadd (fv nvf tj) (fv nvf a)) f ∧ ra_closed tnp f ∈ lrel) $ >
+  $ G ⇒ c0 ∊ fseq u $ >
+  $ G ⇒ cdm c0 = fv nvf tj $ >
+  $ G ⇒ r = scat c0 (scat p rr) $ >
+  $ G ⇒ esat u (dsh u M r) tm w = {l | l ∊ fseq u ∧ cdm l = fv nvf tk ∧ ∀ i (i ∊ fv nvf tn → fv nvf tj ⊆ i → vat (scat l c0) (fv nvf tn) i ∈ imot u (dnf u M) td i w p (lv tv w))} $;
+
+-- --------------------------------------------------------------------------
+-- The recursor's tail (D6 for the recursor's type)
+-- --------------------------------------------------------------------------
+
+--| The leaf of the recursor's tail: `X2 @ #0` for `X2` the variable `#mi` applied to the
+--| binders passed so far (`pargs #mi 1 d`), at a valuation `scons a r` with `r` the binders
+--| `e` in front of `c0` (the minors and motives) and the parameters: the entry `K` of `c0`
+--| (the motive) at the indices `e` and the major `a`.
+theorem rtail_leaf_val (G: hyps) (M K: class) (u w d mi t1 tz x2 tbm tb0 tap e c0 p rr r a: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ e ∊ fseq u $ >
+  $ G ⇒ c0 ∊ fseq u $ >
+  $ G ⇒ p ∊ fseq u $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ r = scat e (scat c0 (scat p rr)) $ >
+  $ G ⇒ a ∊ u $ >
+  $ G ⇒ cdm e = fv nvf d $ >
+  $ G ⇒ K ∈ cdm c0 $ >
+  $ G ⇒ fv nvf mi = suc (nadd (cdm e) K) $ >
+  $ G ⇒ tbm = ⟨ kc_bvar , scons mi ∅ ⟩ $ >
+  $ G ⇒ mi ∊ trees ω $ >
+  $ G ⇒ fv nvf t1 = suc ∅ $ >
+  $ G ⇒ ra_pargs tbm t1 d x2 ∈ lrel $ >
+  $ G ⇒ tb0 = ⟨ kc_bvar , scons tz ∅ ⟩ $ >
+  $ G ⇒ tz ∊ trees ω $ >
+  $ G ⇒ fv nvf tz = ∅ $ >
+  $ G ⇒ x2 ∊ trees ω $ >
+  $ G ⇒ tap = ⟨ kc_app , scons x2 (scons tb0 ∅) ⟩ $ >
+  $ G ⇒ dt u M tap w (scons a r) = apn (fv c0 K) (scons a e) $;
+
+--| The value of the recursor's tail, read off the type's type `t1` by `rtail` at depth `td0`,
+--| at a valuation `e` of the binders passed so far in front of `c0` (the minors and motives)
+--| and the parameters `p`: the traces over `t1`'s paths with a major in `Z` (the type itself),
+--| valued in the entry `K` of `c0` (the type's motive) at the indices and the major.
+--| @freshen G x
+--| @freshen G t
+--| @freshen G f
+theorem rtail_sem {x t f: set} (G: hyps) (M Z K: class) (u w td tn tm ti tnp p c0 rr n0 t1 td0 tb e r: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ p ∊ fseq u $ >
+  $ G ⇒ cdm p = fv nvf tnp $ >
+  $ G ⇒ c0 ∊ fseq u $ >
+  $ G ⇒ cdm c0 = nadd (fv nvf tm) (fv nvf tn) $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ n0 = ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ $ >
+  $ G ⇒ n0 ∊ trees ω $ >
+  $ G ⇒ ∀ x (x ∊ fseq u → dt u M n0 w x = Z) $ >
+  $ G ⇒ K ∈ cdm c0 $ >
+  $ G ⇒ nadd (suc K) (fv nvf ti) = cdm c0 $ >
+  $ G ⇒ ra_rtail td tnp tn tm ti td0 t1 tb ∈ lrel $ >
+  $ G ⇒ t1 ∊ trees ω $ >
+  $ G ⇒ tb ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ td0 ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ e ∊ fseq u $ >
+  $ G ⇒ cdm e = fv nvf td0 $ >
+  $ G ⇒ r = scat e (scat c0 (scat p rr)) $ >
+  $ G ⇒ dt u M tb w r = fpi t (mpth u (dnf u M) t1 w r (clam f (fseq u) (apn (Z) (scat f (scat e p))))) (ap (clam f (fseq u) (apn (fv c0 K) (scat f e))) t) $;
+
+-- --------------------------------------------------------------------------
+-- The minors (D6 for the recursor's type): the inductive hypotheses
+-- --------------------------------------------------------------------------
+
+--| `sinst` for the paths: as `lrel_sinst_sem`, `e2`'s paths at `p ++ s` are `e`'s at `p ++ v ++ s`.
+--| @freshen G i
+--| @freshen G b
+theorem lrel_sinst_etel {i b: set} (G: hyps) (M: class) (u w t1 t2 t3 t4 t5 t6 p s v: set):
+  $ G ⇒ ra_sinst t1 t2 t3 t4 t5 t6 ∈ lrel $ > $ G ⇒ uadm u $ > $ G ⇒ t1 ∊ trees ω $ > $ G ⇒ t2 ∊ trees ω $ >
+  $ G ⇒ w ∊ lvals $ > $ G ⇒ p ∊ fseq u $ > $ G ⇒ cdm p = fv nvf t4 $ > $ G ⇒ s ∊ fseq u $ >
+  $ G ⇒ v ∊ fseq u $ > $ G ⇒ nadd (fv nvf t2) (cdm v) = fv nvf t3 $ >
+  $ G ⇒ ∀ i ∀ b (i ∊ cdm v → b ∊ trees ω → fv nvf b = nadd (fv nvf t2) i →
+      dt u M ⟨ kc_ind_ty , scons t1 (scons b ∅) ⟩ w ∅ = fv v i) $ >
+  $ G ⇒ etel u (dnf u M) t6 w (scat p s) = etel u (dnf u M) t5 w (scat p (scat v s)) $;
+
+--| The generic `Π` step over any classes of paths: if the body's value at `scons a r`, for every
+--| `a` in `A`'s value, is the space over the paths `S2` with the table `T2`, where `S2` is the
+--| sequences whose extension by `a` is in `S` and `T2`'s values there are `T`'s at the extension,
+--| and every element of `S` is such an extension, then the node's value is the space over `S`
+--| with `T`.
+--| @freshen G s
+--| @freshen G a
+--| @freshen G q
+--| @freshen G x
+--| @freshen G b
+--| @freshen G c
+theorem gpi_step {s a q x b c: set} (G: hyps) (M S T: class) (S2 T2: class a) (u w r ta tm: set):
+  $ G ⇒ ta ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tm ∊ trees ω $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ uadm u $ >
+  $ G ⇒ ∀ a (a ∊ dt u M ta w r → dt u M tm w (scons a r) = fpi s (S2) (ap (T2) s)) $ >
+  $ G ⇒ ∀ a (a ∊ dt u M ta w r → S2 = {x | x ∊ fseq u ∧ ssnoc x a ∈ S}) $ >
+  $ G ⇒ ∀ s (s ∊ S → ∃ c ∃ b (b ∊ dt u M ta w r ∧ c ∊ fseq u ∧ s = ssnoc c b)) $ >
+  $ G ⇒ ∀ a (a ∊ dt u M ta w r → ∀ q (q ∊ S2 → ap (T2) q = ap (T) (ssnoc q a))) $ >
+  $ G ⇒ dt u M ⟨ kc_pi , scons ta (scons tm ∅) ⟩ w r = fpi s (S) (ap (T) s) $;
+
+--| The arguments of a path of a spine: the spine's own (as many as its number), in front
+--| of a path's of the head (whose paths' arguments are sequences).
+--| @freshen G i
+--| @freshen G b
+--| @freshen G y
+theorem spine_args {i b y: set} (G: hyps) (M: class) (u w r tY te tk a: set):
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ ∀ b (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , b ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tY w r → b ∊ fseq {y | y = y}) $ >
+  $ G ⇒ ra_spine tY te tk ∈ lrel $ >
+  $ G ⇒ te ∊ trees ω $ >
+  $ G ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u (dnf u M) te w r $ >
+  $ G ⇒ ∃ i ∃ b (a = scat i b ∧ i ∊ fseq {y | y = y} ∧ cdm i = fv nvf tk ∧ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , b ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tY w r) $;
+
+--| The arguments of a path of a re-headed spine `e`: the spine's own `i`, in front of a
+--| path's of the old head `Y`; and the result's value is the new head `X`'s applied to `i`.
+--| @freshen G i
+--| @freshen G b
+--| @freshen G y
+theorem rehead_args {i b y: set} (G: hyps) (M: class) (u w r tY tX te tk te2 a: set):
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ ∀ b (⟨ ∅ , ⟨ ∅ , ⟨ ∅ , b ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tY w r → b ∊ fseq {y | y = y}) $ >
+  $ G ⇒ ra_rehead tY tX tk te te2 ∈ lrel $ >
+  $ G ⇒ te ∊ trees ω $ >
+  $ G ⇒ te2 ∊ trees ω $ >
+  $ G ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u (dnf u M) te w r $ >
+  $ G ⇒ ∃ i ∃ b (a = scat i b ∧ i ∊ fseq {y | y = y} ∧ cdm i = fv nvf tk ∧ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , b ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tY w r ∧ dt u M te2 w r = apn (dt u M tX w r) i) $;
+
+--| The value of the type of an inductive hypothesis at its leaf `X @ U` (`ihty_app`): the motive
+--| (the entry `tmj`) at the indices, the first `tni` arguments of a path of the field's result
+--| `tA`, and the field (the entry `tf`) applied to the binders passed.
+theorem ihty_leaf_val (G: hyps) (M: class) (u w r td tj tmj tf tni tnp ty tA tX tU tY n0 x0 x1 z0 a: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ n0 = ⟨ kc_ind_ty , scons td (scons tj ∅) ⟩ $ >
+  $ G ⇒ n0 ∊ trees ω $ >
+  $ G ⇒ x0 = ⟨ kc_bvar , scons tmj ∅ ⟩ $ >
+  $ G ⇒ tmj ∊ trees ω $ >
+  $ G ⇒ x1 = ⟨ kc_bvar , scons tf ∅ ⟩ $ >
+  $ G ⇒ tf ∊ trees ω $ >
+  $ G ⇒ fv nvf z0 = ∅ $ >
+  $ G ⇒ ra_rehead tY x0 tni tA tX ∈ lrel $ >
+  $ G ⇒ ra_spine n0 tY tnp ∈ lrel $ >
+  $ G ⇒ ra_pargs x1 z0 ty tU ∈ lrel $ >
+  $ G ⇒ tA ∊ trees ω $ >
+  $ G ⇒ tX ∊ trees ω $ >
+  $ G ⇒ tU ∊ trees ω $ >
+  $ G ⇒ tY ∊ trees ω $ >
+  $ G ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tA w r $ >
+  $ G ⇒ fv r (fv nvf tf) ∈ u $ >
+  $ G ⇒ dt u M ⟨ kc_app , scons tX (scons tU ∅) ⟩ w r = apn (fv r (fv nvf tmj)) (scons (apn (fv r (fv nvf tf)) (swin r ∅ (fv nvf ty))) (cres a (fv nvf tni))) $;
+
+--| The fields of the paths in `Q`.
+def tpth (Q: class) (.z .g .h .o: set): class = $ {z | ∃ g ∃ h ∃ o (⟨ z , ⟨ g , ⟨ h , o ⟩ ⟩ ⟩ ∈ Q)} $;
+--| @congr
+theorem tpth_congr (A B: class): $ A ≐ B $ > $ tpth A ≐ tpth B $;
+--| @rewrite
+theorem sb_c_tpth {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (tpth A)) ≐ tpth (⟦ x / t ⟧ A) $;
+--| The table of an inductive hypothesis's type over the paths `Q` of its field's type: at
+--| the fields `f` of a path with the arguments `o`, the trace `C` (a motive) at the first `N`
+--| arguments and the field `V` applied to `f` and the binders `E` passed before.
+def ihtb (U Q C V E N: class) (.f .l .g .h .o: set): class =
+  $ clam f (fseq U) {l | ∃ g ∃ h ∃ o (⟨ f , ⟨ g , ⟨ h , o ⟩ ⟩ ⟩ ∈ Q ∧ l ∊ apn C (scons (apn V (scat f E)) (cres o N)))} $;
+--| @congr
+theorem ihtb_congr (A B C D E F H I J K L N: class):
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ L ≐ N $ > $ ihtb A C E H J L ≐ ihtb B D F I K N $;
+--| @rewrite
+theorem sb_c_ihtb {x: set} (t: set x) (A B C D E F: class x):
+  $ (⟦ x / t ⟧ (ihtb A B C D E F)) ≐ ihtb (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) (⟦ x / t ⟧ F) $;
+
+--| An element of the paths' fields is the fields of a path.
+--| @freshen G g
+--| @freshen G h
+--| @freshen G o
+theorem tpth_elim {g h o: set} (G: hyps) (Q: class) (z: set):
+  $ G ⇒ z ∊ tpth Q $ > $ G ⇒ ∃ g ∃ h ∃ o (⟨ z , ⟨ g , ⟨ h , o ⟩ ⟩ ⟩ ∈ Q) $;
+
+--| The fields of a path (whose other parts are sets) are an element of the paths' fields.
+theorem tpth_intro (G: hyps) (Q A B C: class) (z: set):
+  $ G ⇒ ⟨ z , ⟨ A , ⟨ B , C ⟩ ⟩ ⟩ ∈ Q $ > $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ isset C $ > $ G ⇒ z ∊ tpth Q $;
+
+--| `tpth` at equal classes.
+theorem tpth_eq (G: hyps) (Q Q2: class): $ G ⇒ Q = Q2 $ > $ G ⇒ tpth Q = tpth Q2 $;
+
+--| An element of an inductive hypothesis's table at `s`: a path with the fields `s`, and an
+--| element of the trace `C` at the path's arguments and the field's value.
+--| @freshen G g
+--| @freshen G h
+--| @freshen G o
+theorem ihtb_elim {g h o: set} (G: hyps) (Q C V E N: class) (u s y: set):
+  $ G ⇒ s ∊ fseq u $ > $ G ⇒ y ∊ ap (ihtb u Q C V E N) s $ >
+  $ G ⇒ ∃ g ∃ h ∃ o (⟨ s , ⟨ g , ⟨ h , o ⟩ ⟩ ⟩ ∈ Q ∧ y ∊ apn C (scons (apn V (scat s E)) (cres o N))) $;
+
+--| Introduction for an inductive hypothesis's table (the path's other parts are sets).
+theorem ihtb_intro (G: hyps) (Q C V E N A B D: class) (u s y: set):
+  $ G ⇒ s ∊ fseq u $ > $ G ⇒ ⟨ s , ⟨ A , ⟨ B , D ⟩ ⟩ ⟩ ∈ Q $ > $ G ⇒ y ∊ apn C (scons (apn V (scat s E)) (cres D N)) $ >
+  $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ isset D $ > $ G ⇒ y ∊ ap (ihtb u Q C V E N) s $;
+
+--| `ihtb` at equal arguments.
+theorem ihtb_eq (G: hyps) (U Q Q2 C C2 V V2 E E2 N N2: class):
+  $ G ⇒ Q = Q2 $ > $ G ⇒ C = C2 $ > $ G ⇒ V = V2 $ > $ G ⇒ E = E2 $ > $ G ⇒ N = N2 $ >
+  $ G ⇒ ihtb U Q C V E N = ihtb U Q2 C2 V2 E2 N2 $;
+
+--| The space over the one empty path is the table's value there.
+--| @freshen G q
+theorem fpi_one {q: set} (G: hyps) (Q T: class):
+  $ G ⇒ ∅ ∈ Q $ > $ G ⇒ ∀ q (q ∊ Q → q = ∅) $ > $ G ⇒ fpi q Q (ap T q) = ap T ∅ $;
+
+--| The paths of a tree are a set.
+theorem etel_set (G: hyps) (E T W R: class) (u: set): $ G ⇒ isset T $ > $ G ⇒ isset (etel u E T W R) $;
+
+--| The arguments of a tree's one path of nothing are a set.
+theorem sarg_set (G: hyps) (E T W R: class) (u: set): $ G ⇒ isset T $ > $ G ⇒ isset (sarg u E T W R) $;
+
+--| The value of the type of an inductive hypothesis (`ihty`, read off the field's type `tA` at
+--| depth `ty`) at a valuation `e` of the binders passed, in front of `v0`: the traces over the
+--| fields of `tA`'s paths, valued in the motive (the entry `tmo + K` of `v0`, `K` the type's
+--| entry among the motives) at the path's first `N` arguments (the type's indices) and the
+--| field (the entry `tfld` of `v0`) applied to the binders.
+--| @freshen G c
+--| @freshen G z
+theorem ihty_sem {c z: set} (G: hyps) (M K N: class) (u w v0 td tnp tn tmo tfld tj n0 tA ty tIH e r: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ v0 ∊ fseq u $ >
+  $ G ⇒ n0 = ⟨ kc_ind_ty , scons td (scons tj ∅) ⟩ $ >
+  $ G ⇒ n0 ∊ trees ω $ >
+  $ G ⇒ fv v0 (fv nvf tfld) ∈ u $ >
+  $ G ⇒ K ∈ ω $ >
+  $ G ⇒ nadd (suc K) (fv nvf tj) = fv nvf tn $ >
+  $ G ⇒ ∀ c (ra_nidx td tj c ∈ lrel → fv nvf c = N) $ >
+  $ G ⇒ ra_ihty td tnp tn tmo tfld ty tj tA tIH ∈ lrel $ >
+  $ G ⇒ tA ∊ trees ω $ >
+  $ G ⇒ tIH ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ty ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ e ∊ fseq u $ >
+  $ G ⇒ cdm e = fv nvf ty $ >
+  $ G ⇒ r = scat e v0 $ >
+  $ G ⇒ dt u M tIH w r = fpi z (tpth (etel u (dnf u M) tA w r)) (ap (ihtb u (etel u (dnf u M) tA w r) (fv v0 (nadd (fv nvf tmo) K)) (fv v0 (fv nvf tfld)) e (N)) z) $;
+
+-- --------------------------------------------------------------------------
+-- The minors (D6 for the recursor's type): the fields
+-- --------------------------------------------------------------------------
+
+--| A type closed at `d + np` is not a recursive field's type at depth `d`: `mwalk`'s two
+--| clauses for a field exclude each other.
+theorem closed_recfield_ex (G: hyps) (td tn tnp tj tk td0 ta: set):
+  $ G ⇒ ra_closed tk ta ∈ lrel $ > $ G ⇒ ra_recfield td tn tnp td0 ta tj ∈ lrel $ >
+  $ G ⇒ fv nvf tk = nadd (fv nvf td0) (fv nvf tnp) $ > $ G ⇒ ⊥ $;
+
+--| A recursive field's type is one of the block's types.
+theorem recfield_lt (G: hyps) (td tn tnp tj td0 ta: set):
+  $ G ⇒ ra_recfield td tn tnp td0 ta tj ∈ lrel $ > $ G ⇒ fv nvf tj ∈ fv nvf tn $;
+
+--| The type of an inductive hypothesis (`ihty` at depth `0`) has the hypothesis's space as its
+--| value at `v0`, for tables `Gg`, `Tt` whose entries at `Dd` are the field (the entry `tfld`
+--| of `v0`) and the paths of the field's type there, and the motives `cv` whose entry for the
+--| field's type is the entry `tmo + K` of `v0`.
+theorem ih_val (G: hyps) (M K Tt Gg Dd: class) (u w v0 td tnp tn tmo tfld tj tA tIH cv: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ v0 ∊ fseq u $ >
+  $ G ⇒ td ∊ trees ω $ >
+  $ G ⇒ tj ∊ trees ω $ >
+  $ G ⇒ fv v0 (fv nvf tfld) ∈ u $ >
+  $ G ⇒ K ∈ ω $ >
+  $ G ⇒ nadd (suc K) (fv nvf tj) = fv nvf tn $ >
+  $ G ⇒ ra_ihty td tnp tn tmo tfld ⟨ kc_nz , ∅ ⟩ tj tA tIH ∈ lrel $ >
+  $ G ⇒ tA ∊ trees ω $ >
+  $ G ⇒ tIH ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ fv Tt Dd = etel u (dnf u M) tA w v0 $ >
+  $ G ⇒ fv Gg Dd = fv v0 (fv nvf tfld) $ >
+  $ G ⇒ fv v0 (nadd (fv nvf tmo) K) = vat cv (intys td) (fv nvf tj) $ >
+  $ G ⇒ dt u M tIH w v0 = ihsp (imrel td cv) Gg Tt Dd (fv nvf tj) $;
+
+--| The paths of a minor: the fields `f` of a path in `Q`, behind inductive hypotheses `h` for
+--| the fields in order (`G`, then the path's `g`) and their telescopes (`T`, then `t`).
+def mqp (Q D K L G T N: class) (.z .f .g .c .a .h: set): class =
+  $ {z | ∃ f ∃ g ∃ c ∃ a ∃ h (⟨ f , ⟨ g , ⟨ c , a ⟩ ⟩ ⟩ ∈ Q ∧ h ∊ ihv D K L (scat G g) (scat T c) N ∧ z = scat h f)} $;
+--| @congr
+theorem mqp_congr (A0 B0 A1 B1 A2 B2 A3 B3 A4 B4 A5 B5 A6 B6: class):
+  $ A0 ≐ B0 $ > $ A1 ≐ B1 $ > $ A2 ≐ B2 $ > $ A3 ≐ B3 $ > $ A4 ≐ B4 $ > $ A5 ≐ B5 $ > $ A6 ≐ B6 $ >
+  $ mqp A0 A1 A2 A3 A4 A5 A6 ≐ mqp B0 B1 B2 B3 B4 B5 B6 $;
+--| @rewrite
+theorem sb_c_mqp {x: set} (t: set x) (A0 A1 A2 A3 A4 A5 A6: class x):
+  $ (⟦ x / t ⟧ (mqp A0 A1 A2 A3 A4 A5 A6)) ≐ mqp (⟦ x / t ⟧ A0) (⟦ x / t ⟧ A1) (⟦ x / t ⟧ A2) (⟦ x / t ⟧ A3) (⟦ x / t ⟧ A4) (⟦ x / t ⟧ A5) (⟦ x / t ⟧ A6) $;
+
+--| The table of a minor's type over its paths: at `scat h f`, the trace `C` (the motive) at the
+--| first `I` arguments `a` of the path (the indices) and the trace `V` (the constructor)
+--| applied to the fields `f`, those passed before `F` and the parameters `P`.
+def mtb (U Q D K L G T N C V F P I: class) (.z .y .f .g .c .a .h: set): class =
+  $ clam z (fseq U) {y | ∃ f ∃ g ∃ c ∃ a ∃ h (⟨ f , ⟨ g , ⟨ c , a ⟩ ⟩ ⟩ ∈ Q ∧ h ∊ ihv D K L (scat G g) (scat T c) N ∧ z = scat h f ∧ y ∊ apn C (scons (apn V (scat (scat f F) P)) (cres a I)))} $;
+--| @congr
+theorem mtb_congr (A0 B0 A1 B1 A2 B2 A3 B3 A4 B4 A5 B5 A6 B6 A7 B7 A8 B8 A9 B9 A10 B10 A11 B11 A12 B12: class):
+  $ A0 ≐ B0 $ > $ A1 ≐ B1 $ > $ A2 ≐ B2 $ > $ A3 ≐ B3 $ > $ A4 ≐ B4 $ > $ A5 ≐ B5 $ > $ A6 ≐ B6 $ > $ A7 ≐ B7 $ > $ A8 ≐ B8 $ > $ A9 ≐ B9 $ > $ A10 ≐ B10 $ > $ A11 ≐ B11 $ > $ A12 ≐ B12 $ >
+  $ mtb A0 A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 ≐ mtb B0 B1 B2 B3 B4 B5 B6 B7 B8 B9 B10 B11 B12 $;
+--| @rewrite
+theorem sb_c_mtb {x: set} (t: set x) (A0 A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12: class x):
+  $ (⟦ x / t ⟧ (mtb A0 A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12)) ≐ mtb (⟦ x / t ⟧ A0) (⟦ x / t ⟧ A1) (⟦ x / t ⟧ A2) (⟦ x / t ⟧ A3) (⟦ x / t ⟧ A4) (⟦ x / t ⟧ A5) (⟦ x / t ⟧ A6) (⟦ x / t ⟧ A7) (⟦ x / t ⟧ A8) (⟦ x / t ⟧ A9) (⟦ x / t ⟧ A10) (⟦ x / t ⟧ A11) (⟦ x / t ⟧ A12) $;
+
+--| An element of a minor's paths.
+--| @freshen G f
+--| @freshen G g
+--| @freshen G c
+--| @freshen G a
+--| @freshen G h
+theorem mqp_elim {f g c a h: set} (G: hyps) (Q D K L X Y N: class) (z: set):
+  $ G ⇒ z ∊ mqp Q D K L X Y N $ >
+  $ G ⇒ ∃ f ∃ g ∃ c ∃ a ∃ h (⟨ f , ⟨ g , ⟨ c , a ⟩ ⟩ ⟩ ∈ Q ∧ h ∊ ihv D K L (scat X g) (scat Y c) N ∧ z = scat h f) $;
+
+--| Introduction for a minor's paths (the path's parts are sets).
+theorem mqp_intro (G: hyps) (Q D K L X Y N A1 A2 A3 A4 A5: class) (z: set):
+  $ G ⇒ ⟨ A1 , ⟨ A2 , ⟨ A3 , A4 ⟩ ⟩ ⟩ ∈ Q $ > $ G ⇒ A5 ∈ ihv D K L (scat X A2) (scat Y A3) N $ > $ G ⇒ z = scat A5 A1 $ >
+  $ G ⇒ isset A1 $ > $ G ⇒ isset A2 $ > $ G ⇒ isset A3 $ > $ G ⇒ isset A4 $ > $ G ⇒ z ∊ mqp Q D K L X Y N $;
+
+--| `mqp` at equal arguments.
+theorem mqp_eq (G: hyps) (Q Q2 D K L X X2 Y Y2 N: class):
+  $ G ⇒ Q = Q2 $ > $ G ⇒ X = X2 $ > $ G ⇒ Y = Y2 $ > $ G ⇒ mqp Q D K L X Y N = mqp Q2 D K L X2 Y2 N $;
+
+--| An element of a minor's table at `s`.
+--| @freshen G f
+--| @freshen G g
+--| @freshen G c
+--| @freshen G a
+--| @freshen G h
+theorem mtb_elim {f g c a h: set} (G: hyps) (Q D K L X Y N C V F P I: class) (u s v: set):
+  $ G ⇒ s ∊ fseq u $ > $ G ⇒ v ∊ ap (mtb u Q D K L X Y N C V F P I) s $ >
+  $ G ⇒ ∃ f ∃ g ∃ c ∃ a ∃ h (⟨ f , ⟨ g , ⟨ c , a ⟩ ⟩ ⟩ ∈ Q ∧ h ∊ ihv D K L (scat X g) (scat Y c) N ∧ s = scat h f ∧ v ∊ apn C (scons (apn V (scat (scat f F) P)) (cres a I))) $;
+
+--| Introduction for a minor's table (the path's parts are sets).
+theorem mtb_intro (G: hyps) (Q D K L X Y N C V F P I A1 A2 A3 A4 A5: class) (u s v: set):
+  $ G ⇒ s ∊ fseq u $ > $ G ⇒ ⟨ A1 , ⟨ A2 , ⟨ A3 , A4 ⟩ ⟩ ⟩ ∈ Q $ > $ G ⇒ A5 ∈ ihv D K L (scat X A2) (scat Y A3) N $ > $ G ⇒ s = scat A5 A1 $ >
+  $ G ⇒ v ∊ apn C (scons (apn V (scat (scat A1 F) P)) (cres A4 I)) $ >
+  $ G ⇒ isset A1 $ > $ G ⇒ isset A2 $ > $ G ⇒ isset A3 $ > $ G ⇒ isset A4 $ > $ G ⇒ v ∊ ap (mtb u Q D K L X Y N C V F P I) s $;
+
+--| `mtb` at equal arguments.
+theorem mtb_eq (G: hyps) (U Q Q2 D K L X X2 Y Y2 N C V F F2 P I: class):
+  $ G ⇒ Q = Q2 $ > $ G ⇒ X = X2 $ > $ G ⇒ Y = Y2 $ > $ G ⇒ F = F2 $ >
+  $ G ⇒ mtb U Q D K L X Y N C V F P I = mtb U Q2 D K L X2 Y2 N C V F2 P I $;
+
+-- --------------------------------------------------------------------------
+-- The minors (D6 for the recursor's type): the walk
+-- --------------------------------------------------------------------------
+
+--| The step of the walk over a minor's type at a field `tA`, whose type in the minor is `tA3`
+--| with the same value: if at every `a` in that value the rest's value is the space over the
+--| rest's paths (with `a` put after the fields `gd` and the field's paths after the telescopes
+--| `hd`) and its hypotheses' valuations are sequences over `u`, the same holds for the node.
+--| @freshen G a
+--| @freshen G z
+--| @freshen G y
+--| @freshen G f
+--| @freshen G g
+--| @freshen G c
+--| @freshen G o
+theorem mw_step {a z y f g c o: set} (G: hyps) (M D K L N C V P I: class) (u w rm rk fd gd hd tA3 tA tB tMin: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ rm ∊ fseq u $ >
+  $ G ⇒ rk ∊ fseq u $ >
+  $ G ⇒ fd ∊ fseq u $ >
+  $ G ⇒ gd ∊ fseq u $ >
+  $ G ⇒ hd ∊ fseq {y | y = y} $ >
+  $ G ⇒ tA3 ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tA ∊ trees ω $ >
+  $ G ⇒ tB ∊ trees ω $ >
+  $ G ⇒ tMin ∊ trees ω $ >
+  $ G ⇒ dt u M tA3 w rm = dt u M tA w rk $ >
+  $ G ⇒ ∀ a (a ∊ dt u M tA3 w rm → dt u M tMin w (scons a rm) = fpi z (mqp (etel u (dnf u M) tB w (scons a rk)) D K L (ssnoc gd a) (ssnoc hd (etel u (dnf u M) tA w rk)) N) (ap (mtb u (etel u (dnf u M) tB w (scons a rk)) D K L (ssnoc gd a) (ssnoc hd (etel u (dnf u M) tA w rk)) N C V (scons a fd) P I) z)) $ >
+  $ G ⇒ ∀ a (a ∊ dt u M tA3 w rm → ∀ f ∀ g ∀ c ∀ o (⟨ f , ⟨ g , ⟨ c , o ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tB w (scons a rk) → ihv D K L (scat (ssnoc gd a) g) (scat (ssnoc hd (etel u (dnf u M) tA w rk)) c) N ⊆ fseq u)) $ >
+  $ G ⇒ dt u M ⟨ kc_pi , scons tA3 (scons tMin ∅) ⟩ w rm = fpi z (mqp (etel u (dnf u M) ⟨ kc_pi , scons tA (scons tB ∅) ⟩ w rk) D K L gd hd N) (ap (mtb u (etel u (dnf u M) ⟨ kc_pi , scons tA (scons tB ∅) ⟩ w rk) D K L gd hd N C V fd P I) z) ∧ ∀ f ∀ g ∀ c ∀ o (⟨ f , ⟨ g , ⟨ c , o ⟩ ⟩ ⟩ ∈ etel u (dnf u M) ⟨ kc_pi , scons tA (scons tB ∅) ⟩ w rk → ihv D K L (scat gd g) (scat hd c) N ⊆ fseq u) $;
+
+--| A non-recursive field's type in a minor (`tA3`, the field's type lifted over the minors and
+--| motives `c0`) has the value of the field's type in the constructor's, at the fields passed
+--| `fd`, the parameters `pp` and the types' values `xs`.
+theorem fld_nr (G: hyps) (M: class) (u w fd pp xs c0 rr d tnp tdp tkn tA tA3: set):
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ fd ∊ fseq u $ >
+  $ G ⇒ cdm fd = fv nvf d $ >
+  $ G ⇒ pp ∊ fseq u $ >
+  $ G ⇒ cdm pp = fv nvf tnp $ >
+  $ G ⇒ xs ∊ fseq u $ >
+  $ G ⇒ c0 ∊ fseq u $ >
+  $ G ⇒ cdm c0 = fv nvf tkn $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ ra_add d tnp tdp ∈ lrel $ >
+  $ G ⇒ ra_closed tdp tA ∈ lrel $ >
+  $ G ⇒ ra_lift tkn d tA tA3 ∈ lrel $ >
+  $ G ⇒ dt u M tA3 w (scat fd (scat c0 (scat pp rr))) = dt u M tA w (scat fd (scat pp xs)) $;
+
+--| A recursive field's type in a minor (the block's types put in, then lifted) has the value
+--| of the field's type in the constructor's, which is closed past the types (`tx`).
+--| @freshen G i
+--| @freshen G b
+theorem fld_rec {i b: set} (G: hyps) (M: class) (u w fd pp xs c0 rr d tnp tdp tkn tA tA3 tA2 td tn tx: set):
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ fd ∊ fseq u $ >
+  $ G ⇒ cdm fd = fv nvf d $ >
+  $ G ⇒ pp ∊ fseq u $ >
+  $ G ⇒ cdm pp = fv nvf tnp $ >
+  $ G ⇒ xs ∊ fseq u $ >
+  $ G ⇒ c0 ∊ fseq u $ >
+  $ G ⇒ cdm c0 = fv nvf tkn $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ ra_add d tnp tdp ∈ lrel $ >
+  $ G ⇒ ra_closed tx tA ∈ lrel $ >
+  $ G ⇒ fv nvf tx = nadd (fv nvf tdp) (cdm xs) $ >
+  $ G ⇒ ra_lift tkn d tA2 tA3 ∈ lrel $ >
+  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tdp tA tA2 ∈ lrel $ >
+  $ G ⇒ uadm u $ >
+  $ G ⇒ td ∊ trees ω $ >
+  $ G ⇒ cdm xs = fv nvf tn $ >
+  $ G ⇒ ∀ i ∀ b (i ∊ cdm xs → b ∊ trees ω → fv nvf b = i → dt u M ⟨ kc_ind_ty , scons td (scons b ∅) ⟩ w ∅ = fv xs i) $ >
+  $ G ⇒ dt u M tA3 w (scat fd (scat c0 (scat pp rr))) = dt u M tA w (scat fd (scat pp xs)) $;
+
+--| Likewise its paths.
+--| @freshen G i
+--| @freshen G b
+theorem fld_rec_etel {i b: set} (G: hyps) (M: class) (u w fd pp xs c0 rr d tnp tdp tkn tA tA3 tA2 td tn tx: set):
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ fd ∊ fseq u $ >
+  $ G ⇒ cdm fd = fv nvf d $ >
+  $ G ⇒ pp ∊ fseq u $ >
+  $ G ⇒ cdm pp = fv nvf tnp $ >
+  $ G ⇒ xs ∊ fseq u $ >
+  $ G ⇒ c0 ∊ fseq u $ >
+  $ G ⇒ cdm c0 = fv nvf tkn $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ ra_add d tnp tdp ∈ lrel $ >
+  $ G ⇒ ra_closed tx tA ∈ lrel $ >
+  $ G ⇒ fv nvf tx = nadd (fv nvf tdp) (cdm xs) $ >
+  $ G ⇒ ra_lift tkn d tA2 tA3 ∈ lrel $ >
+  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tdp tA tA2 ∈ lrel $ >
+  $ G ⇒ uadm u $ >
+  $ G ⇒ td ∊ trees ω $ >
+  $ G ⇒ cdm xs = fv nvf tn $ >
+  $ G ⇒ ∀ i ∀ b (i ∊ cdm xs → b ∊ trees ω → fv nvf b = i → dt u M ⟨ kc_ind_ty , scons td (scons b ∅) ⟩ w ∅ = fv xs i) $ >
+  $ G ⇒ tA ∊ trees ω $ >
+  $ G ⇒ etel u (dnf u M) tA3 w (scat fd (scat c0 (scat pp rr))) = etel u (dnf u M) tA w (scat fd (scat pp xs)) $;
+
+--| The valuations of the hypotheses' context with one more hypothesis `tIH` in front, over `rv`:
+--| when the context's are the inductive hypotheses' valuations up to field `Dn`, a recursive
+--| field on type `J`, and the new hypothesis's type has the hypothesis's space as its value
+--| over each of them, they are the valuations up to the next field.
+--| @freshen G q
+--| @freshen G a
+theorem hih_rec {q a: set} (G: hyps) (M D K L Gg Tt Dn J: class) (u w rv tIH tIhs: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ rv ∊ fseq u $ >
+  $ G ⇒ tIH ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tIhs ∊ trees ω $ >
+  $ G ⇒ esat u (dsh u M rv) tIhs w = ihv D K L Gg Tt Dn $ >
+  $ G ⇒ ∀ q (q ∊ esat u (dsh u M rv) tIhs w → dt u M tIH w (scat q rv) = ihsp L Gg Tt Dn J) $ >
+  $ G ⇒ isset Tt $ >
+  $ G ⇒ ∀ a (isset (ap L a)) $ >
+  $ G ⇒ Dn ∈ ω $ >
+  $ G ⇒ irf D K Dn J $ >
+  $ G ⇒ esat u (dsh u M rv) ⟨ kc_cons , scons tIH (scons tIhs ∅) ⟩ w = ihv D K L Gg Tt (suc Dn) $;
+
+--| The type of the inductive hypothesis of field `d` (`mwalk_pi_rec`) at the valuation with the
+--| hypotheses `q` before it, the later fields `f` and the field `a` in front of the minor's
+--| valuation `rm` at the field: the hypothesis's space, for tables whose entries at `d` are `a`
+--| and the paths of the field's type `tA3` at `rm`.
+theorem ih_at (G: hyps) (M Gg Tt: class) (u w q f a rm fd mk cv c0 rs d td tnp tn tk tnf tr ta tsh tfld tmo tj tA3 tA4 tIH: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ q ∊ fseq u $ >
+  $ G ⇒ cdm q = fv nvf tr $ >
+  $ G ⇒ f ∊ fseq u $ >
+  $ G ⇒ nadd (suc (cdm f)) (fv nvf d) = fv nvf tnf $ >
+  $ G ⇒ a ∊ u $ >
+  $ G ⇒ fd ∊ fseq u $ >
+  $ G ⇒ cdm fd = fv nvf d $ >
+  $ G ⇒ mk ∊ fseq u $ >
+  $ G ⇒ cdm mk = fv nvf tk $ >
+  $ G ⇒ cv ∊ fseq u $ >
+  $ G ⇒ cdm cv = fv nvf tn $ >
+  $ G ⇒ c0 = scat mk cv $ >
+  $ G ⇒ rs ∊ fseq u $ >
+  $ G ⇒ rm = scat fd (scat c0 rs) $ >
+  $ G ⇒ td ∊ trees ω $ >
+  $ G ⇒ tj ∊ trees ω $ >
+  $ G ⇒ fv nvf tj ∈ fv nvf tn $ >
+  $ G ⇒ intys td = fv nvf tn $ >
+  $ G ⇒ ra_add tr tnf ta ∈ lrel $ >
+  $ G ⇒ ra_add tsh d ta ∈ lrel $ >
+  $ G ⇒ ra_add tfld ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ tsh ∈ lrel $ >
+  $ G ⇒ ra_add ta tk tmo ∈ lrel $ >
+  $ G ⇒ ra_lift tsh ⟨ kc_nz , ∅ ⟩ tA3 tA4 ∈ lrel $ >
+  $ G ⇒ ra_ihty td tnp tn tmo tfld ⟨ kc_nz , ∅ ⟩ tj tA4 tIH ∈ lrel $ >
+  $ G ⇒ tA4 ∊ trees ω $ >
+  $ G ⇒ tIH ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ fv Tt (fv nvf d) = etel u (dnf u M) tA3 w rm $ >
+  $ G ⇒ fv Gg (fv nvf d) = a $ >
+  $ G ⇒ dt u M tIH w (scat q (scat f (scons a rm))) = ihsp (imrel td cv) Gg Tt (fv nvf d) (fv nvf tj) $;
+
+--| A field whose type is closed at its depth past the parameters is not recursive (`irf`).
+--| @freshen G v
+theorem nr_not_irf {v: set} (G: hyps) (td tp tt tnp tdp d te tA tK0: set):
+  $ G ⇒ iprt td tp tt $ > $ G ⇒ ra_clen tp tnp ∈ lrel $ > $ G ⇒ ra_add d tnp tdp ∈ lrel $ > $ G ⇒ ra_closed tdp tA ∈ lrel $ > $ G ⇒ ra_nth_pi tK0 te tA ∈ lrel $ > $ G ⇒ fv nvf te = fv nvf d $ >
+  $ G ⇒ ¬ ∃ v (irf td tK0 (fv nvf d) v) $;
+
+-- --------------------------------------------------------------------------
+-- The minors (D6 for the recursor's type): the leaf of the walk
+-- --------------------------------------------------------------------------
+
+--| The curried `Π` of a telescope and a type is the space over the telescope's valuations.
+--| @freshen G z
+theorem ipi_fpi {z: set} (G: hyps) (E P F: class) (u w: set):
+  $ G ⇒ ipi u E P F w = fpi z (esat u E P w) (da (fv E F) w z) $;
+
+--| The value of a re-headed spine `tX` of a spine `tA` of a head `n0` with one path of nothing:
+--| the new head's `x0` applied to the first `tni` arguments of `tA`'s path.
+--| @freshen G y
+theorem rehead_val {y: set} (G: hyps) (M: class) (u w r n0 x0 tnp tni tA tX tY a: set):
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ etel u (dnf u M) n0 w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩ $ >
+  $ G ⇒ ra_spine n0 tY tnp ∈ lrel $ >
+  $ G ⇒ ra_rehead tY x0 tni tA tX ∈ lrel $ >
+  $ G ⇒ tA ∊ trees ω $ >
+  $ G ⇒ tX ∊ trees ω $ >
+  $ G ⇒ tY ∊ trees ω $ >
+  $ G ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , a ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tA w r $ >
+  $ G ⇒ cres a (fv nvf tni) ∈ fseq {y | y = y} ∧ dt u M tX w r = apn (dt u M x0 w r) (cres a (fv nvf tni)) $;
+
+--| The value of a minor's result type `X @ Y2` (`mwalk_res`) at the hypotheses `q` in front of
+--| the minor's valuation: the motive (the entry `Km` of the motives `cv`) at the indices (the
+--| first `NI` arguments `e` of the constructor type's result at the fields `fd`, the parameters
+--| `pp` and the types' values) and the constructor's trace `CT` at the fields and parameters.
+--| @freshen G x
+--| @freshen G c
+theorem mw_leaf_val {x c: set} (G: hyps) (M CT Km NI: class) (u w q fd pp xs mk cv c0 rr rm rk nc e d td ti tc tn tnp tk tkn tr ta tb tmi th tni tK tK2 tK3 tY tX tY1 tY2: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ q ∊ fseq u $ >
+  $ G ⇒ cdm q = fv nvf tr $ >
+  $ G ⇒ fd ∊ fseq u $ >
+  $ G ⇒ cdm fd = fv nvf d $ >
+  $ G ⇒ pp ∊ fseq u $ >
+  $ G ⇒ cdm pp = fv nvf tnp $ >
+  $ G ⇒ xs ∊ fseq u $ >
+  $ G ⇒ mk ∊ fseq u $ >
+  $ G ⇒ cdm mk = fv nvf tk $ >
+  $ G ⇒ cv ∊ fseq u $ >
+  $ G ⇒ cdm cv = fv nvf tn $ >
+  $ G ⇒ c0 = scat mk cv $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ rm = scat fd (scat c0 (scat pp rr)) $ >
+  $ G ⇒ rk = scat fd (scat pp xs) $ >
+  $ G ⇒ nc = ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ $ >
+  $ G ⇒ nc ∊ trees ω $ >
+  $ G ⇒ ∀ x (x ∊ fseq u → dt u M nc w x = CT) $ >
+  $ G ⇒ ∀ x (isset (apn (CT) x)) $ >
+  $ G ⇒ Km ∈ ω $ >
+  $ G ⇒ nadd (suc Km) (fv nvf ti) = fv nvf tn $ >
+  $ G ⇒ ∀ c (ra_nidx td ti c ∈ lrel → fv nvf c = NI) $ >
+  $ G ⇒ ra_add tk tn tkn ∈ lrel $ >
+  $ G ⇒ ra_lift tkn d tK tK2 ∈ lrel $ >
+  $ G ⇒ ra_lift tr ⟨ kc_nz , ∅ ⟩ tK2 tK3 ∈ lrel $ >
+  $ G ⇒ ra_nidx td ti tni ∈ lrel $ >
+  $ G ⇒ ra_rehead tY ⟨ kc_bvar , scons tmi ∅ ⟩ tni tK3 tX ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_bvar , scons th ∅ ⟩ tY tnp ∈ lrel $ >
+  $ G ⇒ ra_add tr d ta ∈ lrel $ >
+  $ G ⇒ ra_add ta tkn tb ∈ lrel $ >
+  $ G ⇒ ra_add tmi ⟨ kc_s , scons ti ∅ ⟩ tb ∈ lrel $ >
+  $ G ⇒ ra_pargs nc tb tnp tY1 ∈ lrel $ >
+  $ G ⇒ ra_pargs tY1 tr d tY2 ∈ lrel $ >
+  $ G ⇒ tK ∊ trees ω $ >
+  $ G ⇒ tX ∊ trees ω $ >
+  $ G ⇒ tY2 ∊ trees ω $ >
+  $ G ⇒ ra_indapp td tn tnp d tK ti ∈ lrel $ >
+  $ G ⇒ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , e ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tK w rk $ >
+  $ G ⇒ dt u M ⟨ kc_app , scons tX (scons tY2 ∅) ⟩ w (scat q rm) = apn (fv cv Km) (scons (apn (CT) (scat fd pp)) (cres e (NI))) $;
+
+--| The leaf of the walk over a minor's type (`mwalk_res`): `Π Ihs. X @ Y2` at the minor's
+--| valuation `rm` is the space over the minor's paths at the constructor type's result `tK`
+--| (one path of nothing: the paths are the hypotheses' valuations, which the context `tIhs`
+--| has at it), with the motive at the result's indices and the constructor's value.
+--| @freshen G x
+--| @freshen G c
+--| @freshen G a
+--| @freshen G b
+--| @freshen G i
+--| @freshen G z
+--| @freshen G y
+theorem mw_leaf {x c a b i z y: set} (G: hyps) (M CT Km NI D K0 L N: class) (u w fd gd hd pp xs mk cv c0 rr rm rk nc d td ti tc tn tnp tk tkn tr ta tb tmi th tni tK tK2 tK3 tY tX tY1 tY2 tIhs tMin: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ fd ∊ fseq u $ >
+  $ G ⇒ cdm fd = fv nvf d $ >
+  $ G ⇒ gd ∊ fseq u $ >
+  $ G ⇒ hd ∊ fseq {y | y = y} $ >
+  $ G ⇒ pp ∊ fseq u $ >
+  $ G ⇒ cdm pp = fv nvf tnp $ >
+  $ G ⇒ xs ∊ fseq u $ >
+  $ G ⇒ mk ∊ fseq u $ >
+  $ G ⇒ cdm mk = fv nvf tk $ >
+  $ G ⇒ cv ∊ fseq u $ >
+  $ G ⇒ cdm cv = fv nvf tn $ >
+  $ G ⇒ c0 = scat mk cv $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ rm = scat fd (scat c0 (scat pp rr)) $ >
+  $ G ⇒ rk = scat fd (scat pp xs) $ >
+  $ G ⇒ nc = ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ $ >
+  $ G ⇒ nc ∊ trees ω $ >
+  $ G ⇒ ∀ x (x ∊ fseq u → dt u M nc w x = CT) $ >
+  $ G ⇒ ∀ x (isset (apn (CT) x)) $ >
+  $ G ⇒ Km ∈ ω $ >
+  $ G ⇒ nadd (suc Km) (fv nvf ti) = fv nvf tn $ >
+  $ G ⇒ ∀ c (ra_nidx td ti c ∈ lrel → fv nvf c = NI) $ >
+  $ G ⇒ ra_add tk tn tkn ∈ lrel $ >
+  $ G ⇒ ra_lift tkn d tK tK2 ∈ lrel $ >
+  $ G ⇒ ra_lift tr ⟨ kc_nz , ∅ ⟩ tK2 tK3 ∈ lrel $ >
+  $ G ⇒ ra_nidx td ti tni ∈ lrel $ >
+  $ G ⇒ ra_rehead tY ⟨ kc_bvar , scons tmi ∅ ⟩ tni tK3 tX ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_bvar , scons th ∅ ⟩ tY tnp ∈ lrel $ >
+  $ G ⇒ ra_add tr d ta ∈ lrel $ >
+  $ G ⇒ ra_add ta tkn tb ∈ lrel $ >
+  $ G ⇒ ra_add tmi ⟨ kc_s , scons ti ∅ ⟩ tb ∈ lrel $ >
+  $ G ⇒ ra_pargs nc tb tnp tY1 ∈ lrel $ >
+  $ G ⇒ ra_pargs tY1 tr d tY2 ∈ lrel $ >
+  $ G ⇒ tK ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tMin ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_pis tIhs ⟨ kc_app , scons tX (scons tY2 ∅) ⟩ tMin ∈ lrel $ >
+  $ G ⇒ ra_indapp td tn tnp d tK ti ∈ lrel $ >
+  $ G ⇒ ra_clen tIhs tr ∈ lrel $ >
+  $ G ⇒ ∀ a ∀ b ∀ c ∀ i (⟨ a , ⟨ b , ⟨ c , i ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tK w rk → tIhs ∊ ofsort lsig lopen ks_ctx → esat u (dsh u M (scat a rm)) tIhs w = ihv D K0 L (scat gd b) (scat hd c) N) $ >
+  $ G ⇒ dt u M tMin w rm = fpi z (mqp (etel u (dnf u M) tK w rk) D K0 L gd hd N) (ap (mtb u (etel u (dnf u M) tK w rk) D K0 L gd hd N (fv cv Km) (CT) fd pp (NI)) z) ∧ ∀ a ∀ b ∀ c ∀ i (⟨ a , ⟨ b , ⟨ c , i ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tK w rk → ihv D K0 L (scat gd b) (scat hd c) N ⊆ fseq u) $;
+
+--| The hypotheses' valuations at the paths of the rest after a non-recursive field `a`: those at
+--| the node's paths, at the tables extended by `a` and the field's paths; the stage `Dn2`
+--| (the next field) has the valuations of `Dn`.
+--| @freshen G f
+--| @freshen G g
+--| @freshen G c
+--| @freshen G o
+--| @freshen G y
+theorem hih_nr {f g c o y: set} (G: hyps) (M D K L Dn Dn2: class) (u w rm rk gd hd tA tB a tIhs: set):
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ rm ∊ fseq u $ >
+  $ G ⇒ rk ∊ fseq u $ >
+  $ G ⇒ gd ∊ fseq u $ >
+  $ G ⇒ hd ∊ fseq {y | y = y} $ >
+  $ G ⇒ tA ∊ trees ω $ >
+  $ G ⇒ tB ∊ trees ω $ >
+  $ G ⇒ a ∊ dt u M tA w rk $ >
+  $ G ⇒ a ∊ u $ >
+  $ G ⇒ ∀ f ∀ g ∀ c ∀ o (⟨ f , ⟨ g , ⟨ c , o ⟩ ⟩ ⟩ ∈ etel u (dnf u M) ⟨ kc_pi , scons tA (scons tB ∅) ⟩ w rk → tIhs ∊ ofsort lsig lopen ks_ctx → esat u (dsh u M (scat f rm)) tIhs w = ihv D K L (scat gd g) (scat hd c) Dn) $ >
+  $ G ⇒ ∀ g ∀ c (ihv D K L g c Dn2 = ihv D K L g c Dn) $ >
+  $ G ⇒ ∀ f ∀ g ∀ c ∀ o (⟨ f , ⟨ g , ⟨ c , o ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tB w (scons a rk) → tIhs ∊ ofsort lsig lopen ks_ctx → esat u (dsh u M (scat f (scons a rm))) tIhs w = ihv D K L (scat (ssnoc gd a) g) (scat (ssnoc hd (etel u (dnf u M) tA w rk)) c) Dn2) $;
+
+--| After a recursive field `a`, with the new hypothesis `tIH` in front of the context: the
+--| valuations up to the next field, when `tIH`'s value over each valuation of the context is
+--| the hypothesis's space.
+--| @freshen G f
+--| @freshen G g
+--| @freshen G c
+--| @freshen G o
+--| @freshen G y
+--| @freshen G q
+--| @freshen G x
+theorem hih_rc {f g c o y q x: set} (G: hyps) (M D K L Dn Dn2 J: class) (u w rm rk gd hd tA tB a tIhs tIH tr: set):
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ rm ∊ fseq u $ >
+  $ G ⇒ rk ∊ fseq u $ >
+  $ G ⇒ gd ∊ fseq u $ >
+  $ G ⇒ hd ∊ fseq {y | y = y} $ >
+  $ G ⇒ tA ∊ trees ω $ >
+  $ G ⇒ tB ∊ trees ω $ >
+  $ G ⇒ a ∊ dt u M tA w rk $ >
+  $ G ⇒ a ∊ u $ >
+  $ G ⇒ ∀ f ∀ g ∀ c ∀ o (⟨ f , ⟨ g , ⟨ c , o ⟩ ⟩ ⟩ ∈ etel u (dnf u M) ⟨ kc_pi , scons tA (scons tB ∅) ⟩ w rk → tIhs ∊ ofsort lsig lopen ks_ctx → esat u (dsh u M (scat f rm)) tIhs w = ihv D K L (scat gd g) (scat hd c) Dn) $ >
+  $ G ⇒ ra_clen tIhs tr ∈ lrel $ >
+  $ G ⇒ ∀ q ∀ f ∀ g ∀ c ∀ o (⟨ f , ⟨ g , ⟨ c , o ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tB w (scons a rk) → ⟨ kc_cons , scons tIH (scons tIhs ∅) ⟩ ∈ ofsort lsig lopen ks_ctx → q ∊ fseq u → cdm q = fv nvf tr → dt u M tIH w (scat q (scat f (scons a rm))) = ihsp L (scat (ssnoc gd a) g) (scat (ssnoc hd (etel u (dnf u M) tA w rk)) c) Dn J) $ >
+  $ G ⇒ ∀ x (isset (ap L x)) $ >
+  $ G ⇒ Dn ∈ ω $ >
+  $ G ⇒ irf D K Dn J $ >
+  $ G ⇒ Dn2 = suc Dn $ >
+  $ G ⇒ uadm u $ >
+  $ G ⇒ ∀ f ∀ g ∀ c ∀ o (⟨ f , ⟨ g , ⟨ c , o ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tB w (scons a rk) → ⟨ kc_cons , scons tIH (scons tIhs ∅) ⟩ ∈ ofsort lsig lopen ks_ctx → esat u (dsh u M (scat f (scons a rm))) ⟨ kc_cons , scons tIH (scons tIhs ∅) ⟩ w = ihv D K L (scat (ssnoc gd a) g) (scat (ssnoc hd (etel u (dnf u M) tA w rk)) c) Dn2) $;
+
+-- --------------------------------------------------------------------------
+-- The minors (D6 for the recursor's type): the walk over a constructor's type
+-- --------------------------------------------------------------------------
+
+--| `add 0 a e`: `e` is `a` (as trees).
+theorem add_zero_l (G: hyps) (a e: set): $ G ⇒ ra_add ⟨ kc_nz , ∅ ⟩ a e ∈ lrel $ > $ G ⇒ e = a $;
+
+--| `add (s d) a e` gives `add d (s a) e`.
+theorem add_shift (G: hyps) (d a e: set): $ G ⇒ ra_add ⟨ kc_s , scons d ∅ ⟩ a e ∈ lrel $ > $ G ⇒ ra_add d ⟨ kc_s , scons a ∅ ⟩ e ∈ lrel $;
+
+--| A `Π` is not an application of a type of the block (`indapp`).
+theorem indapp_not_pi (G: hyps) (t1 t2 t3 t4 a b t6: set): $ G ⇒ ra_indapp t1 t2 t3 t4 ⟨ kc_pi , scons a (scons b ∅) ⟩ t6 ∈ lrel $ > $ G ⇒ ⊥ $;
+
+--| A closed `Π`: its domain is closed, its body closed one binder deeper.
+theorem closed_pi_inv (G: hyps) (tx ta tb: set): $ G ⇒ ra_closed tx ⟨ kc_pi , scons ta (scons tb ∅) ⟩ ∈ lrel $ > $ G ⇒ ra_closed tx ta ∈ lrel ∧ ra_closed ⟨ kc_s , scons tx ∅ ⟩ tb ∈ lrel $;
+
+--| The binders of a `Π`: one more than its body's.
+--| @freshen G n
+theorem npis_pi_inv {n: set} (G: hyps) (ta tb tq: set): $ G ⇒ ra_npis ⟨ kc_pi , scons ta (scons tb ∅) ⟩ tq ∈ lrel $ > $ G ⇒ ∃ n (tq = ⟨ kc_s , scons n ∅ ⟩ ∧ ra_npis tb n ∈ lrel) $;
+
+--| A well-formed constructor type that is a `Π`: its body is one, a binder deeper.
+--| @freshen G c
+theorem cwf_pi_inv {c: set} (G: hyps) (J: class) (t1 t2 t3 t4 t5 t6 t7 ta tb: set): $ G ⇒ ra_cwf t1 t2 t3 t4 t5 t6 t7 ⟨ kc_pi , scons ta (scons tb ∅) ⟩ ∈ lrel3 J $ > $ G ⇒ ∃ c (ra_cwf t1 t2 t3 t4 t5 c ⟨ kc_s , scons t7 ∅ ⟩ tb ∈ lrel3 J) $;
+
+--| A well-formed constructor type with no binders is an application of its type.
+theorem cwf_leaf (G: hyps) (J: class) (t1 t2 t3 t4 t5 t6 t7 t8 tq: set):
+  $ G ⇒ ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ∈ lrel3 J $ > $ G ⇒ ra_npis t8 tq ∈ lrel $ > $ G ⇒ fv nvf tq = ∅ $ > $ G ⇒ ra_indapp t1 t2 t3 t7 t8 t5 ∈ lrel $;
+
+--| The walk over a minor's type (`mwalk`): the rest `tMin` of a minor's type, read off the rest `tK`
+--| of the constructor's type after `d` fields, has at the minor's valuation `rm` (the fields
+--| passed `fd` in front of the minors and motives `c0`, the parameters `pp` and the outer
+--| valuation `rr`) the space over the minor's paths as its value: the paths of `tK` at
+--| `rk` (the fields in front of the parameters and the types' values `xs`) behind inductive
+--| hypotheses, valued in the motive at the result's indices and the constructor applied to all
+--| the fields. `gd` and `hd` are the fields passed and the paths of their types, in order.
+--| The hypotheses: the rest is closed at `d` past the parameters and types (`tx`), has `tq`
+--| binders left, is well-formed (`cwf`), its binders are the later binders of the whole type
+--| `tK0`, and the context `tIhs` of the hypotheses so far has their valuations at each path.
+--| @freshen G z
+--| @freshen G y
+--| @freshen G f
+--| @freshen G g
+--| @freshen G c
+--| @freshen G o
+--| @freshen G x
+theorem mwalk_sem {z y f g c o x: set} (G: hyps) (M CT Km NI J: class) (u w pp xs mk cv c0 rr nc td tp tt ti tc tn tm tnp tk tnf tK0 tl: set) (tK d tr tIhs tMin fd gd hd rm rk tx tq tg: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ pp ∊ fseq u $ >
+  $ G ⇒ cdm pp = fv nvf tnp $ >
+  $ G ⇒ xs ∊ fseq u $ >
+  $ G ⇒ cdm xs = fv nvf tn $ >
+  $ G ⇒ mk ∊ fseq u $ >
+  $ G ⇒ cdm mk = fv nvf tk $ >
+  $ G ⇒ cv ∊ fseq u $ >
+  $ G ⇒ cdm cv = fv nvf tn $ >
+  $ G ⇒ c0 = scat mk cv $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ nc = ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ $ >
+  $ G ⇒ nc ∊ trees ω $ >
+  $ G ⇒ ∀ x (x ∊ fseq u → dt u M nc w x = CT) $ >
+  $ G ⇒ ∀ x (isset (apn (CT) x)) $ >
+  $ G ⇒ Km ∈ ω $ >
+  $ G ⇒ nadd (suc Km) (fv nvf ti) = fv nvf tn $ >
+  $ G ⇒ ∀ c (ra_nidx td ti c ∈ lrel → fv nvf c = NI) $ >
+  $ G ⇒ td ∊ trees ω $ >
+  $ G ⇒ ∀ f ∀ g (f ∊ cdm xs → g ∊ trees ω → fv nvf g = f → dt u M ⟨ kc_ind_ty , scons td (scons g ∅) ⟩ w ∅ = fv xs f) $ >
+  $ G ⇒ intys td = fv nvf tn $ >
+  $ G ⇒ iprt td tp tt $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ∀ x (isset (ap (imrel td cv) x)) $ >
+  $ G ⇒ ra_mwalk td tnp tn tk ti tc tnf d tr tIhs tK tMin ∈ lrel $ >
+  $ G ⇒ tK ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tMin ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ d ∊ trees ω $ >
+  $ G ⇒ ra_closed tx tK ∈ lrel $ >
+  $ G ⇒ fv nvf tx = nadd (nadd (fv nvf d) (fv nvf tnp)) (fv nvf tn) $ >
+  $ G ⇒ ra_npis tK tq ∈ lrel $ >
+  $ G ⇒ nadd (fv nvf tq) (fv nvf d) = fv nvf tnf $ >
+  $ G ⇒ ra_cwf td tn tnp tl ti tg d tK ∈ lrel3 J $ >
+  $ G ⇒ ∀ f ∀ g ∀ c (ra_nth_pi tK f g ∈ lrel → ra_add d f c ∈ lrel → ra_nth_pi tK0 c g ∈ lrel) $ >
+  $ G ⇒ ra_clen tIhs tr ∈ lrel $ >
+  $ G ⇒ fd ∊ fseq u $ >
+  $ G ⇒ cdm fd = fv nvf d $ >
+  $ G ⇒ gd ∊ fseq u $ >
+  $ G ⇒ cdm gd = fv nvf d $ >
+  $ G ⇒ hd ∊ fseq {y | y = y} $ >
+  $ G ⇒ cdm hd = fv nvf d $ >
+  $ G ⇒ rm = scat fd (scat c0 (scat pp rr)) $ >
+  $ G ⇒ rk = scat fd (scat pp xs) $ >
+  $ G ⇒ ∀ f ∀ g ∀ c ∀ o (⟨ f , ⟨ g , ⟨ c , o ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tK w rk → tIhs ∊ ofsort lsig lopen ks_ctx → esat u (dsh u M (scat f rm)) tIhs w = ihv td tK0 (imrel td cv) (scat gd g) (scat hd c) (fv nvf d)) $ >
+  $ G ⇒ dt u M tMin w rm = fpi z (mqp (etel u (dnf u M) tK w rk) td tK0 (imrel td cv) gd hd (fv nvf tnf)) (ap (mtb u (etel u (dnf u M) tK w rk) td tK0 (imrel td cv) gd hd (fv nvf tnf) (fv cv Km) (CT) fd pp (NI)) z) ∧ ∀ f ∀ g ∀ c ∀ o (⟨ f , ⟨ g , ⟨ c , o ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tK w rk → ihv td tK0 (imrel td cv) (scat gd g) (scat hd c) (fv nvf tnf) ⊆ fseq u) $;
+
+-- --------------------------------------------------------------------------
+-- The minors (D6 for the recursor's type): a minor
+-- --------------------------------------------------------------------------
+
+--| A minor's type (`mwalk` from depth `0` over the constructor's type `tK0`) has the minor's space `imin` as its
+--| value, at the valuation with the minors before it `mk` and the motives `cv` in front of the
+--| parameters `pp`: for a hook whose value at the constructor's node is `ictor` and whose values
+--| at the types' nodes are the entries of `xs`, the family's values. `Km` is the motive's
+--| entry (`Km + 1 + i = n`); the constructor's type is closed past the parameters and types and
+--| well-formed (`cwf`).
+--| @freshen G f
+--| @freshen G g
+--| @freshen G x
+theorem min_sem {f g x: set} (G: hyps) (M Km J V: class) (u w pp xs mk cv c0 rr nc td tp tt ti tc tn tm tnp tk tnf tK0 tl tF tC tMin tx tg: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ pp ∊ esat u (dnf u M) tp w $ >
+  $ G ⇒ xs = ixs td w (ifam u (dnf u M) td w) $ >
+  $ G ⇒ xs ∊ fseq u $ >
+  $ G ⇒ cdm xs = fv nvf tn $ >
+  $ G ⇒ mk ∊ fseq u $ >
+  $ G ⇒ cdm mk = fv nvf tk $ >
+  $ G ⇒ cv ∊ imots u (dnf u M) td w pp V $ >
+  $ G ⇒ c0 = scat mk cv $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ nc = ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ $ >
+  $ G ⇒ nc ∊ trees ω $ >
+  $ G ⇒ ∀ x (x ∊ fseq u → dt u M nc w x = (ictor u (dnf u M) td (fv nvf ti) (fv nvf tc) w)) $ >
+  $ G ⇒ ∀ x (isset (apn ((ictor u (dnf u M) td (fv nvf ti) (fv nvf tc) w)) x)) $ >
+  $ G ⇒ Km ∈ ω $ >
+  $ G ⇒ nadd (suc Km) (fv nvf ti) = fv nvf tn $ >
+  $ G ⇒ fv nvf ti ∈ fv nvf tn $ >
+  $ G ⇒ td ∊ trees ω $ >
+  $ G ⇒ ∀ f ∀ g (f ∊ cdm xs → g ∊ trees ω → fv nvf g = f → dt u M ⟨ kc_ind_ty , scons td (scons g ∅) ⟩ w ∅ = fv xs f) $ >
+  $ G ⇒ intys td = fv nvf tn $ >
+  $ G ⇒ iprt td tp tt $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tC ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor tC tc tK0 ∈ lrel $ >
+  $ G ⇒ ra_npis tK0 tnf ∈ lrel $ >
+  $ G ⇒ ra_mwalk td tnp tn tk ti tc tnf ⟨ kc_nz , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ tK0 tMin ∈ lrel $ >
+  $ G ⇒ tK0 ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tMin ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_closed tx tK0 ∈ lrel $ >
+  $ G ⇒ fv nvf tx = nadd (fv nvf tnp) (fv nvf tn) $ >
+  $ G ⇒ ra_cwf td tn tnp tl ti tg ⟨ kc_nz , ∅ ⟩ tK0 ∈ lrel3 J $ >
+  $ G ⇒ dt u M tMin w (scat c0 (scat pp rr)) = imin u (dnf u M) td (fv nvf ti) (fv nvf tc) w pp cv $;
+
+-- --------------------------------------------------------------------------
+-- The minors' telescope (D6 for the recursor's type)
+-- --------------------------------------------------------------------------
+
+--| The minors of the constructors `tC` of one type `ti` (`cminors`, from constructor `tc` on,
+--| minor `tk` on): over the earlier minors `mk`, the motives `cv` and the parameters `pp`, the
+--| valuations of their context `tM` are the sequences with the minor of constructor `c` in the
+--| space of minor `k` (`N` is `tk` plus the number `tq` of constructors left). `tC` is the rest
+--| of the type's constructors `tC0` (`add` gives each one's number), and constructor `c` has
+--| minor `c + tk0`. The hypotheses on the hook and on each constructor are `min_sem`'s.
+--| @freshen G l
+--| @freshen G i
+--| @freshen G v
+--| @freshen G a
+--| @freshen G o
+--| @freshen G f
+--| @freshen G g
+--| @freshen G b
+--| @freshen G e
+theorem cminors_sem {l i v a o f g b e: set} (G: hyps) (M Km J V N: class) (u w pp xs cv rr td tp tt ti tn tm tnp tF tC0 tk0: set) (tC tk tc tM mk tq r: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ pp ∊ esat u (dnf u M) tp w $ >
+  $ G ⇒ xs = ixs td w (ifam u (dnf u M) td w) $ >
+  $ G ⇒ xs ∊ fseq u $ >
+  $ G ⇒ cdm xs = fv nvf tn $ >
+  $ G ⇒ cv ∊ imots u (dnf u M) td w pp V $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ td ∊ trees ω $ >
+  $ G ⇒ ∀ f ∀ g (f ∊ cdm xs → g ∊ trees ω → fv nvf g = f → dt u M ⟨ kc_ind_ty , scons td (scons g ∅) ⟩ w ∅ = fv xs f) $ >
+  $ G ⇒ intys td = fv nvf tn $ >
+  $ G ⇒ iprt td tp tt $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tC0 ∈ lrel $ >
+  $ G ⇒ Km ∈ ω $ >
+  $ G ⇒ nadd (suc Km) (fv nvf ti) = fv nvf tn $ >
+  $ G ⇒ fv nvf ti ∈ fv nvf tn $ >
+  $ G ⇒ ti ∊ trees ω $ >
+  $ G ⇒ ∀ b ∀ f (b ∊ trees ω → f ∊ fseq u → dt u M ⟨ kc_ind_ctor , scons td (scons ti (scons b ∅)) ⟩ w f = ictor u (dnf u M) td (fv nvf ti) (fv nvf b) w) $ >
+  $ G ⇒ ∀ b ∀ e (ra_nth_ctor tC0 b e ∈ lrel → e ∊ ofsort lsig lopen ks_expr ∧ ∀ f (isset (apn (ictor u (dnf u M) td (fv nvf ti) (fv nvf b) w) f)) ∧ ∃ a (ra_closed a e ∈ lrel ∧ fv nvf a = nadd (fv nvf tnp) (fv nvf tn)) ∧ ∃ l ∃ o (ra_cwf td tn tnp l ti o ⟨ kc_nz , ∅ ⟩ e ∈ lrel3 J)) $ >
+  $ G ⇒ ∀ b (b ∊ ofsort lsig lopen ks_nat → iminx td (fv nvf ti) (fv nvf b) (nadd (fv nvf b) (fv nvf tk0))) $ >
+  $ G ⇒ ra_cminors td tnp tn tk ti tc tC tM ∈ lrel $ >
+  $ G ⇒ tM ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ tc ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ fv nvf tk = nadd (fv nvf tc) (fv nvf tk0) $ >
+  $ G ⇒ ∀ a ∀ e (ra_nth_ctor tC a e ∈ lrel → ∃ b (ra_add a tc b ∈ lrel ∧ ra_nth_ctor tC0 b e ∈ lrel)) $ >
+  $ G ⇒ ra_clen_c tC tq ∈ lrel $ >
+  $ G ⇒ nadd (fv nvf tk) (fv nvf tq) = N $ >
+  $ G ⇒ mk ∊ fseq u $ >
+  $ G ⇒ cdm mk = fv nvf tk $ >
+  $ G ⇒ r = scat mk (scat cv (scat pp rr)) $ >
+  $ G ⇒ esat u (dsh u M r) tM w = {l | l ∊ fseq u ∧ cdm l = fv nvf tq ∧ ∀ i (i ∊ N → fv nvf tk ⊆ i → vat (scat l mk) N i ∈ {v | ∃ a ∃ o (iminx td a o i ∧ v ∊ imin u (dnf u M) td a o w pp cv ∧ ihasc td a o)})} $;
+
+--| A sequence of length `a + b` is a sequence of length `a` in front of one of length `b`.
+--| @freshen G q
+--| @freshen G g
+theorem fseq_split {q g: set} (G: hyps) (A: class) (s a b: set):
+  $ G ⇒ s ∊ fseq A $ > $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ cdm s = nadd a b $ >
+  $ G ⇒ ∃ q ∃ g (q ∊ fseq A ∧ g ∊ fseq A ∧ cdm q = a ∧ cdm g = b ∧ s = scat q g) $;
+
+--| The minors of the types `tT` (`minors`, from type `ti` on, minor `tk` on): over the earlier
+--| minors `mk`, the motives `cv` and the parameters `pp`, the valuations of their context `tM`
+--| are the sequences with each minor in its space (`N` is `tk` plus the number `tq` of
+--| constructors left; `tj` types are left). `tT` is the rest of the block's types `tt`: `add`
+--| gives each type's number, and a minor index in `tT` is one in `tt` with `ti` added to the
+--| type and `tk` to the minor. The hypotheses on the hook, at every type and constructor, are
+--| `min_sem`'s.
+--| @freshen G l
+--| @freshen G i
+--| @freshen G v
+--| @freshen G a
+--| @freshen G o
+--| @freshen G f
+--| @freshen G g
+--| @freshen G b
+--| @freshen G e
+theorem minors_sem {l i v a o f g b e: set} (G: hyps) (M J V N: class) (u w pp xs cv rr td tp tt tn tm tnp: set) (tT tk ti tM mk tj tq r: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ pp ∊ esat u (dnf u M) tp w $ >
+  $ G ⇒ xs = ixs td w (ifam u (dnf u M) td w) $ >
+  $ G ⇒ xs ∊ fseq u $ >
+  $ G ⇒ cdm xs = fv nvf tn $ >
+  $ G ⇒ cv ∊ imots u (dnf u M) td w pp V $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ td ∊ trees ω $ >
+  $ G ⇒ ∀ f ∀ g (f ∊ cdm xs → g ∊ trees ω → fv nvf g = f → dt u M ⟨ kc_ind_ty , scons td (scons g ∅) ⟩ w ∅ = fv xs f) $ >
+  $ G ⇒ intys td = fv nvf tn $ >
+  $ G ⇒ iprt td tp tt $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ∀ a ∀ b ∀ f (a ∊ trees ω → b ∊ trees ω → f ∊ fseq u → dt u M ⟨ kc_ind_ctor , scons td (scons a (scons b ∅)) ⟩ w f = ictor u (dnf u M) td (fv nvf a) (fv nvf b) w) $ >
+  $ G ⇒ ∀ i ∀ g ∀ v ∀ b ∀ e (ra_nth_ty tt i g v ∈ lrel → ra_nth_ctor v b e ∈ lrel → e ∊ ofsort lsig lopen ks_expr ∧ ∀ f (isset (apn (ictor u (dnf u M) td (fv nvf i) (fv nvf b) w) f)) ∧ ∃ a (ra_closed a e ∈ lrel ∧ fv nvf a = nadd (fv nvf tnp) (fv nvf tn)) ∧ ∃ l ∃ o (ra_cwf td tn tnp l i o ⟨ kc_nz , ∅ ⟩ e ∈ lrel3 J)) $ >
+  $ G ⇒ ra_minors td tnp tn tk ti tT tM ∈ lrel $ >
+  $ G ⇒ tM ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ ra_ntys tT tj tq ∈ lrel $ >
+  $ G ⇒ nadd (fv nvf ti) (fv nvf tj) = fv nvf tn $ >
+  $ G ⇒ nadd (fv nvf tk) (fv nvf tq) = N $ >
+  $ G ⇒ ∀ a ∀ f ∀ e (ra_nth_ty tT a f e ∈ lrel → ∃ b (ra_add a ti b ∈ lrel ∧ ra_nth_ty tt b f e ∈ lrel)) $ >
+  $ G ⇒ ∀ a ∀ b ∀ e (b ∊ ofsort lsig lopen ks_nat → e ∊ ofsort lsig lopen ks_nat → ra_minor_idx tT a b e ∈ lrel → ∃ g ∃ o (ra_minor_idx tt g b o ∈ lrel ∧ fv nvf g = nadd (fv nvf a) (fv nvf ti) ∧ fv nvf o = nadd (fv nvf e) (fv nvf tk))) $ >
+  $ G ⇒ mk ∊ fseq u $ >
+  $ G ⇒ cdm mk = fv nvf tk $ >
+  $ G ⇒ r = scat mk (scat cv (scat pp rr)) $ >
+  $ G ⇒ esat u (dsh u M r) tM w = {l | l ∊ fseq u ∧ cdm l = fv nvf tq ∧ ∀ i (i ∊ N → fv nvf tk ⊆ i → vat (scat l mk) N i ∈ {v | ∃ a ∃ o (iminx td a o i ∧ v ∊ imin u (dnf u M) td a o w pp cv ∧ ihasc td a o)})} $;
+
+-- --------------------------------------------------------------------------
+-- The minors' telescope at the whole block (D6 for the recursor's type)
+-- --------------------------------------------------------------------------
+
+--| The minors' telescope of the whole block (`minors` from type `0` and minor `0`) over the
+--| motives `cv` and the parameters `pp`: its valuations are `imins`, the sequences with a minor
+--| in its space for every constructor. The hypotheses on the hook are `minors_sem`'s.
+--| @freshen G l
+--| @freshen G i
+--| @freshen G v
+--| @freshen G a
+--| @freshen G o
+--| @freshen G f
+--| @freshen G g
+--| @freshen G b
+--| @freshen G e
+theorem imins_sem {l i v a o f g b e: set} (G: hyps) (M J V: class) (u w pp xs cv rr td tb tp tt tn tm tnp tN r: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ pp ∊ esat u (dnf u M) tp w $ >
+  $ G ⇒ xs = ixs td w (ifam u (dnf u M) td w) $ >
+  $ G ⇒ xs ∊ fseq u $ >
+  $ G ⇒ cdm xs = fv nvf tn $ >
+  $ G ⇒ cv ∊ imots u (dnf u M) td w pp V $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ td ∊ trees ω $ >
+  $ G ⇒ ∀ f ∀ g (f ∊ cdm xs → g ∊ trees ω → fv nvf g = f → dt u M ⟨ kc_ind_ty , scons td (scons g ∅) ⟩ w ∅ = fv xs f) $ >
+  $ G ⇒ intys td = fv nvf tn $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ∀ a ∀ b ∀ f (a ∊ trees ω → b ∊ trees ω → f ∊ fseq u → dt u M ⟨ kc_ind_ctor , scons td (scons a (scons b ∅)) ⟩ w f = ictor u (dnf u M) td (fv nvf a) (fv nvf b) w) $ >
+  $ G ⇒ ∀ i ∀ g ∀ v ∀ b ∀ e (ra_nth_ty tt i g v ∈ lrel → ra_nth_ctor v b e ∈ lrel → e ∊ ofsort lsig lopen ks_expr ∧ ∀ f (isset (apn (ictor u (dnf u M) td (fv nvf i) (fv nvf b) w) f)) ∧ ∃ a (ra_closed a e ∈ lrel ∧ fv nvf a = nadd (fv nvf tnp) (fv nvf tn)) ∧ ∃ l ∃ o (ra_cwf td tn tnp l i o ⟨ kc_nz , ∅ ⟩ e ∈ lrel3 J)) $ >
+  $ G ⇒ ra_minors td tnp tn ⟨ kc_nz , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ tt tN ∈ lrel $ >
+  $ G ⇒ tN ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ r = scat cv (scat pp rr) $ >
+  $ G ⇒ esat u (dsh u M r) tN w = imins u (dnf u M) td w pp cv $;
+
+--| The motives' telescope of the whole block (`motives` from type `0`) over the parameters `p`:
+--| its valuations are `imots`, the sequences with a motive in its space for every type. The
+--| hypotheses on the hook are `motives_sem`'s.
+--| @freshen G a
+--| @freshen G b
+--| @freshen G x
+--| @freshen G f
+theorem imots_sem {a b x f: set} (G: hyps) (M: class) (u w td tnp tv tn p rr tt tm tM r: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ p ∊ fseq u $ >
+  $ G ⇒ cdm p = fv nvf tnp $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ tv ∊ trees ω $ >
+  $ G ⇒ ∀ a ∀ b ∀ x (a ∊ ofsort lsig lopen ks_nat → fv nvf a ∈ fv nvf tn → b = ⟨ kc_ind_ty , scons td (scons a ∅) ⟩ → x ∊ fseq u → dt u M b w x = ity u (dnf u M) td (fv nvf a) w) $ >
+  $ G ⇒ ∀ a (a ∊ ofsort lsig lopen ks_nat → fv nvf a ∈ fv nvf tn → ity u (dnf u M) td (fv nvf a) w ∈ u) $ >
+  $ G ⇒ ra_motives td tnp tv ⟨ kc_nz , ∅ ⟩ tt tM ∈ lrel $ >
+  $ G ⇒ tM ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ∀ a ∀ f ∀ b (ra_nth_ty tt a f b ∈ lrel → ityf td (fv nvf a) f ∧ ra_closed tnp f ∈ lrel) $ >
+  $ G ⇒ intys td = fv nvf tn $ >
+  $ G ⇒ r = scat p rr $ >
+  $ G ⇒ esat u (dsh u M r) tM w = imots u (dnf u M) td w p (lv tv w) $;
+
+-- --------------------------------------------------------------------------
+-- The recursor in its type (D6 and E5 for `rec_ty`)
+-- --------------------------------------------------------------------------
+
+--| The recursor's value in the value of its type: for a block with `iwf`, motives at the level of
+--| `tv` and the type `tR` of `rec_ty` (`Π` over the parameters `tp`, the motives `tM`, the minors `tN`,
+--| then the tail `tB` of type `ti`), `irc` is an element of `tR`'s value at every valuation `rr`.
+--| The hook's values at the block's types and constructors are hypotheses (those of `imots_sem`
+--| and `imins_sem`).
+--| @freshen G a
+--| @freshen G b
+--| @freshen G x
+--| @freshen G f
+--| @freshen G g
+--| @freshen G i
+--| @freshen G v
+--| @freshen G e
+--| @freshen G l
+--| @freshen G o
+theorem rec_ty_sem {a b x f g i v e l o: set} (G: hyps) (H J Rc: class) (u w rr td tb tp tt tv ti tnp tn tm tmn tM tN tF tC tF2 tB tR1 tR2 tR xs tc tk tl: set):
+  $ G ⇒ iwf u H J tc td w Rc $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_tys_closed tp tt ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tC ∈ lrel $ >
+  $ G ⇒ ra_isort tF tk tl ∈ lrel $ >
+  $ G ⇒ ra_elim_ok tc td tv ∈ lrel3 J $ >
+  $ G ⇒ ra_motives td tnp tv ⟨ kc_nz , ∅ ⟩ tt tM ∈ lrel $ >
+  $ G ⇒ ra_minors td tnp tn ⟨ kc_nz , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ tt tN ∈ lrel $ >
+  $ G ⇒ ra_add tm tn tmn ∈ lrel $ >
+  $ G ⇒ ra_lift tmn ⟨ kc_nz , ∅ ⟩ tF tF2 ∈ lrel $ >
+  $ G ⇒ ra_rtail td tnp tn tm ti ⟨ kc_nz , ∅ ⟩ tF2 tB ∈ lrel $ >
+  $ G ⇒ ra_pis tN tB tR1 ∈ lrel $ >
+  $ G ⇒ ra_pis tM tR1 tR2 ∈ lrel $ >
+  $ G ⇒ ra_pis tp tR2 tR ∈ lrel $ >
+  $ G ⇒ tR ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ti ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ ∀ a ∀ b ∀ x (a ∊ ofsort lsig lopen ks_nat → fv nvf a ∈ fv nvf tn → b = ⟨ kc_ind_ty , scons td (scons a ∅) ⟩ → x ∊ fseq u → dt u (mcv H) b w x = ity u (dnf u (mcv H)) td (fv nvf a) w) $ >
+  $ G ⇒ ∀ a (a ∊ ofsort lsig lopen ks_nat → fv nvf a ∈ fv nvf tn → ity u (dnf u (mcv H)) td (fv nvf a) w ∈ u) $ >
+  $ G ⇒ ∀ a ∀ f ∀ b (ra_nth_ty tt a f b ∈ lrel → ityf td (fv nvf a) f ∧ ra_closed tnp f ∈ lrel) $ >
+  $ G ⇒ xs = ixs td w (ifam u (dnf u (mcv H)) td w) $ >
+  $ G ⇒ xs ∊ fseq u $ >
+  $ G ⇒ cdm xs = fv nvf tn $ >
+  $ G ⇒ ∀ f ∀ g (f ∊ cdm xs → g ∊ trees ω → fv nvf g = f → dt u (mcv H) ⟨ kc_ind_ty , scons td (scons g ∅) ⟩ w ∅ = fv xs f) $ >
+  $ G ⇒ ∀ a ∀ b ∀ f (a ∊ trees ω → b ∊ trees ω → f ∊ fseq u → dt u (mcv H) ⟨ kc_ind_ctor , scons td (scons a (scons b ∅)) ⟩ w f = ictor u (dnf u (mcv H)) td (fv nvf a) (fv nvf b) w) $ >
+  $ G ⇒ ∀ i ∀ g ∀ v ∀ b ∀ e (ra_nth_ty tt i g v ∈ lrel → ra_nth_ctor v b e ∈ lrel → e ∊ ofsort lsig lopen ks_expr ∧ ∀ f (isset (apn (ictor u (dnf u (mcv H)) td (fv nvf i) (fv nvf b) w) f)) ∧ ∃ a (ra_closed a e ∈ lrel ∧ fv nvf a = nadd (fv nvf tnp) (fv nvf tn)) ∧ ∃ l ∃ o (ra_cwf td tn tnp l i o ⟨ kc_nz , ∅ ⟩ e ∈ lrel3 J)) $ >
+  $ G ⇒ irc u (dnf u (mcv H)) td (fv nvf ti) (lv tv w) w ∈ dt u (mcv H) tR w rr $;
+
+-- --------------------------------------------------------------------------
+-- The recursor's rule (E5): the hook's facts from `ind_wf`, then `ind_rec_ty`
+-- --------------------------------------------------------------------------
+
+--| The constructors of the `i`-th type of a well-formed list of types are well formed at the
+--| index `i` itself (`tys_wf` counts in unary, as `nth_ty` does).
+theorem tys_wf_nth_ctors (G: hyps) (J: class) (td tn tnp tl tc: set) (tt ti tf te: set):
+  $ G ⇒ ra_tys_wf td tn tnp tl ⟨ kc_nz , ∅ ⟩ tc tt ∈ lrel3 J $ > $ G ⇒ ra_nth_ty tt ti tf te ∈ lrel $ >
+  $ G ⇒ ra_ctors_wf td tn tnp tl ti tc te ∈ lrel3 J $;
+
+--| A closed `Π P. F` has `F` closed at the numeral of `P`'s length (`lrel_pis_closed` gives a
+--| numeral with that value).
+theorem pis_closed_clen (G: hyps) (tp tf tr tq: set):
+  $ G ⇒ ra_pis tp tf tr ∈ lrel $ > $ G ⇒ ra_closed ⟨ kc_nz , ∅ ⟩ tr ∈ lrel $ > $ G ⇒ ra_clen tp tq ∈ lrel $ >
+  $ G ⇒ ra_closed tq tf ∈ lrel $;
+
+--| The recursor's value is an element of the value of the type `rec_ty` builds, for a well-formed
+--| block: `rec_ty_sem` with the hook's facts at the types and the constructors proved from `ind_wf`
+--| (the types' values by `hty`, the constructors' by `hctor`; `tys_wf_nth_ctors` for each
+--| constructor's `cwf`, `ictor_apn_fiber` and `nestfn_universe` for its value in the universe).
+theorem rec_ty_wf (G: hyps) (H J: class) (u w r0 rr tg td tb tp tt tv ti tnp tn tm tmn tM tN tF tC tF2 tB tR1 tR2 tR: set):
+  $ G ⇒ iwf u H J tg td w r0 $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tC ∈ lrel $ >
+  $ G ⇒ ra_elim_ok tg td tv ∈ lrel3 J $ >
+  $ G ⇒ ra_motives td tnp tv ⟨ kc_nz , ∅ ⟩ tt tM ∈ lrel $ >
+  $ G ⇒ ra_minors td tnp tn ⟨ kc_nz , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ tt tN ∈ lrel $ >
+  $ G ⇒ ra_add tm tn tmn ∈ lrel $ >
+  $ G ⇒ ra_lift tmn ⟨ kc_nz , ∅ ⟩ tF tF2 ∈ lrel $ >
+  $ G ⇒ ra_rtail td tnp tn tm ti ⟨ kc_nz , ∅ ⟩ tF2 tB ∈ lrel $ >
+  $ G ⇒ ra_pis tN tB tR1 ∈ lrel $ >
+  $ G ⇒ ra_pis tM tR1 tR2 ∈ lrel $ >
+  $ G ⇒ ra_pis tp tR2 tR ∈ lrel $ >
+  $ G ⇒ tR ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ti ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ rr ∊ fseq u $ >
+  $ G ⇒ irc u (dnf u (mcv H)) td (fv nvf ti) (lv tv w) w ∈ dt u (mcv H) tR w rr $;
+
+--| The rule `ind_rec_ty` in the model, for a block without nested occurrences (`rst` is then the
+--| identity): the recursor `ind_rec D i v` has the type `rec_ty` gives, under `ind_wf` and `elim_ok`.
+theorem ind_rec_ty_wf (G: hyps) (H J: class) (u w r tg td tv ti tR: set):
+  $ G ⇒ iwf u H J tg td w r $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ hrec ⊆ H $ >
+  $ G ⇒ ra_elim_ok tg td tv ∈ lrel3 J $ >
+  $ G ⇒ ra_rec_ty td tv ti tR ∈ lrel $ >
+  $ G ⇒ tR ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ti ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ w r ∈ dt u (mcv H) tR w r $;

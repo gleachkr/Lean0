@@ -1553,6 +1553,83 @@ f10: $ … ⇒ X ⊆ {o | ∃ i ∃ l (i ∊ esat u (dnf u M) P W ∧ l ∊ ⋃ 
 f11: $ … ⇒ X ∈ u $ by universe_subset_c [a7, c12, f10]
 f12: $ … ⇒ X ∈ u $ by wcel_elim [#3, f11]
 
+nestfn_universe
+---------------
+a4: $ G , f = F , f ∊ ofsort lsig lopen ks_expr ⇒ X ⊆ {y | ∃ p ∃ z (p ∊ A ∧ y = nest p z)} $ by weaken [#5]
+a5: $ G , f = F , f ∊ ofsort lsig lopen ks_expr ⇒ ∀ q (q ∊ A → apn X q ∈ dt u M F W (scat q R)) $ by weaken [#8]
+a6: $ G , f = F , f ∊ ofsort lsig lopen ks_expr ⇒ uadm u $ by weaken [#1]
+a7: $ … ⇒ universe u $ by uadm_universe [a6]
+a10: $ G , f = F , f ∊ ofsort lsig lopen ks_expr ⇒ W ∈ lvals $ by weaken [#4]
+a8: $ G , f = F , f ∊ ofsort lsig lopen ks_expr ⇒ A ∈ u $ by weaken [#2]
+b0: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , i ∊ A ⇒ i ∊ A $ by ax
+b1: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , i ∊ A ⇒ A ⊆ fseq u $ by weaken [#6]
+b2: $ … ⇒ i ∊ fseq u $ by subset_elim [b1, b0]
+b3: $ … ⇒ i ∈ fseq u $ by welc_wcel [b2]
+b3q: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , i ∊ A ⇒ R ∈ fseq u $ by weaken [#7]
+b3r: $ … ⇒ scat i R ∈ fseq u $ by scat_fseq_c [b3, b3q]
+b4: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , i ∊ A ⇒ uadm u $ by weaken [a6]
+b5: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , i ∊ A ⇒ f ∊ ofsort lsig lopen ks_expr $ by ax
+b6: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , i ∊ A ⇒ W ∈ lvals $ by weaken [a10]
+b7: $ … ⇒ dt u M f W (scat i R) ∈ u $ by dt_in_u_c [b4, b5, b6, b3r]
+b8: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , i ∊ A ⇒ u = u $ by eq_refl
+b9: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , i ∊ A ⇒ M = M $ by eq_refl
+b10: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , i ∊ A ⇒ f = F $ by ax
+b11: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , i ∊ A ⇒ W = W $ by eq_refl
+b12: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , i ∊ A ⇒ scat i R = scat i R $ by eq_refl
+b13: $ … ⇒ dt u M f W (scat i R) = dt u M F W (scat i R) $ by dt_eq [b8, b9, b10, b11, b12]
+b14: $ … ⇒ dt u M F W (scat i R) ∈ u $ by wcel_eq_l [b13, b7]
+b15: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , i ∊ A ⇒ universe u $ by weaken [a7]
+b16: $ … ⇒ ⋃ (dt u M F W (scat i R)) ∈ u $ by universe_cuni_c [b15, b14]
+b17: $ … ⇒ i ∊ A → ⋃ (dt u M F W (scat i R)) ∈ u $ by imp_intro [b16]
+b18: $ … ⇒ ∀ i (i ∊ A → ⋃ (dt u M F W (scat i R)) ∈ u) $ by all_intro [b17]
+c0: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , i ∊ A , l ∊ ⋃ (dt u M F W (scat i R)) ⇒ l ∊ ⋃ (dt u M F W (scat i R)) $ by ax
+c1: $ … ⇒ l ∈ ⋃ (dt u M F W (scat i R)) $ by welc_wcel [c0]
+c2: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , i ∊ A , l ∊ ⋃ (dt u M F W (scat i R)) ⇒ universe u $ by weaken [a7]
+c3: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , i ∊ A , l ∊ ⋃ (dt u M F W (scat i R)) ⇒ ⋃ (dt u M F W (scat i R)) ∈ u $ by weaken [b16]
+c4: $ … ⇒ l ∈ u $ by universe_elem_elem_c [c2, c3, c1]
+c5: $ … ⇒ l ∊ u $ by wcel_welc [c4]
+c6: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , i ∊ A , l ∊ ⋃ (dt u M F W (scat i R)) ⇒ i ∊ fseq u $ by weaken [b2]
+c7: $ … ⇒ nest i l ∈ u $ by nest_universe [c2, c6, c5]
+c8: $ … ⇒ l ∊ ⋃ (dt u M F W (scat i R)) → nest i l ∈ u $ by imp_intro [c7]
+c9: $ … ⇒ i ∊ A → l ∊ ⋃ (dt u M F W (scat i R)) → nest i l ∈ u $ by imp_intro [c8]
+c10: $ … ⇒ ∀ l (i ∊ A → l ∊ ⋃ (dt u M F W (scat i R)) → nest i l ∈ u) $ by all_intro [c9]
+c11: $ … ⇒ ∀ i ∀ l (i ∊ A → l ∊ ⋃ (dt u M F W (scat i R)) → nest i l ∈ u) $ by all_intro [c10]
+c12: $ … ⇒ {o | ∃ i ∃ l (i ∊ A ∧ l ∊ ⋃ (dt u M F W (scat i R)) ∧ o = nest i l)} ∈ u $ by b3_repl2 [a7, a8, b18, c11]
+d1: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , v ∊ X , p ∊ A ∧ v = nest p z ⇒ p ∊ A ∧ v = nest p z $ by ax
+d2: $ … ⇒ p ∊ A $ by and_elim_l [d1]
+d3: $ … ⇒ v = nest p z $ by and_elim_r [d1]
+d4: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , v ∊ X , p ∊ A ∧ v = nest p z ⇒ v ∊ X $ by ax
+d5: $ … ⇒ v ∈ X $ by welc_wcel [d4]
+d6: $ … ⇒ nest p z ∈ X $ by wcel_eq_l [d3, d5]
+d7: $ … ⇒ z ∊ {y | nest p y ∈ X} $ by cab_intro [d6]
+d8: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , v ∊ X , p ∊ A ∧ v = nest p z ⇒ ∀ q (q ∊ A → apn X q ∈ dt u M F W (scat q R)) $ by weaken [a5]
+d9: $ … ⇒ p ∊ A → apn X p ∈ dt u M F W (scat p R) $ by all_elim [d8]
+d10: $ … ⇒ apn X p ∈ dt u M F W (scat p R) $ by imp_elim [d9, d2]
+e1: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , v ∊ X , p ∊ A ∧ v = nest p z , b = apn X p , b ∊ dt u M F W (scat p R) ⇒ b = apn X p $ by ax
+e2: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , v ∊ X , p ∊ A ∧ v = nest p z , b = apn X p , b ∊ dt u M F W (scat p R) ⇒ z ∊ apn X p $ by weaken [d7]
+e3: $ … ⇒ apn X p = b $ by eq_sym [e1]
+e4: $ … ⇒ z ∊ b $ by welc_eq [e3, e2]
+e5: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , v ∊ X , p ∊ A ∧ v = nest p z , b = apn X p , b ∊ dt u M F W (scat p R) ⇒ b ∊ dt u M F W (scat p R) $ by ax
+e6: $ … ⇒ z ∊ ⋃ (dt u M F W (scat p R)) $ by cuni_intro [e4, e5]
+e7: $ … ⇒ z ∊ ⋃ (dt u M F W (scat p R)) $ by wcel_elim [d10, e6]
+e8: $ … ⇒ z ∊ ⋃ (dt u M F W (scat p R)) ∧ v = nest p z $ by and_intro [e7, d3]
+e9: $ … ⇒ p ∊ A ∧ z ∊ ⋃ (dt u M F W (scat p R)) ∧ v = nest p z $ by and_intro [d2, e8]
+e10: $ … ⇒ ∃ l (p ∊ A ∧ l ∊ ⋃ (dt u M F W (scat p R)) ∧ v = nest p l) $ by ex_intro [e9]
+e11: $ … ⇒ ∃ i ∃ l (i ∊ A ∧ l ∊ ⋃ (dt u M F W (scat i R)) ∧ v = nest i l) $ by ex_intro [e10]
+e12: $ … ⇒ v ∊ {o | ∃ i ∃ l (i ∊ A ∧ l ∊ ⋃ (dt u M F W (scat i R)) ∧ o = nest i l)} $ by cab_intro [e11]
+f1: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , v ∊ X , ∃ z (p ∊ A ∧ v = nest p z) ⇒ ∃ z (p ∊ A ∧ v = nest p z) $ by ax
+f2: $ … ⇒ v ∊ {o | ∃ i ∃ l (i ∊ A ∧ l ∊ ⋃ (dt u M F W (scat i R)) ∧ o = nest i l)} $ by ex_elim [f1, e12]
+f3: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , v ∊ X , ∃ p ∃ z (p ∊ A ∧ v = nest p z) ⇒ ∃ p ∃ z (p ∊ A ∧ v = nest p z) $ by ax
+f4: $ … ⇒ v ∊ {o | ∃ i ∃ l (i ∊ A ∧ l ∊ ⋃ (dt u M F W (scat i R)) ∧ o = nest i l)} $ by ex_elim [f3, f2]
+f5: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , v ∊ X ⇒ v ∊ X $ by ax
+f6: $ G , f = F , f ∊ ofsort lsig lopen ks_expr , v ∊ X ⇒ X ⊆ {y | ∃ p ∃ z (p ∊ A ∧ y = nest p z)} $ by weaken [a4]
+f7: $ … ⇒ v ∊ {y | ∃ p ∃ z (p ∊ A ∧ y = nest p z)} $ by subset_elim [f6, f5]
+f8: $ … ⇒ ∃ p ∃ z (p ∊ A ∧ v = nest p z) $ by cab_elim [f7]
+f9: $ … ⇒ v ∊ {o | ∃ i ∃ l (i ∊ A ∧ l ∊ ⋃ (dt u M F W (scat i R)) ∧ o = nest i l)} $ by cut [f8, f4]
+f10: $ … ⇒ X ⊆ {o | ∃ i ∃ l (i ∊ A ∧ l ∊ ⋃ (dt u M F W (scat i R)) ∧ o = nest i l)} $ by subset_intro [f9]
+f11: $ … ⇒ X ∈ u $ by universe_subset_c [a7, c12, f10]
+f12: $ … ⇒ X ∈ u $ by wcel_elim [#3, f11]
+
 lemma b3_ofsort_u (G: hyps) (K: class) (u: set): $ G ⇒ uadm u $ > $ G ⇒ ofsort lsig lopen K ∈ u $
 ----
 l1: $ … ⇒ universe u $ by uadm_universe [#1]
