@@ -2140,3 +2140,27 @@ theorem ind_rec_ty_wf (G: hyps) (H J: class) (u w r tg td tv ti tR: set):
   $ G ⇒ tR ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ ti ∊ ofsort lsig lopen ks_nat $ >
   $ G ⇒ dt u (mcv H) ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ w r ∈ dt u (mcv H) tR w r $;
+
+-- --------------------------------------------------------------------------
+-- Iota (E6): the fold's computation rule
+-- --------------------------------------------------------------------------
+
+--| The fold's computation rule: at the tuple of a path of constructor `sc` of type
+--| `sj` over the parameters `p`, the fold's value is the constructor's minor at the
+--| fields and the inductive hypotheses `sh` taken from the fold itself.
+theorem ifold_comp (G: hyps) (H J R: class) (u w p cv mv tc td tb tp tt tn tm te tv tk sj sc sk sh pf pg pt pa: set):
+  $ G ⇒ iwf u H J tc td w R $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_clen tp te ∈ lrel $ >
+  $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ >
+  $ G ⇒ cv ∊ imots u (dnf u (mcv H)) td w p (lv tv w) $ >
+  $ G ⇒ mv ∊ imins u (dnf u (mcv H)) td w p cv $ >
+  $ G ⇒ ra_elim_ok tc td tv ∈ lrel3 J $ >
+  $ G ⇒ ictk td sj sc tk $ >
+  $ G ⇒ ⟨ pf , ⟨ pg , ⟨ pt , pa ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) tk w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) $ >
+  $ G ⇒ ⟨ sj , ⟨ pa , scons sc pg ⟩ ⟩ ∈ ifam u (dnf u (mcv H)) td w $ >
+  $ G ⇒ sh ∊ ihv td tk (ifold u (dnf u (mcv H)) td w p mv) pg pt (cdm pf) $ >
+  $ G ⇒ iminx td sj sc sk $ >
+  $ G ⇒ apn (vat mv (inmin td) sk) (scat sh pf) ∈ u $ >
+  $ G ⇒ fv (ifold u (dnf u (mcv H)) td w p mv) ⟨ sj , ⟨ pa , itup td sj sc pg w ⟩ ⟩ = apn (vat mv (inmin td) sk) (scat sh pf) $;
