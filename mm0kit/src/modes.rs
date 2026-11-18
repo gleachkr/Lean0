@@ -111,6 +111,7 @@ pub const TABLE: &[(&str, Kind, &str)] = &[
     ("spz", Kind::Check, ""),
     ("spz_ctors", Kind::Check, ""),
     ("aux_data", Kind::Check, ""),
+    ("nst_ty", Kind::Check, ""),
     ("nst_ok", Kind::Check, ""),
     ("nst_group", Kind::Fn, "++++++++-"),
     // the elimination level

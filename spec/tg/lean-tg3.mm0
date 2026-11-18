@@ -36,7 +36,8 @@ def kr_tys_ty: class = $ suc kr_ctx_wf $;
 def kr_tys_ok: class = $ suc kr_tys_ty $;
 def kr_ind_wf: class = $ suc kr_tys_ok $;
 def kr_nst_ok: class = $ suc kr_ind_wf $;
-def kr_large: class = $ suc kr_nst_ok $;
+def kr_nst_ty: class = $ suc kr_nst_ok $;
+def kr_large: class = $ suc kr_nst_ty $;
 def kr_fir: class = $ suc kr_large $;
 def kr_elim_ok: class = $ suc kr_fir $;
 def kr_fprops: class = $ suc kr_elim_ok $;
@@ -74,6 +75,7 @@ def ra_tys_ty (a1 a2: class): class = $ ⟨ kr_tys_ty , scons a1 (scons a2 ∅) 
 def ra_tys_ok (a1 a2: class): class = $ ⟨ kr_tys_ok , scons a1 (scons a2 ∅) ⟩ $;
 def ra_ind_wf (a1 a2: class): class = $ ⟨ kr_ind_wf , scons a1 (scons a2 ∅) ⟩ $;
 def ra_nst_ok (a1 a2 a3 a4: class): class = $ ⟨ kr_nst_ok , scons a1 (scons a2 (scons a3 (scons a4 ∅))) ⟩ $;
+def ra_nst_ty (a1 a2 a3 a4: class): class = $ ⟨ kr_nst_ty , scons a1 (scons a2 (scons a3 (scons a4 ∅))) ⟩ $;
 def ra_large (a1 a2: class): class = $ ⟨ kr_large , scons a1 (scons a2 ∅) ⟩ $;
 def ra_fir (a1 a2 a3 a4 a5: class): class = $ ⟨ kr_fir , scons a1 (scons a2 (scons a3 (scons a4 (scons a5 ∅)))) ⟩ $;
 def ra_elim_ok (a1 a2 a3: class): class = $ ⟨ kr_elim_ok , scons a1 (scons a2 (scons a3 ∅)) ⟩ $;
@@ -112,6 +114,7 @@ theorem kr_tys_ty_omega (G: hyps): $ G ⇒ kr_tys_ty ∈ ω $;
 theorem kr_tys_ok_omega (G: hyps): $ G ⇒ kr_tys_ok ∈ ω $;
 theorem kr_ind_wf_omega (G: hyps): $ G ⇒ kr_ind_wf ∈ ω $;
 theorem kr_nst_ok_omega (G: hyps): $ G ⇒ kr_nst_ok ∈ ω $;
+theorem kr_nst_ty_omega (G: hyps): $ G ⇒ kr_nst_ty ∈ ω $;
 theorem kr_large_omega (G: hyps): $ G ⇒ kr_large ∈ ω $;
 theorem kr_fir_omega (G: hyps): $ G ⇒ kr_fir ∈ ω $;
 theorem kr_elim_ok_omega (G: hyps): $ G ⇒ kr_elim_ok ∈ ω $;
@@ -197,6 +200,11 @@ theorem ra_nst_ok_congr (A1 B1 A2 B2 A3 B3 A4 B4: class): $ A1 ≐ B1 $ > $ A2 �
 theorem ra_nst_ok_eq (G: hyps) (A1 B1 A2 B2 A3 B3 A4 B4: class): $ G ⇒ A1 = B1 $ > $ G ⇒ A2 = B2 $ > $ G ⇒ A3 = B3 $ > $ G ⇒ A4 = B4 $ > $ G ⇒ ra_nst_ok A1 A2 A3 A4 = ra_nst_ok B1 B2 B3 B4 $;
 --| @rewrite
 theorem sb_c_ra_nst_ok {x: set} (t: set x) (A1 A2 A3 A4: class x): $ (⟦ x / t ⟧ (ra_nst_ok A1 A2 A3 A4)) ≐ ra_nst_ok (⟦ x / t ⟧ A1) (⟦ x / t ⟧ A2) (⟦ x / t ⟧ A3) (⟦ x / t ⟧ A4) $;
+--| @congr
+theorem ra_nst_ty_congr (A1 B1 A2 B2 A3 B3 A4 B4: class): $ A1 ≐ B1 $ > $ A2 ≐ B2 $ > $ A3 ≐ B3 $ > $ A4 ≐ B4 $ > $ ra_nst_ty A1 A2 A3 A4 ≐ ra_nst_ty B1 B2 B3 B4 $;
+theorem ra_nst_ty_eq (G: hyps) (A1 B1 A2 B2 A3 B3 A4 B4: class): $ G ⇒ A1 = B1 $ > $ G ⇒ A2 = B2 $ > $ G ⇒ A3 = B3 $ > $ G ⇒ A4 = B4 $ > $ G ⇒ ra_nst_ty A1 A2 A3 A4 = ra_nst_ty B1 B2 B3 B4 $;
+--| @rewrite
+theorem sb_c_ra_nst_ty {x: set} (t: set x) (A1 A2 A3 A4: class x): $ (⟦ x / t ⟧ (ra_nst_ty A1 A2 A3 A4)) ≐ ra_nst_ty (⟦ x / t ⟧ A1) (⟦ x / t ⟧ A2) (⟦ x / t ⟧ A3) (⟦ x / t ⟧ A4) $;
 --| @congr
 theorem ra_large_congr (A1 B1 A2 B2: class): $ A1 ≐ B1 $ > $ A2 ≐ B2 $ > $ ra_large A1 A2 ≐ ra_large B1 B2 $;
 theorem ra_large_eq (G: hyps) (A1 B1 A2 B2: class): $ G ⇒ A1 = B1 $ > $ G ⇒ A2 = B2 $ > $ G ⇒ ra_large A1 A2 = ra_large B1 B2 $;
@@ -470,7 +478,9 @@ def cl_ind_wf_i (.G .G2 .D .b .P .N .T .np .n .m .k .n0 .l .F .C .w: set): class
 def cl_nst_ok_nil (.G .D .j .w: set): class =
   $ {w | ∃ G ∃ D ∃ j (w = ⟨ ∅ , ra_nst_ok G D j ⟨ kc_nil , ∅ ⟩ ⟩)} $;
 def cl_nst_ok_cons (.G .D .I .j .j2 .npi .ni .mi .ni0 .X .N2 .N3 .NI .w: set): class =
-  $ {w | ∃ G ∃ D ∃ I ∃ j ∃ j2 ∃ npi ∃ ni ∃ mi ∃ ni0 ∃ X ∃ N2 ∃ N3 ∃ NI (w = ⟨ scons (ra_ind_wf G I) (scons (ra_nst_ok G D j2 N3) ∅) , ra_nst_ok G D j ⟨ kc_cons , scons X (scons N2 ∅) ⟩ ⟩ ∧ ra_spine ⟨ kc_ind_ty , scons I (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ X npi ∈ lrel ∧ ra_ind_arity I npi ni mi ∈ lrel ∧ ra_ind_nested I NI ∈ lrel ∧ ra_ndecl NI ni ni0 ∈ lrel ∧ ra_nst_group G D I X j ⟨ kc_nz , ∅ ⟩ ni0 ⟨ kc_cons , scons X (scons N2 ∅) ⟩ N3 ∈ lrel2 ∧ ra_add j ni0 j2 ∈ lrel)} $;
+  $ {w | ∃ G ∃ D ∃ I ∃ j ∃ j2 ∃ npi ∃ ni ∃ mi ∃ ni0 ∃ X ∃ N2 ∃ N3 ∃ NI (w = ⟨ scons (ra_ind_wf G I) (scons (ra_nst_ty G D I X) (scons (ra_nst_ok G D j2 N3) ∅)) , ra_nst_ok G D j ⟨ kc_cons , scons X (scons N2 ∅) ⟩ ⟩ ∧ ra_spine ⟨ kc_ind_ty , scons I (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ X npi ∈ lrel ∧ ra_ind_arity I npi ni mi ∈ lrel ∧ ra_ind_nested I NI ∈ lrel ∧ ra_ndecl NI ni ni0 ∈ lrel ∧ ra_le ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ni0 ∈ lrel ∧ ra_nst_group G D I X j ⟨ kc_nz , ∅ ⟩ ni0 ⟨ kc_cons , scons X (scons N2 ∅) ⟩ N3 ∈ lrel2 ∧ ra_add j ni0 j2 ∈ lrel)} $;
+def cl_nst_ty_i (.G .G2 .D .I .b .bi_v .P .Pi .T .Ti .np .n .m .X .X1 .Fi .RI .S .Ci .w: set): class =
+  $ {w | ∃ G ∃ G2 ∃ D ∃ I ∃ b ∃ bi_v ∃ P ∃ Pi ∃ T ∃ Ti ∃ np ∃ n ∃ m ∃ X ∃ X1 ∃ Fi ∃ RI ∃ S ∃ Ci (w = ⟨ scons (ra_sty G2 ⟨ kc_ind_ty , scons I (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ RI X1 S) ∅ , ra_nst_ty G D I X ⟩ ∧ ra_ind_data D b P T ∈ lrel ∧ ra_capp P G G2 ∈ lrel ∧ ra_ind_arity D np n m ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n np X X1 ∈ lrel ∧ ra_ind_data I bi_v Pi Ti ∈ lrel ∧ ra_nth_ty Ti ⟨ kc_nz , ∅ ⟩ Fi Ci ∈ lrel ∧ ra_pis Pi Fi RI ∈ lrel)} $;
 def cl_large_nz (.G .D .b .P .T .F .C .k .l .w: set): class =
   $ {w | ∃ G ∃ D ∃ b ∃ P ∃ T ∃ F ∃ C ∃ k ∃ l (w = ⟨ ∅ , ra_large G D ⟩ ∧ ra_ind_data D b P T ∈ lrel ∧ ra_nth_ty T ⟨ kc_nz , ∅ ⟩ F C ∈ lrel ∧ ra_isort F k l ∈ lrel ∧ lveq ⟨ kc_lmax , scons ⟨ kc_ls , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ (scons l ∅) ⟩ l)} $;
 def cl_large_empty (.G .D .b .P .F .w: set): class =
@@ -553,6 +563,7 @@ def pr_tys_ty (J: class): class = $ cl_tys_ty_nil ∪ (cl_tys_ty_cons J) $;
 def pr_tys_ok: class = $ cl_tys_ok_i $;
 def pr_ind_wf: class = $ cl_ind_wf_i $;
 def pr_nst_ok: class = $ cl_nst_ok_nil ∪ cl_nst_ok_cons $;
+def pr_nst_ty: class = $ cl_nst_ty_i $;
 def pr_large: class = $ cl_large_nz ∪ (cl_large_empty ∪ cl_large_single) $;
 def pr_fir (J: class): class = $ cl_fir_res ∪ (cl_fir_arg ∪ (cl_fir_prop J)) $;
 def pr_elim_ok: class = $ cl_elim_prop ∪ cl_elim_large $;
@@ -581,7 +592,7 @@ def pr_bitop_eqs (J: class): class = $ cl_bitop_eqs_i J $;
 
 --| The program, at the atoms.
 def lprog3 (J: class): class =
-  $ ((((((pr_sty J) ∪ (pr_aeq J)) ∪ ((pr_cwf J) ∪ pr_ctors_wf)) ∪ ((pr_tys_wf ∪ (pr_ctx_wf J)) ∪ ((pr_tys_ty J) ∪ pr_tys_ok))) ∪ (((pr_ind_wf ∪ pr_nst_ok) ∪ (pr_large ∪ (pr_fir J))) ∪ ((pr_elim_ok ∪ (pr_fprops J)) ∪ (pr_proj_ok ∪ ((pr_add_eqs J) ∪ (pr_pred_eqs J)))))) ∪ (((((pr_sub_eqs J) ∪ (pr_mul_eqs J)) ∪ ((pr_pow_eqs J) ∪ (pr_beq_eqs J))) ∪ (((pr_ble_eqs J) ∪ (pr_shl_eqs J)) ∪ ((pr_shr_eqs J) ∪ ((pr_dec_eqs J) ∪ (pr_ite_eqs J))))) ∪ ((((pr_natle_dec J) ∪ (pr_nateq_dec J)) ∪ ((pr_bool_dec J) ∪ (pr_div_eqs J))) ∪ (((pr_mod_eqs J) ∪ (pr_fix_eqs J)) ∪ ((pr_gcd_eqs J) ∪ ((pr_bitwise_eqs J) ∪ (pr_bitop_eqs J))))))) ∩
+  $ ((((((pr_sty J) ∪ (pr_aeq J)) ∪ ((pr_cwf J) ∪ pr_ctors_wf)) ∪ ((pr_tys_wf ∪ (pr_ctx_wf J)) ∪ ((pr_tys_ty J) ∪ (pr_tys_ok ∪ pr_ind_wf)))) ∪ (((pr_nst_ok ∪ pr_nst_ty) ∪ (pr_large ∪ (pr_fir J))) ∪ ((pr_elim_ok ∪ (pr_fprops J)) ∪ (pr_proj_ok ∪ ((pr_add_eqs J) ∪ (pr_pred_eqs J)))))) ∪ (((((pr_sub_eqs J) ∪ (pr_mul_eqs J)) ∪ ((pr_pow_eqs J) ∪ (pr_beq_eqs J))) ∪ (((pr_ble_eqs J) ∪ (pr_shl_eqs J)) ∪ ((pr_shr_eqs J) ∪ ((pr_dec_eqs J) ∪ (pr_ite_eqs J))))) ∪ ((((pr_natle_dec J) ∪ (pr_nateq_dec J)) ∪ ((pr_bool_dec J) ∪ (pr_div_eqs J))) ∪ (((pr_mod_eqs J) ∪ (pr_fix_eqs J)) ∪ ((pr_gcd_eqs J) ∪ ((pr_bitwise_eqs J) ∪ (pr_bitop_eqs J))))))) ∩
     (fseq latoms × latoms) $;
 --| The derivable atoms.
 def lrel3 (J: class): class = $ horn (lprog3 J) $;
@@ -598,6 +609,7 @@ def tys_ty_j (J: class) (a1: ctx) (a2: tys): wff = $ _ ⇒ ra_tys_ty (enc_ctx a1
 def tys_ok_j (J: class) (a1: ctx) (a2: ind): wff = $ _ ⇒ ra_tys_ok (enc_ctx a1) (enc_ind a2) ∈ lrel3 J $;
 def ind_wf_j (J: class) (a1: ctx) (a2: ind): wff = $ _ ⇒ ra_ind_wf (enc_ctx a1) (enc_ind a2) ∈ lrel3 J $;
 def nst_ok_j (J: class) (a1: ctx) (a2: ind) (a3: nat) (a4: ctx): wff = $ _ ⇒ ra_nst_ok (enc_ctx a1) (enc_ind a2) (enc_nat a3) (enc_ctx a4) ∈ lrel3 J $;
+def nst_ty_j (J: class) (a1: ctx) (a2: ind) (a3: ind) (a4: expr): wff = $ _ ⇒ ra_nst_ty (enc_ctx a1) (enc_ind a2) (enc_ind a3) (enc_expr a4) ∈ lrel3 J $;
 def large_j (J: class) (a1: ctx) (a2: ind): wff = $ _ ⇒ ra_large (enc_ctx a1) (enc_ind a2) ∈ lrel3 J $;
 def fir_j (J: class) (a1: ind) (a2: nat) (a3: ctx) (a4: nat) (a5: expr): wff = $ _ ⇒ ra_fir (enc_ind a1) (enc_nat a2) (enc_ctx a3) (enc_nat a4) (enc_expr a5) ∈ lrel3 J $;
 def elim_ok_j (J: class) (a1: ctx) (a2: ind) (a3: lvl): wff = $ _ ⇒ ra_elim_ok (enc_ctx a1) (enc_ind a2) (enc_lvl a3) ∈ lrel3 J $;
@@ -773,14 +785,31 @@ theorem lrel3_nst_ok_cons (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A1
   $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
   $ G ⇒ A13 ∈ trees ω $ >
   $ G ⇒ ra_ind_wf A1 A3 ∈ lrel3 J $ >
+  $ G ⇒ ra_nst_ty A1 A2 A3 A10 ∈ lrel3 J $ >
   $ G ⇒ ra_nst_ok A1 A2 A5 A12 ∈ lrel3 J $ >
   $ G ⇒ ra_spine ⟨ kc_ind_ty , scons A3 (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ A10 A6 ∈ lrel $ >
   $ G ⇒ ra_ind_arity A3 A6 A7 A8 ∈ lrel $ >
   $ G ⇒ ra_ind_nested A3 A13 ∈ lrel $ >
   $ G ⇒ ra_ndecl A13 A7 A9 ∈ lrel $ >
+  $ G ⇒ ra_le ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ A9 ∈ lrel $ >
   $ G ⇒ ra_nst_group A1 A2 A3 A10 A4 ⟨ kc_nz , ∅ ⟩ A9 ⟨ kc_cons , scons A10 (scons A11 ∅) ⟩ A12 ∈ lrel2 $ >
   $ G ⇒ ra_add A4 A9 A5 ∈ lrel $ >
   $ G ⇒ ra_nst_ok A1 A2 A4 ⟨ kc_cons , scons A10 (scons A11 ∅) ⟩ ∈ lrel3 J $;
+theorem lrel3_nst_ty_i (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ > $ G ⇒ A18 ∈ trees ω $ > $ G ⇒ A19 ∈ trees ω $ >
+  $ G ⇒ ra_sty A2 ⟨ kc_ind_ty , scons A4 (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ A17 A15 A18 ∈ lrel3 J $ >
+  $ G ⇒ ra_ind_data A3 A5 A7 A9 ∈ lrel $ >
+  $ G ⇒ ra_capp A7 A1 A2 ∈ lrel $ >
+  $ G ⇒ ra_ind_arity A3 A11 A12 A13 ∈ lrel $ >
+  $ G ⇒ ra_sinst A3 ⟨ kc_nz , ∅ ⟩ A12 A11 A14 A15 ∈ lrel $ >
+  $ G ⇒ ra_ind_data A4 A6 A8 A10 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A10 ⟨ kc_nz , ∅ ⟩ A16 A19 ∈ lrel $ >
+  $ G ⇒ ra_pis A8 A16 A17 ∈ lrel $ >
+  $ G ⇒ ra_nst_ty A1 A3 A4 A14 ∈ lrel3 J $;
 theorem lrel3_large_nz (G: hyps) (J A1 A2 A3 A4 A5 A6 A7 A8 A9: class):
   $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
   $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
@@ -1110,7 +1139,8 @@ theorem tys_ty_cons_j (J: class) (Ctx: ctx) (F: expr) (C: ctors) (T: tys) (u l: 
 theorem tys_ok_i_j (J: class) (G G2: ctx) (D: ind) (b: blk) (P: ctx) (T: tys): $ ind_data D b P T $ > $ tys_closed P T $ > $ ctx_wf_j J G P $ > $ capp P G G2 $ > $ tys_ty_j J G2 T $ > $ tys_ok_j J G D $;
 theorem ind_wf_i_j (J: class) (G G2: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (np n m k n0: nat) (l: lvl) (F: expr) (C: ctors): $ tys_ok_j J G D $ > $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ capp P G G2 $ > $ nth_ty T nz F C $ > $ isort F k l $ > $ tys_wf_j J D n np l nz G2 T $ > $ ind_nested D N $ > $ ndecl N n n0 $ > $ nst_ok_j J G D n0 N $ > $ ind_wf_j J G D $;
 theorem nst_ok_nil_j (J: class) (G: ctx) (D: ind) (j: nat): $ nst_ok_j J G D j nil $;
-theorem nst_ok_cons_j (J: class) (G: ctx) (D I: ind) (j j2 npi ni mi ni0: nat) (X: expr) (N2 N3 NI: ctx): $ spine (ind_ty I nz) X npi $ > $ ind_wf_j J G I $ > $ ind_arity I npi ni mi $ > $ ind_nested I NI $ > $ ndecl NI ni ni0 $ > $ nst_group G D I X j nz ni0 (cons X N2) N3 $ > $ add j ni0 j2 $ > $ nst_ok_j J G D j2 N3 $ > $ nst_ok_j J G D j (cons X N2) $;
+theorem nst_ok_cons_j (J: class) (G: ctx) (D I: ind) (j j2 npi ni mi ni0: nat) (X: expr) (N2 N3 NI: ctx): $ spine (ind_ty I nz) X npi $ > $ ind_wf_j J G I $ > $ ind_arity I npi ni mi $ > $ ind_nested I NI $ > $ ndecl NI ni ni0 $ > $ lt nz ni0 $ > $ nst_ty_j J G D I X $ > $ nst_group G D I X j nz ni0 (cons X N2) N3 $ > $ add j ni0 j2 $ > $ nst_ok_j J G D j2 N3 $ > $ nst_ok_j J G D j (cons X N2) $;
+theorem nst_ty_i_j (J: class) (G G2: ctx) (D I: ind) (b bi_v: blk) (P Pi: ctx) (T Ti: tys) (np n m: nat) (X X1 Fi RI S: expr) (Ci: ctors): $ ind_data D b P T $ > $ capp P G G2 $ > $ ind_arity D np n m $ > $ sinst D nz n np X X1 $ > $ ind_data I bi_v Pi Ti $ > $ nth_ty Ti nz Fi Ci $ > $ pis Pi Fi RI $ > $ sty_j J G2 (ind_ty I nz) RI X1 S $ > $ nst_ty_j J G D I X $;
 theorem large_nz_j (J: class) (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (F: expr) (C: ctors) (k: nat) (l: lvl): $ ind_data D b P T $ > $ nth_ty T nz F C $ > $ isort F k l $ > $ leqv (lmax (ls lz) l) l $ > $ large_j J G D $;
 theorem large_empty_j (J: class) (G: ctx) (D: ind) (b: blk) (P: ctx) (F: expr): $ ind_data D b P (tcons F cnil tnil) $ > $ large_j J G D $;
 theorem large_single_j (J: class) (G G2: ctx) (D: ind) (b: blk) (P: ctx) (F K: expr) (np: nat): $ ind_data D b P (tcons F (ccons K cnil) tnil) $ > $ clen P np $ > $ capp P G G2 $ > $ fir_j J D np G2 nz K $ > $ large_j J G D $;
@@ -1265,6 +1295,8 @@ theorem lprog3_ind_wf_pr (G: hyps) (J P A1 A2: class):
   $ G ⇒ ⟨ P , ra_ind_wf A1 A2 ⟩ ∈ lprog3 J $ > $ G ⇒ ⟨ P , ra_ind_wf A1 A2 ⟩ ∈ pr_ind_wf $;
 theorem lprog3_nst_ok_pr (G: hyps) (J P A1 A2 A3 A4: class):
   $ G ⇒ ⟨ P , ra_nst_ok A1 A2 A3 A4 ⟩ ∈ lprog3 J $ > $ G ⇒ ⟨ P , ra_nst_ok A1 A2 A3 A4 ⟩ ∈ pr_nst_ok $;
+theorem lprog3_nst_ty_pr (G: hyps) (J P A1 A2 A3 A4: class):
+  $ G ⇒ ⟨ P , ra_nst_ty A1 A2 A3 A4 ⟩ ∈ lprog3 J $ > $ G ⇒ ⟨ P , ra_nst_ty A1 A2 A3 A4 ⟩ ∈ pr_nst_ty $;
 theorem lprog3_large_pr (G: hyps) (J P A1 A2: class):
   $ G ⇒ ⟨ P , ra_large A1 A2 ⟩ ∈ lprog3 J $ > $ G ⇒ ⟨ P , ra_large A1 A2 ⟩ ∈ pr_large $;
 theorem lprog3_fir_pr (G: hyps) (J P A1 A2 A3 A4 A5: class):
@@ -1357,7 +1389,10 @@ theorem lrel3_ind_wf_cases (G: hyps) (J: class) {G_v G2 D b_v P N T np n_v m_v k
 theorem lrel3_nst_ok_cases (G: hyps) (J: class) {G_v D j_v I j2 npi ni mi ni0 X N2 N3 NI: set} (t1 t2 t3 t4: set):
   $ G ⇒ ra_nst_ok t1 t2 t3 t4 ∈ lrel3 J $ >
   $ G ⇒ ∃ G_v ∃ D ∃ j_v (t1 = G_v ∧ t2 = D ∧ t3 = j_v ∧ t4 = ⟨ kc_nil , ∅ ⟩) ∨
-      ∃ G_v ∃ D ∃ I ∃ j_v ∃ j2 ∃ npi ∃ ni ∃ mi ∃ ni0 ∃ X ∃ N2 ∃ N3 ∃ NI (t1 = G_v ∧ t2 = D ∧ t3 = j_v ∧ t4 = ⟨ kc_cons , scons X (scons N2 ∅) ⟩ ∧ ra_spine ⟨ kc_ind_ty , scons I (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ X npi ∈ lrel ∧ ra_ind_wf G_v I ∈ lrel3 J ∧ ra_ind_arity I npi ni mi ∈ lrel ∧ ra_ind_nested I NI ∈ lrel ∧ ra_ndecl NI ni ni0 ∈ lrel ∧ ra_nst_group G_v D I X j_v ⟨ kc_nz , ∅ ⟩ ni0 ⟨ kc_cons , scons X (scons N2 ∅) ⟩ N3 ∈ lrel2 ∧ ra_add j_v ni0 j2 ∈ lrel ∧ ra_nst_ok G_v D j2 N3 ∈ lrel3 J) $;
+      ∃ G_v ∃ D ∃ I ∃ j_v ∃ j2 ∃ npi ∃ ni ∃ mi ∃ ni0 ∃ X ∃ N2 ∃ N3 ∃ NI (t1 = G_v ∧ t2 = D ∧ t3 = j_v ∧ t4 = ⟨ kc_cons , scons X (scons N2 ∅) ⟩ ∧ ra_spine ⟨ kc_ind_ty , scons I (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ X npi ∈ lrel ∧ ra_ind_wf G_v I ∈ lrel3 J ∧ ra_ind_arity I npi ni mi ∈ lrel ∧ ra_ind_nested I NI ∈ lrel ∧ ra_ndecl NI ni ni0 ∈ lrel ∧ ra_le ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ni0 ∈ lrel ∧ ra_nst_ty G_v D I X ∈ lrel3 J ∧ ra_nst_group G_v D I X j_v ⟨ kc_nz , ∅ ⟩ ni0 ⟨ kc_cons , scons X (scons N2 ∅) ⟩ N3 ∈ lrel2 ∧ ra_add j_v ni0 j2 ∈ lrel ∧ ra_nst_ok G_v D j2 N3 ∈ lrel3 J) $;
+theorem lrel3_nst_ty_cases (G: hyps) (J: class) {G_v G2 D I b_v bi_v P Pi T Ti np n_v m_v X X1 Fi RI S Ci: set} (t1 t2 t3 t4: set):
+  $ G ⇒ ra_nst_ty t1 t2 t3 t4 ∈ lrel3 J $ >
+  $ G ⇒ ∃ G_v ∃ G2 ∃ D ∃ I ∃ b_v ∃ bi_v ∃ P ∃ Pi ∃ T ∃ Ti ∃ np ∃ n_v ∃ m_v ∃ X ∃ X1 ∃ Fi ∃ RI ∃ S ∃ Ci (t1 = G_v ∧ t2 = D ∧ t3 = I ∧ t4 = X ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_capp P G_v G2 ∈ lrel ∧ ra_ind_arity D np n_v m_v ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v np X X1 ∈ lrel ∧ ra_ind_data I bi_v Pi Ti ∈ lrel ∧ ra_nth_ty Ti ⟨ kc_nz , ∅ ⟩ Fi Ci ∈ lrel ∧ ra_pis Pi Fi RI ∈ lrel ∧ ra_sty G2 ⟨ kc_ind_ty , scons I (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ RI X1 S ∈ lrel3 J) $;
 theorem lrel3_large_cases (G: hyps) (J: class) {G_v D b_v P T F C k_v l_v G2 K np: set} (t1 t2: set):
   $ G ⇒ ra_large t1 t2 ∈ lrel3 J $ >
   $ G ⇒ ∃ G_v ∃ D ∃ b_v ∃ P ∃ T ∃ F ∃ C ∃ k_v ∃ l_v (t1 = G_v ∧ t2 = D ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_nth_ty T ⟨ kc_nz , ∅ ⟩ F C ∈ lrel ∧ ra_isort F k_v l_v ∈ lrel ∧ lveq ⟨ kc_lmax , scons ⟨ kc_ls , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ (scons l_v ∅) ⟩ l_v) ∨

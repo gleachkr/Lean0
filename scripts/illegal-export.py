@@ -14,6 +14,7 @@ block). Each CASE changes one expression (a copy; shared subterms stay as they a
   result       W.mk : W α                 becomes  W (W α)
   occurrence   V.mk : V α → V α           becomes  V (V α) → V α
   index        IX.mk : IX True            becomes  IX E  (E : Type, the index a Prop)
+  nested       NO.mk : Ph NO E → NO       becomes  Ph NO Type → NO  (Ph's parameters are in Type)
 """
 import json, sys
 
@@ -127,6 +128,9 @@ elif case == "index":
     c = decl("ctors", "IX.mk")
     e = next(i for i, d in exprs.items() if "const" in d and names[d["const"]["name"]] == "E")
     c["type"] = replace(c["type"], [("app", "arg")], e)
+elif case == "nested":
+    c = decl("ctors", "NO.mk")
+    c["type"] = replace(c["type"], [TYPE, ("app", "arg")], sort(level_succ(0)))
 else:
     sys.exit(f"unknown case {case}")
 

@@ -293,5 +293,17 @@ for case in nonpositive universe elim mutual result occurrence index; do
     echo "rejected as expected: $(grep -m1 'by the schema' "$d/log" | sed 's/^lean0: //; s/: horn:.*//') ($case)"
   fi
 done
+# A nested block the schema rejects is left to stage A, where the run fails for another reason
+# (the constructor's exported type), so this case is run with --keep-going and the report read:
+# the schema must have refused the block (`nst_ty` types an occurrence's arguments).
+d="build/gen/illegal-nested"
+rm -rf "$d"; mkdir -p "$d"
+python3 scripts/illegal-export.py build/lean/illegal.ndjson "$d/x.ndjson" nested
+target/release/lean0 gen "$d/x.ndjson" "$d" x --unchecked --keep-going > "$d/log" 2>&1 || true
+if grep -q 'stage A: NO: the constructors of `NO` by the schema' "$d/log"; then
+  echo "rejected as expected: the constructors of \`NO\` by the schema (nested)"
+else
+  echo "FAIL: an illegal nested block was not rejected by the schema"; fail=1
+fi
 
 [ "$fail" = 0 ] && echo "all tests passed" || { echo "SOME TESTS FAILED"; exit 1; }

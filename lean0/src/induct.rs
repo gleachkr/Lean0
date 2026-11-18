@@ -791,6 +791,18 @@ fn ctor_facts<'t>(el: &mut Elab<'_, '_, 't, '_>, ind: NamePtr<'t>, np: usize, al
                 with_binders(el, ty, np, None, facts, record_result)?;
             }
         }
+        // each occurrence's arguments, under the parameters (`nst_ty`)
+        if let Some(h) = nst.st.all_inductives_incl_specialized.first() {
+            let ty = strip_pis(el, h.ty);
+            let occs: Vec<ExprPtr<'t>> = nst.st.nested_to_unspecialized_ty_nofvars.values().copied().collect();
+            with_binders(el, ty, np, Some(np), facts, |el, _, facts| {
+                for &x in &occs {
+                    let x = el.inst_locals(x);
+                    record_result(el, x, facts)?;
+                }
+                Ok(())
+            })?;
+        }
         return Ok(())
     }
     let Some(Declar::Inductive(id)) = all.get(&ind) else { return Err("the block's types are not in the export".into()) };
