@@ -3105,10 +3105,16 @@ theorem rw_uni {h k: set} (G: hyps) (H J SD SI: class) (u w r0 tg td tb tp tt tn
   $ G ⇒ SI ∈ ω $ >
   $ G ⇒ ∀ h ∀ k (h ∊ ihsp (ifold u (dnf u (mcv H)) td w p mv) pg pt SD SI → k ∊ ihsp (ifold u (dnf u (mcv H)) td w p mv) pg pt SD SI → h = k) $;
 
+--| The type `tj` of the field of an inductive hypothesis (`ihval`) is one of the block's types: its entry in the
+--| block's types and its sort's arity (the `nidx` of `ihval`'s leaf, inverted).
+theorem ihval_nth_ty {b e m q: set} (G: hyps) (td tnp tn tm tv tnf tfld ty tj tA tIH tb tp tt: set):
+  $ G ⇒ ra_ihval td tnp tn tm tv tnf tfld ty tj tA tIH ∈ lrel $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ∃ b ∃ e ∃ m ∃ q (ra_nth_ty tt tj b e ∈ lrel ∧ ra_isort b m q ∈ lrel ∧ ra_nidx td tj m ∈ lrel) $;
+
 --| The inductive hypothesis of a recursive field at the walk's valuation is an element of its space under the
 --| fold (`ihval_at` with the points' facts by `rec_pt_at`), given the block's facts at every type: its
 --| sort's arity (`nidx`) and the recursor's value.
-theorem rw_rec_ih {j b e m q z: set} (G: hyps) (H J: class) (u w r0 tg td tb tp tt tnp tn tm tv tK0 tA tj tnf tfld tsh d fd ss rm p cv mv pf pg pt pa sf sa tA3 tA4 tIH: set):
+theorem rw_rec_ih {j b e z: set} (G: hyps) (H J: class) (u w r0 tg td tb tp tt tnp tn tm tv tK0 tA tj tnf tfld tsh d fd ss rm p cv mv pf pg pt pa sf sa tA3 tA4 tIH: set):
   $ G ⇒ iwf u H J tg td w r0 $ >
   $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
   $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
@@ -3118,8 +3124,7 @@ theorem rw_rec_ih {j b e m q z: set} (G: hyps) (H J: class) (u w r0 tg td tb tp 
   $ G ⇒ mv ∊ imins u (dnf u (mcv H)) td w p cv $ >
   $ G ⇒ ra_elim_ok tg td tv ∈ lrel3 J $ >
   $ G ⇒ ⟨ pf , ⟨ pg , ⟨ pt , pa ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) tK0 w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) $ >
-  $ G ⇒ ∀ j (j ∊ trees ω → fv nvf j ∈ fv nvf tn → ∃ b ∃ e ∃ m ∃ q (ra_nth_ty tt j b e ∈ lrel ∧ ra_isort b m q ∈ lrel ∧ ra_nidx td j m ∈ lrel)) $ >
-  $ G ⇒ ∀ j ∀ z (j ∊ trees ω → fv nvf j ∈ fv nvf tn → z ∊ fseq u → dt u (mcv H) ⟨ kc_ind_rec , scons td (scons j (scons tv ∅)) ⟩ w z = irc u (dnf u (mcv H)) td (fv nvf j) (lv tv w) w) $ >
+  $ G ⇒ ∀ j ∀ b ∀ e ∀ z (ra_nth_ty tt j b e ∈ lrel → fv nvf j ∈ fv nvf tn → z ∊ fseq u → dt u (mcv H) ⟨ kc_ind_rec , scons td (scons j (scons tv ∅)) ⟩ w z = irc u (dnf u (mcv H)) td (fv nvf j) (lv tv w) w) $ >
   $ G ⇒ ra_nth_pi tK0 d tA ∈ lrel $ >
   $ G ⇒ ra_recfield td tn tnp d tA tj ∈ lrel $ >
   $ G ⇒ sf ∊ fseq u $ >
@@ -3154,9 +3159,8 @@ theorem rw_rec_ih {j b e m q z: set} (G: hyps) (H J: class) (u w r0 tg td tb tp 
 --| @freshen G b
 --| @freshen G e
 --| @freshen G m
---| @freshen G q
 --| @freshen G y
-theorem rwalk_sem {z j b e m q y: set} (G: hyps) (H J MV: class) (u w r0 tg td tb tp tt tnp tn tm tv tnf tK0 p cv mv pf pg pt pa ss c0 xs: set) (tK d tAcc tVal fd rm rk sf sg sc gd hd tx tq: set):
+theorem rwalk_sem {z j b e m y: set} (G: hyps) (H J MV: class) (u w r0 tg td tb tp tt tnp tn tm tv tnf tK0 p cv mv pf pg pt pa ss c0 xs: set) (tK d tAcc tVal fd rm rk sf sg sc gd hd tx tq: set):
   $ G ⇒ iwf u H J tg td w r0 $ >
   $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
   $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
@@ -3167,8 +3171,7 @@ theorem rwalk_sem {z j b e m q y: set} (G: hyps) (H J MV: class) (u w r0 tg td t
   $ G ⇒ ra_elim_ok tg td tv ∈ lrel3 J $ >
   $ G ⇒ tK0 ∊ trees ω $ >
   $ G ⇒ ⟨ pf , ⟨ pg , ⟨ pt , pa ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) tK0 w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) $ >
-  $ G ⇒ ∀ j (j ∊ trees ω → fv nvf j ∈ fv nvf tn → ∃ b ∃ e ∃ m ∃ q (ra_nth_ty tt j b e ∈ lrel ∧ ra_isort b m q ∈ lrel ∧ ra_nidx td j m ∈ lrel)) $ >
-  $ G ⇒ ∀ j ∀ z (j ∊ trees ω → fv nvf j ∈ fv nvf tn → z ∊ fseq u → dt u (mcv H) ⟨ kc_ind_rec , scons td (scons j (scons tv ∅)) ⟩ w z = irc u (dnf u (mcv H)) td (fv nvf j) (lv tv w) w) $ >
+  $ G ⇒ ∀ j ∀ b ∀ e ∀ z (ra_nth_ty tt j b e ∈ lrel → fv nvf j ∈ fv nvf tn → z ∊ fseq u → dt u (mcv H) ⟨ kc_ind_rec , scons td (scons j (scons tv ∅)) ⟩ w z = irc u (dnf u (mcv H)) td (fv nvf j) (lv tv w) w) $ >
   $ G ⇒ ss ∊ fseq u $ >
   $ G ⇒ cdm (scat mv cv) = nadd (fv nvf tm) (fv nvf tn) $ >
   $ G ⇒ c0 = scat mv cv $ >
@@ -3326,7 +3329,7 @@ theorem rhs_lams (G: hyps) (H J: class) (u w r r0 tg td tb tp tt tnp tn tm tv ti
 --| The walk over the rule's right-hand side from its start (`rwalk_sem` at depth `0`, `rw_start`): the value
 --| `tVal` at the minors, motives and parameters in front of the valuation, applied to the fields `pf` of a path
 --| of the constructor's type, is the constructor's minor `sk` at the inductive hypotheses `sh` and the fields.
-theorem rw_top {z j b e m q: set} (G: hyps) (H J: class) (u w r r0 tg td tb tp tt tnp tn tm tv tnf tK0 p cv mv pf pg pt pa xs ta tmk tk tAcc tVal tx sh sk: set):
+theorem rw_top {z j b e: set} (G: hyps) (H J: class) (u w r r0 tg td tb tp tt tnp tn tm tv tnf tK0 p cv mv pf pg pt pa xs ta tmk tk tAcc tVal tx sh sk: set):
   $ G ⇒ iwf u H J tg td w r0 $ >
   $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
   $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
@@ -3336,8 +3339,7 @@ theorem rw_top {z j b e m q: set} (G: hyps) (H J: class) (u w r r0 tg td tb tp t
   $ G ⇒ mv ∊ imins u (dnf u (mcv H)) td w p cv $ >
   $ G ⇒ ra_elim_ok tg td tv ∈ lrel3 J $ >
   $ G ⇒ ⟨ pf , ⟨ pg , ⟨ pt , pa ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) tK0 w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) $ >
-  $ G ⇒ ∀ j (j ∊ trees ω → fv nvf j ∈ fv nvf tn → ∃ b ∃ e ∃ m ∃ q (ra_nth_ty tt j b e ∈ lrel ∧ ra_isort b m q ∈ lrel ∧ ra_nidx td j m ∈ lrel)) $ >
-  $ G ⇒ ∀ j ∀ z (j ∊ trees ω → fv nvf j ∈ fv nvf tn → z ∊ fseq u → dt u (mcv H) ⟨ kc_ind_rec , scons td (scons j (scons tv ∅)) ⟩ w z = irc u (dnf u (mcv H)) td (fv nvf j) (lv tv w) w) $ >
+  $ G ⇒ ∀ j ∀ b ∀ e ∀ z (ra_nth_ty tt j b e ∈ lrel → fv nvf j ∈ fv nvf tn → z ∊ fseq u → dt u (mcv H) ⟨ kc_ind_rec , scons td (scons j (scons tv ∅)) ⟩ w z = irc u (dnf u (mcv H)) td (fv nvf j) (lv tv w) w) $ >
   $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ xs = (ixs td w (ifam u (dnf u (mcv H)) td w)) $ >
   $ G ⇒ xs ∊ fseq u $ >
@@ -3366,7 +3368,7 @@ theorem rw_top {z j b e m q: set} (G: hyps) (H J: class) (u w r r0 tg td tb tp t
 --| recursor's spine `te3` re-headed to the rule `tR = λ P. λ M. λ N. tVal`): the constructor's minor `sk` at the
 --| inductive hypotheses `sh` and the fields `pf`, the value of the left-hand side (`iota_lhs_val`). By `rhs_maj`,
 --| `rhs_rec`, `rhs_lams` and `rw_top`.
-theorem iota_rhs_val {j b e m q z: set} (G: hyps) (H J K S: class) (u w r r0 tg td tb tp tt tnp tn tm tv ti tF tE tM tN tR tR1 tR2 tVal p cv mv tY trhs0 tnf tnq tmj trhs pf ta te3 te4 tni sf tK0 pg pt pa xs tam tmk tk tAcc tx sh sk: set):
+theorem iota_rhs_val {j b e z: set} (G: hyps) (H J K S: class) (u w r r0 tg td tb tp tt tnp tn tm tv ti tF tE tM tN tR tR1 tR2 tVal p cv mv tY trhs0 tnf tnq tmj trhs pf ta te3 te4 tni sf tK0 pg pt pa xs tam tmk tk tAcc tx sh sk: set):
   $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ ⟨ K , S ⟩ ∈ trees ω $ >
   $ G ⇒ ¬ K = kc_pi $ >
@@ -3401,8 +3403,7 @@ theorem iota_rhs_val {j b e m q z: set} (G: hyps) (H J K S: class) (u w r r0 tg 
   $ G ⇒ ra_lams tN tVal tR1 ∈ lrel $ >
   $ G ⇒ ra_elim_ok tg td tv ∈ lrel3 J $ >
   $ G ⇒ ⟨ pf , ⟨ pg , ⟨ pt , pa ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) tK0 w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) $ >
-  $ G ⇒ ∀ j (j ∊ trees ω → fv nvf j ∈ fv nvf tn → ∃ b ∃ e ∃ m ∃ q (ra_nth_ty tt j b e ∈ lrel ∧ ra_isort b m q ∈ lrel ∧ ra_nidx td j m ∈ lrel)) $ >
-  $ G ⇒ ∀ j ∀ z (j ∊ trees ω → fv nvf j ∈ fv nvf tn → z ∊ fseq u → dt u (mcv H) ⟨ kc_ind_rec , scons td (scons j (scons tv ∅)) ⟩ w z = irc u (dnf u (mcv H)) td (fv nvf j) (lv tv w) w) $ >
+  $ G ⇒ ∀ j ∀ b ∀ e ∀ z (ra_nth_ty tt j b e ∈ lrel → fv nvf j ∈ fv nvf tn → z ∊ fseq u → dt u (mcv H) ⟨ kc_ind_rec , scons td (scons j (scons tv ∅)) ⟩ w z = irc u (dnf u (mcv H)) td (fv nvf j) (lv tv w) w) $ >
   $ G ⇒ xs = (ixs td w (ifam u (dnf u (mcv H)) td w)) $ >
   $ G ⇒ xs ∊ fseq u $ >
   $ G ⇒ cdm xs = fv nvf tn $ >
@@ -3429,7 +3430,7 @@ theorem iota_rhs_val {j b e m q z: set} (G: hyps) (H J K S: class) (u w r r0 tg 
 --| The two sides of the iota rule have one value: the recursor applied to its arguments and the major premise
 --| (`iota_lhs_val`) and the rule's right-hand side (`iota_rhs_val`), with the inductive hypotheses' valuation by
 --| `ifold_ihv_ex`. The hypotheses are theirs.
-theorem iota_vals_eq {j b e m q z: set} (G: hyps) (H J K S: class) (u w r r0 tg td tv ti tc tb tp tt tnp tn tm tF tE tK0 tni tl te4 tks tmj tnq sf mv cv p pf pg pt pa sk sj sc tM tN tR tR1 tR2 tVal tY trhs0 tnf trhs ta te3 xs tam tmk tk tAcc tx: set):
+theorem iota_vals_eq {j b e z: set} (G: hyps) (H J K S: class) (u w r r0 tg td tv ti tc tb tp tt tnp tn tm tF tE tK0 tni tl te4 tks tmj tnq sf mv cv p pf pg pt pa sk sj sc tM tN tR tR1 tR2 tVal tY trhs0 tnf trhs ta te3 xs tam tmk tk tAcc tx: set):
   $ G ⇒ iwf u H J tg td w r0 $ >
   $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
@@ -3476,8 +3477,7 @@ theorem iota_vals_eq {j b e m q z: set} (G: hyps) (H J K S: class) (u w r r0 tg 
   $ G ⇒ ra_lams tp tR2 tR ∈ lrel $ >
   $ G ⇒ ra_lams tM tR1 tR2 ∈ lrel $ >
   $ G ⇒ ra_lams tN tVal tR1 ∈ lrel $ >
-  $ G ⇒ ∀ j (j ∊ trees ω → fv nvf j ∈ fv nvf tn → ∃ b ∃ e ∃ m ∃ q (ra_nth_ty tt j b e ∈ lrel ∧ ra_isort b m q ∈ lrel ∧ ra_nidx td j m ∈ lrel)) $ >
-  $ G ⇒ ∀ j ∀ z (j ∊ trees ω → fv nvf j ∈ fv nvf tn → z ∊ fseq u → dt u (mcv H) ⟨ kc_ind_rec , scons td (scons j (scons tv ∅)) ⟩ w z = irc u (dnf u (mcv H)) td (fv nvf j) (lv tv w) w) $ >
+  $ G ⇒ ∀ j ∀ b ∀ e ∀ z (ra_nth_ty tt j b e ∈ lrel → fv nvf j ∈ fv nvf tn → z ∊ fseq u → dt u (mcv H) ⟨ kc_ind_rec , scons td (scons j (scons tv ∅)) ⟩ w z = irc u (dnf u (mcv H)) td (fv nvf j) (lv tv w) w) $ >
   $ G ⇒ xs = (ixs td w (ifam u (dnf u (mcv H)) td w)) $ >
   $ G ⇒ xs ∊ fseq u $ >
   $ G ⇒ cdm xs = fv nvf tn $ >
@@ -3494,3 +3494,186 @@ theorem iota_vals_eq {j b e m q z: set} (G: hyps) (H J K S: class) (u w r r0 tg 
   $ G ⇒ sk ∈ inmin td $ >
   $ G ⇒ tk ∊ trees ω $ >
   $ G ⇒ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r = dt u (mcv H) trhs w r $;
+
+-- --------------------------------------------------------------------------
+-- Iota (E6): every recursor's value is an element of the universe
+-- --------------------------------------------------------------------------
+
+--| Class form of `universe_cdm`.
+theorem universe_cdm_c (G: hyps) (U A: class): $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ cdm A ∈ U $;
+
+--| `cdm_intro` for a pair with a class for its second component.
+theorem cdm_intro_c (G: hyps) (R B: class) (a: set): $ G ⇒ ⟨ a , B ⟩ ∈ R $ > $ G ⇒ isset B $ > $ G ⇒ a ∊ cdm R $;
+
+--| Class form of `nest_scat`.
+theorem nest_scat_c (G: hyps) (A Y S T: class): $ G ⇒ S ∈ fseq A $ > $ G ⇒ T ∈ fseq A $ > $ G ⇒ isset Y $ > $ G ⇒ nest (scat S T) Y = nest T (nest S Y) $;
+
+--| Class form of `apn_universe`.
+theorem apn_universe_c (G: hyps) (U V S A: class): $ G ⇒ universe U $ > $ G ⇒ V ∈ U $ > $ G ⇒ S ∈ fseq A $ > $ G ⇒ apn V S ∈ U $;
+
+--| `capp P G T` for contexts `P` and `G`: `T` is a context (the converse of `capp_sort`).
+theorem capp_ctx (G: hyps) (t1 t2 t3: set):
+  $ G ⇒ ra_capp t1 t2 t3 ∈ lrel $ > $ G ⇒ t1 ∊ ofsort lsig lopen ks_ctx $ > $ G ⇒ t2 ∊ ofsort lsig lopen ks_ctx $ > $ G ⇒ t3 ∊ ofsort lsig lopen ks_ctx $;
+
+--| The recursor's value at a type of the block is an element of the universe, whether or not `rec_ty` gives that
+--| recursor a type (the rule of one recursor applies the others to the recursive fields, and no rule premise types
+--| them): its elements are traces over valuations of the minors', motives' and parameters' telescopes as one context
+--| (`capp_ctx`, `esat_universe`) of points over the type's paths, with values in elements of the motives' universe
+--| (`ifold_motive`), and these form a set of the universe by replacement (`universe_repl2`).
+theorem irc_universe (G: hyps) (H J: class) (u w r0 tg td tb tp tt tnp tn tm tv tM tN tj tF tC: set):
+  $ G ⇒ iwf u H J tg td w r0 $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_motives td tnp tv ⟨ kc_nz , ∅ ⟩ tt tM ∈ lrel $ >
+  $ G ⇒ ra_minors td tnp tn ⟨ kc_nz , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ tt tN ∈ lrel $ >
+  $ G ⇒ tM ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ tN ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ ra_nth_ty tt tj tF tC ∈ lrel $ >
+  $ G ⇒ fv nvf tj ∈ fv nvf tn $ >
+  $ G ⇒ irc u (dnf u (mcv H)) td (fv nvf tj) (lv tv w) w ∈ u $;
+
+-- --------------------------------------------------------------------------
+-- Iota (E6): the hook's facts for the rule
+-- --------------------------------------------------------------------------
+
+--| The index of an entry of a block's types is below their number.
+theorem nth_ty_lt (G: hyps) (tt ti tf te tn tm: set): $ G ⇒ ra_nth_ty tt ti tf te ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ > $ G ⇒ fv nvf ti ∈ fv nvf tn $;
+
+--| A constructor of a block is an expression.
+theorem ofsort_ind_ctor_intro (G: hyps) (A B C: class): $ G ⇒ A ∈ ofsort lsig lopen ks_ind $ > $ G ⇒ B ∈ ofsort lsig lopen ks_nat $ > $ G ⇒ C ∈ ofsort lsig lopen ks_nat $ > $ G ⇒ ⟨ kc_ind_ctor , scons A (scons B (scons C ∅)) ⟩ ∈ ofsort lsig lopen ks_expr $;
+
+--| The hook's facts for the iota rule, from `ind_wf`: the types' types are closed over the parameters, every
+--| recursor of the block denotes its value `irc` (`hrec`, with `irc_universe`), and the types' values `xs` are
+--| the values of the block's types.
+theorem iota_hook {j b e z: set} (G: hyps) (H J: class) (u w r0 tg td tb tp tt tnp tn tm tv tM tN xs: set):
+  $ G ⇒ iwf u H J tg td w r0 $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ hrec ⊆ H $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_motives td tnp tv ⟨ kc_nz , ∅ ⟩ tt tM ∈ lrel $ >
+  $ G ⇒ ra_minors td tnp tn ⟨ kc_nz , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ tt tN ∈ lrel $ >
+  $ G ⇒ tM ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ tN ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ xs = (ixs td w (ifam u (dnf u (mcv H)) td w)) $ >
+  $ G ⇒ ra_tys_closed tp tt ∈ lrel ∧ ∀ j ∀ b ∀ e ∀ z (ra_nth_ty tt j b e ∈ lrel → fv nvf j ∈ fv nvf tn → z ∊ fseq u → dt u (mcv H) ⟨ kc_ind_rec , scons td (scons j (scons tv ∅)) ⟩ w z = irc u (dnf u (mcv H)) td (fv nvf j) (lv tv w) w) ∧ xs ∊ fseq u ∧ cdm xs = fv nvf tn ∧ ∀ j ∀ b (j ∊ cdm xs → b ∊ trees ω → fv nvf b = j → dt u (mcv H) ⟨ kc_ind_ty , scons td (scons b ∅) ⟩ w ∅ = fv xs j) $;
+
+-- --------------------------------------------------------------------------
+-- Iota (E6): the rule from its pieces
+-- --------------------------------------------------------------------------
+
+--| The binders of a well-sorted iterated `λ` (`lams`) are a context (with `lams_sort` for the body).
+theorem lams_ctx (G: hyps) (tP tX tR: set): $ G ⇒ ra_lams tP tX tR ∈ lrel $ > $ G ⇒ tR ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ tP ∊ ofsort lsig lopen ks_ctx $;
+
+--| The iota rule in the model from its pieces: the recursor `ind_rec D i v` applied to `te4`'s arguments and the major
+--| premise `tmj` (a spine over `ind_ctor D2 i c`, `eeqv` to the block's constructor) has the value of the rule's
+--| right-hand side `trhs` and lies in the type's value, for a hook with `hctor`, `hrec` that is invariant under `eeqv`:
+--| `iota_vals_eq` with its hypotheses from `iota_rec_args`, `iota_ctor_args`, `iota_join` and `iota_hook`, and
+--| `iota_ty_sem` with the heads typed by `ind_rec_ty_wf` and `ind_ctor_ty_wf`. The pieces are those of `rec_rhs`,
+--| `ctor_ty` and the counts, under shared names.
+theorem iota_core (G: hyps) (H J: class) (u w r tg td td2 tv ti tc tb tp tt tnp tn tm tF tE tK0 tK2 tCT tni tl te4 tks tmj tnq tM tN tR tR1 tR2 tVal tY trhs0 tnf trhs ta ta0 te3 tam tmk tk tAcc tRT tTY tC tT tT2: set):
+  $ G ⇒ iwf u H J tg td w r $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ hrec ⊆ H $ >
+  $ G ⇒ minv (mcv H) $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor tE tc tK0 ∈ lrel $ >
+  $ G ⇒ ra_isort tF tni tl ∈ lrel $ >
+  $ G ⇒ ra_elim_ok tg td tv ∈ lrel3 J $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ te4 tks ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ctor , scons td2 (scons ti (scons tc ∅)) ⟩ tmj tnq ∈ lrel $ >
+  $ G ⇒ ra_rec_ty td tv ti tRT ∈ lrel $ >
+  $ G ⇒ tRT ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_add tnp tn ta0 ∈ lrel $ >
+  $ G ⇒ ra_add ta0 tm ta ∈ lrel $ >
+  $ G ⇒ ra_add ta tni tks ∈ lrel $ >
+  $ G ⇒ ra_npis tK0 tnf ∈ lrel $ >
+  $ G ⇒ ra_add tnp tnf tnq ∈ lrel $ >
+  $ G ⇒ ra_rehead ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ tR ta te3 trhs0 ∈ lrel $ >
+  $ G ⇒ ra_spine te3 te4 tni ∈ lrel $ >
+  $ G ⇒ ra_rehead tY trhs0 tnf tmj trhs ∈ lrel $ >
+  $ G ⇒ ra_sty tg ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ tRT te4 ⟨ kc_pi , scons tTY (scons tC ∅) ⟩ ∈ lrel3 J $ >
+  $ G ⇒ ra_inst ⟨ kc_nz , ∅ ⟩ tC tmj tT ∈ lrel $ >
+  $ G ⇒ ra_eeqv ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ ⟨ kc_ind_ctor , scons td2 (scons ti (scons tc ∅)) ⟩ ∈ lrel2 $ >
+  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tK0 tK2 ∈ lrel $ >
+  $ G ⇒ ra_pis tp tK2 tCT ∈ lrel $ >
+  $ G ⇒ ra_sty tg ⟨ kc_ind_ctor , scons td2 (scons ti (scons tc ∅)) ⟩ tCT tmj tT2 ∈ lrel3 J $ >
+  $ G ⇒ ra_aeq tg tT2 tTY ∈ lrel3 J $ >
+  $ G ⇒ te4 ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tmj ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ti ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ tc ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ tR ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_motives td tnp tv ⟨ kc_nz , ∅ ⟩ tt tM ∈ lrel $ >
+  $ G ⇒ ra_minors td tnp tn ⟨ kc_nz , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ tt tN ∈ lrel $ >
+  $ G ⇒ tM ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ tN ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ ra_lams tp tR2 tR ∈ lrel $ >
+  $ G ⇒ ra_lams tM tR1 tR2 ∈ lrel $ >
+  $ G ⇒ ra_lams tN tVal tR1 ∈ lrel $ >
+  $ G ⇒ ra_minor_idx tt ti tc tk ∈ lrel $ >
+  $ G ⇒ ra_add tnf tm tam ∈ lrel $ >
+  $ G ⇒ ra_add tmk ⟨ kc_s , scons tk ∅ ⟩ tam ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_bvar , scons tmk ∅ ⟩ ⟨ kc_nz , ∅ ⟩ tnf tAcc ∈ lrel $ >
+  $ G ⇒ ra_rwalk td tnp tn tm tv tnf ⟨ kc_nz , ∅ ⟩ tAcc tK0 tVal ∈ lrel $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r = dt u (mcv H) trhs w r ∧ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r ∈ dt u (mcv H) tT w r $;
+
+-- --------------------------------------------------------------------------
+-- Iota (E6): the rule from its premises
+-- --------------------------------------------------------------------------
+
+--| The number of indices of a block's type (`nidx`) is its sort's arity (`isort`), at the block's own data.
+theorem nidx_isort {l: set} (G: hyps) (td tb tp tt ti tF tE tni: set): $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ > $ G ⇒ ra_nidx td ti tni ∈ lrel $ > $ G ⇒ ∃ l (ra_isort tF tni l ∈ lrel) $;
+
+--| The number of fields of a block's constructor (`nfields`) counts its type's binders (`npis`), at the block's own data.
+theorem nfields_npis (G: hyps) (td tb tp tt ti tc tF tE tK0 tnf: set): $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ > $ G ⇒ ra_nth_ctor tE tc tK0 ∈ lrel $ > $ G ⇒ ra_nfields td ti tc tnf ∈ lrel $ > $ G ⇒ ra_npis tK0 tnf ∈ lrel $;
+
+--| The rule `ind_iota` in the model, for a block without nested occurrences (`rst` is then the identity: `rec_rhs` for
+--| `rec_rule`, `rec_ty` for the restored type, and `ctor_ty`'s premises in its place, as in `ind_ctor_ty_wf`), for a
+--| hook with `hctor` and `hrec` that is invariant under `eeqv`: at every valuation of the context, the recursor applied
+--| to its arguments and the major premise has the value of the rule's right-hand side, an element of the type's value.
+--| `iota_core` with `rec_rhs`, `nidx` and `nfields` inverted and identified with the block's data by determinacy.
+theorem ind_iota_wf (G: hyps) (H J: class) (u w r tg td td2 tv ti tc tb tp tt tnp tn tm tF tE tK0 tK2 tCT tni te4 tks tmj tnq tR tY trhs0 tnf trhs ta ta0 te3 tRT tTY tC tT tT2: set):
+  $ G ⇒ iwf u H J tg td w r $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ hrec ⊆ H $ >
+  $ G ⇒ minv (mcv H) $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor tE tc tK0 ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tK0 tK2 ∈ lrel $ >
+  $ G ⇒ ra_pis tp tK2 tCT ∈ lrel $ >
+  $ G ⇒ ra_elim_ok tg td tv ∈ lrel3 J $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ te4 tks ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ctor , scons td2 (scons ti (scons tc ∅)) ⟩ tmj tnq ∈ lrel $ >
+  $ G ⇒ ra_rec_rhs td tv ti tc tR ∈ lrel $ >
+  $ G ⇒ ra_add tnp tn ta0 ∈ lrel $ >
+  $ G ⇒ ra_add ta0 tm ta ∈ lrel $ >
+  $ G ⇒ ra_nidx td ti tni ∈ lrel $ >
+  $ G ⇒ ra_add ta tni tks ∈ lrel $ >
+  $ G ⇒ ra_nfields td ti tc tnf ∈ lrel $ >
+  $ G ⇒ ra_add tnp tnf tnq ∈ lrel $ >
+  $ G ⇒ ra_rehead ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ tR ta te3 trhs0 ∈ lrel $ >
+  $ G ⇒ ra_spine te3 te4 tni ∈ lrel $ >
+  $ G ⇒ ra_rehead tY trhs0 tnf tmj trhs ∈ lrel $ >
+  $ G ⇒ ra_rec_ty td tv ti tRT ∈ lrel $ >
+  $ G ⇒ tRT ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_sty tg ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ tRT te4 ⟨ kc_pi , scons tTY (scons tC ∅) ⟩ ∈ lrel3 J $ >
+  $ G ⇒ ra_inst ⟨ kc_nz , ∅ ⟩ tC tmj tT ∈ lrel $ >
+  $ G ⇒ ra_eeqv ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ ⟨ kc_ind_ctor , scons td2 (scons ti (scons tc ∅)) ⟩ ∈ lrel2 $ >
+  $ G ⇒ ra_sty tg ⟨ kc_ind_ctor , scons td2 (scons ti (scons tc ∅)) ⟩ tCT tmj tT2 ∈ lrel3 J $ >
+  $ G ⇒ ra_aeq tg tT2 tTY ∈ lrel3 J $ >
+  $ G ⇒ te4 ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tmj ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ti ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ tc ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ tR ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r = dt u (mcv H) trhs w r ∧ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r ∈ dt u (mcv H) tT w r $;
