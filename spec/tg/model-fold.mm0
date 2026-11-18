@@ -2164,3 +2164,254 @@ theorem ifold_comp (G: hyps) (H J R: class) (u w p cv mv tc td tb tp tt tn tm te
   $ G ⇒ iminx td sj sc sk $ >
   $ G ⇒ apn (vat mv (inmin td) sk) (scat sh pf) ∈ u $ >
   $ G ⇒ fv (ifold u (dnf u (mcv H)) td w p mv) ⟨ sj , ⟨ pa , itup td sj sc pg w ⟩ ⟩ = apn (vat mv (inmin td) sk) (scat sh pf) $;
+
+-- --------------------------------------------------------------------------
+-- Iota (E6): instantiation at `Π` and application nodes
+-- --------------------------------------------------------------------------
+
+--| A closed application: both parts are closed.
+theorem closed_app_inv (G: hyps) (tx ta tb: set): $ G ⇒ ra_closed tx ⟨ kc_app , scons ta (scons tb ∅) ⟩ ∈ lrel $ > $ G ⇒ ra_closed tx ta ∈ lrel ∧ ra_closed tx tb ∈ lrel $;
+
+--| An instance of a `Π` is a `Π` of the parts' instances (the body's a binder deeper).
+--| @freshen G x
+--| @freshen G y
+theorem inst_pi_inv {x y: set} (G: hyps) (tk ta tb tc t4: set): $ G ⇒ ra_inst tk ⟨ kc_pi , scons ta (scons tb ∅) ⟩ tc t4 ∈ lrel $ > $ G ⇒ ∃ x ∃ y (t4 = ⟨ kc_pi , scons x (scons y ∅) ⟩ ∧ ra_inst tk ta tc x ∈ lrel ∧ ra_inst ⟨ kc_s , scons tk ∅ ⟩ tb tc y ∈ lrel) $;
+
+--| An instance of an application is the application of the parts' instances.
+--| @freshen G x
+--| @freshen G y
+theorem inst_app_inv {x y: set} (G: hyps) (tk ta tb tc t4: set): $ G ⇒ ra_inst tk ⟨ kc_app , scons ta (scons tb ∅) ⟩ tc t4 ∈ lrel $ > $ G ⇒ ∃ x ∃ y (t4 = ⟨ kc_app , scons x (scons y ∅) ⟩ ∧ ra_inst tk ta tc x ∈ lrel ∧ ra_inst tk tb tc y ∈ lrel) $;
+
+--| `pinst` at a `Π`: a `Π` of the parts' instances along the same spine (the body's a binder deeper).
+--| @freshen G x
+--| @freshen G z
+theorem pinst_pi_inv {x z: set} (G: hyps) (ti ts ta tb tr: set): $ G ⇒ ra_pinst ti ts ⟨ kc_pi , scons ta (scons tb ∅) ⟩ tr ∈ lrel $ > $ G ⇒ ∃ x ∃ z (tr = ⟨ kc_pi , scons x (scons z ∅) ⟩ ∧ ra_pinst ti ts ta x ∈ lrel ∧ ra_pinst ⟨ kc_s , scons ti ∅ ⟩ ts tb z ∈ lrel) $;
+
+--| `pinst` at an application: the application of the parts' instances along the same spine.
+--| @freshen G x
+--| @freshen G z
+theorem pinst_app_inv {x z: set} (G: hyps) (ti ts ta tb tr: set): $ G ⇒ ra_pinst ti ts ⟨ kc_app , scons ta (scons tb ∅) ⟩ tr ∈ lrel $ > $ G ⇒ ∃ x ∃ z (tr = ⟨ kc_app , scons x (scons z ∅) ⟩ ∧ ra_pinst ti ts ta x ∈ lrel ∧ ra_pinst ti ts tb z ∈ lrel) $;
+
+--| An application of expressions is an expression.
+theorem ofsort_app_intro (G: hyps) (A B: class): $ G ⇒ A ∈ ofsort lsig lopen ks_expr $ > $ G ⇒ B ∈ ofsort lsig lopen ks_expr $ > $ G ⇒ ⟨ kc_app , scons A (scons B ∅) ⟩ ∈ ofsort lsig lopen ks_expr $;
+
+--| `sty` at the head (not an application): no argument, the type unchanged.
+theorem sty_head_inv (G: hyps) (J K S: class) (c tA tT: set): $ G ⇒ ra_sty c ⟨ K , S ⟩ tA ⟨ K , S ⟩ tT ∈ lrel3 J $ > $ G ⇒ isset K $ > $ G ⇒ ¬ K = kc_app $ > $ G ⇒ tT = tA $;
+
+--| `sty` at an application (the head not one): the function's type is a `Π`, the argument has its
+--| domain, and the type is the body's instance.
+--| @freshen G x
+--| @freshen G y
+theorem sty_app_inv {x y: set} (G: hyps) (J K S: class) (c tA te ta tT: set): $ G ⇒ ra_sty c ⟨ K , S ⟩ tA ⟨ kc_app , scons te (scons ta ∅) ⟩ tT ∈ lrel3 J $ > $ G ⇒ isset K $ > $ G ⇒ ¬ K = kc_app $ > $ G ⇒ ∃ x ∃ y (ra_sty c ⟨ K , S ⟩ tA te ⟨ kc_pi , scons x (scons y ∅) ⟩ ∈ lrel3 J ∧ ra_deq c ta ta x ∈ J ∧ ra_inst ⟨ kc_nz , ∅ ⟩ y ta tT ∈ lrel) $;
+
+--| A context of length `0` is empty.
+theorem clen_z_inv (G: hyps) (tq: set): $ G ⇒ ra_clen tq ⟨ kc_nz , ∅ ⟩ ∈ lrel $ > $ G ⇒ tq = ⟨ kc_nil , ∅ ⟩ $;
+
+--| A context of length `s k`: an entry in front of one of length `k`.
+--| @freshen G a
+--| @freshen G p
+theorem clen_s_inv {a p: set} (G: hyps) (tq tk: set): $ G ⇒ ra_clen tq ⟨ kc_s , scons tk ∅ ⟩ ∈ lrel $ > $ G ⇒ ∃ a ∃ p (tq = ⟨ kc_cons , scons a (scons p ∅) ⟩ ∧ ra_clen p tk ∈ lrel) $;
+
+--| `pis` over the empty context: the body.
+theorem pis_nil_inv (G: hyps) (tb tt: set): $ G ⇒ ra_pis ⟨ kc_nil , ∅ ⟩ tb tt ∈ lrel $ > $ G ⇒ tt = tb $;
+
+--| `pis` over `A :: P`: `pis` over `P` of the `Π` of `A` and the body.
+theorem pis_cons_inv (G: hyps) (ta tp tb tt: set): $ G ⇒ ra_pis ⟨ kc_cons , scons ta (scons tp ∅) ⟩ tb tt ∈ lrel $ > $ G ⇒ ra_pis tp ⟨ kc_pi , scons ta (scons tb ∅) ⟩ tt ∈ lrel $;
+
+--| The arguments of an application of a spine: the argument's value in front of the spine's.
+theorem sarg_app (G: hyps) (M K S: class) (u w r te ta tk: set): $ G ⇒ ra_spine ⟨ K , S ⟩ te tk ∈ lrel $ > $ G ⇒ ⟨ K , S ⟩ ∈ trees ω $ > $ G ⇒ ¬ K = kc_pi $ > $ G ⇒ ¬ K = kc_app $ > $ G ⇒ te ∊ trees ω $ > $ G ⇒ ta ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ sarg u (dnf u M) ⟨ kc_app , scons te (scons ta ∅) ⟩ w r = scons (dt u M ta w r) (sarg u (dnf u M) te w r) $;
+
+--| The walk over `sty` (E6): for a head `⟨ K , S ⟩` (not an application or a `Π`) of type `tA`, binders
+--| `tq` over `tp`, and a spine `tf` of as many arguments as `tq` has entries, typed by `sty` with
+--| every atom of `J` true: the type left, `tt`, is the instance of `tp` along the spine re-headed
+--| to a type of a block (`pinst`), and the spine's arguments at a valuation `r` of the context are
+--| a valuation of `tq` over `r`.
+--| @freshen G g
+theorem sty_pinst {g: set} (G: hyps) (J M K S: class) (u w c r tA d0 i0: set) (tf tn tq tp tt: set):
+  $ G ⇒ jval u M J $ >
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ r ∊ sat u M c w $ >
+  $ G ⇒ ⟨ K , S ⟩ ∈ trees ω $ >
+  $ G ⇒ ¬ K = kc_pi $ >
+  $ G ⇒ ¬ K = kc_app $ >
+  $ G ⇒ isset K $ >
+  $ G ⇒ ⟨ kc_ind_ty , scons d0 (scons i0 ∅) ⟩ ∈ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_sty c ⟨ K , S ⟩ tA tf tt ∈ lrel3 J $ >
+  $ G ⇒ ra_spine ⟨ K , S ⟩ tf tn ∈ lrel $ >
+  $ G ⇒ ra_pis tq tp tA ∈ lrel $ >
+  $ G ⇒ ra_clen tq tn ∈ lrel $ >
+  $ G ⇒ tf ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ∃ g (ra_rehead ⟨ K , S ⟩ ⟨ kc_ind_ty , scons d0 (scons i0 ∅) ⟩ tn tf g ∈ lrel ∧ g ∊ ofsort lsig lopen ks_expr ∧ ra_pinst ⟨ kc_nz , ∅ ⟩ g tp tt ∈ lrel ∧ sarg u (dnf u M) g w r = sarg u (dnf u M) tf w r ∧ sarg u (dnf u M) tf w r ∈ esat u (dsh u M r) tq w) $;
+
+--| An instance of a type of a block is that type.
+theorem inst_ind_ty_inv (G: hyps) (tk ta tb tc t4: set): $ G ⇒ ra_inst tk ⟨ kc_ind_ty , scons ta (scons tb ∅) ⟩ tc t4 ∈ lrel $ > $ G ⇒ t4 = ⟨ kc_ind_ty , scons ta (scons tb ∅) ⟩ $;
+
+--| `pinst` at a type of a block: that type.
+theorem pinst_ind_ty_inv (G: hyps) (ti ts ta tb tr: set): $ G ⇒ ra_pinst ti ts ⟨ kc_ind_ty , scons ta (scons tb ∅) ⟩ tr ∈ lrel $ > $ G ⇒ tr = ⟨ kc_ind_ty , scons ta (scons tb ∅) ⟩ $;
+
+--| `pinst` at a type of the block applied to arguments (a spine `te`): a spine of as many arguments, and
+--| its arguments at `q ++ s` are `te`'s at `q ++ a ++ s`, for `a` the arguments of `ts` at `s`.
+theorem pinst_sarg (G: hyps) (M: class) (u w ti ts td tj q s: set) (te tr tn: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ ts ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ q ∊ fseq u $ >
+  $ G ⇒ cdm q = fv nvf ti $ >
+  $ G ⇒ s ∊ fseq u $ >
+  $ G ⇒ sarg u (dnf u M) ts w s ∈ fseq u $ >
+  $ G ⇒ ra_pinst ti ts te tr ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons tj ∅) ⟩ te tn ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons tj ∅) ⟩ tr tn ∈ lrel ∧ sarg u (dnf u M) tr w (scat q s) = sarg u (dnf u M) te w (scat q (scat (sarg u (dnf u M) ts w s) s)) $;
+
+--| `aeq` from a type of the block applied to arguments (a spine `te`), with every atom of `J` true:
+--| the other side is a spine of as many arguments, with the same values at a valuation of the context.
+theorem aeq_sarg (G: hyps) (J M: class) (u w c r td tj: set) (te tt tn: set):
+  $ G ⇒ jval u M J $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ r ∊ sat u M c w $ >
+  $ G ⇒ ra_aeq c te tt ∈ lrel3 J $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons tj ∅) ⟩ te tn ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons tj ∅) ⟩ tt tn ∈ lrel ∧ sarg u (dnf u M) te w r = sarg u (dnf u M) tt w r $;
+
+-- --------------------------------------------------------------------------
+-- Iota (E6): the lengths of the recursor's telescopes
+-- --------------------------------------------------------------------------
+
+--| `add a b c` gives `add (s a) b (s c)`.
+theorem add_suc_l (G: hyps) (ta tb tc: set): $ G ⇒ ra_add ta tb tc ∈ lrel $ > $ G ⇒ ra_add ⟨ kc_s , scons ta ∅ ⟩ tb ⟨ kc_s , scons tc ∅ ⟩ ∈ lrel $;
+
+--| `add` commutes, for a first summand that is a numeral (`add 0 a a`).
+theorem add_comm (G: hyps) (ta tb tc: set): $ G ⇒ ra_add ⟨ kc_nz , ∅ ⟩ ta ta ∈ lrel $ > $ G ⇒ ra_add ta tb tc ∈ lrel $ > $ G ⇒ ra_add tb ta tc ∈ lrel $;
+
+--| A context's length is a numeral: `add 0 n n`.
+theorem clen_num (G: hyps) (tq tn: set): $ G ⇒ ra_clen tq tn ∈ lrel $ > $ G ⇒ ra_add ⟨ kc_nz , ∅ ⟩ tn tn ∈ lrel $;
+
+--| One entry behind a context: one more.
+theorem clen_capp1 (G: hyps) (tp ta tr tn: set): $ G ⇒ ra_capp tp ⟨ kc_cons , scons ta (scons ⟨ kc_nil , ∅ ⟩ ∅) ⟩ tr ∈ lrel $ > $ G ⇒ ra_clen tp tn ∈ lrel $ > $ G ⇒ ra_clen tr ⟨ kc_s , scons tn ∅ ⟩ ∈ lrel $;
+
+--| Contexts append (`capp P G R`, `P` in front), and the lengths add.
+--| @freshen G r
+--| @freshen G c
+theorem capp_clen_ex {r c: set} (G: hyps) (tp tg ta tb: set): $ G ⇒ ra_clen tp ta ∈ lrel $ > $ G ⇒ ra_clen tg tb ∈ lrel $ > $ G ⇒ ∃ r ∃ c (ra_capp tp tg r ∈ lrel ∧ ra_clen r c ∈ lrel ∧ ra_add tb ta c ∈ lrel) $;
+
+--| `pis` over an appended context: over the front part, then over the rest.
+theorem pis_capp (G: hyps) (tp tg tr tb tm tt: set): $ G ⇒ ra_capp tp tg tr ∈ lrel $ > $ G ⇒ ra_pis tp tb tm ∈ lrel $ > $ G ⇒ ra_pis tg tm tt ∈ lrel $ > $ G ⇒ ra_pis tr tb tt ∈ lrel $;
+
+--| The motives' telescope has one entry for each type.
+theorem motives_clen (G: hyps) (t1 t2 t3 tj tT tq tn tm: set): $ G ⇒ ra_motives t1 t2 t3 tj tT tq ∈ lrel $ > $ G ⇒ ra_ntys tT tn tm ∈ lrel $ > $ G ⇒ ra_clen tq tn ∈ lrel $;
+
+--| The minors of one type's constructors: one entry for each constructor.
+theorem cminors_clen (G: hyps) (t1 t2 t3 t5 tk tc tC tq tn: set): $ G ⇒ ra_cminors t1 t2 t3 tk t5 tc tC tq ∈ lrel $ > $ G ⇒ ra_clen_c tC tn ∈ lrel $ > $ G ⇒ ra_clen tq tn ∈ lrel $;
+
+--| The minors' telescope has one entry for each constructor of the block.
+theorem minors_clen (G: hyps) (t1 t2 t3 tk ti tT tq tn tm: set): $ G ⇒ ra_minors t1 t2 t3 tk ti tT tq ∈ lrel $ > $ G ⇒ ra_ntys tT tn tm ∈ lrel $ > $ G ⇒ ra_clen tq tm ∈ lrel $;
+
+--| A lifted type of binders over a sort is one, with as many binders.
+theorem lift_isort (G: hyps) (tk td tF tG tn tl: set): $ G ⇒ ra_lift tk td tF tG ∈ lrel $ > $ G ⇒ ra_isort tF tn tl ∈ lrel $ > $ G ⇒ ra_isort tG tn tl ∈ lrel $;
+
+--| The recursor's tail as a context: `rtail` over a type with `tn` binders over a sort gives `pis` of a
+--| context of `tn` entries over a body that `rtail` gives at that sort and depth (`Π I. X2 @ #0`).
+--| @freshen G x
+--| @freshen G b
+theorem rtail_pis {x b: set} (G: hyps) (t1 t2 t3 t4 t5 tF tB tn tl: set): $ G ⇒ ra_rtail t1 t2 t3 t4 t5 ⟨ kc_nz , ∅ ⟩ tF tB ∈ lrel $ > $ G ⇒ ra_isort tF tn tl ∈ lrel $ > $ G ⇒ ∃ x ∃ b (ra_pis x b tB ∈ lrel ∧ ra_clen x tn ∈ lrel ∧ ra_rtail t1 t2 t3 t4 t5 tn ⟨ kc_srt , scons tl ∅ ⟩ b ∈ lrel) $;
+
+--| `pargs X d n e`: `e` is `X` applied to `n` arguments.
+theorem pargs_spine (G: hyps) (tX td tn te: set): $ G ⇒ ra_pargs tX td tn te ∈ lrel $ > $ G ⇒ ra_spine tX te tn ∈ lrel $;
+
+--| A spine over a spine is a spine over its head.
+--| @freshen G c
+theorem spine_trans {c: set} (G: hyps) (th tx ta te tb: set): $ G ⇒ ra_spine th tx ta ∈ lrel $ > $ G ⇒ ra_spine tx te tb ∈ lrel $ > $ G ⇒ ∃ c (ra_spine th te c ∈ lrel) $;
+
+-- --------------------------------------------------------------------------
+-- Iota (E6): `sinst` through a constructor's type
+-- --------------------------------------------------------------------------
+
+--| No numeral is below itself: `s a ≤ a` is not derivable.
+theorem le_suc_self (G: hyps) (a: set): $ G ⇒ ra_le ⟨ kc_s , scons a ∅ ⟩ a ∈ lrel $ > $ G ⇒ ⊥ $;
+
+--| A lifted type of a block is that type.
+theorem lift_ind_ty_inv (G: hyps) (tk td ta tb t4: set): $ G ⇒ ra_lift tk td ⟨ kc_ind_ty , scons ta (scons tb ∅) ⟩ t4 ∈ lrel $ > $ G ⇒ t4 = ⟨ kc_ind_ty , scons ta (scons tb ∅) ⟩ $;
+
+--| A closed variable is below the bound.
+theorem closed_bvar_inv (G: hyps) (tx ti: set): $ G ⇒ ra_closed tx ⟨ kc_bvar , scons ti ∅ ⟩ ∈ lrel $ > $ G ⇒ ra_le ⟨ kc_s , scons ti ∅ ⟩ tx ∈ lrel $;
+
+--| `sinst` at a `Π` (the types `j` to `n`, `add j d n`): a `Π` of the parts' `sinst`, the body's a binder deeper.
+--| @freshen G x
+--| @freshen G c
+theorem sinst_pi_inv {x c: set} (G: hyps) (td tn tj tk ta tb tz tdd: set): $ G ⇒ ra_add tj tdd tn ∈ lrel $ > $ G ⇒ ra_sinst td tj tn tk ⟨ kc_pi , scons ta (scons tb ∅) ⟩ tz ∈ lrel $ > $ G ⇒ ∃ x ∃ c (tz = ⟨ kc_pi , scons x (scons c ∅) ⟩ ∧ ra_sinst td tj tn tk ta x ∈ lrel ∧ ra_sinst td tj tn ⟨ kc_s , scons tk ∅ ⟩ tb c ∈ lrel) $;
+
+--| `sinst` at an application: the application of the parts' `sinst`.
+--| @freshen G x
+--| @freshen G c
+theorem sinst_app_inv {x c: set} (G: hyps) (td tn tj tk ta tb tz tdd: set): $ G ⇒ ra_add tj tdd tn ∈ lrel $ > $ G ⇒ ra_sinst td tj tn tk ⟨ kc_app , scons ta (scons tb ∅) ⟩ tz ∈ lrel $ > $ G ⇒ ∃ x ∃ c (tz = ⟨ kc_app , scons x (scons c ∅) ⟩ ∧ ra_sinst td tj tn tk ta x ∈ lrel ∧ ra_sinst td tj tn tk tb c ∈ lrel) $;
+
+--| `sinst` at a type of a block: that type.
+theorem sinst_ind_ty_inv (G: hyps) (td tn ta tb tj tk tz tdd: set): $ G ⇒ ra_add tj tdd tn ∈ lrel $ > $ G ⇒ ra_sinst td tj tn tk ⟨ kc_ind_ty , scons ta (scons tb ∅) ⟩ tz ∈ lrel $ > $ G ⇒ tz = ⟨ kc_ind_ty , scons ta (scons tb ∅) ⟩ $;
+
+--| `sinst` (the types `j` to `n`) at the variable of type `i` (`#m`, `m = k + x`, `i = j + x`, `i < n`): `ind_ty D i`.
+theorem sinst_bvar (G: hyps) (td tn ti tj tk tm tx tz tdd: set): $ G ⇒ ra_add tj tdd tn ∈ lrel $ > $ G ⇒ ra_sinst td tj tn tk ⟨ kc_bvar , scons tm ∅ ⟩ tz ∈ lrel $ > $ G ⇒ ra_add tk tx tm ∈ lrel $ > $ G ⇒ ra_add tj tx ti ∈ lrel $ > $ G ⇒ ra_le ⟨ kc_s , scons ti ∅ ⟩ tn ∈ lrel $ > $ G ⇒ tz = ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ $;
+
+--| `sinst` along a spine: a spine of as many arguments over the head's `sinst`.
+--| @freshen G x
+theorem sinst_spine {x: set} (G: hyps) (td tj tn tk th tdd te tm tz: set): $ G ⇒ ra_add tj tdd tn ∈ lrel $ > $ G ⇒ ra_spine th te tm ∈ lrel $ > $ G ⇒ ra_sinst td tj tn tk te tz ∈ lrel $ > $ G ⇒ ∃ x (ra_spine x tz tm ∈ lrel ∧ ra_sinst td tj tn tk th x ∈ lrel) $;
+
+--| The second summand of `add` is a numeral.
+theorem add_num_r (G: hyps) (ta tb tc: set): $ G ⇒ ra_add ta tb tc ∈ lrel $ > $ G ⇒ ra_add ⟨ kc_nz , ∅ ⟩ tb tb ∈ lrel $;
+
+--| A constructor's type `tK` with `tf` binders, well formed (`cwf` at depth `0`, `tz` the numeral `0`), after `sinst`
+--| (`tZ`): `pis` of a context of `tf` entries over the `sinst` of its result `e`, an application of the type
+--| (`indapp` at depth `tf`).
+--| @freshen G x
+--| @freshen G b
+--| @freshen G e
+--| @freshen G h
+theorem ctor_pis {x b e h: set} (G: hyps) (J: class) (td tn tnp tl ti tc tK tf tZ tz: set):
+  $ G ⇒ ra_add tz tn tn ∈ lrel $ >
+  $ G ⇒ ra_add tz tnp tnp ∈ lrel $ >
+  $ G ⇒ ra_npis tK tf ∈ lrel $ >
+  $ G ⇒ ra_sinst td tz tn tnp tK tZ ∈ lrel $ >
+  $ G ⇒ ra_cwf td tn tnp tl ti tc tz tK ∈ lrel3 J $ >
+  $ G ⇒ tz = ⟨ kc_nz , ∅ ⟩ $ >
+  $ G ⇒ ∃ x ∃ b ∃ e ∃ h (ra_pis x b tZ ∈ lrel ∧ ra_clen x tf ∈ lrel ∧ ra_sinst td tz tn h e b ∈ lrel ∧ ra_indapp td tn tnp tf e ti ∈ lrel ∧ ra_add tf tnp h ∈ lrel) $;
+
+--| The `sinst` (at depth `th = tg + tnp`) of an application of type `ti` of the block (`indapp`) is a spine of `ind_ty D i`.
+--| @freshen G m
+theorem ctor_res {m: set} (G: hyps) (td tn tnp ti tg te th tb tz: set):
+  $ G ⇒ ra_indapp td tn tnp tg te ti ∈ lrel $ >
+  $ G ⇒ ra_add tg tnp th ∈ lrel $ >
+  $ G ⇒ ra_sinst td tz tn th te tb ∈ lrel $ >
+  $ G ⇒ ra_add tz tn tn ∈ lrel $ >
+  $ G ⇒ tz = ⟨ kc_nz , ∅ ⟩ $ >
+  $ G ⇒ ∃ m (ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tb m ∈ lrel) $;
+
+-- --------------------------------------------------------------------------
+-- Iota (E6): from valuations to paths; the typing along `sty`
+-- --------------------------------------------------------------------------
+
+--| From a valuation to a path (the converse of `lrel_pis_etel`): for `pis tq tb tt`, a valuation `p` of `tq` over `s`
+--| and a path of the body at `p ++ s` with the fields `x` give a path of `tt` at `s` with the fields `x ++ p`
+--| and the same arguments.
+--| @freshen G h
+--| @freshen G l
+theorem pis_etel_intro {h l: set} (G: hyps) (M: class) (u w s tt a tq tb p x g1 t1: set):
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ s ∊ fseq u $ >
+  $ G ⇒ ra_pis tq tb tt ∈ lrel $ >
+  $ G ⇒ p ∊ esat u (dsh u M s) tq w $ >
+  $ G ⇒ ⟨ x , ⟨ g1 , ⟨ t1 , a ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tb w (scat p s) $ >
+  $ G ⇒ ∃ h ∃ l (⟨ scat x p , ⟨ h , ⟨ l , a ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tt w s) $;
+
+--| The typing along `sty`: when the head's value is an element of its type's, and every atom of `J` is true, the
+--| spine's value is an element of the value of the type left, at a valuation of the context.
+theorem sty_ty_sem (G: hyps) (J M K S: class) (u w c r tA: set) (tf tT: set):
+  $ G ⇒ jval u M J $ >
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ r ∊ sat u M c w $ >
+  $ G ⇒ isset K $ >
+  $ G ⇒ ¬ K = kc_app $ >
+  $ G ⇒ dt u M ⟨ K , S ⟩ w r ∈ dt u M tA w r $ >
+  $ G ⇒ ra_sty c ⟨ K , S ⟩ tA tf tT ∈ lrel3 J $ >
+  $ G ⇒ tf ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ dt u M tf w r ∈ dt u M tT w r $;
