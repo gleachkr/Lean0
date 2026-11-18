@@ -3677,3 +3677,371 @@ theorem ind_iota_wf (G: hyps) (H J: class) (u w r tg td td2 tv ti tc tb tp tt tn
   $ G ⇒ tc ∊ ofsort lsig lopen ks_nat $ >
   $ G ⇒ tR ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r = dt u (mcv H) trhs w r ∧ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r ∈ dt u (mcv H) tT w r $;
+
+-- --------------------------------------------------------------------------
+-- Structures (E8): the elements of a block's type
+-- --------------------------------------------------------------------------
+
+--| A point of the family is a constructor's: a valuation `p` of the parameters and a path of a constructor's type
+--| over `p` and the block's types, with the point's arguments, whose fields behind the constructor's number are the
+--| point's value (`ifam_elim`, with the path lifted from the candidate to the family by `etel_ixs_mono`).
+--| @freshen G p
+--| @freshen G c
+--| @freshen G k
+--| @freshen G f
+--| @freshen G g
+--| @freshen G t
+theorem ifam_pt_path {p c k f g t: set} (G: hyps) (H J: class) (u w r0 tg td tb tp tt sj sa sx: set):
+  $ G ⇒ iwf u H J tg td w r0 $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ⟨ sj , ⟨ sa , sx ⟩ ⟩ ∈ ifam u (dnf u (mcv H)) td w $ >
+  $ G ⇒ ∃ p ∃ c ∃ k ∃ f ∃ g ∃ t (p ∊ esat u (dnf u (mcv H)) tp w ∧ ictk td sj c k ∧ ⟨ f , ⟨ g , ⟨ t , sa ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) k w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) ∧ sx = scons c g) $;
+
+--| A point of the family at type `ti` with `tq` indices, in full: with `ifam_pt_path`, the point's arguments are `tq`
+--| indices `e` before the path's own parameters `p` (the trivial candidate has the point, `ifam_supp`, and a path's
+--| result has its own parameters, `iop0_fiber`).
+--| @freshen G p
+--| @freshen G c
+--| @freshen G k
+--| @freshen G f
+--| @freshen G g
+--| @freshen G t
+--| @freshen G e
+theorem ifam_pt_full {p c k f g t e: set} (G: hyps) (H J: class) (u w r0 tg td tb tp tt tnp ti tF tE tq tl sj sa sx: set):
+  $ G ⇒ iwf u H J tg td w r0 $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ⟨ sj , ⟨ sa , sx ⟩ ⟩ ∈ ifam u (dnf u (mcv H)) td w $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ fv nvf ti = sj $ >
+  $ G ⇒ ra_isort tF tq tl ∈ lrel $ >
+  $ G ⇒ ∃ p ∃ c ∃ k ∃ f ∃ g ∃ t ∃ e (p ∊ esat u (dnf u (mcv H)) tp w ∧ ictk td sj c k ∧ ⟨ f , ⟨ g , ⟨ t , sa ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) k w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) ∧ sx = scons c g ∧ sa = scat e p ∧ e ∊ fseq u ∧ cdm e = fv nvf tq) $;
+
+--| The elements of a block's type: an element `x` of the value of a spine `tS` of `ind_ty td ti` (with as many arguments
+--| as the type's `tq` indices and the parameters) is a constructor's point (`itup`: the fields `g` behind the constructor's
+--| number, `∅` for a proposition), for a path of the constructor's type over a valuation `p` of the parameters and the
+--| block's types, whose arguments are the spine's: indices `e` before `p` (`ient_pt`, `ifam_pt_full`).
+--| @freshen G p
+--| @freshen G c
+--| @freshen G k
+--| @freshen G f
+--| @freshen G g
+--| @freshen G t
+--| @freshen G e
+theorem ity_elem {p c k f g t e: set} (G: hyps) (H J: class) (u w r r0 tg td tb tp tt tnp tn tm ti tF tE tq tl tS tk x: set):
+  $ G ⇒ iwf u H J tg td w r0 $ >
+  $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_isort tF tq tl ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tS tk ∈ lrel $ >
+  $ G ⇒ fv nvf tk = nadd (fv nvf tq) (fv nvf tnp) $ >
+  $ G ⇒ tS ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ x ∊ dt u (mcv H) tS w r $ >
+  $ G ⇒ ∃ p ∃ c ∃ k ∃ f ∃ g ∃ t ∃ e (p ∊ esat u (dnf u (mcv H)) tp w ∧ ictk td (fv nvf ti) c k ∧ ⟨ f , ⟨ g , ⟨ t , sarg u (dnf u (mcv H)) tS w r ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) k w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) ∧ x = itup td (fv nvf ti) c g w ∧ sarg u (dnf u (mcv H)) tS w r = scat e p ∧ e ∊ fseq u ∧ cdm e = fv nvf tq) $;
+
+--| A path's fields in order (`p2`) are its fields as a valuation (`p1`) backwards: field `i` is the valuation's entry `m`
+--| when `i + m + 1` is the number of fields (for a type with `npis`: binders over an application or a variable).
+--| @freshen G i
+--| @freshen G m
+theorem etel_rev {i m: set} (G: hyps) (E: class) (u w r t1 t2 p1 p2 p3 p4: set):
+  $ G ⇒ ra_npis t1 t2 ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ ⟨ p1 , ⟨ p2 , ⟨ p3 , p4 ⟩ ⟩ ⟩ ∈ etel u E t1 w r $ >
+  $ G ⇒ ∀ i ∀ m (i ∊ ω → m ∊ ω → nadd i (suc m) = cdm p1 → fv p2 i = fv p1 m) $;
+
+--| The value of `tY` applied to the projections of `te` (`projs`): `tY`'s applied to a sequence `v` of the `tk` values
+--| `fv (dt te) (suc i)`, the last projection first (`v`'s entry `m` is projection `i` when `i + m + 1` is `tk`).
+--| @freshen G v
+--| @freshen G i
+--| @freshen G m
+--| @freshen G y
+theorem projs_val {v i m y: set} (G: hyps) (M: class) (u w r tb te tk tY tM: set):
+  $ G ⇒ ra_projs tb te tk tY tM ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ ∃ v (v ∊ fseq {y | y = y} ∧ cdm v = fv nvf tk ∧ ∀ i ∀ m (i ∊ ω → m ∊ ω → nadd i (suc m) = fv nvf tk → fv v m = fv (dt u M te w r) (suc i)) ∧ dt u M tM w r = apn (dt u M tY w r) v) $;
+
+--| The constructor of a type with one constructor `tK`: its number is `0` and its type `tK`.
+theorem struct_ictk (G: hyps) (td tb tp tt ti tF tK c k: set):
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_nth_ty tt ti tF ⟨ kc_ccons , scons tK (scons ⟨ kc_cnil , ∅ ⟩ ∅) ⟩ ∈ lrel $ > $ G ⇒ ictk td (fv nvf ti) c k $ >
+  $ G ⇒ c = ∅ ∧ k = tK $;
+
+--| A constructor of a well-formed block denotes its value `ictor` (`hctor`; the value is an element of the universe).
+theorem dt_ind_ctor_wf (G: hyps) (H J: class) (u w r r0 tg td tb tp tt tnp tn tm ti tc: set):
+  $ G ⇒ iwf u H J tg td w r0 $ > $ G ⇒ hctor ⊆ H $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_clen tp tnp ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ > $ G ⇒ ti ∊ trees ω $ > $ G ⇒ tc ∊ trees ω $ > $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ w r = ictor u (dnf u (mcv H)) td (fv nvf ti) (fv nvf tc) w $;
+
+--| Structure eta (`ind_eta`) in the model, from the rule's premises in pieces: for a type `ti` with one constructor `tK` and no
+--| indices, an element `te` of a spine `tS` of the type has the value of the constructor applied to `tS`'s arguments and
+--| the projections of `te` (`tM`). Both are the constructor's point at the element's fields, or empty for a proposition
+--| (`ity_elem`, `projs_val`, `etel_rev`, `ictor_apn_c`).
+theorem ind_eta_wf (G: hyps) (H J: class) (u w r r0 tg td tb tp tt tnp tn tm ti tF tK tl tS tY tnf te tM: set):
+  $ G ⇒ iwf u H J tg td w r0 $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF ⟨ kc_ccons , scons tK (scons ⟨ kc_cnil , ∅ ⟩ ∅) ⟩ ∈ lrel $ >
+  $ G ⇒ ra_isort tF ⟨ kc_nz , ∅ ⟩ tl ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tS tnp ∈ lrel $ >
+  $ G ⇒ tS ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_rehead ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ ⟨ kc_ind_ctor , scons td (scons ti (scons ⟨ kc_nz , ∅ ⟩ ∅)) ⟩ tnp tS tY ∈ lrel $ >
+  $ G ⇒ ra_npis tK tnf ∈ lrel $ >
+  $ G ⇒ ra_projs tb te tnf tY tM ∈ lrel $ >
+  $ G ⇒ dt u (mcv H) te w r ∈ dt u (mcv H) tS w r $ >
+  $ G ⇒ dt u (mcv H) te w r = dt u (mcv H) tM w r $;
+
+-- --------------------------------------------------------------------------
+-- Structures (E8): the fields of a proposition
+-- --------------------------------------------------------------------------
+
+--| The walk over `fprops`: a path of the rest `t0` of a constructor's type whose next `n0` fields are propositions has
+--| `∅` for each of them. The path is over `q0` (the earlier fields and the parameters), the types' values `xs` and a
+--| valuation `s` such that `q0 ++ s` satisfies the context `c0` of the typings; `tz` names `0`.
+--| @freshen G i
+--| @freshen G x4
+--| @freshen G x5
+theorem fprops_fields {i x4 x5: set} (G: hyps) (J M: class) (u w td tn tnp xs s tz t0 c0 d0 n0 q0 e0 p1 p2 p3 p4: set):
+  $ G ⇒ jval u M J $ >
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ xs ∊ fseq u $ >
+  $ G ⇒ s ∊ fseq u $ >
+  $ G ⇒ td ∊ trees ω $ >
+  $ G ⇒ tz = ⟨ kc_nz , ∅ ⟩ $ >
+  $ G ⇒ nadd (fv nvf tz) (cdm xs) = fv nvf tn $ >
+  $ G ⇒ ∀ x4 ∀ x5 (x4 ∊ cdm xs → x5 ∊ trees ω → fv nvf x5 = nadd (fv nvf tz) x4 → dt u M ⟨ kc_ind_ty , scons td (scons x5 ∅) ⟩ w ∅ = fv xs x4) $ >
+  $ G ⇒ ra_fprops td tn tnp c0 d0 n0 t0 ∈ lrel3 J $ >
+  $ G ⇒ q0 ∊ fseq u $ >
+  $ G ⇒ cdm q0 = nadd (fv nvf d0) (fv nvf tnp) $ >
+  $ G ⇒ scat q0 s ∈ sat u M c0 w $ >
+  $ G ⇒ e0 = scat q0 (scat xs s) $ >
+  $ G ⇒ ⟨ p1 , ⟨ p2 , ⟨ p3 , p4 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) t0 w e0 $ >
+  $ G ⇒ ∀ i (i ∊ fv nvf n0 → fv p2 i = ∅) $;
+
+--| A constructor's type of a well-formed block is closed at the parameters and the types, and the types' types
+--| are closed over the parameters (`ind_wf`).
+--| @freshen G a
+theorem ctor_closed {a: set} (G: hyps) (J: class) (tg td tb tp tt tnp tn tm ti tF tE tc tK: set):
+  $ G ⇒ ra_ind_wf tg td ∈ lrel3 J $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_clen tp tnp ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ > $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ > $ G ⇒ ra_nth_ctor tE tc tK ∈ lrel $ >
+  $ G ⇒ ra_tys_closed tp tt ∈ lrel ∧ ∃ a (ra_closed a tK ∈ lrel ∧ fv nvf a = nadd (fv nvf tnp) (fv nvf tn)) $;
+
+--| A field that may be projected (`proj_ok`): for a path of the constructor's type `tK` over the parameters `q` and the
+--| block's types, the constructor's point (`itup`: empty for a proposition) has the path's fields up to field `tfi` at
+--| their places. For a proposition the type's sort is not large (`large_nz_level`), so those fields are propositions
+--| (`fprops`), and each is `∅` (`fprops_fields`).
+--| @freshen G i
+theorem proj_ok_fields {i: set} (G: hyps) (H J: class) (u w r r0 tg td tb tp tt tnp tn tm ti tF tE tK tfi q pf pg pt pa: set):
+  $ G ⇒ iwf u H J tg td w r0 $ >
+  $ G ⇒ r ∊ sat u (mcv H) tg w $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor tE ⟨ kc_nz , ∅ ⟩ tK ∈ lrel $ >
+  $ G ⇒ ra_proj_ok tg td ti tfi ∈ lrel3 J $ >
+  $ G ⇒ q ∊ esat u (dnf u (mcv H)) tp w $ >
+  $ G ⇒ ⟨ pf , ⟨ pg , ⟨ pt , pa ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) tK w (scat q (ixs td w (ifam u (dnf u (mcv H)) td w))) $ >
+  $ G ⇒ ∀ i (i ∊ suc (fv nvf tfi) → fv (itup td (fv nvf ti) ∅ pg w) (suc i) = fv pg i) $;
+
+--| The number of a block's types is a numeral.
+theorem ntys_num (G: hyps) (tt tn tm: set): $ G ⇒ ra_ntys tt tn tm ∈ lrel $ > $ G ⇒ ra_add ⟨ kc_nz , ∅ ⟩ tn tn ∈ lrel $;
+
+--| An argument of a spine by its position: when `te` is `tY @ tf` applied to `tk` more arguments, for `tY` a spine of a
+--| head that is not an application or a `Π`, entry `tk` of `te`'s arguments (the last first) is the value of `tf`; and
+--| `te` is a spine of the head.
+--| @freshen G c
+theorem spine_arg {c: set} (G: hyps) (M K S: class) (u w r tY tf tc te tk: set):
+  $ G ⇒ ⟨ K , S ⟩ ∈ trees ω $ >
+  $ G ⇒ ¬ K = kc_pi $ >
+  $ G ⇒ ¬ K = kc_app $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ ra_spine ⟨ K , S ⟩ tY tc ∈ lrel $ >
+  $ G ⇒ tf ∊ trees ω $ >
+  $ G ⇒ ra_spine ⟨ kc_app , scons tY (scons tf ∅) ⟩ te tk ∈ lrel $ >
+  $ G ⇒ fv (sarg u (dnf u M) te w r) (fv nvf tk) = dt u M tf w r ∧ ∃ c (ra_spine ⟨ K , S ⟩ te c ∈ lrel) $;
+
+--| The projection of a constructor application (`proj_mk`) in the model, from the rule's premises in pieces: the major `tmj`
+--| is the constructor of type `ti` applied along its type (`sty`), `tf` its argument `tii` places from the end, field `tfi`
+--| (`tii + tfi + 1` fields). The application's value is the constructor's point at a path of the constructor's type
+--| (`iota_ctor_args`), whose field `tfi` is the argument's value (`proj_ok_fields`, `etel_rev`, `spine_arg`).
+theorem proj_mk_wf (G: hyps) (H J: class) (u w r r0 tg td tb tp tt tnp tn tm ti tF tE tK tK2 tCT tnf tnq tmj tT2 tfi tii tY tf: set):
+  $ G ⇒ iwf u H J tg td w r0 $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ r ∊ sat u (mcv H) tg w $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor tE ⟨ kc_nz , ∅ ⟩ tK ∈ lrel $ >
+  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tK tK2 ∈ lrel $ >
+  $ G ⇒ ra_pis tp tK2 tCT ∈ lrel $ >
+  $ G ⇒ ra_npis tK tnf ∈ lrel $ >
+  $ G ⇒ ra_add tnp tnf tnq ∈ lrel $ >
+  $ G ⇒ ra_sty tg ⟨ kc_ind_ctor , scons td (scons ti (scons ⟨ kc_nz , ∅ ⟩ ∅)) ⟩ tCT tmj tT2 ∈ lrel3 J $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ctor , scons td (scons ti (scons ⟨ kc_nz , ∅ ⟩ ∅)) ⟩ tmj tnq ∈ lrel $ >
+  $ G ⇒ tmj ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ti ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ ra_proj_ok tg td ti tfi ∈ lrel3 J $ >
+  $ G ⇒ ra_add tii ⟨ kc_s , scons tfi ∅ ⟩ tnf ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_app , scons tY (scons tf ∅) ⟩ tmj tii ∈ lrel $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_proj , scons tb (scons tfi (scons tmj ∅)) ⟩ w r = dt u (mcv H) tf w r $;
+
+-- --------------------------------------------------------------------------
+-- Structures (E8): the type of a projection
+-- --------------------------------------------------------------------------
+
+--| Field `t2` of a path, with its valuation (`etel_field` in full): the field's value is an element of the value of
+--| its type `tA` at `o ++ r`, for `o` the earlier fields backwards (entry `m` of `o` is field `i` when `i + m + 1` is `t2`).
+--| @freshen G o
+--| @freshen G i
+--| @freshen G m
+theorem etel_field_o {o i m: set} (G: hyps) (M: class) (u w r tA t1 t2 p1 p2 p3 p4: set):
+  $ G ⇒ ra_nth_pi t1 t2 tA ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ ⟨ p1 , ⟨ p2 , ⟨ p3 , p4 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) t1 w r $ >
+  $ G ⇒ ∃ o (o ∊ fseq u ∧ cdm o = fv nvf t2 ∧ fv p2 (fv nvf t2) ∈ dt u M tA w (scat o r) ∧ ∀ i ∀ m (i ∊ ω → m ∊ ω → nadd i (suc m) = cdm o → fv p2 i = fv o m)) $;
+
+--| The type of a projection (`proj_ty`) in the model, from the rule's premises in pieces (before `rst`): for a type `ti` with
+--| one constructor `tK` and no indices and a field `tfi` that may be projected, the projections of two terms with one
+--| value, an element of a spine `tS` of the type, have one value, an element of the value of the field's type `tA`
+--| with the parameters (`pinst`) and the earlier fields' projections (`qinst`) put in. The element is the constructor's
+--| point at a path (`ity_elem`), whose field is in its type at the earlier fields (`etel_field_o`, `proj_ok_fields`).
+theorem proj_ty_wf (G: hyps) (H J: class) (u w r r0 tg td tb tp tt tnp tn tm ti tF tK tl tS tfi tK2 tA tA1 tR te te2: set):
+  $ G ⇒ iwf u H J tg td w r0 $ >
+  $ G ⇒ r ∊ sat u (mcv H) tg w $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF ⟨ kc_ccons , scons tK (scons ⟨ kc_cnil , ∅ ⟩ ∅) ⟩ ∈ lrel $ >
+  $ G ⇒ ra_isort tF ⟨ kc_nz , ∅ ⟩ tl ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tS tnp ∈ lrel $ >
+  $ G ⇒ tS ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_proj_ok tg td ti tfi ∈ lrel3 J $ >
+  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tK tK2 ∈ lrel $ >
+  $ G ⇒ ra_nth_pi tK2 tfi tA ∈ lrel $ >
+  $ G ⇒ ra_pinst tfi tS tA tA1 ∈ lrel $ >
+  $ G ⇒ ra_qinst tb te tfi ⟨ kc_nz , ∅ ⟩ tA1 tR ∈ lrel $ >
+  $ G ⇒ te2 ∊ trees ω $ >
+  $ G ⇒ dt u (mcv H) te w r = dt u (mcv H) te2 w r $ >
+  $ G ⇒ dt u (mcv H) te w r ∈ dt u (mcv H) tS w r $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_proj , scons tb (scons tfi (scons te ∅)) ⟩ w r = dt u (mcv H) ⟨ kc_proj , scons tb (scons tfi (scons te2 ∅)) ⟩ w r ∧ dt u (mcv H) ⟨ kc_proj , scons tb (scons tfi (scons te ∅)) ⟩ w r ∈ dt u (mcv H) tR w r $;
+
+-- --------------------------------------------------------------------------
+-- Structures (E8): the rules from their own premises (blocks without nested occurrences)
+-- --------------------------------------------------------------------------
+
+--| Restoring without occurrences changes nothing: `rst D [] e e2` only for `e2 = e` (an auxiliary type needs an entry of
+--| the occurrences, `aux_of`).
+theorem rst_nil_id (G: hyps) (td te te2: set): $ G ⇒ ra_rst td ⟨ kc_nil , ∅ ⟩ te te2 ∈ lrel $ > $ G ⇒ te2 = te $;
+
+--| A well-formed block's types have a number (`ind_wf_data` at the block's own data).
+--| @freshen G n
+--| @freshen G k
+theorem ind_wf_ntys {n k: set} (G: hyps) (J: class) (tg td tb tp tt: set): $ G ⇒ ra_ind_wf tg td ∈ lrel3 J $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ∃ n ∃ k (ra_ntys tt n k ∈ lrel) $;
+
+--| Structure eta in the model from the rule's premises (`ind_eta`; the typing premise as its semantic fact): `eta_ok`,
+--| `struct_like` and `nfields` inverted and identified with the block's data, then `ind_eta_wf`.
+theorem ind_eta_rule (G: hyps) (H J: class) (u w r r0 tg td tb tp tt tnp ti tS tY tnf te tM: set):
+  $ G ⇒ iwf u H J tg td w r0 $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ r ∊ sat u (mcv H) tg w $ >
+  $ G ⇒ dt u (mcv H) te w r ∈ dt u (mcv H) tS w r $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tS tnp ∈ lrel $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_eta_ok td ti ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_rehead ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ ⟨ kc_ind_ctor , scons td (scons ti (scons ⟨ kc_nz , ∅ ⟩ ∅)) ⟩ tnp tS tY ∈ lrel $ >
+  $ G ⇒ ra_nfields td ti ⟨ kc_nz , ∅ ⟩ tnf ∈ lrel $ >
+  $ G ⇒ ra_projs tb te tnf tY tM ∈ lrel $ >
+  $ G ⇒ tS ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ dt u (mcv H) te w r = dt u (mcv H) tM w r $;
+
+--| The projection of a constructor application in the model from the rule's premises (`proj_mk`), for a block without
+--| nested occurrences: `ind_arity`, `nfields` and `ctor_ty` inverted and identified (`rst_nil_id`), then `proj_mk_wf`.
+--| The projection's block name `tb2` is any tree (the rule's `b`).
+theorem proj_mk_rule (G: hyps) (H J: class) (u w r r0 tg td tnp tn tm ti tCT tnf tnq tmj tT2 tfi tii tY tf tb2: set):
+  $ G ⇒ iwf u H J tg td w r0 $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ r ∊ sat u (mcv H) tg w $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ctor , scons td (scons ti (scons ⟨ kc_nz , ∅ ⟩ ∅)) ⟩ tmj tnq ∈ lrel $ >
+  $ G ⇒ ra_ind_arity td tnp tn tm ∈ lrel $ >
+  $ G ⇒ ra_nfields td ti ⟨ kc_nz , ∅ ⟩ tnf ∈ lrel $ >
+  $ G ⇒ ra_add tnp tnf tnq ∈ lrel $ >
+  $ G ⇒ ra_add tii ⟨ kc_s , scons tfi ∅ ⟩ tnf ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_app , scons tY (scons tf ∅) ⟩ tmj tii ∈ lrel $ >
+  $ G ⇒ ra_proj_ok tg td ti tfi ∈ lrel3 J $ >
+  $ G ⇒ ra_ctor_ty td ti ⟨ kc_nz , ∅ ⟩ tCT ∈ lrel $ >
+  $ G ⇒ ra_sty tg ⟨ kc_ind_ctor , scons td (scons ti (scons ⟨ kc_nz , ∅ ⟩ ∅)) ⟩ tCT tmj tT2 ∈ lrel3 J $ >
+  $ G ⇒ ra_ind_nested td ⟨ kc_nil , ∅ ⟩ ∈ lrel $ >
+  $ G ⇒ tmj ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ti ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ tb2 ∊ trees ω $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_proj , scons tb2 (scons tfi (scons tmj ∅)) ⟩ w r = dt u (mcv H) tf w r $;
+
+--| The type of a projection in the model from the rule's premises (`proj_ty`), with `rst` at no occurrences: `struct_like`
+--| and `field_ty` inverted and identified with the block's data, `rst_nil_id`, then `proj_ty_wf`.
+theorem proj_ty_rule (G: hyps) (H J: class) (u w r r0 tg td tb tp tt tnp ti tS tfi tA tA2 tA1 tR te te2: set):
+  $ G ⇒ iwf u H J tg td w r0 $ >
+  $ G ⇒ r ∊ sat u (mcv H) tg w $ >
+  $ G ⇒ dt u (mcv H) te w r = dt u (mcv H) te2 w r $ >
+  $ G ⇒ dt u (mcv H) te w r ∈ dt u (mcv H) tS w r $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tS tnp ∈ lrel $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_struct_like td ti ∈ lrel $ >
+  $ G ⇒ ra_proj_ok tg td ti tfi ∈ lrel3 J $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_field_ty td ti tfi tA ∈ lrel $ >
+  $ G ⇒ ra_rst td ⟨ kc_nil , ∅ ⟩ tA tA2 ∈ lrel $ >
+  $ G ⇒ ra_pinst tfi tS tA2 tA1 ∈ lrel $ >
+  $ G ⇒ ra_qinst tb te tfi ⟨ kc_nz , ∅ ⟩ tA1 tR ∈ lrel $ >
+  $ G ⇒ te2 ∊ trees ω $ >
+  $ G ⇒ tS ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_proj , scons tb (scons tfi (scons te ∅)) ⟩ w r = dt u (mcv H) ⟨ kc_proj , scons tb (scons tfi (scons te2 ∅)) ⟩ w r ∧ dt u (mcv H) ⟨ kc_proj , scons tb (scons tfi (scons te ∅)) ⟩ w r ∈ dt u (mcv H) tR w r $;
+
+--| The constructor's rule in the model from the rule's premises (`ind_ctor_ty` with `ctor_ty`), for a block without nested
+--| occurrences.
+theorem ind_ctor_ty_rule (G: hyps) (H J: class) (u w r tg td ti tc tCT: set):
+  $ G ⇒ iwf u H J tg td w r $ > $ G ⇒ hctor ⊆ H $ > $ G ⇒ ra_ctor_ty td ti tc tCT ∈ lrel $ > $ G ⇒ ra_ind_nested td ⟨ kc_nil , ∅ ⟩ ∈ lrel $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ w r ∈ dt u (mcv H) tCT w r $;
+
+--| The recursor's rule in the model from the rule's premises (`ind_rec_ty`), with `rst` at no occurrences.
+theorem ind_rec_ty_rule (G: hyps) (H J: class) (u w r tg td tv ti tR0 tRT: set):
+  $ G ⇒ iwf u H J tg td w r $ > $ G ⇒ hctor ⊆ H $ > $ G ⇒ hrec ⊆ H $ > $ G ⇒ ra_elim_ok tg td tv ∈ lrel3 J $ > $ G ⇒ ra_rec_ty td tv ti tR0 ∈ lrel $ > $ G ⇒ ra_rst td ⟨ kc_nil , ∅ ⟩ tR0 tRT ∈ lrel $ > $ G ⇒ tR0 ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ ti ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ w r ∈ dt u (mcv H) tRT w r $;
+
+--| The iota rule in the model from the rule's premises (`ind_iota`), for a block without nested occurrences: `rec_rule`,
+--| `ind_arity` and `ctor_ty` inverted and identified (`rst_nil_id`), then `ind_iota_wf`. The rule's `spine Y maj nf` is not
+--| needed; sort hypotheses as there.
+theorem ind_iota_rule (G: hyps) (H J: class) (u w r tg td td2 tv ti tc tnp tn tm tCT tni te4 tks tmj tnq tR tY trhs0 tnf trhs ta ta0 te3 tRT tTY tC tT tT2 tR0: set):
+  $ G ⇒ iwf u H J tg td w r $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ hrec ⊆ H $ >
+  $ G ⇒ minv (mcv H) $ >
+  $ G ⇒ ra_elim_ok tg td tv ∈ lrel3 J $ >
+  $ G ⇒ ra_rec_rule td tv ti tc tR ∈ lrel $ >
+  $ G ⇒ ra_ind_arity td tnp tn tm ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ te4 tks ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ctor , scons td2 (scons ti (scons tc ∅)) ⟩ tmj tnq ∈ lrel $ >
+  $ G ⇒ ra_add tnp tn ta0 ∈ lrel $ >
+  $ G ⇒ ra_add ta0 tm ta ∈ lrel $ >
+  $ G ⇒ ra_nidx td ti tni ∈ lrel $ >
+  $ G ⇒ ra_add ta tni tks ∈ lrel $ >
+  $ G ⇒ ra_nfields td ti tc tnf ∈ lrel $ >
+  $ G ⇒ ra_add tnp tnf tnq ∈ lrel $ >
+  $ G ⇒ ra_rehead ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ tR ta te3 trhs0 ∈ lrel $ >
+  $ G ⇒ ra_spine te3 te4 tni ∈ lrel $ >
+  $ G ⇒ ra_rehead tY trhs0 tnf tmj trhs ∈ lrel $ >
+  $ G ⇒ ra_sty tg ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ tRT te4 ⟨ kc_pi , scons tTY (scons tC ∅) ⟩ ∈ lrel3 J $ >
+  $ G ⇒ ra_inst ⟨ kc_nz , ∅ ⟩ tC tmj tT ∈ lrel $ >
+  $ G ⇒ ra_eeqv ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ ⟨ kc_ind_ctor , scons td2 (scons ti (scons tc ∅)) ⟩ ∈ lrel2 $ >
+  $ G ⇒ ra_sty tg ⟨ kc_ind_ctor , scons td2 (scons ti (scons tc ∅)) ⟩ tCT tmj tT2 ∈ lrel3 J $ >
+  $ G ⇒ ra_aeq tg tT2 tTY ∈ lrel3 J $ >
+  $ G ⇒ te4 ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tmj ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ti ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ tc ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ tR ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_ctor_ty td ti tc tCT ∈ lrel $ >
+  $ G ⇒ ra_ind_nested td ⟨ kc_nil , ∅ ⟩ ∈ lrel $ >
+  $ G ⇒ ra_rec_ty td tv ti tR0 ∈ lrel $ >
+  $ G ⇒ ra_rst td ⟨ kc_nil , ∅ ⟩ tR0 tRT ∈ lrel $ >
+  $ G ⇒ tR0 ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r = dt u (mcv H) trhs w r ∧ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r ∈ dt u (mcv H) tT w r $;
