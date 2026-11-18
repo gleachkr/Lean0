@@ -5,7 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     mm0.url = "github:gleachkr/mm0";
     # mm0-zig and abc (Aufbau's proof assistant, for the hand proofs in spec/)
-    aufbau.url = "github:gleachkr/Aufbau/v0.0.19";
+    aufbau.url = "github:gleachkr/Aufbau/bbc7306def3da914d36bc73cefb821fdc77db6c1";
     aufbau.inputs.mm0.follows = "mm0";
   };
 

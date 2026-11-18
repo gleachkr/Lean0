@@ -23,6 +23,9 @@ MM0_C="${MM0_C:-mm0-c}"
 work="$root/build/lean"
 mkdir -p "$work" "$out"
 cp "$src" "$work/$mod.lean"
+# lean4export finds Lean's own .olean files through `lean`, so the export is pinned to the same
+# toolchain as the compilation (elan's default may be a later Lean, whose files it cannot read).
+export ELAN_TOOLCHAIN="${ELAN_TOOLCHAIN:-leanprover/lean4:v4.35.0}"
 (cd "$work" && lean +leanprover/lean4:v4.35.0 -o "$mod.olean" "$mod.lean") || { echo "certify: lean failed on $src" >&2; exit 1; }
 # A `-- lean0-export: NAME...` line restricts the export to those declarations and their dependencies.
 names="$(sed -n 's/^-- lean0-export://p' "$src" | head -1)"
