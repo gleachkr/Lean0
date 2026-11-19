@@ -672,6 +672,29 @@ axiom spz_app (D: ind) (N: ctx) (d: nat) (f a f2 a2: expr): $ spz D N d f f2 $ >
 axiom spz_lam (D: ind) (N: ctx) (d: nat) (A b A2 b2: expr): $ spz D N d A A2 $ > $ spz D N (s d) b b2 $ > $ spz D N d (λ A. b) (λ A2. b2) $;
 axiom spz_pi (D: ind) (N: ctx) (d: nat) (A b A2 b2: expr): $ spz D N d A A2 $ > $ spz D N (s d) b b2 $ > $ spz D N d (Π A. b) (Π A2. b2) $;
 axiom spz_proj (D: ind) (N: ctx) (d: nat) (b: blk) (i: nat) (e e2: expr): $ spz D N d e e2 $ > $ spz D N d (proj b i e) (proj b i e2) $;
+--| `afree e`: `e` mentions no auxiliary type and no constructor of one: at
+--| `ind_ty D j` and `ind_ctor D j c` the number `j` is one of `D`'s declared
+--| types. Lean's terms are such; `spz_ctors` requires it of a restored
+--| constructor, which makes the restoration unique (`rst` alone may leave
+--| any subterm as it is).
+term afree: expr > wff;
+axiom afree_bvar (i: nat): $ afree #i $;
+axiom afree_srt (l: lvl): $ afree (srt l) $;
+axiom afree_app (f a: expr): $ afree f $ > $ afree a $ > $ afree (f @ a) $;
+axiom afree_lam (A b: expr): $ afree A $ > $ afree b $ > $ afree (λ A. b) $;
+axiom afree_pi (A b: expr): $ afree A $ > $ afree b $ > $ afree (Π A. b) $;
+axiom afree_cst (a: atom) (S: lvls): $ afree (cst a S) $;
+axiom afree_lit (n: bin): $ afree (lit n) $;
+axiom afree_ind_ty (D: ind) (N: ctx) (j np n m n0: nat):
+  $ ind_nested D N $ > $ ind_arity D np n m $ > $ ndecl N n n0 $ > $ j < n0 $ > $ afree (ind_ty D j) $;
+axiom afree_ind_ctor (D: ind) (N: ctx) (j c np n m n0: nat):
+  $ ind_nested D N $ > $ ind_arity D np n m $ > $ ndecl N n n0 $ > $ j < n0 $ > $ afree (ind_ctor D j c) $;
+axiom afree_ind_rec (D: ind) (i: nat) (v: lvl): $ afree (ind_rec D i v) $;
+axiom afree_proj (b: blk) (i: nat) (e: expr): $ afree e $ > $ afree (proj b i e) $;
+axiom afree_quot (u: lvl): $ afree (quot u) $;
+axiom afree_quot_mk (u: lvl): $ afree (quot_mk u) $;
+axiom afree_quot_lift (u v: lvl): $ afree (quot_lift u v) $;
+axiom afree_quot_ind (u: lvl): $ afree (quot_ind u) $;
 --| `spz_ctors D N I X ni npi C C2`: `C2` is the constructors `C` of a type of
 --| `I` at the occurrence `X`, specialized: `I`'s types put in, `I`'s own
 --| occurrences restored (it may be nested itself), the parameters replaced
@@ -679,7 +702,8 @@ axiom spz_proj (D: ind) (N: ctx) (d: nat) (b: blk) (i: nat) (e e2: expr): $ spz 
 term spz_ctors: ind > ctx > ind > expr > nat > nat > ctors > ctors > wff;
 axiom spz_ctors_nil (D: ind) (N: ctx) (I: ind) (X: expr) (ni npi: nat): $ spz_ctors D N I X ni npi cnil cnil $;
 axiom spz_ctors_cons (D I: ind) (N NI: ctx) (X K K1 K2 K3 K4: expr) (ni npi: nat) (C C2: ctors):
-  $ sinst I 0 ni npi K K1 $ > $ ind_nested I NI $ > $ rst I NI K1 K2 $ > $ pinst 0 X K2 K3 $ > $ spz D N 0 K3 K4 $ >
+  $ sinst I 0 ni npi K K1 $ > $ ind_nested I NI $ > $ rst I NI K1 K2 $ > $ afree K2 $ > $ pinst 0 X K2 K3 $ >
+  $ spz D N 0 K3 K4 $ >
   $ spz_ctors D N I X ni npi C C2 $ > $ spz_ctors D N I X ni npi (ccons K C) (ccons K4 C2) $;
 --| `aux_data D I X j i`: type `j` of `D` has the type of `I`'s type `i` at
 --| `X`'s arguments and its constructors specialized.

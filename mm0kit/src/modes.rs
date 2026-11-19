@@ -109,6 +109,7 @@ pub const TABLE: &[(&str, Kind, &str)] = &[
     ("rst", Kind::Search, "+++-"),
     ("nst_hit", Kind::Check, ""),
     ("spz", Kind::Check, ""),
+    ("afree", Kind::Check, ""),
     ("spz_ctors", Kind::Check, ""),
     ("aux_data", Kind::Check, ""),
     ("nst_ty", Kind::Check, ""),
