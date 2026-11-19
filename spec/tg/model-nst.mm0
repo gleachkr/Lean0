@@ -1,0 +1,585 @@
+-- model-nst.mm0: nested inductive blocks (layer E7 of the reduction, audit §11):
+-- the syntax of specialization and restoring, lifts and instantiations, and the
+-- specialization lemma (an auxiliary type's value is its occurrence's). Imports
+-- model-fold.mm0; proofs in model-nst.auf.
+
+import "model-fold.mm0";
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): an auxiliary type's group
+-- --------------------------------------------------------------------------
+
+--| No number is itself plus a successor (`add`, by its values).
+theorem add_s_self (G: hyps) (a b: set): $ G ⇒ ra_add a ⟨ kc_s , scons b ∅ ⟩ a ∈ lrel $ > $ G ⇒ ⊥ $;
+
+--| An auxiliary type's group: entry `tk` of the occurrences of a block with `nst_ok` (from auxiliary type `tj` on), the
+--| occurrence `tX` of auxiliary type `te = tj + tk`, is the type `i` of a well-formed block `a` at the arguments of the
+--| group's first occurrence `b`, whose arguments are typed (`nst_ty`), with the data of `aux_data`; `i` is one of the
+--| types `a` declares. By induction on the list, through `nst_group`.
+--| @freshen G z
+--| @freshen G u
+--| @freshen G v
+--| @freshen G w
+--| @freshen G x0
+--| @freshen G x1
+--| @freshen G x2
+--| @freshen G x3
+--| @freshen G x4
+theorem nst_read {z u v w x0 x1 x2 x3 x4: set} (G: hyps) (J: class) (tg td tj tN tk tX te: set): $ G ⇒ ra_nst_ok tg td tj tN ∈ lrel3 J $ > $ G ⇒ ra_cnth tN tk tX ∈ lrel $ > $ G ⇒ ra_add tj tk te ∈ lrel $ >
+  $ G ⇒ ∃ z ∃ u ∃ v ∃ w ∃ x0 ∃ x1 ∃ x2 ∃ x3 ∃ x4 (ra_ind_wf tg z ∈ lrel3 J ∧ ra_nst_ty tg td z v ∈ lrel3 J ∧ ra_spine ⟨ kc_ind_ty , scons z (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ v w ∈ lrel ∧ ra_spine ⟨ kc_ind_ty , scons z (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ v x0 ∈ lrel ∧ ra_rehead ⟨ kc_ind_ty , scons z (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ ⟨ kc_ind_ty , scons z (scons u ∅) ⟩ x0 v tX ∈ lrel ∧ ra_aux_data td z tX te u ∈ lrel ∧ ra_ind_arity z w x1 x2 ∈ lrel ∧ ra_ind_nested z x4 ∈ lrel ∧ ra_ndecl x4 x1 x3 ∈ lrel ∧ ra_le ⟨ kc_s , scons u ∅ ⟩ x3 ∈ lrel) $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): two telescopes related field by field
+-- --------------------------------------------------------------------------
+
+--| Two telescopes related field by field. `R` relates `tK` to `tK2` under `td` fields (`q`, over the valuations `r` and
+--| `r2`). If a related pair at a `Π` has a `Π` on the right with a larger domain and related bodies, and a related pair at
+--| a leaf gives a path on the right with arguments in `L`, then a path of `tK` gives a path of `tK2` with the same fields
+--| and arguments in `L`. (`lrel_cwf_mono` is the case of one telescope.)
+--| @freshen G i
+--| @freshen G j
+--| @freshen G k
+--| @freshen G l
+--| @freshen G m
+--| @freshen G n
+--| @freshen G o
+--| @freshen G p
+--| @freshen G h
+--| @freshen G e
+--| @freshen G x0
+--| @freshen G x1
+--| @freshen G b
+--| @freshen G c
+theorem etel_cmp {i j k l m n o p h e x0 x1 b c: set} (G: hyps) (R L M: class) (u w r r2 tK td tK2 q sf sg st sa: set):
+  $ G ⇒ tK ∊ trees ω $ > $ G ⇒ ⟨ td , ⟨ tK , tK2 ⟩ ⟩ ∈ R $ >
+  $ G ⇒ td ∊ trees ω $ >
+  $ G ⇒ q ∊ fseq u $ >
+  $ G ⇒ cdm q = fv nvf td $ >
+  $ G ⇒ ⟨ sf , ⟨ sg , ⟨ st , sa ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tK w (scat q r) $ >
+  $ G ⇒ ∀ i ∀ j ∀ k ∀ l ∀ m (⟨ i , ⟨ ⟨ kc_pi , scons j (scons k ∅) ⟩ , l ⟩ ⟩ ∈ R → m ∊ fseq u → cdm m = fv nvf i → ∃ x0 ∃ x1 (l = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ x0 ∊ trees ω ∧ x1 ∊ trees ω ∧ dt u M j w (scat m r) ⊆ dt u M x0 w (scat m r2) ∧ ⟨ ⟨ kc_s , scons i ∅ ⟩ , ⟨ k , x1 ⟩ ⟩ ∈ R)) $ >
+  $ G ⇒ ∀ i ∀ e ∀ l ∀ m ∀ n ∀ o ∀ p ∀ h (⟨ i , ⟨ e , l ⟩ ⟩ ∈ R → ¬ ∃ j ∃ k (e = ⟨ kc_pi , scons j (scons k ∅) ⟩) → m ∊ fseq u → cdm m = fv nvf i → ⟨ n , ⟨ o , ⟨ p , h ⟩ ⟩ ⟩ ∈ etel u (dnf u M) e w (scat m r) → ∃ b ∃ c (⟨ n , ⟨ o , ⟨ b , c ⟩ ⟩ ⟩ ∈ etel u (dnf u M) l w (scat m r2) ∧ ⟨ h , c ⟩ ∈ L)) $ >
+  $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ r2 ∊ fseq u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ ∃ b ∃ c (⟨ sf , ⟨ sg , ⟨ b , c ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tK2 w (scat q r2) ∧ ⟨ sa , c ⟩ ∈ L) $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): restoring and specializing at a `Π`
+-- --------------------------------------------------------------------------
+
+--| `rst` at a `Π`: the result is a `Π` of restored parts (a spine of a block's type or constructor is no `Π`).
+--| @freshen G a
+--| @freshen G b
+theorem rst_pi_inv {a b: set} (G: hyps) (td tN ta tb te2: set): $ G ⇒ ra_rst td tN ⟨ kc_pi , scons ta (scons tb ∅) ⟩ te2 ∈ lrel $ >
+  $ G ⇒ ∃ a ∃ b (te2 = ⟨ kc_pi , scons a (scons b ∅) ⟩ ∧ ra_rst td tN ta a ∈ lrel ∧ ra_rst td tN tb b ∈ lrel) $;
+
+--| `spz` at a `Π`: the result is a `Π` of specialized parts, the body one binder deeper (an occurrence is no `Π`).
+--| @freshen G a
+--| @freshen G b
+theorem spz_pi_inv {a b: set} (G: hyps) (td tN tdd ta tb te2: set): $ G ⇒ ra_spz td tN tdd ⟨ kc_pi , scons ta (scons tb ∅) ⟩ te2 ∈ lrel $ >
+  $ G ⇒ ∃ a ∃ b (te2 = ⟨ kc_pi , scons a (scons b ∅) ⟩ ∧ ra_spz td tN tdd ta a ∈ lrel ∧ ra_spz td tN ⟨ kc_s , scons tdd ∅ ⟩ tb b ∈ lrel) $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): two telescopes related field by field, from right to left
+-- --------------------------------------------------------------------------
+
+--| `etel_cmp` from right to left: if a related pair at a `Π` has a `Π` on the right with a smaller domain and related
+--| bodies, and at a related leaf a path of the right gives a path of the left with arguments in `L`, then a path of `tK2`
+--| gives a path of `tK` with the same fields and arguments in `L`. (The induction is still on the left tree: the chain of
+--| a specialized constructor is inverted from its source.)
+--| @freshen G i
+--| @freshen G j
+--| @freshen G k
+--| @freshen G l
+--| @freshen G m
+--| @freshen G n
+--| @freshen G o
+--| @freshen G p
+--| @freshen G h
+--| @freshen G e
+--| @freshen G x0
+--| @freshen G x1
+--| @freshen G b
+--| @freshen G c
+theorem etel_cmp_rev {i j k l m n o p h e x0 x1 b c: set} (G: hyps) (R L M: class) (u w r r2 tK td tK2 q sf sg st sa: set):
+  $ G ⇒ tK ∊ trees ω $ > $ G ⇒ ⟨ td , ⟨ tK , tK2 ⟩ ⟩ ∈ R $ >
+  $ G ⇒ td ∊ trees ω $ >
+  $ G ⇒ q ∊ fseq u $ >
+  $ G ⇒ cdm q = fv nvf td $ >
+  $ G ⇒ ⟨ sf , ⟨ sg , ⟨ st , sa ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tK2 w (scat q r2) $ >
+  $ G ⇒ ∀ i ∀ j ∀ k ∀ l ∀ m (⟨ i , ⟨ ⟨ kc_pi , scons j (scons k ∅) ⟩ , l ⟩ ⟩ ∈ R → m ∊ fseq u → cdm m = fv nvf i → ∃ x0 ∃ x1 (l = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ x0 ∊ trees ω ∧ x1 ∊ trees ω ∧ dt u M x0 w (scat m r2) ⊆ dt u M j w (scat m r) ∧ ⟨ ⟨ kc_s , scons i ∅ ⟩ , ⟨ k , x1 ⟩ ⟩ ∈ R)) $ >
+  $ G ⇒ ∀ i ∀ e ∀ l ∀ m ∀ n ∀ o ∀ p ∀ h (⟨ i , ⟨ e , l ⟩ ⟩ ∈ R → ¬ ∃ j ∃ k (e = ⟨ kc_pi , scons j (scons k ∅) ⟩) → m ∊ fseq u → cdm m = fv nvf i → ⟨ n , ⟨ o , ⟨ p , h ⟩ ⟩ ⟩ ∈ etel u (dnf u M) l w (scat m r2) → ∃ b ∃ c (⟨ n , ⟨ o , ⟨ b , c ⟩ ⟩ ⟩ ∈ etel u (dnf u M) e w (scat m r) ∧ ⟨ h , c ⟩ ∈ L)) $ >
+  $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ r2 ∊ fseq u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ ∃ b ∃ c (⟨ sf , ⟨ sg , ⟨ b , c ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tK w (scat q r) ∧ ⟨ sa , c ⟩ ∈ L) $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the relation along a specialized constructor
+-- --------------------------------------------------------------------------
+
+--| A well-formed constructor type that is a `Π`: its domain is a positive field (`ipos_closed` for a field that does not
+--| mention the block), its body well formed a binder deeper.
+--| @freshen G c
+theorem cwf_pi_ipos {c: set} (G: hyps) (J: class) (t1 t2 t3 t4 t5 t6 t7 ta tb: set): $ G ⇒ ra_cwf t1 t2 t3 t4 t5 t6 t7 ⟨ kc_pi , scons ta (scons tb ∅) ⟩ ∈ lrel3 J $ >
+  $ G ⇒ ∃ c (ra_ipos t1 t2 t3 t7 ta ∈ lrel ∧ ra_cwf t1 t2 t3 t4 t5 c ⟨ kc_s , scons t7 ∅ ⟩ tb ∈ lrel3 J) $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): closed terms under `inst` and `sinst`
+-- --------------------------------------------------------------------------
+
+--| A closed `λ`: its domain is closed, its body closed one binder deeper.
+theorem closed_lam_inv (G: hyps) (tx ta tb: set): $ G ⇒ ra_closed tx ⟨ kc_lam , scons ta (scons tb ∅) ⟩ ∈ lrel $ > $ G ⇒ ra_closed tx ta ∈ lrel ∧ ra_closed ⟨ kc_s , scons tx ∅ ⟩ tb ∈ lrel $;
+
+--| A closed projection: its structure is closed.
+theorem closed_proj_inv (G: hyps) (tx tb ti te: set): $ G ⇒ ra_closed tx ⟨ kc_proj , scons tb (scons ti (scons te ∅)) ⟩ ∈ lrel $ > $ G ⇒ ra_closed tx te ∈ lrel $;
+
+--| `inst` at a variable leaves a term closed at that variable as it is (by induction on the term; no determinacy of
+--| `inst` is needed).
+theorem inst_closed_id (G: hyps) (tk te ta te2: set): $ G ⇒ ra_inst tk te ta te2 ∈ lrel $ > $ G ⇒ ra_closed tk te ∈ lrel $ > $ G ⇒ te2 = te $;
+
+--| `sinst` leaves a term closed at its variable as it is (`tdd` types are put in).
+theorem sinst_closed_id (G: hyps) (td tj tn tk te te2 tdd: set): $ G ⇒ ra_add tj tdd tn ∈ lrel $ > $ G ⇒ ra_sinst td tj tn tk te te2 ∈ lrel $ > $ G ⇒ ra_closed tk te ∈ lrel $ > $ G ⇒ te2 = te $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): `spz` with a closed result
+-- --------------------------------------------------------------------------
+
+--| The head of a closed spine is closed.
+theorem spine_closed_head (G: hyps) (th te tn tk: set): $ G ⇒ ra_spine th te tn ∈ lrel $ > $ G ⇒ ra_closed tk te ∈ lrel $ > $ G ⇒ ra_closed tk th ∈ lrel $;
+
+--| `spz` with a result closed at the fields and the parameters did nothing: a replaced occurrence leaves the variable
+--| of an auxiliary type, which is above them.
+theorem spz_closed_id (G: hyps) (tD tN tdd te te2 tk tnp tn tm: set): $ G ⇒ ra_spz tD tN tdd te te2 ∈ lrel $ > $ G ⇒ ra_closed tk te2 ∈ lrel $ > $ G ⇒ ra_add tdd tnp tk ∈ lrel $ > $ G ⇒ ra_ind_arity tD tnp tn tm ∈ lrel $ > $ G ⇒ te2 = te $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): a transitive closure
+-- --------------------------------------------------------------------------
+
+--| The elements of every transitive set that includes `X`: the transitive closure of `X` (every set is an element of
+--| a universe, which is transitive, so this is a set; no recursion is needed).
+def tcl (X: class) (.t .q: set): class = $ {q | ∀ t (transitive t → X ⊆ t → q ∊ t)} $;
+--| @congr
+theorem tcl_congr (A B: class): $ A ≐ B $ > $ tcl A ≐ tcl B $;
+--| @rewrite
+theorem sb_c_tcl {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (tcl A)) ≐ tcl (⟦ x / t ⟧ A) $;
+
+--| `rst` leaves a term inside the block (in its transitive closure: a part of its data) as it is: a restored spine has
+--| the block in its head, and no set is inside itself (`ax_induction`).
+theorem rst_free_id (G: hyps) (td tN te te2: set): $ G ⇒ ra_rst td tN te te2 ∈ lrel $ > $ G ⇒ te ∊ tcl td $ > $ G ⇒ te2 = te $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): a block's data is inside the block
+-- --------------------------------------------------------------------------
+
+--| A block's types are inside the block (in its transitive closure).
+theorem ind_data_tc (G: hyps) (td tb tp tt: set): $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ tt ∊ tcl td $;
+
+--| The constructors of a type of a list of types inside `tx` are inside `tx`.
+theorem nth_ty_tc (G: hyps) (tt ti tF tC tx: set): $ G ⇒ ra_nth_ty tt ti tF tC ∈ lrel $ > $ G ⇒ tt ∊ tcl tx $ > $ G ⇒ tC ∊ tcl tx $;
+
+--| A constructor's type of a list of constructors inside `tx` is inside `tx`.
+theorem nth_ctor_tc (G: hyps) (tC tc tK tx: set): $ G ⇒ ra_nth_ctor tC tc tK ∈ lrel $ > $ G ⇒ tC ∊ tcl tx $ > $ G ⇒ tK ∊ tcl tx $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): an occurrence's spine under `spz`
+-- --------------------------------------------------------------------------
+
+--| `le` to a successor.
+theorem le_suc_r (G: hyps) (ta tb: set): $ G ⇒ ra_le ta tb ∈ lrel $ > $ G ⇒ ra_le ta ⟨ kc_s , scons tb ∅ ⟩ ∈ lrel $;
+
+--| A summand is below the sum (`le ta ta` says that `ta` is a numeral).
+theorem add_le (G: hyps) (ta tb tc: set): $ G ⇒ ra_add ta tb tc ∈ lrel $ > $ G ⇒ ra_le ta ta ∈ lrel $ > $ G ⇒ ra_le ta tc ∈ lrel $;
+
+--| A valid occurrence is a variable applied to arguments that are all closed at the fields and the parameters
+--| (the parameters among them; `le td td` says that the depth is a numeral).
+--| @freshen G t
+--| @freshen G q
+theorem indapp_iargs {t q: set} (G: hyps) (tD tn tnp td tA tj tk: set): $ G ⇒ ra_indapp tD tn tnp td tA tj ∈ lrel $ > $ G ⇒ ra_add td tnp tk ∈ lrel $ > $ G ⇒ ra_le td td ∈ lrel $ >
+  $ G ⇒ ∃ t ∃ q (ra_iargs tk q ⟨ kc_bvar , scons t ∅ ⟩ tA ∈ lrel) $;
+
+--| `spz` with a `Π` as its result: the term is a `Π` of parts specialized to the result's (no replaced occurrence is a `Π`).
+--| @freshen G a
+--| @freshen G b
+theorem spz_pi_inv_r {a b: set} (G: hyps) (td tN tdd te ta tb: set): $ G ⇒ ra_spz td tN tdd te ⟨ kc_pi , scons ta (scons tb ∅) ⟩ ∈ lrel $ >
+  $ G ⇒ ∃ a ∃ b (te = ⟨ kc_pi , scons a (scons b ∅) ⟩ ∧ ra_spz td tN tdd a ta ∈ lrel ∧ ra_spz td tN ⟨ kc_s , scons tdd ∅ ⟩ b tb ∈ lrel) $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the value of an occurrence's spine under `spz`
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): spines and their prefixes; `ipos` at a `Π`
+-- --------------------------------------------------------------------------
+
+--| `add` cancels on the right.
+theorem add_cancel_r (G: hyps) (ta tb tc te: set): $ G ⇒ ra_add ta tc te ∈ lrel $ > $ G ⇒ ra_add tb tc te ∈ lrel $ > $ G ⇒ ta = tb $;
+
+--| A spine over a spine: the numbers of arguments add up.
+--| @freshen G c
+theorem spine_trans2 {c: set} (G: hyps) (th tx ta te tb: set): $ G ⇒ ra_spine th tx ta ∈ lrel $ > $ G ⇒ ra_spine tx te tb ∈ lrel $ > $ G ⇒ ∃ c (ra_add ta tb c ∈ lrel ∧ ra_spine th te c ∈ lrel) $;
+
+--| A positive field type that is a `Π`: its domain is closed at the fields and the parameters, its body positive a
+--| binder deeper.
+--| @freshen G k
+theorem ipos_pi_inv {k: set} (G: hyps) (tD tn tnp td ta tb: set): $ G ⇒ ra_ipos tD tn tnp td ⟨ kc_pi , scons ta (scons tb ∅) ⟩ ∈ lrel $ >
+  $ G ⇒ ∃ k (ra_add td tnp k ∈ lrel ∧ ra_closed k ta ∈ lrel ∧ ra_ipos tD tn tnp ⟨ kc_s , scons td ∅ ⟩ tb ∈ lrel) $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): a recursive field under `sinst` and `rst`
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): a field of a specialized constructor, leaf by leaf
+-- --------------------------------------------------------------------------
+
+--| A positive field type's depth and the parameters have a sum.
+--| @freshen G k
+theorem ipos_add {k: set} (G: hyps) (tD tn tnp td te: set): $ G ⇒ ra_ipos tD tn tnp td te ∈ lrel $ > $ G ⇒ ∃ k (ra_add td tnp k ∈ lrel) $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): a type's sort through `inst` and `pinst`
+-- --------------------------------------------------------------------------
+
+--| An instance of a type of binders over a sort is one, with as many binders.
+theorem inst_isort (G: hyps) (tk te ta tz tn tl: set): $ G ⇒ ra_inst tk te ta tz ∈ lrel $ > $ G ⇒ ra_isort te tn tl ∈ lrel $ > $ G ⇒ ra_isort tz tn tl ∈ lrel $;
+
+--| A type of binders over a sort with a block's parameters put in is one, with as many binders: an auxiliary type has
+--| the sort and the number of indices of the nested block's type.
+theorem pinst_isort (G: hyps) (ti tS tA tR tn tl: set): $ G ⇒ ra_pinst ti tS tA tR ∈ lrel $ > $ G ⇒ ra_isort tA tn tl ∈ lrel $ > $ G ⇒ ra_isort tR tn tl ∈ lrel $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the arguments of a specialized constructor's result
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the telescope relation along a specialized constructor
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): reading an auxiliary type's data
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the step of the first inclusion at a constructor
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): fibers of the two families
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the entries of a block's list of occurrences
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the rule induction of the first inclusion
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the step of the rule induction
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): an occurrence's arguments in the nested parameters' telescope
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): a lift is injective
+-- --------------------------------------------------------------------------
+
+--| A lift whose result is closed below the cutoff is the identity (by induction on the term).
+theorem lift_res_closed_id (G: hyps) (tn tk te tj tz: set): $ G ⇒ ra_lift tn tk te tz ∈ lrel $ > $ G ⇒ ra_closed tj tz ∈ lrel $ > $ G ⇒ ra_le tj tk ∈ lrel $ > $ G ⇒ tz = te $;
+
+--| A lift is injective: two terms with one lift at one cutoff are equal (by induction on the term; the clause for
+--| closed terms by `lift_res_closed_id`).
+theorem lift_inj (G: hyps) (tn tk te te2 tz: set): $ G ⇒ ra_lift tn tk te tz ∈ lrel $ > $ G ⇒ ra_lift tn tk te2 tz ∈ lrel $ > $ G ⇒ te2 = te $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): lifts by zero, and lifts under an instantiation
+-- --------------------------------------------------------------------------
+
+--| A lift by zero is the identity (by induction on the term).
+theorem lift_zero_id (G: hyps) (tk te tz: set): $ G ⇒ ra_lift ⟨ kc_nz , ∅ ⟩ tk te tz ∈ lrel $ > $ G ⇒ tz = te $;
+
+--| `inst` at a variable leaves a term closed below that variable as it is (`inst_closed_id` with the closedness at a
+--| depth `tj ≤ tc` and the variable at `tc + tn`; by induction on the term).
+theorem inst_closed_below_id (G: hyps) (tk te ta tn tc tj te2: set): $ G ⇒ ra_inst tk te ta te2 ∈ lrel $ > $ G ⇒ ra_closed tj te ∈ lrel $ > $ G ⇒ ra_le tj tc ∈ lrel $ > $ G ⇒ ra_add tc tn tk ∈ lrel $ > $ G ⇒ te2 = te $;
+
+--| A lift by `tn + 1` at a cutoff, then `inst` at the cutoff plus `tn`, is the lift by `tn` (the instantiated variable is
+--| one of those the lift skipped; by induction on the term).
+theorem inst_lift (G: hyps) (tn tm ta tc tk te tl tz: set): $ G ⇒ ra_lift tm tc te tl ∈ lrel $ > $ G ⇒ ra_inst tk tl ta tz ∈ lrel $ > $ G ⇒ ra_add tc tn tk ∈ lrel $ > $ G ⇒ tm = ⟨ kc_s , scons tn ∅ ⟩ $ > $ G ⇒ ra_lift tn tc te tz ∈ lrel $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): factoring a lift through a lift
+-- --------------------------------------------------------------------------
+
+--| A bound of a summand bounds the sum (by induction on the other summand).
+theorem le_add (G: hyps) (tj ta tn tb: set): $ G ⇒ ra_add ta tn tb ∈ lrel $ > $ G ⇒ ra_le tj ta ∈ lrel $ > $ G ⇒ ra_le tj tb ∈ lrel $;
+
+--| Factoring a lift: if the lift of `te` by `tk + td` at a cutoff is also the lift of `tu` by `td` at that cutoff plus `tk`,
+--| then `tu` is the lift of `te` by `tk` (by induction on `te`).
+theorem lift_factor (G: hyps) (tm td tk tc tq te tu tz: set): $ G ⇒ ra_lift tm tc te tz ∈ lrel $ > $ G ⇒ ra_lift td tq tu tz ∈ lrel $ > $ G ⇒ ra_add tk td tm ∈ lrel $ > $ G ⇒ ra_add tc tk tq ∈ lrel $ > $ G ⇒ ra_lift tk tc te tu ∈ lrel $;
+
+--| A lift leaves a term closed below its cutoff as it is (by induction on the term).
+theorem lift_closed_id (G: hyps) (tn tk te tj tz: set): $ G ⇒ ra_lift tn tk te tz ∈ lrel $ > $ G ⇒ ra_closed tj te ∈ lrel $ > $ G ⇒ ra_le tj tk ∈ lrel $ > $ G ⇒ tz = te $;
+
+--| Lifts compose: a lift by `ta` at a cutoff, then a lift by `tk` at that cutoff plus `ta`, is the lift by `ta + tk`
+--| (by induction on the term).
+theorem lift_lift (G: hyps) (ta tk tm tp tq te tu tz: set): $ G ⇒ ra_lift ta tp te tu ∈ lrel $ > $ G ⇒ ra_lift tk tq tu tz ∈ lrel $ > $ G ⇒ ra_add ta tk tm ∈ lrel $ > $ G ⇒ ra_add tp ta tq ∈ lrel $ > $ G ⇒ ra_lift tm tp te tz ∈ lrel $;
+
+
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): a lift at an application and at a `Π`, read from the source and from the result
+-- --------------------------------------------------------------------------
+
+--| A lift of an application is the application of the parts' lifts.
+--| @freshen G x
+--| @freshen G y
+theorem lift_app_inv {x y: set} (G: hyps) (tn tk ta tb t4: set): $ G ⇒ ra_lift tn tk ⟨ kc_app , scons ta (scons tb ∅) ⟩ t4 ∈ lrel $ > $ G ⇒ ∃ x ∃ y (t4 = ⟨ kc_app , scons x (scons y ∅) ⟩ ∧ ra_lift tn tk ta x ∈ lrel ∧ ra_lift tn tk tb y ∈ lrel) $;
+
+--| A lift of a `Π` is the `Π` of the parts' lifts (the body's at the next cutoff).
+--| @freshen G x
+--| @freshen G y
+theorem lift_pi_inv {x y: set} (G: hyps) (tn tk ta tb t4: set): $ G ⇒ ra_lift tn tk ⟨ kc_pi , scons ta (scons tb ∅) ⟩ t4 ∈ lrel $ > $ G ⇒ ∃ x ∃ y (t4 = ⟨ kc_pi , scons x (scons y ∅) ⟩ ∧ ra_lift tn tk ta x ∈ lrel ∧ ra_lift tn ⟨ kc_s , scons tk ∅ ⟩ tb y ∈ lrel) $;
+
+--| A term whose lift is an application is an application, and the parts are lifted.
+--| @freshen G x
+--| @freshen G y
+theorem lift_app_res {x y: set} (G: hyps) (tn tk te ta tb: set): $ G ⇒ ra_lift tn tk te ⟨ kc_app , scons ta (scons tb ∅) ⟩ ∈ lrel $ > $ G ⇒ ∃ x ∃ y (te = ⟨ kc_app , scons x (scons y ∅) ⟩ ∧ ra_lift tn tk x ta ∈ lrel ∧ ra_lift tn tk y tb ∈ lrel) $;
+
+--| A term whose lift is a `Π` is a `Π`, and the parts are lifted (the body at the next cutoff).
+--| @freshen G x
+--| @freshen G y
+theorem lift_pi_res {x y: set} (G: hyps) (tn tk te ta tb: set): $ G ⇒ ra_lift tn tk te ⟨ kc_pi , scons ta (scons tb ∅) ⟩ ∈ lrel $ > $ G ⇒ ∃ x ∃ y (te = ⟨ kc_pi , scons x (scons y ∅) ⟩ ∧ ra_lift tn tk x ta ∈ lrel ∧ ra_lift tn ⟨ kc_s , scons tk ∅ ⟩ y tb ∈ lrel) $;
+
+
+
+
+
+
+
+
+
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the converse of the `spz` step (a positive field after `spz` contains its source)
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the converse of a hit (the claims as inclusions of values)
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the field lemma for the converse inclusion
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the telescope comparison for the converse inclusion
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the step of the converse inclusion at a constructor
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the pointwise step of the converse inclusion
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the pointwise step of the converse inclusion at the hook
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): `pinst` of a head applied to the parameters
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the recursive leaf of the field lemma for the converse inclusion (blocks without nested occurrences)
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the converse inclusion at one point of the nested block's operator
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the type of a nested block without nested occurrences is good
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): `rst` at a block type applied to the parameters
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): instantiating a variable by a variable
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): comparisons of numerals from their values
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): comparisons of numerals, and a lift factored at a cutoff in between
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): unlifting an instantiation
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): determinacy of lifts and instantiations
+-- --------------------------------------------------------------------------
+
+--| A lift has one result (by induction on the term; the closed clause by `lift_closed_id`).
+theorem lift_det (G: hyps) (tn tk te tz tw: set): $ G ⇒ ra_lift tn tk te tz ∈ lrel $ > $ G ⇒ ra_lift tn tk te tw ∈ lrel $ > $ G ⇒ tz = tw $;
+
+--| An instantiation has one result (by induction on the term; the closed clause by `inst_closed_below_id`, the
+--| instantiated variable by `lift_det`).
+theorem inst_det (G: hyps) (ta tk te tz tw: set): $ G ⇒ ra_inst tk te ta tz ∈ lrel $ > $ G ⇒ ra_inst tk te ta tw ∈ lrel $ > $ G ⇒ tz = tw $;
+
+--| `sinst` has one result (`tdd` types are put in; by induction on `tdd`, with `inst_det`).
+theorem sinst_det (G: hyps) (td tj tn tk te tz tw tdd: set): $ G ⇒ ra_add tj tdd tn ∈ lrel $ > $ G ⇒ ra_sinst td tj tn tk te tz ∈ lrel $ > $ G ⇒ ra_sinst td tj tn tk te tw ∈ lrel $ > $ G ⇒ tz = tw $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the syntax of a restored recursive leaf
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the candidate at the auxiliary types of a nested block
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the family of a nested block with nested occurrences of its own, inside the candidate's classes
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): restoration is unique under `afree`
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): lifting an instantiation
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): `pinst` and `sinst` at the nodes of a term
+-- --------------------------------------------------------------------------
+
+--| An instance of a `λ` is a `λ` of the parts' instances (the body's a binder deeper).
+--| @freshen G x
+--| @freshen G y
+theorem inst_lam_inv {x y: set} (G: hyps) (tk ta tb tc t4: set): $ G ⇒ ra_inst tk ⟨ kc_lam , scons ta (scons tb ∅) ⟩ tc t4 ∈ lrel $ > $ G ⇒ ∃ x ∃ y (t4 = ⟨ kc_lam , scons x (scons y ∅) ⟩ ∧ ra_inst tk ta tc x ∈ lrel ∧ ra_inst ⟨ kc_s , scons tk ∅ ⟩ tb tc y ∈ lrel) $;
+
+--| `pinst` at a `λ`: a `λ` of the parts' instances along the same spine (the body's a binder deeper).
+--| @freshen G x
+--| @freshen G z
+theorem pinst_lam_inv {x z: set} (G: hyps) (ti ts ta tb tr: set): $ G ⇒ ra_pinst ti ts ⟨ kc_lam , scons ta (scons tb ∅) ⟩ tr ∈ lrel $ > $ G ⇒ ∃ x ∃ z (tr = ⟨ kc_lam , scons x (scons z ∅) ⟩ ∧ ra_pinst ti ts ta x ∈ lrel ∧ ra_pinst ⟨ kc_s , scons ti ∅ ⟩ ts tb z ∈ lrel) $;
+
+--| An instance of a projection is the projection of the structure's instance.
+--| @freshen G x
+theorem inst_proj_inv {x: set} (G: hyps) (tk tb ti te tc t4: set): $ G ⇒ ra_inst tk ⟨ kc_proj , scons tb (scons ti (scons te ∅)) ⟩ tc t4 ∈ lrel $ > $ G ⇒ ∃ x (t4 = ⟨ kc_proj , scons tb (scons ti (scons x ∅)) ⟩ ∧ ra_inst tk te tc x ∈ lrel) $;
+
+--| `pinst` at a projection: the projection of the structure's instance along the same spine.
+--| @freshen G x
+theorem pinst_proj_inv {x: set} (G: hyps) (tj ts tb ti te tr: set): $ G ⇒ ra_pinst tj ts ⟨ kc_proj , scons tb (scons ti (scons te ∅)) ⟩ tr ∈ lrel $ > $ G ⇒ ∃ x (tr = ⟨ kc_proj , scons tb (scons ti (scons x ∅)) ⟩ ∧ ra_pinst tj ts te x ∈ lrel) $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the composition of `pinst` through `sinst`
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): closedness through lifts and instantiations
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): restoring keeps a term closed
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): building instantiations (a closed term at a variable; `pinst` and `sinst` at the parameters)
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): a specialized occurrence with the block's types put in restores to the occurrence
+-- --------------------------------------------------------------------------
+
+--| `sinst` at a `λ`: a `λ` of the parts' `sinst`, the body's a binder deeper.
+--| @freshen G x
+--| @freshen G c
+theorem sinst_lam_inv {x c: set} (G: hyps) (td tn tj tk ta tb tz tdd: set): $ G ⇒ ra_add tj tdd tn ∈ lrel $ > $ G ⇒ ra_sinst td tj tn tk ⟨ kc_lam , scons ta (scons tb ∅) ⟩ tz ∈ lrel $ > $ G ⇒ ∃ x ∃ c (tz = ⟨ kc_lam , scons x (scons c ∅) ⟩ ∧ ra_sinst td tj tn tk ta x ∈ lrel ∧ ra_sinst td tj tn ⟨ kc_s , scons tk ∅ ⟩ tb c ∈ lrel) $;
+
+--| `sinst` at a projection: the projection of the structure's `sinst`.
+--| @freshen G x
+theorem sinst_proj_inv {x: set} (G: hyps) (td tn tj tk tb ti ta tz tdd: set): $ G ⇒ ra_add tj tdd tn ∈ lrel $ > $ G ⇒ ra_sinst td tj tn tk ⟨ kc_proj , scons tb (scons ti (scons ta ∅)) ⟩ tz ∈ lrel $ > $ G ⇒ ∃ x (tz = ⟨ kc_proj , scons tb (scons ti (scons x ∅)) ⟩ ∧ ra_sinst td tj tn tk ta x ∈ lrel) $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): restoring undoes the specialization
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the two specializations of a constructor of a nested block's nested block
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): a specialized constructor's result is no `Π`, at an auxiliary type of the nested block too
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the step of the converse inclusion at a constructor of an auxiliary type of the nested block
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the pointwise step of the converse inclusion at an auxiliary type of the nested block
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the pointwise step of the converse inclusion at the hook, at an auxiliary type of the nested block
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the step of the converse inclusion at a point of an auxiliary type of the nested block
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the data of the block behind an auxiliary type of the nested block
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the step of the converse inclusion at a point of an auxiliary type of the nested block
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the nested block's family is inside the candidate's two classes
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the type of a nested block with nested occurrences of its own is good
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): every block type is good (the induction on the tree)
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): every entry of the nested list is in the claims' class
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the fibers of an auxiliary type and of the nested block's type are equal
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the lemma at the block: an auxiliary type at the parameters has the value of its occurrence
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the lemma at the block from the lemma at its nested blocks
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): an entry's block: inside the block's tree, its data, its parameters' valuation
+-- --------------------------------------------------------------------------
+
+-- --------------------------------------------------------------------------
+-- Nested blocks (E7): the lemma at every block (the outer induction on the block's tree)
+-- --------------------------------------------------------------------------
