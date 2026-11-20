@@ -352,3 +352,44 @@ theorem mcv_inv_node_quot_lift (G: hyps) (H: class) (u w d z y t: set):
 theorem mcv_inv_node_quot_ind (G: hyps) (H: class) (u w d z y t: set):
   $ G ⇒ hqind ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ d ∊ fseq u $ > $ G ⇒ z = ⟨ kc_quot_ind , y ⟩ $ > $ G ⇒ ra_eeqv z t ∈ lrel2 $ >
   $ G ⇒ dt u (mcv H) z w d = dt u (mcv H) t w d $;
+
+
+-- --------------------------------------------------------------------------
+-- The judgment atoms that hold in the model
+-- --------------------------------------------------------------------------
+
+--| The judgment atoms that hold in the model with the hook `M`: `ra_deq g e a b` with `e` and `a` of equal value in
+--| the value of `b`, at every admissible universe, level valuation and valuation of `g`. The class `J` of the
+--| spec's relations over `⊢` in the model (`mdeq M` is `deq_j (jmod M)`).
+def jmod (M: class) (.q .g .e .a .b .u .w .r: set): class =
+  $ {q | ∀ g (∀ e (∀ a (∀ b ((q = (ra_deq g e a b)) → (∀ u ((uadm u) → (∀ w ((w ∊ lvals) → (∀ r ((r ∊ (sat u M g w)) → (((dt u M e w r) = (dt u M a w r)) ∧ ((dt u M e w r) ∈ (dt u M b w r)))))))))))))} $;
+--| @congr
+theorem jmod_congr (A B: class): $ A ≐ B $ > $ jmod A ≐ jmod B $;
+--| @rewrite
+theorem sb_c_jmod {x: set} (t: set x) (A: class x):
+  $ (⟦ x / t ⟧ (jmod A)) ≐ jmod (⟦ x / t ⟧ A) $;
+
+--| A judgment that holds in the model is an atom of `jmod`.
+theorem jmod_i (M: class) (G: ctx) (e e2 A: expr): $ mdeq M G e e2 A $ > $ deq_j (jmod M) G e e2 A $;
+
+--| The atoms of `jmod` hold in the model, at every admissible universe.
+theorem jmod_jval (G: hyps) (M: class) (u: set): $ G ⇒ uadm u $ > $ G ⇒ jval u M (jmod M) $;
+
+
+-- --------------------------------------------------------------------------
+-- The block of `Eq` is well formed in the model
+-- --------------------------------------------------------------------------
+
+--| The block of `Eq` is well formed, over the judgment atoms that hold in the model.
+theorem eq_D_wf (M: class) (v: lvl): $ ind_wf_j (jmod M) nil (eq_D v) $;
+
+
+
+-- --------------------------------------------------------------------------
+-- The model's `Eq` is equality
+-- --------------------------------------------------------------------------
+
+--| The model's `Eq` is equality, for a hook with the inductive types' parts: the value of `ind_ty (eq_D v) 0` at a type and
+--| two of its elements is the truth value of their equation (from the rules of `Eq`, its constructor and its
+--| recursor in the model: the recursor at the motive `x = z` turns an element of `Eq b x y` into `x = y`).
+theorem meqs_i (H: class) (v: lvl): $ _ ⇒ hty ⊆ H $ > $ _ ⇒ hctor ⊆ H $ > $ _ ⇒ hrec ⊆ H $ > $ _ ⇒ functional H $ > $ _ ⇒ meqs (mcv H) v $;
