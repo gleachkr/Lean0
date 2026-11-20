@@ -1028,10 +1028,14 @@ fn quot_axiom<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util
     let h = g.const_term(&sig.lean_name, &us).ok_or("quotient term")?;
     let lhs = apps(g, h, &[xs.clone(), vec![q]].concat());
     let rhs = g.lean.app(&mut g.env, xs[3], a);
-    let hyp = g.env.app_n("sty", &[gv, h, qty, lhs, tv]);
+    let mut hyps = vec![g.env.app_n("sty", &[gv, h, qty, lhs, tv])];
+    if nargs == 5 {
+        // `Quot.lift`: `a` at `f`'s domain (the spec's `quot_lift_mk`)
+        hyps.push(g.lean.deq(&mut g.env, gv, a, a, xs[0]));
+    }
     let concl = g.lean.deq(&mut g.env, gv, lhs, rhs, tv);
     let name = g.thms.fresh(&format!("{}_mk", sig.cname));
-    let th = add_thm(&mut g.env, &name, v.args, vec![hyp], concl, true, false, None, &format!("Reduction of `{}` on `Quot.mk`.", sig.lean_name))?;
+    let th = add_thm(&mut g.env, &name, v.args, hyps, concl, true, false, None, &format!("Reduction of `{}` on `Quot.mk`.", sig.lean_name))?;
     g.quot_red.insert(sig.lean_name.clone(), th);
     Ok(())
 }

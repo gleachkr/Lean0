@@ -1682,7 +1682,14 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
             }
             let (tl2, pl2) = self.sty_spine(f, &args2)?;
             a.push(self.tr(tl2)?);
-            (self.g.quot_red[&fname], vec![pl2], tl2)
+            let mut hyps = vec![pl2];
+            if major_idx == 5 {
+                // `Quot.lift`: `a` at `f`'s domain `α`
+                let Some(&ae) = margs.get(2) else { return Err("Quot.mk is not applied to its three arguments".into()) };
+                let (ta, pa) = self.infer(ae)?;
+                hyps.push(self.cast(pa, ta, args[0])?);
+            }
+            (self.g.quot_red[&fname], hyps, tl2)
         } else {
             let cl = self.g.lean_name(self.tc, cname);
             let Some(&th) = self.g.iota.get(&(fname.clone(), cl.clone())) else { return Err(format!("no iota rule {fname} {cl}")) };
