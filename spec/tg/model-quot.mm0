@@ -1,0 +1,354 @@
+-- model-quot.mm0: the quotient primitives (layer F of the reduction, audit §11):
+-- the classes of the equivalence a relation generates, the values of `Quot`,
+-- `Quot.mk`, `Quot.lift` and `Quot.ind` as parts of the hook, and their rules in
+-- the model. Imports model-nst.mm0; proofs in model-quot.auf.
+
+import "model-nst.mm0";
+
+
+-- --------------------------------------------------------------------------
+-- The classes of the equivalence a relation generates
+-- --------------------------------------------------------------------------
+
+--| `C` is closed under the relation `R` on `A`, in both directions: with `p` it has every `q` of `A` that `R`
+--| relates to `p` or `p` to (`R` a curried trace: `R p q` holds when its value at `p`, `q` has an element).
+def qclo (A R C: class) (.p .q .z: set): fml =
+  $ ∀ p (∀ q ((p ∊ C) → ((q ∊ A) → (((∃ z (z ∊ (ap (ap R p) q))) ∨ (∃ z (z ∊ (ap (ap R q) p)))) → (q ∊ C))))) $;
+--| @congr
+theorem qclo_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ qclo A C E ⟺ qclo B D F $;
+--| @rewrite
+theorem sb_f_qclo {x: set} (t: set x) (A B C: class x):
+  $ [x/t] (qclo A B C) ⟺ qclo (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+
+--| The class of `X` in the equivalence `R` generates on `A`: the least closed set with `X`.
+def qcl (A R X: class) (.y .c: set): class =
+  $ {y | ∀ c ((X ∈ c) → ((qclo A R c) → (y ∊ c)))} $;
+--| @congr
+theorem qcl_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ qcl A C E ≐ qcl B D F $;
+--| @rewrite
+theorem sb_c_qcl {x: set} (t: set x) (A B C: class x):
+  $ (⟦ x / t ⟧ (qcl A B C)) ≐ qcl (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+
+--| An element is in its class.
+theorem qcl_self (G: hyps) (A R: class) (a: set): $ G ⇒ a ∊ qcl A R a $;
+
+--| The class is inside every closed set with the element.
+theorem qcl_min (G: hyps) (A R C: class) (a b: set):
+  $ G ⇒ isset C $ > $ G ⇒ b ∊ qcl A R a $ > $ G ⇒ a ∊ C $ > $ G ⇒ qclo A R C $ > $ G ⇒ b ∊ C $;
+
+--| A class is inside the carrier.
+theorem qcl_sub (G: hyps) (A R: class) (a: set): $ G ⇒ isset A $ > $ G ⇒ a ∊ A $ > $ G ⇒ qcl A R a ⊆ A $;
+
+theorem qcl_set (G: hyps) (A R: class) (a: set): $ G ⇒ isset A $ > $ G ⇒ a ∊ A $ > $ G ⇒ isset (qcl A R a) $;
+
+--| A class is closed.
+theorem qcl_clo (G: hyps) (A R: class) (a: set): $ G ⇒ qclo A R (qcl A R a) $;
+
+--| An element of a class has the same class.
+theorem qcl_eq (G: hyps) (A R: class) (a b: set):
+  $ G ⇒ isset A $ > $ G ⇒ a ∊ A $ > $ G ⇒ b ∊ qcl A R a $ > $ G ⇒ qcl A R b = qcl A R a $;
+
+--| Related elements are in one class.
+theorem qcl_rel (G: hyps) (A R: class) (a b c: set): $ G ⇒ b ∊ A $ > $ G ⇒ c ∊ ap (ap R a) b $ > $ G ⇒ b ∊ qcl A R a $;
+
+
+-- --------------------------------------------------------------------------
+-- The quotient of a set by a relation
+-- --------------------------------------------------------------------------
+
+--| The quotient of `A` by `R`: the classes; `A` itself when `A` is a proposition (an element of `two`), since the
+--| types of the model in `Prop` have at most the element `∅`.
+def qty (A R: class) (.c .a: set): class =
+  $ {c | ((A ∈ two) ∧ (c ∊ A)) ∨ ((¬ (A ∈ two)) ∧ (∃ a ((a ∊ A) ∧ (c = (qcl A R a)))))} $;
+--| @congr
+theorem qty_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ qty A C ≐ qty B D $;
+--| @rewrite
+theorem sb_c_qty {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (qty A B)) ≐ qty (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+
+--| The class of `X` as an element of the quotient (`∅` at a proposition).
+def qmk (A R X: class) (.y: set): class =
+  $ {y | (¬ (A ∈ two)) ∧ (y ∊ (qcl A R X))} $;
+--| @congr
+theorem qmk_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ qmk A C E ≐ qmk B D F $;
+--| @rewrite
+theorem sb_c_qmk {x: set} (t: set x) (A B C: class x):
+  $ (⟦ x / t ⟧ (qmk A B C)) ≐ qmk (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+
+--| The lift of the trace `F` at the element `Q` of the quotient of `A`: the values of `F` at the elements of `Q`
+--| (at `∅` when `A` is a proposition).
+def qlift (A F Q: class) (.y .a: set): class =
+  $ {y | ((A ∈ two) ∧ (y ∊ (ap F ∅))) ∨ ((¬ (A ∈ two)) ∧ (∃ a ((a ∊ Q) ∧ (y ∊ (ap F a)))))} $;
+--| @congr
+theorem qlift_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ qlift A C E ≐ qlift B D F $;
+--| @rewrite
+theorem sb_c_qlift {x: set} (t: set x) (A B C: class x):
+  $ (⟦ x / t ⟧ (qlift A B C)) ≐ qlift (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+
+--| The trace `F` has one value at related elements of `A`.
+def qresp (A R F: class) (.a .b .z: set): fml =
+  $ ∀ a (∀ b ((a ∊ A) → ((b ∊ A) → ((∃ z (z ∊ (ap (ap R a) b))) → ((ap F a) = (ap F b)))))) $;
+--| @congr
+theorem qresp_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ qresp A C E ⟺ qresp B D F $;
+--| @rewrite
+theorem sb_f_qresp {x: set} (t: set x) (A B C: class x):
+  $ [x/t] (qresp A B C) ⟺ qresp (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+
+--| The truth value of `X = Y`: `csn ∅` or `∅`.
+def teq (X Y: class) (.y: set): class =
+  $ {y | (y = ∅) ∧ (X = Y)} $;
+--| @congr
+theorem teq_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ teq A C ≐ teq B D $;
+--| @rewrite
+theorem sb_c_teq {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (teq A B)) ≐ teq (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+
+--| The space of the proofs that `F` respects `R` (the value of `Π p q. R p q → F p = F q`, with `teq` for the equation).
+def qhd (A R F: class) (.p .q .z: set): class =
+  $ cpi p A (cpi q A (cpi z (ap (ap R p) q) (teq (ap F p) (ap F q)))) $;
+--| @congr
+theorem qhd_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ qhd A C E ≐ qhd B D F $;
+--| @rewrite
+theorem sb_c_qhd {x: set} (t: set x) (A B C: class x):
+  $ (⟦ x / t ⟧ (qhd A B C)) ≐ qhd (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+
+--| At a proposition the quotient is the proposition.
+theorem qty_prop (G: hyps) (A R: class): $ G ⇒ A ∈ two $ > $ G ⇒ qty A R = A $;
+
+theorem qmk_prop (G: hyps) (A R X: class): $ G ⇒ A ∈ two $ > $ G ⇒ qmk A R X = ∅ $;
+
+theorem qmk_cls (G: hyps) (A R X: class): $ G ⇒ ¬ A ∈ two $ > $ G ⇒ qmk A R X = qcl A R X $;
+
+--| A class is an element of the quotient.
+theorem qty_cls (G: hyps) (A R: class) (a: set): $ G ⇒ ¬ A ∈ two $ > $ G ⇒ isset A $ > $ G ⇒ a ∊ A $ > $ G ⇒ qcl A R a ∈ qty A R $;
+
+--| The class of an element of `A` is an element of the quotient.
+theorem qmk_in (G: hyps) (A R: class) (a: set): $ G ⇒ isset A $ > $ G ⇒ a ∊ A $ > $ G ⇒ qmk A R a ∈ qty A R $;
+
+--| Every element of the quotient is the class of an element of `A`.
+--| @freshen G a
+theorem qty_elim {a: set} (G: hyps) (A R: class) (c: set): $ G ⇒ c ∊ qty A R $ > $ G ⇒ ∃ a (a ∊ A ∧ c = qmk A R a) $;
+
+--| The quotient of an element of `U_n` is an element of `U_n`.
+theorem qty_uni (G: hyps) (R: class) (a n: set): $ G ⇒ n ∊ ω $ > $ G ⇒ a ∊ fv uni n $ > $ G ⇒ qty a R ∈ fv uni n $;
+
+theorem qlift_prop (G: hyps) (A F Q: class): $ G ⇒ A ∈ two $ > $ G ⇒ qlift A F Q = ap F ∅ $;
+
+--| @freshen G z
+theorem qresp_elim {z: set} (G: hyps) (A R F: class) (a b: set):
+  $ G ⇒ qresp A R F $ > $ G ⇒ a ∊ A $ > $ G ⇒ b ∊ A $ > $ G ⇒ ∃ z (z ∊ ap (ap R a) b) $ > $ G ⇒ ap F a = ap F b $;
+
+theorem teq_elim (G: hyps) (X Y: class) (a: set): $ G ⇒ a ∊ teq X Y $ > $ G ⇒ X = Y $;
+
+theorem teq_set (G: hyps) (X Y: class): $ G ⇒ isset (teq X Y) $;
+
+theorem qhd_set (G: hyps) (A R F: class): $ G ⇒ isset A $ > $ G ⇒ isset R $ > $ G ⇒ isset (qhd A R F) $;
+
+--| A proof that `F` respects `R` gives that it does.
+theorem qhd_resp (G: hyps) (A R F: class) (h: set): $ G ⇒ h ∊ qhd A R F $ > $ G ⇒ qresp A R F $;
+
+theorem qlift_eq (G: hyps) (A F Q Q2: class): $ G ⇒ Q = Q2 $ > $ G ⇒ qlift A F Q = qlift A F Q2 $;
+
+--| The lift at a class is the value at its element, for a trace that respects the relation.
+theorem qlift_mk (G: hyps) (A R F: class) (a: set):
+  $ G ⇒ isset A $ > $ G ⇒ a ∊ A $ > $ G ⇒ qresp A R F $ > $ G ⇒ qlift A F (qmk A R a) = ap F a $;
+
+
+-- --------------------------------------------------------------------------
+-- The hook's parts for the quotient constants
+-- --------------------------------------------------------------------------
+-- The values of `quot u`, `quot_mk u`, `quot_lift u v` and `quot_ind u` at a
+-- level valuation are traces over the types of their arguments: a type `a` of
+-- `U_n` (`n` the value of `u`), a relation `r` on it, and then the quotient
+-- `qty a r`, the class `qmk a r c` of `c`, and the lift `qlift a f q` of `f` (a
+-- trace into a type `b` of `U_k`; the proof `h` that `f` respects `r` ranges
+-- over `qhd a r f`). `quot_ind` is a proof: `∅`.
+
+--| At `quot l`: the quotients.
+def hquot (.u .l .e .z .w .y .n .a .r .i .j: set): class =
+  $ {z | ∃ u ∃ l ∃ e (z = ⟨ ⟨ u , ⟨ kc_quot , ⟨ scons l ∅ , e ⟩ ⟩ ⟩ , clam w lvals (sclip {y | ∃ n (n = lv l w ∧ y ∊ clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (qty a r)))}) ⟩)} $;
+
+--| The denotation of `quot`, for a hook `mcv H` with `H` extending `hquot`, at the level value `n`.
+--| @freshen G a
+--| @freshen G r
+--| @freshen G i
+--| @freshen G j
+theorem dt_quot {a r i j: set} (G: hyps) (H L W R: class) (u n: set):
+  $ G ⇒ hquot ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ L ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ lv L W = n $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_quot , scons L ∅ ⟩ W R = mclip u (sclip (clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (qty a r)))) $;
+
+--| At `quot_mk l`: the classes.
+def hqmk (.u .l .e .z .w .y .n .a .r .i .j .c: set): class =
+  $ {z | ∃ u ∃ l ∃ e (z = ⟨ ⟨ u , ⟨ kc_quot_mk , ⟨ scons l ∅ , e ⟩ ⟩ ⟩ , clam w lvals (sclip {y | ∃ n (n = lv l w ∧ y ∊ clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (clam c a (qmk a r c))))}) ⟩)} $;
+
+--| The denotation of `quot_mk`, for a hook `mcv H` with `H` extending `hqmk`, at the level value `n`.
+--| @freshen G a
+--| @freshen G r
+--| @freshen G i
+--| @freshen G j
+--| @freshen G c
+theorem dt_quot_mk {a r i j c: set} (G: hyps) (H L W R: class) (u n: set):
+  $ G ⇒ hqmk ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ L ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ lv L W = n $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_quot_mk , scons L ∅ ⟩ W R = mclip u (sclip (clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (clam c a (qmk a r c))))) $;
+
+--| At `quot_lift l m`: the lifts.
+def hqlift (.u .l .m .e .z .w .y .n .k .a .r .i .j .b .f .h .q: set): class =
+  $ {z | ∃ u ∃ l ∃ m ∃ e (z = ⟨ ⟨ u , ⟨ kc_quot_lift , ⟨ scons l (scons m ∅) , e ⟩ ⟩ ⟩ , clam w lvals (sclip {y | ∃ n ∃ k (n = lv l w ∧ k = lv m w ∧ y ∊ clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (clam b (fv uni k) (clam f (cpi i a b) (clam h (qhd a r f) (clam q (qty a r) (qlift a f q)))))))}) ⟩)} $;
+
+--| The denotation of `quot_lift`, for a hook `mcv H` with `H` extending `hqlift`, at the level values `n`, `k`.
+--| @freshen G a
+--| @freshen G r
+--| @freshen G i
+--| @freshen G j
+--| @freshen G b
+--| @freshen G f
+--| @freshen G h
+--| @freshen G q
+theorem dt_quot_lift {a r i j b f h q: set} (G: hyps) (H L M W R: class) (u n k: set):
+  $ G ⇒ hqlift ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ L ∈ trees ω $ > $ G ⇒ M ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ lv L W = n $ > $ G ⇒ lv M W = k $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_quot_lift , scons L (scons M ∅) ⟩ W R = mclip u (sclip (clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (clam b (fv uni k) (clam f (cpi i a b) (clam h (qhd a r f) (clam q (qty a r) (qlift a f q)))))))) $;
+
+--| At `quot_ind l`: `∅`.
+def hqind (.u .l .e .z: set): class =
+  $ {z | ∃ u ∃ l ∃ e (z = ⟨ ⟨ u , ⟨ kc_quot_ind , ⟨ scons l ∅ , e ⟩ ⟩ ⟩ , ∅ ⟩)} $;
+
+--| The denotation of `quot_ind`, for a hook `mcv H` with `H` extending `hqind`.
+theorem dt_quot_ind (G: hyps) (H L W R: class) (u: set):
+  $ G ⇒ hqind ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ L ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_quot_ind , scons L ∅ ⟩ W R = ∅ $;
+
+--| A hook with the quotient constants' parts.
+def hqu (H: class): fml = $ hquot ⊆ H ∧ hqmk ⊆ H ∧ hqlift ⊆ H ∧ hqind ⊆ H ∧ functional H $;
+
+
+-- --------------------------------------------------------------------------
+-- The quotient constants' rules: `quot_ty`
+-- --------------------------------------------------------------------------
+
+--| The value of `quot` for a hook with the quotients' parts, in an admissible universe: the trace of the quotients over the types of `U_n` and their relations.
+--| @freshen G a
+--| @freshen G r
+--| @freshen G i
+--| @freshen G j
+theorem dt_quot_u {a r i j: set} (G: hyps) (H R: class) (l: lvl) (u w n: set):
+  $ G ⇒ uadm u $ > $ G ⇒ hqu H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ lv (enc_lvl l) w = n $ >
+  $ G ⇒ dt u (mcv H) (enc_expr (quot l)) w R = clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (qty a r)) $;
+
+--| The rule `quot_ty` in the model.
+theorem mquot_ty (H: class) (G: ctx) (l: lvl):
+  $ _ ⇒ hqu H $ > $ mdeq (mcv H) G (quot l) (quot l) (pi (srt l) (pi (pi (bvar nz) (pi (bvar n1) (Prop))) (srt l))) $;
+
+
+-- --------------------------------------------------------------------------
+-- The quotient constants' rules: `quot_mk_ty`
+-- --------------------------------------------------------------------------
+
+--| The value of `quot_mk` for a hook with the quotients' parts, in an admissible universe: the trace of the classes.
+--| @freshen G a
+--| @freshen G r
+--| @freshen G i
+--| @freshen G j
+--| @freshen G c
+theorem dt_quot_mk_u {a r i j c: set} (G: hyps) (H R: class) (l: lvl) (u w n: set):
+  $ G ⇒ uadm u $ > $ G ⇒ hqu H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ lv (enc_lvl l) w = n $ >
+  $ G ⇒ dt u (mcv H) (enc_expr (quot_mk l)) w R = clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (clam c a (qmk a r c))) $;
+
+--| The rule `quot_mk_ty` in the model.
+theorem mquot_mk_ty (H: class) (G: ctx) (l: lvl):
+  $ _ ⇒ hqu H $ > $ mdeq (mcv H) G (quot_mk l) (quot_mk l) (pi (srt l) (pi (pi (bvar nz) (pi (bvar n1) (Prop))) (pi (bvar n1) (app (app (quot l) (bvar n2)) (bvar n1))))) $;
+
+
+-- --------------------------------------------------------------------------
+-- The quotient constants' rules: `quot_ind_ty`
+-- --------------------------------------------------------------------------
+
+--| The rule `quot_ind_ty` in the model (the value is a proof, `∅`; its type is inhabited since every element of
+--| the quotient is a class).
+theorem mquot_ind_ty (H: class) (G: ctx) (l: lvl):
+  $ _ ⇒ hqu H $ > $ mdeq (mcv H) G (quot_ind l) (quot_ind l) (pi (srt l) (pi (pi (bvar nz) (pi (bvar n1) (Prop))) (pi (pi (app (app (quot l) (bvar n1)) (bvar nz)) (Prop)) (pi (pi (bvar n2) (app (bvar n1) (app (app (app (quot_mk l) (bvar n3)) (bvar n2)) (bvar nz)))) (pi (app (app (quot l) (bvar n3)) (bvar n2)) (app (bvar n2) (bvar nz))))))) $;
+
+
+-- --------------------------------------------------------------------------
+-- The quotient constants' rules: `quot_lift_ty`
+-- --------------------------------------------------------------------------
+
+--| The model's `Eq` at the level `v` is equality: at a type `b` of `U_v` and two of its elements, the value of
+--| `ind_ty (eq_D v) 0` is the truth value of their equation.
+def meqs (M: class) (v: lvl) (.u .w .b .x .y: set): fml =
+  $ ∀ u ∀ w (uadm u → w ∊ lvals → ∀ b ∀ x ∀ y (b ∊ fv uni (lv (enc_lvl v) w) → x ∊ b → y ∊ b →
+      ap (ap (ap (dt u M (enc_expr (ind_ty (eq_D v) nz)) w ∅) b) x) y = teq x y)) $;
+
+theorem teq_eq (G: hyps) (A B C D: class): $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ teq A C = teq B D $;
+
+--| The value of `quot_lift` for a hook with the quotients' parts, in an admissible universe: the trace of the lifts.
+--| @freshen G a
+--| @freshen G r
+--| @freshen G i
+--| @freshen G j
+--| @freshen G b
+--| @freshen G f
+--| @freshen G h
+--| @freshen G q
+theorem dt_quot_lift_u {a r i j b f h q: set} (G: hyps) (H R: class) (l l2: lvl) (u w n k: set):
+  $ G ⇒ uadm u $ > $ G ⇒ hqu H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ lv (enc_lvl l) w = n $ > $ G ⇒ lv (enc_lvl l2) w = k $ > $ G ⇒ meqs (mcv H) l2 $ >
+  $ G ⇒ dt u (mcv H) (enc_expr (quot_lift l l2)) w R = clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (clam b (fv uni k) (clam f (cpi i a b) (clam h (qhd a r f) (clam q (qty a r) (qlift a f q)))))) $;
+
+--| The rule `quot_lift_ty` in the model.
+theorem mquot_lift_ty (H: class) (G: ctx) (l l2: lvl):
+  $ _ ⇒ hqu H $ > $ _ ⇒ meqs (mcv H) l2 $ > $ mdeq (mcv H) G (quot_lift l l2) (quot_lift l l2) (pi (srt l) (pi (pi (bvar nz) (pi (bvar n1) (Prop))) (pi (srt l2) (pi (pi (bvar n2) (bvar n1)) (pi (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D l2) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (pi (app (app (quot l) (bvar n4)) (bvar n3)) (bvar n3))))))) $;
+
+
+-- --------------------------------------------------------------------------
+-- The quotient constants' rules: the spines of the computation rules
+-- --------------------------------------------------------------------------
+
+
+-- --------------------------------------------------------------------------
+-- The quotient constants' rules: `quot_ind_mk`
+-- --------------------------------------------------------------------------
+
+--| The rule `quot_ind_mk` in the model: both sides are proofs, `∅` (`J`: atoms that hold in the model, for the `sty` premise).
+--| @freshen G u
+theorem mquot_ind_mk {u: set} (H J: class) (G: ctx) (l: lvl) (e1 e2 e3 e4: expr) (l1: lvl) (f1 f2 ea T: expr):
+  $ _ ⇒ hqu H $ > $ _ ⇒ ∀ u (uadm u → jval u (mcv H) J) $ >
+  $ sty_j J G (quot_ind l) (pi (srt l) (pi (pi (bvar nz) (pi (bvar n1) (Prop))) (pi (pi (app (app (quot l) (bvar n1)) (bvar nz)) (Prop)) (pi (pi (bvar n2) (app (bvar n1) (app (app (app (quot_mk l) (bvar n3)) (bvar n2)) (bvar nz)))) (pi (app (app (quot l) (bvar n3)) (bvar n2)) (app (bvar n2) (bvar nz))))))) (app (app (app (app (app (quot_ind l) (e1)) (e2)) (e3)) (e4)) (app (app (app (quot_mk l1) f1) f2) ea)) T $ >
+  $ mdeq (mcv H) G (app (app (app (app (app (quot_ind l) (e1)) (e2)) (e3)) (e4)) (app (app (app (quot_mk l1) f1) f2) ea)) (app e4 ea) T $;
+
+
+-- --------------------------------------------------------------------------
+-- The quotient constants' rules: `quot_lift_mk`
+-- --------------------------------------------------------------------------
+
+--| The rule `quot_lift_mk` in the model, with the premise that `a` has the type `f`'s domain (audit §4): at a
+--| proposition both sides are `f` at `∅`; otherwise the major premise is a class of the quotient with `a` in it,
+--| and `f` is constant on it.
+--| @freshen G u
+theorem mquot_lift_mk {u: set} (H J: class) (G: ctx) (l l2: lvl) (e1 e2 e3 e4 e5: expr) (l1: lvl) (f1 f2 ea T: expr):
+  $ _ ⇒ hqu H $ > $ _ ⇒ meqs (mcv H) l2 $ > $ _ ⇒ ∀ u (uadm u → jval u (mcv H) J) $ >
+  $ sty_j J G (quot_lift l l2) (pi (srt l) (pi (pi (bvar nz) (pi (bvar n1) (Prop))) (pi (srt l2) (pi (pi (bvar n2) (bvar n1)) (pi (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D l2) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (pi (app (app (quot l) (bvar n4)) (bvar n3)) (bvar n3))))))) (app (app (app (app (app (app (quot_lift l l2) (e1)) (e2)) (e3)) (e4)) (e5)) (app (app (app (quot_mk l1) f1) f2) ea)) T $ > $ ty_j J G ea e1 $ >
+  $ mdeq (mcv H) G (app (app (app (app (app (app (quot_lift l l2) (e1)) (e2)) (e3)) (e4)) (e5)) (app (app (app (quot_mk l1) f1) f2) ea)) (app e4 ea) T $;
+
+
+-- --------------------------------------------------------------------------
+-- Invariance of the quotient constants' values (D4): the hook at their nodes
+-- --------------------------------------------------------------------------
+
+--| `minv_intro`'s step at the nodes `quot`: equivalent levels have the same values, so the node denotes as every tree it is `eeqv` to.
+theorem mcv_inv_node_quot (G: hyps) (H: class) (u w d z y t: set):
+  $ G ⇒ hquot ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ d ∊ fseq u $ > $ G ⇒ z = ⟨ kc_quot , y ⟩ $ > $ G ⇒ ra_eeqv z t ∈ lrel2 $ >
+  $ G ⇒ dt u (mcv H) z w d = dt u (mcv H) t w d $;
+
+--| `minv_intro`'s step at the nodes `quot_mk`: equivalent levels have the same values, so the node denotes as every tree it is `eeqv` to.
+theorem mcv_inv_node_quot_mk (G: hyps) (H: class) (u w d z y t: set):
+  $ G ⇒ hqmk ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ d ∊ fseq u $ > $ G ⇒ z = ⟨ kc_quot_mk , y ⟩ $ > $ G ⇒ ra_eeqv z t ∈ lrel2 $ >
+  $ G ⇒ dt u (mcv H) z w d = dt u (mcv H) t w d $;
+
+--| `minv_intro`'s step at the nodes `quot_lift`: equivalent levels have the same values, so the node denotes as every tree it is `eeqv` to.
+theorem mcv_inv_node_quot_lift (G: hyps) (H: class) (u w d z y t: set):
+  $ G ⇒ hqlift ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ d ∊ fseq u $ > $ G ⇒ z = ⟨ kc_quot_lift , y ⟩ $ > $ G ⇒ ra_eeqv z t ∈ lrel2 $ >
+  $ G ⇒ dt u (mcv H) z w d = dt u (mcv H) t w d $;
+
+--| `minv_intro`'s step at the nodes `quot_ind`: equivalent levels have the same values, so the node denotes as every tree it is `eeqv` to.
+theorem mcv_inv_node_quot_ind (G: hyps) (H: class) (u w d z y t: set):
+  $ G ⇒ hqind ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ d ∊ fseq u $ > $ G ⇒ z = ⟨ kc_quot_ind , y ⟩ $ > $ G ⇒ ra_eeqv z t ∈ lrel2 $ >
+  $ G ⇒ dt u (mcv H) z w d = dt u (mcv H) t w d $;
