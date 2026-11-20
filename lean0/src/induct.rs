@@ -1091,7 +1091,6 @@ pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &Recurs
         let cty = ctor_type_at(el, &cd, mlv);
         let cty = el.tr(cty)?;
         let nf = rule.ctor_telescope_size_wo_params as usize;
-        let c = cd.ctor_idx as usize;
         // an auxiliary type's recursor reduces on the constructors of the occurrence's block
         // (`ind_iota_nst`): the major premise takes that block's parameters and levels
         let aux = i >= block.names.len();
@@ -1110,21 +1109,15 @@ pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &Recurs
         let def_name = g.terms.fresh(&format!("{}_{}", sig.cname, mangle(short)));
         let expr_s = g.env.sort_names["expr"];
         let lvl_args = g.lvl_args(&sig.lvl_names);
-        // the schema's right-hand side must be the export's
-        if !g.replay {
-            let (v, bl) = if large { (us[0], &us[1..]) } else { (g.env.app_n("lz", &[]), &us[..]) };
-            let d = block.data_term(g, bl);
-            let (ie, ce) = (g.lean.nat(&mut g.env, i), g.lean.nat(&mut g.env, c));
-            let goal = g.env.app_n("rec_rule", &[d, v, ie, ce, rhs]);
-            pv.prove(g, goal).map_err(|e| format!("the rule of `{}` for `{ctor_lean}` is not the schema's: {e}", sig.lean_name))?;
-        }
         let def = add_term(&mut g.env, &def_name, lvl_args, expr_s, TermKind::Def { body: rhs0, public_body: true },
             &format!("The right-hand side of the iota rule of `{}` for `{ctor_lean}`.", sig.lean_name))?;
         let counts = [rd.num_params as usize, rd.num_motives as usize, rd.num_minors as usize, rd.num_indices as usize];
         let (v, hyps, concl) = crate::gen::iota_statement(g, sig, counts, &ctor_lean, cnl, cnp, nf, def, rty, &mls, cty)?;
         let name = g.thms.fresh(&format!("{def_name}_iota"));
         let rule_ax = if aux { "ind_iota_nst" } else { "ind_iota" };
-        let proof = prove_lemma(g, &mut pv, rule_ax, &hyps, concl).map_err(|e| format!("iota of `{}` on `{ctor_lean}`: {e}", sig.lean_name))?;
+        // the rule's premises `rec_rhs` and `rst` make the schema's right-hand side the export's
+        let proof = prove_lemma(g, &mut pv, rule_ax, &hyps, concl)
+            .map_err(|e| format!("iota of `{}` on `{ctor_lean}` (the rule may not be the schema's): {e}", sig.lean_name))?;
         let th = add_thm(&mut g.env, &name, v.args, hyps, concl, false, false, proof,
             &format!("Iota reduction of `{}` on `{ctor_lean}`.", sig.lean_name))?;
         g.iota.insert((sig.lean_name.clone(), ctor_lean), th);

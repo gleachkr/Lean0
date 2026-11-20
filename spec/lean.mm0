@@ -832,10 +832,6 @@ axiom rec_rhs_i (D: ind) (b: blk) (P: ctx) (T: tys) (v: lvl) (i c np n m k nf a 
   $ nth_ty T i F C $ > $ nth_ctor C c K $ > $ minor_idx T i c k $ > $ npis K nf $ >
   $ add nf m a $ > $ add mk (s k) a $ > $ pargs #mk 0 nf Acc $ > $ rwalk D np n m v nf 0 Acc K Val $ >
   $ lams N Val R1 $ > $ lams M R1 R2 $ > $ lams P R2 R $ > $ rec_rhs D v i c R $;
---| `rec_rule D v i c R`: the rule's right-hand side, restored.
-term rec_rule: ind > lvl > nat > nat > expr > wff;
-axiom rec_rule_i (D: ind) (N: ctx) (v: lvl) (i c: nat) (R0 R: expr):
-  $ rec_rhs D v i c R0 $ > $ ind_nested D N $ > $ rst D N R0 R $ > $ rec_rule D v i c R $;
 
 -- Structures: fields, projections and eta ----------------------------------
 
@@ -1587,11 +1583,12 @@ axiom ind_rec_ty (G: ctx) (D: ind) (N: ctx) (i: nat) (v: lvl) (R0 R: expr):
 --| and the arguments of `T2` are those of `TY`, one by one (`aeq`: the
 --| parameters `qs` are the recursor's `ps`, the constructor's indices are `is`).
 axiom ind_iota (G: ctx) (D D2: ind) (N: ctx) (i c: nat) (v: lvl) (np n m a0 a ni k nf nq: nat)
-    (R e3 e4 Y maj rhs0 rhs R0 RT TY C CT T2 T: expr):
-  $ spine (ind_rec D i v) e4 k $ > $ spine (ind_ctor D2 i c) maj nq $ > $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_rule D v i c R $ >
+    (Rh R e3 e4 Y maj rhs0 rhs R0 RT TY C CT T2 T: expr):
+  $ spine (ind_rec D i v) e4 k $ > $ spine (ind_ctor D2 i c) maj nq $ > $ ind_wf G D $ > $ elim_ok G D v $ >
+  $ ind_nested D N $ > $ rec_rhs D v i c Rh $ > $ rst D N Rh R $ >
   $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m a $ > $ nidx D i ni $ > $ add a ni k $ > $ nfields D i c nf $ >
   $ add np nf nq $ > $ rehead (ind_rec D i v) R a e3 rhs0 $ > $ spine e3 e4 ni $ > $ spine Y maj nf $ >
-  $ rehead Y rhs0 nf maj rhs $ > $ rec_ty D v i R0 $ > $ ind_nested D N $ > $ rst D N R0 RT $ >
+  $ rehead Y rhs0 nf maj rhs $ > $ rec_ty D v i R0 $ > $ rst D N R0 RT $ >
   $ sty G (ind_rec D i v) RT e4 (Π TY. C) $ > $ inst 0 C maj T $ >
   $ eeqv (ind_ctor D i c) (ind_ctor D2 i c) $ > $ ctor_ty D i c CT $ > $ sty G (ind_ctor D2 i c) CT maj T2 $ > $ aeq G T2 TY $ >
   $ ⟦ G ⊢ e4 @ maj ≡ rhs : T ⟧ $;
@@ -1601,9 +1598,9 @@ axiom ind_iota (G: ctx) (D D2: ind) (N: ctx) (i c: nat) (v: lvl) (np n m a0 a ni
 --| (`aeq` makes `qs` the occurrence's arguments at `ps`); the fields are the
 --| last `nf` arguments of the major premise, as in `inductive_reduce_rec`.
 axiom ind_iota_nst (G: ctx) (D I I2: ind) (N: ctx) (i ii c: nat) (v: lvl) (np n m a0 a ni k nf nq npi: nat)
-    (R e3 e4 X Y maj rhs0 rhs R0 RT TY C CT T2 T: expr):
+    (Rh R e3 e4 X Y maj rhs0 rhs R0 RT TY C CT T2 T: expr):
   $ spine (ind_rec D i v) e4 k $ > $ spine (ind_ctor I2 ii c) maj nq $ > $ ind_wf G D $ > $ elim_ok G D v $ >
-  $ ind_nested D N $ > $ aux_of D N i X $ > $ spine (ind_ty I ii) X npi $ > $ rec_rule D v i c R $ >
+  $ ind_nested D N $ > $ aux_of D N i X $ > $ spine (ind_ty I ii) X npi $ > $ rec_rhs D v i c Rh $ > $ rst D N Rh R $ >
   $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m a $ > $ nidx D i ni $ > $ add a ni k $ > $ nfields D i c nf $ >
   $ add npi nf nq $ > $ rehead (ind_rec D i v) R a e3 rhs0 $ > $ spine e3 e4 ni $ > $ spine Y maj nf $ >
   $ rehead Y rhs0 nf maj rhs $ > $ rec_ty D v i R0 $ > $ rst D N R0 RT $ >

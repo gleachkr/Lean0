@@ -133,7 +133,6 @@ pub const TABLE: &[(&str, Kind, &str)] = &[
     ("ihval", Kind::Fn, "++++++++++-"),
     ("rwalk", Kind::Fn, "+++++++++-"),
     ("rec_rhs", Kind::Fn, "++++-"),
-    ("rec_rule", Kind::Fn, "++++-"),
     // structures
     ("struct_like", Kind::Check, ""),
     ("field_ty", Kind::Fn, "+++-"),
