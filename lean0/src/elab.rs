@@ -1692,6 +1692,26 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
             (self.g.quot_red[&fname], hyps, tl2)
         } else {
             let cl = self.g.lean_name(self.tc, cname);
+            if let Some(&th) = self.g.iota_eq.get(&(fname.clone(), cl.clone())) {
+                match self.iota_closed(th, &fname, f, &a, &args2[..major_idx], &margs, cname, lhs2, tl) {
+                    Ok(p2) => {
+                        self.g.iota_eq_used += 1;
+                        let mut pf = mm(self.g.lean.trans(&mut self.g.env, p1, p2))?;
+                        let mut ft = tl;
+                        for &x in &args[major_idx + 1..] {
+                            (ft, pf) = self.app_step(ft, pf, x, None)?;
+                        }
+                        let tcur = self.infer(cur)?.0;
+                        return self.cast(pf, ft, tcur)
+                    }
+                    Err(e) => {
+                        if self.g.iota_eq_fallback == 0 || std::env::var_os("LEAN0_TRACE").is_some() {
+                            eprintln!("closed iota of {fname} on {cl} not used: {e}");
+                        }
+                        self.g.iota_eq_fallback += 1;
+                    }
+                }
+            }
             let Some(&th) = self.g.iota.get(&(fname.clone(), cl.clone())) else { return Err(format!("no iota rule {fname} {cl}")) };
             for &x in &args[..major_idx] {
                 a.push(self.tr(x)?);
@@ -1759,6 +1779,76 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         }
         let tcur = self.infer(cur)?.0;
         self.cast(pf, ft, tcur)
+    }
+
+    /// The iota step from the closed equation `th` (`ind_iota_eq`, audit §4):
+    /// `Γ ⊢ lhs2 ≡ R_c ps ms ns fs : tl`, where `lhs2` is the recursor `f` applied to `rargs`
+    /// (its arguments before the major premise) and the constructor `cname` applied to
+    /// `margs`. The lemma's variables are instantiated one by one from the bottom of its
+    /// context (`instDF`): parameters, motives, minors, each typed at the recursor's binder,
+    /// then the fields, typed along the constructor's type at the recursor's parameters. The
+    /// instance has the constructor's own indices and the recursor's parameters and levels in
+    /// the major premise: `lhs2` is equal to it by congruence. `a` is `Γ` and the levels.
+    #[allow(clippy::too_many_arguments)]
+    fn iota_closed(&mut self, th: mm0kit::env::ThId, fname: &str, f: ExprPtr<'t>, a: &[E], rargs: &[ExprPtr<'t>], margs: &[ExprPtr<'t>], cname: nanoda_lib::util::NamePtr<'t>, lhs2: ExprPtr<'t>, tl: ExprPtr<'t>) -> R<P> {
+        let Expr::Const { name, .. } = self.read(f) else { unreachable!() };
+        let rec = self.tc.env.get_recursor(&name).cloned().unwrap();
+        let (np, nm, nn) = (rec.num_params as usize, rec.num_motives as usize, rec.num_minors as usize);
+        let fixed = np + nm + nn;
+        let Some(&crate::gen::ConstInfo { kind: crate::gen::ConstKind::Rec { i, .. }, .. }) = self.g.consts.get(fname) else { return Err("not a recursor".into()) };
+        if margs.len() < np || rargs.len() < fixed || i >= nm {
+            return Err("argument counts".into())
+        }
+        // the substitution: each argument with the type of its binder
+        let mut subst = Vec::new();
+        let ty = self.infer(f)?.0;
+        let mut ty = crate::induct::strip_pis(self, ty);
+        for (q, &x) in rargs.iter().enumerate() {
+            let Expr::Pi { binder_type, body, .. } = self.read(ty) else { return Err("the recursor's type is not a telescope over its arguments".into()) };
+            if q < fixed {
+                subst.push((x, binder_type));
+            }
+            ty = self.tc.ctx.inst(body, &[x]);
+        }
+        let Expr::Pi { binder_type: ty_m, .. } = self.read(ty) else { return Err("the recursor's type has no binder for the major premise".into()) };
+        let (hty, _) = self.tc.ctx.unfold_apps(ty_m);
+        let Expr::Const { levels: mlv, .. } = self.read(hty) else { return Err("the major premise's type is not a constant's application".into()) };
+        let Some(cd) = self.tc.env.get_constructor(&cname).cloned() else { return Err("unknown constructor".into()) };
+        let mut cty = crate::induct::ctor_type_at(self, &cd, mlv);
+        for (q, &x) in rargs[..np].iter().chain(&margs[np..]).enumerate() {
+            let Expr::Pi { binder_type, body, .. } = self.read(cty) else { return Err("the constructor's type is not a telescope over its arguments".into()) };
+            if q >= np {
+                subst.push((x, binder_type));
+            }
+            cty = self.tc.ctx.inst(body, &[x]);
+        }
+        let (_, targs) = self.tc.ctx.unfold_apps(cty);
+        if targs.len() < np {
+            return Err("the constructor's result".into())
+        }
+        // the instance's left-hand side and type
+        let ch = self.tc.ctx.mk_const(cname, mlv);
+        let major3 = self.tc.ctx.foldl_apps(ch, rargs[..np].iter().chain(&margs[np..]).copied());
+        let lhs3 = self.tc.ctx.foldl_apps(f, rargs[..fixed].iter().chain(&targs[np..]).copied().chain([major3]));
+        let tl3 = self.tc.ctx.foldl_apps(rargs[np + i], targs[np..].iter().copied().chain([major3]));
+        let mut p = mm(self.g.env.thm(th, a, &[]))?;
+        let n = subst.len();
+        for (j, &(x, bt)) in subst.iter().enumerate() {
+            let (tx, px) = self.infer(x)?;
+            let px = self.cast(px, tx, bt)?;
+            p = mm(self.g.lean.inst_df(&mut self.g.env, n - 1 - j, px, p))?;
+        }
+        let (_, le, _, te) = self.g.lean.deq_parts(&mut self.g.env, p);
+        if le != self.tr(lhs3)? || te != self.tr(tl3)? {
+            return Err("the instance is not the expected one".into())
+        }
+        let p = self.cast(p, tl3, tl)?;
+        if lhs2 == lhs3 {
+            return Ok(p)
+        }
+        let (t, q) = self.app_cong(lhs2, lhs3)?;
+        let q = self.cast(q, t, tl)?;
+        mm(self.g.lean.trans(&mut self.g.env, q, p))
     }
 
     /// One step at the head of `cur` (other than delta and zeta): `Γ ⊢ cur ≡ next : τ(cur)`.

@@ -719,6 +719,14 @@ axiom ind_iota_nst (G: ctx) (D I I2: ind) (N: ctx) (i ii c: nat) (v: lvl) (np n 
   $ sty G (ind_rec D i v) RT e4 (Π TY. C) $ > $ inst 0 C maj T $ >
   $ eeqv (ind_ctor I ii c) (ind_ctor I2 ii c) $ > $ ctor_ty I ii c CT $ > $ sty G (ind_ctor I2 ii c) CT maj T2 $ > $ aeq G T2 TY $ >
   $ ⟦ G ⊢ e4 @ maj ≡ rhs : T ⟧ $;
+--| Weakening below a closed context: a judgment in a context `G` whose
+--| entries and terms mention no variable outside `G` holds over any base
+--| context `G0` (`IsDefEq.weakN` for `Ctx.LiftN n k` at `k` the length of
+--| `G`, where lifting is the identity; see notes/audit-lean-mm0.md §6).
+axiom weakBaseDF (k: nat) (G G0 G2: ctx) (e e2 A K: expr):
+  $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ pis G (srt lz) K $ > $ closed 0 K $ > $ clen G k $ >
+  $ closed k e $ > $ closed k e2 $ > $ closed k A $ > $ capp G G0 G2 $ >
+  $ ⟦ G2 ⊢ e ≡ e2 : A ⟧ $;
 --| Iota as a closed equation, for a block without nested occurrences: in the
 --| context of the recursor's own variables, `ind_rec D i v ps ms ns is
 --| (ind_ctor D i c ps fs) ≡ Rh ps ms ns fs`. No typing premise: every

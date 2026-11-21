@@ -336,3 +336,29 @@ theorem ind_iota_eq_rule (G: hyps) (H J: class) (u w r tg td tv ti tc tnp tn tm 
 -- --------------------------------------------------------------------------
 
 theorem ind_iota_eq (D: ind) (i c: nat) (v: lvl) (np n m a0 ar nf: nat) (X Dl: ctx) (res e3 e4 c1 maj Rh rhs0 rhs T: expr): $ ind_wf Dl D $ > $ elim_ok Dl D v $ > $ ind_nested D nil $ > $ iota_tel D v i c X res nf Dl $ > $ iota_lhs D v i c nf res e3 c1 maj e4 T $ > $ rec_rhs D v i c Rh $ > $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m ar $ > $ rehead (ind_rec D i v) Rh ar e3 rhs0 $ > $ rehead c1 rhs0 nf maj rhs $ > $ deq Dl (app e4 maj) rhs T $;
+
+--| A valuation `r` of a closed context `tg` appended to a base context `tg0` begins with a valuation `c` of `tg`
+--| itself (`pis_esat_closed` at depth `0`), and every expression closed below `tg`'s length has the same value at
+--| both (`lrel_closed_sem`).
+--| @freshen G c
+theorem weak_base_sem {c: set} (G: hyps) (M: class) (u w r tg tg0 tg2 tB tK tz tk te te2 tA: set):
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ r ∊ sat u M tg2 w $ >
+  $ G ⇒ tg ∊ trees ω $ >
+  $ G ⇒ tg0 ∊ trees ω $ >
+  $ G ⇒ ra_capp tg tg0 tg2 ∈ lrel $ >
+  $ G ⇒ ra_pis tg tB tK ∈ lrel $ >
+  $ G ⇒ ra_closed tz tK ∈ lrel $ >
+  $ G ⇒ tz = ⟨ kc_nz , ∅ ⟩ $ >
+  $ G ⇒ ra_clen tg tk ∈ lrel $ >
+  $ G ⇒ ra_closed tk te ∈ lrel $ >
+  $ G ⇒ ra_closed tk te2 ∈ lrel $ >
+  $ G ⇒ ra_closed tk tA ∈ lrel $ >
+  $ G ⇒ ∃ c (c ∊ sat u M tg w ∧ dt u M te w r = dt u M te w c ∧ dt u M te2 w r = dt u M te2 w c ∧ dt u M tA w r = dt u M tA w c) $;
+
+--| Weakening below a closed context, for every hook: a judgment in a context `G` whose entries and terms mention no
+--| variable outside `G` holds over any base context `G0` (`weak_base_sem`).
+theorem mweakBaseDF (M: class) (k: nat) (G G0 G2: ctx) (e e2 A K: expr):
+  $ mdeq M G e e2 A $ > $ pis G (srt lz) K $ > $ closed nz K $ > $ clen G k $ > $ closed k e $ > $ closed k e2 $ > $ closed k A $ > $ capp G G0 G2 $ > $ mdeq M G2 e e2 A $;
+
+theorem weakBaseDF (k: nat) (G G0 G2: ctx) (e e2 A K: expr): $ deq G e e2 A $ > $ pis G (srt lz) K $ > $ closed nz K $ > $ clen G k $ > $ closed k e $ > $ closed k e2 $ > $ closed k A $ > $ capp G G0 G2 $ > $ deq G2 e e2 A $;

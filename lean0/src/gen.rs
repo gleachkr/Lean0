@@ -86,6 +86,11 @@ pub struct Gen {
     pub stats: Vec<DeclStat>,
     /// Iota axioms, by (recursor, constructor).
     pub iota: HashMap<(String, String), ThId>,
+    /// Iota as a closed equation (`ind_iota_eq`), by (recursor, constructor), where the
+    /// schema has it; and how many steps used one, and how many fell back to `iota`.
+    pub iota_eq: HashMap<(String, String), ThId>,
+    pub iota_eq_used: usize,
+    pub iota_eq_fallback: usize,
     /// `Quot.lift` / `Quot.ind` reduction axioms.
     pub quot_red: HashMap<String, ThId>,
     /// Structures, by inductive type name.
@@ -208,6 +213,9 @@ impl Gen {
             spec_thms,
             stats: Vec::new(),
             iota: HashMap::default(),
+            iota_eq: HashMap::default(),
+            iota_eq_used: 0,
+            iota_eq_fallback: 0,
             quot_red: HashMap::default(),
             structs: HashMap::default(),
             blks: HashMap::default(),
@@ -462,6 +470,9 @@ impl Gen {
             for (n, why) in self.stage_a.iter().take(20) {
                 eprintln!("  stage A: {n}: {why}");
             }
+        }
+        if self.iota_eq_used + self.iota_eq_fallback > 0 {
+            eprintln!("lean0: {} iota steps by the closed equation, {} by the rule with typing premises where a closed equation exists", self.iota_eq_used, self.iota_eq_fallback);
         }
         if self.lit_stage_b + self.lit_stage_a.len() > 0 {
             eprintln!("lean0: {} literal operations certified by their defining equations, {} with generated axioms", self.lit_stage_b, self.lit_stage_a.len());
@@ -764,7 +775,7 @@ impl Gen {
     }
 
     /// `(k: nat)` followed by the level arguments.
-    fn k_args(&self, lvl_names: &[String]) -> Vec<(String, u8)> {
+    pub(crate) fn k_args(&self, lvl_names: &[String]) -> Vec<(String, u8)> {
         let mut v = vec![("k".to_string(), self.env.sort_names["nat"])];
         v.extend(self.lvl_args(lvl_names));
         v

@@ -304,6 +304,39 @@ impl Horn {
         }
     }
 
+    /// [`Horn::prove`] for a goal with `n` unknowns (outputs of a computing relation): `mk`
+    /// builds the goal from fresh metavariables. The result's conclusion has their values.
+    pub fn prove_open(&mut self, env: &mut Env, lean: &mut Lean, lv: &mut Levels, hooks: &mut dyn Hooks, n: usize, mk: impl FnOnce(&mut Env, &[E]) -> E) -> Result<P> {
+        self.start();
+        let ms: Vec<E> = (0..n).map(|_| self.meta(env)).collect();
+        let goal = mk(env, &ms);
+        let r = self.solve(env, lean, lv, hooks, goal).and_then(|pd| self.finish(env, pd));
+        match r {
+            Ok(p) => Ok(p),
+            Err(e) => {
+                let g = self.zonk(env, goal);
+                let deepest = self.fail.take().map(|(_, m)| format!("\n  deepest failure: {m}")).unwrap_or_default();
+                bail!("horn: cannot prove {}: {}{}", env.show(g, &[]), e.0, deepest)
+            }
+        }
+    }
+
+    /// [`Horn::apply`] for a goal with `n` unknowns, as [`Horn::prove_open`].
+    pub fn apply_open(&mut self, env: &mut Env, lean: &mut Lean, lv: &mut Levels, hooks: &mut dyn Hooks, th: ThId, n: usize, mk: impl FnOnce(&mut Env, &[E]) -> E) -> Result<P> {
+        self.start();
+        let ms: Vec<E> = (0..n).map(|_| self.meta(env)).collect();
+        let goal = mk(env, &ms);
+        let r = self.try_clause(env, lean, lv, hooks, th, goal).and_then(|pd| self.finish(env, pd));
+        match r {
+            Ok(p) => Ok(p),
+            Err(e) => {
+                let g = self.zonk(env, goal);
+                let deepest = self.fail.take().map(|(_, m)| format!("\n  deepest failure: {m}")).unwrap_or_default();
+                bail!("horn: cannot prove {} by {}: {}{}", env.show(g, &[]), env.thm_label(th), e.0, deepest)
+            }
+        }
+    }
+
     /// A top-level goal starts: its metavariables are fresh (the goal itself must not mention
     /// metavariables of an earlier goal).
     fn start(&mut self) {

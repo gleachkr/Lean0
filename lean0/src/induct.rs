@@ -25,7 +25,7 @@ use crate::gen::{add_term, add_thm, apps, ConstInfo, ConstKind, Gen, Nested, Sig
 use crate::names::mangle;
 use mm0kit::env::{Env, TermKind, ThId, TId, E, P};
 use mm0kit::horn::{Hooks, Horn};
-use mm0kit::lean::Lean;
+use mm0kit::lean::{Lean, View};
 use mm0kit::level::Levels;
 use nanoda_lib::env::{Declar, DeclarMap, InductiveData, RecursorData};
 use nanoda_lib::expr::Expr;
@@ -1017,6 +1017,114 @@ fn prove_lemma(g: &mut Gen, pv: &mut Prover, rule: &str, hyps: &[E], concl: E) -
     Ok(Some(pv.apply(g, rule, concl)?))
 }
 
+/// Whether iota is certified as a closed equation where the schema has it (`ind_iota_eq`):
+/// `LEAN0_CLOSED_IOTA=0` keeps the rule with typing premises only.
+pub(crate) fn closed_iota() -> bool {
+    std::env::var("LEAN0_CLOSED_IOTA").map_or(true, |v| v != "0")
+}
+
+/// The arguments of an application spine, first to last.
+fn spine_args(g: &Gen, mut e: E) -> Vec<E> {
+    let mut out = Vec::new();
+    while let View::App(f, a) = g.lean.view(&g.env, e) {
+        out.push(a);
+        e = f;
+    }
+    out.reverse();
+    out
+}
+
+/// Iota as a closed equation (`ind_iota_eq`, audit §4), for the recursor `rt` (`ind_rec D i v`)
+/// on the constructor `ct` (`ind_ctor D i c`) of a block without nested occurrences:
+/// `⟦ Dl ++ G ⊢ rec ps ms ns is (ctor ps fs) ≡ def ps ms ns fs : motive is (ctor ps fs) ⟧`,
+/// every argument a variable of the rule's context `Dl` (the fields over the minors, the
+/// motives and the parameters) or an index of the constructor's result, over any base
+/// context `G` (`weakBaseDF`). The statement comes from Part I's relations alone, so a
+/// replayed declaration states it without the proof.
+#[allow(clippy::too_many_arguments)]
+fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &str, rt: E, ct: E, def_us: E, np: usize, nf: usize, elim: Option<ThId>, doc: &str) -> R<ThId> {
+    let (d, i, v) = match g.env.head(rt) {
+        Some((_, &[d, i, v])) => (d, i, v),
+        _ => return Err("not a recursor term".into()),
+    };
+    let c = match g.env.head(ct) {
+        Some((_, &[_, _, c])) => c,
+        _ => return Err("not a constructor term".into()),
+    };
+    pv.horn.facts.clear();
+    // the constructor's type, for its fields' context and its result
+    let p = mm(pv.horn.prove_open(&mut g.env, &mut g.lean, &mut g.lv, &mut pv.facts, 1, |env, ms| env.app_n("ctor_ty", &[d, i, c, ms[0]])))?;
+    let cc = g.env.concl(p);
+    let mut body = g.env.head(cc).map(|(_, a)| a[3]).ok_or("ctor_ty")?;
+    let mut x = g.env.app(g.lean.ids.nil, &[]);
+    for q in 0..np + nf {
+        let View::Pi(a, b) = g.lean.view(&g.env, body) else { return Err("the constructor's type has too few binders".into()) };
+        if q >= np {
+            x = g.lean.cons(&mut g.env, a, x);
+        }
+        body = b;
+    }
+    let res = body;
+    let p_tel = mm(pv.horn.prove_open(&mut g.env, &mut g.lean, &mut g.lv, &mut pv.facts, 2, |env, ms| env.app_n("iota_tel", &[d, v, i, c, x, res, ms[0], ms[1]])))?;
+    let c_tel = g.env.concl(p_tel);
+    let (nfe, dl) = g.env.head(c_tel).map(|(_, a)| (a[6], a[7])).ok_or("iota_tel")?;
+    let p_lhs = mm(pv.horn.prove_open(&mut g.env, &mut g.lean, &mut g.lv, &mut pv.facts, 5, |env, ms| {
+        env.app_n("iota_lhs", &[d, v, i, c, nfe, res, ms[0], ms[1], ms[2], ms[3], ms[4]])
+    }))?;
+    let c_lhs = g.env.concl(p_lhs);
+    let (e3, maj, e4, ty) = g.env.head(c_lhs).map(|(_, a)| (a[6], a[8], a[9], a[10])).ok_or("iota_lhs")?;
+    // the right-hand side: the rule's definition at the recursor's variables and the fields
+    let mut ra = spine_args(g, e3);
+    let ma = spine_args(g, maj);
+    if ma.len() < nf {
+        return Err("the major premise has too few arguments".into())
+    }
+    ra.extend(&ma[ma.len() - nf..]);
+    let rhs = crate::gen::apps(g, def_us, &ra);
+    let lhs = g.lean.app(&mut g.env, e4, maj);
+    // the context over the base `G`
+    let mut entries = Vec::new();
+    let mut t = dl;
+    while let Some((h, &[a, rest])) = g.env.head(t) {
+        if h != g.lean.ids.cons {
+            break
+        }
+        entries.push(a);
+        t = rest;
+    }
+    let mut dlg = g.env.var(0);
+    for &a in entries.iter().rev() {
+        dlg = g.lean.cons(&mut g.env, a, dlg);
+    }
+    let concl = g.lean.deq(&mut g.env, dlg, lhs, rhs, ty);
+    let proof = if g.replay {
+        None
+    } else {
+        pv.horn.facts.insert(c_tel, p_tel);
+        pv.horn.facts.insert(c_lhs, p_lhs);
+        if let Some(th) = elim {
+            // `elim_ok` at the rule's context, from the recursor's lemma over any context
+            let mut la = vec![dl];
+            la.extend((1..args.len()).map(|k| g.env.var(k as u16)));
+            let q = mm(g.env.thm(th, &la, &[]))?;
+            let cq = g.env.concl(q);
+            pv.horn.facts.insert(cq, q);
+        }
+        // the block is read off `ind_wf`, the rule's first premise
+        let wf = g.env.app_n("ind_wf", &[dl, d]);
+        let p_wf = pv.prove(g, wf)?;
+        pv.horn.facts.insert(wf, p_wf);
+        let goal0 = g.lean.deq(&mut g.env, dl, lhs, rhs, ty);
+        let p0 = pv.apply(g, "ind_iota_eq", goal0)?;
+        pv.horn.facts.clear();
+        pv.horn.facts.insert(goal0, p0);
+        let p = pv.apply(g, "weakBaseDF", concl)?;
+        pv.horn.facts.clear();
+        Some(p)
+    };
+    add_thm(&mut g.env, name, args, Vec::new(), concl, false, false, proof, doc)
+}
+
 /// The type whose recursor `name` is: `X.rec` for a declared type `X`, or `X.rec_k` (`X` the
 /// first type) for the `k`th auxiliary type of a nested block (`mkAuxRecNameMap`).
 fn rec_index(block: &Block, name: &str) -> Option<usize> {
@@ -1085,6 +1193,27 @@ pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &Recurs
     let rty = el.tr(rd.info.ty)?;
     let mlv = major_levels(el, rd)?;
     let mls: Vec<E> = el.tc.ctx.read_levels(mlv).to_vec().iter().map(|&l| el.trl(l)).collect::<R<_>>()?;
+    // `elim_ok` over any context, once: the closed iota lemmas take it at their own context
+    let closed = i < block.names.len() && block.n_all == block.names.len() && closed_iota();
+    let elim = if closed && !el.g.replay && !rd.rec_rules.is_empty() {
+        let g = &mut *el.g;
+        let (d, v) = match g.env.head(rt) {
+            Some((_, &[d, _, v])) => (d, v),
+            _ => return Err("not a recursor term".into()),
+        };
+        let g0 = g.env.var(0);
+        let goal = g.env.app_n("elim_ok", &[g0, d, v]);
+        pv.horn.facts.clear();
+        let p = pv.prove(g, goal)?;
+        let mut name = format!("{}{}_elim", mm0kit::lean::FACT_PREFIX, sig.cname);
+        while g.env.has_thm(&name) {
+            name.push('_');
+        }
+        let la = g.g_args(&sig.lvl_names);
+        Some(mm(g.env.add_lemma(&name, la.into(), p, crate::gen::split_budget()))?)
+    } else {
+        None
+    };
     for (rule, &rhs) in rd.rec_rules.iter().zip(&rhss) {
         let ctor_lean = el.g.lean_name(el.tc, rule.ctor_name);
         let Some(cd) = el.tc.env.get_constructor(&rule.ctor_name).cloned() else { return Err(format!("unknown constructor {ctor_lean}")) };
@@ -1111,6 +1240,24 @@ pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &Recurs
         let lvl_args = g.lvl_args(&sig.lvl_names);
         let def = add_term(&mut g.env, &def_name, lvl_args, expr_s, TermKind::Def { body: rhs0, public_body: true },
             &format!("The right-hand side of the iota rule of `{}` for `{ctor_lean}`.", sig.lean_name))?;
+        if closed {
+            // theorem R_closed (k) (us): closed k (R us): the closed equation is instantiated
+            // through the definition
+            g.lean.reset();
+            let kv = g.env.var(0);
+            let du = g.env.app(def, &us);
+            let cl_concl = g.env.app_n("closed", &[kv, du]);
+            let pc = if g.replay {
+                None
+            } else {
+                let pc = mm(g.lean.closed(&mut g.env, kv, rhs))?;
+                Some(mm(g.env.convert(pc, cl_concl))?)
+            };
+            let cl_args = g.k_args(&sig.lvl_names);
+            let cl_name = g.thms.fresh(&format!("{def_name}_closed"));
+            let cl = add_thm(&mut g.env, &cl_name, cl_args, vec![], cl_concl, false, false, pc, &format!("`{def_name}` has no loose bound variables."))?;
+            g.lean.const_closed.insert(def, cl);
+        }
         let counts = [rd.num_params as usize, rd.num_motives as usize, rd.num_minors as usize, rd.num_indices as usize];
         let (v, hyps, concl) = crate::gen::iota_statement(g, sig, counts, &ctor_lean, cnl, cnp, nf, def, rty, &mls, cty)?;
         let name = g.thms.fresh(&format!("{def_name}_iota"));
@@ -1120,7 +1267,17 @@ pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &Recurs
             .map_err(|e| format!("iota of `{}` on `{ctor_lean}` (the rule may not be the schema's): {e}", sig.lean_name))?;
         let th = add_thm(&mut g.env, &name, v.args, hyps, concl, false, false, proof,
             &format!("Iota reduction of `{}` on `{ctor_lean}`.", sig.lean_name))?;
-        g.iota.insert((sig.lean_name.clone(), ctor_lean), th);
+        g.iota.insert((sig.lean_name.clone(), ctor_lean.clone()), th);
+        if closed {
+            let name = g.thms.fresh(&format!("{def_name}_iota_eq"));
+            let ct = g.const_term(&ctor_lean, &us[nl - block.nlevels..]).ok_or("constructor term")?;
+            let du = g.env.app(def, &us);
+            let la = g.g_args(&sig.lvl_names);
+            let th = iota_eq_lemma(g, &mut pv, la, &name, rt, ct, du, block.np, nf, elim,
+                &format!("Iota reduction of `{}` on `{ctor_lean}`, as a closed equation.", sig.lean_name))
+                .map_err(|e| format!("closed iota of `{}` on `{ctor_lean}`: {e}", sig.lean_name))?;
+            g.iota_eq.insert((sig.lean_name.clone(), ctor_lean), th);
+        }
     }
     Ok(true)
 }
