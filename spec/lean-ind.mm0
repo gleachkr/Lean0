@@ -441,6 +441,13 @@ term clift: nat > ctx > ctx > wff;
 axiom clift_nil (k: nat): $ clift k [] [] $;
 axiom clift_cons (k d: nat) (A A2: expr) (X Y: ctx):
   $ clift k X Y $ > $ clen X d $ > $ lift k d A A2 $ > $ clift k (A :: X) (A2 :: Y) $;
+--| `psplit n K A X res`: `K` is `Π` over `n` binders of `res`, and `X` is
+--| those binders' context on top of `A` (the inverse of `pis` at a given
+--| number of binders).
+term psplit: nat > expr > ctx > ctx > expr > wff;
+axiom psplit_z (K: expr) (A: ctx): $ psplit 0 K A A K $;
+axiom psplit_s (n: nat) (B C res: expr) (A X: ctx):
+  $ psplit n C (B :: A) X res $ > $ psplit (s n) (Π B. C) A X res $;
 --| `iota_tel D v i c X res nf Dl`: the context `Dl` of the rule of constructor
 --| `c` of type `i` as a closed equation: the parameters, the motives, the
 --| minors, then the constructor's `nf` fields `X` (its type with the block's
@@ -449,8 +456,8 @@ term iota_tel: ind > lvl > nat > nat > ctx > expr > nat > ctx > wff;
 axiom iota_tel_i (D: ind) (b: blk) (P: ctx) (T: tys) (v: lvl) (i c np n m mn nf: nat) (M N X Xl Q1 Q2 Dl: ctx)
     (F K K2 res: expr) (C: ctors):
   $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ motives D np v 0 T M $ > $ minors D np n 0 0 T N $ >
-  $ nth_ty T i F C $ > $ nth_ctor C c K $ > $ sinst D 0 n np K K2 $ > $ pis X res K2 $ >
-  $ clen X nf $ > $ add m n mn $ > $ clift mn X Xl $ > $ capp M P Q1 $ > $ capp N Q1 Q2 $ > $ capp Xl Q2 Dl $ >
+  $ nth_ty T i F C $ > $ nth_ctor C c K $ > $ npis K nf $ > $ sinst D 0 n np K K2 $ > $ psplit nf K2 [] X res $ >
+  $ add m n mn $ > $ clift mn X Xl $ > $ capp M P Q1 $ > $ capp N Q1 Q2 $ > $ capp Xl Q2 Dl $ >
   $ iota_tel D v i c X res nf Dl $;
 --| `iota_lhs D v i c nf res e3 c1 maj e4 T`: in that context, `e3` is the
 --| recursor at the parameters, the motives and the minors, `c1` the
@@ -466,6 +473,21 @@ axiom iota_lhs_i (D: ind) (v: lvl) (i c np n m mn nf ni a d1 io mo: nat) (res e1
   $ pargs (ind_ctor D i c) d1 np c1 $ > $ pargs c1 0 nf maj $ >
   $ add io (s i) n $ > $ add a io mo $ > $ rehead Y #mo ni T2 T0 $ >
   $ iota_lhs D v i c nf res e3 c1 maj e4 (T0 @ maj) $;
+--| `iota_eq D i c v Dl lhs rhs T`: the rule of constructor `c` of type `i` of
+--| a block without nested occurrences, as a closed equation: its context
+--| (`iota_tel`), its left-hand side and type (`iota_lhs`), and its right-hand
+--| side, `rec_rhs`'s closed term at the context's variables. For `Nat.rec` at
+--| `succ`, with `N` for the type and `R` for `rec_rhs`'s term: the context is
+--| `N :: (Π N. Π (#2 @ #0). #3 @ (succ @ #1)) :: (#0 @ zero) :: (Π N. Sort v)
+--| :: []` (the field, the two minors, the motive), `lhs` is `rec @ #3 @ #2 @
+--| #1 @ (succ @ #0)`, `rhs` is `R @ #3 @ #2 @ #1 @ #0` and `T` is `#3 @ (succ
+--| @ #0)`.
+term iota_eq: ind > nat > nat > lvl > ctx > expr > expr > expr > wff;
+axiom iota_eq_i (D: ind) (i c: nat) (v: lvl) (np n m a0 ar nf: nat) (X Dl: ctx) (res e3 e4 c1 maj Rh rhs0 rhs T: expr):
+  $ ind_nested D [] $ > $ iota_tel D v i c X res nf Dl $ > $ iota_lhs D v i c nf res e3 c1 maj e4 T $ >
+  $ rec_rhs D v i c Rh $ > $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m ar $ >
+  $ rehead (ind_rec D i v) Rh ar e3 rhs0 $ > $ rehead c1 rhs0 nf maj rhs $ >
+  $ iota_eq D i c v Dl (e4 @ maj) rhs T $;
 
 -- Structures: fields, projections and eta ----------------------------------
 
@@ -727,17 +749,14 @@ axiom weakBaseDF (k: nat) (G G0 G2: ctx) (e e2 A K: expr):
   $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ pis G (srt lz) K $ > $ closed 0 K $ > $ clen G k $ >
   $ closed k e $ > $ closed k e2 $ > $ closed k A $ > $ capp G G0 G2 $ >
   $ ⟦ G2 ⊢ e ≡ e2 : A ⟧ $;
---| Iota as a closed equation, for a block without nested occurrences: in the
---| context of the recursor's own variables, `ind_rec D i v ps ms ns is
---| (ind_ctor D i c ps fs) ≡ Rh ps ms ns fs`. No typing premise: every
---| argument is a variable of the context or an index of the constructor's
---| result. Instances follow by `instDF`.
-axiom ind_iota_eq (D: ind) (i c: nat) (v: lvl) (np n m a0 ar nf: nat) (X Dl: ctx) (res e3 e4 c1 maj Rh rhs0 rhs T: expr):
-  $ ind_wf Dl D $ > $ elim_ok Dl D v $ > $ ind_nested D [] $ >
-  $ iota_tel D v i c X res nf Dl $ > $ iota_lhs D v i c nf res e3 c1 maj e4 T $ > $ rec_rhs D v i c Rh $ >
-  $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m ar $ >
-  $ rehead (ind_rec D i v) Rh ar e3 rhs0 $ > $ rehead c1 rhs0 nf maj rhs $ >
-  $ ⟦ Dl ⊢ e4 @ maj ≡ rhs : T ⟧ $;
+--| Iota as a closed equation, for a block without nested occurrences
+--| (`iota_eq`): in the context `Dl` of the recursor's own variables,
+--| `ind_rec D i v ps ms ns is (ind_ctor D i c ps fs) ≡ Rh ps ms ns fs`. No
+--| typing premise: every argument is a variable of the context or an index of
+--| the constructor's result. Instances follow by `weakBaseDF` and `instDF`.
+axiom ind_iota_eq (D: ind) (i c: nat) (v: lvl) (Dl: ctx) (lhs rhs T: expr):
+  $ ind_wf Dl D $ > $ elim_ok Dl D v $ > $ iota_eq D i c v Dl lhs rhs T $ >
+  $ ⟦ Dl ⊢ lhs ≡ rhs : T ⟧ $;
 axiom proj_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (j i np: nat) (e e2 S A A1 A2 R: expr):
   $ ⟦ G ⊢ e ≡ e2 : S ⟧ $ > $ spine (ind_ty D j) S np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ struct_like D j $ >
   $ proj_ok G D j i $ > $ clen P np $ > $ field_ty D j i A $ > $ ind_nested D N $ > $ rst D N A A2 $ > $ pinst i S A2 A1 $ >

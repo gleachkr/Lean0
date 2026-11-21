@@ -1039,10 +1039,10 @@ fn spine_args(g: &Gen, mut e: E) -> Vec<E> {
 /// `⟦ Dl ++ G ⊢ rec ps ms ns is (ctor ps fs) ≡ def ps ms ns fs : motive is (ctor ps fs) ⟧`,
 /// every argument a variable of the rule's context `Dl` (the fields over the minors, the
 /// motives and the parameters) or an index of the constructor's result, over any base
-/// context `G` (`weakBaseDF`). The statement comes from Part I's relations alone, so a
+/// context `G` (`weakBaseDF`). The statement comes from Part I's `iota_eq` alone, so a
 /// replayed declaration states it without the proof.
 #[allow(clippy::too_many_arguments)]
-fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &str, rt: E, ct: E, def_us: E, np: usize, nf: usize, elim: Option<ThId>, doc: &str) -> R<ThId> {
+fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &str, rt: E, ct: E, def_us: E, fixed: usize, nf: usize, elim: Option<ThId>, doc: &str) -> R<ThId> {
     let (d, i, v) = match g.env.head(rt) {
         Some((_, &[d, i, v])) => (d, i, v),
         _ => return Err("not a recursor term".into()),
@@ -1052,36 +1052,21 @@ fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &s
         _ => return Err("not a constructor term".into()),
     };
     pv.horn.facts.clear();
-    // the constructor's type, for its fields' context and its result
-    let p = mm(pv.horn.prove_open(&mut g.env, &mut g.lean, &mut g.lv, &mut pv.facts, 1, |env, ms| env.app_n("ctor_ty", &[d, i, c, ms[0]])))?;
-    let cc = g.env.concl(p);
-    let mut body = g.env.head(cc).map(|(_, a)| a[3]).ok_or("ctor_ty")?;
-    let mut x = g.env.app(g.lean.ids.nil, &[]);
-    for q in 0..np + nf {
-        let View::Pi(a, b) = g.lean.view(&g.env, body) else { return Err("the constructor's type has too few binders".into()) };
-        if q >= np {
-            x = g.lean.cons(&mut g.env, a, x);
-        }
-        body = b;
-    }
-    let res = body;
-    let p_tel = mm(pv.horn.prove_open(&mut g.env, &mut g.lean, &mut g.lv, &mut pv.facts, 2, |env, ms| env.app_n("iota_tel", &[d, v, i, c, x, res, ms[0], ms[1]])))?;
-    let c_tel = g.env.concl(p_tel);
-    let (nfe, dl) = g.env.head(c_tel).map(|(_, a)| (a[6], a[7])).ok_or("iota_tel")?;
-    let p_lhs = mm(pv.horn.prove_open(&mut g.env, &mut g.lean, &mut g.lv, &mut pv.facts, 5, |env, ms| {
-        env.app_n("iota_lhs", &[d, v, i, c, nfe, res, ms[0], ms[1], ms[2], ms[3], ms[4]])
-    }))?;
-    let c_lhs = g.env.concl(p_lhs);
-    let (e3, maj, e4, ty) = g.env.head(c_lhs).map(|(_, a)| (a[6], a[8], a[9], a[10])).ok_or("iota_lhs")?;
-    // the right-hand side: the rule's definition at the recursor's variables and the fields
-    let mut ra = spine_args(g, e3);
+    // the rule's context, sides and type: Part I's `iota_eq`
+    let p_eq = mm(pv.horn.prove_open(&mut g.env, &mut g.lean, &mut g.lv, &mut pv.facts, 4, |env, ms| env.app_n("iota_eq", &[d, i, c, v, ms[0], ms[1], ms[2], ms[3]])))?;
+    let c_eq = g.env.concl(p_eq);
+    let (dl, lhs, rhs_u, ty) = g.env.head(c_eq).map(|(_, a)| (a[4], a[5], a[6], a[7])).ok_or("iota_eq")?;
+    // the right-hand side through the rule's definition: its arguments are the recursor's
+    // before the indices, then the fields
+    let View::App(e4, maj) = g.lean.view(&g.env, lhs) else { return Err("iota_eq: the left-hand side".into()) };
+    let mut ra = spine_args(g, e4);
     let ma = spine_args(g, maj);
-    if ma.len() < nf {
-        return Err("the major premise has too few arguments".into())
+    if ma.len() < nf || ra.len() < fixed {
+        return Err("iota_eq: too few arguments".into())
     }
+    ra.truncate(fixed);
     ra.extend(&ma[ma.len() - nf..]);
     let rhs = crate::gen::apps(g, def_us, &ra);
-    let lhs = g.lean.app(&mut g.env, e4, maj);
     // the context over the base `G`
     let mut entries = Vec::new();
     let mut t = dl;
@@ -1100,8 +1085,7 @@ fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &s
     let proof = if g.replay {
         None
     } else {
-        pv.horn.facts.insert(c_tel, p_tel);
-        pv.horn.facts.insert(c_lhs, p_lhs);
+        pv.horn.facts.insert(c_eq, p_eq);
         if let Some(th) = elim {
             // `elim_ok` at the rule's context, from the recursor's lemma over any context
             let mut la = vec![dl];
@@ -1114,8 +1098,10 @@ fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &s
         let wf = g.env.app_n("ind_wf", &[dl, d]);
         let p_wf = pv.prove(g, wf)?;
         pv.horn.facts.insert(wf, p_wf);
+        let goal_u = g.lean.deq(&mut g.env, dl, lhs, rhs_u, ty);
+        let p0 = pv.apply(g, "ind_iota_eq", goal_u)?;
         let goal0 = g.lean.deq(&mut g.env, dl, lhs, rhs, ty);
-        let p0 = pv.apply(g, "ind_iota_eq", goal0)?;
+        let p0 = mm(g.env.convert(p0, goal0))?;
         pv.horn.facts.clear();
         pv.horn.facts.insert(goal0, p0);
         let p = pv.apply(g, "weakBaseDF", concl)?;
@@ -1273,7 +1259,7 @@ pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &Recurs
             let ct = g.const_term(&ctor_lean, &us[nl - block.nlevels..]).ok_or("constructor term")?;
             let du = g.env.app(def, &us);
             let la = g.g_args(&sig.lvl_names);
-            let th = iota_eq_lemma(g, &mut pv, la, &name, rt, ct, du, block.np, nf, elim,
+            let th = iota_eq_lemma(g, &mut pv, la, &name, rt, ct, du, counts[0] + counts[1] + counts[2], nf, elim,
                 &format!("Iota reduction of `{}` on `{ctor_lean}`, as a closed equation.", sig.lean_name))
                 .map_err(|e| format!("closed iota of `{}` on `{ctor_lean}`: {e}", sig.lean_name))?;
             g.iota_eq.insert((sig.lean_name.clone(), ctor_lean), th);

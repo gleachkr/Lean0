@@ -222,49 +222,13 @@ theorem capp_total {q: set} (G: hyps) (t1 t2: set): $ G ⇒ t1 ∊ ofsort lsig l
 --| (by induction on the lift: `lift_app_res`, `lift_inj`).
 theorem lift_spine_inv (G: hyps) (tn tk th te te2 tl: set): $ G ⇒ ra_lift tn tk th th ∈ lrel $ > $ G ⇒ ra_lift tn tk te te2 ∈ lrel $ > $ G ⇒ ra_spine th te2 tl ∈ lrel $ > $ G ⇒ ra_spine th te tl ∈ lrel $;
 
---| A telescope type (`pis`) over a `Π` is a `Π`.
+--| A telescope type split at `tn` binders (`psplit` from the empty context): the context `tx` and the body `tr` give
+--| the type back (`pis`), `tx` has `tn` entries, and `tx` can be appended to any tree `tp` (`capp`).
 --| @freshen G e
---| @freshen G f
-theorem pis_pi {e f: set} (G: hyps) (t1 t2 t3: set): $ G ⇒ ra_pis t1 t2 t3 ∈ lrel $ > $ G ⇒ ∃ e ∃ f (t2 = ⟨ kc_pi , scons e (scons f ∅) ⟩) $ > $ G ⇒ ∃ e ∃ f (t3 = ⟨ kc_pi , scons e (scons f ∅) ⟩) $;
+theorem psplit_pis {e: set} (G: hyps) (tn tK tx tr tp: set): $ G ⇒ ra_psplit tn tK ⟨ kc_nil , ∅ ⟩ tx tr ∈ lrel $ > $ G ⇒ tp ∊ trees ω $ > $ G ⇒ ra_pis tx tr tK ∈ lrel ∧ ra_clen tx tn ∈ lrel ∧ ∃ e (ra_capp tx tp e ∈ lrel) $;
 
---| A telescope type (`pis`) that is no `Π` has no binders.
---| @freshen G e
---| @freshen G f
-theorem pis_nonpi_len {e f: set} (G: hyps) (t1 t2 t3 tn: set): $ G ⇒ ra_pis t1 t2 t3 ∈ lrel $ > $ G ⇒ ¬ ∃ e ∃ f (t3 = ⟨ kc_pi , scons e (scons f ∅) ⟩) $ > $ G ⇒ ra_clen t1 tn ∈ lrel $ > $ G ⇒ tn = ⟨ kc_nz , ∅ ⟩ $;
-
---| A telescope type (`pis`) that is `Π tB. tU`: its context is empty and the body is the type, or the outermost
---| binder comes off: a context one shorter gives `tU`.
---| @freshen G e
---| @freshen G f
-theorem pis_peel {e f: set} (G: hyps) (tT tB tU t1 t2 tn: set): $ G ⇒ ra_pis t1 t2 tT ∈ lrel $ > $ G ⇒ tT = ⟨ kc_pi , scons tB (scons tU ∅) ⟩ $ > $ G ⇒ ra_clen t1 tn ∈ lrel $ > $ G ⇒ (t1 = ⟨ kc_nil , ∅ ⟩ ∧ t2 = tT) ∨ ∃ e ∃ f (ra_pis e t2 tU ∈ lrel ∧ ra_clen e f ∈ lrel ∧ tn = ⟨ kc_s , scons f ∅ ⟩) $;
-
---| Two telescopes (`pis`) of one type over bodies that are no `Π` have the same length (by induction on the type:
---| `pis_peel`, `pis_nonpi_len`).
---| @freshen G e
---| @freshen G f
-theorem pis_len_det {e f: set} (G: hyps) (tT t1 t2 t3 t4 tn tm: set): $ G ⇒ ra_pis t1 t2 tT ∈ lrel $ > $ G ⇒ ra_pis t3 t4 tT ∈ lrel $ > $ G ⇒ ra_clen t1 tn ∈ lrel $ > $ G ⇒ ra_clen t3 tm ∈ lrel $ > $ G ⇒ ¬ ∃ e ∃ f (t2 = ⟨ kc_pi , scons e (scons f ∅) ⟩) $ > $ G ⇒ ¬ ∃ e ∃ f (t4 = ⟨ kc_pi , scons e (scons f ∅) ⟩) $ > $ G ⇒ tn = tm $;
-
---| A spine of a block's type is no `Π`.
---| @freshen G e
---| @freshen G f
-theorem spine_ind_ty_nonpi {e f: set} (G: hyps) (td ti te tl: set): $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ te tl ∈ lrel $ > $ G ⇒ ¬ ∃ e ∃ f (te = ⟨ kc_pi , scons e (scons f ∅) ⟩) $;
-
---| A constructor's fields: a context `tX` split off its type with the block's types put in (`tK2`), above a result
---| that is a spine of the type, has as many entries as the constructor's type has binders (`ctor_pis`, `ctor_res`,
---| `pis_len_det`).
-theorem ctor_fields_len (G: hyps) (J: class) (tg td tb tp tt tnp tn tm ti tF tE tc tK tK2 tX tB tnf tl tq: set):
-  $ G ⇒ ra_ind_wf tg td ∈ lrel3 J $ >
-  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
-  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
-  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
-  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
-  $ G ⇒ ra_nth_ctor tE tc tK ∈ lrel $ >
-  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tK tK2 ∈ lrel $ >
-  $ G ⇒ ra_pis tX tB tK2 ∈ lrel $ >
-  $ G ⇒ ra_clen tX tnf ∈ lrel $ >
-  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tB tl ∈ lrel $ >
-  $ G ⇒ ra_npis tK tq ∈ lrel $ >
-  $ G ⇒ tq = tnf $;
+--| The new head of a re-headed spine that is an expression is an expression.
+theorem rehead_head_sort (G: hyps) (tY tX tk te te2: set): $ G ⇒ ra_rehead tY tX tk te te2 ∈ lrel $ > $ G ⇒ te2 ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ tX ∊ ofsort lsig lopen ks_expr $;
 
 --| `ci_core` with `rec_rhs` inverted and identified with the block's data by determinacy (the motives' and minors'
 --| contexts of the right-hand side need not be the context's: `motives` and `minors` have no determinacy lemma), the
@@ -282,6 +246,7 @@ theorem ci_wf1 (G: hyps) (H J: class) (u w r tg td tv ti tc tb tp tt tnp tn tm t
   $ G ⇒ te4 ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ tmj ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ tR ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_npis tK0 tnf ∈ lrel $ >
   $ G ⇒ ra_add tnf tm tam ∈ lrel $ >
   $ G ⇒ ra_rehead ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ tR ta te3 trhs0 ∈ lrel $ >
   $ G ⇒ ra_rehead tc1 trhs0 tnf tmj trhs ∈ lrel $ >
@@ -336,6 +301,7 @@ theorem ci_wf2 (G: hyps) (H J: class) (u w r tg td tv ti tc tb tp tt tnp tn tm t
   $ G ⇒ te4 ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ tmj ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ tR ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_npis tK0 tnf ∈ lrel $ >
   $ G ⇒ ra_rehead ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ tR ta te3 trhs0 ∈ lrel $ >
   $ G ⇒ ra_rehead tc1 trhs0 tnf tmj trhs ∈ lrel $ >
   $ G ⇒ ra_motives td tnp tv ⟨ kc_nz , ∅ ⟩ tt tM2 ∈ lrel $ >
@@ -358,11 +324,9 @@ theorem ci_wf2 (G: hyps) (H J: class) (u w r tg td tv ti tc tb tp tt tnp tn tm t
   $ G ⇒ tT ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r = dt u (mcv H) trhs w r ∧ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r ∈ dt u (mcv H) tT w r $;
 
---| The closed iota rule in the model from the rule's premises (`ind_iota_eq`), for a block without nested occurrences:
---| `iota_tel`, `iota_lhs` and `rec_rhs` inverted and identified with the block's data, then `ci_core`. At every valuation
---| of the rule's context, the recursor at the context's variables applied to the constructor at them has the value of
---| the right-hand side, an element of the type's value. No typing premise.
-theorem ind_iota_eq_rule (G: hyps) (H J: class) (u w r tg td tv ti tc tnp tn tm te4 tmj tR tc1 trhs0 tnf trhs ta te3 tX tB tT: set):
+--| `ci_wf2` with `iota_tel` and `ind_arity` inverted: the fields' context and the result from `psplit_pis`, the
+--| closedness of the constructor's type with the types put in from `ind_wf` (`ctor_closed_add`, `sinst_closed`).
+theorem ci_wf3 (G: hyps) (H J: class) (u w r tg td tv ti tc tnp tn tm te4 tmj tR tc1 trhs0 tnf trhs ta te3 tX tB tT: set):
   $ G ⇒ iwf u H J tg td w r $ >
   $ G ⇒ hctor ⊆ H $ >
   $ G ⇒ hrec ⊆ H $ >
@@ -378,15 +342,30 @@ theorem ind_iota_eq_rule (G: hyps) (H J: class) (u w r tg td tv ti tc tnp tn tm 
   $ G ⇒ tT ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ ra_iota_tel td tv ti tc tX tB tnf tg ∈ lrel $ >
   $ G ⇒ tg ∊ ofsort lsig lopen ks_ctx $ >
-  $ G ⇒ tX ∊ ofsort lsig lopen ks_ctx $ >
   $ G ⇒ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r = dt u (mcv H) trhs w r ∧ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r ∈ dt u (mcv H) tT w r $;
+
+--| The closed iota rule in the model from the rule's premises (`ind_iota_eq`), for a block without nested occurrences:
+--| `iota_eq` inverted, the sorts of its parts from those of the two sides, then `ci_wf3`. At every valuation of the
+--| rule's context, the left-hand side has the value of the right-hand side, an element of the type's value. No typing
+--| premise.
+theorem ind_iota_eq_rule (G: hyps) (H J: class) (u w r tg td tv ti tc tl trhs tT: set):
+  $ G ⇒ iwf u H J tg td w r $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ hrec ⊆ H $ >
+  $ G ⇒ ra_elim_ok tg td tv ∈ lrel3 J $ >
+  $ G ⇒ tl ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ trhs ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tT ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tg ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ ra_iota_eq td ti tc tv tg tl trhs tT ∈ lrel $ >
+  $ G ⇒ dt u (mcv H) tl w r = dt u (mcv H) trhs w r ∧ dt u (mcv H) tl w r ∈ dt u (mcv H) tT w r $;
 
 
 -- --------------------------------------------------------------------------
 -- The spec's rule
 -- --------------------------------------------------------------------------
 
-theorem ind_iota_eq (D: ind) (i c: nat) (v: lvl) (np n m a0 ar nf: nat) (X Dl: ctx) (res e3 e4 c1 maj Rh rhs0 rhs T: expr): $ ind_wf Dl D $ > $ elim_ok Dl D v $ > $ ind_nested D nil $ > $ iota_tel D v i c X res nf Dl $ > $ iota_lhs D v i c nf res e3 c1 maj e4 T $ > $ rec_rhs D v i c Rh $ > $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m ar $ > $ rehead (ind_rec D i v) Rh ar e3 rhs0 $ > $ rehead c1 rhs0 nf maj rhs $ > $ deq Dl (app e4 maj) rhs T $;
+theorem ind_iota_eq (D: ind) (i c: nat) (v: lvl) (Dl: ctx) (lhs rhs T: expr): $ ind_wf Dl D $ > $ elim_ok Dl D v $ > $ iota_eq D i c v Dl lhs rhs T $ > $ deq Dl lhs rhs T $;
 
 --| A valuation `r` of a closed context `tg` appended to a base context `tg0` begins with a valuation `c` of `tg`
 --| itself (`pis_esat_closed` at depth `0`), and every expression closed below `tg`'s length has the same value at
