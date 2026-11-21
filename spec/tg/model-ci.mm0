@@ -214,6 +214,58 @@ theorem ci_core (G: hyps) (H J: class) (u w r tg td tv ti tc tb tp tt tnp tn tm 
   $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tK0 tK2 ∈ lrel $ >
   $ G ⇒ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r = dt u (mcv H) trhs w r ∧ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r ∈ dt u (mcv H) ⟨ kc_app , scons tT0 (scons tmj ∅) ⟩ w r $;
 
+--| Appending to a context is total: every context `t1` has an appended context over any tree `t2` (`capp`).
+--| @freshen G q
+theorem capp_total {q: set} (G: hyps) (t1 t2: set): $ G ⇒ t1 ∊ ofsort lsig lopen ks_ctx $ > $ G ⇒ t2 ∊ trees ω $ > $ G ⇒ ∃ q (ra_capp t1 t2 q ∈ lrel) $;
+
+--| A term whose lift is a spine over a head that the lift keeps is a spine over that head, of the same length
+--| (by induction on the lift: `lift_app_res`, `lift_inj`).
+theorem lift_spine_inv (G: hyps) (tn tk th te te2 tl: set): $ G ⇒ ra_lift tn tk th th ∈ lrel $ > $ G ⇒ ra_lift tn tk te te2 ∈ lrel $ > $ G ⇒ ra_spine th te2 tl ∈ lrel $ > $ G ⇒ ra_spine th te tl ∈ lrel $;
+
+--| A telescope type (`pis`) over a `Π` is a `Π`.
+--| @freshen G e
+--| @freshen G f
+theorem pis_pi {e f: set} (G: hyps) (t1 t2 t3: set): $ G ⇒ ra_pis t1 t2 t3 ∈ lrel $ > $ G ⇒ ∃ e ∃ f (t2 = ⟨ kc_pi , scons e (scons f ∅) ⟩) $ > $ G ⇒ ∃ e ∃ f (t3 = ⟨ kc_pi , scons e (scons f ∅) ⟩) $;
+
+--| A telescope type (`pis`) that is no `Π` has no binders.
+--| @freshen G e
+--| @freshen G f
+theorem pis_nonpi_len {e f: set} (G: hyps) (t1 t2 t3 tn: set): $ G ⇒ ra_pis t1 t2 t3 ∈ lrel $ > $ G ⇒ ¬ ∃ e ∃ f (t3 = ⟨ kc_pi , scons e (scons f ∅) ⟩) $ > $ G ⇒ ra_clen t1 tn ∈ lrel $ > $ G ⇒ tn = ⟨ kc_nz , ∅ ⟩ $;
+
+--| A telescope type (`pis`) that is `Π tB. tU`: its context is empty and the body is the type, or the outermost
+--| binder comes off: a context one shorter gives `tU`.
+--| @freshen G e
+--| @freshen G f
+theorem pis_peel {e f: set} (G: hyps) (tT tB tU t1 t2 tn: set): $ G ⇒ ra_pis t1 t2 tT ∈ lrel $ > $ G ⇒ tT = ⟨ kc_pi , scons tB (scons tU ∅) ⟩ $ > $ G ⇒ ra_clen t1 tn ∈ lrel $ > $ G ⇒ (t1 = ⟨ kc_nil , ∅ ⟩ ∧ t2 = tT) ∨ ∃ e ∃ f (ra_pis e t2 tU ∈ lrel ∧ ra_clen e f ∈ lrel ∧ tn = ⟨ kc_s , scons f ∅ ⟩) $;
+
+--| Two telescopes (`pis`) of one type over bodies that are no `Π` have the same length (by induction on the type:
+--| `pis_peel`, `pis_nonpi_len`).
+--| @freshen G e
+--| @freshen G f
+theorem pis_len_det {e f: set} (G: hyps) (tT t1 t2 t3 t4 tn tm: set): $ G ⇒ ra_pis t1 t2 tT ∈ lrel $ > $ G ⇒ ra_pis t3 t4 tT ∈ lrel $ > $ G ⇒ ra_clen t1 tn ∈ lrel $ > $ G ⇒ ra_clen t3 tm ∈ lrel $ > $ G ⇒ ¬ ∃ e ∃ f (t2 = ⟨ kc_pi , scons e (scons f ∅) ⟩) $ > $ G ⇒ ¬ ∃ e ∃ f (t4 = ⟨ kc_pi , scons e (scons f ∅) ⟩) $ > $ G ⇒ tn = tm $;
+
+--| A spine of a block's type is no `Π`.
+--| @freshen G e
+--| @freshen G f
+theorem spine_ind_ty_nonpi {e f: set} (G: hyps) (td ti te tl: set): $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ te tl ∈ lrel $ > $ G ⇒ ¬ ∃ e ∃ f (te = ⟨ kc_pi , scons e (scons f ∅) ⟩) $;
+
+--| A constructor's fields: a context `tX` split off its type with the block's types put in (`tK2`), above a result
+--| that is a spine of the type, has as many entries as the constructor's type has binders (`ctor_pis`, `ctor_res`,
+--| `pis_len_det`).
+theorem ctor_fields_len (G: hyps) (J: class) (tg td tb tp tt tnp tn tm ti tF tE tc tK tK2 tX tB tnf tl tq: set):
+  $ G ⇒ ra_ind_wf tg td ∈ lrel3 J $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor tE tc tK ∈ lrel $ >
+  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tK tK2 ∈ lrel $ >
+  $ G ⇒ ra_pis tX tB tK2 ∈ lrel $ >
+  $ G ⇒ ra_clen tX tnf ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tB tl ∈ lrel $ >
+  $ G ⇒ ra_npis tK tq ∈ lrel $ >
+  $ G ⇒ tq = tnf $;
+
 --| `ci_core` with `rec_rhs` inverted and identified with the block's data by determinacy (the motives' and minors'
 --| contexts of the right-hand side need not be the context's: `motives` and `minors` have no determinacy lemma), the
 --| two spines' lengths from `pargs_spine` and `spine_trans2`, and `isort` from `nidx`.
@@ -230,7 +282,6 @@ theorem ci_wf1 (G: hyps) (H J: class) (u w r tg td tv ti tc tb tp tt tnp tn tm t
   $ G ⇒ te4 ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ tmj ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ tR ∊ ofsort lsig lopen ks_expr $ >
-  $ G ⇒ ra_npis tK0 tnf ∈ lrel $ >
   $ G ⇒ ra_add tnf tm tam ∈ lrel $ >
   $ G ⇒ ra_rehead ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ tR ta te3 trhs0 ∈ lrel $ >
   $ G ⇒ ra_rehead tc1 trhs0 tnf tmj trhs ∈ lrel $ >
@@ -285,7 +336,6 @@ theorem ci_wf2 (G: hyps) (H J: class) (u w r tg td tv ti tc tb tp tt tnp tn tm t
   $ G ⇒ te4 ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ tmj ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ tR ∊ ofsort lsig lopen ks_expr $ >
-  $ G ⇒ ra_npis tK0 tnf ∈ lrel $ >
   $ G ⇒ ra_rehead ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ tR ta te3 trhs0 ∈ lrel $ >
   $ G ⇒ ra_rehead tc1 trhs0 tnf tmj trhs ∈ lrel $ >
   $ G ⇒ ra_motives td tnp tv ⟨ kc_nz , ∅ ⟩ tt tM2 ∈ lrel $ >
@@ -328,6 +378,7 @@ theorem ind_iota_eq_rule (G: hyps) (H J: class) (u w r tg td tv ti tc tnp tn tm 
   $ G ⇒ tT ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ ra_iota_tel td tv ti tc tX tB tnf tg ∈ lrel $ >
   $ G ⇒ tg ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ tX ∊ ofsort lsig lopen ks_ctx $ >
   $ G ⇒ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r = dt u (mcv H) trhs w r ∧ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r ∈ dt u (mcv H) tT w r $;
 
 

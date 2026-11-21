@@ -916,3 +916,27 @@ theorem mcv_inv_node_ind_rec (G: hyps) (H: class) (u w r z y t: set):
   $ G ⇒ psub y ⊆ einv u (mcv H) w $ >
   $ G ⇒ ra_eeqv z t ∈ lrel2 $ >
   $ G ⇒ dt u (mcv H) z w r = dt u (mcv H) t w r $;
+
+--| `sinst` keeps a term closed: a term closed over the bound `tk` and the types left to put in (`tdd` of them) is
+--| closed over `tk` once they are in.
+theorem sinst_closed (G: hyps) (td tj tn tk te te2 tdd tb: set):
+  $ G ⇒ ra_add tj tdd tn ∈ lrel $ >
+  $ G ⇒ ra_add tk tdd tb ∈ lrel $ >
+  $ G ⇒ ra_sinst td tj tn tk te te2 ∈ lrel $ >
+  $ G ⇒ ra_closed tb te ∈ lrel $ >
+  $ G ⇒ ra_le tk tk ∈ lrel $ >
+  $ G ⇒ ra_closed tk te2 ∈ lrel $;
+
+--| A constructor's type of a well-formed block is closed over the types and the parameters, with the bound as a numeral
+--| (`ctor_closed` gives the bound's value).
+--| @freshen G a
+theorem ctor_closed_add {a: set} (G: hyps) (J: class) (tg td tb tp tt tnp tn tm ti tF tE tc tK: set):
+  $ G ⇒ ra_ind_wf tg td ∈ lrel3 J $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor tE tc tK ∈ lrel $ >
+  $ G ⇒ ra_ind_arity td tnp tn tm ∈ lrel $ >
+  $ G ⇒ ∃ a (ra_add tn tnp a ∈ lrel ∧ ra_closed a tK ∈ lrel) $;
+
+--| A numeral is below itself (`add 0 n n` says that `n` is a numeral).
+theorem num_le_refl (G: hyps) (tb: set): $ G ⇒ ra_add ⟨ kc_nz , ∅ ⟩ tb tb ∈ lrel $ > $ G ⇒ ra_le tb tb ∈ lrel $;
