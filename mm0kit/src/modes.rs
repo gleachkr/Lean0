@@ -87,6 +87,7 @@ pub const TABLE: &[(&str, Kind, &str)] = &[
     ("psplit", Kind::Fn, "+++--"),
     ("iota_tel", Kind::Fn, "++++----"),
     ("iota_lhs", Kind::Fn, "++++++-----"),
+    ("crst", Kind::Fn, "+++-"),
     ("iota_eq", Kind::Fn, "++++----"),
     ("pargs", Kind::Fn, "+++-"),
     ("rehead", Kind::Fn, "-+++-"),

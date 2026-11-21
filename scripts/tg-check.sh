@@ -6,6 +6,9 @@
 # admitted with `sorry!` are allowed through (every tool exits 3 for them) and
 # counted at the end; abc's other warnings are printed and counted too.
 set -uo pipefail
+# A proof that no longer fits its statements can make abc use all memory (the check needs about
+# 4 GB): cap the address space, in kB (TG_MEM_KB).
+ulimit -v "${TG_MEM_KB:-20000000}"
 cd "$(dirname "$0")/.."
 ABC=${ABC:-abc}; MM0_ZIG=${MM0_ZIG:-mm0-zig}; MM0_C=${MM0_C:-mm0-c}
 top=${1:-spec/tg/lean-tg-rest.mm0}

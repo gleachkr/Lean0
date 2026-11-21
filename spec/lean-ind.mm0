@@ -256,6 +256,11 @@ axiom rst_lam (D: ind) (N: ctx) (A b A2 b2: expr): $ rst D N A A2 $ > $ rst D N 
 axiom rst_pi (D: ind) (N: ctx) (A b A2 b2: expr): $ rst D N A A2 $ > $ rst D N b b2 $ > $ rst D N (Π A. b) (Π A2. b2) $;
 axiom rst_proj (D: ind) (N: ctx) (b: blk) (i: nat) (e e2: expr): $ rst D N e e2 $ > $ rst D N (proj b i e) (proj b i e2) $;
 axiom rst_refl (D: ind) (N: ctx) (e: expr): $ rst D N e e $;
+--| `crst D N G G2`: the context `G2` is `G` with each entry restored.
+term crst: ind > ctx > ctx > ctx > wff;
+axiom crst_nil (D: ind) (N: ctx): $ crst D N [] [] $;
+axiom crst_cons (D: ind) (N: ctx) (A A2: expr) (G G2: ctx):
+  $ rst D N A A2 $ > $ crst D N G G2 $ > $ crst D N (A :: G) (A2 :: G2) $;
 term nst_hit: ctx > nat > nat > nat > expr > expr > wff;
 --| `nst_hit N j d np e e2`: `e` is an occurrence of `N` (the first entry being
 --| auxiliary type `j`) lifted to depth `d` and applied to more arguments,
@@ -473,8 +478,9 @@ axiom iota_lhs_i (D: ind) (v: lvl) (i c np n m mn nf ni a d1 io mo: nat) (res e1
   $ pargs (ind_ctor D i c) d1 np c1 $ > $ pargs c1 0 nf maj $ >
   $ add io (s i) n $ > $ add a io mo $ > $ rehead Y #mo ni T2 T0 $ >
   $ iota_lhs D v i c nf res e3 c1 maj e4 (T0 @ maj) $;
---| `iota_eq D i c v Dl lhs rhs T`: the rule of constructor `c` of type `i` of
---| a block without nested occurrences, as a closed equation: its context
+--| `iota_eq D i c v Dl lhs rhs T`: the rule of constructor `c` of type `i`
+--| as a closed equation over the block's own types and constructors (for a
+--| block with nested occurrences, the rule restores it, `rst`): its context
 --| (`iota_tel`), its left-hand side and type (`iota_lhs`), and its right-hand
 --| side, `rec_rhs`'s closed term at the context's variables. For `Nat.rec` at
 --| `succ`, with `N` for the type and `R` for `rec_rhs`'s term: the context is
@@ -484,7 +490,7 @@ axiom iota_lhs_i (D: ind) (v: lvl) (i c np n m mn nf ni a d1 io mo: nat) (res e1
 --| @ #0)`.
 term iota_eq: ind > nat > nat > lvl > ctx > expr > expr > expr > wff;
 axiom iota_eq_i (D: ind) (i c: nat) (v: lvl) (np n m a0 ar nf: nat) (X Dl: ctx) (res e3 e4 c1 maj Rh rhs0 rhs T: expr):
-  $ ind_nested D [] $ > $ iota_tel D v i c X res nf Dl $ > $ iota_lhs D v i c nf res e3 c1 maj e4 T $ >
+  $ iota_tel D v i c X res nf Dl $ > $ iota_lhs D v i c nf res e3 c1 maj e4 T $ >
   $ rec_rhs D v i c Rh $ > $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m ar $ >
   $ rehead (ind_rec D i v) Rh ar e3 rhs0 $ > $ rehead c1 rhs0 nf maj rhs $ >
   $ iota_eq D i c v Dl (e4 @ maj) rhs T $;
@@ -749,13 +755,16 @@ axiom weakBaseDF (k: nat) (G G0 G2: ctx) (e e2 A K: expr):
   $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ pis G (srt lz) K $ > $ closed 0 K $ > $ clen G k $ >
   $ closed k e $ > $ closed k e2 $ > $ closed k A $ > $ capp G G0 G2 $ >
   $ ⟦ G2 ⊢ e ≡ e2 : A ⟧ $;
---| Iota as a closed equation, for a block without nested occurrences
---| (`iota_eq`): in the context `Dl` of the recursor's own variables,
---| `ind_rec D i v ps ms ns is (ind_ctor D i c ps fs) ≡ Rh ps ms ns fs`. No
---| typing premise: every argument is a variable of the context or an index of
---| the constructor's result. Instances follow by `weakBaseDF` and `instDF`.
-axiom ind_iota_eq (D: ind) (i c: nat) (v: lvl) (Dl: ctx) (lhs rhs T: expr):
-  $ ind_wf Dl D $ > $ elim_ok Dl D v $ > $ iota_eq D i c v Dl lhs rhs T $ >
+--| Iota as a closed equation (`iota_eq`): in the context `Dl` of the
+--| recursor's own variables, `ind_rec D i v ps ms ns is (ind_ctor D i c ps fs)
+--| ≡ Rh ps ms ns fs`, with the block's auxiliary types and constructors
+--| restored to its nested occurrences in the context, both sides and the type
+--| (`crst`, `rst`; nothing to restore when `N` is empty). No typing premise:
+--| every argument is a variable of the context or an index of the
+--| constructor's result. Instances follow by `weakBaseDF` and `instDF`.
+axiom ind_iota_eq (D: ind) (N: ctx) (i c: nat) (v: lvl) (Dl0 Dl: ctx) (lhs0 rhs0 T0 lhs rhs T: expr):
+  $ ind_wf Dl D $ > $ elim_ok Dl D v $ > $ iota_eq D i c v Dl0 lhs0 rhs0 T0 $ > $ ind_nested D N $ >
+  $ crst D N Dl0 Dl $ > $ rst D N lhs0 lhs $ > $ rst D N rhs0 rhs $ > $ rst D N T0 T $ >
   $ ⟦ Dl ⊢ lhs ≡ rhs : T ⟧ $;
 axiom proj_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (j i np: nat) (e e2 S A A1 A2 R: expr):
   $ ⟦ G ⊢ e ≡ e2 : S ⟧ $ > $ spine (ind_ty D j) S np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ struct_like D j $ >

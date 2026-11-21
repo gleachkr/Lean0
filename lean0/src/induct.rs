@@ -1035,12 +1035,13 @@ fn spine_args(g: &Gen, mut e: E) -> Vec<E> {
 }
 
 /// Iota as a closed equation (`ind_iota_eq`, audit §4), for the recursor `rt` (`ind_rec D i v`)
-/// on the constructor `ct` (`ind_ctor D i c`) of a block without nested occurrences:
+/// on the constructor `ct` (`ind_ctor D i c`):
 /// `⟦ Dl ++ G ⊢ rec ps ms ns is (ctor ps fs) ≡ def ps ms ns fs : motive is (ctor ps fs) ⟧`,
 /// every argument a variable of the rule's context `Dl` (the fields over the minors, the
 /// motives and the parameters) or an index of the constructor's result, over any base
-/// context `G` (`weakBaseDF`). The statement comes from Part I's `iota_eq` alone, so a
-/// replayed declaration states it without the proof.
+/// context `G` (`weakBaseDF`), with the block's nested occurrences restored. The statement
+/// comes from Part I's `iota_eq`, `crst` and `rst` alone, so a replayed declaration states
+/// it without the proof.
 #[allow(clippy::too_many_arguments)]
 fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &str, rt: E, ct: E, def_us: E, fixed: usize, nf: usize, elim: Option<ThId>, doc: &str) -> R<ThId> {
     let (d, i, v) = match g.env.head(rt) {
@@ -1055,7 +1056,19 @@ fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &s
     // the rule's context, sides and type: Part I's `iota_eq`
     let p_eq = mm(pv.horn.prove_open(&mut g.env, &mut g.lean, &mut g.lv, &mut pv.facts, 4, |env, ms| env.app_n("iota_eq", &[d, i, c, v, ms[0], ms[1], ms[2], ms[3]])))?;
     let c_eq = g.env.concl(p_eq);
-    let (dl, lhs, rhs_u, ty) = g.env.head(c_eq).map(|(_, a)| (a[4], a[5], a[6], a[7])).ok_or("iota_eq")?;
+    let (dl0, lhs0, rhs0, ty0) = g.env.head(c_eq).map(|(_, a)| (a[4], a[5], a[6], a[7])).ok_or("iota_eq")?;
+    // restored to the block's nested occurrences (nothing for a block without them)
+    let p_n = mm(pv.horn.prove_open(&mut g.env, &mut g.lean, &mut g.lv, &mut pv.facts, 1, |env, ms| env.app_n("ind_nested", &[d, ms[0]])))?;
+    let c_n = g.env.concl(p_n);
+    let n = g.env.head(c_n).map(|(_, a)| a[1]).ok_or("ind_nested")?;
+    let mut restored = Vec::new();
+    for (rel, e) in [("crst", dl0), ("rst", lhs0), ("rst", rhs0), ("rst", ty0)] {
+        let p = mm(pv.horn.prove_open(&mut g.env, &mut g.lean, &mut g.lv, &mut pv.facts, 1, |env, ms| env.app_n(rel, &[d, n, e, ms[0]])))?;
+        let cp = g.env.concl(p);
+        let e2 = g.env.head(cp).map(|(_, a)| a[3]).ok_or("rst")?;
+        restored.push((cp, p, e2));
+    }
+    let (dl, lhs, rhs_u, ty) = (restored[0].2, restored[1].2, restored[2].2, restored[3].2);
     // the right-hand side through the rule's definition: its arguments are the recursor's
     // before the indices, then the fields
     let View::App(e4, maj) = g.lean.view(&g.env, lhs) else { return Err("iota_eq: the left-hand side".into()) };
@@ -1086,6 +1099,10 @@ fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &s
         None
     } else {
         pv.horn.facts.insert(c_eq, p_eq);
+        pv.horn.facts.insert(c_n, p_n);
+        for &(cp, p, _) in &restored {
+            pv.horn.facts.insert(cp, p);
+        }
         if let Some(th) = elim {
             // `elim_ok` at the rule's context, from the recursor's lemma over any context
             let mut la = vec![dl];
