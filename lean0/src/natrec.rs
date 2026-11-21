@@ -929,6 +929,15 @@ fn bitwise_eqs<'t>(el: &mut El<'_, '_, 't, '_>, v: &Voc<'t>, r: &Rec<'t>, targs:
         let a = app(el, r.pack, &[n, m]);
         Ok((app(el, w.hm, &[a]), n, Some(v.nat)))
     })?);
+    // `motive (pack n m) ≡ ℕ`: the type of the recursive call in the probe below
+    hyps.push(eqn_at(el, |el| {
+        let (n, m) = (open(el, "n", v.nat)?, open(el, "m", v.nat)?);
+        let a = app(el, r.pack, &[n, m]);
+        let zero = el.tc.ctx.zero();
+        let one = el.tc.ctx.succ(zero);
+        let ty = el.tc.ctx.mk_sort(one);
+        Ok((app(el, w.motive, &[a]), v.nat, Some(ty)))
+    })?);
     hyps.push(eqn(el, |el| {
         let (p, b) = (open(el, "p", v.prop)?, open(el, "b", v.bool_)?);
         let tpb = v.t(el, p, b);
