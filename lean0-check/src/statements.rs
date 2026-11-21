@@ -98,14 +98,18 @@ pub struct Stmt {
 }
 
 /// The spec's statements between its `-- lean0-check: begin` and `-- lean0-check: end` lines
+/// (each such block)
 /// (written in prefix form for this): the data of Lean's `Nat` and `Eq` (`nat_D`, `eq_D`) and
 /// the quotient primitives, which the export's declarations are compared with (audit §4).
 pub fn spec_statements(spec: &str) -> Result<Vec<Stmt>, String> {
     let (b, e) = ("-- lean0-check: begin", "-- lean0-check: end");
-    let Some(i) = spec.find(b) else { return Ok(Vec::new()) };
-    let r = &spec[i + b.len()..];
-    let Some(j) = r.find(e) else { return Err("spec: `lean0-check: begin` without `end`".into()) };
-    let mut out = parse_mm0(&r[..j]).map_err(|e| format!("spec: {e}"))?;
+    let (mut out, mut rest) = (Vec::new(), spec);
+    while let Some(i) = rest.find(b) {
+        let r = &rest[i + b.len()..];
+        let Some(j) = r.find(e) else { return Err("spec: `lean0-check: begin` without `end`".into()) };
+        out.extend(parse_mm0(&r[..j]).map_err(|e| format!("spec: {e}"))?);
+        rest = &r[j + e.len()..];
+    }
     for s in &mut out {
         s.spec = true;
     }

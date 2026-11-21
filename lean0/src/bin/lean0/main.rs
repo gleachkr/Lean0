@@ -38,7 +38,7 @@ fn run(args: &[String]) -> Result<bool, String> {
             let (spec, files) = match rest {
                 [o, f, files @ ..] if o == "--spec" => (std::fs::read_to_string(f).map_err(|e| format!("{f}: {e}"))?, files),
                 [o, files @ ..] if o == "--tg" => (lean0_check::tg::text()?, files),
-                files => (lean0_check::SPEC.to_string(), files),
+                files => (lean0_check::spec().to_string(), files),
             };
             let texts = files.iter().map(|f| Ok((f.clone(), std::fs::read_to_string(f).map_err(|e| format!("{f}: {e}"))?)))
                 .collect::<Result<Vec<_>, String>>()?;
@@ -47,7 +47,7 @@ fn run(args: &[String]) -> Result<bool, String> {
         }
         [cmd, cert, lib, out] if cmd == "tg-link" => {
             let mut env = mm0kit::env::Env::new();
-            mm0kit::parse::parse_into(&mut env, lean0_check::SPEC).map_err(|e| format!("spec: {}", e.0))?;
+            mm0kit::parse::parse_into(&mut env, lean0_check::spec()).map_err(|e| format!("spec: {}", e.0))?;
             let l = mm0kit::mmb::link(cert.as_ref(), lib.as_ref(), out.as_ref(), env.order.len()).map_err(|e| e.to_string())?;
             eprintln!("tg-link: {out}: the library's {} statements, then the certificate's {} ({} bytes); the spec's {} are the library's",
                 l.library, l.own, l.size, l.spec);
@@ -71,7 +71,7 @@ fn run(args: &[String]) -> Result<bool, String> {
             Ok(c.report.problems.is_empty())
         }
         [cmd] if cmd == "spec" => {
-            print!("{}", lean0_check::SPEC);
+            print!("{}", lean0_check::spec());
             Ok(true)
         }
         [cmd, o] if cmd == "spec" && o == "--tg" => {
@@ -81,7 +81,7 @@ fn run(args: &[String]) -> Result<bool, String> {
         [cmd, rest @ ..] if cmd == "modes" && rest.len() <= 1 => {
             let spec = match rest {
                 [f] => std::fs::read_to_string(f).map_err(|e| format!("{f}: {e}"))?,
-                _ => lean0_check::SPEC.to_string(),
+                _ => lean0_check::spec().to_string(),
             };
             let r = mm0kit::modes::check(&spec).map_err(|e| e.0)?;
             print!("{}", r.text);

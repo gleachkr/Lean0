@@ -50,7 +50,7 @@ struct Spec {
 pub fn run(args: &[String]) -> Result<(), String> {
     let usage = "usage: lean0 gen EXPORT.ndjson OUT_DIR NAME [--keep-going] [--stats-only | --statements-only] [--jobs N [--parts P [--max-pending M]] [--balance STATS]] [--spec SPEC.mm0] [--tamper-axiom A | --tamper-theorem T]... [--unchecked]";
     let [export, out, name, opts @ ..] = args else { return Err(usage.into()) };
-    let mut spec = Spec { text: lean0_check::SPEC.to_string(), file: "lean.mm0".into(), path: None };
+    let mut spec = Spec { text: lean0_check::spec().to_string(), file: "lean.mm0".into(), path: None };
     let mut tamper_axioms = Vec::new();
     let mut tamper_thms = Vec::new();
     let mut keep_going = false;

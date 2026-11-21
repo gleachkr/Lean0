@@ -1,7 +1,7 @@
 //! The trusted side of Lean0, apart from the MM0 verifiers: what a certificate is checked
 //! against, and whether its statements say what the Lean export says.
 //!
-//! - [`SPEC`]: the spec, `spec/lean.mm0`, embedded.
+//! - [`spec`]: the spec, `spec/lean.mm0` with the four files it imports, embedded.
 //! - [`joined`]: the text a verifier checks a certificate (or one part of a multi-part
 //!   certificate) against: the spec, the earlier parts' statements restated, and the
 //!   certificate's own statements (audit §7).
@@ -19,8 +19,51 @@ pub mod statements;
 pub mod summary;
 pub mod tg;
 
-/// The trusted spec of LeanTT that every certificate is checked against.
-pub const SPEC: &str = include_str!("../../spec/lean.mm0");
+/// The spec's files, by name: `lean.mm0` imports the others.
+const SPEC_FILES: &[(&str, &str)] = &[
+    ("lean-core.mm0", include_str!("../../spec/lean-core.mm0")),
+    ("lean-ind.mm0", include_str!("../../spec/lean-ind.mm0")),
+    ("lean-quot.mm0", include_str!("../../spec/lean-quot.mm0")),
+    ("lean-lit.mm0", include_str!("../../spec/lean-lit.mm0")),
+    ("lean.mm0", include_str!("../../spec/lean.mm0")),
+];
+
+/// The trusted spec of LeanTT that every certificate is checked against: `spec/lean.mm0`
+/// with the files it imports, as one text (core, inductive types, quotients, literals).
+pub fn spec() -> &'static str {
+    static SPEC: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+    SPEC.get_or_init(|| flatten(SPEC_FILES, "lean.mm0").expect("the embedded spec's imports"))
+}
+
+/// The text of the file `top` of `files` with each `import "F";` line replaced by the text
+/// of `F` (itself flattened, and only the first time: as `abc join` does, so the declarations
+/// come in the order an MMB file compiled from `top` has them).
+pub fn flatten(files: &[(&str, &str)], top: &str) -> Result<String, String> {
+    fn go(files: &[(&str, &str)], name: &str, seen: &mut Vec<String>, out: &mut String) -> Result<(), String> {
+        if seen.iter().any(|s| s == name) {
+            return Ok(())
+        }
+        seen.push(name.to_string());
+        let Some(&(_, src)) = files.iter().find(|f| f.0 == name) else { return Err(format!("no embedded file {name}")) };
+        for line in src.split_inclusive('\n') {
+            if line.starts_with("import") {
+                let Some(file) = line.trim_end().strip_prefix("import \"").and_then(|l| l.strip_suffix("\";")) else {
+                    return Err(format!("{name}: unexpected import line {line:?}"))
+                };
+                go(files, file, seen, out)?;
+            } else {
+                out.push_str(line);
+            }
+        }
+        if !out.ends_with('\n') {
+            out.push('\n');
+        }
+        Ok(())
+    }
+    let mut out = String::new();
+    go(files, top, &mut Vec::new(), &mut out)?;
+    Ok(out)
+}
 
 /// What `lean0 check` found.
 pub struct Checked {
@@ -34,7 +77,7 @@ pub struct Checked {
 /// Check that the statement files (all parts of a certificate, in order) say what the export's
 /// declarations say.
 pub fn check(export: &str, files: &[String]) -> Result<Checked, String> {
-    let mut stmts = statements::spec_statements(SPEC)?;
+    let mut stmts = statements::spec_statements(spec())?;
     let nspec = stmts.len();
     for f in files {
         let text = std::fs::read_to_string(f).map_err(|e| format!("{f}: {e}"))?;

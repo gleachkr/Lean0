@@ -57,7 +57,8 @@
         src = pkgs.lib.fileset.toSource {
           root = ./.;
           fileset = pkgs.lib.fileset.unions [
-            ./Cargo.toml ./Cargo.lock ./lean0 ./lean0-check ./mm0kit ./spec/lean.mm0
+            ./Cargo.toml ./Cargo.lock ./lean0 ./lean0-check ./mm0kit
+            ./spec/lean.mm0 ./spec/lean-core.mm0 ./spec/lean-ind.mm0 ./spec/lean-quot.mm0 ./spec/lean-lit.mm0
             # the TG library's statements, embedded by lean0-check (TG mode)
             (pkgs.lib.fileset.fileFilter (f: f.hasExt "mm0") ./spec/tg)
           ];

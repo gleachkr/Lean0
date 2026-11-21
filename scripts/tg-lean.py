@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Write spec/tg/lean-tg.mm0, the encoding of the spec's syntax in the TG library.
 
-Reads the sorts and constructors of spec/lean.mm0 (every `term` whose sort is not
+Reads the sorts and constructors of spec/lean.mm0 (its four files; every `term` whose sort is not
 `wff`) and writes, after `import "all.mm0";`:
   - the sorts and constructor lines, verbatim from the spec (without notations);
   - a label per sort (`ks_S`) and per constructor (`kc_c`), natural numbers in
@@ -75,9 +75,62 @@ MODEL = "model.mm0"
 # The sorts a certificate declares new constants of (`term X_blk: blk`,
 # `term X_atom: atom`): their trees are also any leaves `⟨ n , ∅ ⟩`.
 OPEN = ["blk", "atom"]
-# Where Parts II and III of the spec start.
+# The spec's files, in the order `lean.mm0` imports them (as `lean0 spec` prints them).
+ORDER = ROOT / "scripts/tg-order.txt"
+SPEC_FILES = ["lean-core.mm0", "lean-ind.mm0", "lean-quot.mm0", "lean-lit.mm0"]
+# Where Parts II and III start, in each file and in `read_spec`'s text.
 PART2 = "-- PART II"
 PART3 = "-- PART III"
+
+
+def spec_chunks(text):
+    """The declarations of a piece of the spec, each with the comment lines above it and
+    the notation lines after it: pairs (key, text), the key `thm NAME` or `term NAME`."""
+    out, cur = [], []
+    for line in text.splitlines(keepends=True):
+        cur.append(line)
+        s = line.strip()
+        if s.startswith("--") or not s.endswith(";"):
+            continue
+        decl = "".join(l for l in cur if not l.lstrip().startswith("--")).split()
+        while decl and decl[0] in ("strict", "pure", "provable", "free"):
+            decl = decl[1:]
+        if decl[0] == "delimiter":
+            out.append(["delimiter", "".join(cur)])
+        elif decl[0] in ("prefix", "infixl", "infixr", "notation"):
+            out[-1][1] += "".join(cur)
+        else:
+            kind = "thm" if decl[0] in ("axiom", "theorem") else "term"
+            out.append([kind + " " + re.match(r"\w+", decl[1]).group(0), "".join(cur)])
+        cur = []
+    if out:
+        out[-1][1] += "".join(cur)
+    return out
+
+
+def read_spec():
+    """The spec as one text in three parts: the files' Parts I, then their Parts II, then
+    their Parts III (each file is in three parts and uses only earlier files, so this is the
+    same theory with the parts together). Within a part the declarations come in the order
+    of `tg-order.txt`: the labels of the encoding and the order of each relation's clauses
+    follow the order of declarations, and the model's proofs depend on both (the cases of
+    an inversion, the names `kc_a_ne_b`), so the order is fixed there and not by where the
+    spec's files put a declaration. A declaration missing from the list is an error."""
+    order = {k: i for i, k in enumerate(ORDER.read_text(encoding="utf-8").split("\n"))}
+    parts = [[], [], []]
+    for f in SPEC_FILES:
+        text = (ROOT / "spec" / f).read_text(encoding="utf-8")
+        text = "".join(l for l in text.splitlines(keepends=True) if not l.startswith("import "))
+        i, j = text.index(PART2 + ":"), text.index(PART3 + ":")
+        for k, chunk in enumerate((text[:i], text[i:j], text[j:])):
+            parts[k] += spec_chunks("".join(l for l in chunk.splitlines(keepends=True) if not l.startswith("-- PART I")))
+    for p in parts:
+        for key, _ in p:
+            if key not in order:
+                sys.exit(f"tg-lean: {key} is not in {ORDER.relative_to(ROOT)}: add it where the encoding should have it")
+        p.sort(key=lambda c: order[c[0]])
+    join = lambda p: "".join(c[1] for c in p)
+    return join(parts[0]) + PART2 + "\n" + join(parts[1]) + PART3 + "\n" + join(parts[2])
 # The second stratum (Part II's relations over level equivalence), between the
 # model's levels, which it imports, and the rest of the model.
 OUT2 = ROOT / "spec/tg/lean-tg2.mm0"
@@ -1218,7 +1271,7 @@ def parse_check(spec, out):
 
 
 def main():
-    spec = SPEC.read_text(encoding="utf-8")
+    spec = read_spec()
     if sys.argv[1:2] == ["--parse-check"]:
         parse_check(spec, Path(sys.argv[2]))
         return

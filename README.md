@@ -272,7 +272,10 @@ for where the proof bytes go.
 
 ## Layout
 
-- `spec/lean.mm0`: the trusted MM0 spec of LeanTT; `spec/lib.auf`: derived rules (untrusted);
+- `spec/lean.mm0`: the trusted MM0 spec of LeanTT, which imports its four files: `lean-core.mm0`
+  (levels, expressions, contexts, the judgment and its rules), `lean-ind.mm0` (inductive types),
+  `lean-quot.mm0` (quotients) and `lean-lit.mm0` (Nat literals); `lean0 spec` prints them as one
+  text; `spec/lib.auf`: derived rules (untrusted);
   `spec/examples/`: hand-proven certificates
 - `spec/tg/`: a Tarski–Grothendieck set-theory library in Aufbau (`tg.mm0` its
   base), toward a model of the spec in set theory, and `lean-tg.mm0`, the encoding of the

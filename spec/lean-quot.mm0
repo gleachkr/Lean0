@@ -1,0 +1,101 @@
+import "lean-ind.mm0";
+
+-- LeanTT, quotients: the primitives `Quot`, `Quot.mk`, `Quot.lift` and
+-- `Quot.ind` as constants with the kernel's types and reduction rules, and
+-- Lean's `Eq` (notes/audit-lean-mm0.md §4). See lean-core.mm0 for the spec's
+-- organization and notations.
+
+---------------------------------------------------------------------------
+-- PART I: SYNTAX
+---------------------------------------------------------------------------
+
+-- Lean's `Eq`, and the quotient primitives ---------------------------------
+-- (notes/audit-lean-mm0.md §4.) `eq_D` is the data of the block `Eq` as Lean's
+-- prelude declares it (the type of `Quot.lift` mentions `Eq`); `lean0 check`
+-- reads the statements between the `lean0-check` marks (written in prefix form
+-- for that) and compares the export's `Eq` and quotient declarations with
+-- them. A certificate proves `tys_ok` and `ind_wf` for the block like any
+-- other. The quotient primitives' types and reduction rules are in Part III.
+
+-- lean0-check: begin
+--| The inductive block of `Eq`.
+term eq_blk: blk;
+--| The inductive block of `Eq`: its parameters, types and constructors.
+def eq_D (u: lvl): ind = $ ind_mk eq_blk (cons (bvar nz) (cons (srt u) nil)) (tcons (pi (bvar (s nz)) (srt lz)) (ccons (app (app (app (bvar (s (s nz))) (bvar (s nz))) (bvar nz)) (bvar nz)) cnil) tnil) $;
+--| Lean quotient primitive `Quot`.
+term quot (u: lvl): expr;
+--| Lean quotient primitive `Quot.mk`.
+term quot_mk (u: lvl): expr;
+--| Lean quotient primitive `Quot.lift`.
+term quot_lift (u v: lvl): expr;
+--| Lean quotient primitive `Quot.ind`.
+term quot_ind (u: lvl): expr;
+-- lean0-check: end
+
+axiom closed_quot (k: nat) (u: lvl): $ closed k (quot u) $;
+axiom closed_quot_mk (k: nat) (u: lvl): $ closed k (quot_mk u) $;
+axiom closed_quot_lift (k: nat) (u v: lvl): $ closed k (quot_lift u v) $;
+axiom closed_quot_ind (k: nat) (u: lvl): $ closed k (quot_ind u) $;
+axiom afree_quot (u: lvl): $ afree (quot u) $;
+axiom afree_quot_mk (u: lvl): $ afree (quot_mk u) $;
+axiom afree_quot_lift (u v: lvl): $ afree (quot_lift u v) $;
+axiom afree_quot_ind (u: lvl): $ afree (quot_ind u) $;
+
+---------------------------------------------------------------------------
+-- PART II: DEFINITIONS OVER LEVEL EQUIVALENCE AND THE JUDGMENT
+---------------------------------------------------------------------------
+
+-- Level equivalence of expressions -----------------------------------------
+
+axiom eeqv_quot (u u2: lvl): $ leqv u u2 $ > $ eeqv (quot u) (quot u2) $;
+axiom eeqv_quot_mk (u u2: lvl): $ leqv u u2 $ > $ eeqv (quot_mk u) (quot_mk u2) $;
+axiom eeqv_quot_lift (u v u2 v2: lvl):
+  $ leqv u u2 $ > $ leqv v v2 $ > $ eeqv (quot_lift u v) (quot_lift u2 v2) $;
+axiom eeqv_quot_ind (u u2: lvl): $ leqv u u2 $ > $ eeqv (quot_ind u) (quot_ind u2) $;
+
+---------------------------------------------------------------------------
+-- PART III: THE RULES
+---------------------------------------------------------------------------
+
+-- Quotients (audit §4) -----------------------------------------------------
+-- The kernel's types of the primitives (`Quot.lift`'s mentions `Eq`), and
+-- `Quot.lift` and `Quot.ind` reduce on `Quot.mk`.
+
+--| `Quot : Π (α : Sort u). (α → α → Prop) → Sort u`
+axiom quot_ty (G: ctx) (u: lvl):
+  $ ⟨ G ⊢ quot u : Π (srt u). Π (Π #0. Π #1. Prop). srt u ⟩ $;
+--| `Quot.mk : Π (α : Sort u) (r : α → α → Prop). α → Quot r`
+axiom quot_mk_ty (G: ctx) (u: lvl):
+  $ ⟨ G ⊢ quot_mk u : Π (srt u). Π (Π #0. Π #1. Prop). Π #1. quot u @ #2 @ #1 ⟩ $;
+--| `Quot.lift : Π (α : Sort u) (r : α → α → Prop) (β : Sort v) (f : α → β).
+--|   (Π a b. r a b → Eq (f a) (f b)) → Quot r → β`
+axiom quot_lift_ty (G: ctx) (u v: lvl):
+  $ ⟨ G ⊢ quot_lift u v : Π (srt u). Π (Π #0. Π #1. Prop). Π (srt v). Π (Π #2. #1).
+      Π (Π #3. Π #4. Π (#4 @ #1 @ #0). ind_ty (eq_D v) 0 @ #4 @ (#3 @ #2) @ (#3 @ #1)).
+      Π (quot u @ #4 @ #3). #3 ⟩ $;
+--| `Quot.ind : Π (α : Sort u) (r : α → α → Prop) (β : Quot r → Prop).
+--|   (Π a. β (Quot.mk r a)) → Π q. β q`
+axiom quot_ind_ty (G: ctx) (u: lvl):
+  $ ⟨ G ⊢ quot_ind u : Π (srt u). Π (Π #0. Π #1. Prop). Π (Π (quot u @ #1 @ #0). Prop).
+      Π (Π #2. #1 @ (quot_mk u @ #3 @ #2 @ #0)). Π (quot u @ #3 @ #2). #2 @ #0 ⟩ $;
+
+--| Reduction of `Quot.lift f h (Quot.mk r a)` to `f a` and of
+--| `Quot.ind h (Quot.mk r a)` to `h a`, when every argument has its binder's
+--| type in the primitive's type (`sty`), as nanoda's `reduce_quot`, which
+--| checks only the spine: the typing makes the constructor's `α` and `r` the
+--| primitive's.
+--| `quot_lift_mk` also takes `a` at `f`'s domain, the typing of its right
+--| side's argument: the typing of `Quot.mk r a` as a whole does not give it
+--| when `α` is a proposition (audit §4).
+axiom quot_lift_mk (G: ctx) (u v: lvl) (x1 x2 x3 x4 x5: expr) (v1: lvl) (y1 y2 a T: expr):
+  $ sty G (quot_lift u v) (Π (srt u). Π (Π #0. Π #1. Prop). Π (srt v). Π (Π #2. #1).
+      Π (Π #3. Π #4. Π (#4 @ #1 @ #0). ind_ty (eq_D v) 0 @ #4 @ (#3 @ #2) @ (#3 @ #1)).
+      Π (quot u @ #4 @ #3). #3)
+      (quot_lift u v @ x1 @ x2 @ x3 @ x4 @ x5 @ (quot_mk v1 @ y1 @ y2 @ a)) T $ >
+  $ ⟨ G ⊢ a : x1 ⟩ $ >
+  $ ⟦ G ⊢ quot_lift u v @ x1 @ x2 @ x3 @ x4 @ x5 @ (quot_mk v1 @ y1 @ y2 @ a) ≡ x4 @ a : T ⟧ $;
+axiom quot_ind_mk (G: ctx) (u: lvl) (x1 x2 x3 x4: expr) (v1: lvl) (y1 y2 a T: expr):
+  $ sty G (quot_ind u) (Π (srt u). Π (Π #0. Π #1. Prop). Π (Π (quot u @ #1 @ #0). Prop).
+      Π (Π #2. #1 @ (quot_mk u @ #3 @ #2 @ #0)). Π (quot u @ #3 @ #2). #2 @ #0)
+      (quot_ind u @ x1 @ x2 @ x3 @ x4 @ (quot_mk v1 @ y1 @ y2 @ a)) T $ >
+  $ ⟦ G ⊢ quot_ind u @ x1 @ x2 @ x3 @ x4 @ (quot_mk v1 @ y1 @ y2 @ a) ≡ x4 @ a : T ⟧ $;

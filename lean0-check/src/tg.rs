@@ -53,34 +53,9 @@ const FILES: &[(&str, &str)] = &[
 /// The file certificates are verified against, with everything it imports.
 pub const TOP: &str = "lean-tg-rest.mm0";
 
-/// The text of `TOP` with each `import "F";` line replaced by the text of `F` (itself
-/// flattened, and only the first time: as `abc join` does, so the declarations come in the
-/// order the library's MMB file has them).
+/// The text of `TOP` with everything it imports ([`crate::flatten`]).
 pub fn text() -> Result<String, String> {
-    fn flatten(name: &str, seen: &mut Vec<String>, out: &mut String) -> Result<(), String> {
-        if seen.iter().any(|s| s == name) {
-            return Ok(())
-        }
-        seen.push(name.to_string());
-        let Some(&(_, src)) = FILES.iter().find(|f| f.0 == name) else { return Err(format!("the TG library has no file {name}")) };
-        for line in src.split_inclusive('\n') {
-            if line.starts_with("import") {
-                let Some(file) = line.trim_end().strip_prefix("import \"").and_then(|l| l.strip_suffix("\";")) else {
-                    return Err(format!("{name}: unexpected import line {line:?}"))
-                };
-                flatten(file, seen, out)?;
-            } else {
-                out.push_str(line);
-            }
-        }
-        if !out.ends_with('\n') {
-            out.push('\n');
-        }
-        Ok(())
-    }
-    let mut out = String::new();
-    flatten(TOP, &mut Vec::new(), &mut out)?;
-    Ok(out)
+    crate::flatten(FILES, TOP)
 }
 
 /// The names the library declares, for the generator to leave alone so that a certificate's

@@ -51,7 +51,9 @@ if scripts/tg-lean.py --parse-check $pc && "${ABC:-abc}" compile $pc/check.mm0 $
 else echo "FAIL: the notation parser (scripts/mm0math.py)"; fail=1; fi
 
 echo "== mm0kit self-test"
-cargo run -q --release -p mm0kit --example selftest -- spec/lean.mm0 build/out/selftest.mm0 build/out/selftest.mmb > /dev/null
+# the spec as one text (spec/lean.mm0 imports its four files)
+cargo run -q --release --bin lean0 -- spec > build/out/lean.mm0
+cargo run -q --release -p mm0kit --example selftest -- build/out/lean.mm0 build/out/selftest.mm0 build/out/selftest.mmb > /dev/null
 [ "$(accepted_by build/out/selftest.mmb build/out/selftest.mm0)" = 2 ] && echo "selftest: ok" || { echo "FAIL: selftest"; fail=1; }
 
 # The spec's relations are the functions and predicates they are read as (mm0kit/src/modes.rs):
@@ -60,7 +62,7 @@ cargo run -q --release -p mm0kit --example selftest -- spec/lean.mm0 build/out/s
 echo "== lean0 modes (the spec's relations as functions)"
 cargo build -q --release --bin lean0
 target/release/lean0 modes > build/out/modes.txt && echo "modes: $(tail -1 build/out/modes.txt)" || { echo "FAIL: lean0 modes"; fail=1; }
-{ cat spec/lean.mm0; echo 'axiom lift_dup (n k: nat) (e: expr): $ lift n k e e $;'; } > build/out/modes-bad.mm0
+{ cat build/out/lean.mm0; echo 'axiom lift_dup (n k: nat) (e: expr): $ lift n k e e $;'; } > build/out/modes-bad.mm0
 if target/release/lean0 modes build/out/modes-bad.mm0 > build/out/modes-bad.txt; then echo "FAIL: lean0 modes accepted an overlapping clause"; fail=1; else echo "modes: an overlapping clause is rejected"; fi
 
 # Each module's certificate is verified against the spec, and in TG mode against the library
