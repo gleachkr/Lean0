@@ -24,3 +24,189 @@ theorem pis_esat_closed (G: hyps) (M: class) (u w p s s2 tk tX tB tZ tq: set):
 theorem rehead_etel {i z q: set} (G: hyps) (M: class) (u w r tY tX sa sb te te2 tk: set):
   $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ etel u (dnf u M) tY w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , sa ⟩ ⟩ ⟩ $ > $ G ⇒ etel u (dnf u M) tX w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , sb ⟩ ⟩ ⟩ $ > $ G ⇒ sa ∊ fseq u $ > $ G ⇒ sb ∊ fseq u $ > $ G ⇒ te ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ te2 ∊ trees ω $ > $ G ⇒ ra_rehead tY tX tk te te2 ∈ lrel $ >
   $ G ⇒ ∃ i ∃ z ∃ q (i ∊ fseq u ∧ cdm i = fv nvf tk ∧ etel u (dnf u M) te w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , z ⟩ ⟩ ⟩ ∧ z = scat i sa ∧ etel u (dnf u M) te2 w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , q ⟩ ⟩ ⟩ ∧ q = scat i sb) $;
+
+--| The recursor's side of the closed iota rule: at a valuation `r` that is `x`, the minors `m`, the motives `c` and
+--| the parameters `p`, the recursor at the three windows (`te3`) re-headed from the major premise's type `tT2`, a spine
+--| with `tni` arguments over the block's type at the parameters' window: its arguments are `tT2`'s first `tni`
+--| arguments `f`, then `m`, `c` and `p`, and `tT2`'s are `f` and `p`; and the variable `tmo` of a motive (entry `tio` of `c`) re-headed likewise (`tT0`)
+--| has the motive's value applied to `f`. No typing is involved.
+--| @freshen G f
+theorem ci_rec {f: set} (G: hyps) (M: class) (u w r x m c p td ti tv tnf tm tn tnp td1 td2 te1 te2 te3 tY tni tT2 te4 tio tmo tT0: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ x ∊ fseq u $ >
+  $ G ⇒ m ∊ fseq u $ >
+  $ G ⇒ c ∊ fseq u $ >
+  $ G ⇒ p ∊ fseq u $ >
+  $ G ⇒ r = scat x (scat m (scat c p)) $ >
+  $ G ⇒ cdm x = fv nvf tnf $ >
+  $ G ⇒ cdm m = fv nvf tm $ >
+  $ G ⇒ cdm c = fv nvf tn $ >
+  $ G ⇒ cdm p = fv nvf tnp $ >
+  $ G ⇒ ra_add tnf tm td2 ∈ lrel $ >
+  $ G ⇒ ra_add td2 tn td1 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ td1 tnp te1 ∈ lrel $ >
+  $ G ⇒ ra_pargs te1 td2 tn te2 ∈ lrel $ >
+  $ G ⇒ ra_pargs te2 tnf tm te3 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ td1 tnp tY ∈ lrel $ >
+  $ G ⇒ ra_rehead tY te3 tni tT2 te4 ∈ lrel $ >
+  $ G ⇒ tT2 ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ te4 ∊ trees ω $ >
+  $ G ⇒ ra_add td2 tio tmo ∈ lrel $ >
+  $ G ⇒ fv nvf tio ∈ fv nvf tn $ >
+  $ G ⇒ ra_rehead tY ⟨ kc_bvar , scons tmo ∅ ⟩ tni tT2 tT0 ∈ lrel $ >
+  $ G ⇒ tT0 ∊ trees ω $ >
+  $ G ⇒ ∃ f (sarg u (dnf u M) te4 w r = scat f (scat m (scat c p)) ∧ f ∊ fseq u ∧ cdm f = fv nvf tni ∧ sarg u (dnf u M) tT2 w r = scat f p ∧ dt u M tT0 w r = apn (fv c (fv nvf tio)) f) $;
+
+--| The constructor's side of the closed iota rule: at a valuation `r` that is the fields `f`, a valuation of the
+--| constructor's binders moved under `tmn` more variables, then `m` of that length, then the parameters `p`, the
+--| constructor at the parameters' and the fields' windows (`tmj`) has the arguments `f ++ p`, a valuation of the
+--| constructor's context over `r`, and the lifted result `tT2` has the result's arguments there: the hypotheses of
+--| `iota_ctor_sem`, with no typing involved.
+theorem ci_ctor (G: hyps) (M: class) (u w r f m p td ti tc tp tt tF tE tX tXl tQ tB tK2 tnf tmn tnp td1 tc1 tmj tT2 tl: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ m ∊ fseq u $ >
+  $ G ⇒ p ∊ esat u (dnf u M) tp w $ >
+  $ G ⇒ f ∊ esat u (dsh u M (scat m p)) tXl w $ >
+  $ G ⇒ r = scat f (scat m p) $ >
+  $ G ⇒ cdm m = fv nvf tmn $ >
+  $ G ⇒ ra_clift tmn tX tXl ∈ lrel $ >
+  $ G ⇒ ra_clen tX tnf ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_tys_closed tp tt ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_capp tX tp tQ ∈ lrel $ >
+  $ G ⇒ ra_pis tX tB tK2 ∈ lrel $ >
+  $ G ⇒ ra_closed tnp tK2 ∈ lrel $ >
+  $ G ⇒ ra_add tnf tmn td1 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ td1 tnp tc1 ∈ lrel $ >
+  $ G ⇒ ra_pargs tc1 ⟨ kc_nz , ∅ ⟩ tnf tmj ∈ lrel $ >
+  $ G ⇒ ra_lift tmn tnf tB tT2 ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tB tl ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tT2 tl ∈ lrel $ >
+  $ G ⇒ sarg u (dnf u M) tmj w r ∈ esat u (dsh u M r) tQ w ∧ sarg u (dnf u M) tT2 w r = sarg u (dnf u M) tB w (scat (sarg u (dnf u M) tmj w r) r) ∧ sarg u (dnf u M) tmj w r = scat f p ∧ cdm f = fv nvf tnf $;
+
+--| A valuation of the closed iota rule's context `tQ3` (the fields' context `tXl` appended to the minors, the motives
+--| and the parameters) is the fields `x`, the minors `m`, the motives `c` and the parameters `p`, each in its space
+--| (`lrel_capp_sem`, `imots_wf`, `imins_wf`).
+--| @freshen G x
+--| @freshen G m
+--| @freshen G c
+--| @freshen G p
+theorem ci_shape {x m c p: set} (G: hyps) (H J: class) (u w r r0 tg td tv tb tp tt tnp tn tm tM tN tXl tQ1 tQ2 tQ3: set):
+  $ G ⇒ iwf u H J tg td w r0 $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_motives td tnp tv ⟨ kc_nz , ∅ ⟩ tt tM ∈ lrel $ >
+  $ G ⇒ ra_minors td tnp tn ⟨ kc_nz , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ tt tN ∈ lrel $ >
+  $ G ⇒ tM ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ tN ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ ra_capp tM tp tQ1 ∈ lrel $ >
+  $ G ⇒ ra_capp tN tQ1 tQ2 ∈ lrel $ >
+  $ G ⇒ ra_capp tXl tQ2 tQ3 ∈ lrel $ >
+  $ G ⇒ r ∊ sat u (mcv H) tQ3 w $ >
+  $ G ⇒ ∃ x ∃ m ∃ c ∃ p (r = scat x (scat m (scat c p)) ∧ p ∊ esat u (dnf u (mcv H)) tp w ∧ c ∊ imots u (dnf u (mcv H)) td w p (lv tv w) ∧ m ∊ imins u (dnf u (mcv H)) td w p c ∧ x ∊ esat u (dsh u (mcv H) (scat m (scat c p))) tXl w) $;
+
+--| The type of the iota rule's left-hand side, semantically: the recursor's spine `te` with the arguments `sf`
+--| (indices), `mv`, `cv`, `p`, applied to a constructor's spine `tmj` whose arguments are a path of the constructor's
+--| type (with the arguments `pa = sf ++ p`) and `p`, has its value in the type's motive at the indices and the major
+--| premise's value (`irc_apn`, `irc_val`). No typing of the two spines is involved.
+theorem iota_lhs_ty (G: hyps) (H J K S: class) (u w r r0 tg td tv ti tc tb tp tt tnp tn tm tF tE tK tni tl te tk tmj tnq sf mv cv p pf pg pt pa sj sc: set):
+  $ G ⇒ iwf u H J tg td w r0 $ >
+  $ G ⇒ r ∊ fseq u $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_elim_ok tg td tv ∈ lrel3 J $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor tE tc tK ∈ lrel $ >
+  $ G ⇒ ra_isort tF tni tl ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ te tk ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ K , S ⟩ tmj tnq ∈ lrel $ >
+  $ G ⇒ ⟨ K , S ⟩ ∈ trees ω $ >
+  $ G ⇒ ¬ K = kc_pi $ >
+  $ G ⇒ ¬ K = kc_app $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ w r = irc u (dnf u (mcv H)) td (fv nvf ti) (lv tv w) w $ >
+  $ G ⇒ dt u (mcv H) ⟨ K , S ⟩ w r = ictor u (dnf u (mcv H)) td (fv nvf ti) (fv nvf tc) w $ >
+  $ G ⇒ te ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tmj ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ sarg u (dnf u (mcv H)) te w r = scat sf (scat mv (scat cv p)) $ >
+  $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ >
+  $ G ⇒ cv ∊ imots u (dnf u (mcv H)) td w p (lv tv w) $ >
+  $ G ⇒ mv ∊ imins u (dnf u (mcv H)) td w p cv $ >
+  $ G ⇒ sarg u (dnf u (mcv H)) tmj w r = scat pf p $ >
+  $ G ⇒ ⟨ pf , ⟨ pg , ⟨ pt , pa ⟩ ⟩ ⟩ ∈ etel u (dnf u (mcv H)) tK w (scat p (ixs td w (ifam u (dnf u (mcv H)) td w))) $ >
+  $ G ⇒ pa = scat sf p $ >
+  $ G ⇒ sf ∊ fseq u $ >
+  $ G ⇒ cdm sf = fv nvf tni $ >
+  $ G ⇒ sj = fv nvf ti $ >
+  $ G ⇒ sc = fv nvf tc $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_app , scons te (scons tmj ∅) ⟩ w r ∈ apn (vat cv (intys td) (fv nvf ti)) (scons (dt u (mcv H) tmj w r) sf) $;
+
+--| The closed iota rule in the model from its pieces, at one valuation `r` of the rule's context `tg` (the fields'
+--| context moved under the minors and the motives, `tXl`, appended to the minors, the motives and the parameters):
+--| the recursor at the context's variables and the indices of the constructor's lifted result `tT2` (`te4`), applied
+--| to the constructor at the variables (`tmj`), has the value of the right-hand side `trhs` and lies in the value of
+--| the motive's variable at those indices applied to `tmj`. No typing premise: the valuation gives the arguments'
+--| spaces (`ci_shape`, `ci_rec`, `ci_ctor`), then `iota_vals_eq` and `iota_lhs_ty`.
+theorem ci_core (G: hyps) (H J: class) (u w r tg td tv ti tc tb tp tt tnp tn tm tF tE tK0 tK2 tni tl te4 tks tmj tnq tM tN tR tR1 tR2 tVal tc1 trhs0 tnf trhs ta te3 tam tmk tk tAcc tQ1 tQ2 tXl td1 te1 te2 tY tT2 tio tmo tT0 tmn tX tQ tB tsl: set):
+  $ G ⇒ iwf u H J tg td w r $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ hrec ⊆ H $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor tE tc tK0 ∈ lrel $ >
+  $ G ⇒ ra_isort tF tni tl ∈ lrel $ >
+  $ G ⇒ ra_elim_ok tg td tv ∈ lrel3 J $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ te4 tks ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ tmj tnq ∈ lrel $ >
+  $ G ⇒ te4 ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tmj ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tR ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_motives td tnp tv ⟨ kc_nz , ∅ ⟩ tt tM ∈ lrel $ >
+  $ G ⇒ ra_minors td tnp tn ⟨ kc_nz , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ tt tN ∈ lrel $ >
+  $ G ⇒ tM ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ tN ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ ra_lams tp tR2 tR ∈ lrel $ >
+  $ G ⇒ ra_lams tM tR1 tR2 ∈ lrel $ >
+  $ G ⇒ ra_lams tN tVal tR1 ∈ lrel $ >
+  $ G ⇒ ra_minor_idx tt ti tc tk ∈ lrel $ >
+  $ G ⇒ ra_npis tK0 tnf ∈ lrel $ >
+  $ G ⇒ ra_add tnf tm tam ∈ lrel $ >
+  $ G ⇒ ra_add tmk ⟨ kc_s , scons tk ∅ ⟩ tam ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_bvar , scons tmk ∅ ⟩ ⟨ kc_nz , ∅ ⟩ tnf tAcc ∈ lrel $ >
+  $ G ⇒ ra_rwalk td tnp tn tm tv tnf ⟨ kc_nz , ∅ ⟩ tAcc tK0 tVal ∈ lrel $ >
+  $ G ⇒ ra_rehead ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ tR ta te3 trhs0 ∈ lrel $ >
+  $ G ⇒ ra_rehead tc1 trhs0 tnf tmj trhs ∈ lrel $ >
+  $ G ⇒ ra_capp tM tp tQ1 ∈ lrel $ >
+  $ G ⇒ ra_capp tN tQ1 tQ2 ∈ lrel $ >
+  $ G ⇒ ra_capp tXl tQ2 tg ∈ lrel $ >
+  $ G ⇒ ra_add tam tn td1 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ td1 tnp te1 ∈ lrel $ >
+  $ G ⇒ ra_pargs te1 tam tn te2 ∈ lrel $ >
+  $ G ⇒ ra_pargs te2 tnf tm te3 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ td1 tnp tY ∈ lrel $ >
+  $ G ⇒ ra_rehead tY te3 tni tT2 te4 ∈ lrel $ >
+  $ G ⇒ tT2 ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_add tam tio tmo ∈ lrel $ >
+  $ G ⇒ ra_add ⟨ kc_s , scons ti ∅ ⟩ tio tn ∈ lrel $ >
+  $ G ⇒ ra_rehead tY ⟨ kc_bvar , scons tmo ∅ ⟩ tni tT2 tT0 ∈ lrel $ >
+  $ G ⇒ tT0 ∊ trees ω $ >
+  $ G ⇒ ra_clift tmn tX tXl ∈ lrel $ >
+  $ G ⇒ ra_clen tX tnf ∈ lrel $ >
+  $ G ⇒ ra_capp tX tp tQ ∈ lrel $ >
+  $ G ⇒ ra_pis tX tB tK2 ∈ lrel $ >
+  $ G ⇒ ra_closed tnp tK2 ∈ lrel $ >
+  $ G ⇒ ra_add tm tn tmn ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ td1 tnp tc1 ∈ lrel $ >
+  $ G ⇒ ra_pargs tc1 ⟨ kc_nz , ∅ ⟩ tnf tmj ∈ lrel $ >
+  $ G ⇒ ra_lift tmn tnf tB tT2 ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tB tsl ∈ lrel $ >
+  $ G ⇒ ra_add tnp tni tsl ∈ lrel $ >
+  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tK0 tK2 ∈ lrel $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r = dt u (mcv H) trhs w r ∧ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r ∈ dt u (mcv H) ⟨ kc_app , scons tT0 (scons tmj ∅) ⟩ w r $;
