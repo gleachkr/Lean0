@@ -1,0 +1,26 @@
+-- model-ci.mm0: the iota rule as a closed equation, in the model (in progress).
+-- The recursor's rule in the context of its own variables (parameters, motives,
+-- minors, fields), from the value lemmas of model-fold: the lemmas about
+-- contexts and spines of variables that replace the typing premises.
+import "model-top.mm0";
+
+--| A context moved under more variables (`clift`) has the same valuations: over the table shifted by `m ++ s`,
+--| `m` as long as the move, the valuations of `tY` are those of `tX` over the table shifted by `s`.
+theorem clift_sem (G: hyps) (M: class) (u w s m tk tX tY: set):
+  $ G ⇒ w ∊ lvals $ > $ G ⇒ s ∊ fseq u $ > $ G ⇒ m ∊ fseq u $ > $ G ⇒ cdm m = fv nvf tk $ > $ G ⇒ ra_clift tk tX tY ∈ lrel $ >
+  $ G ⇒ esat u (dsh u M (scat m s)) tY w = esat u (dsh u M s) tX w $;
+
+--| The binders `tX` of a telescope type `Π tX. tB` closed at `tk` read only the first `tk` entries of the outer
+--| valuation: over tables shifted by `p ++ s` and by `p ++ s2`, `p` of length `tk`, they have the same valuations.
+theorem pis_esat_closed (G: hyps) (M: class) (u w p s s2 tk tX tB tZ tq: set):
+  $ G ⇒ w ∊ lvals $ > $ G ⇒ p ∊ fseq u $ > $ G ⇒ s ∊ fseq u $ > $ G ⇒ s2 ∊ fseq u $ > $ G ⇒ cdm p = fv nvf tk $ > $ G ⇒ ra_closed tk tZ ∈ lrel $ > $ G ⇒ ra_pis tX tB tZ ∈ lrel $ > $ G ⇒ ra_clen tX tq ∈ lrel $ >
+  $ G ⇒ esat u (dsh u M (scat p s)) tX w = esat u (dsh u M (scat p s2)) tX w $;
+
+--| `rehead Y X k e e2` in path form: when `Y` and `X` each have one path, with no fields and the arguments `sa` and
+--| `sb`, so have `e` and `e2`, with the same `k` new arguments `i` in front of them.
+--| @freshen G i
+--| @freshen G z
+--| @freshen G q
+theorem rehead_etel {i z q: set} (G: hyps) (M: class) (u w r tY tX sa sb te te2 tk: set):
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ etel u (dnf u M) tY w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , sa ⟩ ⟩ ⟩ $ > $ G ⇒ etel u (dnf u M) tX w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , sb ⟩ ⟩ ⟩ $ > $ G ⇒ sa ∊ fseq u $ > $ G ⇒ sb ∊ fseq u $ > $ G ⇒ te ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ te2 ∊ trees ω $ > $ G ⇒ ra_rehead tY tX tk te te2 ∈ lrel $ >
+  $ G ⇒ ∃ i ∃ z ∃ q (i ∊ fseq u ∧ cdm i = fv nvf tk ∧ etel u (dnf u M) te w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , z ⟩ ⟩ ⟩ ∧ z = scat i sa ∧ etel u (dnf u M) te2 w r = csn ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , q ⟩ ⟩ ⟩ ∧ q = scat i sb) $;
