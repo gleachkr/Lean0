@@ -442,6 +442,7 @@ def kr_qinst: class = $ suc kr_field_ty $;
 def kr_nonrec: class = $ suc kr_qinst $;
 def kr_eta_ok: class = $ suc kr_nonrec $;
 def kr_projs: class = $ suc kr_eta_ok $;
+def kr_clift: class = $ suc kr_projs $;
 
 --| The atoms: a label and the trees of the arguments.
 def latoms: class = $ ω × fseq (trees ω) $;
@@ -521,6 +522,7 @@ def ra_qinst (a1 a2 a3 a4 a5 a6: class): class = $ ⟨ kr_qinst , scons a1 (scon
 def ra_nonrec (a1 a2 a3: class): class = $ ⟨ kr_nonrec , scons a1 (scons a2 (scons a3 ∅)) ⟩ $;
 def ra_eta_ok (a1 a2: class): class = $ ⟨ kr_eta_ok , scons a1 (scons a2 ∅) ⟩ $;
 def ra_projs (a1 a2 a3 a4 a5: class): class = $ ⟨ kr_projs , scons a1 (scons a2 (scons a3 (scons a4 (scons a5 ∅)))) ⟩ $;
+def ra_clift (a1 a2 a3: class): class = $ ⟨ kr_clift , scons a1 (scons a2 (scons a3 ∅)) ⟩ $;
 
 --| The ground instances of each clause axiom: ⟨ premises , conclusion ⟩.
 def cl_le_z (.n .w: set): class =
@@ -975,6 +977,10 @@ def cl_projs_z (.b .e .Y .w: set): class =
   $ {w | ∃ b ∃ e ∃ Y (w = ⟨ ∅ , ra_projs b e ⟨ kc_nz , ∅ ⟩ Y Y ⟩)} $;
 def cl_projs_s (.b .e .Y .M .k .w: set): class =
   $ {w | ∃ b ∃ e ∃ Y ∃ M ∃ k (w = ⟨ scons (ra_projs b e k Y M) ∅ , ra_projs b e ⟨ kc_s , scons k ∅ ⟩ Y ⟨ kc_app , scons M (scons ⟨ kc_proj , scons b (scons k (scons e ∅)) ⟩ ∅) ⟩ ⟩)} $;
+def cl_clift_nil (.k .w: set): class =
+  $ {w | ∃ k (w = ⟨ ∅ , ra_clift k ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ⟩)} $;
+def cl_clift_cons (.k .d .A .A2 .X .Y .w: set): class =
+  $ {w | ∃ k ∃ d ∃ A ∃ A2 ∃ X ∃ Y (w = ⟨ scons (ra_clift k X Y) (scons (ra_clen X d) (scons (ra_lift k d A A2) ∅)) , ra_clift k ⟨ kc_cons , scons A (scons X ∅) ⟩ ⟨ kc_cons , scons A2 (scons Y ∅) ⟩ ⟩)} $;
 
 --| The clauses of each relation.
 def pr_le: class = $ cl_le_z ∪ cl_le_s $;
@@ -1053,10 +1059,11 @@ def pr_qinst: class = $ cl_qinst_z ∪ cl_qinst_s $;
 def pr_nonrec: class = $ cl_nonrec_pi ∪ cl_nonrec_res $;
 def pr_eta_ok: class = $ cl_eta_ok_i $;
 def pr_projs: class = $ cl_projs_z ∪ cl_projs_s $;
+def pr_clift: class = $ cl_clift_nil ∪ cl_clift_cons $;
 
 --| The program, at the atoms.
 def lprog: class =
-  $ ((((((pr_le ∪ pr_add) ∪ (pr_lnth ∪ pr_linst)) ∪ ((pr_lsubst ∪ pr_closed) ∪ (pr_lift ∪ (pr_inst ∪ pr_lookup)))) ∪ (((pr_cinst ∪ pr_cext) ∪ (pr_clen ∪ (pr_cnth ∪ pr_capp))) ∪ ((pr_bsucc ∪ pr_bdbl) ∪ (pr_badd ∪ (pr_baddc ∪ pr_bmul))))) ∪ ((((pr_bpow ∪ pr_band) ∪ (pr_bor ∪ pr_bxor)) ∪ ((pr_ind_data ∪ pr_ind_nested) ∪ (pr_nth_ty ∪ (pr_nth_ctor ∪ pr_clen_c)))) ∪ (((pr_ntys ∪ pr_minor_idx) ∪ (pr_npis ∪ (pr_nth_pi ∪ pr_isort))) ∪ ((pr_ind_arity ∪ pr_nidx) ∪ (pr_nfields ∪ (pr_ndecl ∪ pr_aux_of)))))) ∪ (((((pr_pis ∪ pr_lams) ∪ (pr_tys_closed ∪ pr_pargs)) ∪ ((pr_spine ∪ pr_rehead) ∪ (pr_has_arg ∪ (pr_leaf_has ∪ pr_pinst)))) ∪ (((pr_sinst ∪ pr_iargs) ∪ (pr_indapp ∪ (pr_ipos ∪ pr_recfield))) ∪ ((pr_rst ∪ pr_nst_hit) ∪ (pr_spz ∪ (pr_afree ∪ pr_spz_ctors))))) ∪ ((((pr_aux_data ∪ pr_mty) ∪ (pr_motives ∪ pr_ihty)) ∪ ((pr_mwalk ∪ pr_cminors) ∪ (pr_minors ∪ (pr_rtail ∪ pr_rec_ty)))) ∪ (((pr_ctor_ty ∪ pr_ihval) ∪ (pr_rwalk ∪ (pr_rec_rhs ∪ pr_struct_like))) ∪ ((pr_field_ty ∪ pr_qinst) ∪ (pr_nonrec ∪ (pr_eta_ok ∪ pr_projs))))))) ∩
+  $ ((((((pr_le ∪ pr_add) ∪ (pr_lnth ∪ pr_linst)) ∪ ((pr_lsubst ∪ pr_closed) ∪ (pr_lift ∪ (pr_inst ∪ pr_lookup)))) ∪ (((pr_cinst ∪ pr_cext) ∪ (pr_clen ∪ (pr_cnth ∪ pr_capp))) ∪ ((pr_bsucc ∪ pr_bdbl) ∪ (pr_badd ∪ (pr_baddc ∪ pr_bmul))))) ∪ ((((pr_bpow ∪ pr_band) ∪ (pr_bor ∪ pr_bxor)) ∪ ((pr_ind_data ∪ pr_ind_nested) ∪ (pr_nth_ty ∪ (pr_nth_ctor ∪ pr_clen_c)))) ∪ (((pr_ntys ∪ pr_minor_idx) ∪ (pr_npis ∪ (pr_nth_pi ∪ pr_isort))) ∪ ((pr_ind_arity ∪ pr_nidx) ∪ (pr_nfields ∪ (pr_ndecl ∪ pr_aux_of)))))) ∪ (((((pr_pis ∪ pr_lams) ∪ (pr_tys_closed ∪ pr_pargs)) ∪ ((pr_spine ∪ pr_rehead) ∪ (pr_has_arg ∪ (pr_leaf_has ∪ pr_pinst)))) ∪ (((pr_sinst ∪ pr_iargs) ∪ (pr_indapp ∪ (pr_ipos ∪ pr_recfield))) ∪ ((pr_rst ∪ pr_nst_hit) ∪ (pr_spz ∪ (pr_afree ∪ pr_spz_ctors))))) ∪ ((((pr_aux_data ∪ pr_mty) ∪ (pr_motives ∪ (pr_ihty ∪ pr_mwalk))) ∪ ((pr_cminors ∪ pr_minors) ∪ (pr_rtail ∪ (pr_rec_ty ∪ pr_ctor_ty)))) ∪ (((pr_ihval ∪ pr_rwalk) ∪ (pr_rec_rhs ∪ (pr_struct_like ∪ pr_field_ty))) ∪ ((pr_qinst ∪ pr_nonrec) ∪ (pr_eta_ok ∪ (pr_projs ∪ pr_clift))))))) ∩
     (fseq latoms × latoms) $;
 --| The derivable atoms.
 def lrel: class = $ horn lprog $;
@@ -1138,6 +1145,7 @@ def qinst (a1: blk) (a2: expr) (a3: nat) (a4: nat) (a5: expr) (a6: expr): wff = 
 def nonrec (a1: nat) (a2: nat) (a3: expr): wff = $ _ ⇒ ra_nonrec (enc_nat a1) (enc_nat a2) (enc_expr a3) ∈ lrel $;
 def eta_ok (a1: ind) (a2: nat): wff = $ _ ⇒ ra_eta_ok (enc_ind a1) (enc_nat a2) ∈ lrel $;
 def projs (a1: blk) (a2: expr) (a3: nat) (a4: expr) (a5: expr): wff = $ _ ⇒ ra_projs (enc_blk a1) (enc_expr a2) (enc_nat a3) (enc_expr a4) (enc_expr a5) ∈ lrel $;
+def clift (a1: nat) (a2: ctx) (a3: ctx): wff = $ _ ⇒ ra_clift (enc_nat a1) (enc_ctx a2) (enc_ctx a3) ∈ lrel $;
 
 --| The spec's definitions (in prefix form).
 def n1: nat = $ s nz $;
@@ -2366,6 +2374,16 @@ theorem lrel_projs_s (G: hyps) (A1 A2 A3 A4 A5: class):
   $ G ⇒ A5 ∈ trees ω $ >
   $ G ⇒ ra_projs A1 A2 A5 A3 A4 ∈ lrel $ >
   $ G ⇒ ra_projs A1 A2 ⟨ kc_s , scons A5 ∅ ⟩ A3 ⟨ kc_app , scons A4 (scons ⟨ kc_proj , scons A1 (scons A5 (scons A2 ∅)) ⟩ ∅) ⟩ ∈ lrel $;
+theorem lrel_clift_nil (G: hyps) (A1: class):
+  $ G ⇒ A1 ∈ trees ω $ >
+  $ G ⇒ ra_clift A1 ⟨ kc_nil , ∅ ⟩ ⟨ kc_nil , ∅ ⟩ ∈ lrel $;
+theorem lrel_clift_cons (G: hyps) (A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
+  $ G ⇒ ra_clift A1 A5 A6 ∈ lrel $ >
+  $ G ⇒ ra_clen A5 A2 ∈ lrel $ >
+  $ G ⇒ ra_lift A1 A2 A3 A4 ∈ lrel $ >
+  $ G ⇒ ra_clift A1 ⟨ kc_cons , scons A3 (scons A5 ∅) ⟩ ⟨ kc_cons , scons A4 (scons A6 ∅) ⟩ ∈ lrel $;
 
 --| The clause axioms of Part I, in prefix form.
 theorem le_z (n: nat): $ le nz n $;
@@ -2594,6 +2612,8 @@ theorem nonrec_res (np d: nat) (K: expr): $ npis K nz $ > $ nonrec np d K $;
 theorem eta_ok_i (D: ind) (b: blk) (P: ctx) (T: tys) (j np: nat) (F K: expr): $ struct_like D j $ > $ ind_data D b P T $ > $ nth_ty T j F (ccons K cnil) $ > $ clen P np $ > $ nonrec np nz K $ > $ eta_ok D j $;
 theorem projs_z (b: blk) (e Y: expr): $ projs b e nz Y Y $;
 theorem projs_s (b: blk) (e Y M: expr) (k: nat): $ projs b e k Y M $ > $ projs b e (s k) Y (app M (proj b k e)) $;
+theorem clift_nil (k: nat): $ clift k nil nil $;
+theorem clift_cons (k d: nat) (A A2: expr) (X Y: ctx): $ clift k X Y $ > $ clen X d $ > $ lift k d A A2 $ > $ clift k (cons A X) (cons A2 Y) $;
 
 --| The program's clauses that conclude an atom of a relation are that relation's
 --| (rule induction over `lrel` with `horn_ind` reduces to them).
@@ -2749,6 +2769,8 @@ theorem lprog_eta_ok_pr (G: hyps) (P A1 A2: class):
   $ G ⇒ ⟨ P , ra_eta_ok A1 A2 ⟩ ∈ lprog $ > $ G ⇒ ⟨ P , ra_eta_ok A1 A2 ⟩ ∈ pr_eta_ok $;
 theorem lprog_projs_pr (G: hyps) (P A1 A2 A3 A4 A5: class):
   $ G ⇒ ⟨ P , ra_projs A1 A2 A3 A4 A5 ⟩ ∈ lprog $ > $ G ⇒ ⟨ P , ra_projs A1 A2 A3 A4 A5 ⟩ ∈ pr_projs $;
+theorem lprog_clift_pr (G: hyps) (P A1 A2 A3: class):
+  $ G ⇒ ⟨ P , ra_clift A1 A2 A3 ⟩ ∈ lprog $ > $ G ⇒ ⟨ P , ra_clift A1 A2 A3 ⟩ ∈ pr_clift $;
 
 --| Inversion: a derivable atom of a relation is the conclusion of one of its
 --| clauses, at sets, with the clause's premises derivable (the arguments `tN`,
@@ -3131,6 +3153,10 @@ theorem lrel_projs_cases (G: hyps) {b_v e_v Y M k_v: set} (t1 t2 t3 t4 t5: set):
   $ G ⇒ ra_projs t1 t2 t3 t4 t5 ∈ lrel $ >
   $ G ⇒ ∃ b_v ∃ e_v ∃ Y (t1 = b_v ∧ t2 = e_v ∧ t3 = ⟨ kc_nz , ∅ ⟩ ∧ t4 = Y ∧ t5 = Y) ∨
       ∃ b_v ∃ e_v ∃ Y ∃ M ∃ k_v (t1 = b_v ∧ t2 = e_v ∧ t3 = ⟨ kc_s , scons k_v ∅ ⟩ ∧ t4 = Y ∧ t5 = ⟨ kc_app , scons M (scons ⟨ kc_proj , scons b_v (scons k_v (scons e_v ∅)) ⟩ ∅) ⟩ ∧ ra_projs b_v e_v k_v Y M ∈ lrel) $;
+theorem lrel_clift_cases (G: hyps) {k_v d_v A A2 X Y: set} (t1 t2 t3: set):
+  $ G ⇒ ra_clift t1 t2 t3 ∈ lrel $ >
+  $ G ⇒ ∃ k_v (t1 = k_v ∧ t2 = ⟨ kc_nil , ∅ ⟩ ∧ t3 = ⟨ kc_nil , ∅ ⟩) ∨
+      ∃ k_v ∃ d_v ∃ A ∃ A2 ∃ X ∃ Y (t1 = k_v ∧ t2 = ⟨ kc_cons , scons A (scons X ∅) ⟩ ∧ t3 = ⟨ kc_cons , scons A2 (scons Y ∅) ⟩ ∧ ra_clift k_v X Y ∈ lrel ∧ ra_clen X d_v ∈ lrel ∧ ra_lift k_v d_v A A2 ∈ lrel) $;
 
 --| Determinacy: two derivable atoms of a computing relation with the same
 --| inputs (`tN`) have the same outputs (`uN`, `vN`).
@@ -3324,6 +3350,7 @@ theorem kr_qinst_omega (G: hyps): $ G ⇒ kr_qinst ∈ ω $;
 theorem kr_nonrec_omega (G: hyps): $ G ⇒ kr_nonrec ∈ ω $;
 theorem kr_eta_ok_omega (G: hyps): $ G ⇒ kr_eta_ok ∈ ω $;
 theorem kr_projs_omega (G: hyps): $ G ⇒ kr_projs ∈ ω $;
+theorem kr_clift_omega (G: hyps): $ G ⇒ kr_clift ∈ ω $;
 --| Constructor labels differ (each pair once, the earlier label first; `ne_sym`
 --| turns one around).
 theorem kc_nz_ne_s (G: hyps): $ G ⇒ ¬ kc_nz = kc_s $;
@@ -4377,3 +4404,8 @@ theorem ra_projs_congr (A1 B1 A2 B2 A3 B3 A4 B4 A5 B5: class): $ A1 ≐ B1 $ > $
 theorem ra_projs_eq (G: hyps) (A1 B1 A2 B2 A3 B3 A4 B4 A5 B5: class): $ G ⇒ A1 = B1 $ > $ G ⇒ A2 = B2 $ > $ G ⇒ A3 = B3 $ > $ G ⇒ A4 = B4 $ > $ G ⇒ A5 = B5 $ > $ G ⇒ ra_projs A1 A2 A3 A4 A5 = ra_projs B1 B2 B3 B4 B5 $;
 --| @rewrite
 theorem sb_c_ra_projs {x: set} (t: set x) (A1 A2 A3 A4 A5: class x): $ (⟦ x / t ⟧ (ra_projs A1 A2 A3 A4 A5)) ≐ ra_projs (⟦ x / t ⟧ A1) (⟦ x / t ⟧ A2) (⟦ x / t ⟧ A3) (⟦ x / t ⟧ A4) (⟦ x / t ⟧ A5) $;
+--| @congr
+theorem ra_clift_congr (A1 B1 A2 B2 A3 B3: class): $ A1 ≐ B1 $ > $ A2 ≐ B2 $ > $ A3 ≐ B3 $ > $ ra_clift A1 A2 A3 ≐ ra_clift B1 B2 B3 $;
+theorem ra_clift_eq (G: hyps) (A1 B1 A2 B2 A3 B3: class): $ G ⇒ A1 = B1 $ > $ G ⇒ A2 = B2 $ > $ G ⇒ A3 = B3 $ > $ G ⇒ ra_clift A1 A2 A3 = ra_clift B1 B2 B3 $;
+--| @rewrite
+theorem sb_c_ra_clift {x: set} (t: set x) (A1 A2 A3: class x): $ (⟦ x / t ⟧ (ra_clift A1 A2 A3)) ≐ ra_clift (⟦ x / t ⟧ A1) (⟦ x / t ⟧ A2) (⟦ x / t ⟧ A3) $;

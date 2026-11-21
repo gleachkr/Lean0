@@ -433,6 +433,15 @@ axiom rec_rhs_i (D: ind) (b: blk) (P: ctx) (T: tys) (v: lvl) (i c np n m k nf a 
   $ add nf m a $ > $ add mk (s k) a $ > $ pargs #mk 0 nf Acc $ > $ rwalk D np n m v nf 0 Acc K Val $ >
   $ lams N Val R1 $ > $ lams M R1 R2 $ > $ lams P R2 R $ > $ rec_rhs D v i c R $;
 
+-- The recursor's rules as closed equations (draft) -------------------------
+
+--| `clift k X Y`: the context `Y` is `X` moved under `k` more variables: each
+--| entry lifted by `k` past the entries before it.
+term clift: nat > ctx > ctx > wff;
+axiom clift_nil (k: nat): $ clift k [] [] $;
+axiom clift_cons (k d: nat) (A A2: expr) (X Y: ctx):
+  $ clift k X Y $ > $ clen X d $ > $ lift k d A A2 $ > $ clift k (A :: X) (A2 :: Y) $;
+
 -- Structures: fields, projections and eta ----------------------------------
 
 --| `struct_like D j`: type `j` has one constructor and no indices (the kernel's
