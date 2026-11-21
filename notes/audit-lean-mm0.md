@@ -980,11 +980,13 @@ the same `--check`). It imports the model (below) and states the rest of the spe
 states it, in prefix form, with variables named like a library term renamed: Part II's
 relations and their clauses and Part III's rules, less what the model declares (a spec term
 as a definition, an axiom as a theorem; `lean0 tg-link` checks that each is the spec's
-statement). Today that is 38 terms, 1 definition and 105 axioms. They are the spec's own
-axioms, so nothing new is trusted. Later layers of the reduction turn them into definitions
-and theorems. Until then, the trusted base in TG mode (below) is `tg.mm0`'s 76 axioms, the 48
-encoding axioms above and these 105, in place of the spec's 381: Part I's 226 clauses, the 29
-clauses of Part II above and the 21 level rules are theorems.
+statement). Until 2026-11-20 that was 38 terms, 1 definition and 105 axioms. Since the
+assembly (`model-top.mm0`, below) it is three axioms, `nat_land_lit`, `nat_lor_lit` and
+`nat_xor_lit`: every term of Parts II and III is a definition of the model and every other
+axiom a theorem. They are the spec's own axioms, so nothing new is trusted. The trusted base
+in TG mode (below) is `tg.mm0`'s 76 axioms, the 48 encoding axioms above and these three, in
+place of the spec's 381, with one new term and no axiom about it: the environment `Env` of
+the opaque constants (below).
 
 **The model** (`spec/tg/model-levels.mm0`, `spec/tg/model-den.mm0`, 2026-11-09, layer C of
 the reduction; `spec/tg/model-meta.mm0` and `spec/tg/model-core.mm0`, 2026-11-10, layers D and I; it imports the strata `lean-tg2.mm0` and
@@ -1089,8 +1091,37 @@ The rest of the model is not yet the spec's `deq`, so it changes nothing that is
   node's proper subtrees are (`minv_intro`); and the hook of the inductive types is so at
   `ind_ty` and `ind_ctor` nodes: blocks related by `ind_eqv` have the same types' and
   constructors' values (`mcv_inv_ind_ty`, `mcv_inv_ind_ctor`; as the step of `minv_intro`:
-  `mcv_inv_node_ind_ty`, `mcv_inv_node_ind_ctor`). The recursors' and the other
-  constants' nodes are not done.
+  `mcv_inv_node_ind_ty`, `mcv_inv_node_ind_ctor`). The recursors' node is in `model-nst.mm0`
+  (`mcv_inv_node_ind_rec`), the quotient constants' in `model-quot.mm0`, the literals' in
+  `model-lit.mm0`, the opaque constants' in `model-top.mm0`.
+- **The rules of the schema, the quotients and the literals** (`model-fold.mm0`,
+  `model-nst.mm0`, `model-quot.mm0`, `model-lit.mm0`, 2026-11-15 to 2026-11-20, layers E to
+  G): every rule of Part III holds in the model for a hook with the parts concerned, at every
+  block, nested or not. Definitions and theorems only. The three bitwise rules are proved
+  under one hypothesis the spec does not give, that `motive @ (pack @ #1 @ #0)` is `ℕ` over
+  `ℕ :: ℕ :: G`; without it they are not provable in the model as stated, since the untaken
+  branch of a `dite` must be typed there (§5's argument for them reads the typing off a
+  derivation, which the fixed semantics does not have).
+- **The assembly** (`model-top.mm0`, 2026-11-20). The hook is fixed: `hfin`, the union of the
+  parts for the inductive types, their constructors and recursors, the quotient constants,
+  the literals and the opaque constants. It is a function (the parts are, and their keys
+  carry different labels) and invariant under `eeqv` (`hfin_minv`). The spec's `deq G e e2 A`
+  is the definition `mdeq (mcv hfin) G e e2 A`: in every admissible universe, at every level
+  valuation and every valuation satisfying `G`, the two sides have the same value, an element
+  of the value of `A`. `inh` is `minh` at the same hook, and each relation of Part II over
+  `⊢` is lean-tg3's `R_j` at the class `jmod (mcv hfin)` of the judgment atoms that hold in
+  the model. With these definitions, 102 of the 105 axioms of Parts II and III are theorems
+  with the spec's statements: the 48 clauses are instances of lean-tg3's, and the rules are
+  the model's theorems at `hfin`. As for `leqv`, replacing an axiomatized relation by a
+  definition that satisfies its axioms is conservative for the certificate's proofs.
+- **The opaque constants** (`model-top.mm0`). The value of `cst a S` is
+  `Env ⟨ u , ⟨ a , values of S ⟩ ⟩` cut to the universe `u`, for a class `Env` declared as a
+  term with no axiom (`hcst`, `dt_cst`). It depends on the levels only through their values,
+  which is what `eeqv_cst` needs (`lrel2_lseqv_lsv`, `mcv_inv_node_cst`). The spec has no
+  typing rule for `cst`: a certificate's typing axioms for its opaque constants, which are
+  judgments and so now set-theoretic statements, are the constraints on `Env`. They are the
+  certificate's hypotheses, as before (§8); a certificate without such axioms assumes nothing
+  about `Env`.
 
 **TG mode: a certificate verified against the library** (2026-11-09). The same certificate
 can be checked against the library instead of the spec:
