@@ -1286,6 +1286,38 @@ e3: $ G , c = cres (cgr x (reps x s)) (hartogs s) ⇒ isset (hartogs s) $ by wea
 e4: $ … ⇒ hartogs s ∈ U $ by isset_elim [e3, e2]
 e5: $ … ⇒ hartogs s ∈ U $ by isset_elim [b6, e4]
 
+choice_ex
+---------
+l1: $ G ⇒ functional (cgr k (ch k)) $ by cgr_functional
+l2: $ G ⇒ isset a $ by isset_var
+l3: $ G ⇒ isset (cres (cgr k (ch k)) a) $ by cres_set [l1, l2]
+l4: $ G ⇒ functional (cres (cgr k (ch k)) a) $ by functional_cres [l1]
+m0: $ G ⇒ ∃ y (y ∊ x) → ch x ∈ x $ by ax_choice
+m1: $ G , x ∊ a , ∃ y (y ∊ x) ⇒ ∃ y (y ∊ x) → ch x ∈ x $ by weaken [m0]
+m2: $ G , x ∊ a , ∃ y (y ∊ x) ⇒ ∃ y (y ∊ x) $ by ax
+m3: $ … ⇒ ch x ∈ x $ by imp_elim [m1, m2]
+m4a: $ G , x ∊ a , ∃ y (y ∊ x) , z = ch x ⇒ z = ch x $ by ax
+m4: $ G , x ∊ a , ∃ y (y ∊ x) , z = ch x , z ∊ x ⇒ z = ch x $ by weaken [m4a]
+m5: $ G , x ∊ a , ∃ y (y ∊ x) , z = ch x , z ∊ x ⇒ ⟨ x , z ⟩ ∈ cgr k (ch k) $ by cgr_intro [m4]
+m6a: $ G , x ∊ a ⇒ x ∊ a $ by ax
+m6: $ G , x ∊ a , ∃ y (y ∊ x) , z = ch x , z ∊ x ⇒ x ∊ a $ by weaken [m6a]
+m7: $ … ⇒ ⟨ x , z ⟩ ∈ cres (cgr k (ch k)) a $ by cres_intro [m6, m5]
+m8: $ G , x ∊ a , ∃ y (y ∊ x) , z = ch x , z ∊ x ⇒ z ∊ x $ by ax
+m9: $ … ⇒ z ∊ x ∧ ⟨ x , z ⟩ ∈ cres (cgr k (ch k)) a $ by and_intro [m8, m7]
+m10: $ … ⇒ ∃ y (y ∊ x ∧ ⟨ x , y ⟩ ∈ cres (cgr k (ch k)) a) $ by ex_intro [m9]
+m11: $ G , x ∊ a , ∃ y (y ∊ x) ⇒ ∃ y (y ∊ x ∧ ⟨ x , y ⟩ ∈ cres (cgr k (ch k)) a) $ by wcel_elim [m3, m10]
+m12: $ G , x ∊ a ⇒ ∃ y (y ∊ x) → ∃ y (y ∊ x ∧ ⟨ x , y ⟩ ∈ cres (cgr k (ch k)) a) $ by imp_intro [m11]
+m13: $ G ⇒ x ∊ a → ∃ y (y ∊ x) → ∃ y (y ∊ x ∧ ⟨ x , y ⟩ ∈ cres (cgr k (ch k)) a) $ by imp_intro [m12]
+m14: $ G ⇒ ∀ x (x ∊ a → ∃ y (y ∊ x) → ∃ y (y ∊ x ∧ ⟨ x , y ⟩ ∈ cres (cgr k (ch k)) a)) $ by all_intro [m13]
+m15: $ G ⇒ chooses (cres (cgr k (ch k)) a) a $ by and_intro [l4, m14]
+n2: $ G , f = cres (cgr k (ch k)) a ⇒ f = cres (cgr k (ch k)) a $ by ax
+n3: $ … ⇒ cres (cgr k (ch k)) a = f $ by eq_sym [n2]
+n4: $ G , f = cres (cgr k (ch k)) a ⇒ a = a $ by eq_refl
+n5: $ G , f = cres (cgr k (ch k)) a ⇒ chooses (cres (cgr k (ch k)) a) a $ by weaken [m15]
+n6: $ … ⇒ chooses f a $ by chooses_eq [n3, n4, n5]
+n7: $ … ⇒ ∃ f chooses f a $ by ex_intro [n6]
+n8: $ G ⇒ ∃ f chooses f a $ by isset_elim [l3, n7]
+
 chooses_fv
 ----------
 l1: $ … ⇒ functional f $ by and_elim_l [#1]
@@ -1332,7 +1364,7 @@ choice_injs
 l1: $ G ⇒ functional (cgr k (injs (fv f k) s)) $ by cgr_functional
 l2: $ G ⇒ isset a $ by isset_var
 l3: $ … ⇒ isset (img (cgr k (injs (fv f k) s)) a) $ by img_set [l1, l2]
-l4: $ G , w = img (cgr k (injs (fv f k) s)) a ⇒ ∃ c chooses c w $ by ax_choice
+l4: $ G , w = img (cgr k (injs (fv f k) s)) a ⇒ ∃ c chooses c w $ by choice_ex
 l7a: $ G , w = img (cgr k (injs (fv f k) s)) a , chooses c w ⇒ functional (cgr k (fv c (injs (fv f k) s))) $ by cgr_functional
 l7: $ … ⇒ functional (cres (cgr k (fv c (injs (fv f k) s))) a) $ by functional_cres [l7a]
 l10: $ G , w = img (cgr k (injs (fv f k) s)) a , chooses c w , j = cres (cgr k (fv c (injs (fv f k) s))) a , x ∊ a ⇒ ∀ x (x ∊ a → inj_into (fv f x) s) $ by weaken [#2]
@@ -1384,7 +1416,7 @@ l2: $ G ⇒ isset a $ by isset_var
 l3: $ … ⇒ isset (img f a) $ by img_set [#1, l2]
 l4: $ … ⇒ isset (⋃ (img f a)) $ by cuni_set [l3]
 l5: $ … ⇒ isset (img (cgr k {z | z ∊ a ∧ k ∊ fv f z}) (⋃ (img f a))) $ by img_set [l1, l4]
-l6: $ G , w = img (cgr k {z | z ∊ a ∧ k ∊ fv f z}) (⋃ (img f a)) ⇒ ∃ c chooses c w $ by ax_choice
+l6: $ G , w = img (cgr k {z | z ∊ a ∧ k ∊ fv f z}) (⋃ (img f a)) ⇒ ∃ c chooses c w $ by choice_ex
 l8: $ G , w = img (cgr k {z | z ∊ a ∧ k ∊ fv f z}) (⋃ (img f a)) , chooses c w ⇒ functional (cgr k (fv c {z | z ∊ a ∧ k ∊ fv f z})) $ by cgr_functional
 l9: $ … ⇒ functional (cres (cgr k (fv c {z | z ∊ a ∧ k ∊ fv f z})) (⋃ (img f a))) $ by functional_cres [l8]
 l10: $ G , w = img (cgr k {z | z ∊ a ∧ k ∊ fv f z}) (⋃ (img f a)) , chooses c w ⇒ isset (⋃ (img f a)) $ by weaken [l4]

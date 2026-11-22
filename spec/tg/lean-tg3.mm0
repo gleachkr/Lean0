@@ -335,6 +335,7 @@ def fix_fty (al motive hm ltN: expr): expr = $ pi al (pi (pi al (pi (app (app lt
 --| big tree (more than 16 constructors) is a def `tr_D`, which the trees
 --| of the clauses below use.
 def tr_nat_D: class = $ ⟨ kc_ind_mk , scons ⟨ kc_nat_blk , ∅ ⟩ (scons ⟨ kc_nil , ∅ ⟩ (scons ⟨ kc_tcons , scons ⟨ kc_srt , scons ⟨ kc_ls , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons ⟨ kc_ccons , scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ (scons ⟨ kc_ccons , scons ⟨ kc_pi , scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_cnil , ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_tnil , ∅ ⟩ ∅)) ⟩ ∅)) ⟩ $;
+def tr_iff_D: class = $ ⟨ kc_ind_mk , scons ⟨ kc_iff_blk , ∅ ⟩ (scons ⟨ kc_cons , scons ⟨ kc_srt , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ (scons ⟨ kc_cons , scons ⟨ kc_srt , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ (scons ⟨ kc_nil , ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_tcons , scons ⟨ kc_srt , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ (scons ⟨ kc_ccons , scons ⟨ kc_pi , scons ⟨ kc_pi , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_pi , scons ⟨ kc_pi , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_cnil , ∅ ⟩ ∅) ⟩ (scons ⟨ kc_tnil , ∅ ⟩ ∅)) ⟩ ∅)) ⟩ $;
 def tr_nat_ty: class = $ ⟨ kc_ind_ty , scons tr_nat_D (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ $;
 def tr_nat_zero: class = $ ⟨ kc_ind_ctor , scons tr_nat_D (scons ⟨ kc_nz , ∅ ⟩ (scons ⟨ kc_nz , ∅ ⟩ ∅)) ⟩ $;
 def tr_nat_succ: class = $ ⟨ kc_ind_ctor , scons tr_nat_D (scons ⟨ kc_nz , ∅ ⟩ (scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅)) ⟩ $;
@@ -368,6 +369,16 @@ theorem enc_lit2: $ enc_expr lit2 ≐ ⟨ kc_lit , scons ⟨ kc_bd0 , scons ⟨ 
 theorem enc_nat_D: $ enc_ind nat_D ≐ tr_nat_D $;
 --| @rewrite
 theorem enc_eq_D (u: lvl): $ enc_ind (eq_D u) ≐ ⟨ kc_ind_mk , scons ⟨ kc_eq_blk , ∅ ⟩ (scons ⟨ kc_cons , scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ (scons ⟨ kc_cons , scons ⟨ kc_srt , scons (enc_lvl u) ∅ ⟩ (scons ⟨ kc_nil , ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_tcons , scons ⟨ kc_pi , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons ⟨ kc_srt , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_ccons , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅) ⟩ (scons ⟨ kc_cnil , ∅ ⟩ ∅) ⟩ (scons ⟨ kc_tnil , ∅ ⟩ ∅)) ⟩ ∅)) ⟩ $;
+--| @rewrite
+theorem enc_iff_D: $ enc_ind iff_D ≐ tr_iff_D $;
+--| @rewrite
+theorem enc_propext: $ enc_expr propext ≐ ⟨ kc_cst , scons ⟨ kc_propext_atom , ∅ ⟩ (scons ⟨ kc_lnil , ∅ ⟩ ∅) ⟩ $;
+--| @rewrite
+theorem enc_quot_sound (u: lvl): $ enc_expr (quot_sound u) ≐ ⟨ kc_cst , scons ⟨ kc_quot_sound_atom , ∅ ⟩ (scons ⟨ kc_lcons , scons (enc_lvl u) (scons ⟨ kc_lnil , ∅ ⟩ ∅) ⟩ ∅) ⟩ $;
+--| @rewrite
+theorem enc_nonempty_D (u: lvl): $ enc_ind (nonempty_D u) ≐ ⟨ kc_ind_mk , scons ⟨ kc_nonempty_blk , ∅ ⟩ (scons ⟨ kc_cons , scons ⟨ kc_srt , scons (enc_lvl u) ∅ ⟩ (scons ⟨ kc_nil , ∅ ⟩ ∅) ⟩ (scons ⟨ kc_tcons , scons ⟨ kc_srt , scons ⟨ kc_lz , ∅ ⟩ ∅ ⟩ (scons ⟨ kc_ccons , scons ⟨ kc_pi , scons ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ (scons ⟨ kc_app , scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅ ⟩ (scons ⟨ kc_bvar , scons ⟨ kc_s , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ ∅ ⟩ ∅) ⟩ ∅) ⟩ (scons ⟨ kc_cnil , ∅ ⟩ ∅) ⟩ (scons ⟨ kc_tnil , ∅ ⟩ ∅)) ⟩ ∅)) ⟩ $;
+--| @rewrite
+theorem enc_choice (u: lvl): $ enc_expr (choice u) ≐ ⟨ kc_cst , scons ⟨ kc_choice_atom , ∅ ⟩ (scons ⟨ kc_lcons , scons (enc_lvl u) (scons ⟨ kc_lnil , ∅ ⟩ ∅) ⟩ ∅) ⟩ $;
 --| @rewrite
 theorem enc_nat_ty: $ enc_expr nat_ty ≐ tr_nat_ty $;
 --| @rewrite

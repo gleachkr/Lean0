@@ -11,21 +11,39 @@ import "model-lit.mm0";
 -- --------------------------------------------------------------------------
 -- A certificate's opaque and axiomatic constants are `cst a S` over generated
 -- atoms; the spec says nothing of them but `closed_cst` and `eeqv_cst`. Their
--- values are a parameter of the model: a class `Env` with no axioms. The
+-- values are a parameter of the model: a class `Env` with no axioms (cut to
+-- `Envx` at the three atoms of the spec whose constants have rules). The
 -- certificate's typing axioms for its constants are the constraints on it.
 
 --| The environment of the opaque constants. No axiom mentions it.
 term Env: class;
 
+--| The graph of the choice function at the atom of `Classical.choice`: the value at a universe and a list of level values is
+--| `chv` at the list's first.
+def Envc (.c .x .y: set): class = $ {c | ∃ x ∃ y (c = ⟨ ⟨ x , ⟨ ⟨ kc_choice_atom , ∅ ⟩ , y ⟩ ⟩ , chv (fv y ∅) ⟩)} $;
+
+--| The environment without its entries at the atoms of `propext`, `Quot.sound` and `Classical.choice`, the spec's own, and
+--| with the choice function at the last: the values at the first two are `∅`, the proof of a true proposition
+--| (`propext_ty`, `quot_sound_ty`), and at the third the choice function (`choice_ty`).
+def Envx (.c .x .y .v: set): class =
+  $ {c | (c ∊ Env ∧ ¬ ∃ x ∃ y ∃ v ((c = ⟨ ⟨ x , ⟨ ⟨ kc_propext_atom , ∅ ⟩ , y ⟩ ⟩ , v ⟩ ∨ c = ⟨ ⟨ x , ⟨ ⟨ kc_quot_sound_atom , ∅ ⟩ , y ⟩ ⟩ , v ⟩) ∨ c = ⟨ ⟨ x , ⟨ ⟨ kc_choice_atom , ∅ ⟩ , y ⟩ ⟩ , v ⟩)) ∨ c ∊ Envc} $;
+
+--| The value at the atom of `propext` is `∅`.
+theorem envx_propext (G: hyps) (u s: set): $ G ⇒ fv Envx ⟨ u , ⟨ ⟨ kc_propext_atom , ∅ ⟩ , s ⟩ ⟩ = ∅ $;
+--| The value at the atom of `Quot.sound` is `∅`.
+theorem envx_quot_sound (G: hyps) (u s: set): $ G ⇒ fv Envx ⟨ u , ⟨ ⟨ kc_quot_sound_atom , ∅ ⟩ , s ⟩ ⟩ = ∅ $;
+--| The value at the atom of `Classical.choice` is the choice function at the first level value.
+theorem envx_choice (G: hyps) (u s: set): $ G ⇒ fv Envx ⟨ u , ⟨ ⟨ kc_choice_atom , ∅ ⟩ , s ⟩ ⟩ = chv (fv s ∅) $;
+
 --| At `cst a S`: the environment's value at the universe, the atom and the values of the levels.
 def hcst (.u .a .l .e .z .w: set): class =
-  $ {z | ∃ u ∃ a ∃ l ∃ e (z = ⟨ ⟨ u , ⟨ kc_cst , ⟨ scons a (scons l ∅) , e ⟩ ⟩ ⟩ , clam w lvals (sclip (fv Env ⟨ u , ⟨ a , lsv l w ⟩ ⟩)) ⟩)} $;
+  $ {z | ∃ u ∃ a ∃ l ∃ e (z = ⟨ ⟨ u , ⟨ kc_cst , ⟨ scons a (scons l ∅) , e ⟩ ⟩ ⟩ , clam w lvals (sclip (fv Envx ⟨ u , ⟨ a , lsv l w ⟩ ⟩)) ⟩)} $;
 
 --| The denotation of `cst a S`, for a hook `mcv H` with `H` extending `hcst`: the environment's value at the
 --| universe, the atom and the values of the levels, if it is an element of the universe.
 theorem dt_cst (G: hyps) (H A S W R: class) (u: set):
   $ G ⇒ hcst ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ A ∈ trees ω $ > $ G ⇒ S ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_cst , scons A (scons S ∅) ⟩ W R = mclip u (sclip (fv Env ⟨ u , ⟨ A , lsv S W ⟩ ⟩)) $;
+  $ G ⇒ dt u (mcv H) ⟨ kc_cst , scons A (scons S ∅) ⟩ W R = mclip u (sclip (fv Envx ⟨ u , ⟨ A , lsv S W ⟩ ⟩)) $;
 
 
 -- --------------------------------------------------------------------------

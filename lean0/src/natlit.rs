@@ -9,8 +9,9 @@
 //! and the operation's theorems on literals (`Nat_add_lit`, ...) follow from the spec's
 //! rules. `natrec` does the same for the division-like operations (`Nat.div`, `Nat.mod`,
 //! `Nat.gcd`, `Nat.bitwise` and the bitwise operations), whose relations are larger. The
-//! theorems of an operation whose equations cannot be derived are generated axioms (stage A,
-//! counted in the run's report).
+//! equations of an operation that cannot be derived are an error: no axioms are generated
+//! (a sliced export must include the constants the derivations name, e.g.
+//! `instDecidableEqBool` for `Nat.div` and `Nat.mod`).
 //!
 //! One table (`OPS`) gives each operation's theorems. `op_axioms` states them, and the
 //! elaborator instantiates them with `witness`.
@@ -612,8 +613,7 @@ fn term<'t>(el: &mut Elab<'_, '_, 't, '_>, e: &Eqs, t: &T) -> R<ExprPtr<'t>> {
 /// After the definition `lean` (MM0 constant `cname`, of type `ty`): if it has defining
 /// equations in the spec (`EQS`), derive them (`{cname}_eqs`); if it is one of the
 /// operations the kernel computes on literals, with the expected type, state its theorems
-/// on literals, proved from the spec's rules when its equations were derived and generated
-/// axioms otherwise. An operation without them cannot be certified on literals.
+/// on literals, proved from the spec's rules. Equations that are not derived are an error.
 pub fn op_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, lean: &str, cname: &str, ty: ExprPtr<'t>) -> R<()> {
     if el.g.nat.is_none() {
         return Ok(())
@@ -635,11 +635,11 @@ pub fn op_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, lean: &str, cname: &str, ty:
                 Err(why) => {
                     el.g.rollback(order0, pfs0, &[]);
                     el.forget_proofs();
-                    el.g.lit_stage_a.push((lean.to_string(), why));
+                    return Err(format!("the defining equations of `{lean}` are not derived ({why}): no axioms are generated for a literal operation; if the export lacks a constant, add its name to the exported names"))
                 }
             }
         } else {
-            el.g.lit_stage_a.push((lean.to_string(), "the spec's `Nat` is not the environment's".into()));
+            return Err(format!("`{lean}`: the spec's `Nat` is not the environment's, and no axioms are generated for a literal operation"))
         }
     }
     let Some(o) = op(lean) else { return Ok(()) };
@@ -715,15 +715,9 @@ pub fn op_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, lean: &str, cname: &str, ty:
                 };
                 add_thm(&mut g.env, &name, v.args, hyps, concl, false, false, p, &doc)?
             }
-            _ => {
-                let doc = format!("`{lean}` on literals (the kernel computes it with GMP).");
-                add_thm(&mut g.env, &name, v.args, hyps, concl, true, false, None, &doc)?
-            }
+            _ => return Err(format!("`{lean}` on literals: no rule in the spec, and no axioms are generated for a literal operation")),
         };
         ths.push(th);
-    }
-    if eqs_th.is_none() && eqs(lean).is_none() && rec_op.is_none() {
-        g.lit_stage_a.push((lean.to_string(), "no rules in the spec".into()));
     }
     g.nat_ops.insert(lean.to_string(), ths);
     Ok(())

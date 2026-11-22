@@ -383,22 +383,86 @@ above the parameters). The relations that are not functions are declared as such
 checking relations (`ipos`, `cwf`, `elim_ok`, ..., where the kernel's disjunctions are), and
 `rst`, whose clauses are tried in order (`rst_refl` last) and which admits every partial
 restoration, sound since an auxiliary type denotes its occurrence (below). Totals: 126
-relations with 175 computing clauses, 133 checking clauses and the 8 clauses of `rst`, and 73
+relations with 175 computing clauses, 133 checking clauses and the 8 clauses of `rst`, and 76
 rules. `scripts/test.sh` runs the check and requires a spec with an overlapping clause to be
 rejected.
+
+### Lean's axioms `propext` and `Quot.sound` (`spec/lean-quot.mm0`)
+
+`propext_ty` and `quot_sound_ty` give the two constants the types Lean's library declares for
+them (`propext : Π (a b : Prop). (a ↔ b) → a = b`, with `Iff` as the spec's block `iff_D`, compared
+with the export's like `Nat` and `Eq`; `Quot.sound : Π α r a b. r a b → Quot.mk r a = Quot.mk r b`).
+The constants are `cst` of two atoms that the spec declares (`propext_atom`, `quot_sound_atom`), so
+closedness and level congruence are `closed_cst` and `eeqv_cst`, and no syntax is added. Sound
+because both types are true propositions in the model, whose proofs are all `∅`: for `propext`,
+propositions are the truth values `∅` and `{∅}`, the two fields of an `Iff a b` are functions both
+ways between them (`proj_ty` at `iff_D`), so they are equal sets (`two_iff_eq`), and the model's
+`Eq` is equality (`meqs_i`); for `Quot.sound`, the quotient is the set of classes of the
+equivalence the relation generates, so related elements have the same class (`qmk_rel_eq`).
+Machine-checked: model-quot's `propext_inh` and `quot_sound_inh`, and the two rules in model-ci
+(§11). The model's environment of opaque constants is cut at the two atoms (`Envx`), where the
+value is `∅`.
+
+### Lean's axiom `Classical.choice` (`spec/lean-quot.mm0`, `spec/tg/tg.mm0`)
+
+`choice_ty` gives `choice u`, a `cst` of the spec's atom `choice_atom`, the type
+`Π (α : Sort u). Nonempty α → α`, with `Nonempty` as the spec's block `nonempty_D` (compared with
+the export's). Unlike the other two axioms its type is not a proposition, so the constant needs a
+value that is a term: a function choosing an element of every inhabited type of a universe. The
+axiom of choice in the form "every set has a choice function" proves such functions to exist but
+names none, so the base file states choice through an operator instead (2026-11-22, the user's
+decision): `term ch (a: set): class` with `ax_choice`, `∃ x (x ∊ a) → ch a ∈ a`, and the
+operator's substitution equation `sb_c_ch`. The former axiom (`∃ f chooses f a`) is the theorem
+`choice_ex` of `hartogs.mm0` (the operator's graph on `a`), so the library is unchanged above it.
+
+*What the operator costs.* The base is Tarski–Grothendieck set theory with a global choice
+operator in place of the axiom of choice, and its schemas (replacement, in the form of
+`ax_replace` over any class term) apply to terms that mention `ch`. This is a conservative
+extension: a statement that does not mention `ch` is provable with the operator only if it is
+provable from the axiom of choice. For ZFC that is Felgner's theorem (U. Felgner, "Comparison of
+the axioms of local and universal choice", Fund. Math. 71, 1971: a global choice function can be
+added to a countable model by forcing with set-sized partial choice functions, which adds no
+sets and keeps the schemas in the extended language). It carries over to TG by the deduction
+theorem: Tarski's axiom is one sentence `T` without `ch`, so a proof of `P` from TG with the
+operator is a proof of `T → P` from ZFC with the operator, hence from ZFC, hence `P` from TG.
+Two details of the base's form: `ch a` is a class term, so in first-order terms the new symbol is
+a binary predicate `y ∊ ch a`, which Felgner's function `F` interprets as `y ∈ F(a)` (taking
+`F(∅) = ∅`), carrying each instance of a schema to an instance for `F`; and foundation is the
+schema of `∈`-induction, whose instances with `ch` follow from the axiom of foundation and
+separation in the extended language. (The class terms of `tg.mm0` are a notation over
+first-order set theory; we have not formalized this argument, and the reference is cited from
+memory.) A certified judgment does mention `ch`, through the value of `choice`, so the
+statement to trust is the one with the operator; the conservativity says that the operator adds
+no risk of inconsistency to TG.
+
+*The model.* The value of `choice` at a level of value `n` is `chv n`, the function taking a
+type `a` of the universe `uni n` and a proof that `a` has an element to `ch a` (model-quot;
+`chv_cpi`: it is an element of the product over those). The value of `Nonempty` at a type `a` is
+the truth value of "`a` has an element" (`tne a`), proved as the model's `Eq` is shown to be
+equality: from the rules of `nonempty_D`'s type, constructor and recursor in the model, the
+recursor at the motive with that truth value. So `chv n` is an element of the value of the
+axiom's type (`choice_mem`). The environment `Envx` has the graph of `chv` at the atom
+(`envx_choice`), and the rule is model-ci's `choice_ty`.
 
 ### Generated per-declaration axioms (`lean0/src/gen.rs`)
 
 These live in the generated `.mm0`, not in `lean.mm0`, and must be read against the Lean
-declaration. They remain for Lean's axioms and opaque constants. No inductive type, constructor,
-recursor or quotient primitive has one: a block the schema does not certify, or a quotient
-primitive whose type is not the spec's, is an error.
+declaration. They remain only for axioms other than Lean's three standard ones (those the
+development declares, and `sorryAx`): the typing of each is assumed. `propext`, `Quot.sound` and
+`Classical.choice` are not among them when the export gives them the types of the spec's rules
+`propext_ty`, `quot_sound_ty` and `choice_ty` (above): their `_df` statements are then theorems. Nothing else is assumed. No
+inductive type, constructor, recursor or quotient primitive has an axiom (a block the schema does
+not certify, or a quotient primitive whose type is not the spec's, is an error); no literal
+operation has one (equations that are not derived are an error, §5); and an opaque constant is
+certified like a theorem, as an abstract definition by its value, which the kernel never unfolds
+(`def c (us): expr;` and `theorem c_ty`; until 2026-11-22 it was an atom with an assumed typing,
+its value's typing proved beside it).
 
 | axiom class | Lean4Lean counterpart / argument |
 |---|---|
-| `c_df` (axioms, opaques) | `constDF` for a constant whose type is the given `T` (`T` is checked well-typed by the public theorem `c_wf`) |
+| `c_df` (Lean axioms) | `constDF` for a constant whose type is the given `T` (`T` is checked well-typed by the public theorem `c_wf`) |
 | `c_atom` (term of sort `atom`) and `c` (def, `cst c_atom (lcons u1 ... lnil)`) | the constant itself: an atom of its own at its levels (§10). `c_closed` is a theorem (`closed_cst`) and the level congruence is the spec's `eeqv_cst`, so neither is an axiom (until 2026-11-04 both were generated axioms, 260 and 24 of them in Init) |
-| `c_eeqv`: `leqv u u2 > ... > eeqv (c us) (c us2)` (only for a theorem constant that an inductive declaration mentions at its levels; above) | the same constant at equivalent levels has the same shape (`eeqv` is defined that way) |
+| (`c_eeqv`: `leqv u u2 > ... > eeqv (c us) (c us2)`, for a theorem or opaque constant that an inductive declaration mentions at its levels; above) | not an axiom since 2026-11-22: a theorem, proved where the constant is declared by unfolding it (the proof term at equivalent levels is the same expression up to levels; `induct::theorem_eeqv`, for the constants `gen::eeqv_needed` finds in the export, a set closed under mention in proof terms) |
 
 K-like reduction (`Eq.rec` on a non-constructor) has no axiom: the major premise is replaced by
 the constructor using `proofIrrel`.
@@ -444,9 +508,9 @@ and `lit` is inert.
 |---|---|
 | `lit_zero`: `deq G (lit b0) (ind_ctor nat_D nz nz) (ind_ty nat_D nz)` | in the model, `Nat.zero ≡ Nat.zero : Nat` (`constDF`); `nat_D` is Lean's `Nat`, with `Nat.zero : Nat` by its data |
 | `lit_succ`: `bsucc a b > deq G (lit b) (app (ind_ctor nat_D 0 1) (lit a)) (ind_ty nat_D 0)` | both sides denote the same term `succ^(a+1) zero`, which has type `Nat` because `Nat.succ : Nat → Nat` by the data |
-| generated (stage A, only when the operation's equations below could not be derived; the run reports it): `Nat_add_lit`, `Nat_sub_lit`/`_lit0`, `Nat_mul_lit`, `Nat_beq_lit`/`_lit_lt`/`_lit_gt`, `Nat_ble_lit`/`_lit_gt`, `Nat_pow_lit`, `Nat_shiftLeft_lit`, `Nat_shiftRight_lit`, `Nat_div_lit`/`_lit0`, `Nat_mod_lit`/`_lit0`, `Nat_gcd_lit`/`_lit2`, `Nat_land_lit`, `Nat_lor_lit`, `Nat_xor_lit` | `op (succ^a zero) (succ^b zero) ≡ succ^(f a b) zero : Nat` (or `≡ Bool.true/false : Bool`), where the premises force the value: `sub` from `c+b = a` or `a+c = b`; `div`/`mod` from `q·b = m`, `m+r = a`, `r+x+1 = b` (so `r < b`, Euclidean division, and `b = 0` has its own axiom: `a/0 = 0`, `a%0 = a`); `gcd` from `g·p = a`, `g·q = b` (`g` divides both) and `x·a = y·b + g` or `y·b = x·a + g` (every common divisor divides `g`, so `g = gcd a b`; `a = b = 0` forces `g = 0`); `beq` false from `a+c+1 = b` or `b+c+1 = a`; `ble` from `a+c = b` / `b+c+1 = a`; shifts via `2^b`. |
+| the operations' theorems on literals, proved from the rules below (generated axioms until 2026-11-22, when the equations could not be derived; that is now an error): `Nat_add_lit`, `Nat_sub_lit`/`_lit0`, `Nat_mul_lit`, `Nat_beq_lit`/`_lit_lt`/`_lit_gt`, `Nat_ble_lit`/`_lit_gt`, `Nat_pow_lit`, `Nat_shiftLeft_lit`, `Nat_shiftRight_lit`, `Nat_div_lit`/`_lit0`, `Nat_mod_lit`/`_lit0`, `Nat_gcd_lit`/`_lit2`, `Nat_land_lit`, `Nat_lor_lit`, `Nat_xor_lit` | `op (succ^a zero) (succ^b zero) ≡ succ^(f a b) zero : Nat` (or `≡ Bool.true/false : Bool`), where the premises force the value: `sub` from `c+b = a` or `a+c = b`; `div`/`mod` from `q·b = m`, `m+r = a`, `r+x+1 = b` (so `r < b`, Euclidean division, and `b = 0` has its own axiom: `a/0 = 0`, `a%0 = a`); `gcd` from `g·p = a`, `g·q = b` (`g` divides both) and `x·a = y·b + g` or `y·b = x·a + g` (every common divisor divides `g`, so `g = gcd a b`; `a = b = 0` forces `g = 0`); `beq` false from `a+c+1 = b` or `b+c+1 = a`; `ble` from `a+c = b` / `b+c+1 = a`; shifts via `2^b`. |
 
-**Trust gap of the generated operation axioms (stage A).** They are valid only if the
+**What the operations' rules establish (the trust gap of the former generated axioms).** The statements are valid only if the
 environment's definition of the operation computes it on numerals, which is Lean4Lean's
 `HasPrimitives` invariant. Lean4Lean establishes it by checking defining equations when the
 definition is added (`Primitive.lean`: e.g. `Nat.add x 0 ≡ x` and
@@ -454,8 +518,10 @@ definition is added (`Primitive.lean`: e.g. `Nat.add x 0 ≡ x` and
 `WellFounded.Nat.fix`, `dite` and `Decidable` reflection for `gcd`, `div`, `mod` and the
 bitwise operations). A generated axiom, like nanoda and the C++ kernel, only checks the name
 and the type (`Nat → Nat → Nat`, or `→ Bool` for `beq`/`ble`). Every operation has rules in
-the spec (stage B, below), so a certificate falls back to the axiom only when the derivation
-of the equations failed, which the run reports.
+the spec (stage B, below), and a certificate has no such axiom: when the derivation of an
+operation's equations fails, `lean0 gen` fails. (A sliced export must then include the
+constants the derivation names; `instDecidableEqBool` is the one that `Nat.div` and `Nat.mod`
+do not depend on themselves.)
 
 ### The literal operations as rules over defining equations (`spec/lean.mm0`, "The defining equations of the literal operations" and Part III "Literals"; stage B)
 
@@ -729,9 +795,7 @@ itself, accepting only the forms lean0 writes. For every declaration of the expo
 * every `term` the certificate declares is a constant of sort `atom` (an opaque constant's)
   or `blk` (a block's), the sorts §11's encoding leaves open.
 
-Not checked by it: the other generated axioms, of the
-literal operations (§4 and §5) and the `_df` typing axioms of opaque constants, which are
-argued and generated, not compared with anything in the export; and whether a
+Not checked by it: whether a
 theorem's proof term (an abstract def) is the export's (it is never stated, so it cannot
 matter). The comparison reads both sides structurally, so a translation bug, a doc comment
 naming the wrong constant, or a statement edited by hand is reported, with the first place
@@ -828,7 +892,7 @@ and likewise Parts II and III. Part I, *Syntax*, declares the sorts and the
 relations that are functions or predicates on syntax, defined by clauses recursing on their
 inputs; nothing in it mentions `≈` or `⊢`. Part II declares `≈` and `⊢` and the relations
 defined over them in the same way (the well-formedness of a block, its elimination level, the
-defining equations of the literal operations). Part III states the rules: the 73 axioms
+defining equations of the literal operations). Part III states the rules: the 76 axioms
 concluding `≈` or `⊢` (and `inh_i`), which are the semantic content and the only axioms whose
 truth is at issue in §§2–6; the other 316 are definitions, which `lean0 modes` checks to be the
 functions and predicates they are read as (§4, *Functionality*). In a reduction to set theory
@@ -843,7 +907,7 @@ The departures from the verbatim presentation:
   `def c (u v: lvl): expr = $ v $;` with a proved typing theorem `⟨ G ⊢ c u v : T ⟩`, schematic in
   `G`; so δ-unfolding is MM0 unfolding, and universe instantiation (`instL`) is MM0
   substitution of the `lvl` variables. A theorem's body is abstract (only in the MMB), so the
-  `.mm0` never shows a proof term. Axioms and opaques become an atom and a definition,
+  `.mm0` never shows a proof term, and so is an opaque constant's value. Lean's axioms become an atom and a definition,
   `term c_atom: atom; def c (u v: lvl): expr = $ cst c_atom (lcons u (lcons v lnil)) $;`
   (the spec's `cst`: an atom at a list of levels, closed and level-congruent by the spec's
   `closed_cst` and `eeqv_cst`), with one generated axiom each, a `constDF` instance
@@ -880,9 +944,9 @@ The departures from the verbatim presentation:
   erased. Binder names and styles are not represented.
 
 The generated `.mm0` therefore contains, per declaration, its `def` or `term` (or, for a
-stage-B block, its atom and data definition), its typing statement, and for opaque constants
-the atom and the `constDF` axiom (and `c_eeqv` when a block's data mentions a constant that is
-not a `cst`), plus the per-structure and per-recursor lemmas or axioms above;
+stage-B block, its atom and data definition), its typing statement, and for Lean's axioms
+the atom and the `constDF` axiom (and the theorem `c_eeqv` when a block's data mentions a
+theorem or opaque constant at its levels), plus the per-structure and per-recursor lemmas or axioms above;
 lemmas made while proving are local to the MMB. §8 says how those statements are tied back
 to the export.
 
@@ -997,7 +1061,7 @@ as a definition, an axiom as a theorem; `lean0 tg-link` checks that each is the 
 statement). Until 2026-11-20 that was 38 terms, 1 definition and 105 axioms. Since the
 assembly (`model-top.mm0`, below) it is only the import of the model: every term of Parts
 II and III is a definition of the model and every axiom a theorem. The trusted base in TG
-mode (below) is `tg.mm0`'s 76 axioms and the 48 encoding axioms above, in place of the
+mode (below) is `tg.mm0`'s 77 axioms and the 53 encoding axioms above, in place of the
 spec's 381, with one new term and no axiom about it: the environment `Env` of the opaque
 constants (below).
 
@@ -1133,7 +1197,20 @@ The rest of the model is not yet the spec's `deq`, so it changes nothing that is
   typing rule for `cst`: a certificate's typing axioms for its opaque constants, which are
   judgments and so now set-theoretic statements, are the constraints on `Env`. They are the
   certificate's hypotheses, as before (§8); a certificate without such axioms assumes nothing
-  about `Env`.
+  about `Env`. Since 2026-11-22 only Lean's axioms are such constants (an opaque constant is an
+  abstract definition by its value), and the environment the hook reads is `Envx`, `Env` without
+  its entries at the spec's atoms `propext_atom`, `quot_sound_atom` and `choice_atom`, and with the
+  choice function's graph at the last (`envx_propext`, `envx_quot_sound`: the value there is `∅`;
+  `envx_choice`: the value is `chv` at the level's value), for the rules `propext_ty`,
+  `quot_sound_ty` and `choice_ty` (§4; model-ci, from model-quot's `propext_inh`,
+  `quot_sound_inh` and `choice_mem`).
+- *Consistency* (2026-11-22). model-ci's `lean_consistent`: from `ty nil e (pi Prop (bvar nz))`, a
+  contradiction in the set theory (an admissible universe exists, `uadm_exists`; the constant-zero
+  valuation of the levels; the value of `Π (p : Prop). p` there is the empty product over the
+  truth values). With the rules as theorems this is a relative consistency proof by
+  interpretation, and it does not depend on what the definitions are: no reading of the model is
+  needed to conclude that the spec's rules, the three standard axioms among them, derive no
+  closed proof of `False` unless the set theory is inconsistent.
 
 **TG mode: a certificate verified against the library** (2026-11-09). The same certificate
 can be checked against the library instead of the spec:

@@ -582,8 +582,8 @@ pub fn check(export: &ExportFile<'_>, stmts: &[Stmt]) -> Report {
                     problems.push(format!("{lean}: `{}` states another type ({})", c.stmt, cmp.why.unwrap_or_default()));
                 }
             }
-            // a theorem's or definition's type is proved, not assumed
-            if matches!(d, Declar::Theorem { .. } | Declar::Definition { .. }) && !cs.iter().any(|c| c.proved) {
+            // a theorem's, definition's or opaque constant's type is proved, not assumed
+            if matches!(d, Declar::Theorem { .. } | Declar::Definition { .. } | Declar::Opaque { .. }) && !cs.iter().any(|c| c.proved) {
                 problems.push(format!("{lean}: no proved statement of its type"));
             }
             let val = match d {

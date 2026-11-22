@@ -559,11 +559,13 @@ pub(crate) fn block_head<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, id: &Indu
         shift.extend((0..n).map(|i| g.env.var(i as u16)));
         g.env.subst(body, &shift)
     };
-    // Lean's `Nat` and `Eq` are the spec's blocks `nat_D` and `eq_D` (audit §4) when the
+    // Lean's `Nat`, `Eq`, `Iff` and `Nonempty` are the spec's blocks `nat_D`, `eq_D`, `iff_D` and `nonempty_D` (audit §4) when the
     // export declares them as the spec has them
     let spec = match lean_name.as_str() {
         "Nat" => Some(("nat_D", "nat_blk")),
         "Eq" => Some(("eq_D", "eq_blk")),
+        "Iff" => Some(("iff_D", "iff_blk")),
+        "Nonempty" => Some(("nonempty_D", "nonempty_blk")),
         _ => None,
     };
     let spec = spec.filter(|(d, b)| g.env.has_term(d) && g.env.has_term(b)).and_then(|(d, b)| {
@@ -659,40 +661,71 @@ pub(crate) fn block_head<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, id: &Indu
     Ok(())
 }
 
-/// Level congruence of the opaque constants in the block's data. `eeqv (c us) (c us2)` has
-/// no clause when `c` is a generated term that is not a public definition (an opaque, an
-/// axiom, a theorem), so a block whose data mentions one at its levels
-/// gets `axiom c_eeqv (us us2): leqv u u2 > ... > eeqv (c us) (c us2)`, once per constant
-/// (audit §4; `lean0 check` checks the shape). The scan mirrors the prover: a subterm
-/// without level variables is `eeqv_refl`, a public definition is unfolded.
+/// Level congruence of the theorem constants in the block's data. `eeqv (c us) (c us2)` has
+/// no clause when `c` is a generated term that is not a public definition (a theorem: its
+/// proof term is not in the statements), so a block whose data mentions one at its levels
+/// needs `theorem c_eeqv`, proved where the theorem is declared (`theorem_eeqv`, for the
+/// constants `gen::eeqv_needed` finds in the export). No axiom is generated: a constant
+/// without the theorem is an error. The scan mirrors the prover: a subterm without level
+/// variables is `eeqv_refl`, a public definition is unfolded.
 fn eeqv_axioms(g: &mut Gen, data: E) -> R<()> {
     let mut marked = Vec::new();
     scan_eeqv(g, data, &mut HashSet::default(), &mut HashMap::default(), &mut marked);
     for t in marked {
-        if g.eeqv_axioms.contains_key(&t) {
-            continue
+        if !g.eeqv_axioms.contains_key(&t) {
+            return Err(format!("the level congruence of `{}` is not proved", g.env.terms[t.0 as usize].name))
         }
-        let d = g.env.terms[t.0 as usize].clone();
-        let lean = g.consts.iter().find(|(_, ci)| ci.term == t).map(|(n, _)| n.clone()).unwrap_or_else(|| d.name.clone());
-        let n = d.args.len();
-        let lvl_names: Vec<String> = d.args.iter().map(|a| a.0.clone()).collect();
-        let mut args = g.lvl_args(&lvl_names);
-        let lvl_s = g.env.sort_names["lvl"];
-        for s in &lvl_names {
-            let s2 = g.var_names_fresh2(s, &lvl_names);
-            args.push((s2, lvl_s));
-        }
-        let us: Vec<E> = (0..n).map(|i| g.env.var(i as u16)).collect();
-        let us2: Vec<E> = (0..n).map(|i| g.env.var((n + i) as u16)).collect();
-        let hyps: Vec<E> = us.iter().zip(&us2).map(|(&a, &b)| g.env.app_n("leqv", &[a, b])).collect();
-        let (c1, c2) = (g.env.app(t, &us), g.env.app(t, &us2));
-        let concl = g.env.app_n("eeqv", &[c1, c2]);
-        let name = g.thms.fresh(&format!("{}_eeqv", d.name));
-        let th = add_thm(&mut g.env, &name, args, hyps, concl, true, false, None,
-            &format!("`{lean}` at equivalent levels is the same expression up to levels (an opaque constant in an inductive declaration)."))?;
-        g.eeqv_axioms.insert(t, th);
     }
     Ok(())
+}
+
+/// `theorem c_eeqv (us us2): leqv u u2 > ... > eeqv (c us) (c us2)` for a theorem constant
+/// `c` (the term `t`, an abstract definition), by unfolding it: its proof term at
+/// equivalent levels is the same expression up to levels (audit §4). The constants in it
+/// that are theorems have theirs already (`gen::eeqv_needed` is closed under mention).
+pub(crate) fn theorem_eeqv(g: &mut Gen, t: TId, lean: &str) -> R<()> {
+    let d = g.env.terms[t.0 as usize].clone();
+    let n = d.args.len();
+    let lvl_names: Vec<String> = d.args.iter().map(|a| a.0.clone()).collect();
+    let mut args = g.lvl_args(&lvl_names);
+    let lvl_s = g.env.sort_names["lvl"];
+    for s in &lvl_names {
+        let s2 = g.var_names_fresh2(s, &lvl_names);
+        args.push((s2, lvl_s));
+    }
+    let us: Vec<E> = (0..n).map(|i| g.env.var(i as u16)).collect();
+    let us2: Vec<E> = (0..n).map(|i| g.env.var((n + i) as u16)).collect();
+    let hyps: Vec<E> = us.iter().zip(&us2).map(|(&a, &b)| g.env.app_n("leqv", &[a, b])).collect();
+    let (c1, c2) = (g.env.app(t, &us), g.env.app(t, &us2));
+    let concl = g.env.app_n("eeqv", &[c1, c2]);
+    let proof = if g.replay {
+        None
+    } else {
+        let (Some(b1), Some(b2)) = (g.env.unfold(c1), g.env.unfold(c2)) else { return Err(format!("`{lean}` has no proof term here")) };
+        let mut pv = Prover::new(g);
+        for (i, &h) in hyps.iter().enumerate() {
+            let p = g.env.hyp(i as u16, h);
+            pv.horn.facts.insert(h, p);
+        }
+        let goal = g.env.app_n("eeqv", &[b1, b2]);
+        let p = pv.prove(g, goal).map_err(|e| format!("the level congruence of `{lean}`: {e}"))?;
+        Some(mm(g.env.convert(p, concl))?)
+    };
+    let name = g.thms.fresh(&format!("{}_eeqv", d.name));
+    let th = add_thm(&mut g.env, &name, args, hyps, concl, false, false, proof,
+        &format!("`{lean}` at equivalent levels is the same expression up to levels (it occurs in an inductive declaration)."))?;
+    g.eeqv_axioms.insert(t, th);
+    Ok(())
+}
+
+/// `goal` from the hypotheses `hyps` (numbered in order) by the Horn prover over the spec.
+pub(crate) fn prove_from(g: &mut Gen, hyps: &[E], goal: E) -> R<P> {
+    let mut pv = Prover::new(g);
+    for (i, &h) in hyps.iter().enumerate() {
+        let p = g.env.hyp(i as u16, h);
+        pv.horn.facts.insert(h, p);
+    }
+    pv.prove(g, goal)
 }
 
 /// The generated terms of `e` whose level congruence the prover needs (`eeqv_axioms`).

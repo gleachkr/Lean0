@@ -759,12 +759,29 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
                 mm(self.g.env.thm(ci.ty_thm, &args, &hyps))?
             }
             ConstKind::Def => {
-                if ls != ls2 && a.iter().zip(&b).any(|(&x, &y)| x != y) {
-                    return Err(format!("constDF for the definition {s} at different levels is not supported yet"))
-                }
                 let p = mm(self.g.env.thm(ci.ty_thm, &args, &[]))?;
-                let target = self.deq(e, e, ty)?;
-                mm(self.g.env.convert(p, target))?
+                if ls != ls2 && a.iter().zip(&b).any(|(&x, &y)| x != y) {
+                    // an opaque constant at equivalent levels: its level congruence (a theorem
+                    // from its value, `induct::theorem_eeqv`), then `eeqv_df`
+                    let Some(&eq_th) = self.g.eeqv_axioms.get(&ci.term) else {
+                        return Err(format!("constDF for the definition {s} at different levels is not supported yet"))
+                    };
+                    let mut eargs: Vec<E> = args[1..].to_vec();
+                    let mut hyps = Vec::new();
+                    for (&l, &l2) in a.iter().zip(&b) {
+                        eargs.push(self.trl(l2)?);
+                        hyps.push(self.level_equiv(l, l2)?);
+                    }
+                    let p_eq = mm(self.g.env.thm(eq_th, &eargs, &hyps))?;
+                    // the typing lemma concludes `ty G (c us) T`
+                    let cp = self.g.env.concl(p);
+                    let Some((_, &[_, c1, t])) = self.g.env.head(cp) else { return Err(format!("constDF for {s}: not a typing")) };
+                    let c2 = self.g.env.app(ci.term, &eargs[a.len()..]);
+                    mm(self.g.env.thm_n("eeqv_df", &[g, c1, c2, t], &[p, p_eq]))?
+                } else {
+                    let target = self.deq(e, e, ty)?;
+                    mm(self.g.env.convert(p, target))?
+                }
             }
         };
         Ok((ty, p))

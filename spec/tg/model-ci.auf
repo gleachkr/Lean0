@@ -8495,3 +8495,448 @@ l71: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx Dl) w ⇒ (dt u (m
 l72: $ … ⇒ dt u (mcv hfin) ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ w r = dt u (mcv hfin) (enc_expr M) w r $ by and_elim_l [l71]
 l73: $ … ⇒ dt u (mcv hfin) ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ w r ∈ dt u (mcv hfin) (enc_expr S) w r $ by and_elim_r [l71]
 z1: $ deq Dl (bvar nz) M S $ by mdeq_i [l72, l73]
+
+lemma fci_pip (G: ctx) (u: lvl) (A B: expr): $ deq G A A (srt u) $ > $ deq (cons A G) B B (srt lz) $ > $ deq G (pi A B) (pi A B) (srt lz) $
+----
+l1: $ deq G (pi A B) (pi A B) (srt (limax u lz)) $ by forallEDF [#1, #2]
+l0: $ leqv (limax u lz) lz $ by limax_zero
+l2: $ deq G (srt (limax u lz)) (srt lz) (srt (ls (limax u lz))) $ by sortDF [l0]
+l3: $ deq G (pi A B) (pi A B) (srt lz) $ by defeqDF [l2, l1]
+
+propext_ty
+----------
+h1: $ closed nz (ind_ty iff_D nz) $ by closed_ind_ty
+h2: $ le nz nz $ by le_z
+h3: $ lift n1 nz (ind_ty iff_D nz) (ind_ty iff_D nz) $ by lift_closed [h1, h2]
+h4: $ le nz n1 $ by le_z
+h5: $ add n1 nz n1 $ by add_z
+h6: $ add n1 n1 n2 $ by add_s [h5]
+h7: $ lift n1 nz (bvar n1) (bvar n2) $ by lift_bvar_ge [h4, h6]
+h8: $ lift n1 nz (app (ind_ty iff_D nz) (bvar n1)) (app (ind_ty iff_D nz) (bvar n2)) $ by lift_app [h3, h7]
+h9: $ add nz nz nz $ by add_z
+h10: $ add nz n1 n1 $ by add_s [h9]
+h11: $ lift n1 nz (bvar nz) (bvar n1) $ by lift_bvar_ge [h2, h10]
+h12: $ lift n1 nz (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (app (app (ind_ty iff_D nz) (bvar n2)) (bvar n1)) $ by lift_app [h8, h11]
+h13: $ lookup (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))) nz (app (app (ind_ty iff_D nz) (bvar n2)) (bvar n1)) $ by lookup_z [h12]
+h14: $ deq (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))) (bvar nz) (bvar nz) (app (app (ind_ty iff_D nz) (bvar n2)) (bvar n1)) $ by bvar [h13]
+h15: $ spine (ind_ty iff_D nz) (ind_ty iff_D nz) nz $ by spine_z
+h16: $ spine (ind_ty iff_D nz) (app (ind_ty iff_D nz) (bvar n2)) n1 $ by spine_s [h15]
+h17: $ spine (ind_ty iff_D nz) (app (app (ind_ty iff_D nz) (bvar n2)) (bvar n1)) n2 $ by spine_s [h16]
+h18: $ ind_data iff_D iff_blk (cons Prop (cons Prop nil)) (tcons Prop (ccons (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) cnil) tnil) $ by ind_data_i
+h19: $ pis nil (pi Prop (pi Prop Prop)) (pi Prop (pi Prop Prop)) $ by pis_nil
+h20: $ pis (cons Prop nil) (pi Prop Prop) (pi Prop (pi Prop Prop)) $ by pis_cons [h19]
+h21: $ pis (cons Prop (cons Prop nil)) Prop (pi Prop (pi Prop Prop)) $ by pis_cons [h20]
+h22: $ closed nz Prop $ by closed_srt
+h23: $ closed n1 Prop $ by closed_srt
+h24: $ closed n2 Prop $ by closed_srt
+h25: $ closed n1 (pi Prop Prop) $ by closed_pi [h23, h24]
+h26: $ closed nz (pi Prop (pi Prop Prop)) $ by closed_pi [h22, h25]
+h27: $ tys_closed (cons Prop (cons Prop nil)) tnil $ by tys_closed_nil
+h28: $ tys_closed (cons Prop (cons Prop nil)) (tcons Prop (ccons (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) cnil) tnil) $ by tys_closed_cons [h21, h26, h27]
+h29: $ ctx_wf (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))) nil $ by ctx_wf_nil
+h30: $ capp nil (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))) (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))) $ by capp_nil
+h31: $ leqv lz lz $ by leqv_refl
+h32: $ deq (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))) Prop Prop (srt (ls lz)) $ by sortDF [h31]
+h33: $ ctx_wf (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))) (cons Prop nil) $ by ctx_wf_cons [h29, h30, h32]
+h34: $ capp (cons Prop nil) (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))) (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G)))) $ by capp_cons [h30]
+h35: $ deq (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G)))) Prop Prop (srt (ls lz)) $ by sortDF [h31]
+h36: $ ctx_wf (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))) (cons Prop (cons Prop nil)) $ by ctx_wf_cons [h33, h34, h35]
+h37: $ capp (cons Prop (cons Prop nil)) (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))) $ by capp_cons [h34]
+h38: $ isort Prop nz lz $ by isort_srt
+h39: $ deq (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))) Prop Prop (srt (ls lz)) $ by sortDF [h31]
+h40: $ tys_ty (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))) tnil $ by tys_ty_nil
+h41: $ tys_ty (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))) (tcons Prop (ccons (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) cnil) tnil) $ by tys_ty_cons [h38, h39, h40]
+h42: $ tys_ok (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))) iff_D $ by tys_ok_i [h18, h28, h36, h37, h41]
+h43: $ clen nil nz $ by clen_nil
+h44: $ clen (cons Prop nil) n1 $ by clen_cons [h43]
+h45: $ clen (cons Prop (cons Prop nil)) n2 $ by clen_cons [h44]
+h46: $ ntys tnil nz nz $ by ntys_nil
+h47: $ clen_c cnil nz $ by clen_c_nil
+h48: $ clen_c (ccons (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) cnil) n1 $ by clen_c_cons [h47]
+h49: $ ntys (tcons Prop (ccons (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) cnil) tnil) n1 n1 $ by ntys_cons [h46, h48, h10]
+h50: $ nth_ty (tcons Prop (ccons (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) cnil) tnil) nz Prop (ccons (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) cnil) $ by nth_ty_z
+h51: $ pis nil (pi Prop (pi Prop (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))))) (pi Prop (pi Prop (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))))) $ by pis_nil
+h52: $ pis (cons Prop nil) (pi Prop (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2))))) (pi Prop (pi Prop (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))))) $ by pis_cons [h51]
+h53: $ pis (cons Prop (cons Prop nil)) (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) (pi Prop (pi Prop (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))))) $ by pis_cons [h52]
+h54: $ le n1 n2 $ by le_s [h4]
+h55: $ le n2 n3 $ by le_s [h54]
+h56: $ closed n3 (bvar n1) $ by closed_bvar [h55]
+h57: $ le nz n2 $ by le_z
+h58: $ le n1 n3 $ by le_s [h57]
+h59: $ le n2 n4 $ by le_s [h58]
+h60: $ closed n4 (bvar n1) $ by closed_bvar [h59]
+h61: $ closed n3 (pi (bvar n1) (bvar n1)) $ by closed_pi [h56, h60]
+h62: $ le n3 n4 $ by le_s [h55]
+h63: $ le n4 n5 $ by le_s [h62]
+h64: $ closed n5 (bvar n3) $ by closed_bvar [h63]
+h65: $ closed n4 (pi (bvar n1) (bvar n3)) $ by closed_pi [h60, h64]
+h66: $ le n1 n1 $ by le_s [h2]
+h67: $ le n2 n2 $ by le_s [h66]
+h68: $ le n3 n3 $ by le_s [h67]
+h69: $ le n4 n4 $ by le_s [h68]
+h70: $ le n5 n5 $ by le_s [h69]
+h71: $ closed n5 (bvar n4) $ by closed_bvar [h70]
+h72: $ closed n5 (app (bvar n4) (bvar n3)) $ by closed_app [h71, h64]
+h73: $ le n3 n5 $ by le_s [h59]
+h74: $ closed n5 (bvar n2) $ by closed_bvar [h73]
+h75: $ closed n5 (app (app (bvar n4) (bvar n3)) (bvar n2)) $ by closed_app [h72, h74]
+h76: $ closed n4 (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2))) $ by closed_pi [h65, h75]
+h77: $ closed n3 (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) $ by closed_pi [h61, h76]
+h78: $ closed n2 (pi Prop (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2))))) $ by closed_pi [h24, h77]
+h79: $ closed n1 (pi Prop (pi Prop (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))))) $ by closed_pi [h23, h78]
+h80: $ add nz n2 n2 $ by add_s [h10]
+h81: $ closed n2 (bvar n1) $ by closed_bvar [h67]
+h82: $ closed n2 (pi (bvar n1) (bvar n1)) $ by closed_pi [h81, h56]
+h83: $ inst n2 (bvar n1) (ind_ty iff_D nz) (bvar n1) $ by inst_bvar_lt [h67]
+h84: $ inst n3 (bvar n1) (ind_ty iff_D nz) (bvar n1) $ by inst_bvar_lt [h55]
+h85: $ inst n2 (pi (bvar n1) (bvar n1)) (ind_ty iff_D nz) (pi (bvar n1) (bvar n1)) $ by inst_pi [h83, h84]
+h86: $ sinst iff_D n1 n1 n2 (pi (bvar n1) (bvar n1)) (pi (bvar n1) (bvar n1)) $ by sinst_done
+h87: $ sinst iff_D nz n1 n2 (pi (bvar n1) (bvar n1)) (pi (bvar n1) (bvar n1)) $ by sinst_step [h66, h85, h86]
+h88: $ lift n1 nz Prop Prop $ by lift_srt
+h89: $ lookup (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G)))) nz Prop $ by lookup_z [h88]
+h90: $ lookup (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))) n1 Prop $ by lookup_s [h89, h88]
+h91: $ deq (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))) (bvar n1) (bvar n1) Prop $ by bvar [h90]
+h92: $ lookup (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))) nz Prop $ by lookup_z [h88]
+h93: $ lookup (cons (bvar n1) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G)))))) n1 Prop $ by lookup_s [h92, h88]
+h94: $ deq (cons (bvar n1) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G)))))) (bvar n1) (bvar n1) Prop $ by bvar [h93]
+h95: $ deq (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))) (pi (bvar n1) (bvar n1)) (pi (bvar n1) (bvar n1)) Prop $ by fci_pip [h91, h94]
+h96: $ ulevel lz lz $ by ulevel_prop [h31]
+h97: $ add n1 n2 n3 $ by add_s [h6]
+h98: $ closed n4 (bvar n3) $ by closed_bvar [h69]
+h99: $ closed n3 (pi (bvar n1) (bvar n3)) $ by closed_pi [h56, h98]
+h100: $ inst n4 (bvar n3) (ind_ty iff_D nz) (bvar n3) $ by inst_bvar_lt [h69]
+h101: $ inst n3 (pi (bvar n1) (bvar n3)) (ind_ty iff_D nz) (pi (bvar n1) (bvar n3)) $ by inst_pi [h84, h100]
+h102: $ sinst iff_D n1 n1 n3 (pi (bvar n1) (bvar n3)) (pi (bvar n1) (bvar n3)) $ by sinst_done
+h103: $ sinst iff_D nz n1 n3 (pi (bvar n1) (bvar n3)) (pi (bvar n1) (bvar n3)) $ by sinst_step [h66, h101, h102]
+h104: $ lookup (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G)))))) n1 Prop $ by lookup_s [h92, h88]
+h105: $ deq (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G)))))) (bvar n1) (bvar n1) Prop $ by bvar [h104]
+h106: $ lookup (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G)))))) n2 Prop $ by lookup_s [h90, h88]
+h107: $ lookup (cons (bvar n1) (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))))) n3 Prop $ by lookup_s [h106, h88]
+h108: $ deq (cons (bvar n1) (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))))) (bvar n3) (bvar n3) Prop $ by bvar [h107]
+h109: $ deq (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G)))))) (pi (bvar n1) (bvar n3)) (pi (bvar n1) (bvar n3)) Prop $ by fci_pip [h105, h108]
+h110: $ spine (bvar n4) (bvar n4) nz $ by spine_z
+h111: $ spine (bvar n4) (app (bvar n4) (bvar n3)) n1 $ by spine_s [h110]
+h112: $ spine (bvar n4) (app (app (bvar n4) (bvar n3)) (bvar n2)) n2 $ by spine_s [h111]
+h113: $ add n2 nz n2 $ by add_z
+h114: $ add n2 n1 n3 $ by add_s [h113]
+h115: $ add n2 n2 n4 $ by add_s [h114]
+h116: $ add n4 nz n4 $ by add_z
+h117: $ pargs (bvar n4) n4 nz (bvar n4) $ by pargs_z
+h118: $ pargs (bvar n4) n3 n1 (app (bvar n4) (bvar n3)) $ by pargs_s [h117]
+h119: $ pargs (bvar n4) n2 n2 (app (app (bvar n4) (bvar n3)) (bvar n2)) $ by pargs_s [h118]
+h120: $ nidx iff_D nz nz $ by nidx_i [h18, h50, h38]
+h121: $ iargs n4 nz (app (app (bvar n4) (bvar n3)) (bvar n2)) (app (app (bvar n4) (bvar n3)) (bvar n2)) $ by iargs_z
+h122: $ indapp iff_D n1 n2 n2 (app (app (bvar n4) (bvar n3)) (bvar n2)) nz $ by indapp_i [h112, h115, h116, h66, h119, h120, h121]
+h123: $ lift n4 nz (ind_ty iff_D nz) (ind_ty iff_D nz) $ by lift_closed [h1, h2]
+h124: $ inst n4 (bvar n4) (ind_ty iff_D nz) (ind_ty iff_D nz) $ by inst_bvar_eq [h123]
+h125: $ inst n4 (app (bvar n4) (bvar n3)) (ind_ty iff_D nz) (app (ind_ty iff_D nz) (bvar n3)) $ by inst_app [h124, h100]
+h126: $ inst n4 (bvar n2) (ind_ty iff_D nz) (bvar n2) $ by inst_bvar_lt [h62]
+h127: $ inst n4 (app (app (bvar n4) (bvar n3)) (bvar n2)) (ind_ty iff_D nz) (app (app (ind_ty iff_D nz) (bvar n3)) (bvar n2)) $ by inst_app [h125, h126]
+h128: $ sinst iff_D n1 n1 n4 (app (app (ind_ty iff_D nz) (bvar n3)) (bvar n2)) (app (app (ind_ty iff_D nz) (bvar n3)) (bvar n2)) $ by sinst_done
+h129: $ sinst iff_D nz n1 n4 (app (app (bvar n4) (bvar n3)) (bvar n2)) (app (app (ind_ty iff_D nz) (bvar n3)) (bvar n2)) $ by sinst_step [h66, h127, h128]
+h130: $ lift n4 nz Prop Prop $ by lift_srt
+h131: $ lift n4 n1 Prop Prop $ by lift_srt
+h132: $ lift n4 n2 Prop Prop $ by lift_srt
+h133: $ lift n4 n1 (pi Prop Prop) (pi Prop Prop) $ by lift_pi [h131, h132]
+h134: $ lift n4 nz (pi Prop (pi Prop Prop)) (pi Prop (pi Prop Prop)) $ by lift_pi [h130, h133]
+h135: $ sty (cons (pi (bvar n1) (bvar n3)) (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))))) (ind_ty iff_D nz) (pi Prop (pi Prop Prop)) (ind_ty iff_D nz) (pi Prop (pi Prop Prop)) $ by sty_nil
+h136: $ lookup (cons (pi (bvar n1) (bvar n3)) (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))))) n3 Prop $ by lookup_s [h106, h88]
+h137: $ deq (cons (pi (bvar n1) (bvar n3)) (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))))) (bvar n3) (bvar n3) Prop $ by bvar [h136]
+h138: $ inst nz Prop (bvar n3) Prop $ by inst_srt
+h139: $ inst n1 Prop (bvar n3) Prop $ by inst_srt
+h140: $ inst nz (pi Prop Prop) (bvar n3) (pi Prop Prop) $ by inst_pi [h138, h139]
+h141: $ sty (cons (pi (bvar n1) (bvar n3)) (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))))) (ind_ty iff_D nz) (pi Prop (pi Prop Prop)) (app (ind_ty iff_D nz) (bvar n3)) (pi Prop Prop) $ by sty_app [h135, h137, h140]
+h142: $ lookup (cons (pi (bvar n1) (bvar n3)) (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))))) n2 Prop $ by lookup_s [h104, h88]
+h143: $ deq (cons (pi (bvar n1) (bvar n3)) (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))))) (bvar n2) (bvar n2) Prop $ by bvar [h142]
+h144: $ inst nz Prop (bvar n2) Prop $ by inst_srt
+h145: $ sty (cons (pi (bvar n1) (bvar n3)) (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))))) (ind_ty iff_D nz) (pi Prop (pi Prop Prop)) (app (app (ind_ty iff_D nz) (bvar n3)) (bvar n2)) Prop $ by sty_app [h141, h143, h144]
+h146: $ cwf iff_D n1 n2 lz nz (cons (pi (bvar n1) (bvar n3)) (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))))) n2 (app (app (bvar n4) (bvar n3)) (bvar n2)) $ by cwf_res [h122, h115, h129, h18, h50, h21, h134, h145]
+h147: $ cwf iff_D n1 n2 lz nz (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G)))))) n1 (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2))) $ by cwf_pi [h97, h99, h103, h109, h96, h146]
+h148: $ cwf iff_D n1 n2 lz nz (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))) nz (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) $ by cwf_pi [h80, h82, h87, h95, h96, h147]
+h149: $ ctors_wf iff_D n1 n2 lz nz (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))) cnil $ by ctors_wf_nil
+h150: $ ctors_wf iff_D n1 n2 lz nz (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))) (ccons (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) cnil) $ by ctors_wf_cons [h18, h53, h79, h148, h149]
+h151: $ tys_wf iff_D n1 n2 lz n1 (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))) tnil $ by tys_wf_nil
+h152: $ tys_wf iff_D n1 n2 lz nz (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))) (tcons Prop (ccons (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) cnil) tnil) $ by tys_wf_cons [h38, h31, h150, h151]
+h153: $ ind_nested iff_D nil $ by ind_nested_mk
+h154: $ ndecl nil n1 n1 $ by ndecl_nil
+h155: $ nst_ok (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))) iff_D n1 nil $ by nst_ok_nil
+h156: $ ind_wf (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))) iff_D $ by ind_wf_i [h42, h18, h45, h49, h37, h50, h38, h152, h153, h154, h155]
+h157: $ struct_like iff_D nz $ by struct_like_i [h18, h50, h38]
+h158: $ nth_ctor (ccons (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) cnil) nz (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) $ by nth_ctor_z
+h159: $ fprops iff_D n1 n2 (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G)))))) n1 nz (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2))) $ by fprops_z
+h160: $ fprops iff_D n1 n2 (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))) nz n1 (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) $ by fprops_s [h80, h87, h95, h159]
+h161: $ proj_ok (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))) iff_D nz nz $ by proj_ok_prop [h18, h45, h49, h37, h50, h158, h160]
+h162: $ inst n3 (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2))) (ind_ty iff_D nz) (pi (pi (bvar n1) (bvar n3)) (app (app (ind_ty iff_D nz) (bvar n3)) (bvar n2))) $ by inst_pi [h101, h127]
+h163: $ inst n2 (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) (ind_ty iff_D nz) (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (ind_ty iff_D nz) (bvar n3)) (bvar n2)))) $ by inst_pi [h85, h162]
+h164: $ sinst iff_D n1 n1 n2 (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (ind_ty iff_D nz) (bvar n3)) (bvar n2)))) (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (ind_ty iff_D nz) (bvar n3)) (bvar n2)))) $ by sinst_done
+h165: $ sinst iff_D nz n1 n2 (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (ind_ty iff_D nz) (bvar n3)) (bvar n2)))) $ by sinst_step [h66, h163, h164]
+h166: $ nth_pi (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (ind_ty iff_D nz) (bvar n3)) (bvar n2)))) nz (pi (bvar n1) (bvar n1)) $ by nth_pi_z
+h167: $ field_ty iff_D nz nz (pi (bvar n1) (bvar n1)) $ by field_ty_i [h18, h50, h158, h45, h49, h165, h166]
+h168: $ rst iff_D nil (pi (bvar n1) (bvar n1)) (pi (bvar n1) (bvar n1)) $ by rst_nil
+h169: $ pinst n2 (ind_ty iff_D nz) (pi (bvar n1) (bvar n1)) (pi (bvar n1) (bvar n1)) $ by pinst_head
+h170: $ lift n1 nz (bvar n2) (bvar n3) $ by lift_bvar_ge [h57, h114]
+h171: $ inst n1 (bvar n1) (bvar n2) (bvar n3) $ by inst_bvar_eq [h170]
+h172: $ inst n2 (bvar n1) (bvar n2) (bvar n1) $ by inst_bvar_lt [h67]
+h173: $ inst n1 (pi (bvar n1) (bvar n1)) (bvar n2) (pi (bvar n3) (bvar n1)) $ by inst_pi [h171, h172]
+h174: $ pinst n1 (app (ind_ty iff_D nz) (bvar n2)) (pi (bvar n1) (bvar n1)) (pi (bvar n3) (bvar n1)) $ by pinst_app [h169, h173]
+h175: $ inst nz (bvar n3) (bvar n1) (bvar n2) $ by inst_bvar_gt [h57]
+h176: $ inst n1 (bvar n1) (bvar n1) (bvar n2) $ by inst_bvar_eq [h7]
+h177: $ inst nz (pi (bvar n3) (bvar n1)) (bvar n1) (pi (bvar n2) (bvar n2)) $ by inst_pi [h175, h176]
+h178: $ pinst nz (app (app (ind_ty iff_D nz) (bvar n2)) (bvar n1)) (pi (bvar n1) (bvar n1)) (pi (bvar n2) (bvar n2)) $ by pinst_app [h174, h177]
+h179: $ qinst iff_blk (bvar nz) nz nz (pi (bvar n2) (bvar n2)) (pi (bvar n2) (bvar n2)) $ by qinst_z
+h180: $ deq (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))) (proj iff_blk nz (bvar nz)) (proj iff_blk nz (bvar nz)) (pi (bvar n2) (bvar n2)) $ by proj_ty [h14, h17, h156, h18, h157, h161, h45, h167, h153, h168, h178, h179]
+h181: $ fprops iff_D n1 n2 (cons (pi (bvar n1) (bvar n3)) (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))))) n2 nz (app (app (bvar n4) (bvar n3)) (bvar n2)) $ by fprops_z
+h182: $ fprops iff_D n1 n2 (cons (pi (bvar n1) (bvar n1)) (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G)))))) n1 n1 (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2))) $ by fprops_s [h97, h103, h109, h181]
+h183: $ fprops iff_D n1 n2 (cons Prop (cons Prop (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))))) nz n2 (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (bvar n4) (bvar n3)) (bvar n2)))) $ by fprops_s [h80, h87, h95, h182]
+h184: $ proj_ok (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))) iff_D nz n1 $ by proj_ok_prop [h18, h45, h49, h37, h50, h158, h183]
+h185: $ nth_pi (pi (pi (bvar n1) (bvar n3)) (app (app (ind_ty iff_D nz) (bvar n3)) (bvar n2))) nz (pi (bvar n1) (bvar n3)) $ by nth_pi_z
+h186: $ nth_pi (pi (pi (bvar n1) (bvar n1)) (pi (pi (bvar n1) (bvar n3)) (app (app (ind_ty iff_D nz) (bvar n3)) (bvar n2)))) n1 (pi (bvar n1) (bvar n3)) $ by nth_pi_s [h185]
+h187: $ field_ty iff_D nz n1 (pi (bvar n1) (bvar n3)) $ by field_ty_i [h18, h50, h158, h45, h49, h165, h186]
+h188: $ rst iff_D nil (pi (bvar n1) (bvar n3)) (pi (bvar n1) (bvar n3)) $ by rst_nil
+h189: $ pinst n3 (ind_ty iff_D nz) (pi (bvar n1) (bvar n3)) (pi (bvar n1) (bvar n3)) $ by pinst_head
+h190: $ add n2 n3 n5 $ by add_s [h115]
+h191: $ lift n3 nz (bvar n2) (bvar n5) $ by lift_bvar_ge [h57, h190]
+h192: $ inst n3 (bvar n3) (bvar n2) (bvar n5) $ by inst_bvar_eq [h191]
+h193: $ inst n2 (pi (bvar n1) (bvar n3)) (bvar n2) (pi (bvar n1) (bvar n5)) $ by inst_pi [h172, h192]
+h194: $ pinst n2 (app (ind_ty iff_D nz) (bvar n2)) (pi (bvar n1) (bvar n3)) (pi (bvar n1) (bvar n5)) $ by pinst_app [h189, h193]
+h195: $ inst n2 (bvar n5) (bvar n1) (bvar n4) $ by inst_bvar_gt [h59]
+h196: $ inst n1 (pi (bvar n1) (bvar n5)) (bvar n1) (pi (bvar n2) (bvar n4)) $ by inst_pi [h176, h195]
+h197: $ pinst n1 (app (app (ind_ty iff_D nz) (bvar n2)) (bvar n1)) (pi (bvar n1) (bvar n3)) (pi (bvar n2) (bvar n4)) $ by pinst_app [h194, h196]
+h198: $ inst nz (bvar n2) (proj iff_blk nz (bvar nz)) (bvar n1) $ by inst_bvar_gt [h4]
+h199: $ inst n1 (bvar n4) (proj iff_blk nz (bvar nz)) (bvar n3) $ by inst_bvar_gt [h58]
+h200: $ inst nz (pi (bvar n2) (bvar n4)) (proj iff_blk nz (bvar nz)) (pi (bvar n1) (bvar n3)) $ by inst_pi [h198, h199]
+h201: $ qinst iff_blk (bvar nz) nz n1 (pi (bvar n1) (bvar n3)) (pi (bvar n1) (bvar n3)) $ by qinst_z
+h202: $ qinst iff_blk (bvar nz) n1 nz (pi (bvar n2) (bvar n4)) (pi (bvar n1) (bvar n3)) $ by qinst_s [h200, h201]
+h203: $ deq (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons Prop (cons Prop G))) (proj iff_blk n1 (bvar nz)) (proj iff_blk n1 (bvar nz)) (pi (bvar n1) (bvar n3)) $ by proj_ty [h14, h17, h156, h18, h157, h184, h45, h187, h153, h188, h197, h202]
+p0: $ _ ⇒ hty ⊆ hfin $ by hfin_hty
+p1: $ _ ⇒ hctor ⊆ hfin $ by hfin_hctor
+p2: $ _ ⇒ hrec ⊆ hfin $ by hfin_hrec
+p3: $ _ ⇒ functional hfin $ by hfin_functional
+q1: $ _ ⇒ meqs (mcv hfin) (ls lz) $ by meqs_i [p0, p1, p2, p3]
+l1: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ uadm u $ by ax
+l2: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ w ∊ lvals $ by ax
+l3: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ r ∊ sat u (mcv hfin) (enc_ctx G) w $ by ax
+l4: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ w ∈ lvals $ by welc_wcel [l2]
+l5: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ sat u (mcv hfin) (enc_ctx G) w ⊆ fseq u $ by sat_fseq
+l6: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ r ∈ fseq u $ by wcel_subset [l5, welc_wcel [l3]]
+l7: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ ∅ ∈ dt u (mcv hfin) (enc_expr (pi Prop (pi Prop (pi (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D (ls lz)) nz) Prop) (bvar n2)) (bvar n1)))))) w r $ by propext_inh [q1, h180, h203]
+l8: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ hcst ⊆ hfin $ by hfin_hcst
+l9: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ functional hfin $ by hfin_functional
+l10: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ enc_atom propext_atom ∈ trees ω $ by enc_atom_trees
+l11: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ enc_lvls (lnil) ∈ trees ω $ by enc_lvls_trees
+l12: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ dt u (mcv hfin) (enc_expr (propext)) w r = mclip u (sclip (fv Envx ⟨ u , ⟨ enc_atom propext_atom , lsv (enc_lvls (lnil)) w ⟩ ⟩)) $ by dt_cst [l8, l9, l10, l11, l4, l6]
+l13: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = ∅ ⇒ lsv (enc_lvls (lnil)) w = ∅ $ by lsv_lnil
+l14: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = ∅ ⇒ xx8 = ∅ $ by ax
+l15: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = ∅ ⇒ lsv (enc_lvls (lnil)) w = xx8 $ by eq_trans [l13, eq_sym [l14]]
+l16: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = ∅ ⇒ fv Envx ⟨ u , ⟨ enc_atom propext_atom , xx8 ⟩ ⟩ = ∅ $ by envx_propext
+l17: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = ∅ ⇒ Envx = Envx $ by eq_refl
+l18: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = ∅ ⇒ u = u $ by eq_refl
+l19: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = ∅ ⇒ enc_atom propext_atom = enc_atom propext_atom $ by eq_refl
+l20: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = ∅ ⇒ fv Envx ⟨ u , ⟨ enc_atom propext_atom , lsv (enc_lvls (lnil)) w ⟩ ⟩ = fv Envx ⟨ u , ⟨ enc_atom propext_atom , xx8 ⟩ ⟩ $ by fv_eq [l17, opair_eq [l18, opair_eq [l19, l15]]]
+l21: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = ∅ ⇒ fv Envx ⟨ u , ⟨ enc_atom propext_atom , lsv (enc_lvls (lnil)) w ⟩ ⟩ = ∅ $ by eq_trans [l20, l16]
+l22: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = ∅ ⇒ isset ∅ $ by ax_empty
+l23: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = ∅ ⇒ sclip (fv Envx ⟨ u , ⟨ enc_atom propext_atom , lsv (enc_lvls (lnil)) w ⟩ ⟩) = ∅ $ by eq_trans [sclip_eq [l21], sclip_in [l22]]
+l24: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = ∅ ⇒ uadm u $ by weaken [l1]
+l25: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = ∅ ⇒ mclip u (sclip (fv Envx ⟨ u , ⟨ enc_atom propext_atom , lsv (enc_lvls (lnil)) w ⟩ ⟩)) = ∅ $ by eq_trans [mclip_eq [l18, l23], mclip_in [uadm_empty [l24]]]
+l26: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = ∅ ⇒ dt u (mcv hfin) (enc_expr (propext)) w r = mclip u (sclip (fv Envx ⟨ u , ⟨ enc_atom propext_atom , lsv (enc_lvls (lnil)) w ⟩ ⟩)) $ by weaken [l12]
+l27: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = ∅ ⇒ dt u (mcv hfin) (enc_expr (propext)) w r = ∅ $ by eq_trans [l26, l25]
+l28: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ isset ∅ $ by ax_empty
+l29: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ dt u (mcv hfin) (enc_expr (propext)) w r = ∅ $ by isset_elim [l28, l27]
+l30: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ dt u (mcv hfin) (enc_expr (propext)) w r ∈ dt u (mcv hfin) (enc_expr (pi Prop (pi Prop (pi (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D (ls lz)) nz) Prop) (bvar n2)) (bvar n1)))))) w r $ by wcel_eq_l [eq_sym [l29], l7]
+l31: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ dt u (mcv hfin) (enc_expr (propext)) w r = dt u (mcv hfin) (enc_expr (propext)) w r $ by eq_refl
+z1: $ ty G (propext) (pi Prop (pi Prop (pi (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D (ls lz)) nz) Prop) (bvar n2)) (bvar n1))))) $ by mdeq_i [l31, l30]
+
+lemma fci_quot_sound_ty (G: ctx) (l: lvl): $ ty G (quot_sound l) (pi (srt l) (pi (pi (bvar nz) (pi (bvar n1) Prop)) (pi (bvar n1) (pi (bvar n2) (pi (app (app (bvar n2) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D l) nz) (app (app (quot l) (bvar n4)) (bvar n3))) (app (app (app (quot_mk l) (bvar n4)) (bvar n3)) (bvar n2))) (app (app (app (quot_mk l) (bvar n4)) (bvar n3)) (bvar n1)))))))) $
+----
+q2: $ _ ⇒ hqu hfin $ by hfin_hqu
+p0: $ _ ⇒ hty ⊆ hfin $ by hfin_hty
+p1: $ _ ⇒ hctor ⊆ hfin $ by hfin_hctor
+p2: $ _ ⇒ hrec ⊆ hfin $ by hfin_hrec
+p3: $ _ ⇒ functional hfin $ by hfin_functional
+q1: $ _ ⇒ meqs (mcv hfin) l $ by meqs_i [p0, p1, p2, p3]
+l1: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ uadm u $ by ax
+l2: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ w ∊ lvals $ by ax
+l3: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ r ∊ sat u (mcv hfin) (enc_ctx G) w $ by ax
+l4: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ w ∈ lvals $ by welc_wcel [l2]
+l5: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ sat u (mcv hfin) (enc_ctx G) w ⊆ fseq u $ by sat_fseq
+l6: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ r ∈ fseq u $ by wcel_subset [l5, welc_wcel [l3]]
+l7: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ ∅ ∈ dt u (mcv hfin) (enc_expr (pi (srt l) (pi (pi (bvar nz) (pi (bvar n1) Prop)) (pi (bvar n1) (pi (bvar n2) (pi (app (app (bvar n2) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D l) nz) (app (app (quot l) (bvar n4)) (bvar n3))) (app (app (app (quot_mk l) (bvar n4)) (bvar n3)) (bvar n2))) (app (app (app (quot_mk l) (bvar n4)) (bvar n3)) (bvar n1))))))))) w r $ by quot_sound_inh [q2, q1]
+l8: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ hcst ⊆ hfin $ by hfin_hcst
+l9: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ functional hfin $ by hfin_functional
+l10: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ enc_atom quot_sound_atom ∈ trees ω $ by enc_atom_trees
+l11: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ enc_lvls (lcons l lnil) ∈ trees ω $ by enc_lvls_trees
+l12: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ dt u (mcv hfin) (enc_expr (quot_sound l)) w r = mclip u (sclip (fv Envx ⟨ u , ⟨ enc_atom quot_sound_atom , lsv (enc_lvls (lcons l lnil)) w ⟩ ⟩)) $ by dt_cst [l8, l9, l10, l11, l4, l6]
+l13: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ xx8 = lsv (enc_lvls (lcons l lnil)) w $ by ax
+l14: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ lsv (enc_lvls (lcons l lnil)) w = xx8 $ by eq_sym [l13]
+l15: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ fv Envx ⟨ u , ⟨ enc_atom quot_sound_atom , xx8 ⟩ ⟩ = ∅ $ by envx_quot_sound
+l16: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ Envx = Envx $ by eq_refl
+l17: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ u = u $ by eq_refl
+l18: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ enc_atom quot_sound_atom = enc_atom quot_sound_atom $ by eq_refl
+l19: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ fv Envx ⟨ u , ⟨ enc_atom quot_sound_atom , lsv (enc_lvls (lcons l lnil)) w ⟩ ⟩ = fv Envx ⟨ u , ⟨ enc_atom quot_sound_atom , xx8 ⟩ ⟩ $ by fv_eq [l16, opair_eq [l17, opair_eq [l18, l14]]]
+l20: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ fv Envx ⟨ u , ⟨ enc_atom quot_sound_atom , lsv (enc_lvls (lcons l lnil)) w ⟩ ⟩ = ∅ $ by eq_trans [l19, l15]
+l21: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ isset ∅ $ by ax_empty
+l22: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ sclip (fv Envx ⟨ u , ⟨ enc_atom quot_sound_atom , lsv (enc_lvls (lcons l lnil)) w ⟩ ⟩) = ∅ $ by eq_trans [sclip_eq [l20], sclip_in [l21]]
+l23: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ uadm u $ by weaken [l1]
+l24: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ mclip u (sclip (fv Envx ⟨ u , ⟨ enc_atom quot_sound_atom , lsv (enc_lvls (lcons l lnil)) w ⟩ ⟩)) = ∅ $ by eq_trans [mclip_eq [l17, l22], mclip_in [uadm_empty [l23]]]
+l25: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ dt u (mcv hfin) (enc_expr (quot_sound l)) w r = mclip u (sclip (fv Envx ⟨ u , ⟨ enc_atom quot_sound_atom , lsv (enc_lvls (lcons l lnil)) w ⟩ ⟩)) $ by weaken [l12]
+l26: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ dt u (mcv hfin) (enc_expr (quot_sound l)) w r = ∅ $ by eq_trans [l25, l24]
+l27: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ enc_lvls (lcons l lnil) ∈ trees ω $ by enc_lvls_trees
+l28: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ w ∊ lvals $ by weaken [l2]
+l29: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ isset (lsv (enc_lvls (lcons l lnil)) w) $ by wcel_isset [lsv_fseq [wcel_isset [l27], l28]]
+l30: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ dt u (mcv hfin) (enc_expr (quot_sound l)) w r = ∅ $ by isset_elim [l29, l26]
+l31: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ dt u (mcv hfin) (enc_expr (quot_sound l)) w r ∈ dt u (mcv hfin) (enc_expr (pi (srt l) (pi (pi (bvar nz) (pi (bvar n1) Prop)) (pi (bvar n1) (pi (bvar n2) (pi (app (app (bvar n2) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D l) nz) (app (app (quot l) (bvar n4)) (bvar n3))) (app (app (app (quot_mk l) (bvar n4)) (bvar n3)) (bvar n2))) (app (app (app (quot_mk l) (bvar n4)) (bvar n3)) (bvar n1))))))))) w r $ by wcel_eq_l [eq_sym [l30], l7]
+l32: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ dt u (mcv hfin) (enc_expr (quot_sound l)) w r = dt u (mcv hfin) (enc_expr (quot_sound l)) w r $ by eq_refl
+z1: $ ty G (quot_sound l) (pi (srt l) (pi (pi (bvar nz) (pi (bvar n1) Prop)) (pi (bvar n1) (pi (bvar n2) (pi (app (app (bvar n2) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D l) nz) (app (app (quot l) (bvar n4)) (bvar n3))) (app (app (app (quot_mk l) (bvar n4)) (bvar n3)) (bvar n2))) (app (app (app (quot_mk l) (bvar n4)) (bvar n3)) (bvar n1)))))))) $ by mdeq_i [l32, l31]
+
+quot_sound_ty
+-------------
+z1: $ ty G (quot_sound u) (pi (srt u) (pi (pi (bvar nz) (pi (bvar n1) Prop)) (pi (bvar n1) (pi (bvar n2) (pi (app (app (bvar n2) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D u) nz) (app (app (quot u) (bvar n4)) (bvar n3))) (app (app (app (quot_mk u) (bvar n4)) (bvar n3)) (bvar n2))) (app (app (app (quot_mk u) (bvar n4)) (bvar n3)) (bvar n1)))))))) $ by fci_quot_sound_ty
+
+lemma fci_choice_ty (G: ctx) (l: lvl): $ ty G (choice l) (pi (srt l) (pi (app (ind_ty (nonempty_D l) nz) (bvar nz)) (bvar n1))) $
+----
+l1: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ uadm u $ by ax
+l2: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ w ∊ lvals $ by ax
+l3: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ r ∊ sat u (mcv hfin) (enc_ctx G) w $ by ax
+l4: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ w ∈ lvals $ by welc_wcel [l2]
+l5: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ sat u (mcv hfin) (enc_ctx G) w ⊆ fseq u $ by sat_fseq
+l6: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ r ∈ fseq u $ by wcel_subset [l5, welc_wcel [l3]]
+l7: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ hty ⊆ hfin $ by hfin_hty
+l8: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ hctor ⊆ hfin $ by hfin_hctor
+l9: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ hrec ⊆ hfin $ by hfin_hrec
+l10: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ functional hfin $ by hfin_functional
+l11: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ chv (lv (enc_lvl l) w) ∈ dt u (mcv hfin) (enc_expr (pi (srt l) (pi (app (ind_ty (nonempty_D l) nz) (bvar nz)) (bvar n1)))) w r $ by choice_mem [l1, l7, l8, l9, l10, l2, l6]
+l12: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ enc_lvl l ∈ trees ω $ by enc_lvl_trees
+l13: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ enc_lvls lnil ∈ trees ω $ by enc_lvls_trees
+l14: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ enc_lvls (lcons l lnil) ∈ trees ω $ by enc_lvls_trees
+l15: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ hcst ⊆ hfin $ by hfin_hcst
+l16: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ enc_atom choice_atom ∈ trees ω $ by enc_atom_trees
+l17: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ dt u (mcv hfin) (enc_expr (choice l)) w r = mclip u (sclip (fv Envx ⟨ u , ⟨ enc_atom choice_atom , lsv (enc_lvls (lcons l lnil)) w ⟩ ⟩)) $ by dt_cst [l15, l10, l16, l14, l4, l6]
+l18: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ lsv (enc_lvls (lcons l lnil)) w = scons (lv (enc_lvl l) w) (lsv (enc_lvls lnil) w) $ by lsv_lcons [l12, l13, l2]
+l19: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ isset (lv (enc_lvl l) w) $ by wcel_isset [lv_omega [wcel_isset [l12], l2]]
+l20: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ isset (lsv (enc_lvls lnil) w) $ by wcel_isset [lsv_fseq [wcel_isset [l13], l2]]
+l21: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ ∅ = ∅ $ by eq_refl
+l22: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ fv (lsv (enc_lvls (lcons l lnil)) w) ∅ = lv (enc_lvl l) w $ by eq_trans [fv_eq [l18, l21], scons_fv_zero_c [l19, l20]]
+l23: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ xx8 = lsv (enc_lvls (lcons l lnil)) w $ by ax
+l24: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ fv Envx ⟨ u , ⟨ enc_atom choice_atom , xx8 ⟩ ⟩ = chv (fv xx8 ∅) $ by envx_choice
+l25: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ Envx = Envx $ by eq_refl
+l26: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ u = u $ by eq_refl
+l27: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ enc_atom choice_atom = enc_atom choice_atom $ by eq_refl
+l28: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ fv Envx ⟨ u , ⟨ enc_atom choice_atom , lsv (enc_lvls (lcons l lnil)) w ⟩ ⟩ = fv Envx ⟨ u , ⟨ enc_atom choice_atom , xx8 ⟩ ⟩ $ by fv_eq [l25, opair_eq [l26, opair_eq [l27, eq_sym [l23]]]]
+l29: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ ∅ = ∅ $ by eq_refl
+l30: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ fv (lsv (enc_lvls (lcons l lnil)) w) ∅ = lv (enc_lvl l) w $ by weaken [l22]
+l31: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ chv (fv xx8 ∅) = chv (lv (enc_lvl l) w) $ by chv_eq [eq_trans [fv_eq [l23, l29], l30]]
+l32: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w , xx8 = lsv (enc_lvls (lcons l lnil)) w ⇒ fv Envx ⟨ u , ⟨ enc_atom choice_atom , lsv (enc_lvls (lcons l lnil)) w ⟩ ⟩ = chv (lv (enc_lvl l) w) $ by eq_trans [l28, eq_trans [l24, l31]]
+l33: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ enc_lvls (lcons l lnil) ∈ trees ω $ by weaken [l14]
+l34: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ w ∊ lvals $ by weaken [l2]
+l35: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ isset (lsv (enc_lvls (lcons l lnil)) w) $ by wcel_isset [lsv_fseq [wcel_isset [l33], l34]]
+l36: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ fv Envx ⟨ u , ⟨ enc_atom choice_atom , lsv (enc_lvls (lcons l lnil)) w ⟩ ⟩ = chv (lv (enc_lvl l) w) $ by isset_elim [l35, l32]
+l37: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ dt u (mcv hfin) (enc_expr (pi (srt l) (pi (app (ind_ty (nonempty_D l) nz) (bvar nz)) (bvar n1)))) w r ∈ u $ by den_in_u_c [l1, l4, l6]
+l38: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ chv (lv (enc_lvl l) w) ∈ u $ by universe_elem_elem_c [uadm_universe [l1], l37, l11]
+l39: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ sclip (fv Envx ⟨ u , ⟨ enc_atom choice_atom , lsv (enc_lvls (lcons l lnil)) w ⟩ ⟩) = chv (lv (enc_lvl l) w) $ by eq_trans [sclip_eq [l36], sclip_in [wcel_isset [l11]]]
+l40: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ u = u $ by eq_refl
+l41: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ mclip u (sclip (fv Envx ⟨ u , ⟨ enc_atom choice_atom , lsv (enc_lvls (lcons l lnil)) w ⟩ ⟩)) = chv (lv (enc_lvl l) w) $ by eq_trans [mclip_eq [l40, l39], mclip_in [l38]]
+l42: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ dt u (mcv hfin) (enc_expr (choice l)) w r = chv (lv (enc_lvl l) w) $ by eq_trans [l17, l41]
+l43: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ dt u (mcv hfin) (enc_expr (choice l)) w r ∈ dt u (mcv hfin) (enc_expr (pi (srt l) (pi (app (ind_ty (nonempty_D l) nz) (bvar nz)) (bvar n1)))) w r $ by wcel_eq_l [eq_sym [l42], l11]
+l44: $ uadm u , w ∊ lvals , r ∊ sat u (mcv hfin) (enc_ctx G) w ⇒ dt u (mcv hfin) (enc_expr (choice l)) w r = dt u (mcv hfin) (enc_expr (choice l)) w r $ by eq_refl
+z1: $ ty G (choice l) (pi (srt l) (pi (app (ind_ty (nonempty_D l) nz) (bvar nz)) (bvar n1))) $ by mdeq_i [l44, l43]
+
+choice_ty
+---------
+z1: $ ty G (choice u) (pi (srt u) (pi (app (ind_ty (nonempty_D u) nz) (bvar nz)) (bvar n1))) $ by fci_choice_ty
+
+lemma fci_false (H: class) (e: expr): $ mdeq (mcv H) nil e e (pi Prop (bvar nz)) $ > $ _ ⇒ ⊥ $
+----
+l1: $ _ , uadm u , w = clam x ω ∅ ⇒ w = clam x ω ∅ $ by ax
+l2: $ _ , uadm u , w = clam x ω ∅ , x ∊ ω ⇒ ∅ ∈ ω $ by omega_zero
+l3: $ _ , uadm u , w = clam x ω ∅ ⇒ x ∊ ω → ∅ ∈ ω $ by imp_intro [l2]
+l4: $ _ , uadm u , w = clam x ω ∅ ⇒ ∀ x (x ∊ ω → ∅ ∈ ω) $ by all_intro [l3]
+l5: $ _ , uadm u , w = clam x ω ∅ , x ∊ ω ⇒ isset ∅ $ by ax_empty
+l6: $ _ , uadm u , w = clam x ω ∅ ⇒ x ∊ ω → isset ∅ $ by imp_intro [l5]
+l7: $ _ , uadm u , w = clam x ω ∅ ⇒ ∀ x (x ∊ ω → isset ∅) $ by all_intro [l6]
+l8: $ _ , uadm u , w = clam x ω ∅ ⇒ isset ω $ by omega_set
+l9: $ _ , uadm u , w = clam x ω ∅ ⇒ isset (clam x ω ∅) $ by clam_set [l8, l7]
+l10: $ _ , uadm u , w = clam x ω ∅ ⇒ clam x ω ∅ ∈ cpi x ω ω $ by clam_cpi_intro [l9, l4]
+l11: $ _ , uadm u , w = clam x ω ∅ ⇒ w ∊ lvals $ by wcel_welc [wcel_eq_l [eq_sym [l1], l10]]
+l12: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ r = ∅ $ by ax
+l13: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ uadm u $ by ax
+l14: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ w ∊ lvals $ by weaken [l11]
+l15: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ w ∈ lvals $ by welc_wcel [l14]
+l16: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ ∅ ∈ fseq u $ by fseq_empty
+l17: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ r ∈ fseq u $ by wcel_eq_l [eq_sym [l12], l16]
+l18: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ ∀ u (uadm u → ∀ w (w ∊ lvals → ∀ r (r ∊ sat u (mcv H) (enc_ctx nil) w → dt u (mcv H) (enc_expr e) w r = dt u (mcv H) (enc_expr e) w r ∧ dt u (mcv H) (enc_expr e) w r ∈ dt u (mcv H) (enc_expr (pi (Prop) (bvar nz))) w r))) $ by weaken [#1]
+l19: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ ∀ w (w ∊ lvals → ∀ r (r ∊ sat u (mcv H) (enc_ctx nil) w → dt u (mcv H) (enc_expr e) w r = dt u (mcv H) (enc_expr e) w r ∧ dt u (mcv H) (enc_expr e) w r ∈ dt u (mcv H) (enc_expr (pi (Prop) (bvar nz))) w r)) $ by imp_elim [all_elim [l18], l13]
+l20: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ ∀ r (r ∊ sat u (mcv H) (enc_ctx nil) w → dt u (mcv H) (enc_expr e) w r = dt u (mcv H) (enc_expr e) w r ∧ dt u (mcv H) (enc_expr e) w r ∈ dt u (mcv H) (enc_expr (pi (Prop) (bvar nz))) w r) $ by imp_elim [all_elim [l19], l14]
+l21: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ sat u (mcv H) (enc_ctx nil) w = csn ∅ $ by sat_nil [l14]
+l22: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ r ∊ sat u (mcv H) (enc_ctx nil) w $ by welc_eq [eq_sym [l21], csn_intro [l12]]
+l23: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ dt u (mcv H) (enc_expr e) w r ∈ dt u (mcv H) (enc_expr (pi (Prop) (bvar nz))) w r $ by and_elim_r [imp_elim [all_elim [l20], l22]]
+l24: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ w ∈ lvals $ by weaken [l15]
+l25: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ r ∈ fseq u $ by weaken [l17]
+l26: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ enc_expr (Prop) ∈ trees ω $ by enc_expr_trees
+l27: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ enc_expr (bvar nz) ∈ trees ω $ by enc_expr_trees
+l28: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ dt u (mcv H) (enc_expr (pi (Prop) (bvar nz))) w r = cpi x1 (dt u (mcv H) (enc_expr (Prop)) w r) (dt u (mcv H) (enc_expr (bvar nz)) w (scons x1 r)) $ by dt_pi_c [l26, l27, l24, l25]
+l29: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ w ∈ lvals $ by weaken [l15]
+l30: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ r ∈ fseq u $ by weaken [l17]
+l31: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ enc_lvl lz ∈ trees ω $ by enc_lvl_trees
+l32: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ dt u (mcv H) (enc_expr (Prop)) w r = fv uni (lv (enc_lvl lz) w) $ by dt_srt_c [l31, l29, l30]
+l33: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ lv (enc_lvl lz) w = ∅ $ by lv_lz
+l34: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ uni = uni $ by eq_refl
+l35: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ fv uni (lv (enc_lvl lz) w) = fv uni ∅ $ by fv_eq [l34, l33]
+l36: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ dt u (mcv H) (enc_expr (Prop)) w r = fv uni ∅ $ by eq_trans [l32, l35]
+l37: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r $ by ax
+l38: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ uadm u $ by weaken [l13]
+l39: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ w ∈ lvals $ by weaken [l15]
+l40: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ r ∈ fseq u $ by weaken [l17]
+l41: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ scons x1 r ∈ fseq u $ by dt_scons_fseq [l38, l39, l40, l37]
+l42: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ dt u (mcv H) (enc_expr (Prop)) w r = fv uni ∅ $ by weaken [l36]
+l43: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ x1 ∊ fv uni ∅ $ by welc_eq [l42, l37]
+l44: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ w ∈ lvals $ by weaken [l15]
+l45: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ scons x1 r ∈ fseq u $ by weaken [l41]
+l46: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ enc_nat nz ∈ trees ω $ by enc_nat_trees
+l47: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ dt u (mcv H) (enc_expr (bvar nz)) w (scons x1 r) = fv (scons x1 r) (fv nvf (enc_nat nz)) $ by dt_bvar_c [l46, l44, l45]
+l48: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ fv nvf (enc_nat nz) = ∅ $ by nvf_nz
+l49: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ scons x1 r = scons x1 r $ by eq_refl
+l50: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ fv (scons x1 r) (fv nvf (enc_nat nz)) = fv (scons x1 r) ∅ $ by fv_eq [l49, l48]
+l51: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ r ∈ fseq u $ by weaken [l17]
+l52: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ isset r $ by wcel_isset [l51]
+l53: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ isset (scons x1 r) $ by scons_set [l52]
+l54: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ isset ∅ $ by ax_empty
+l55: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ isset x1 $ by isset_var
+l56: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ fv (scons x1 r) ∅ = x1 $ by scons_fv_zero_c [l55, l52]
+l57: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ fv (scons x1 r) (fv nvf (enc_nat nz)) = x1 $ by eq_trans [l50, l56]
+l58: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r ⇒ dt u (mcv H) (enc_expr (bvar nz)) w (scons x1 r) = x1 $ by eq_trans [l47, l57]
+l59: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r → dt u (mcv H) (enc_expr (bvar nz)) w (scons x1 r) = x1 $ by imp_intro [l58]
+l60: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ ∀ x1 (x1 ∊ dt u (mcv H) (enc_expr (Prop)) w r → dt u (mcv H) (enc_expr (bvar nz)) w (scons x1 r) = x1) $ by all_intro [l59]
+l61: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ cpi x1 (dt u (mcv H) (enc_expr (Prop)) w r) (dt u (mcv H) (enc_expr (bvar nz)) w (scons x1 r)) = cpi x1 (fv uni ∅) x1 $ by cpi_eq_pt [l36, l60]
+l62: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ dt u (mcv H) (enc_expr (pi (Prop) (bvar nz))) w r = cpi x1 (fv uni ∅) x1 $ by eq_trans [l28, l61]
+l63: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ dt u (mcv H) (enc_expr e) w r ∈ cpi x1 (fv uni ∅) x1 $ by wcel_eq_r [l62, l23]
+l64: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , f = dt u (mcv H) (enc_expr e) w r , z = ∅ ⇒ f = dt u (mcv H) (enc_expr e) w r $ by ax
+l65: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , f = dt u (mcv H) (enc_expr e) w r , z = ∅ ⇒ z = ∅ $ by ax
+l66: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , f = dt u (mcv H) (enc_expr e) w r , z = ∅ ⇒ dt u (mcv H) (enc_expr e) w r ∈ cpi x1 (fv uni ∅) x1 $ by weaken [l63]
+l67: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , f = dt u (mcv H) (enc_expr e) w r , z = ∅ ⇒ f ∊ cpi x1 (fv uni ∅) x1 $ by wcel_welc [wcel_eq_l [eq_sym [l64], l66]]
+l68: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , f = dt u (mcv H) (enc_expr e) w r , z = ∅ ⇒ fv uni ∅ = two $ by uni_zero
+l69: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , f = dt u (mcv H) (enc_expr e) w r , z = ∅ ⇒ ∅ ∈ two $ by two_intro_l
+l70: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , f = dt u (mcv H) (enc_expr e) w r , z = ∅ ⇒ z ∊ fv uni ∅ $ by wcel_welc [wcel_eq_l [eq_sym [l65], wcel_eq_r [eq_sym [l68], l69]]]
+l71: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , f = dt u (mcv H) (enc_expr e) w r , z = ∅ ⇒ ap f z ∈ z $ by cpi_elim_ap [l67, l70]
+l72: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , f = dt u (mcv H) (enc_expr e) w r , z = ∅ ⇒ ap f z ∈ ∅ $ by wcel_eq_r [l65, l71]
+l73: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , f = dt u (mcv H) (enc_expr e) w r , z = ∅ , y = ap f z , y ∊ ∅ ⇒ y ∊ ∅ $ by ax
+l74: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , f = dt u (mcv H) (enc_expr e) w r , z = ∅ , y = ap f z , y ∊ ∅ ⇒ ⊥ $ by empty_elim [l73]
+l75: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , f = dt u (mcv H) (enc_expr e) w r , z = ∅ ⇒ ⊥ $ by wcel_elim [l72, l74]
+l76: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , f = dt u (mcv H) (enc_expr e) w r ⇒ isset ∅ $ by ax_empty
+l77: $ _ , uadm u , w = clam x ω ∅ , r = ∅ , f = dt u (mcv H) (enc_expr e) w r ⇒ ⊥ $ by isset_elim [l76, l75]
+l78: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ dt u (mcv H) (enc_expr e) w r ∈ cpi x1 (fv uni ∅) x1 $ by weaken [l63]
+l79: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ isset (dt u (mcv H) (enc_expr e) w r) $ by wcel_isset [l78]
+l80: $ _ , uadm u , w = clam x ω ∅ , r = ∅ ⇒ ⊥ $ by isset_elim [l79, l77]
+l81: $ _ , uadm u , w = clam x ω ∅ ⇒ isset ∅ $ by ax_empty
+l82: $ _ , uadm u , w = clam x ω ∅ ⇒ ⊥ $ by isset_elim [l81, l80]
+l83: $ _ , uadm u , x ∊ ω ⇒ isset ∅ $ by ax_empty
+l84: $ _ , uadm u ⇒ x ∊ ω → isset ∅ $ by imp_intro [l83]
+l85: $ _ , uadm u ⇒ ∀ x (x ∊ ω → isset ∅) $ by all_intro [l84]
+l86: $ _ , uadm u ⇒ isset ω $ by omega_set
+l87: $ _ , uadm u ⇒ isset (clam x ω ∅) $ by clam_set [l86, l85]
+l88: $ _ , uadm u ⇒ ⊥ $ by isset_elim [l87, l82]
+l89: $ _ ⇒ ∃ u (uadm u) $ by uadm_exists
+l90: $ _ ⇒ ⊥ $ by ex_elim [l89, l88]
+
+lean_consistent
+---------------
+z1: $ _ ⇒ ⊥ $ by fci_false [#1]

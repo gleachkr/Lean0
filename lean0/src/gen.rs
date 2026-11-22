@@ -25,6 +25,7 @@ use mm0kit::bin::Bins;
 use mm0kit::lean::Lean;
 use mm0kit::level::Levels;
 use rustc_hash::FxHashMap as HashMap;
+use rustc_hash::FxHashSet as HashSet;
 use std::time::Instant;
 
 /// Proofs larger than this (estimated proof steps plus arguments) are split into local lemmas,
@@ -106,6 +107,9 @@ pub struct Gen {
     /// Level-congruence axioms `c_eeqv` of the opaque constants that occur in a block's data
     /// (`induct::eeqv_axioms`), by the constant's term.
     pub eeqv_axioms: HashMap<TId, ThId>,
+    /// The theorem constants whose level congruence some inductive declaration of the export
+    /// needs (`eeqv_needed`), by Lean name; computed at the first declaration.
+    pub eeqv_needed: Option<HashSet<String>>,
     /// Binary numerals and the arithmetic relations' prover.
     pub bins: Bins,
     /// The literal axioms, once `Nat.zero` and `Nat.succ` are declared.
@@ -114,10 +118,8 @@ pub struct Gen {
     pub nat_ops: HashMap<String, Vec<ThId>>,
     /// The derived defining equations of the operations (`natlit::eq_ops`): `Nat_add_eqs`, ...
     pub nat_eqs: HashMap<String, ThId>,
-    /// Counts for the run's report: operations whose literal theorems follow from their
-    /// equations, and operations left with generated axioms, with the reason.
+    /// For the run's report: operations whose literal theorems follow from their equations.
     pub lit_stage_b: usize,
-    pub lit_stage_a: Vec<(String, String)>,
     /// Recursors declared early, with a sibling whose rules mention them: their MM0 names.
     predeclared: HashMap<String, String>,
     /// `LEAN0_COSTS`: proof nodes by elaborator rule.
@@ -216,12 +218,12 @@ impl Gen {
             horn_index,
             spec_terms,
             eeqv_axioms: HashMap::default(),
+            eeqv_needed: None,
             bins,
             nat: None,
             nat_ops: HashMap::default(),
             nat_eqs: HashMap::default(),
             lit_stage_b: 0,
-            lit_stage_a: Vec::new(),
             costs,
             shard: None,
             replay: false,
@@ -456,14 +458,11 @@ impl Gen {
             }
         }
         if self.stage_b > 0 {
-            eprintln!("lean0: {} inductive blocks certified by the schema, {} level-congruence axioms for opaque constants in block data",
+            eprintln!("lean0: {} inductive blocks certified by the schema, {} level congruences of theorem constants in block data proved",
                 self.stage_b, self.eeqv_axioms.len());
         }
-        if self.lit_stage_b + self.lit_stage_a.len() > 0 {
-            eprintln!("lean0: {} literal operations certified by their defining equations, {} with generated axioms", self.lit_stage_b, self.lit_stage_a.len());
-            for (n, why) in &self.lit_stage_a {
-                eprintln!("  stage A: {n}: {why}");
-            }
+        if self.lit_stage_b > 0 {
+            eprintln!("lean0: {} literal operations certified by their defining equations", self.lit_stage_b);
         }
         Ok(())
     }
@@ -543,6 +542,9 @@ impl Gen {
     }
 
     fn declar<'t>(&mut self, tc: &mut TypeChecker<'_, 't, '_>, d: &Declar<'t>, all: &DeclarMap<'t>, nested: Option<&Nested<'t>>) -> R<usize> {
+        if self.eeqv_needed.is_none() {
+            self.eeqv_needed = Some(eeqv_needed(self, tc, all));
+        }
         let info = *d.info();
         let uparams: Vec<NamePtr<'t>> = tc
             .ctx
@@ -566,7 +568,21 @@ impl Gen {
         let mut el = Elab::new(tc, self, uparams, sig.cname.clone(), lemma_args);
         match d {
             Declar::Axiom { .. } => {
-                opaque(&mut el, &sig, info.ty, "axiom")?;
+                // `propext`, `Quot.sound` and `Classical.choice` are constants of the spec with their types as rules
+                // (audit §4), when the export gives them those types: nothing is assumed
+                let spec = match sig.lean_name.as_str() {
+                    "propext" => Some(("propext", "propext_ty")),
+                    "Quot.sound" => Some(("quot_sound", "quot_sound_ty")),
+                    "Classical.choice" => Some(("choice", "choice_ty")),
+                    _ => None,
+                };
+                let done = match spec {
+                    Some((t, ax)) if el.g.env.has_term(t) && el.g.env.has_thm(ax) => spec_axiom(&mut el, &sig, info.ty, t, ax)?,
+                    _ => false,
+                };
+                if !done {
+                    opaque(&mut el, &sig, info.ty, "axiom")?;
+                }
             }
             Declar::Inductive(id) => {
                 if id.all_ind_names.first() == Some(&id.info.name) {
@@ -600,24 +616,9 @@ impl Gen {
                 return Err("its inductive block is not certified".into())
             }
             Declar::Quot { .. } => quot_spec(&mut el, &sig, info.ty)?,
-            Declar::Opaque { val, .. } => {
-                let pv = if el.g.replay {
-                    None
-                } else {
-                    let (vt, pv) = el.infer(*val)?;
-                    Some(el.cast(pv, vt, info.ty)?)
-                };
-                let (v, t) = (el.tr(*val)?, el.tr(info.ty)?);
-                opaque(&mut el, &sig, info.ty, "opaque constant")?;
-                let g = &mut *el.g;
-                let gv = g.env.var(0);
-                let concl = g.env.app_n("ty", &[gv, v, t]);
-                let p = pv.map(|pv| g.env.convert(pv, concl)).transpose().map_err(|e| e.0)?;
-                let name = g.thms.fresh(&format!("{}_val", sig.cname));
-                let args = g.g_args(&sig.lvl_names);
-                add_thm(&mut g.env, &name, args, vec![], concl, false, false, p, &format!("The value of `{}` has its type.", sig.lean_name))?;
-            }
-            Declar::Definition { val, .. } | Declar::Theorem { val, .. } => {
+            // an opaque constant is certified like a theorem: an abstract definition by its
+            // value, which the kernel never unfolds, so its type is proved and nothing assumed
+            Declar::Definition { val, .. } | Declar::Theorem { val, .. } | Declar::Opaque { val, .. } => {
                 let public_body = matches!(d, Declar::Definition { .. });
                 let pv = if el.g.replay {
                     None
@@ -640,6 +641,8 @@ impl Gen {
                 };
                 let doc = if public_body {
                     format!("Lean definition `{}`.", sig.lean_name)
+                } else if matches!(d, Declar::Opaque { .. }) {
+                    format!("Lean opaque constant `{}`. Its value is given in the .mmb.", sig.lean_name)
                 } else {
                     format!("Lean theorem `{}`. Its proof term is given in the .mmb.", sig.lean_name)
                 };
@@ -675,6 +678,9 @@ impl Gen {
                 let cl = add_thm(&mut g.env, &cl_name, cl_args, vec![], cl_concl, false, false, pc, &format!("`{}` has no loose bound variables.", sig.lean_name))?;
                 g.lean.const_closed.insert(term, cl);
                 g.consts.insert(sig.lean_name.clone(), ConstInfo { term, kind: ConstKind::Def, nlevels: n, ty_thm: ty });
+                if !public_body && n > 0 && g.eeqv_needed.as_ref().is_some_and(|s| s.contains(&sig.lean_name)) {
+                    crate::induct::theorem_eeqv(g, term, &sig.lean_name)?;
+                }
                 natlit::op_axioms(&mut el, &sig.lean_name, &sig.cname, info.ty)?;
             }
         }
@@ -853,6 +859,68 @@ fn opaque<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::Ex
     Ok(term)
 }
 
+/// The theorem constants of the export whose level congruence (`induct::theorem_eeqv`) an
+/// inductive declaration needs: those a block's types or constructor types mention at
+/// levels with a parameter, directly, through the definitions mentioned so, or through such
+/// a theorem's proof term; and every opaque constant with universe parameters, with what
+/// its value mentions so. An over-approximation of what the blocks' scans mark, from the
+/// export alone, so that a replayed declaration states the same theorems.
+fn eeqv_needed<'t>(g: &Gen, tc: &TypeChecker<'_, 't, '_>, all: &DeclarMap<'t>) -> HashSet<String> {
+    use nanoda_lib::expr::Expr;
+    use nanoda_lib::level::Level;
+    fn has_param<'t>(tc: &TypeChecker<'_, 't, '_>, l: nanoda_lib::util::LevelPtr<'t>) -> bool {
+        match tc.ctx.read_level(l) {
+            Level::Zero => false,
+            Level::Succ(a, _) => has_param(tc, a),
+            Level::Max(a, b, _) | Level::IMax(a, b, _) => has_param(tc, a) || has_param(tc, b),
+            Level::Param(..) => true,
+        }
+    }
+    let mut seen = HashSet::default();
+    let mut names = HashSet::default();
+    let mut out = HashSet::default();
+    let mut stack: Vec<nanoda_lib::util::ExprPtr<'t>> = Vec::new();
+    for d in all.values() {
+        match d {
+            Declar::Inductive(id) => stack.push(id.info.ty),
+            Declar::Constructor(cd) => stack.push(cd.info.ty),
+            // an opaque constant may be compared with itself at equivalent levels (`constDF`)
+            Declar::Opaque { info, val } if !tc.ctx.read_levels(info.uparams).is_empty() => {
+                names.insert(info.name);
+                out.insert(g.lean_name(tc, info.name));
+                stack.push(*val);
+            }
+            _ => {}
+        }
+    }
+    while let Some(e) = stack.pop() {
+        if !seen.insert(e) {
+            continue
+        }
+        match tc.ctx.read_expr(e) {
+            Expr::Const { name, levels, .. } => {
+                if !tc.ctx.read_levels(levels).iter().any(|&l| has_param(tc, l)) || !names.insert(name) {
+                    continue
+                }
+                match all.get(&name) {
+                    Some(Declar::Definition { val, .. }) => stack.push(*val),
+                    Some(Declar::Theorem { val, .. } | Declar::Opaque { val, .. }) => {
+                        out.insert(g.lean_name(tc, name));
+                        stack.push(*val);
+                    }
+                    _ => {}
+                }
+            }
+            Expr::App { fun, arg, .. } => stack.extend([fun, arg]),
+            Expr::Pi { binder_type, body, .. } | Expr::Lambda { binder_type, body, .. } => stack.extend([binder_type, body]),
+            Expr::Let { binder_type, val, body, .. } => stack.extend([binder_type, val, body]),
+            Expr::Proj { structure, .. } => stack.push(structure),
+            _ => {}
+        }
+    }
+    out
+}
+
 /// A quotient primitive as the spec's constant (`quot`, `quot_mk`, `quot_lift`, `quot_ind`,
 /// typed by `quot_ty` and so on, reducing by `quot_lift_mk`; audit §4), when
 /// the export's type is the spec's: `theorem Quot_df` (`constDF`, from `eeqv_df`), and for
@@ -921,6 +989,70 @@ fn quot_spec<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util:
         g.quot_red.insert(sig.lean_name.clone(), th);
     }
     Ok(())
+}
+
+/// A Lean axiom as the spec's constant `term` (`propext`, `quot_sound`, `choice`: a `cst` of an atom of
+/// the spec, typed by the rule `ty_ax`; audit §4), when the export's type is the spec's:
+/// `theorem c_df` (`constDF`, from `eeqv_df`). `Ok(false)`, with nothing stated, when the type
+/// differs: the axiom is then an assumption like any other.
+fn spec_axiom<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::ExprPtr<'t>, term: &str, ty_ax: &str) -> R<bool> {
+    let t = el.tr(ty)?;
+    let g = &mut *el.g;
+    let term = g.env.term_id(term);
+    let n = g.env.terms[term.0 as usize].args.len();
+    if n != sig.lvl_names.len() {
+        return Ok(false)
+    }
+    let gv = g.env.var(0);
+    let us: Vec<E> = (0..n).map(|i| g.env.var(1 + i as u16)).collect();
+    let us2: Vec<E> = (0..n).map(|i| g.env.var(1 + (n + i) as u16)).collect();
+    let ty_th = g.env.thm_id(ty_ax);
+    let concl = g.env.plain_concl(ty_th);
+    let args: Vec<E> = std::iter::once(gv).chain(us.iter().copied()).collect();
+    let stmt = g.env.subst(concl, &args);
+    let Some((_, [_, c1, spec_t])) = g.env.head(stmt) else { return Err(format!("{ty_ax}: not a typing")) };
+    let (c1, spec_t) = (*c1, *spec_t);
+    if spec_t != t {
+        return Ok(false)
+    }
+    let c2 = g.env.app(term, &us2);
+    let hyps: Vec<E> = us.iter().zip(&us2).map(|(&a, &b)| g.env.app_n("leqv", &[a, b])).collect();
+    let concl = g.lean.deq(&mut g.env, gv, c1, c2, t);
+    let mut df_args = g.g_args(&sig.lvl_names);
+    let lvl_s = g.env.sort_names["lvl"];
+    for s in &sig.lvl_names {
+        let s2 = g.var_names_fresh2(s, &sig.lvl_names);
+        df_args.push((s2, lvl_s));
+    }
+    let proof = if g.replay {
+        None
+    } else {
+        let p_ty = g.env.thm(ty_th, &args, &[]).map_err(|e| e.0)?;
+        let eq_goal = g.env.app_n("eeqv", &[c1, c2]);
+        let p_eq = crate::induct::prove_from(g, &hyps, eq_goal)?;
+        Some(g.env.thm_n("eeqv_df", &[gv, c1, c2, t], &[p_ty, p_eq]).map_err(|e| e.0)?)
+    };
+    let spec_name = g.env.terms[term.0 as usize].name.clone();
+    let df_name = g.thms.fresh(&format!("{}_df", sig.cname));
+    let df = add_thm(&mut g.env, &df_name, df_args, hyps, concl, false, false, proof,
+        &format!("`{}` (the spec's `{spec_name}`) has its type, at any equivalent levels (`constDF`).", sig.lean_name))?;
+    // theorem c_closed (k: nat) (us): closed k (c us), by `closed_cst`
+    let kv = g.env.var(0);
+    let cl_concl = g.env.app_n("closed", &[kv, c1]);
+    let cl_args = g.k_args(&sig.lvl_names);
+    let cl_name = g.thms.fresh(&format!("{}_closed", sig.cname));
+    let pc = if g.replay {
+        None
+    } else {
+        let body = g.env.unfold(c1).ok_or("the spec's constant is not a definition")?;
+        let Some((_, &[atom, ls])) = g.env.head(body) else { return Err("the spec's constant is not `cst` of an atom".into()) };
+        let p = g.env.thm_n("closed_cst", &[kv, atom, ls], &[]).map_err(|e| e.0)?;
+        Some(g.env.convert(p, cl_concl).map_err(|e| e.0)?)
+    };
+    let cl = add_thm(&mut g.env, &cl_name, cl_args, vec![], cl_concl, false, false, pc, &format!("`{}` has no loose bound variables.", sig.lean_name))?;
+    g.lean.const_closed.insert(term, cl);
+    g.consts.insert(sig.lean_name.clone(), ConstInfo { term, kind: ConstKind::Opaque, nlevels: n, ty_thm: df });
+    Ok(true)
 }
 
 /// What the structure lemmas (`induct::structure`) need from the constructor's type: each field's type (a de Bruijn

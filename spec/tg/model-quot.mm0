@@ -376,3 +376,74 @@ theorem eq_D_wf (M: class) (v: lvl): $ ind_wf_j (jmod M) nil (eq_D v) $;
 --| two of its elements is the truth value of their equation (from the rules of `Eq`, its constructor and its
 --| recursor in the model: the recursor at the motive `x = z` turns an element of `Eq b x y` into `x = y`).
 theorem meqs_i (H: class) (v: lvl): $ _ ⇒ hty ⊆ H $ > $ _ ⇒ hctor ⊆ H $ > $ _ ⇒ hrec ⊆ H $ > $ _ ⇒ functional H $ > $ _ ⇒ meqs (mcv H) v $;
+
+--| A closed term has the same value at every valuation.
+theorem closed0_den (G: hyps) (M W R R2: class) (e: expr) (u: set):
+  $ closed nz e $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ R2 ∈ fseq u $ > $ G ⇒ dt u M (enc_expr e) W R = dt u M (enc_expr e) W R2 $;
+
+
+-- --------------------------------------------------------------------------
+-- Lean's axioms `Quot.sound` and `propext`: their types are true
+-- --------------------------------------------------------------------------
+
+--| The type of equalities is true at equal sides.
+theorem teq_true (G: hyps) (X Y: class): $ G ⇒ X = Y $ > $ G ⇒ teq X Y = csn ∅ $;
+
+--| Related elements have the same class in the quotient (`Quot.sound` in the model).
+theorem qmk_rel_eq (G: hyps) (A R: class) (a b c: set): $ G ⇒ isset A $ > $ G ⇒ a ∊ A $ > $ G ⇒ b ∊ A $ > $ G ⇒ c ∊ ap (ap R a) b $ > $ G ⇒ qmk A R a = qmk A R b $;
+
+--| Truth values with functions both ways are equal (`propext` in the model).
+theorem two_iff_eq {i: set} (G: hyps) (F K: class) (a b: set): $ G ⇒ a ∊ two $ > $ G ⇒ b ∊ two $ > $ G ⇒ F ∈ cpi i a b $ > $ G ⇒ K ∈ cpi i b a $ > $ G ⇒ a = b $;
+
+--| The type of `Quot.sound` is a true proposition in the model: the constant function to `∅` is its element (the classes of
+--| related elements are equal, `qmk_rel_eq`, and the model's `Eq` is equality).
+theorem quot_sound_inh (H: class) (G: ctx) (l: lvl) (u w t: set):
+  $ _ ⇒ hqu H $ > $ _ ⇒ meqs (mcv H) l $ >
+  $ uadm u , w ∊ lvals , t ∊ sat u (mcv H) (enc_ctx G) w ⇒ ∅ ∈ dt u (mcv H) (enc_expr (pi (srt l) (pi (pi (bvar nz) (pi (bvar n1) (Prop))) (pi (bvar n1) (pi (bvar n2) (pi (app (app (bvar n2) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D l) nz) (app (app (quot l) (bvar n4)) (bvar n3))) (app (app (app (quot_mk l) (bvar n4)) (bvar n3)) (bvar n2))) (app (app (app (quot_mk l) (bvar n4)) (bvar n3)) (bvar n1))))))))) w t $;
+
+--| The type of `propext` is a true proposition in the model, given the two fields of an `Iff` as judgments (`proj_ty` at
+--| the block `iff_D`): truth values with functions both ways are equal (`two_iff_eq`), and the model's `Eq` is equality.
+theorem propext_inh (H: class) (G: ctx) (u w t: set):
+  $ _ ⇒ meqs (mcv H) (ls lz) $ >
+  $ mdeq (mcv H) (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons (Prop) (cons (Prop) G))) (proj iff_blk nz (bvar nz)) (proj iff_blk nz (bvar nz)) (pi (bvar n2) (bvar n2)) $ >
+  $ mdeq (mcv H) (cons (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (cons (Prop) (cons (Prop) G))) (proj iff_blk n1 (bvar nz)) (proj iff_blk n1 (bvar nz)) (pi (bvar n1) (bvar n3)) $ >
+  $ uadm u , w ∊ lvals , t ∊ sat u (mcv H) (enc_ctx G) w ⇒ ∅ ∈ dt u (mcv H) (enc_expr (pi (Prop) (pi (Prop) (pi (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D (ls lz)) nz) (Prop)) (bvar n2)) (bvar n1)))))) w t $;
+
+
+-- --------------------------------------------------------------------------
+-- Lean's axiom `Classical.choice`: the block of `Nonempty` and the choice function
+-- --------------------------------------------------------------------------
+
+--| The block of `Nonempty` is well formed, over the judgment atoms that hold in the model.
+theorem nonempty_D_wf (M: class) (v: lvl): $ ind_wf_j (jmod M) nil (nonempty_D v) $;
+
+--| The truth value of "`A` has an element".
+def tne (A: class) (.h .y: set): class =
+  $ {h | (h = ∅) ∧ (∃ y (y ∊ A))} $;
+--| @congr
+theorem tne_congr (A B: class): $ A ≐ B $ > $ tne A ≐ tne B $;
+--| @rewrite
+theorem sb_c_tne {x: set} (t: set x) (A: class x):
+  $ (⟦ x / t ⟧ (tne A)) ≐ tne (⟦ x / t ⟧ A) $;
+
+--| The value of `Classical.choice` at the level value `N`: at a type `a` of that universe and a proof that `a` has an
+--| element, the choice operator's element of `a`.
+def chv (N: class) (.a .h: set): class = $ clam a (fv uni N) (clam h (tne a) (ch a)) $;
+--| @congr
+theorem chv_congr (A B: class): $ A ≐ B $ > $ chv A ≐ chv B $;
+--| @rewrite
+theorem sb_c_chv {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (chv A)) ≐ chv (⟦ x / t ⟧ A) $;
+
+theorem chv_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ chv A = chv B $;
+
+--| The choice function is an element of the dependent product over the types `a` of the universe and the proofs that
+--| `a` has an element.
+--| @freshen G x1
+--| @freshen G x2
+theorem chv_cpi {x1 x2: set} (G: hyps) (n: set): $ G ⇒ chv n ∈ cpi x1 (fv uni n) (cpi x2 (tne x1) x1) $;
+
+--| `Classical.choice` in the model, for a hook with the inductive types' parts: the choice function at the level's value is an
+--| element of the value of the axiom's type (the value of `Nonempty` at a type is the truth value of "the type has an
+--| element", from the rules of `Nonempty`, its constructor and its recursor in the model).
+theorem choice_mem (G: hyps) (H R: class) (v: lvl) (u w: set): $ G ⇒ uadm u $ > $ G ⇒ hty ⊆ H $ > $ G ⇒ hctor ⊆ H $ > $ G ⇒ hrec ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ chv (lv (enc_lvl v) w) ∈ dt u (mcv H) (enc_expr (pi (srt v) (pi (app (ind_ty (nonempty_D v) nz) (bvar nz)) (bvar n1)))) w R $;

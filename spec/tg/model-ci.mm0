@@ -619,3 +619,29 @@ theorem ind_eta_eq_rule (G: hyps) (H J: class) (u w r tg td ti tM tS: set):
 -- --------------------------------------------------------------------------
 
 theorem ind_eta (D: ind) (j: nat) (Dl: ctx) (M S: expr): $ ind_wf Dl D $ > $ eta_ok D j $ > $ eta_eq D j Dl M S $ > $ deq Dl (bvar nz) M S $;
+
+
+-- --------------------------------------------------------------------------
+-- The spec's rules `propext_ty` and `quot_sound_ty`
+-- --------------------------------------------------------------------------
+
+theorem propext_ty (G: ctx): $ ty G propext (pi Prop (pi Prop (pi (app (app (ind_ty iff_D nz) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D (ls lz)) nz) Prop) (bvar n2)) (bvar n1))))) $;
+
+theorem quot_sound_ty (G: ctx) (u: lvl): $ ty G (quot_sound u) (pi (srt u) (pi (pi (bvar nz) (pi (bvar n1) Prop)) (pi (bvar n1) (pi (bvar n2) (pi (app (app (bvar n2) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D u) nz) (app (app (quot u) (bvar n4)) (bvar n3))) (app (app (app (quot_mk u) (bvar n4)) (bvar n3)) (bvar n2))) (app (app (app (quot_mk u) (bvar n4)) (bvar n3)) (bvar n1)))))))) $;
+
+
+-- --------------------------------------------------------------------------
+-- The spec's rule `choice_ty`
+-- --------------------------------------------------------------------------
+
+theorem choice_ty (G: ctx) (u: lvl): $ ty G (choice u) (pi (srt u) (pi (app (ind_ty (nonempty_D u) nz) (bvar nz)) (bvar n1))) $;
+
+
+-- --------------------------------------------------------------------------
+-- Consistency: the judgment is not trivial
+-- --------------------------------------------------------------------------
+
+--| Consistency. No term has the type `Π (p : Prop). p` in the empty context: a derivation of such a judgment from the
+--| spec's rules would be a proof of a contradiction in the set theory (an admissible universe and a valuation of the
+--| levels exist, and the value of that type there is empty).
+theorem lean_consistent (e: expr): $ ty nil e (pi Prop (bvar nz)) $ > $ _ ⇒ ⊥ $;

@@ -1,6 +1,6 @@
 /-! Milestone 4 test module: inductive types, structures, projections and quotients.
 Only the names on the `lean0-export` line (and what they depend on) are exported. -/
--- lean0-export: two_add_two len_ex proj_red prod_eta and_swap eq_symm k_ex unit_eta sigma_ex quot_ex quot_ind_ex ev_rec_ex opq_ex
+-- lean0-export: two_add_two len_ex proj_red prod_eta and_swap eq_symm k_ex unit_eta sigma_ex quot_ex quot_ind_ex ev_rec_ex opq_ex thm_ex opq_c_ex opq_c_lvl propext_ex quot_sound_ex choice_ex
 universe u v
 
 noncomputable section
@@ -51,3 +51,28 @@ axiom Opq : Type u
 structure OpqS where
   x : Opq.{u}
 theorem opq_ex (s : OpqS.{u}) : s = OpqS.mk s.x := rfl
+
+-- A theorem constant at the block's level in a field's type: the structure's lemmas need the
+-- constant's level congruence, a theorem proved from its proof term where it is declared
+-- (and so for the theorems its proof term mentions: `thm_u`, through the definition `thm_d`).
+theorem thm_u (α : Sort u) (a : α) : a = a := rfl
+def thm_d (α : Sort u) (a : α) : a = a := thm_u α a
+theorem thm_v (α : Sort u) (a : α) : a = a := thm_d α a
+structure ThmS (α : Sort u) (a : α) : Prop where
+  h : thm_v α a = thm_v α a
+theorem thm_ex (α : Sort u) (a : α) (s : ThmS α a) : s = ThmS.mk s.h := rfl
+
+-- An opaque constant is certified like a theorem (an abstract definition by its value: its
+-- type is proved, not assumed), with its level congruence when a block mentions it.
+opaque opq_c (α : Type u) : Nat := 0
+structure OpqC (α : Type u) where
+  x : Fin (opq_c α + 1)
+theorem opq_c_ex (α : Type u) (s : OpqC α) : s = OpqC.mk s.x := rfl
+-- the opaque constant at equivalent levels (by its level congruence)
+theorem opq_c_lvl (α : Type u) : opq_c.{max u u} α = opq_c.{u} α := rfl
+
+-- `propext`, `Quot.sound` and `Classical.choice` are constants of the spec, typed by its rules: no axiom
+theorem propext_ex (a b : Prop) (h : a ↔ b) : a = b := propext h
+theorem quot_sound_ex {α : Sort u} (r : α → α → Prop) (a b : α) (h : r a b) : Quot.mk r a = Quot.mk r b :=
+  Quot.sound h
+noncomputable def choice_ex {α : Sort u} (h : Nonempty α) : α := Classical.choice h

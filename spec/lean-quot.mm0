@@ -9,9 +9,14 @@ import "lean-ind.mm0";
 -- PART I: SYNTAX
 ---------------------------------------------------------------------------
 
--- Lean's `Eq`, and the quotient primitives ---------------------------------
+-- Lean's `Eq`, the quotient primitives, and the axioms `propext`,
+-- `Quot.sound` and `Classical.choice` ----------------------------------------
 -- (notes/audit-lean-mm0.md §4.) `eq_D` is the data of the block `Eq` as Lean's
--- prelude declares it (the type of `Quot.lift` mentions `Eq`); `lean0 check`
+-- prelude declares it (the type of `Quot.lift` mentions `Eq`), and `iff_D`
+-- that of `Iff` (the type of `propext` mentions it), `nonempty_D` that of
+-- `Nonempty` (the type of `Classical.choice`). The three axioms are
+-- constants like any Lean axiom (`cst` of an atom), but with atoms of the
+-- spec, so that Part III can state their types as rules; `lean0 check`
 -- reads the statements between the `lean0-check` marks (written in prefix form
 -- for that) and compares the export's `Eq` and quotient declarations with
 -- them. A certificate proves `tys_ok` and `ind_wf` for the block like any
@@ -30,6 +35,26 @@ term quot_mk (u: lvl): expr;
 term quot_lift (u v: lvl): expr;
 --| Lean quotient primitive `Quot.ind`.
 term quot_ind (u: lvl): expr;
+--| The inductive block of `Iff`.
+term iff_blk: blk;
+--| The inductive block of `Iff`: its parameters, types and constructors.
+def iff_D: ind = $ ind_mk iff_blk (cons (srt lz) (cons (srt lz) nil)) (tcons (srt lz) (ccons (pi (pi (bvar (s nz)) (bvar (s nz))) (pi (pi (bvar (s nz)) (bvar (s (s (s nz))))) (app (app (bvar (s (s (s (s nz))))) (bvar (s (s (s nz))))) (bvar (s (s nz)))))) cnil) tnil) $;
+--| The atom of Lean axiom `propext`.
+term propext_atom: atom;
+--| Lean axiom `propext`.
+def propext: expr = $ cst propext_atom lnil $;
+--| The atom of Lean axiom `Quot.sound`.
+term quot_sound_atom: atom;
+--| Lean axiom `Quot.sound`.
+def quot_sound (u: lvl): expr = $ cst quot_sound_atom (lcons u lnil) $;
+--| The inductive block of `Nonempty`.
+term nonempty_blk: blk;
+--| The inductive block of `Nonempty`: its parameters, types and constructors.
+def nonempty_D (u: lvl): ind = $ ind_mk nonempty_blk (cons (srt u) nil) (tcons (srt lz) (ccons (pi (bvar nz) (app (bvar (s (s nz))) (bvar (s nz)))) cnil) tnil) $;
+--| The atom of Lean axiom `Classical.choice`.
+term choice_atom: atom;
+--| Lean axiom `Classical.choice`.
+def choice (u: lvl): expr = $ cst choice_atom (lcons u lnil) $;
 -- lean0-check: end
 
 axiom closed_quot (k: nat) (u: lvl): $ closed k (quot u) $;
@@ -89,3 +114,19 @@ axiom quot_lift_mk (u v: lvl):
   $ ⟦ #4 :: (Π #3. Π #4. Π (#4 @ #1 @ #0). ind_ty (eq_D v) 0 @ #4 @ (#3 @ #2) @ (#3 @ #1)) ::
       (Π #2. #1) :: srt v :: (Π #0. Π #1. Prop) :: srt u :: []
     ⊢ quot_lift u v @ #5 @ #4 @ #3 @ #2 @ #1 @ (quot_mk u @ #5 @ #4 @ #0) ≡ #2 @ #0 : #3 ⟧ $;
+
+-- Lean's axioms `propext`, `Quot.sound` and `Classical.choice` (audit §4) ----
+-- The three axioms of Lean's library that hold in the model outright, with the
+-- types Lean gives them: a certificate that uses them assumes nothing.
+
+--| `propext : Π (a b : Prop). (a ↔ b) → a = b`
+axiom propext_ty (G: ctx):
+  $ ⟨ G ⊢ propext : Π Prop. Π Prop. Π (ind_ty iff_D 0 @ #1 @ #0). ind_ty (eq_D (ls lz)) 0 @ Prop @ #2 @ #1 ⟩ $;
+--| `Quot.sound : Π (α : Sort u) (r : α → α → Prop) (a b : α).
+--|   r a b → Quot.mk r a = Quot.mk r b`
+axiom quot_sound_ty (G: ctx) (u: lvl):
+  $ ⟨ G ⊢ quot_sound u : Π (srt u). Π (Π #0. Π #1. Prop). Π #1. Π #2. Π (#2 @ #1 @ #0).
+      ind_ty (eq_D u) 0 @ (quot u @ #4 @ #3) @ (quot_mk u @ #4 @ #3 @ #2) @ (quot_mk u @ #4 @ #3 @ #1) ⟩ $;
+--| `Classical.choice : Π (α : Sort u). Nonempty α → α`
+axiom choice_ty (G: ctx) (u: lvl):
+  $ ⟨ G ⊢ choice u : Π (srt u). Π (ind_ty (nonempty_D u) 0 @ #0). #1 ⟩ $;
