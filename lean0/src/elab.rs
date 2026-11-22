@@ -1581,16 +1581,9 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         self.cast(pf, ft, tcur)
     }
 
-    /// `sty G h A (h args) T` for a head `h` with type `A`, a `Π` telescope over `args`
-    /// as written (a recursor's or a quotient primitive's type): each argument typed at its
-    /// binder's type, `T` the rest of `A`. The premise of the reduction rules (audit §4).
-    fn sty_spine(&mut self, h: ExprPtr<'t>, args: &[ExprPtr<'t>]) -> R<(ExprPtr<'t>, P)> {
-        let (ty, _) = self.infer(h)?;
-        self.sty_spine_at(h, ty, args)
-    }
-
-    /// `sty_spine` with the head's type given (a type of the head up to annotations: an
-    /// inductive type's type as the schema's data has it, for `cwf_res`).
+    /// `sty G h A (h args) T` for a head `h` with the type `ty` (a `Π` telescope over `args`;
+    /// a type of the head up to annotations: an inductive type's type as the schema's data
+    /// has it, for `cwf_res`): each argument typed at its binder's type, `T` the rest.
     pub(crate) fn sty_spine_at(&mut self, h: ExprPtr<'t>, ty: ExprPtr<'t>, args: &[ExprPtr<'t>]) -> R<(ExprPtr<'t>, P)> {
         let mut ty = ty;
         let (g, he, te) = (self.ctx(), self.tr(h)?, self.tr(ty)?);
@@ -1669,43 +1662,18 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
             a.push(self.trl(l)?);
         }
         let (mf, margs) = self.tc.ctx.unfold_apps(major2);
-        let Expr::Const { name: cname, levels: clevels, .. } = self.read(mf) else { return Err("major premise is not a constructor application".into()) };
-        let (th, hyps, tl2) = if kind == Step::Quot {
-            for &x in &args[..major_idx] {
-                a.push(self.tr(x)?);
-            }
-            for &l in self.tc.ctx.read_levels(clevels).to_vec().iter() {
-                a.push(self.trl(l)?);
-            }
-            for &x in &margs {
-                a.push(self.tr(x)?);
-            }
-            let (tl2, pl2) = self.sty_spine(f, &args2)?;
-            a.push(self.tr(tl2)?);
-            let mut hyps = vec![pl2];
-            if major_idx == 5 {
-                // `Quot.lift`: `a` at `f`'s domain `α`
-                let Some(&ae) = margs.get(2) else { return Err("Quot.mk is not applied to its three arguments".into()) };
-                let (ta, pa) = self.infer(ae)?;
-                hyps.push(self.cast(pa, ta, args[0])?);
-            }
-            (self.g.quot_red[&fname], hyps, tl2)
+        let Expr::Const { name: cname, .. } = self.read(mf) else { return Err("major premise is not a constructor application".into()) };
+        let p2 = if kind == Step::Quot {
+            // the closed equation of the primitive (`quot_lift_mk`, `quot_ind_mk`; audit §4)
+            let th = self.g.quot_red[&fname];
+            self.quot_closed(th, f, &a, &args2[..major_idx], &margs, cname, lhs2, tl).map_err(|e| format!("reduction of {fname}: {e}"))?
         } else {
             let cl = self.g.lean_name(self.tc, cname);
             // the closed equation of the block's recursor rule (audit §4)
             let Some(&th) = self.g.iota_eq.get(&(fname.clone(), cl.clone())) else { return Err(format!("no iota rule {fname} {cl}")) };
-            let p2 = self.iota_closed(th, &fname, f, &a, &args2[..major_idx], &margs, cname, lhs2, tl)
-                .map_err(|e| format!("iota of {fname} on {cl}: {e}"))?;
-            let mut pf = mm(self.g.lean.trans(&mut self.g.env, p1, p2))?;
-            let mut ft = tl;
-            for &x in &args[major_idx + 1..] {
-                (ft, pf) = self.app_step(ft, pf, x, None)?;
-            }
-            let tcur = self.infer(cur)?.0;
-            return self.cast(pf, ft, tcur)
+            self.iota_closed(th, &fname, f, &a, &args2[..major_idx], &margs, cname, lhs2, tl)
+                .map_err(|e| format!("iota of {fname} on {cl}: {e}"))?
         };
-        let p2 = mm(self.g.env.thm(th, &a, &hyps))?;
-        let p2 = self.cast(p2, tl2, tl)?;
         let mut pf = mm(self.g.lean.trans(&mut self.g.env, p1, p2))?;
         let mut ft = tl;
         for &x in &args[major_idx + 1..] {
@@ -1713,6 +1681,53 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         }
         let tcur = self.infer(cur)?.0;
         self.cast(pf, ft, tcur)
+    }
+
+    /// The reduction of `Quot.lift` or `Quot.ind` (`f`, applied to `rargs` and to `Quot.mk`,
+    /// `cname`, applied to `margs`) from the closed equation `th`: its variables are
+    /// instantiated from the bottom of its context (`instDF`), the primitive's arguments each
+    /// typed at its binder, then `a` at `α`. The instance has the primitive's `α`, `r` and
+    /// level in `Quot.mk`: `lhs2` is equal to it by congruence. `a` is `Γ` and the levels.
+    #[allow(clippy::too_many_arguments)]
+    fn quot_closed(&mut self, th: mm0kit::env::ThId, f: ExprPtr<'t>, a: &[E], rargs: &[ExprPtr<'t>], margs: &[ExprPtr<'t>], cname: nanoda_lib::util::NamePtr<'t>, lhs2: ExprPtr<'t>, tl: ExprPtr<'t>) -> R<P> {
+        let Some(&ae) = margs.get(2) else { return Err("Quot.mk is not applied to its three arguments".into()) };
+        if rargs.len() < 4 {
+            return Err("argument counts".into())
+        }
+        let mut subst = Vec::new();
+        let mut ty = self.infer(f)?.0;
+        for &x in rargs {
+            let Expr::Pi { binder_type, body, .. } = self.read(ty) else { return Err("the primitive's type is not a telescope over its arguments".into()) };
+            subst.push((x, binder_type));
+            ty = self.tc.ctx.inst(body, &[x]);
+        }
+        subst.push((ae, rargs[0]));
+        // the instance's left-hand side and type
+        let Expr::Const { levels, .. } = self.read(f) else { unreachable!() };
+        let l0 = self.tc.ctx.read_levels(levels)[0];
+        let ls = self.tc.ctx.alloc_levels_slice(&[l0]);
+        let mk = self.tc.ctx.mk_const(cname, ls);
+        let major3 = self.tc.ctx.foldl_apps(mk, [rargs[0], rargs[1], ae].into_iter());
+        let lhs3 = self.tc.ctx.foldl_apps(f, rargs.iter().copied().chain([major3]));
+        let tl3 = if rargs.len() == 5 { rargs[2] } else { self.tc.ctx.foldl_apps(rargs[2], [major3].into_iter()) };
+        let mut p = mm(self.g.env.thm(th, a, &[]))?;
+        let n = subst.len();
+        for (j, &(x, bt)) in subst.iter().enumerate() {
+            let (tx, px) = self.infer(x)?;
+            let px = self.cast(px, tx, bt)?;
+            p = mm(self.g.lean.inst_df(&mut self.g.env, n - 1 - j, px, p))?;
+        }
+        let (_, le, _, te) = self.g.lean.deq_parts(&mut self.g.env, p);
+        if le != self.tr(lhs3)? || te != self.tr(tl3)? {
+            return Err("the instance is not the expected one".into())
+        }
+        let p = self.cast(p, tl3, tl)?;
+        if lhs2 == lhs3 {
+            return Ok(p)
+        }
+        let (t, q) = self.app_cong(lhs2, lhs3)?;
+        let q = self.cast(q, t, tl)?;
+        mm(self.g.lean.trans(&mut self.g.env, q, p))
     }
 
     /// The iota step from the closed equation `th` (`ind_iota_eq`, audit §4):

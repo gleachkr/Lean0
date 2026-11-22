@@ -96,10 +96,8 @@ pub struct Gen {
     /// Stage-B blocks, by the name of each of their types.
     pub blocks: HashMap<String, std::rc::Rc<crate::induct::Block>>,
     /// For the run's report: the number of blocks certified by the schema (a block it does not
-    /// certify is an error), and the quotient primitives left with generated axioms, with
-    /// the reason.
+    /// certify is an error).
     pub stage_b: usize,
-    pub quot_stage_a: Vec<(String, String)>,
     /// The Horn prover's index of the spec's clauses (made once; the blocks' theorems are
     /// added per declaration).
     pub horn_index: mm0kit::horn::Index,
@@ -215,7 +213,6 @@ impl Gen {
             blks: HashMap::default(),
             blocks: HashMap::default(),
             stage_b: 0,
-            quot_stage_a: Vec::new(),
             horn_index,
             spec_terms,
             eeqv_axioms: HashMap::default(),
@@ -462,9 +459,6 @@ impl Gen {
             eprintln!("lean0: {} inductive blocks certified by the schema, {} level-congruence axioms for opaque constants in block data",
                 self.stage_b, self.eeqv_axioms.len());
         }
-        for (n, why) in &self.quot_stage_a {
-            eprintln!("lean0: generated axioms for {n}: {why}");
-        }
         if self.lit_stage_b + self.lit_stage_a.len() > 0 {
             eprintln!("lean0: {} literal operations certified by their defining equations, {} with generated axioms", self.lit_stage_b, self.lit_stage_a.len());
             for (n, why) in &self.lit_stage_a {
@@ -605,14 +599,7 @@ impl Gen {
                 }
                 return Err("its inductive block is not certified".into())
             }
-            Declar::Quot { .. } => {
-                if !quot_spec(&mut el, &sig, info.ty)? {
-                    opaque(&mut el, &sig, info.ty, "quotient primitive")?;
-                    if sig.lean_name == "Quot.lift" || sig.lean_name == "Quot.ind" {
-                        quot_axiom(&mut el, &sig, info.ty)?;
-                    }
-                }
-            }
+            Declar::Quot { .. } => quot_spec(&mut el, &sig, info.ty)?,
             Declar::Opaque { val, .. } => {
                 let pv = if el.g.replay {
                     None
@@ -797,8 +784,8 @@ pub(crate) fn apps(g: &mut Gen, f: E, args: &[E]) -> E {
 
 /// An opaque constant: its own atom (`term c_atom: atom`) and the public definition
 /// `def c (us): expr = $ cst c_atom (lcons u1 ... lnil) $` (audit §10), with its
-/// well-formedness and closedness theorems and its `constDF` axiom. Used for Lean axioms,
-/// inductive types, constructors, recursors, quotient primitives and opaque definitions.
+/// well-formedness and closedness theorems and its `constDF` axiom. Used for Lean axioms
+/// and opaque definitions.
 fn opaque<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::ExprPtr<'t>, what: &str) -> R<TId> {
     let (st, pt) = el.infer(ty)?;
     let (level, pt) = el.as_sort(pt, st)?;
@@ -866,61 +853,28 @@ fn opaque<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::Ex
     Ok(term)
 }
 
-/// `Quot.lift f h (Quot.mk r a) ≡ f a` and `Quot.ind f (Quot.mk r a) ≡ f a`, under the premise
-/// that the arguments have their binders' types in the primitive's type `ty` (`sty`).
-fn quot_axiom<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::ExprPtr<'t>) -> R<()> {
-    let qty = el.tr(ty)?;
-    let g = &mut *el.g;
-    let Some(mk) = g.consts.get("Quot.mk").cloned() else { return Err("Quot.mk must precede Quot.lift and Quot.ind".into()) };
-    let nargs = if sig.lean_name == "Quot.lift" { 5 } else { 4 };
-    let mut v = Vars::new();
-    let gv = v.add(&mut g.env, "G", "ctx");
-    let us = v.lvls(&mut g.env, &sig.lvl_names, "");
-    let xs = v.many(&mut g.env, "x", "expr", nargs);
-    let mls: Vec<E> = (0..mk.nlevels).map(|i| v.add(&mut g.env, &format!("v{}", i + 1), "lvl")).collect();
-    let ys = v.many(&mut g.env, "y", "expr", 2);
-    let a = v.add(&mut g.env, "a", "expr");
-    let tv = v.add(&mut g.env, "T", "expr");
-    let m = g.const_term("Quot.mk", &mls).ok_or("Quot.mk term")?;
-    let q = apps(g, m, &[ys[0], ys[1], a]);
-    let h = g.const_term(&sig.lean_name, &us).ok_or("quotient term")?;
-    let lhs = apps(g, h, &[xs.clone(), vec![q]].concat());
-    let rhs = g.lean.app(&mut g.env, xs[3], a);
-    let mut hyps = vec![g.env.app_n("sty", &[gv, h, qty, lhs, tv])];
-    if nargs == 5 {
-        // `Quot.lift`: `a` at `f`'s domain (the spec's `quot_lift_mk`)
-        hyps.push(g.lean.deq(&mut g.env, gv, a, a, xs[0]));
-    }
-    let concl = g.lean.deq(&mut g.env, gv, lhs, rhs, tv);
-    let name = g.thms.fresh(&format!("{}_mk", sig.cname));
-    let th = add_thm(&mut g.env, &name, v.args, hyps, concl, true, false, None, &format!("Reduction of `{}` on `Quot.mk`.", sig.lean_name))?;
-    g.quot_red.insert(sig.lean_name.clone(), th);
-    Ok(())
-}
-
 /// A quotient primitive as the spec's constant (`quot`, `quot_mk`, `quot_lift`, `quot_ind`,
 /// typed by `quot_ty` and so on, reducing by `quot_lift_mk`/`quot_ind_mk`; audit §4), when
-/// the export's type is the spec's: `theorem Quot_df` (`constDF`, from `eeqv_df`), no
-/// generated axiom. `Ok(false)` when the spec has no such constant or the type differs (then
-/// generated axioms, `opaque` and `quot_axiom`, reported).
-fn quot_spec<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::ExprPtr<'t>) -> R<bool> {
+/// the export's type is the spec's: `theorem Quot_df` (`constDF`, from `eeqv_df`), and for
+/// `Quot.lift` and `Quot.ind` the reduction lemma `Quot_lift_mk`, `Quot_ind_mk`. An error
+/// when the type differs: no axioms are generated for a quotient primitive.
+fn quot_spec<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::ExprPtr<'t>) -> R<()> {
     let (term, ty_ax, eqv_ax, red) = match sig.lean_name.as_str() {
         "Quot" => ("quot", "quot_ty", "eeqv_quot", None),
         "Quot.mk" => ("quot_mk", "quot_mk_ty", "eeqv_quot_mk", None),
         "Quot.lift" => ("quot_lift", "quot_lift_ty", "eeqv_quot_lift", Some("quot_lift_mk")),
         "Quot.ind" => ("quot_ind", "quot_ind_ty", "eeqv_quot_ind", Some("quot_ind_mk")),
-        _ => return Ok(false),
+        n => return Err(format!("unknown quotient primitive {n}")),
     };
     if !el.g.env.has_term(term) || !el.g.env.has_thm(ty_ax) {
-        return Ok(false)
+        return Err("the spec has no such quotient primitive".into())
     }
     let t = el.tr(ty)?;
     let g = &mut *el.g;
     let term = g.env.term_id(term);
     let n = g.env.terms[term.0 as usize].args.len();
     if n != sig.lvl_names.len() {
-        g.quot_stage_a.push((sig.lean_name.clone(), "the quotient primitive's universe parameters are not the spec's".into()));
-        return Ok(false)
+        return Err("the quotient primitive's universe parameters are not the spec's".into())
     }
     let gv = g.env.var(0);
     let us: Vec<E> = (0..n).map(|i| g.env.var(1 + i as u16)).collect();
@@ -933,8 +887,7 @@ fn quot_spec<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util:
     let Some((_, [_, c1, spec_t])) = g.env.head(stmt) else { return Err(format!("{ty_ax}: not a typing")) };
     let (c1, spec_t) = (*c1, *spec_t);
     if spec_t != t {
-        g.quot_stage_a.push((sig.lean_name.clone(), "the quotient primitive's type is not the spec's".into()));
-        return Ok(false)
+        return Err("the quotient primitive's type is not the spec's".into())
     }
     let c2 = g.env.app(term, &us2);
     let hyps: Vec<E> = us.iter().zip(&us2).map(|(&a, &b)| g.env.app_n("leqv", &[a, b])).collect();
@@ -960,10 +913,13 @@ fn quot_spec<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util:
         &format!("`{}` (the spec's `{spec_name}`) has its type, at any equivalent levels (`constDF`).", sig.lean_name))?;
     g.consts.insert(sig.lean_name.clone(), ConstInfo { term, kind: ConstKind::Opaque, nlevels: n, ty_thm: df });
     if let Some(r) = red {
-        let th = g.env.thm_id(r);
+        // the spec's closed equation over any base context
+        let name = g.thms.fresh(&format!("{}_mk", sig.cname));
+        let args = g.g_args(&sig.lvl_names);
+        let th = crate::induct::closed_over_base(g, r, &us, &name, args, &format!("Reduction of `{}` on `Quot.mk` (the spec's `{r}`, over any base context).", sig.lean_name))?;
         g.quot_red.insert(sig.lean_name.clone(), th);
     }
-    Ok(true)
+    Ok(())
 }
 
 /// What the structure lemmas (`induct::structure`) need from the constructor's type: each field's type (a de Bruijn

@@ -1110,6 +1110,40 @@ fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &s
     add_thm(&mut g.env, name, args, Vec::new(), concl, false, false, proof, doc)
 }
 
+/// The spec's closed equation `ax` at the levels `us` (a rule without premises whose context
+/// is closed: `quot_lift_mk`, `quot_ind_mk`), over any base context `G` (`weakBaseDF`): the
+/// theorem `name` over `args` (`G`, then the levels).
+pub(crate) fn closed_over_base(g: &mut Gen, ax: &str, us: &[E], name: &str, args: Vec<(String, u8)>, doc: &str) -> R<ThId> {
+    let th = g.env.thm_id(ax);
+    let c0 = g.env.plain_concl(th);
+    let c0 = g.env.subst(c0, us);
+    let Some((_, &[dl, lhs, rhs, ty])) = g.env.head(c0) else { return Err(format!("{ax}: not an equation")) };
+    let mut entries = Vec::new();
+    let mut t = dl;
+    while let Some((h, &[a, rest])) = g.env.head(t) {
+        if h != g.lean.ids.cons {
+            break
+        }
+        entries.push(a);
+        t = rest;
+    }
+    let mut dlg = g.env.var(0);
+    for &a in entries.iter().rev() {
+        dlg = g.lean.cons(&mut g.env, a, dlg);
+    }
+    let concl = g.lean.deq(&mut g.env, dlg, lhs, rhs, ty);
+    let proof = if g.replay {
+        None
+    } else {
+        let p0 = mm(g.env.thm(th, us, &[]))?;
+        let p0 = mm(g.env.convert(p0, c0))?;
+        let mut pv = Prover::new(g);
+        pv.horn.facts.insert(c0, p0);
+        Some(pv.apply(g, "weakBaseDF", concl)?)
+    };
+    add_thm(&mut g.env, name, args, Vec::new(), concl, false, false, proof, doc)
+}
+
 /// The type whose recursor `name` is: `X.rec` for a declared type `X`, or `X.rec_k` (`X` the
 /// first type) for the `k`th auxiliary type of a nested block (`mkAuxRecNameMap`).
 fn rec_index(block: &Block, name: &str) -> Option<usize> {

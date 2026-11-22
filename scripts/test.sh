@@ -209,9 +209,9 @@ for th in Eq_rec_refl_iota MyNat_rec_succ_iota MyList_rec_cons_iota Prod_eta PUn
           Prod_proj_0_mk And_proj_1_df; do
   tamper induct rejected --tamper-theorem "$th"
 done
-for ax in inst_proj ind_iota_eq proj_ty quot_lift_mk lit_succ eeqv_cst; do tamper induct rejected --tamper-axiom "$ax"; done
+for ax in inst_proj ind_iota_eq proj_ty quot_lift_mk quot_ind_mk lit_succ eeqv_cst; do tamper induct rejected --tamper-axiom "$ax"; done
 # ... and rules they do not use are harmless, which shows the test can tell the difference.
-tamper induct accepted --tamper-axiom quot_ind_mk
+tamper induct accepted --tamper-axiom nat_mul_lit
 tamper induct accepted --tamper-axiom eta
 # Nested blocks: the restore, the occurrence lookup, the auxiliary types' data and their iota.
 tamper nested rejected --tamper-theorem tree_size_ex_ty
