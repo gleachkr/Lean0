@@ -1524,7 +1524,7 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         let tf = self.infer(f)?.0;
         // s.i ≡ s2.i by congruence, then s2.i ≡ field by the reduction axiom
         let p1 = self.proj_df_p(idx, structure, Some((s2, q)))?;
-        let (t2, pt2) = self.infer(proj2)?;
+        self.infer(proj2)?;
         let sname = self.g.lean_name(self.tc, ty_name);
         let si = self.g.structs[&sname].clone();
         let (_, ctor_args) = self.tc.ctx.unfold_apps(s2);
@@ -1534,14 +1534,11 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         for &l in self.tc.ctx.read_levels(clevels).to_vec().iter() {
             a.push(self.trl(l)?);
         }
-        let k = ctor_args.len() - si.nf - si.np;
-        for &x in &ctor_args[k..] {
-            a.push(self.tr(x)?);
+        if ctor_args.len() != si.nf + si.np {
+            return Err(format!("projection {idx} of {sname}: the constructor's argument count"))
         }
-        a.push(self.tr(t2)?);
-        // `proj_ok`'s premises (as `proj_df_p`), then the constructor application's spine
-        // typed along the constructor's type as the schema has it
-        let lvls: Vec<E> = a[..a.len() - 1 - (ctor_args.len() - k)].to_vec();
+        // `proj_ok`'s premises (as `proj_df_p`)
+        let lvls: Vec<E> = a.clone();
         let (mut th, needs_sort) = si.red[idx];
         let mut hyps = Vec::new();
         if needs_sort {
@@ -1562,16 +1559,32 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
                 (Err(e), _, _) => return Err(format!("projection {idx} of {sname} from a proposition: {e}")),
             }
         }
+        // the closed equation (`proj_mk`, audit §4), its variables instantiated from the
+        // bottom of its context (`instDF`): the parameters, then the fields, each typed at
+        // its binder in the constructor's type as the schema has it
         let (cf, _) = self.tc.ctx.unfold_apps(s2);
         let cty = self.infer(cf)?.0;
-        let cty = crate::induct::strip_pis(self, cty);
-        let (sty_t, p_sty) = self.sty_spine_at(cf, cty, &ctor_args[k..])?;
-        a.push(self.tr(sty_t)?);
-        hyps.push(p_sty);
-        hyps.push(pt2);
-        let p2 = mm(self.g.env.thm(th, &a, &hyps))?;
+        let mut cty = crate::induct::strip_pis(self, cty);
+        let mut subst = Vec::new();
+        for &x in &ctor_args {
+            let Expr::Pi { binder_type, body, .. } = self.read(cty) else { return Err("the constructor's type is not a telescope over its arguments".into()) };
+            subst.push((x, binder_type));
+            cty = self.tc.ctx.inst(body, &[x]);
+        }
+        let tl3 = subst[si.np + idx].1;
+        let mut p2 = mm(self.g.env.thm(th, &a, &hyps))?;
+        let n = subst.len();
+        for (j, &(x, bt)) in subst.iter().enumerate() {
+            let (tx, px) = self.infer(x)?;
+            let px = self.cast(px, tx, bt)?;
+            p2 = mm(self.g.lean.inst_df(&mut self.g.env, n - 1 - j, px, p2))?;
+        }
+        let (_, le, _, te) = self.g.lean.deq_parts(&mut self.g.env, p2);
+        if le != self.tr(proj2)? || te != self.tr(tl3)? {
+            return Err(format!("projection {idx} of {sname}: the instance is not the expected one"))
+        }
         let p1 = self.proj_cast(p1, f, tf)?;
-        let p2 = self.cast(p2, t2, tf)?;
+        let p2 = self.cast(p2, tl3, tf)?;
         let mut pf = mm(self.g.lean.trans(&mut self.g.env, p1, p2))?;
         let mut ft = tf;
         for &x in &args {

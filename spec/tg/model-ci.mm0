@@ -519,3 +519,85 @@ theorem mweakBaseDF (M: class) (k: nat) (G G0 G2: ctx) (e e2 A K: expr):
   $ mdeq M G e e2 A $ > $ pis G (srt lz) K $ > $ closed nz K $ > $ clen G k $ > $ closed k e $ > $ closed k e2 $ > $ closed k A $ > $ capp G G0 G2 $ > $ mdeq M G2 e e2 A $;
 
 theorem weakBaseDF (k: nat) (G G0 G2: ctx) (e e2 A K: expr): $ deq G e e2 A $ > $ pis G (srt lz) K $ > $ closed nz K $ > $ clen G k $ > $ closed k e $ > $ closed k e2 $ > $ closed k A $ > $ capp G G0 G2 $ > $ deq G2 e e2 A $;
+
+
+-- --------------------------------------------------------------------------
+-- The projection rule as a closed equation
+-- --------------------------------------------------------------------------
+
+--| The constructor's side of a closed rule whose context is the constructor's fields over the parameters (`ci_ctor`
+--| with no variables between them): at a valuation `r` that is the fields `f` and the parameters `p`, the constructor at
+--| the parameters' and the fields' windows (`tmj`) has the arguments `f ++ p`, a valuation of the constructor's
+--| context over `r`, and the result `tB` has there the arguments it has at `r`: the hypotheses of `iota_ctor_sem`.
+theorem ci_ctor0 (G: hyps) (M: class) (u w r f p td ti tc tp tt tF tE tX tQ tB tK2 tnf tnp tc1 tmj tl: set):
+  $ G ⇒ uadm u $ >
+  $ G ⇒ w ∊ lvals $ >
+  $ G ⇒ p ∊ esat u (dnf u M) tp w $ >
+  $ G ⇒ f ∊ esat u (dsh u M p) tX w $ >
+  $ G ⇒ r = scat f p $ >
+  $ G ⇒ ra_clen tX tnf ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_tys_closed tp tt ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_capp tX tp tQ ∈ lrel $ >
+  $ G ⇒ ra_pis tX tB tK2 ∈ lrel $ >
+  $ G ⇒ ra_closed tnp tK2 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ tnf tnp tc1 ∈ lrel $ >
+  $ G ⇒ ra_pargs tc1 ⟨ kc_nz , ∅ ⟩ tnf tmj ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tB tl ∈ lrel $ >
+  $ G ⇒ sarg u (dnf u M) tmj w r ∈ esat u (dsh u M r) tQ w ∧ sarg u (dnf u M) tB w r = sarg u (dnf u M) tB w (scat (sarg u (dnf u M) tmj w r) r) ∧ sarg u (dnf u M) tmj w r = scat f p ∧ cdm f = fv nvf tnf $;
+
+--| The closed projection rule at one valuation `r` of the unrestored context (the fields `xx0` over the parameters
+--| `xx1`): the projection of field `tfi` of the constructor at the parameters' and the fields' windows (`tmj`) is the
+--| valuation's entry `tii` (`tii + tfi + 1` fields). The application's value is the constructor's point at a path of
+--| the constructor's type (`ci_ctor0`, `iota_ctor_sem`), whose field `tfi` is that entry (`proj_ok_fields`,
+--| `etel_rev`). No typing premise.
+theorem proj_ci_wf (G: hyps) (H J: class) (u w r r0 xx0 xx1 tg td tb tp tt tnp tn tm ti tF tE tK tK2 tnf tnq tmj tfi tii tX tQ tB tc1 tl: set):
+  $ G ⇒ iwf u H J tg td w r0 $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ r ∊ sat u (mcv H) tg w $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor tE ⟨ kc_nz , ∅ ⟩ tK ∈ lrel $ >
+  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tK tK2 ∈ lrel $ >
+  $ G ⇒ ra_npis tK tnf ∈ lrel $ >
+  $ G ⇒ ra_proj_ok tg td ti tfi ∈ lrel3 J $ >
+  $ G ⇒ ra_add tii ⟨ kc_s , scons tfi ∅ ⟩ tnf ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ctor , scons td (scons ti (scons ⟨ kc_nz , ∅ ⟩ ∅)) ⟩ tmj tnq ∈ lrel $ >
+  $ G ⇒ xx1 ∊ esat u (dnf u (mcv H)) tp w $ >
+  $ G ⇒ xx0 ∊ esat u (dsh u (mcv H) xx1) tX w $ >
+  $ G ⇒ r = scat xx0 xx1 $ >
+  $ G ⇒ ra_clen tX tnf ∈ lrel $ >
+  $ G ⇒ ra_tys_closed tp tt ∈ lrel $ >
+  $ G ⇒ ra_capp tX tp tQ ∈ lrel $ >
+  $ G ⇒ ra_pis tX tB tK2 ∈ lrel $ >
+  $ G ⇒ ra_closed tnp tK2 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ctor , scons td (scons ti (scons ⟨ kc_nz , ∅ ⟩ ∅)) ⟩ tnf tnp tc1 ∈ lrel $ >
+  $ G ⇒ ra_pargs tc1 ⟨ kc_nz , ∅ ⟩ tnf tmj ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tB tl ∈ lrel $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_proj , scons tb (scons tfi (scons tmj ∅)) ⟩ w r = fv r (fv nvf tii) $;
+
+--| The closed projection rule in the model from the rule's premises (`proj_mk`): `proj_eq` inverted. At every
+--| valuation of the rule's restored context `tg1` (a valuation of the unrestored one, `proj_tel_rst_sat`), the restored
+--| left-hand side has the value of the unrestored one (`proj_lhs_rst_val`), which is the valuation's entry `tk`
+--| (`proj_ci_wf`), an element of the value of the entry's type (`lrel_lookup_sem`). No typing premise.
+theorem proj_mk_eq_rule (G: hyps) (H J: class) (u w r tg tg1 td tN ti tfi tk tl z1 tT: set):
+  $ G ⇒ iwf u H J tg1 td w r $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ ra_proj_ok tg1 td ti tfi ∈ lrel3 J $ >
+  $ G ⇒ tl ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_proj_eq td ti tfi tg tl tk ∈ lrel $ >
+  $ G ⇒ ra_ind_nested td tN ∈ lrel $ >
+  $ G ⇒ ra_crst td tN tg tg1 ∈ lrel $ >
+  $ G ⇒ ra_rst td tN tl z1 ∈ lrel $ >
+  $ G ⇒ ra_lookup tg1 tk tT ∈ lrel $ >
+  $ G ⇒ dt u (mcv H) z1 w r = dt u (mcv H) ⟨ kc_bvar , scons tk ∅ ⟩ w r ∧ dt u (mcv H) z1 w r ∈ dt u (mcv H) tT w r $;
+
+
+-- --------------------------------------------------------------------------
+-- The spec's rule `proj_mk`
+-- --------------------------------------------------------------------------
+
+theorem proj_mk (D: ind) (N: ctx) (j i k: nat) (Dl0 Dl: ctx) (lhs0 lhs T: expr): $ ind_wf Dl D $ > $ proj_ok Dl D j i $ > $ proj_eq D j i Dl0 lhs0 k $ > $ ind_nested D N $ > $ crst D N Dl0 Dl $ > $ rst D N lhs0 lhs $ > $ lookup Dl k T $ > $ deq Dl lhs (bvar k) T $;

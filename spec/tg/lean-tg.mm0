@@ -448,6 +448,7 @@ def kr_iota_tel: class = $ suc kr_psplit $;
 def kr_iota_lhs: class = $ suc kr_iota_tel $;
 def kr_crst: class = $ suc kr_iota_lhs $;
 def kr_iota_eq: class = $ suc kr_crst $;
+def kr_proj_eq: class = $ suc kr_iota_eq $;
 
 --| The atoms: a label and the trees of the arguments.
 def latoms: class = $ ω × fseq (trees ω) $;
@@ -533,6 +534,7 @@ def ra_iota_tel (a1 a2 a3 a4 a5 a6 a7 a8: class): class = $ ⟨ kr_iota_tel , sc
 def ra_iota_lhs (a1 a2 a3 a4 a5 a6 a7 a8 a9 a10 a11: class): class = $ ⟨ kr_iota_lhs , scons a1 (scons a2 (scons a3 (scons a4 (scons a5 (scons a6 (scons a7 (scons a8 (scons a9 (scons a10 (scons a11 ∅)))))))))) ⟩ $;
 def ra_crst (a1 a2 a3 a4: class): class = $ ⟨ kr_crst , scons a1 (scons a2 (scons a3 (scons a4 ∅))) ⟩ $;
 def ra_iota_eq (a1 a2 a3 a4 a5 a6 a7 a8: class): class = $ ⟨ kr_iota_eq , scons a1 (scons a2 (scons a3 (scons a4 (scons a5 (scons a6 (scons a7 (scons a8 ∅))))))) ⟩ $;
+def ra_proj_eq (a1 a2 a3 a4 a5 a6: class): class = $ ⟨ kr_proj_eq , scons a1 (scons a2 (scons a3 (scons a4 (scons a5 (scons a6 ∅))))) ⟩ $;
 
 --| The ground instances of each clause axiom: ⟨ premises , conclusion ⟩.
 def cl_le_z (.n .w: set): class =
@@ -1005,6 +1007,8 @@ def cl_crst_cons (.D .N .A .A2 .G .G2 .w: set): class =
   $ {w | ∃ D ∃ N ∃ A ∃ A2 ∃ G ∃ G2 (w = ⟨ scons (ra_rst D N A A2) (scons (ra_crst D N G G2) ∅) , ra_crst D N ⟨ kc_cons , scons A (scons G ∅) ⟩ ⟨ kc_cons , scons A2 (scons G2 ∅) ⟩ ⟩)} $;
 def cl_iota_eq_i (.D .i .c .v .np .n .m .a0 .ar .nf .X .Dl .res .e3 .e4 .c1 .maj .Rh .rhs0 .rhs .T .w: set): class =
   $ {w | ∃ D ∃ i ∃ c ∃ v ∃ np ∃ n ∃ m ∃ a0 ∃ ar ∃ nf ∃ X ∃ Dl ∃ res ∃ e3 ∃ e4 ∃ c1 ∃ maj ∃ Rh ∃ rhs0 ∃ rhs ∃ T (w = ⟨ scons (ra_iota_tel D v i c X res nf Dl) (scons (ra_iota_lhs D v i c nf res e3 c1 maj e4 T) (scons (ra_rec_rhs D v i c Rh) (scons (ra_ind_arity D np n m) (scons (ra_add np n a0) (scons (ra_add a0 m ar) (scons (ra_rehead ⟨ kc_ind_rec , scons D (scons i (scons v ∅)) ⟩ Rh ar e3 rhs0) (scons (ra_rehead c1 rhs0 nf maj rhs) ∅))))))) , ra_iota_eq D i c v Dl ⟨ kc_app , scons e4 (scons maj ∅) ⟩ rhs T ⟩)} $;
+def cl_proj_eq_i (.D .b .P .X .Dl .T .j .i .np .n .m .nf .k .F .K .K2 .res .c1 .maj .C .w: set): class =
+  $ {w | ∃ D ∃ b ∃ P ∃ X ∃ Dl ∃ T ∃ j ∃ i ∃ np ∃ n ∃ m ∃ nf ∃ k ∃ F ∃ K ∃ K2 ∃ res ∃ c1 ∃ maj ∃ C (w = ⟨ scons (ra_ind_data D b P T) (scons (ra_clen P np) (scons (ra_ntys T n m) (scons (ra_nth_ty T j F C) (scons (ra_nth_ctor C ⟨ kc_nz , ∅ ⟩ K) (scons (ra_npis K nf) (scons (ra_sinst D ⟨ kc_nz , ∅ ⟩ n np K K2) (scons (ra_psplit nf K2 ⟨ kc_nil , ∅ ⟩ X res) (scons (ra_capp X P Dl) (scons (ra_pargs ⟨ kc_ind_ctor , scons D (scons j (scons ⟨ kc_nz , ∅ ⟩ ∅)) ⟩ nf np c1) (scons (ra_pargs c1 ⟨ kc_nz , ∅ ⟩ nf maj) (scons (ra_add k ⟨ kc_s , scons i ∅ ⟩ nf) ∅))))))))))) , ra_proj_eq D j i Dl ⟨ kc_proj , scons b (scons i (scons maj ∅)) ⟩ k ⟩)} $;
 
 --| The clauses of each relation.
 def pr_le: class = $ cl_le_z ∪ cl_le_s $;
@@ -1089,10 +1093,11 @@ def pr_iota_tel: class = $ cl_iota_tel_i $;
 def pr_iota_lhs: class = $ cl_iota_lhs_i $;
 def pr_crst: class = $ cl_crst_nil ∪ cl_crst_cons $;
 def pr_iota_eq: class = $ cl_iota_eq_i $;
+def pr_proj_eq: class = $ cl_proj_eq_i $;
 
 --| The program, at the atoms.
 def lprog: class =
-  $ ((((((pr_le ∪ pr_add) ∪ (pr_lnth ∪ (pr_linst ∪ pr_lsubst))) ∪ ((pr_closed ∪ pr_lift) ∪ (pr_inst ∪ (pr_lookup ∪ pr_cinst)))) ∪ (((pr_cext ∪ pr_clen) ∪ (pr_cnth ∪ (pr_capp ∪ pr_bsucc))) ∪ ((pr_bdbl ∪ pr_badd) ∪ (pr_baddc ∪ (pr_bmul ∪ pr_bpow))))) ∪ ((((pr_band ∪ pr_bor) ∪ (pr_bxor ∪ (pr_ind_data ∪ pr_ind_nested))) ∪ ((pr_nth_ty ∪ pr_nth_ctor) ∪ (pr_clen_c ∪ (pr_ntys ∪ pr_minor_idx)))) ∪ (((pr_npis ∪ pr_nth_pi) ∪ (pr_isort ∪ (pr_ind_arity ∪ pr_nidx))) ∪ ((pr_nfields ∪ (pr_ndecl ∪ pr_aux_of)) ∪ (pr_pis ∪ (pr_lams ∪ pr_tys_closed)))))) ∪ (((((pr_pargs ∪ pr_spine) ∪ (pr_rehead ∪ (pr_has_arg ∪ pr_leaf_has))) ∪ ((pr_pinst ∪ pr_sinst) ∪ (pr_iargs ∪ (pr_indapp ∪ pr_ipos)))) ∪ (((pr_recfield ∪ pr_rst) ∪ (pr_nst_hit ∪ (pr_spz ∪ pr_afree))) ∪ ((pr_spz_ctors ∪ pr_aux_data) ∪ (pr_mty ∪ (pr_motives ∪ pr_ihty))))) ∪ ((((pr_mwalk ∪ pr_cminors) ∪ (pr_minors ∪ (pr_rtail ∪ pr_rec_ty))) ∪ ((pr_ctor_ty ∪ pr_ihval) ∪ (pr_rwalk ∪ (pr_rec_rhs ∪ pr_struct_like)))) ∪ (((pr_field_ty ∪ pr_qinst) ∪ (pr_nonrec ∪ (pr_eta_ok ∪ pr_projs))) ∪ ((pr_clift ∪ (pr_psplit ∪ pr_iota_tel)) ∪ (pr_iota_lhs ∪ (pr_crst ∪ pr_iota_eq))))))) ∩
+  $ ((((((pr_le ∪ pr_add) ∪ (pr_lnth ∪ (pr_linst ∪ pr_lsubst))) ∪ ((pr_closed ∪ pr_lift) ∪ (pr_inst ∪ (pr_lookup ∪ pr_cinst)))) ∪ (((pr_cext ∪ pr_clen) ∪ (pr_cnth ∪ (pr_capp ∪ pr_bsucc))) ∪ ((pr_bdbl ∪ pr_badd) ∪ (pr_baddc ∪ (pr_bmul ∪ pr_bpow))))) ∪ ((((pr_band ∪ pr_bor) ∪ (pr_bxor ∪ (pr_ind_data ∪ pr_ind_nested))) ∪ ((pr_nth_ty ∪ pr_nth_ctor) ∪ (pr_clen_c ∪ (pr_ntys ∪ pr_minor_idx)))) ∪ (((pr_npis ∪ pr_nth_pi) ∪ (pr_isort ∪ (pr_ind_arity ∪ pr_nidx))) ∪ ((pr_nfields ∪ (pr_ndecl ∪ pr_aux_of)) ∪ (pr_pis ∪ (pr_lams ∪ pr_tys_closed)))))) ∪ (((((pr_pargs ∪ pr_spine) ∪ (pr_rehead ∪ (pr_has_arg ∪ pr_leaf_has))) ∪ ((pr_pinst ∪ pr_sinst) ∪ (pr_iargs ∪ (pr_indapp ∪ pr_ipos)))) ∪ (((pr_recfield ∪ pr_rst) ∪ (pr_nst_hit ∪ (pr_spz ∪ pr_afree))) ∪ ((pr_spz_ctors ∪ (pr_aux_data ∪ pr_mty)) ∪ (pr_motives ∪ (pr_ihty ∪ pr_mwalk))))) ∪ ((((pr_cminors ∪ pr_minors) ∪ (pr_rtail ∪ (pr_rec_ty ∪ pr_ctor_ty))) ∪ ((pr_ihval ∪ pr_rwalk) ∪ (pr_rec_rhs ∪ (pr_struct_like ∪ pr_field_ty)))) ∪ (((pr_qinst ∪ pr_nonrec) ∪ (pr_eta_ok ∪ (pr_projs ∪ pr_clift))) ∪ ((pr_psplit ∪ (pr_iota_tel ∪ pr_iota_lhs)) ∪ (pr_crst ∪ (pr_iota_eq ∪ pr_proj_eq))))))) ∩
     (fseq latoms × latoms) $;
 --| The derivable atoms.
 def lrel: class = $ horn lprog $;
@@ -1180,6 +1185,7 @@ def iota_tel (a1: ind) (a2: lvl) (a3: nat) (a4: nat) (a5: ctx) (a6: expr) (a7: n
 def iota_lhs (a1: ind) (a2: lvl) (a3: nat) (a4: nat) (a5: nat) (a6: expr) (a7: expr) (a8: expr) (a9: expr) (a10: expr) (a11: expr): wff = $ _ ⇒ ra_iota_lhs (enc_ind a1) (enc_lvl a2) (enc_nat a3) (enc_nat a4) (enc_nat a5) (enc_expr a6) (enc_expr a7) (enc_expr a8) (enc_expr a9) (enc_expr a10) (enc_expr a11) ∈ lrel $;
 def crst (a1: ind) (a2: ctx) (a3: ctx) (a4: ctx): wff = $ _ ⇒ ra_crst (enc_ind a1) (enc_ctx a2) (enc_ctx a3) (enc_ctx a4) ∈ lrel $;
 def iota_eq (a1: ind) (a2: nat) (a3: nat) (a4: lvl) (a5: ctx) (a6: expr) (a7: expr) (a8: expr): wff = $ _ ⇒ ra_iota_eq (enc_ind a1) (enc_nat a2) (enc_nat a3) (enc_lvl a4) (enc_ctx a5) (enc_expr a6) (enc_expr a7) (enc_expr a8) ∈ lrel $;
+def proj_eq (a1: ind) (a2: nat) (a3: nat) (a4: ctx) (a5: expr) (a6: nat): wff = $ _ ⇒ ra_proj_eq (enc_ind a1) (enc_nat a2) (enc_nat a3) (enc_ctx a4) (enc_expr a5) (enc_nat a6) ∈ lrel $;
 
 --| The spec's definitions (in prefix form).
 def n1: nat = $ s nz $;
@@ -2498,6 +2504,25 @@ theorem lrel_iota_eq_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14
   $ G ⇒ ra_rehead ⟨ kc_ind_rec , scons A1 (scons A2 (scons A4 ∅)) ⟩ A18 A9 A14 A19 ∈ lrel $ >
   $ G ⇒ ra_rehead A16 A19 A10 A17 A20 ∈ lrel $ >
   $ G ⇒ ra_iota_eq A1 A2 A3 A4 A12 ⟨ kc_app , scons A15 (scons A17 ∅) ⟩ A20 A21 ∈ lrel $;
+theorem lrel_proj_eq_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9 A10 A11 A12 A13 A14 A15 A16 A17 A18 A19 A20: class):
+  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
+  $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
+  $ G ⇒ A9 ∈ trees ω $ > $ G ⇒ A10 ∈ trees ω $ > $ G ⇒ A11 ∈ trees ω $ > $ G ⇒ A12 ∈ trees ω $ >
+  $ G ⇒ A13 ∈ trees ω $ > $ G ⇒ A14 ∈ trees ω $ > $ G ⇒ A15 ∈ trees ω $ > $ G ⇒ A16 ∈ trees ω $ >
+  $ G ⇒ A17 ∈ trees ω $ > $ G ⇒ A18 ∈ trees ω $ > $ G ⇒ A19 ∈ trees ω $ > $ G ⇒ A20 ∈ trees ω $ >
+  $ G ⇒ ra_ind_data A1 A2 A3 A6 ∈ lrel $ >
+  $ G ⇒ ra_clen A3 A9 ∈ lrel $ >
+  $ G ⇒ ra_ntys A6 A10 A11 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty A6 A7 A14 A20 ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor A20 ⟨ kc_nz , ∅ ⟩ A15 ∈ lrel $ >
+  $ G ⇒ ra_npis A15 A12 ∈ lrel $ >
+  $ G ⇒ ra_sinst A1 ⟨ kc_nz , ∅ ⟩ A10 A9 A15 A16 ∈ lrel $ >
+  $ G ⇒ ra_psplit A12 A16 ⟨ kc_nil , ∅ ⟩ A4 A17 ∈ lrel $ >
+  $ G ⇒ ra_capp A4 A3 A5 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ctor , scons A1 (scons A7 (scons ⟨ kc_nz , ∅ ⟩ ∅)) ⟩ A12 A9 A18 ∈ lrel $ >
+  $ G ⇒ ra_pargs A18 ⟨ kc_nz , ∅ ⟩ A12 A19 ∈ lrel $ >
+  $ G ⇒ ra_add A13 ⟨ kc_s , scons A8 ∅ ⟩ A12 ∈ lrel $ >
+  $ G ⇒ ra_proj_eq A1 A7 A8 A5 ⟨ kc_proj , scons A2 (scons A8 (scons A19 ∅)) ⟩ A13 ∈ lrel $;
 
 --| The clause axioms of Part I, in prefix form.
 theorem le_z (n: nat): $ le nz n $;
@@ -2735,6 +2760,7 @@ theorem iota_lhs_i (D: ind) (v: lvl) (i c np n m mn nf ni a d1 io mo: nat) (res 
 theorem crst_nil (D: ind) (N: ctx): $ crst D N nil nil $;
 theorem crst_cons (D: ind) (N: ctx) (A A2: expr) (G G2: ctx): $ rst D N A A2 $ > $ crst D N G G2 $ > $ crst D N (cons A G) (cons A2 G2) $;
 theorem iota_eq_i (D: ind) (i c: nat) (v: lvl) (np n m a0 ar nf: nat) (X Dl: ctx) (res e3 e4 c1 maj Rh rhs0 rhs T: expr): $ iota_tel D v i c X res nf Dl $ > $ iota_lhs D v i c nf res e3 c1 maj e4 T $ > $ rec_rhs D v i c Rh $ > $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m ar $ > $ rehead (ind_rec D i v) Rh ar e3 rhs0 $ > $ rehead c1 rhs0 nf maj rhs $ > $ iota_eq D i c v Dl (app e4 maj) rhs T $;
+theorem proj_eq_i (D: ind) (b: blk) (P X Dl: ctx) (T: tys) (j i np n m nf k: nat) (F K K2 res c1 maj: expr) (C: ctors): $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ nth_ty T j F C $ > $ nth_ctor C nz K $ > $ npis K nf $ > $ sinst D nz n np K K2 $ > $ psplit nf K2 nil X res $ > $ capp X P Dl $ > $ pargs (ind_ctor D j nz) nf np c1 $ > $ pargs c1 nz nf maj $ > $ add k (s i) nf $ > $ proj_eq D j i Dl (proj b i maj) k $;
 
 --| The program's clauses that conclude an atom of a relation are that relation's
 --| (rule induction over `lrel` with `horn_ind` reduces to them).
@@ -2902,6 +2928,8 @@ theorem lprog_crst_pr (G: hyps) (P A1 A2 A3 A4: class):
   $ G ⇒ ⟨ P , ra_crst A1 A2 A3 A4 ⟩ ∈ lprog $ > $ G ⇒ ⟨ P , ra_crst A1 A2 A3 A4 ⟩ ∈ pr_crst $;
 theorem lprog_iota_eq_pr (G: hyps) (P A1 A2 A3 A4 A5 A6 A7 A8: class):
   $ G ⇒ ⟨ P , ra_iota_eq A1 A2 A3 A4 A5 A6 A7 A8 ⟩ ∈ lprog $ > $ G ⇒ ⟨ P , ra_iota_eq A1 A2 A3 A4 A5 A6 A7 A8 ⟩ ∈ pr_iota_eq $;
+theorem lprog_proj_eq_pr (G: hyps) (P A1 A2 A3 A4 A5 A6: class):
+  $ G ⇒ ⟨ P , ra_proj_eq A1 A2 A3 A4 A5 A6 ⟩ ∈ lprog $ > $ G ⇒ ⟨ P , ra_proj_eq A1 A2 A3 A4 A5 A6 ⟩ ∈ pr_proj_eq $;
 
 --| Inversion: a derivable atom of a relation is the conclusion of one of its
 --| clauses, at sets, with the clause's premises derivable (the arguments `tN`,
@@ -3305,6 +3333,9 @@ theorem lrel_crst_cases (G: hyps) {D N A A2 G_v G2: set} (t1 t2 t3 t4: set):
 theorem lrel_iota_eq_cases (G: hyps) {D i_v c_v v_v np n_v m_v a0 ar nf X Dl res e3 e4 c1 maj Rh rhs0 rhs T: set} (t1 t2 t3 t4 t5 t6 t7 t8: set):
   $ G ⇒ ra_iota_eq t1 t2 t3 t4 t5 t6 t7 t8 ∈ lrel $ >
   $ G ⇒ ∃ D ∃ i_v ∃ c_v ∃ v_v ∃ np ∃ n_v ∃ m_v ∃ a0 ∃ ar ∃ nf ∃ X ∃ Dl ∃ res ∃ e3 ∃ e4 ∃ c1 ∃ maj ∃ Rh ∃ rhs0 ∃ rhs ∃ T (t1 = D ∧ t2 = i_v ∧ t3 = c_v ∧ t4 = v_v ∧ t5 = Dl ∧ t6 = ⟨ kc_app , scons e4 (scons maj ∅) ⟩ ∧ t7 = rhs ∧ t8 = T ∧ ra_iota_tel D v_v i_v c_v X res nf Dl ∈ lrel ∧ ra_iota_lhs D v_v i_v c_v nf res e3 c1 maj e4 T ∈ lrel ∧ ra_rec_rhs D v_v i_v c_v Rh ∈ lrel ∧ ra_ind_arity D np n_v m_v ∈ lrel ∧ ra_add np n_v a0 ∈ lrel ∧ ra_add a0 m_v ar ∈ lrel ∧ ra_rehead ⟨ kc_ind_rec , scons D (scons i_v (scons v_v ∅)) ⟩ Rh ar e3 rhs0 ∈ lrel ∧ ra_rehead c1 rhs0 nf maj rhs ∈ lrel) $;
+theorem lrel_proj_eq_cases (G: hyps) {D b_v P X Dl T j_v i_v np n_v m_v nf k_v F K K2 res c1 maj C: set} (t1 t2 t3 t4 t5 t6: set):
+  $ G ⇒ ra_proj_eq t1 t2 t3 t4 t5 t6 ∈ lrel $ >
+  $ G ⇒ ∃ D ∃ b_v ∃ P ∃ X ∃ Dl ∃ T ∃ j_v ∃ i_v ∃ np ∃ n_v ∃ m_v ∃ nf ∃ k_v ∃ F ∃ K ∃ K2 ∃ res ∃ c1 ∃ maj ∃ C (t1 = D ∧ t2 = j_v ∧ t3 = i_v ∧ t4 = Dl ∧ t5 = ⟨ kc_proj , scons b_v (scons i_v (scons maj ∅)) ⟩ ∧ t6 = k_v ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_clen P np ∈ lrel ∧ ra_ntys T n_v m_v ∈ lrel ∧ ra_nth_ty T j_v F C ∈ lrel ∧ ra_nth_ctor C ⟨ kc_nz , ∅ ⟩ K ∈ lrel ∧ ra_npis K nf ∈ lrel ∧ ra_sinst D ⟨ kc_nz , ∅ ⟩ n_v np K K2 ∈ lrel ∧ ra_psplit nf K2 ⟨ kc_nil , ∅ ⟩ X res ∈ lrel ∧ ra_capp X P Dl ∈ lrel ∧ ra_pargs ⟨ kc_ind_ctor , scons D (scons j_v (scons ⟨ kc_nz , ∅ ⟩ ∅)) ⟩ nf np c1 ∈ lrel ∧ ra_pargs c1 ⟨ kc_nz , ∅ ⟩ nf maj ∈ lrel ∧ ra_add k_v ⟨ kc_s , scons i_v ∅ ⟩ nf ∈ lrel) $;
 
 --| Determinacy: two derivable atoms of a computing relation with the same
 --| inputs (`tN`) have the same outputs (`uN`, `vN`).
@@ -3504,6 +3535,7 @@ theorem kr_iota_tel_omega (G: hyps): $ G ⇒ kr_iota_tel ∈ ω $;
 theorem kr_iota_lhs_omega (G: hyps): $ G ⇒ kr_iota_lhs ∈ ω $;
 theorem kr_crst_omega (G: hyps): $ G ⇒ kr_crst ∈ ω $;
 theorem kr_iota_eq_omega (G: hyps): $ G ⇒ kr_iota_eq ∈ ω $;
+theorem kr_proj_eq_omega (G: hyps): $ G ⇒ kr_proj_eq ∈ ω $;
 --| Constructor labels differ (each pair once, the earlier label first; `ne_sym`
 --| turns one around).
 theorem kc_nz_ne_s (G: hyps): $ G ⇒ ¬ kc_nz = kc_s $;
@@ -4587,3 +4619,8 @@ theorem ra_iota_eq_congr (A1 B1 A2 B2 A3 B3 A4 B4 A5 B5 A6 B6 A7 B7 A8 B8: class
 theorem ra_iota_eq_eq (G: hyps) (A1 B1 A2 B2 A3 B3 A4 B4 A5 B5 A6 B6 A7 B7 A8 B8: class): $ G ⇒ A1 = B1 $ > $ G ⇒ A2 = B2 $ > $ G ⇒ A3 = B3 $ > $ G ⇒ A4 = B4 $ > $ G ⇒ A5 = B5 $ > $ G ⇒ A6 = B6 $ > $ G ⇒ A7 = B7 $ > $ G ⇒ A8 = B8 $ > $ G ⇒ ra_iota_eq A1 A2 A3 A4 A5 A6 A7 A8 = ra_iota_eq B1 B2 B3 B4 B5 B6 B7 B8 $;
 --| @rewrite
 theorem sb_c_ra_iota_eq {x: set} (t: set x) (A1 A2 A3 A4 A5 A6 A7 A8: class x): $ (⟦ x / t ⟧ (ra_iota_eq A1 A2 A3 A4 A5 A6 A7 A8)) ≐ ra_iota_eq (⟦ x / t ⟧ A1) (⟦ x / t ⟧ A2) (⟦ x / t ⟧ A3) (⟦ x / t ⟧ A4) (⟦ x / t ⟧ A5) (⟦ x / t ⟧ A6) (⟦ x / t ⟧ A7) (⟦ x / t ⟧ A8) $;
+--| @congr
+theorem ra_proj_eq_congr (A1 B1 A2 B2 A3 B3 A4 B4 A5 B5 A6 B6: class): $ A1 ≐ B1 $ > $ A2 ≐ B2 $ > $ A3 ≐ B3 $ > $ A4 ≐ B4 $ > $ A5 ≐ B5 $ > $ A6 ≐ B6 $ > $ ra_proj_eq A1 A2 A3 A4 A5 A6 ≐ ra_proj_eq B1 B2 B3 B4 B5 B6 $;
+theorem ra_proj_eq_eq (G: hyps) (A1 B1 A2 B2 A3 B3 A4 B4 A5 B5 A6 B6: class): $ G ⇒ A1 = B1 $ > $ G ⇒ A2 = B2 $ > $ G ⇒ A3 = B3 $ > $ G ⇒ A4 = B4 $ > $ G ⇒ A5 = B5 $ > $ G ⇒ A6 = B6 $ > $ G ⇒ ra_proj_eq A1 A2 A3 A4 A5 A6 = ra_proj_eq B1 B2 B3 B4 B5 B6 $;
+--| @rewrite
+theorem sb_c_ra_proj_eq {x: set} (t: set x) (A1 A2 A3 A4 A5 A6: class x): $ (⟦ x / t ⟧ (ra_proj_eq A1 A2 A3 A4 A5 A6)) ≐ ra_proj_eq (⟦ x / t ⟧ A1) (⟦ x / t ⟧ A2) (⟦ x / t ⟧ A3) (⟦ x / t ⟧ A4) (⟦ x / t ⟧ A5) (⟦ x / t ⟧ A6) $;

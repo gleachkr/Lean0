@@ -89,6 +89,7 @@ pub const TABLE: &[(&str, Kind, &str)] = &[
     ("iota_lhs", Kind::Fn, "++++++-----"),
     ("crst", Kind::Fn, "+++-"),
     ("iota_eq", Kind::Fn, "++++----"),
+    ("proj_eq", Kind::Fn, "+++---"),
     ("pargs", Kind::Fn, "+++-"),
     ("rehead", Kind::Fn, "-+++-"),
     ("spine", Kind::Fn, "-++|*+-"),

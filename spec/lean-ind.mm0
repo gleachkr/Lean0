@@ -526,6 +526,20 @@ axiom eta_ok_i (D: ind) (b: blk) (P: ctx) (T: tys) (j np: nat) (F K: expr):
 term projs: blk > expr > nat > expr > expr > wff;
 axiom projs_z (b: blk) (e Y: expr): $ projs b e 0 Y Y $;
 axiom projs_s (b: blk) (e Y M: expr) (k: nat): $ projs b e k Y M $ > $ projs b e (s k) Y (M @ proj b k e) $;
+--| `proj_eq D j i Dl lhs k`: the reduction of field `i` of type `j`'s first
+--| constructor as a closed equation, over the block's own types: `Dl` is the
+--| context of the parameters and then the constructor's fields `X` (`psplit`
+--| of its type with the block's types put in, `sinst`), `lhs` is `proj b i` of
+--| the constructor applied to the parameters and the fields, all variables of
+--| `Dl` (windows `pargs`), and `#k` is field `i`. For `Prod.mk`, field `0`:
+--| the context is `#1 :: #1 :: Sort v :: Sort u :: []` (`snd`, `fst`, `β`,
+--| `α`), `lhs` is `proj b 0 (mk @ #3 @ #2 @ #1 @ #0)` and `k` is `1`.
+term proj_eq: ind > nat > nat > ctx > expr > nat > wff;
+axiom proj_eq_i (D: ind) (b: blk) (P X Dl: ctx) (T: tys) (j i np n m nf k: nat) (F K K2 res c1 maj: expr) (C: ctors):
+  $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ nth_ty T j F C $ > $ nth_ctor C 0 K $ > $ npis K nf $ >
+  $ sinst D 0 n np K K2 $ > $ psplit nf K2 [] X res $ > $ capp X P Dl $ >
+  $ pargs (ind_ctor D j 0) nf np c1 $ > $ pargs c1 0 nf maj $ > $ add k (s i) nf $ >
+  $ proj_eq D j i Dl (proj b i maj) k $;
 ---------------------------------------------------------------------------
 -- PART II: DEFINITIONS OVER LEVEL EQUIVALENCE AND THE JUDGMENT
 ---------------------------------------------------------------------------
@@ -739,14 +753,17 @@ axiom proj_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (j i np: nat) (e e2
   $ proj_ok G D j i $ > $ clen P np $ > $ field_ty D j i A $ > $ ind_nested D N $ > $ rst D N A A2 $ > $ pinst i S A2 A1 $ >
   $ qinst b e i 0 A1 R $ >
   $ ⟦ G ⊢ proj b i e ≡ proj b i e2 : R ⟧ $;
---| `proj b i (ind_ctor D2 j nz qs fs) ≡ fs[i]` when the field may be projected
---| (`proj_ok`) and the constructor's arguments have their binders' types in
---| its type (`sty`).
-axiom proj_mk (G: ctx) (D2: ind) (b: blk) (j i np n m nf nq ii: nat) (M Y f T CT S: expr):
-  $ spine (ind_ctor D2 j 0) M nq $ > $ ind_arity D2 np n m $ > $ nfields D2 j 0 nf $ > $ add np nf nq $ >
-  $ add ii (s i) nf $ > $ spine (Y @ f) M ii $ > $ ind_wf G D2 $ > $ proj_ok G D2 j i $ >
-  $ ctor_ty D2 j 0 CT $ > $ sty G (ind_ctor D2 j 0) CT M S $ >
-  $ ⟨ G ⊢ proj b i M : T ⟩ $ > $ ⟦ G ⊢ proj b i M ≡ f : T ⟧ $;
+--| `proj b i (ind_ctor D j 0 @ ps @ fs) ≡ fs[i]` when the field may be
+--| projected (`proj_ok`), as a closed equation: stated once (`proj_eq`), in
+--| the context of the parameters and the constructor's fields, with the
+--| block's auxiliary types restored to its nested occurrences in the context
+--| and the left-hand side (`crst`, `rst`; nothing to restore when `N` is
+--| empty). The field is a variable of the context, at its type there
+--| (`lookup`). No typing premise: every argument is a variable of the
+--| context. Instances follow by `weakBaseDF` and `instDF`.
+axiom proj_mk (D: ind) (N: ctx) (j i k: nat) (Dl0 Dl: ctx) (lhs0 lhs T: expr):
+  $ ind_wf Dl D $ > $ proj_ok Dl D j i $ > $ proj_eq D j i Dl0 lhs0 k $ > $ ind_nested D N $ >
+  $ crst D N Dl0 Dl $ > $ rst D N lhs0 lhs $ > $ lookup Dl k T $ > $ ⟦ Dl ⊢ lhs ≡ #k : T ⟧ $;
 axiom ind_eta (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (j np nf: nat) (e S Y M: expr):
   $ ⟨ G ⊢ e : S ⟩ $ > $ spine (ind_ty D j) S np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ eta_ok D j $ > $ clen P np $ >
   $ rehead (ind_ty D j) (ind_ctor D j 0) np S Y $ > $ nfields D j 0 nf $ > $ projs b e nf Y M $ > $ ⟦ G ⊢ e ≡ M : S ⟧ $;

@@ -149,9 +149,9 @@ pub struct StructInfo {
     /// from a proposition, if the fields up to it can all be propositions, with the levels
     /// (over the level variables `1..`) that its premises equate to `lz`.
     pub df_prop: Vec<Option<(ThId, Vec<E>)>>,
-    /// Reduction lemma of each field (`proj_mk`), with `df`'s premises of `proj_ok`, then the
-    /// constructor application's `sty` and the projection's typing; `red_prop` as `df_prop`
-    /// (its levels are `df_prop`'s).
+    /// Reduction lemma of each field (`proj_mk` as a closed equation over any base context:
+    /// the field is a variable of the context), with `df`'s premises of `proj_ok`; `red_prop`
+    /// as `df_prop` (its levels are `df_prop`'s).
     pub red: Vec<(ThId, bool)>,
     pub red_prop: Vec<Option<ThId>>,
     pub eta: Option<ThId>,

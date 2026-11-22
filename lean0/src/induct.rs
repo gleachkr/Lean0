@@ -844,7 +844,6 @@ fn structure<'t>(el: &mut Elab<'_, '_, 't, '_>, pv: &mut Prover, sig: &Sig, bloc
     let nf = field_tys.len();
     // the facts: the fields' types (`proj_ok_prop`)
     let ty_s = strip_pis(el, cd.info.ty);
-    let cty = el.tr(ty_s)?;
     if !el.g.replay {
         let mut facts = std::mem::take(&mut pv.facts);
         with_binders(el, ty_s, np, None, &mut facts, |_, _, _| Ok(()))?;
@@ -931,10 +930,6 @@ fn structure<'t>(el: &mut Elab<'_, '_, 't, '_>, pv: &mut Prover, sig: &Sig, bloc
             let mut v = Vars::new();
             let gv = v.add(&mut g.env, "G", "ctx");
             let cls = v.lvls(&mut g.env, &sig.lvl_names, "");
-            let ps = v.many(&mut g.env, "p", "expr", np);
-            let fs = v.many(&mut g.env, "f", "expr", nf);
-            let tv = v.add(&mut g.env, "T", "expr");
-            let sv = v.add(&mut g.env, "S", "expr");
             let mut hyps = Vec::new();
             let subst: Vec<E> = std::iter::once(gv).chain(cls.iter().copied()).collect();
             let z = g.env.app_n("lz", &[]);
@@ -951,14 +946,8 @@ fn structure<'t>(el: &mut Elab<'_, '_, 't, '_>, pv: &mut Prover, sig: &Sig, bloc
                 }
             }
             let c = g.const_term(&sig.lean_name, &cls).unwrap();
-            let m = apps(g, c, &[ps, fs.clone()].concat());
-            let lhs = g.lean.proj(&mut g.env, proj, i, m);
-            hyps.push(g.env.app_n("sty", &[gv, c, cty, m, sv]));
-            hyps.push(g.env.app_n("ty", &[gv, lhs, tv]));
-            let concl = g.lean.deq(&mut g.env, gv, lhs, fs[i], tv);
             let name = g.thms.fresh(&format!("{proj_name}_{i}_mk{}", if from_prop { "p" } else { "" }));
-            let proof = prove_lemma(g, pv, "proj_mk", &hyps, concl)?;
-            let th = add_thm(&mut g.env, &name, v.args, hyps, concl, false, false, proof, &format!("Field {i} of a `{}` application.", sig.lean_name))?;
+            let th = proj_eq_lemma(g, pv, v.args, hyps, &name, c, i, block.wf.get(), &cls, &format!("Field {i} of a `{}` application, as a closed equation.", sig.lean_name))?;
             if from_prop {
                 red_prop.push(Some(th));
             } else {
@@ -1108,6 +1097,93 @@ fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &s
         Some(p)
     };
     add_thm(&mut g.env, name, args, Vec::new(), concl, false, false, proof, doc)
+}
+
+/// The projection rule as a closed equation (`proj_mk`, audit §4): field `i` of the
+/// constructor `c` (`ind_ctor D j 0`) applied to the variables of the rule's context `Dl`
+/// (the fields over the parameters) is the field's variable, over any base context `G`
+/// (`weakBaseDF`), with the block's nested occurrences restored, under the hypotheses `hyps`
+/// of `proj_ok` (on the levels). The statement comes from Part I's `proj_eq`, `crst`, `rst`
+/// and `lookup` alone, so a replayed declaration states it without the proof.
+#[allow(clippy::too_many_arguments)]
+fn proj_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, hyps: Vec<E>, name: &str, c: E, i: usize, wf: Option<ThId>, us: &[E], doc: &str) -> R<ThId> {
+    let (d, j) = match g.env.head(c) {
+        Some((_, &[d, j, _])) => (d, j),
+        _ => return Err("not a constructor term".into()),
+    };
+    pv.horn.facts.clear();
+    let ie = g.lean.nat(&mut g.env, i);
+    let p_eq = mm(pv.horn.prove_open(&mut g.env, &mut g.lean, &mut g.lv, &mut pv.facts, 3, |env, ms| env.app_n("proj_eq", &[d, j, ie, ms[0], ms[1], ms[2]])))?;
+    let c_eq = g.env.concl(p_eq);
+    let (dl0, lhs0, k) = g.env.head(c_eq).map(|(_, a)| (a[3], a[4], a[5])).ok_or("proj_eq")?;
+    let p_n = mm(pv.horn.prove_open(&mut g.env, &mut g.lean, &mut g.lv, &mut pv.facts, 1, |env, ms| env.app_n("ind_nested", &[d, ms[0]])))?;
+    let c_n = g.env.concl(p_n);
+    let n = g.env.head(c_n).map(|(_, a)| a[1]).ok_or("ind_nested")?;
+    let mut restored = Vec::new();
+    for (rel, e) in [("crst", dl0), ("rst", lhs0)] {
+        let p = mm(pv.horn.prove_open(&mut g.env, &mut g.lean, &mut g.lv, &mut pv.facts, 1, |env, ms| env.app_n(rel, &[d, n, e, ms[0]])))?;
+        let cp = g.env.concl(p);
+        let e2 = g.env.head(cp).map(|(_, a)| a[3]).ok_or("rst")?;
+        restored.push((cp, p, e2));
+    }
+    let (dl, lhs) = (restored[0].2, restored[1].2);
+    let p_lk = mm(pv.horn.prove_open(&mut g.env, &mut g.lean, &mut g.lv, &mut pv.facts, 1, |env, ms| env.app_n("lookup", &[dl, k, ms[0]])))?;
+    let c_lk = g.env.concl(p_lk);
+    let ty = g.env.head(c_lk).map(|(_, a)| a[2]).ok_or("lookup")?;
+    let rhs = g.env.app_n("bvar", &[k]);
+    // the context over the base `G`
+    let mut entries = Vec::new();
+    let mut t = dl;
+    while let Some((h, &[a, rest])) = g.env.head(t) {
+        if h != g.lean.ids.cons {
+            break
+        }
+        entries.push(a);
+        t = rest;
+    }
+    let mut dlg = g.env.var(0);
+    for &a in entries.iter().rev() {
+        dlg = g.lean.cons(&mut g.env, a, dlg);
+    }
+    let concl = g.lean.deq(&mut g.env, dlg, lhs, rhs, ty);
+    let proof = if g.replay {
+        None
+    } else {
+        // `proj_ok` over any context, from the hypotheses: a lemma, used at the rule's context
+        // (the typing facts are those of the declaration's context)
+        let g0 = g.env.var(0);
+        let ok_goal = g.env.app_n("proj_ok", &[g0, d, j, ie]);
+        pv.horn.facts.clear();
+        for (q, &h) in hyps.iter().enumerate() {
+            let p = g.env.hyp(q as u16, h);
+            pv.horn.facts.insert(h, p);
+        }
+        let p_ok = pv.prove(g, ok_goal)?;
+        let mut ok_name = format!("{}{name}_ok", mm0kit::lean::FACT_PREFIX);
+        while g.env.has_thm(&ok_name) {
+            ok_name.push('_');
+        }
+        let ok = add_thm(&mut g.env, &ok_name, args.clone(), hyps.clone(), ok_goal, false, true, Some(p_ok), "")?;
+        let hp: Vec<P> = hyps.iter().enumerate().map(|(q, &h)| g.env.hyp(q as u16, h)).collect();
+        let mut la = vec![dl];
+        la.extend(us);
+        let q_ok = mm(g.env.thm(ok, &la, &hp))?;
+        let Some(wf) = wf else { return Err("the block's well-formedness lemma is missing".into()) };
+        let q_wf = mm(g.env.thm(wf, &la, &[]))?;
+        pv.horn.facts.clear();
+        for q in [q_ok, q_wf, p_eq, p_n, restored[0].1, restored[1].1, p_lk] {
+            let cq = g.env.concl(q);
+            pv.horn.facts.insert(cq, q);
+        }
+        let goal0 = g.lean.deq(&mut g.env, dl, lhs, rhs, ty);
+        let p0 = pv.apply(g, "proj_mk", goal0)?;
+        pv.horn.facts.clear();
+        pv.horn.facts.insert(goal0, p0);
+        let p = pv.apply(g, "weakBaseDF", concl)?;
+        pv.horn.facts.clear();
+        Some(p)
+    };
+    add_thm(&mut g.env, name, args, hyps, concl, false, false, proof, doc)
 }
 
 /// The spec's closed equation `ax` at the levels `us` (a rule without premises whose context

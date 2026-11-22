@@ -682,66 +682,6 @@ theorem proj_ty_all (G: hyps) (H J: class) (u w r r0 tg td tb tp tt tnp ti tS tf
 -- Nested blocks (E7): the computation rules at every block
 -- --------------------------------------------------------------------------
 
---| The projection of a constructor application in the model from the rule's premises (`proj_mk`), at every block: the
---| constructor's type is restored inside `ctor_ty`, and the major premise's arguments are a valuation of the unrestored
---| context all the same (`f150_ca`: a restored telescope has the same valuations over the parameters).
-theorem proj_mk_all (G: hyps) (H J: class) (u w r r0 tg td tnp tn tm ti tCT tnf tnq tmj tT2 tfi tii tY tf tb2: set):
-  $ G ⇒ iwf u H J tg td w r0 $ >
-  $ G ⇒ hctor ⊆ H $ >
-  $ G ⇒ r ∊ sat u (mcv H) tg w $ >
-  $ G ⇒ ra_spine ⟨ kc_ind_ctor , scons td (scons ti (scons ⟨ kc_nz , ∅ ⟩ ∅)) ⟩ tmj tnq ∈ lrel $ >
-  $ G ⇒ ra_ind_arity td tnp tn tm ∈ lrel $ >
-  $ G ⇒ ra_nfields td ti ⟨ kc_nz , ∅ ⟩ tnf ∈ lrel $ >
-  $ G ⇒ ra_add tnp tnf tnq ∈ lrel $ >
-  $ G ⇒ ra_add tii ⟨ kc_s , scons tfi ∅ ⟩ tnf ∈ lrel $ >
-  $ G ⇒ ra_spine ⟨ kc_app , scons tY (scons tf ∅) ⟩ tmj tii ∈ lrel $ >
-  $ G ⇒ ra_proj_ok tg td ti tfi ∈ lrel3 J $ >
-  $ G ⇒ ra_ctor_ty td ti ⟨ kc_nz , ∅ ⟩ tCT ∈ lrel $ >
-  $ G ⇒ ra_sty tg ⟨ kc_ind_ctor , scons td (scons ti (scons ⟨ kc_nz , ∅ ⟩ ∅)) ⟩ tCT tmj tT2 ∈ lrel3 J $ >
-  $ G ⇒ tmj ∊ ofsort lsig lopen ks_expr $ >
-  $ G ⇒ ti ∊ ofsort lsig lopen ks_nat $ >
-  $ G ⇒ tb2 ∊ trees ω $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_proj , scons tb2 (scons tfi (scons tmj ∅)) ⟩ w r = dt u (mcv H) tf w r $;
-
-
-
-
--- --------------------------------------------------------------------------
--- Nested blocks (E7): restoring a guarded spine over a type of the block
--- --------------------------------------------------------------------------
-
--- --------------------------------------------------------------------------
--- Nested blocks (E7): the arguments of a restored spine after an instantiation
--- --------------------------------------------------------------------------
-
--- --------------------------------------------------------------------------
--- Nested blocks (E7): the recursor's side of the computation rules, with the type of the major premise's binder read
--- --------------------------------------------------------------------------
-
--- --------------------------------------------------------------------------
--- Nested blocks (E7): the constructor's side of the computation rules, with the type left by the major premise read
--- --------------------------------------------------------------------------
-
--- --------------------------------------------------------------------------
--- Nested blocks (E7): joining the two sides of the computation rules
--- --------------------------------------------------------------------------
-
--- --------------------------------------------------------------------------
--- Nested blocks (E7): a constructor's path at an auxiliary type, from one valuation of the parameters to another
--- --------------------------------------------------------------------------
-
--- --------------------------------------------------------------------------
--- Nested blocks (E7): the computation rule at every block
--- --------------------------------------------------------------------------
-
--- --------------------------------------------------------------------------
--- Nested blocks (E7): the right-hand side of the recursor's rule is guarded (an inductive hypothesis's value, the walk over `rwalk`)
--- --------------------------------------------------------------------------
-
--- --------------------------------------------------------------------------
--- Nested blocks (E7): the computation rule from the rule's premises, at every block
--- --------------------------------------------------------------------------
-
 --| The recursors' part of the hook is invariant at `ind_rec` nodes: equivalent blocks (`ind_eqv`) and equivalent
 --| levels have the same recursors' values, when the subtrees of the first block are invariant.
 theorem mcv_inv_ind_rec (G: hyps) (H: class) (u w r d e i v v2: set):
@@ -889,3 +829,73 @@ theorem iota_tel_rst_sat {x8 x9: set} (G: hyps) (H J: class) (u w r r0 tgw td tb
   $ G ⇒ ra_add tnf tm tam ∈ lrel $ >
   $ G ⇒ ra_add tam tn td1 ∈ lrel $ >
   $ G ⇒ r ∊ sat u (mcv H) tg w ∧ ∃ x8 ∃ x9 (x8 ∊ esat u (dnf u (mcv H)) tp w ∧ x9 ∊ fseq u ∧ cdm x9 = fv nvf td1 ∧ r = scat x9 x8) $;
+
+
+-- --------------------------------------------------------------------------
+-- Nested blocks: the closed projection rule
+-- --------------------------------------------------------------------------
+
+--| A valuation of the restored context of the closed projection rule (`crst` of the constructor's fields `tX`
+--| appended to the parameters) is a valuation of the unrestored one: one `x8` of the parameters under one `x9` of the
+--| fields' context over it (`fnx_cc`, `fnx_cf`, `fnx_cp`, `fnx_pi`, `f148_cx`, as `iota_tel_rst_sat`).
+theorem proj_tel_rst_sat {x8 x9: set} (G: hyps) (H J: class) (u w r r0 tgw td tb tp tt tnp tn tm ti tc tF tE tK0 tK2 tX tB tnf tg tg1 tN: set):
+  $ G ⇒ iwf u H J tgw td w r0 $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor tE tc tK0 ∈ lrel $ >
+  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tK0 tK2 ∈ lrel $ >
+  $ G ⇒ ra_pis tX tB tK2 ∈ lrel $ >
+  $ G ⇒ ra_clen tX tnf ∈ lrel $ >
+  $ G ⇒ ra_capp tX tp tg ∈ lrel $ >
+  $ G ⇒ ra_ind_nested td tN ∈ lrel $ >
+  $ G ⇒ ra_crst td tN tg tg1 ∈ lrel $ >
+  $ G ⇒ r ∊ sat u (mcv H) tg1 w $ >
+  $ G ⇒ ∃ x8 ∃ x9 (x8 ∊ esat u (dnf u (mcv H)) tp w ∧ x9 ∊ esat u (dsh u (mcv H) x8) tX w ∧ r = scat x9 x8) $;
+
+--| Restoring the left-hand side of the closed projection rule keeps its value: at a valuation `m` of the fields'
+--| context (`cdm m` its length), a valuation `p` of the parameters and any base `s`, every `rst` result of the
+--| projection of the constructor at the parameters' and the fields' windows has the value of its source (it is
+--| guarded: the constructor sits on the parameters' variables).
+theorem proj_lhs_rst_val (G: hyps) (H J: class) (u w r0 tg td tb tp tt tnp tn tm tN ti tc tF tE tK0 tK2 tX tnf tc1 tmj tb2 tfi tl z1 p s m: set):
+  $ G ⇒ iwf u H J tg td w r0 $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ind_nested td tN ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor tE tc tK0 ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tK0 tK2 ∈ lrel $ >
+  $ G ⇒ ra_clen tX tnf ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ tnf tnp tc1 ∈ lrel $ >
+  $ G ⇒ ra_pargs tc1 ⟨ kc_nz , ∅ ⟩ tnf tmj ∈ lrel $ >
+  $ G ⇒ tl ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_rst td tN tl z1 ∈ lrel $ >
+  $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ >
+  $ G ⇒ s ∊ fseq u $ >
+  $ G ⇒ m ∊ fseq u $ >
+  $ G ⇒ cdm m = fv nvf tnf $ >
+  $ G ⇒ tl = ⟨ kc_proj , scons tb2 (scons tfi (scons tmj ∅)) ⟩ $ >
+  $ G ⇒ tb2 ∊ trees ω $ >
+  $ G ⇒ tfi ∊ trees ω $ >
+  $ G ⇒ dt u (mcv H) z1 w (scat m (scat p s)) = dt u (mcv H) tl w (scat m (scat p s)) $;
+
+--| The result under a constructor's fields: when a context `tX` as long as the constructor's type has binders is split
+--| off that type with the block's types put in (`tK2`), what is left is a spine of the constructor's type
+--| (`ctor_pis`, `ctor_res`; `fnx_pi`, `f152_pj`: the split is the one they give).
+--| @freshen G x9
+theorem proj_res_spine {x9: set} (G: hyps) (J: class) (tg td tb tp tt tnp tn tm ti tc tF tE tK tK2 tX tB tnf: set):
+  $ G ⇒ ra_ind_wf tg td ∈ lrel3 J $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor tE tc tK ∈ lrel $ >
+  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tK tK2 ∈ lrel $ >
+  $ G ⇒ ra_pis tX tB tK2 ∈ lrel $ >
+  $ G ⇒ ra_clen tX tnf ∈ lrel $ >
+  $ G ⇒ ra_npis tK tnf ∈ lrel $ >
+  $ G ⇒ ∃ x9 (ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tB x9 ∈ lrel) $;
