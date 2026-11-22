@@ -4,9 +4,10 @@
 //! `ind_mkn X_blk P T N`: the kernel's mutual block with auxiliary types and the nested
 //! occurrences `N`, from nanoda's specialization; the statements restore the occurrences),
 //! and its types, constructors and recursors are the spec's `ind_ty (X_D us) i`,
-//! `ind_ctor (X_D us) i c` and `ind_rec (X_D us) i v`. Their typing lemmas (`X_df`), the
-//! iota rules (`X_rec_c_iota`), projection typing and reduction and structure eta keep the
-//! statements of stage A but are theorems, proved from the schema's axioms by the Horn
+//! `ind_ctor (X_D us) i c` and `ind_rec (X_D us) i v`. Their typing lemmas (`X_df`),
+//! projection typing and reduction and structure eta keep the statements of stage A, and
+//! the iota rules (`X_rec_c_iota`) are closed equations (`iota_eq_lemma`); all are
+//! theorems, proved from the schema's axioms by the Horn
 //! prover over the spec: `tys_ok` (the parameters and the types' types are types),
 //! `ind_wf` (the constructors are legal), `rec_ty`, `rec_rhs`, and so on. The typing facts
 //! these need (each parameter, each type's type, each field's type is a type) come from the
@@ -1017,12 +1018,6 @@ fn prove_lemma(g: &mut Gen, pv: &mut Prover, rule: &str, hyps: &[E], concl: E) -
     Ok(Some(pv.apply(g, rule, concl)?))
 }
 
-/// Whether iota is certified as a closed equation where the schema has it (`ind_iota_eq`):
-/// `LEAN0_CLOSED_IOTA=0` keeps the rule with typing premises only.
-pub(crate) fn closed_iota() -> bool {
-    std::env::var("LEAN0_CLOSED_IOTA").map_or(true, |v| v != "0")
-}
-
 /// The arguments of an application spine, first to last.
 fn spine_args(g: &Gen, mut e: E) -> Vec<E> {
     let mut out = Vec::new();
@@ -1191,14 +1186,8 @@ pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &Recurs
         }
     }
     let rhss: Vec<E> = rd.rec_rules.iter().map(|r| el.tr(r.val)).collect::<R<_>>()?;
-    // the recursor's type at its levels `us` (variables `1..`, after `G`), where the iota
-    // lemmas' `sty` premise starts
-    let rty = el.tr(rd.info.ty)?;
-    let mlv = major_levels(el, rd)?;
-    let mls: Vec<E> = el.tc.ctx.read_levels(mlv).to_vec().iter().map(|&l| el.trl(l)).collect::<R<_>>()?;
-    // `elim_ok` over any context, once: the closed iota lemmas take it at their own context
-    let closed = closed_iota();
-    let elim = if closed && !el.g.replay && !rd.rec_rules.is_empty() {
+    // `elim_ok` over any context, once: the iota lemmas take it at their own context
+    let elim = if !el.g.replay && !rd.rec_rules.is_empty() {
         let g = &mut *el.g;
         let (d, v) = match g.env.head(rt) {
             Some((_, &[d, _, v])) => (d, v),
@@ -1219,20 +1208,7 @@ pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &Recurs
     };
     for (rule, &rhs) in rd.rec_rules.iter().zip(&rhss) {
         let ctor_lean = el.g.lean_name(el.tc, rule.ctor_name);
-        let Some(cd) = el.tc.env.get_constructor(&rule.ctor_name).cloned() else { return Err(format!("unknown constructor {ctor_lean}")) };
-        let cty = ctor_type_at(el, &cd, mlv);
-        let cty = el.tr(cty)?;
         let nf = rule.ctor_telescope_size_wo_params as usize;
-        // an auxiliary type's recursor reduces on the constructors of the occurrence's block
-        // (`ind_iota_nst`): the major premise takes that block's parameters and levels
-        let aux = i >= block.names.len();
-        let (cnp, cnl) = if aux {
-            let cind = el.g.lean_name(el.tc, cd.inductive_name);
-            let Some(cb) = el.g.blocks.get(&cind) else { return Err(format!("the nested type {cind} is not certified by the schema")) };
-            (cb.np, cb.nlevels)
-        } else {
-            (block.np, block.nlevels)
-        };
         let g = &mut *el.g;
         let short = ctor_lean.rsplit('.').next().unwrap_or(&ctor_lean);
         let mut shift = vec![g.env.var(0)];
@@ -1243,45 +1219,33 @@ pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &Recurs
         let lvl_args = g.lvl_args(&sig.lvl_names);
         let def = add_term(&mut g.env, &def_name, lvl_args, expr_s, TermKind::Def { body: rhs0, public_body: true },
             &format!("The right-hand side of the iota rule of `{}` for `{ctor_lean}`.", sig.lean_name))?;
-        if closed {
-            // theorem R_closed (k) (us): closed k (R us): the closed equation is instantiated
-            // through the definition
-            g.lean.reset();
-            let kv = g.env.var(0);
-            let du = g.env.app(def, &us);
-            let cl_concl = g.env.app_n("closed", &[kv, du]);
-            let pc = if g.replay {
-                None
-            } else {
-                let pc = mm(g.lean.closed(&mut g.env, kv, rhs))?;
-                Some(mm(g.env.convert(pc, cl_concl))?)
-            };
-            let cl_args = g.k_args(&sig.lvl_names);
-            let cl_name = g.thms.fresh(&format!("{def_name}_closed"));
-            let cl = add_thm(&mut g.env, &cl_name, cl_args, vec![], cl_concl, false, false, pc, &format!("`{def_name}` has no loose bound variables."))?;
-            g.lean.const_closed.insert(def, cl);
-        }
-        let counts = [rd.num_params as usize, rd.num_motives as usize, rd.num_minors as usize, rd.num_indices as usize];
-        let (v, hyps, concl) = crate::gen::iota_statement(g, sig, counts, &ctor_lean, cnl, cnp, nf, def, rty, &mls, cty)?;
+        // theorem R_closed (k) (us): closed k (R us): the closed equation is instantiated
+        // through the definition
+        g.lean.reset();
+        let kv = g.env.var(0);
+        let du = g.env.app(def, &us);
+        let cl_concl = g.env.app_n("closed", &[kv, du]);
+        let pc = if g.replay {
+            None
+        } else {
+            let pc = mm(g.lean.closed(&mut g.env, kv, rhs))?;
+            Some(mm(g.env.convert(pc, cl_concl))?)
+        };
+        let cl_args = g.k_args(&sig.lvl_names);
+        let cl_name = g.thms.fresh(&format!("{def_name}_closed"));
+        let cl = add_thm(&mut g.env, &cl_name, cl_args, vec![], cl_concl, false, false, pc, &format!("`{def_name}` has no loose bound variables."))?;
+        g.lean.const_closed.insert(def, cl);
+        let fixed = (rd.num_params + rd.num_motives + rd.num_minors) as usize;
         let name = g.thms.fresh(&format!("{def_name}_iota"));
-        let rule_ax = if aux { "ind_iota_nst" } else { "ind_iota" };
-        // the rule's premises `rec_rhs` and `rst` make the schema's right-hand side the export's
-        let proof = prove_lemma(g, &mut pv, rule_ax, &hyps, concl)
+        // an auxiliary type's constructor has the number of the nested block's
+        let Some(&ConstInfo { kind: ConstKind::Ctor { c, .. }, .. }) = g.consts.get(&ctor_lean) else { return Err(format!("{ctor_lean} is not a constructor")) };
+        let c = g.lean.nat(&mut g.env, c);
+        let la = g.g_args(&sig.lvl_names);
+        // the rule's premises `iota_eq` and `rst` make the schema's right-hand side the export's
+        let th = iota_eq_lemma(g, &mut pv, la, &name, rt, c, du, fixed, nf, (wf, &us[nl - block.nlevels..]), elim,
+            &format!("Iota reduction of `{}` on `{ctor_lean}`, as a closed equation.", sig.lean_name))
             .map_err(|e| format!("iota of `{}` on `{ctor_lean}` (the rule may not be the schema's): {e}", sig.lean_name))?;
-        let th = add_thm(&mut g.env, &name, v.args, hyps, concl, false, false, proof,
-            &format!("Iota reduction of `{}` on `{ctor_lean}`.", sig.lean_name))?;
-        g.iota.insert((sig.lean_name.clone(), ctor_lean.clone()), th);
-        if closed {
-            let name = g.thms.fresh(&format!("{def_name}_iota_eq"));
-            let Some(&ConstInfo { kind: ConstKind::Ctor { c, .. }, .. }) = g.consts.get(&ctor_lean) else { return Err(format!("{ctor_lean} is not a constructor")) };
-            let c = g.lean.nat(&mut g.env, c);
-            let du = g.env.app(def, &us);
-            let la = g.g_args(&sig.lvl_names);
-            let th = iota_eq_lemma(g, &mut pv, la, &name, rt, c, du, counts[0] + counts[1] + counts[2], nf, (wf, &us[nl - block.nlevels..]), elim,
-                &format!("Iota reduction of `{}` on `{ctor_lean}`, as a closed equation.", sig.lean_name))
-                .map_err(|e| format!("closed iota of `{}` on `{ctor_lean}`: {e}", sig.lean_name))?;
-            g.iota_eq.insert((sig.lean_name.clone(), ctor_lean), th);
-        }
+        g.iota_eq.insert((sig.lean_name.clone(), ctor_lean), th);
     }
     Ok(true)
 }

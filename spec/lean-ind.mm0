@@ -715,38 +715,6 @@ axiom ind_ctor_ty (G: ctx) (D: ind) (i c: nat) (R: expr):
   $ ind_wf G D $ > $ ctor_ty D i c R $ > $ ⟨ G ⊢ ind_ctor D i c : R ⟩ $;
 axiom ind_rec_ty (G: ctx) (D: ind) (N: ctx) (i: nat) (v: lvl) (R0 R: expr):
   $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_ty D v i R0 $ > $ ind_nested D N $ > $ rst D N R0 R $ > $ ⟨ G ⊢ ind_rec D i v : R ⟩ $;
---| Iota: `ind_rec D i v ps ms ns is (ind_ctor D2 i c qs fs) ≡ R ps ms ns fs`
---| when the recursor's arguments before the major premise have their binders'
---| types in the recursor's type (`sty`, which leaves `Π TY. C`), the
---| constructor is the block's up to its levels (`eeqv`), its arguments `qs fs`
---| have their binders' types in its type at `D` (`sty`, which leaves `T2`),
---| and the arguments of `T2` are those of `TY`, one by one (`aeq`: the
---| parameters `qs` are the recursor's `ps`, the constructor's indices are `is`).
-axiom ind_iota (G: ctx) (D D2: ind) (N: ctx) (i c: nat) (v: lvl) (np n m a0 a ni k nf nq: nat)
-    (Rh R e3 e4 Y maj rhs0 rhs R0 RT TY C CT T2 T: expr):
-  $ spine (ind_rec D i v) e4 k $ > $ spine (ind_ctor D2 i c) maj nq $ > $ ind_wf G D $ > $ elim_ok G D v $ >
-  $ ind_nested D N $ > $ rec_rhs D v i c Rh $ > $ rst D N Rh R $ >
-  $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m a $ > $ nidx D i ni $ > $ add a ni k $ > $ nfields D i c nf $ >
-  $ add np nf nq $ > $ rehead (ind_rec D i v) R a e3 rhs0 $ > $ spine e3 e4 ni $ > $ spine Y maj nf $ >
-  $ rehead Y rhs0 nf maj rhs $ > $ rec_ty D v i R0 $ > $ rst D N R0 RT $ >
-  $ sty G (ind_rec D i v) RT e4 (Π TY. C) $ > $ inst 0 C maj T $ >
-  $ eeqv (ind_ctor D i c) (ind_ctor D2 i c) $ > $ ctor_ty D i c CT $ > $ sty G (ind_ctor D2 i c) CT maj T2 $ > $ aeq G T2 TY $ >
-  $ ⟦ G ⊢ e4 @ maj ≡ rhs : T ⟧ $;
---| Iota of the recursor of an auxiliary type `i` (the occurrence `I Ds`) on
---| `I`'s constructor `c`: `ind_rec D i v ps ms ns is (ind_ctor I2 ii c qs fs)
---| ≡ R ps ms ns fs`, with `ind_iota`'s typing premises at `I`'s constructor
---| (`aeq` makes `qs` the occurrence's arguments at `ps`); the fields are the
---| last `nf` arguments of the major premise, as in `inductive_reduce_rec`.
-axiom ind_iota_nst (G: ctx) (D I I2: ind) (N: ctx) (i ii c: nat) (v: lvl) (np n m a0 a ni k nf nq npi: nat)
-    (Rh R e3 e4 X Y maj rhs0 rhs R0 RT TY C CT T2 T: expr):
-  $ spine (ind_rec D i v) e4 k $ > $ spine (ind_ctor I2 ii c) maj nq $ > $ ind_wf G D $ > $ elim_ok G D v $ >
-  $ ind_nested D N $ > $ aux_of D N i X $ > $ spine (ind_ty I ii) X npi $ > $ rec_rhs D v i c Rh $ > $ rst D N Rh R $ >
-  $ ind_arity D np n m $ > $ add np n a0 $ > $ add a0 m a $ > $ nidx D i ni $ > $ add a ni k $ > $ nfields D i c nf $ >
-  $ add npi nf nq $ > $ rehead (ind_rec D i v) R a e3 rhs0 $ > $ spine e3 e4 ni $ > $ spine Y maj nf $ >
-  $ rehead Y rhs0 nf maj rhs $ > $ rec_ty D v i R0 $ > $ rst D N R0 RT $ >
-  $ sty G (ind_rec D i v) RT e4 (Π TY. C) $ > $ inst 0 C maj T $ >
-  $ eeqv (ind_ctor I ii c) (ind_ctor I2 ii c) $ > $ ctor_ty I ii c CT $ > $ sty G (ind_ctor I2 ii c) CT maj T2 $ > $ aeq G T2 TY $ >
-  $ ⟦ G ⊢ e4 @ maj ≡ rhs : T ⟧ $;
 --| Weakening below a closed context: a judgment in a context `G` whose
 --| entries and terms mention no variable outside `G` holds over any base
 --| context `G0` (`IsDefEq.weakN` for `Ctx.LiftN n k` at `k` the length of

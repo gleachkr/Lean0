@@ -209,13 +209,13 @@ for th in Eq_rec_refl_iota MyNat_rec_succ_iota MyList_rec_cons_iota Prod_eta PUn
           Prod_proj_0_mk And_proj_1_df; do
   tamper induct rejected --tamper-theorem "$th"
 done
-for ax in inst_proj ind_iota proj_ty quot_lift_mk lit_succ eeqv_cst; do tamper induct rejected --tamper-axiom "$ax"; done
+for ax in inst_proj ind_iota_eq proj_ty quot_lift_mk lit_succ eeqv_cst; do tamper induct rejected --tamper-axiom "$ax"; done
 # ... and rules they do not use are harmless, which shows the test can tell the difference.
 tamper induct accepted --tamper-axiom quot_ind_mk
 tamper induct accepted --tamper-axiom eta
 # Nested blocks: the restore, the occurrence lookup, the auxiliary types' data and their iota.
 tamper nested rejected --tamper-theorem tree_size_ex_ty
-for ax in ind_iota_nst rst_ty nst_hit_z aux_data_i spz_hit ndecl_cons; do tamper nested rejected --tamper-axiom "$ax"; done
+for ax in crst_cons rst_ty nst_hit_z aux_data_i spz_hit ndecl_cons; do tamper nested rejected --tamper-axiom "$ax"; done
 tamper nested accepted --tamper-axiom spz_proj
 # Literals: the ties, the operations' rules over their defining equations (the derived
 # `_eqs` and `_lit` theorems, including the division-like operations' relations over the
@@ -237,7 +237,7 @@ for ax in lit_zero lit_succ nat_add_lit add_eqs_i pred_eqs_i sub_eqs_i nat_mul_l
 done
 # every rule is used by its `_lit` theorem's proof; what the module has no use for
 tamper lit accepted --tamper-axiom quot_lift_mk
-tamper lit accepted --tamper-axiom ind_iota_nst
+tamper lit accepted --tamper-axiom nst_hit_z
 # Substitution (typing handles).
 for ax in instDF cinst_z cinst_s; do tamper lit rejected --tamper-axiom "$ax"; done
 

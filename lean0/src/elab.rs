@@ -1693,24 +1693,16 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         } else {
             let cl = self.g.lean_name(self.tc, cname);
             if let Some(&th) = self.g.iota_eq.get(&(fname.clone(), cl.clone())) {
-                match self.iota_closed(th, &fname, f, &a, &args2[..major_idx], &margs, cname, lhs2, tl) {
-                    Ok(p2) => {
-                        self.g.iota_eq_used += 1;
-                        let mut pf = mm(self.g.lean.trans(&mut self.g.env, p1, p2))?;
-                        let mut ft = tl;
-                        for &x in &args[major_idx + 1..] {
-                            (ft, pf) = self.app_step(ft, pf, x, None)?;
-                        }
-                        let tcur = self.infer(cur)?.0;
-                        return self.cast(pf, ft, tcur)
-                    }
-                    Err(e) => {
-                        if self.g.iota_eq_fallback == 0 || std::env::var_os("LEAN0_TRACE").is_some() {
-                            eprintln!("closed iota of {fname} on {cl} not used: {e}");
-                        }
-                        self.g.iota_eq_fallback += 1;
-                    }
+                // a block certified by the schema: the closed equation
+                let p2 = self.iota_closed(th, &fname, f, &a, &args2[..major_idx], &margs, cname, lhs2, tl)
+                    .map_err(|e| format!("iota of {fname} on {cl}: {e}"))?;
+                let mut pf = mm(self.g.lean.trans(&mut self.g.env, p1, p2))?;
+                let mut ft = tl;
+                for &x in &args[major_idx + 1..] {
+                    (ft, pf) = self.app_step(ft, pf, x, None)?;
                 }
+                let tcur = self.infer(cur)?.0;
+                return self.cast(pf, ft, tcur)
             }
             let Some(&th) = self.g.iota.get(&(fname.clone(), cl.clone())) else { return Err(format!("no iota rule {fname} {cl}")) };
             for &x in &args[..major_idx] {
