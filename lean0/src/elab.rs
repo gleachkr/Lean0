@@ -999,7 +999,9 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         // of its context (`instDF`): the parameters, each typed at its binder in the type's
         // type, then `x` at the structure type
         let (tf, _) = self.tc.ctx.unfold_apps(w);
-        let mut ty = self.infer(tf)?.0;
+        // (the block states its binders without type annotations)
+        let ty = self.infer(tf)?.0;
+        let mut ty = crate::induct::strip_pis(self, ty);
         let mut subst = Vec::new();
         for &p in &params {
             let Expr::Pi { binder_type, body, .. } = self.read(ty) else { return Err("the structure type's type is not a telescope over its parameters".into()) };
