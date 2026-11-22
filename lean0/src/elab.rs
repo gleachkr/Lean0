@@ -1786,9 +1786,11 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
     /// (its arguments before the major premise) and the constructor `cname` applied to
     /// `margs`. The lemma's variables are instantiated one by one from the bottom of its
     /// context (`instDF`): parameters, motives, minors, each typed at the recursor's binder,
-    /// then the fields, typed along the constructor's type at the recursor's parameters. The
-    /// instance has the constructor's own indices and the recursor's parameters and levels in
-    /// the major premise: `lhs2` is equal to it by congruence. `a` is `Γ` and the levels.
+    /// then the fields, typed along the constructor's type at the parameters of the major
+    /// premise's type in the recursor's type (the recursor's own, or at an auxiliary type
+    /// the nested occurrence's arguments). The instance has the constructor's own indices
+    /// and those parameters and levels in the major premise: `lhs2` is equal to it by
+    /// congruence. `a` is `Γ` and the levels.
     #[allow(clippy::too_many_arguments)]
     fn iota_closed(&mut self, th: mm0kit::env::ThId, fname: &str, f: ExprPtr<'t>, a: &[E], rargs: &[ExprPtr<'t>], margs: &[ExprPtr<'t>], cname: nanoda_lib::util::NamePtr<'t>, lhs2: ExprPtr<'t>, tl: ExprPtr<'t>) -> R<P> {
         let Expr::Const { name, .. } = self.read(f) else { unreachable!() };
@@ -1796,7 +1798,7 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         let (np, nm, nn) = (rec.num_params as usize, rec.num_motives as usize, rec.num_minors as usize);
         let fixed = np + nm + nn;
         let Some(&crate::gen::ConstInfo { kind: crate::gen::ConstKind::Rec { i, .. }, .. }) = self.g.consts.get(fname) else { return Err("not a recursor".into()) };
-        if margs.len() < np || rargs.len() < fixed || i >= nm {
+        if rargs.len() < fixed || i >= nm {
             return Err("argument counts".into())
         }
         // the substitution: each argument with the type of its binder
@@ -1811,26 +1813,32 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
             ty = self.tc.ctx.inst(body, &[x]);
         }
         let Expr::Pi { binder_type: ty_m, .. } = self.read(ty) else { return Err("the recursor's type has no binder for the major premise".into()) };
-        let (hty, _) = self.tc.ctx.unfold_apps(ty_m);
+        // the constructor's parameters are those of the major premise's type: the recursor's,
+        // or at an auxiliary type the nested occurrence's arguments
+        let (hty, pargs) = self.tc.ctx.unfold_apps(ty_m);
         let Expr::Const { levels: mlv, .. } = self.read(hty) else { return Err("the major premise's type is not a constant's application".into()) };
         let Some(cd) = self.tc.env.get_constructor(&cname).cloned() else { return Err("unknown constructor".into()) };
+        let cnp = cd.num_params as usize;
+        if margs.len() < cnp || pargs.len() < cnp {
+            return Err("the constructor's parameters".into())
+        }
         let mut cty = crate::induct::ctor_type_at(self, &cd, mlv);
-        for (q, &x) in rargs[..np].iter().chain(&margs[np..]).enumerate() {
+        for (q, &x) in pargs[..cnp].iter().chain(&margs[cnp..]).enumerate() {
             let Expr::Pi { binder_type, body, .. } = self.read(cty) else { return Err("the constructor's type is not a telescope over its arguments".into()) };
-            if q >= np {
+            if q >= cnp {
                 subst.push((x, binder_type));
             }
             cty = self.tc.ctx.inst(body, &[x]);
         }
         let (_, targs) = self.tc.ctx.unfold_apps(cty);
-        if targs.len() < np {
+        if targs.len() < cnp {
             return Err("the constructor's result".into())
         }
         // the instance's left-hand side and type
         let ch = self.tc.ctx.mk_const(cname, mlv);
-        let major3 = self.tc.ctx.foldl_apps(ch, rargs[..np].iter().chain(&margs[np..]).copied());
-        let lhs3 = self.tc.ctx.foldl_apps(f, rargs[..fixed].iter().chain(&targs[np..]).copied().chain([major3]));
-        let tl3 = self.tc.ctx.foldl_apps(rargs[np + i], targs[np..].iter().copied().chain([major3]));
+        let major3 = self.tc.ctx.foldl_apps(ch, pargs[..cnp].iter().chain(&margs[cnp..]).copied());
+        let lhs3 = self.tc.ctx.foldl_apps(f, rargs[..fixed].iter().chain(&targs[cnp..]).copied().chain([major3]));
+        let tl3 = self.tc.ctx.foldl_apps(rargs[np + i], targs[cnp..].iter().copied().chain([major3]));
         let mut p = mm(self.g.env.thm(th, a, &[]))?;
         let n = subst.len();
         for (j, &(x, bt)) in subst.iter().enumerate() {

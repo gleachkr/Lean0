@@ -1035,22 +1035,19 @@ fn spine_args(g: &Gen, mut e: E) -> Vec<E> {
 }
 
 /// Iota as a closed equation (`ind_iota_eq`, audit §4), for the recursor `rt` (`ind_rec D i v`)
-/// on the constructor `ct` (`ind_ctor D i c`):
-/// `⟦ Dl ++ G ⊢ rec ps ms ns is (ctor ps fs) ≡ def ps ms ns fs : motive is (ctor ps fs) ⟧`,
+/// on its type's constructor number `c`:
+/// `⟦ Dl ++ G ⊢ rec ps ms ns is (ctor ps fs) ≡ def ps ms ns fs : motive is (ctor ps fs) ⟧`
+/// (at an auxiliary type the constructor is the nested block's, at the occurrence's arguments),
 /// every argument a variable of the rule's context `Dl` (the fields over the minors, the
 /// motives and the parameters) or an index of the constructor's result, over any base
 /// context `G` (`weakBaseDF`), with the block's nested occurrences restored. The statement
 /// comes from Part I's `iota_eq`, `crst` and `rst` alone, so a replayed declaration states
 /// it without the proof.
 #[allow(clippy::too_many_arguments)]
-fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &str, rt: E, ct: E, def_us: E, fixed: usize, nf: usize, elim: Option<ThId>, doc: &str) -> R<ThId> {
+fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &str, rt: E, c: E, def_us: E, fixed: usize, nf: usize, elim: Option<ThId>, doc: &str) -> R<ThId> {
     let (d, i, v) = match g.env.head(rt) {
         Some((_, &[d, i, v])) => (d, i, v),
         _ => return Err("not a recursor term".into()),
-    };
-    let c = match g.env.head(ct) {
-        Some((_, &[_, _, c])) => c,
-        _ => return Err("not a constructor term".into()),
     };
     pv.horn.facts.clear();
     // the rule's context, sides and type: Part I's `iota_eq`
@@ -1197,7 +1194,7 @@ pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &Recurs
     let mlv = major_levels(el, rd)?;
     let mls: Vec<E> = el.tc.ctx.read_levels(mlv).to_vec().iter().map(|&l| el.trl(l)).collect::<R<_>>()?;
     // `elim_ok` over any context, once: the closed iota lemmas take it at their own context
-    let closed = i < block.names.len() && block.n_all == block.names.len() && closed_iota();
+    let closed = closed_iota();
     let elim = if closed && !el.g.replay && !rd.rec_rules.is_empty() {
         let g = &mut *el.g;
         let (d, v) = match g.env.head(rt) {
@@ -1273,10 +1270,11 @@ pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &Recurs
         g.iota.insert((sig.lean_name.clone(), ctor_lean.clone()), th);
         if closed {
             let name = g.thms.fresh(&format!("{def_name}_iota_eq"));
-            let ct = g.const_term(&ctor_lean, &us[nl - block.nlevels..]).ok_or("constructor term")?;
+            let Some(&ConstInfo { kind: ConstKind::Ctor { c, .. }, .. }) = g.consts.get(&ctor_lean) else { return Err(format!("{ctor_lean} is not a constructor")) };
+            let c = g.lean.nat(&mut g.env, c);
             let du = g.env.app(def, &us);
             let la = g.g_args(&sig.lvl_names);
-            let th = iota_eq_lemma(g, &mut pv, la, &name, rt, ct, du, counts[0] + counts[1] + counts[2], nf, elim,
+            let th = iota_eq_lemma(g, &mut pv, la, &name, rt, c, du, counts[0] + counts[1] + counts[2], nf, elim,
                 &format!("Iota reduction of `{}` on `{ctor_lean}`, as a closed equation.", sig.lean_name))
                 .map_err(|e| format!("closed iota of `{}` on `{ctor_lean}`: {e}", sig.lean_name))?;
             g.iota_eq.insert((sig.lean_name.clone(), ctor_lean), th);
