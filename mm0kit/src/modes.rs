@@ -152,7 +152,6 @@ pub const TABLE: &[(&str, Kind, &str)] = &[
     // itself an application would make `sty_nil` and `sty_app` overlap)
     ("sty", Kind::Fn, "+*++-"),
     // spines with definitionally equal arguments
-    ("aeq", Kind::Check, ""),
     // level equivalence of expressions
     ("eeqv", Kind::Check, ""),
     ("lseqv", Kind::Check, ""),

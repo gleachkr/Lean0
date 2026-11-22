@@ -112,8 +112,6 @@ def ty (G: ctx) (e A: expr): wff = $ deq G e e A $;
 def inh (G: ctx) (A: expr): wff = $ minh (mcv hfin) G A $;
 --| The spec's `sty`, over the judgments that hold in the model.
 def sty (G: ctx) (e1 e2 e3 e4: expr): wff = $ sty_j (jmod (mcv hfin)) G e1 e2 e3 e4 $;
---| The spec's `aeq`, over the judgments that hold in the model.
-def aeq (G: ctx) (e1 e2: expr): wff = $ aeq_j (jmod (mcv hfin)) G e1 e2 $;
 --| The spec's `cwf`, over the judgments that hold in the model.
 def cwf (D: ind) (n1_v n2_v: nat) (l: lvl) (n3_v: nat) (G: ctx) (n4_v: nat) (e1: expr): wff = $ cwf_j (jmod (mcv hfin)) D n1_v n2_v l n3_v G n4_v e1 $;
 --| The spec's `ctors_wf`, over the judgments that hold in the model.
@@ -191,10 +189,6 @@ def bitop_eqs (G: ctx) (e1 e2 e3 e4 e5 e6 e7 e8 e9 e10 e11 e12 e13 e14 e15 e16 e
 theorem sty_nil (G: ctx) (h A: expr): $ sty G h A h A $;
 
 theorem sty_app (G: ctx) (h A f a B C C2: expr): $ sty G h A f (pi B C) $ > $ ty G a B $ > $ inst nz C a C2 $ > $ sty G h A (app f a) C2 $;
-
-theorem aeq_nil (G: ctx) (h: expr): $ aeq G h h $;
-
-theorem aeq_app (G: ctx) (f f2 a a2 A: expr): $ aeq G f f2 $ > $ deq G a a2 A $ > $ aeq G (app f a) (app f2 a2) $;
 
 theorem cwf_pi (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (A B A2: expr) (u: lvl): $ add d np k $ > $ closed k A $ > $ sinst D nz n k A A2 $ > $ ty Ctx A2 (srt u) $ > $ ulevel l u $ > $ cwf D n np l i (cons A2 Ctx) (s d) B $ > $ cwf D n np l i Ctx d (pi A B) $;
 

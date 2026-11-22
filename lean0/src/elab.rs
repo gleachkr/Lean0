@@ -1692,75 +1692,17 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
             (self.g.quot_red[&fname], hyps, tl2)
         } else {
             let cl = self.g.lean_name(self.tc, cname);
-            if let Some(&th) = self.g.iota_eq.get(&(fname.clone(), cl.clone())) {
-                // a block certified by the schema: the closed equation
-                let p2 = self.iota_closed(th, &fname, f, &a, &args2[..major_idx], &margs, cname, lhs2, tl)
-                    .map_err(|e| format!("iota of {fname} on {cl}: {e}"))?;
-                let mut pf = mm(self.g.lean.trans(&mut self.g.env, p1, p2))?;
-                let mut ft = tl;
-                for &x in &args[major_idx + 1..] {
-                    (ft, pf) = self.app_step(ft, pf, x, None)?;
-                }
-                let tcur = self.infer(cur)?.0;
-                return self.cast(pf, ft, tcur)
+            // the closed equation of the block's recursor rule (audit §4)
+            let Some(&th) = self.g.iota_eq.get(&(fname.clone(), cl.clone())) else { return Err(format!("no iota rule {fname} {cl}")) };
+            let p2 = self.iota_closed(th, &fname, f, &a, &args2[..major_idx], &margs, cname, lhs2, tl)
+                .map_err(|e| format!("iota of {fname} on {cl}: {e}"))?;
+            let mut pf = mm(self.g.lean.trans(&mut self.g.env, p1, p2))?;
+            let mut ft = tl;
+            for &x in &args[major_idx + 1..] {
+                (ft, pf) = self.app_step(ft, pf, x, None)?;
             }
-            let Some(&th) = self.g.iota.get(&(fname.clone(), cl.clone())) else { return Err(format!("no iota rule {fname} {cl}")) };
-            for &x in &args[..major_idx] {
-                a.push(self.tr(x)?);
-            }
-            for &l in self.tc.ctx.read_levels(clevels).to_vec().iter() {
-                a.push(self.trl(l)?);
-            }
-            for &x in &margs {
-                a.push(self.tr(x)?);
-            }
-            // the recursor's arguments before the major premise, typed along its type
-            let (tpi, p_e4) = self.sty_spine(f, &args2[..major_idx])?;
-            let Expr::Pi { binder_type: ty_m, body: cbody, .. } = self.read(tpi) else {
-                return Err("iota: the recursor's type has no binder for the major premise".into())
-            };
-            let tl2 = self.tc.ctx.inst(cbody, &[major2]);
-            let c4 = self.g.env.concl(p_e4);
-            let fty = match self.g.env.head(c4) {
-                Some((_, &[_, _, _, _, fty])) => fty,
-                _ => return Err("iota: not an sty".into()),
-            };
-            let mm0kit::lean::View::Pi(tye, cbe) = self.g.lean.view(&self.g.env, fty) else { return Err("iota: the major premise's binder".into()) };
-            let mj = self.tr(major2)?;
-            let (tl2e, p_inst) = mm(self.g.lean.inst(&mut self.g.env, 0, cbe, mj))?;
-            // the constructor's arguments, typed along its type at the levels of the major
-            // premise's type; the arguments of the type that leaves are that type's
-            let (hty, targs) = self.tc.ctx.unfold_apps(ty_m);
-            let Expr::Const { levels: mlv, .. } = self.read(hty) else { return Err("iota: the major premise's type is not a constant's application".into()) };
-            let Some(cd) = self.tc.env.get_constructor(&cname).cloned() else { return Err(format!("iota: unknown constructor {cl}")) };
-            let cty = crate::induct::ctor_type_at(self, &cd, mlv);
-            let (t2m, p_m) = self.sty_spine_at(mf, cty, &margs)?;
-            let (h2, t2args) = self.tc.ctx.unfold_apps(t2m);
-            if h2 != hty || t2args.len() != targs.len() {
-                return Err(format!("iota: the type of the constructor application is not the major premise's ({fname} on {cl})"))
-            }
-            let mut fe = self.tr(h2)?;
-            let mut fe2 = fe;
-            let mut p_aeq = mm(self.g.env.thm_n("aeq_nil", &[g, fe], &[]))?;
-            for (&x, &y) in t2args.iter().zip(&targs) {
-                let q = self.defeq(x, y)?;
-                let (_, xe, ye, ae) = self.g.lean.deq_parts(&mut self.g.env, q);
-                p_aeq = mm(self.g.env.thm_n("aeq_app", &[g, fe, fe2, xe, ye, ae], &[p_aeq, q]))?;
-                fe = self.g.lean.app(&mut self.g.env, fe, xe);
-                fe2 = self.g.lean.app(&mut self.g.env, fe2, ye);
-            }
-            let mut hyps = Vec::new();
-            let (l1, l2) = (self.tc.ctx.read_levels(mlv).to_vec(), self.tc.ctx.read_levels(clevels).to_vec());
-            if l1.len() != l2.len() {
-                return Err(format!("iota: level counts differ ({fname} on {cl})"))
-            }
-            for (&x, &y) in l1.iter().zip(&l2) {
-                hyps.push(self.level_equiv(x, y)?);
-            }
-            hyps.extend([p_e4, p_inst, p_m, p_aeq]);
-            let t2e = self.tr(t2m)?;
-            a.extend([tl2e, tye, cbe, t2e]);
-            (th, hyps, tl2)
+            let tcur = self.infer(cur)?.0;
+            return self.cast(pf, ft, tcur)
         };
         let p2 = mm(self.g.env.thm(th, &a, &hyps))?;
         let p2 = self.cast(p2, tl2, tl)?;

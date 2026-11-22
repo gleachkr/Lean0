@@ -64,17 +64,14 @@ trust:
   [#14613](https://github.com/leanprover/lean4/pull/14613),
   [#14807](https://github.com/leanprover/lean4/pull/14807),
   [#14843](https://github.com/leanprover/lean4/pull/14843));
-- axioms generated per declaration for the few inductive types the schema 
-  leaves out (those whose shape the kernel reads through `whnf`: recursor 
-  rules, projections and eta, with the declaration's legality unchecked), one 
-  per accelerated `Nat` operation whose defining equations could not be 
-  derived (`Nat.add` on numerals is addition, and so on; none in Init), and 
-  one per 
-  theorem constant that an inductive declaration mentions at its universe 
-  levels (the constant at equivalent levels is the same expression; opaque 
-  constants and Lean axioms are atoms of the spec, `cst`, and need none). `lean0 
-  gen` reports how many blocks the schema left to these axioms, and the 
-  assumptions are inspectable in the generated `.mm0` file;
+- axioms generated per declaration: one per accelerated `Nat` operation 
+  whose defining equations could not be derived (`Nat.add` on numerals is 
+  addition, and so on; none in Init), and one per theorem constant that an 
+  inductive declaration mentions at its universe levels (the constant at 
+  equivalent levels is the same expression; opaque constants and Lean axioms 
+  are atoms of the spec, `cst`, and need none). No inductive type has one: a 
+  block the schema does not certify is an error. The assumptions are 
+  inspectable in the generated `.mm0` file;
 - that the `.mm0` file the verifier reads is in fact the spec followed by the 
   certificate's statements (the verification targets). `lean0 joined` generates 
   this file, and its output can be checked by inspection.

@@ -84,8 +84,6 @@ pub struct Gen {
     /// The number of theorems in the spec.
     pub spec_thms: usize,
     pub stats: Vec<DeclStat>,
-    /// Iota axioms of the blocks left to stage A, by (recursor, constructor).
-    pub iota: HashMap<(String, String), ThId>,
     /// Iota as a closed equation (`ind_iota_eq`) of the blocks certified by the schema, by
     /// (recursor, constructor).
     pub iota_eq: HashMap<(String, String), ThId>,
@@ -97,10 +95,11 @@ pub struct Gen {
     pub blks: HashMap<String, TId>,
     /// Stage-B blocks, by the name of each of their types.
     pub blocks: HashMap<String, std::rc::Rc<crate::induct::Block>>,
-    /// Counts for the run's report: blocks certified by the schema, and blocks left in stage A
-    /// with the reason.
+    /// For the run's report: the number of blocks certified by the schema (a block it does not
+    /// certify is an error), and the quotient primitives left with generated axioms, with
+    /// the reason.
     pub stage_b: usize,
-    pub stage_a: Vec<(String, String)>,
+    pub quot_stage_a: Vec<(String, String)>,
     /// The Horn prover's index of the spec's clauses (made once; the blocks' theorems are
     /// added per declaration).
     pub horn_index: mm0kit::horn::Index,
@@ -210,14 +209,13 @@ impl Gen {
             spec_len,
             spec_thms,
             stats: Vec::new(),
-            iota: HashMap::default(),
             iota_eq: HashMap::default(),
             quot_red: HashMap::default(),
             structs: HashMap::default(),
             blks: HashMap::default(),
             blocks: HashMap::default(),
             stage_b: 0,
-            stage_a: Vec::new(),
+            quot_stage_a: Vec::new(),
             horn_index,
             spec_terms,
             eeqv_axioms: HashMap::default(),
@@ -460,12 +458,12 @@ impl Gen {
                 }
             }
         }
-        if self.stage_b + self.stage_a.len() > 0 {
-            eprintln!("lean0: {} inductive blocks certified by the schema, {} left to stage A, {} level-congruence axioms for opaque constants in block data",
-                self.stage_b, self.stage_a.len(), self.eeqv_axioms.len());
-            for (n, why) in self.stage_a.iter().take(20) {
-                eprintln!("  stage A: {n}: {why}");
-            }
+        if self.stage_b > 0 {
+            eprintln!("lean0: {} inductive blocks certified by the schema, {} level-congruence axioms for opaque constants in block data",
+                self.stage_b, self.eeqv_axioms.len());
+        }
+        for (n, why) in &self.quot_stage_a {
+            eprintln!("lean0: generated axioms for {n}: {why}");
         }
         if self.lit_stage_b + self.lit_stage_a.len() > 0 {
             eprintln!("lean0: {} literal operations certified by their defining equations, {} with generated axioms", self.lit_stage_b, self.lit_stage_a.len());
@@ -579,21 +577,18 @@ impl Gen {
             Declar::Inductive(id) => {
                 if id.all_ind_names.first() == Some(&id.info.name) {
                     let (order0, pfs0) = (el.g.env.order.len(), el.g.env.num_pfs());
-                    match crate::induct::block_head(&mut el, &sig, id, all, nested) {
-                        Ok(true) => return Ok(el.type_mismatches),
-                        Ok(false) => {}
-                        Err(e) => {
-                            let names: Vec<String> = id.all_ind_names.iter().map(|&n| el.g.lean_name(el.tc, n)).collect();
-                            el.g.rollback(order0, pfs0, &names);
-                            el.forget_proofs();
-                            el.g.stage_a.push((sig.lean_name.clone(), e));
-                        }
+                    // a block the schema does not certify is an error: no generated axioms
+                    if let Err(e) = crate::induct::block_head(&mut el, &sig, id, all, nested) {
+                        let names: Vec<String> = id.all_ind_names.iter().map(|&n| el.g.lean_name(el.tc, n)).collect();
+                        el.g.rollback(order0, pfs0, &names);
+                        el.forget_proofs();
+                        return Err(format!("the inductive block is not certified: {e}"))
                     }
-                } else if el.g.blocks.contains_key(&sig.lean_name) {
-                    // a later type of a stage-B block: its lemmas were made with the block
-                    return Ok(el.type_mismatches)
+                } else if !el.g.blocks.contains_key(&sig.lean_name) {
+                    // a later type of a block: its lemmas were made with the block
+                    return Err("its inductive block is not certified".into())
                 }
-                opaque(&mut el, &sig, info.ty, "inductive type")?;
+                return Ok(el.type_mismatches)
             }
             Declar::Constructor(cd) => {
                 if crate::induct::constructor(&mut el, &sig, cd, all, nested)? {
@@ -602,69 +597,13 @@ impl Gen {
                     }
                     return Ok(el.type_mismatches)
                 }
-                // translate everything first: a failure must not leave statements behind
-                let fields = if el.tc.env.get_structure(&cd.inductive_name, true).is_some() {
-                    Some(structure_fields(&mut el, cd.inductive_name, info.ty)?)
-                } else {
-                    None
-                };
-                opaque(&mut el, &sig, info.ty, "constructor")?;
-                if let Some(f) = fields {
-                    let cty = crate::induct::strip_pis(&mut el, info.ty);
-                    let cty = el.tr(cty)?;
-                    structure_axioms(&mut el, &sig, cd.inductive_name, f, cty)?;
-                }
-                if sig.lean_name == "Nat.zero" || sig.lean_name == "Nat.succ" {
-                    natlit::lit_axioms(&mut el, &sig.lean_name, info.ty)?;
-                }
+                return Err("its inductive block is not certified".into())
             }
             Declar::Recursor(rd) => {
                 if crate::induct::recursor(&mut el, &sig, rd, all, nested)? {
                     return Ok(el.type_mismatches)
                 }
-                // The rules mention the recursor itself, and for a mutual or nested inductive
-                // its sibling recursors, so they are translated after those are declared.
-                // Check first that everything else they mention is known; undeclared siblings
-                // (with the same universe parameters) are declared here, before the rules.
-                let mut sibs = Vec::new();
-                for r in rd.rec_rules.iter() {
-                    let mut names = vec![r.ctor_name];
-                    el.const_names(r.val, &mut names);
-                    for n in names {
-                        let c = el.g.lean_name(el.tc, n);
-                        if c == sig.lean_name || el.g.consts.contains_key(&c) || sibs.iter().any(|(s, _)| *s == c) {
-                            continue
-                        }
-                        // not yet in the type checker's environment: it is declared later
-                        match all.get(&n) {
-                            Some(Declar::Recursor(sr)) if sr.all_inductives == rd.all_inductives && sr.info.uparams == info.uparams => {
-                                sibs.push((c, sr.info.ty))
-                            }
-                            _ => return Err(format!("unknown constant {c}")),
-                        }
-                    }
-                }
-                for &(_, ty) in &sibs {
-                    let mut names = Vec::new();
-                    el.const_names(ty, &mut names);
-                    for n in names {
-                        let c = el.g.lean_name(el.tc, n);
-                        if !el.g.consts.contains_key(&c) {
-                            return Err(format!("unknown constant {c}"))
-                        }
-                    }
-                }
-                if !el.g.predeclared.contains_key(&sig.lean_name) {
-                    opaque(&mut el, &sig, info.ty, "recursor")?;
-                }
-                for (c, ty) in sibs {
-                    let cname = el.g.terms.fresh(&mangle(&c));
-                    let ssig = Sig { lean_name: c.clone(), cname: cname.clone(), lvl_names: sig.lvl_names.clone() };
-                    opaque(&mut el, &ssig, ty, "recursor")?;
-                    el.g.predeclared.insert(c, cname);
-                }
-                let rhss: Vec<E> = rd.rec_rules.iter().map(|r| el.tr(r.val)).collect::<R<_>>()?;
-                recursor_axioms(&mut el, &sig, rd, &rhss)?;
+                return Err("its inductive block is not certified".into())
             }
             Declar::Quot { .. } => {
                 if !quot_spec(&mut el, &sig, info.ty)? {
@@ -852,50 +791,6 @@ impl Vars {
     }
 }
 
-/// The statement of the iota lemma of a recursor `sig` on the constructor `ctor_lean`
-/// (`ind_iota`'s premises, audit §4): the constructor's levels are those of the major
-/// premise's type up to `leqv` (`mls`, over the recursor's level variables), the arguments
-/// before the major premise are typed along the recursor's type `rty`, the constructor's
-/// along its type `cty` at the levels `mls`, and the arguments of the type that leaves are
-/// those of the major premise's binder (`aeq`). Variables: `G`, the recursor's levels, its
-/// arguments, the constructor's levels and arguments, then `T`, `TY`, `C`, `T2`.
-#[allow(clippy::too_many_arguments)]
-pub(crate) fn iota_statement(g: &mut Gen, sig: &Sig, counts: [usize; 4], ctor_lean: &str, ncl: usize, ncp: usize, nf: usize, def: TId, rty: E, mls: &[E], cty: E) -> R<(Vars, Vec<E>, E)> {
-    if mls.len() != ncl {
-        return Err(format!("iota of `{}` on `{ctor_lean}`: the major premise's type has {} levels, the constructor {ncl}", sig.lean_name, mls.len()))
-    }
-    let mut v = Vars::new();
-    let gv = v.add(&mut g.env, "G", "ctx");
-    let us = v.lvls(&mut g.env, &sig.lvl_names, "");
-    let ps = v.many(&mut g.env, "p", "expr", counts[0]);
-    let ms = v.many(&mut g.env, "m", "expr", counts[1]);
-    let mins = v.many(&mut g.env, "n", "expr", counts[2]);
-    let is = v.many(&mut g.env, "i", "expr", counts[3]);
-    let cls: Vec<E> = (0..ncl).map(|i| v.add(&mut g.env, &format!("v{}", i + 1), "lvl")).collect();
-    let cps = v.many(&mut g.env, "q", "expr", ncp);
-    let fs = v.many(&mut g.env, "f", "expr", nf);
-    let tv = v.add(&mut g.env, "T", "expr");
-    let ty = v.add(&mut g.env, "TY", "expr");
-    let cv = v.add(&mut g.env, "C", "expr");
-    let t2 = v.add(&mut g.env, "T2", "expr");
-    let c = g.const_term(ctor_lean, &cls).ok_or("constructor term")?;
-    let major = apps(g, c, &[cps, fs.clone()].concat());
-    let r = g.const_term(&sig.lean_name, &us).ok_or("recursor term")?;
-    let e4 = apps(g, r, &[ps.clone(), ms.clone(), mins.clone(), is].concat());
-    let lhs = g.lean.app(&mut g.env, e4, major);
-    let d = g.env.app(def, &us);
-    let rhs = apps(g, d, &[ps, ms, mins, fs].concat());
-    let mut hyps: Vec<E> = mls.iter().zip(&cls).map(|(&a, &b)| g.env.app_n("leqv", &[a, b])).collect();
-    let pi = g.env.app_n("pi", &[ty, cv]);
-    hyps.push(g.env.app_n("sty", &[gv, r, rty, e4, pi]));
-    let z = g.lean.nat(&mut g.env, 0);
-    hyps.push(g.env.app_n("inst", &[z, cv, major, tv]));
-    hyps.push(g.env.app_n("sty", &[gv, c, cty, major, t2]));
-    hyps.push(g.env.app_n("aeq", &[gv, t2, ty]));
-    let concl = g.lean.deq(&mut g.env, gv, lhs, rhs, tv);
-    Ok((v, hyps, concl))
-}
-
 pub(crate) fn apps(g: &mut Gen, f: E, args: &[E]) -> E {
     args.iter().fold(f, |f, &a| g.lean.app(&mut g.env, f, a))
 }
@@ -971,47 +866,6 @@ fn opaque<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::Ex
     Ok(term)
 }
 
-/// Iota rules of a recursor: for each constructor `c`, a definition `R_c` holding the rule's
-/// right-hand side and the axiom
-/// `sty G rec RT (rec ps ms mins is (c cps fs)) T > deq G (rec ps ms mins is (c cps fs)) (R_c ps ms mins fs) T`
-/// (`RT` the recursor's type). The constructor's parameters, levels and the indices are
-/// separate variables, as in nanoda, which does not compare them with the recursor's; the
-/// typing premise forces them to agree.
-fn recursor_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &nanoda_lib::env::RecursorData<'t>, rhss: &[E]) -> R<()> {
-    let rty = el.tr(rd.info.ty)?;
-    let mlv = crate::induct::major_levels(el, rd)?;
-    let mls: Vec<E> = el.tc.ctx.read_levels(mlv).to_vec().iter().map(|&l| el.trl(l)).collect::<R<_>>()?;
-    for (rule, &rhs) in rd.rec_rules.iter().zip(rhss) {
-        let ctor_lean = el.g.lean_name(el.tc, rule.ctor_name);
-        let Some(cd) = el.tc.env.get_constructor(&rule.ctor_name).cloned() else { return Err(format!("unknown constructor {ctor_lean}")) };
-        let cty = crate::induct::ctor_type_at(el, &cd, mlv);
-        let cty = el.tr(cty)?;
-        let nf = rule.ctor_telescope_size_wo_params as usize;
-        let ncp = cd.num_params as usize;
-        let ncl = el.tc.ctx.read_levels(cd.info.uparams).len();
-        let g = &mut *el.g;
-        let short = ctor_lean.rsplit('.').next().unwrap_or(&ctor_lean);
-        // def R_c (us: lvl): expr = $ rhs $;   (shift levels down, as for definitions)
-        let n = sig.lvl_names.len();
-        let mut shift = vec![g.env.var(0)];
-        shift.extend((0..n).map(|i| g.env.var(i as u16)));
-        let rhs0 = g.env.subst(rhs, &shift);
-        let def_name = g.terms.fresh(&format!("{}_{}", sig.cname, mangle(short)));
-        let expr_s = g.env.sort_names["expr"];
-        let lvl_args = g.lvl_args(&sig.lvl_names);
-        let def = add_term(&mut g.env, &def_name, lvl_args, expr_s, TermKind::Def { body: rhs0, public_body: true },
-            &format!("The right-hand side of the iota rule of `{}` for `{ctor_lean}`.", sig.lean_name))?;
-        // the axiom
-        let counts = [rd.num_params as usize, rd.num_motives as usize, rd.num_minors as usize, rd.num_indices as usize];
-        let (v, hyps, concl) = iota_statement(g, sig, counts, &ctor_lean, ncl, ncp, nf, def, rty, &mls, cty)?;
-        let name = g.thms.fresh(&format!("{def_name}_iota"));
-        let th = add_thm(&mut g.env, &name, v.args, hyps, concl, true, false, None,
-            &format!("Iota reduction of `{}` on `{ctor_lean}`.", sig.lean_name))?;
-        g.iota.insert((sig.lean_name.clone(), ctor_lean), th);
-    }
-    Ok(())
-}
-
 /// `Quot.lift f h (Quot.mk r a) ≡ f a` and `Quot.ind f (Quot.mk r a) ≡ f a`, under the premise
 /// that the arguments have their binders' types in the primitive's type `ty` (`sty`).
 fn quot_axiom<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::ExprPtr<'t>) -> R<()> {
@@ -1048,7 +902,7 @@ fn quot_axiom<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util
 /// typed by `quot_ty` and so on, reducing by `quot_lift_mk`/`quot_ind_mk`; audit §4), when
 /// the export's type is the spec's: `theorem Quot_df` (`constDF`, from `eeqv_df`), no
 /// generated axiom. `Ok(false)` when the spec has no such constant or the type differs (then
-/// the stage-A generated axioms, `opaque` and `quot_axiom`).
+/// generated axioms, `opaque` and `quot_axiom`, reported).
 fn quot_spec<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::ExprPtr<'t>) -> R<bool> {
     let (term, ty_ax, eqv_ax, red) = match sig.lean_name.as_str() {
         "Quot" => ("quot", "quot_ty", "eeqv_quot", None),
@@ -1065,7 +919,7 @@ fn quot_spec<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util:
     let term = g.env.term_id(term);
     let n = g.env.terms[term.0 as usize].args.len();
     if n != sig.lvl_names.len() {
-        g.stage_a.push((sig.lean_name.clone(), "the quotient primitive's universe parameters are not the spec's".into()));
+        g.quot_stage_a.push((sig.lean_name.clone(), "the quotient primitive's universe parameters are not the spec's".into()));
         return Ok(false)
     }
     let gv = g.env.var(0);
@@ -1079,7 +933,7 @@ fn quot_spec<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util:
     let Some((_, [_, c1, spec_t])) = g.env.head(stmt) else { return Err(format!("{ty_ax}: not a typing")) };
     let (c1, spec_t) = (*c1, *spec_t);
     if spec_t != t {
-        g.stage_a.push((sig.lean_name.clone(), "the quotient primitive's type is not the spec's".into()));
+        g.quot_stage_a.push((sig.lean_name.clone(), "the quotient primitive's type is not the spec's".into()));
         return Ok(false)
     }
     let c2 = g.env.app(term, &us2);
@@ -1112,18 +966,7 @@ fn quot_spec<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util:
     Ok(true)
 }
 
-/// Projections of a structure `S` (one constructor, no indices): a term `S_proj i e`, its
-/// structural rules for `closed`, `lift` and `inst`, and per field `i` a typing axiom and a
-/// reduction axiom; plus structure eta when `S` is not recursive.
-///
-/// The typing axiom substitutes the parameters and the earlier projections into the field
-/// type through `inst` premises, outermost first (the spec's `pinst` and `qinst`). When `S`
-/// may live in `Prop`, a
-/// field that is not a proposition (or follows one that is not) may only be projected from
-/// a structure whose sort is at least 1, so its axiom takes the premise
-/// `leqv (lmax (ls lz) L) L` (as nanoda's `infer_proj` checks). If the fields up to it are
-/// propositions at some levels only, a second axiom (`_dfp`) puts their sort levels at `lz`.
-/// What `structure_axioms` needs from the constructor's type: each field's type (a de Bruijn
+/// What the structure lemmas (`induct::structure`) need from the constructor's type: each field's type (a de Bruijn
 /// term under the parameters and earlier fields), whether it is a proposition, the level of
 /// its sort, and the structure's sort level.
 pub(crate) struct Fields {
@@ -1176,125 +1019,6 @@ pub(crate) fn structure_fields<'t>(el: &mut Elab<'_, '_, 't, '_>, ind: NamePtr<'
     let Expr::Sort { level, .. } = el.tc.ctx.read_expr(sty) else { return Err("structure type is not a sort".into()) };
     let sort = el.trl(level)?;
     Ok(Fields { tys: field_tys, is_prop, levels, sort })
-}
-
-fn structure_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ind: NamePtr<'t>, fields: Fields, cty: E) -> R<()> {
-    let ind_data = el.tc.env.get_structure(&ind, true).cloned().unwrap();
-    let eta_ok = el.tc.env.can_be_struct(&ind);
-    let np = ind_data.num_params as usize;
-    let ind_lean = el.g.lean_name(el.tc, ind);
-    let Fields { tys: field_tys, is_prop, levels: field_lvls, sort: lsort } = fields;
-    let nf = field_tys.len();
-    let g = &mut *el.g;
-    let sort_ok = !level_may_be_zero(g, lsort);
-    let ind_cname = mangle(&ind_lean);
-    let proj_name = format!("{ind_cname}_proj");
-    // projections are the spec's `proj b i e`, `b` the block's atom
-    let blk = g.blk_id(&ind_lean)?;
-    let proj = g.env.app(blk, &[]);
-    // typing axioms
-    let mut df = Vec::new();
-    let mut df_prop = Vec::new();
-    for i in 0..nf {
-        let needs_sort = !sort_ok && !is_prop[..=i].iter().all(|&b| b);
-        // fields up to `i` that are propositions only at some levels (`Exists.{0}`'s witness)
-        let lvl_js: Vec<usize> = (0..=i).filter(|&j| !is_prop[j]).collect();
-        let prop_ok = needs_sort && lvl_js.iter().all(|&j| level_may_be_zero(g, field_lvls[j]));
-        let mut variants = vec![needs_sort];
-        if prop_ok {
-            variants.push(false);
-        }
-        for (vi, &sort_premise) in variants.iter().enumerate() {
-            let from_prop = vi == 1;
-            let mut v = Vars::new();
-            let gv = v.add(&mut g.env, "G", "ctx");
-            let us = v.lvls(&mut g.env, &sig.lvl_names, "");
-            let ps = v.many(&mut g.env, "p", "expr", np);
-            let (e, e2) = (v.add(&mut g.env, "e", "expr"), v.add(&mut g.env, "e2", "expr"));
-            let mut hyps = Vec::new();
-            // the levels of `S` are the constructor's (same names, same order)
-            let lsort_here = g.env.subst(lsort, &std::iter::once(gv).chain(us.iter().copied()).collect::<Vec<_>>());
-            if sort_premise {
-                let z = g.env.app_n("lz", &[]);
-                let one = g.env.app_n("ls", &[z]);
-                let m = g.env.app_n("lmax", &[one, lsort_here]);
-                hyps.push(g.env.app_n("leqv", &[m, lsort_here]));
-            }
-            if from_prop {
-                let z = g.env.app_n("lz", &[]);
-                for &j in &lvl_js {
-                    let l = g.env.subst(field_lvls[j], &std::iter::once(gv).chain(us.iter().copied()).collect::<Vec<_>>());
-                    hyps.push(g.env.app_n("leqv", &[l, z]));
-                }
-            }
-            let st = g.const_term(&ind_lean, &us).ok_or("structure term")?;
-            let st = apps(g, st, &ps);
-            hyps.push(g.lean.deq(&mut g.env, gv, e, e2, st));
-            let subst: Vec<E> = std::iter::once(gv).chain(us.iter().copied()).collect();
-            let (ihyps, r) = field_inst_hyps(g, &mut v, field_tys[i], &subst, &ps, i, proj, e);
-            hyps.extend(ihyps);
-            let (pe, pe2) = (g.lean.proj(&mut g.env, proj, i, e), g.lean.proj(&mut g.env, proj, i, e2));
-            let concl = g.lean.deq(&mut g.env, gv, pe, pe2, r);
-            let name = g.thms.fresh(&format!("{proj_name}_{i}_df{}", if from_prop { "p" } else { "" }));
-            let what = if from_prop {
-                " (from a proposition, when the fields up to it are propositions)"
-            } else if sort_premise {
-                " (not from a proposition)"
-            } else {
-                ""
-            };
-            let th = add_thm(&mut g.env, &name, v.args, hyps, concl, true, false, None, &format!("Typing of field {i} of `{ind_lean}`{what}."))?;
-            if from_prop {
-                df_prop.push(Some((th, lvl_js.iter().map(|&j| field_lvls[j]).collect())));
-            } else {
-                df.push((th, needs_sort));
-            }
-        }
-        if !prop_ok {
-            df_prop.push(None);
-        }
-    }
-    // reduction axioms
-    let mut red = Vec::new();
-    let mut red_prop = Vec::new();
-    for i in 0..nf {
-        let mut v = Vars::new();
-        let gv = v.add(&mut g.env, "G", "ctx");
-        let cls = v.lvls(&mut g.env, &sig.lvl_names, "");
-        let ps = v.many(&mut g.env, "p", "expr", np);
-        let fs = v.many(&mut g.env, "f", "expr", nf);
-        let tv = v.add(&mut g.env, "T", "expr");
-        let sv = v.add(&mut g.env, "S", "expr");
-        let c = g.const_term(&sig.lean_name, &cls).ok_or("constructor term")?;
-        let m = apps(g, c, &[ps, fs.clone()].concat());
-        let lhs = g.lean.proj(&mut g.env, proj, i, m);
-        let hyps = vec![g.env.app_n("sty", &[gv, c, cty, m, sv]), g.env.app_n("ty", &[gv, lhs, tv])];
-        let concl = g.lean.deq(&mut g.env, gv, lhs, fs[i], tv);
-        let name = g.thms.fresh(&format!("{proj_name}_{i}_mk"));
-        red.push((add_thm(&mut g.env, &name, v.args, hyps, concl, true, false, None, &format!("Field {i} of a `{}` application.", sig.lean_name))?, false));
-        red_prop.push(None);
-    }
-    // eta
-    let eta = if eta_ok {
-        let mut v = Vars::new();
-        let gv = v.add(&mut g.env, "G", "ctx");
-        let us = v.lvls(&mut g.env, &sig.lvl_names, "");
-        let ps = v.many(&mut g.env, "p", "expr", np);
-        let e = v.add(&mut g.env, "e", "expr");
-        let st = g.const_term(&ind_lean, &us).ok_or("structure term")?;
-        let st = apps(g, st, &ps);
-        let hyp = g.env.app_n("ty", &[gv, e, st]);
-        let projs: Vec<E> = (0..nf).map(|i| g.lean.proj(&mut g.env, proj, i, e)).collect();
-        let m = g.const_term(&sig.lean_name, &us).ok_or("constructor term")?;
-        let m = apps(g, m, &[ps, projs].concat());
-        let concl = g.lean.deq(&mut g.env, gv, e, m, st);
-        let name = g.thms.fresh(&format!("{ind_cname}_eta"));
-        Some(add_thm(&mut g.env, &name, v.args, vec![hyp], concl, true, false, None, &format!("Structure eta for `{ind_lean}`."))?)
-    } else {
-        None
-    };
-    g.structs.insert(ind_lean, StructInfo { blk, np, nf, df, df_prop, red, red_prop, eta, sort: lsort, field_tys });
-    Ok(())
 }
 
 /// The level `l` may be zero: it is not provably at least 1 (`lmax 1 l ≈ l` fails).

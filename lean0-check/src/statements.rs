@@ -23,7 +23,7 @@
 //!
 //! Like the rest of this crate it is independent of the generator: it parses the `.mm0` text
 //! itself, for exactly the forms lean0 writes. What it does not check: the generated axioms
-//! of blocks left to stage A, quotients and literals (audit §4, §5), and that the certificate
+//! of quotients and literals (audit §4, §5), and that the certificate
 //! proves the statements (the verifiers' job).
 
 use nanoda_lib::env::Declar;
@@ -438,7 +438,7 @@ pub fn check(export: &ExportFile<'_>, stmts: &[Stmt]) -> Report {
             _ => problems.push(format!("`{}`: not of the form `cst X_atom (lcons u1 ... lnil)` over its own levels", s.name)),
         }
     }
-    // the syntactic axioms about a constant `c` (an opaque, an axiom, a stage-A constant):
+    // the syntactic axioms about a constant `c` (an opaque constant, a Lean axiom):
     // `axiom c_closed (k: nat) (us): closed k (c us)` and the level congruence
     // `axiom c_eeqv (us us2): leqv u u2 > ... > eeqv (c us) (c us2)`
     for s in stmts {
@@ -546,6 +546,12 @@ pub fn check(export: &ExportFile<'_>, stmts: &[Stmt]) -> Report {
                 Level::Param(n, _) => n,
                 _ => unreachable!("universe parameters are parameters"),
             }).collect();
+            // an inductive type, constructor or recursor is a member of a block's data: no
+            // generated axioms stand for one (audit §4)
+            if matches!(d, Declar::Inductive(..) | Declar::Constructor(..) | Declar::Recursor(..)) && matches!(standing, Standing::Term(_)) {
+                problems.push(format!("{lean}: not a member of an inductive block"));
+                return
+            }
             let term = match standing {
                 Standing::Term(t) => Some(t),
                 Standing::Block(_) => None,

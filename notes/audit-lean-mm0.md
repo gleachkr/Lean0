@@ -324,7 +324,7 @@ are in scope at each point.
 | `iargs`, `indapp` (`isValidIndApp`) | At depth `d`, `#(d+np+j)` applied to exactly the parameters (`pargs #t d np`: `#(d+np-1) .. #d`) and `nidx D j` indices, each without an occurrence of the block (`closed (d+np)`: every variable at or above `d+np` is a block type). |
 | `ipos` (`checkPositivity`), `recfield` (`isRecArg`) | `ipos`: no occurrence, or `Π` over a domain without one (the kernel: an occurrence in a domain is non-positive), or a valid occurrence. `recfield`: a valid occurrence under `Π`s (a reflexive field). Both syntactic where the kernel uses `whnf` first; a block where that matters is left to stage A. |
 | `ulevel` (`checkConstructors`' universe test) | `l ≈ 0` or `l ⊔ u ≈ l` are the semantic readings of `isAlwaysZero` and `geq'`, which are sound approximations of them: whatever the kernel accepts, these accept, and both conditions are what the fixed point in `srt l` needs (a type in `Prop` may have fields of any size; otherwise each field's universe is at most the type's). |
-| `cwf`, `ctors_wf` | Each field's type (with the block's types put in) is a type in the context of the parameters and the earlier fields (`⟨ Ctx ⊢ A2 : srt u ⟩`), of an allowed level, positive; a recursive field is not mentioned in the rest of the constructor type (`cwf_pi_rec`: the rest is a lift, `lift 1 0 B2 B`; a non-recursive field, `cwf_pi`, has no occurrence of the block, `closed k A`); the result is the constructor's own type applied to the parameters and to indices without occurrences, each argument of the result (with the block's types put in, `K2`) typed at its binder's type in the type former's type `Π P. F_i` (`sty Ctx (ind_ty D i) R2 K2 S`, `R2` that type lifted over the fields and parameters, as in the iota rules). The kernel types the indices by `checkType` of the whole constructor type; the spec states each argument's typing, since in the model a typing of the result as a whole says nothing about its arguments (an application outside a function's domain denotes `∅`), and the indices' typing is what puts a constructor's value in the family at an index of the family's domain (until 2026-11-11 the clause had only `indapp`, which accepted an index of the wrong type: `IX.mk : IX E` for `IX : Prop → Type`). This is `checkConstructors`, with the parameters matched syntactically (the data has one telescope `P`) where the kernel uses `isDefEq`; the generator checks that before it states the data, else stage A. The non-occurrence of recursive fields (added 2026-11-12) is implied by the kernel's typing (a term that mentions a field of type `T` mentions `T`, which neither a positive field's domain nor an index may do; the kernel also rejects a nested occurrence whose arguments mention a field), so it rejects no block the kernel accepts; it is stated because the model sees only that the typings hold, not that they are derivable, and without it a field's domain could grow with a recursive field's value and the family leave the universe. Each constructor type is closed over the parameters and the types (`ctors_wf_cons`: `Π P. K` is `closed n`, added 2026-11-12), for the reason `tys_closed` gives: `ind_ctor D i c` is a closed constant. |
+| `cwf`, `ctors_wf` | Each field's type (with the block's types put in) is a type in the context of the parameters and the earlier fields (`⟨ Ctx ⊢ A2 : srt u ⟩`), of an allowed level, positive; a recursive field is not mentioned in the rest of the constructor type (`cwf_pi_rec`: the rest is a lift, `lift 1 0 B2 B`; a non-recursive field, `cwf_pi`, has no occurrence of the block, `closed k A`); the result is the constructor's own type applied to the parameters and to indices without occurrences, each argument of the result (with the block's types put in, `K2`) typed at its binder's type in the type former's type `Π P. F_i` (`sty Ctx (ind_ty D i) R2 K2 S`, `R2` that type lifted over the fields and parameters, as in the iota rules). The kernel types the indices by `checkType` of the whole constructor type; the spec states each argument's typing, since in the model a typing of the result as a whole says nothing about its arguments (an application outside a function's domain denotes `∅`), and the indices' typing is what puts a constructor's value in the family at an index of the family's domain (until 2026-11-11 the clause had only `indapp`, which accepted an index of the wrong type: `IX.mk : IX E` for `IX : Prop → Type`). This is `checkConstructors`, with the parameters matched syntactically (the data has one telescope `P`) where the kernel uses `isDefEq`; the generator checks that before it states the data, else the block is an error. The non-occurrence of recursive fields (added 2026-11-12) is implied by the kernel's typing (a term that mentions a field of type `T` mentions `T`, which neither a positive field's domain nor an index may do; the kernel also rejects a nested occurrence whose arguments mention a field), so it rejects no block the kernel accepts; it is stated because the model sees only that the typings hold, not that they are derivable, and without it a field's domain could grow with a recursive field's value and the family leave the universe. Each constructor type is closed over the parameters and the types (`ctors_wf_cons`: `Π P. K` is `closed n`, added 2026-11-12), for the reason `tys_closed` gives: `ind_ctor D i c` is a closed constant. |
 | `tys_ty`, `tys_ok`, `ctx_wf`, `tys_wf`, `ind_wf`, `tys_closed` | `checkInductiveTypes`: the parameters and the types' types are closed (`tys_closed`: `Π P. F_i` is closed for each type; the kernel's blocks are closed constants, and the model's values of a block's constants are the same at every valuation of the context, so a block whose parameters mention the context could not have the types `ind_ctor_ty` gives it in every context; added 2026-11-12), the parameters are types over the earlier ones, each type's type is a type of the form `Π indices. srt l2` with `l2 ≈ l`, the block's universe being the first type's (the kernel: `isEquiv`). `tys_ty` also requires each type's type to be binders over a sort (`isort`; added 2026-11-15): `ind_ty_ty` has only `tys_ok` as its premise, and without this a block whose type's type is a typed non-sort such as `False` would make `ind_ty D 0` a proof of it (lean0's generator refuses such a block before the schema sees it, so no negative test shows the premise at work). `tys_ok` alone types the type formers (the kernel adds them before it checks the constructors; in the model an illegal block's types are empty families, so typing the formers needs no legality). |
 | `elim_ok`, `large`, `fir`, `leaf_has` (`isLargeEliminator`) | `v ≈ 0` always (small elimination). Large elimination when `ls lz ⊔ l ≈ l` (never a proposition, `isNeverZero`), or one type with no constructors (empty: the fold is vacuous), or one type with one constructor each of whose fields is a proposition (`⟨ Ctx ⊢ A2 : srt lz ⟩`, where the kernel tests `isAlwaysZero` syntactically) or occurs as an argument of the constructor's result (`has_arg`, a syntactic occurrence as a whole argument, as the kernel's `contains`): subsingleton elimination, since such a type has at most one element per index under proof irrelevance, so the fold into any universe is determined. |
 | `mty`, `motives` (`mkRecInfos`' motives) | Motive `j` is `Π indices. Π (ind_ty D j params indices). srt v`, read off `F_j` lifted over the `j` earlier motives: at depth `d` inside it the parameters are `#(d+j+np-1) .. #(d+j)` and the indices `#(d-1) .. #0`. The context lists motive `n-1` first (innermost): `capp Mr (Mj :: [])` appends the outer one. |
@@ -333,7 +333,6 @@ are in scope at each point.
 | `ihval`, `rwalk`, `rec_rhs` (`mkRecRules`) | `λ P. λ M. λ N. λ fields. minor_k fields ihs`, the minor at `#(nf + m - 1 - k)` under the fields; each recursive field's hypothesis is `λ ys. ind_rec D j v params motives minors indices (field ys)`, with the recursor's arguments the variables above the fields: parameters at `#(y+nf+m+n+np-1) ..`, motives and minors `#(y+nf+m+n-1) .. #(y+nf)`, the field at `#(y + nf - 1 - d)`. As in `ihty`, the type index `j` is an argument of `ihval` (`ihval D np n m v nf fld y j A IH`), passed by `rwalk_pi_rec` from `recfield`. |
 | `ind_ty_ty`, `ind_ctor_ty` | The type former has type `Π P. F_i` under `tys_ok`; constructor `c` of type `i` has type `Π P. K` with the block's types put in (`ctor_ty`, a relation of Part I since 2026-11-17, so that the iota and projection rules can name the type), under `ind_wf`: in the model, the families and the tagging injections have these types. |
 | `ind_rec_ty` | Under `ind_wf` and `elim_ok`, the fold has the type `rec_ty` computes (the thesis's recursor; the argument that `rec_ty` computes the kernel's type is the two rows above, tested on every block). |
-| `aeq` | `aeq G e e2`: one head applied to arguments that are pairwise definitionally equal. No rule of the spec has it as a premise (until 2026-11-21 the iota rules `ind_iota` and `ind_iota_nst` did; iota is now the closed equation of the next row). It remains for the generated iota axioms of a block the schema does not certify (stage A, below), whose typing premises it closes: the arguments of the type that leaves with the constructor application are those of the major premise's binder, one by one, so the constructor's parameters are the recursor's and its indices the recursor's indices. A typing of the major premise as a whole does not give that where the model has no tag: the value of a proof carries no fields. For `inductive P (α : Type) : α → Prop | mk (x : α) : P α x`, which eliminates into every sort, the value of `P.mk Nat 0` is the proof's, and it is an element of the value of `P Nat 1`; a rule with only that typing would give `P.rec m 1 (P.mk Nat 0) ≡ m 0`, while the fold's value there is `m 1`. An equation of the two types as wholes says no more (the type former is not injective at propositions in the model), hence the relation. |
 | `clift`, `psplit`, `iota_tel`, `iota_lhs`, `iota_eq`, `crst`, `ind_iota_eq` | Iota as a closed equation: `ind_wf Dl D`, `elim_ok Dl D v`, `iota_eq D i c v Dl0 lhs0 rhs0 T0`, `ind_nested D N`, `crst D N Dl0 Dl` and `rst D N` of `lhs0`, `rhs0`, `T0` to `lhs`, `rhs`, `T` give `Dl ⊢ lhs ≡ rhs : T`: `iota_eq` states the equation over the block's own types and constructors, and the rule restores the auxiliary ones to the nested occurrences in the context (`crst`: `rst` entry by entry), the two sides and the type (nothing changes when `N` is empty: `rst_nil`). The unrestored context, sides and type are variables of the rule, not of a relation, so that they have sorts in the reduction. `iota_eq` (Part I, one clause) puts together the context `Dl` of the recursor's own variables (`iota_tel`: the parameters `P`, the motives, the minors, then the constructor's fields `X`, which `clift` moves under the motives and the minors; `psplit` splits the constructor's type with the block's types put in, `sinst`, at its `npis` binders into `X` and the result `res`), `ind_rec D i v ps ms ns is (ind_ctor D i c ps fs) ≡ Rh ps ms ns fs` at the type `motive_i is (ind_ctor D i c ps fs)` (`iota_lhs`: `ps`, `ms`, `ns`, `fs` are the context's variables, by windows `pargs`; the indices `is` are those of the constructor's result `res`, lifted under the motives and the minors and read off by `rehead`; `Rh` is `rec_rhs`'s term). The rule has no typing premise, since every argument is a variable of the context at its declared type or an index of the constructor's own result (typed by `cwf_res` in `ind_wf`): so the constructor's parameters are the recursor's and its indices the recursor's by construction, where a rule over arbitrary arguments would need typing premises to say so (the previous row's example); it is Lean4Lean's form of a recursor rule (a closed equation over shared variables). An instance at terms in a context `Γ` follows by `weakBaseDF` (§6: the equation over `Γ` as base context) and `instDF` once per variable, from the parameters on, whose premises are the typings of the terms substituted; the generator proves the equation once per recursor rule (`X_rec_c_iota`, with the closedness of the rule's definition, `X_rec_c_closed`) and uses it at every iota step (`Elab::iota_closed`: the instance has the constructor's own indices and, in the major premise, the parameters and levels of the major premise's type in the recursor's type, which are the recursor's own or, for the recursor of an auxiliary type, the nested occurrence's arguments at the recursor's parameters; the term at hand is equal to the instance by congruence). At an auxiliary type `i` the restored equation is the recursor `X.rec_k` (`mkAuxRecNameMap`) on the constructor of the occurrence's block, `ind_rec D i v ps ms ns is (ind_ctor I ii c Ds[ps] fs) ≡ R ps ms ns fs`, the fields being the last arguments of the major premise as in `inductive_reduce_rec`. All of Init (census of 2026-11-21): 3.3 million iota steps, each by this rule. The relations have computing premises only. In the reduction the rule is a theorem at every block (`spec/tg/model-ci.mm0`, audit §11): at a valuation of the unrestored context the arguments lie in their spaces because the valuation does; the restored context has the same valuations, and the restored sides and type the same values, because every auxiliary type and constructor in them sits on the parameters' variables (the specialization lemma of nested blocks, `spec/tg/model-nst.mm0`: `iota_tel_rst_sat`, `iota_lhs_rst_val`, `rec_rhs_rst_val`). `rst` is not a function (`rst_refl`): the rule holds for every result. |
 | `struct_like`, `field_ty`, `proj_ok`, `fprops`, `pinst`, `qinst`, `proj_ty` | Typing of `proj b i e` for `e : ind_ty D j ps`, type `j` structure-like (one constructor, no indices; the kernel's `is_structure_like`, which a type of a mutual block may satisfy): the field's type with the parameters and then the earlier projections put in, outermost first (`pinst` recurses to the innermost argument of `S` and substitutes on the way out; `qinst` fields `0 ..` at `#(k-1) ..`), a simultaneous substitution since each term substituted is lifted over the binders below it. `proj_ok`: the type's sort is at least 1, or the fields up to `i` are propositions (`fprops`: each `⟨ Ctx ⊢ A2 : srt lz ⟩`) — the argument of stage A's `_dfp`: such projections are definable by elimination into `Prop`, and nanoda requires less (only the dependent fields), so this is no more permissive. |
 | `proj_mk` | `proj b i (ind_ctor D2 j nz qs fs) ≡ fs[i]` (`spine (Y @ f) M ii` with `ii = nf - 1 - i`: the field counted from the outside) when the block is well formed (`ind_wf`), the field may be projected (`proj_ok`, as in `proj_ty`), the constructor's arguments have their binders' types in its type (`ctor_ty`, `sty`) and the projection is typed. The three premises before the last are there since 2026-11-17: a typing of the projection alone says nothing about the arguments (with arguments outside the constructor's domain the application and its projection have the value `∅` in the model, an element of many types), and for a structure that is a proposition the value has no fields, so the field must be a proof (`proj_ok`) of its typed type. |
@@ -344,8 +343,10 @@ are in scope at each point.
 
 **What `ind_wf` does not say.** Duplicate constructor names, `checkNoMVarNoFVar`, the
 `_nested` prefix: naming matters, not typing. The syntactic places where the kernel uses
-`whnf` (`isRecArg`, `checkPositivity`, the parameter match) make a block fall back to stage
-A, counted and reported by `lean0 gen`.
+`whnf` (`isRecArg`, `checkPositivity`, the parameter match) make a block an error of `lean0
+gen`: no axioms are generated for an inductive type (until 2026-11-22 such a block got
+generated axioms, "stage A"; Init has no such block), and `lean0 check` requires every
+inductive type, constructor and recursor of the export to be a member of a block's data.
 
 **Negative tests.** The relations that compute a term (`rec_ty`, `rec_rhs`, the projections'
 types) are checked against the kernel on every block, as said above, but the relations that
@@ -362,9 +363,7 @@ constructors into `Sort u` (`elim_ok`); a mutual block with one type in `Type` a
 field `V (V α)` (`ipos`, through `indapp` and `iargs`); a constructor `IX E` of `IX : Prop →
 Type`, the index of the wrong type (`cwf_res`, through `sty`). nanoda rejects all seven as well
 (two by not terminating, `historical/upstream-issues.md`). An eighth case is nested: the
-occurrence `Ph NO E` of `Ph (α β : Type)` becomes `Ph NO Type` (`nst_ty`, through `sty`). A
-nested block the schema refuses is left to stage A, where the run fails on the constructor's
-exported type, so the test reads the run's report for the schema's refusal.
+occurrence `Ph NO E` of `Ph (α β : Type)` becomes `Ph NO Type` (`nst_ty`, through `sty`).
 
 **Functionality (`lean0 modes`, `mm0kit/src/modes.rs`).** The reading of a relation as a
 function, or a predicate, is checked mechanically. Every relation of the spec other than the
@@ -388,26 +387,18 @@ relations with 162 computing clauses, 110 checking clauses and the 8 clauses of 
 rules. `scripts/test.sh` runs the check and requires a spec with an overlapping clause to be
 rejected.
 
-### Generated per-declaration axioms (stage A, `lean0/src/gen.rs`)
+### Generated per-declaration axioms (`lean0/src/gen.rs`)
 
 These live in the generated `.mm0`, not in `lean.mm0`, and must be read against the Lean
-declaration. They remain for the blocks the schema does not cover (the `whnf` places above), and for a
-quotient primitive whose type is not the spec's (above). They are trusted in the same sense that
-nanoda trusts the export's recursors (which it re-derives and compares): nothing trusted
-checks that such a declaration is legal or that its recursor is the one the declaration
-determines, so the arguments below hold per kind of axiom, *assuming* the declaration is
-legal and the export's recursor is the right one.
+declaration. They remain for Lean's axioms and opaque constants, and for a quotient primitive
+whose type is not the spec's (above; reported by `lean0 gen`). No inductive type, constructor
+or recursor has one: a block the schema does not certify is an error.
 
 | axiom class | Lean4Lean counterpart / argument |
 |---|---|
-| `c_df` (axioms, stage-A inductive types, constructors, recursors, opaques) | `constDF` for a constant whose type is the given `T` (`T` is checked well-typed by the public theorem `c_wf`) |
+| `c_df` (axioms, opaques) | `constDF` for a constant whose type is the given `T` (`T` is checked well-typed by the public theorem `c_wf`) |
 | `c_atom` (term of sort `atom`) and `c` (def, `cst c_atom (lcons u1 ... lnil)`) | the constant itself: an atom of its own at its levels (§10). `c_closed` is a theorem (`closed_cst`) and the level congruence is the spec's `eeqv_cst`, so neither is an axiom (until 2026-11-04 both were generated axioms, 260 and 24 of them in Init) |
-| `c_eeqv`: `leqv u u2 > ... > eeqv (c us) (c us2)` (only for a constant, now a theorem of an earlier part or a constant of a stage-A block, that an inductive declaration mentions at its levels; above) | the same constant at equivalent levels has the same shape (`eeqv` is defined that way) |
-| `R_c` (def) + `R_c_iota`: `leqv L_k v_k > sty G rec RT (rec ps ms mins is) (pi TY C) > inst 0 C (c vs qs fs) T > sty G (c vs) CT (c vs qs fs) T2 > aeq G T2 TY > deq G LHS (R_c ps ms mins fs) T` | The iota rule of the exported recursor rule: `rec ps ms mins is (c qs fs) ≡ val ps ms mins fs`, with typing premises (`aeq`, above): the recursor's arguments before the major premise typed along its exported type `RT`, the constructor's levels `vs` equivalent to the levels `L` of the major premise's type (read off the recursor's type), its arguments typed along its type `CT` at `L` (annotations consumed, as the block's data has it), and the arguments of the type that leaves equal to those of the major premise's binder one by one. The constructor's parameters, levels and the indices are separate variables, as in nanoda's `reduce_rec`; the premises make them agree with the recursor's. |
-| `S_proj_i_df` | Typing of `proj b i e` (the spec's `proj`, with the block's atom `b`) for `e : S us ps`: the field type with parameters and earlier projections substituted (the `inst` premises do this outermost-first, which is simultaneous substitution). The premise `leqv (lmax (ls lz) L) L` (sort at least 1) is present unless every field up to `i` is a proposition, matching nanoda's `infer_proj` restriction for structures that may be propositions. |
-| `S_proj_i_dfp` | The same typing, for projecting from a structure that is a proposition: premises `leqv L_j lz` for every field `j ≤ i` that is not a proposition at all levels (`L_j` the level of field `j`'s sort). Generated only when each such `L_j` can be zero. Sound: with every field up to `i` a proposition, `e.0, …, e.i` are definable by eliminating `e` into `Prop`, which is allowed for every inductive proposition, and the field types agree by proof irrelevance. nanoda's `infer_proj` (like Lean's kernel) requires only the fields that the projected one depends on to be propositions; requiring all of them up to `i` is stronger, so this is no more permissive. |
-| `S_proj_i_mk`, `S_proj_i_mkp` | `(S.mk ps fs).i ≡ fs[i]` (nanoda's `reduce_proj`) when the constructor application's arguments have their binders' types in the constructor's type (`sty`) and the projection is typed, with `S_proj_i_df`'s sort premise, or `S_proj_i_dfp`'s premises in the `p` variant (`proj_mk`'s `proj_ok`). |
-| `S_eta` | Structure eta for non-recursive structures (one constructor, no indices): `e ≡ S.mk ps (e.0) … (e.n)` at `S us ps`. Unit eta and nanoda's iota-on-structure expansion are derived from it. |
+| `c_eeqv`: `leqv u u2 > ... > eeqv (c us) (c us2)` (only for a theorem constant that an inductive declaration mentions at its levels; above) | the same constant at equivalent levels has the same shape (`eeqv` is defined that way) |
 | `Quot_lift_mk`, `Quot_ind_mk` (only for a quotient primitive whose type is not the spec's) | `Quot.lift f h (Quot.mk r a) ≡ f a` and `Quot.ind f (Quot.mk r a) ≡ f a` when every argument has its binder's type in the primitive's exported type (`sty`; Lean4Lean's quotient `extra` rules; the spec's `quot_lift_mk`/`quot_ind_mk` above), and for `Quot.lift` when `a` has the type `α` of `f`'s domain. |
 
 K-like reduction (`Eq.rec` on a non-constructor) has no axiom: the major premise is replaced by
@@ -739,7 +730,7 @@ itself, accepting only the forms lean0 writes. For every declaration of the expo
 * every `term` the certificate declares is a constant of sort `atom` (an opaque constant's)
   or `blk` (a block's), the sorts §11's encoding leaves open.
 
-Not checked by it: the other generated axioms, of stage-A blocks and the division-like
+Not checked by it: the other generated axioms, of the
 literal operations (§4 and §5) and the `_df` typing axioms of opaque constants, which are
 argued and generated, not compared with anything in the export; and whether a
 theorem's proof term (an abstract def) is the export's (it is never stated, so it cannot
@@ -840,7 +831,7 @@ inputs; nothing in it mentions `≈` or `⊢`. Part II declares `≈` and `⊢` 
 defined over them in the same way (the well-formedness of a block, its elimination level, the
 defining equations of the literal operations). Part III states the rules: the 74 axioms
 concluding `≈` or `⊢` (and `inh_i`), which are the semantic content and the only axioms whose
-truth is at issue in §§2–6; the other 316 are definitions, which `lean0 modes` checks to be the
+truth is at issue in §§2–6; the other 314 are definitions, which `lean0 modes` checks to be the
 functions and predicates they are read as (§4, *Functionality*). In a reduction to set theory
 the sorts become inductive sets, the clauses of Parts I and II the defining equations of
 functions given by the recursion theorem, and Part III the theorems to prove of the model.
@@ -853,7 +844,7 @@ The departures from the verbatim presentation:
   `def c (u v: lvl): expr = $ v $;` with a proved typing theorem `⟨ G ⊢ c u v : T ⟩`, schematic in
   `G`; so δ-unfolding is MM0 unfolding, and universe instantiation (`instL`) is MM0
   substitution of the `lvl` variables. A theorem's body is abstract (only in the MMB), so the
-  `.mm0` never shows a proof term. Axioms, opaques, inductive types, constructors, recursors and
+  `.mm0` never shows a proof term. Axioms, opaques and
   `Quot.*` left to the generated axioms become an atom and a definition,
   `term c_atom: atom; def c (u v: lvl): expr = $ cst c_atom (lcons u (lcons v lnil)) $;`
   (the spec's `cst`: an atom at a list of levels, closed and level-congruent by the spec's
@@ -880,13 +871,13 @@ The departures from the verbatim presentation:
   `ind_wf G (X_D us)`, and from the schema the typing lemma `X_df` of each constant (at any
   equivalent levels, by `eeqv_df`), each recursor rule's iota lemma `X_rec_c_iota` (with the
   exported rule value as a public `def`, checked to be the schema's `rec_rhs`), and for a
-  structure the projection and eta lemmas; all with the statements stage A had as axioms.
+  structure the projection and eta lemmas.
   A nested block is `ind_mkn b P T N`, the mutual block the kernel checks in its place, with
   the occurrences `N` restored in what it states (§4).
 * **Projections and structure eta** (§4): the spec's `proj b i e` for every structure, with
   the block's atom `b` (so that two structures' rules never apply to the same term) and the
   structural `closed`/`lift`/`inst` rules in the spec; typing, reduction and eta are lemmas
-  of the schema (stage B) or generated axioms (stage A).
+  of the schema.
 * **`let`** is inlined during translation (derivations memoized on the DAG), and `mdata` is
   erased. Binder names and styles are not represented.
 
@@ -985,12 +976,12 @@ axioms is a theorem with the spec's statement, followed by `lprog2_R_pr` and inv
 `lrel2_R_cases`. No axioms.
 
 **Part II's relations over the judgment** (`spec/tg/lean-tg3.mm0`, 2026-11-11, generated and
-checked likewise). The other 36 relations of Part II (`sty`, `cwf`, `ind_wf`, `nst_ok`,
+checked likewise). The other 35 relations of Part II (`sty`, `cwf`, `ind_wf`, `nst_ok`,
 `large`, `proj_ok`, the literal relations `*_eqs` and `*_dec`, ...) have premises of the
 judgment `deq`, which is a term until the model defines it. They are a third program of the
 same form over a parameter `J`, a class of judgment atoms standing for `deq`: their side
 conditions are atoms of Part I in `lrel`, atoms of the second stratum in `lrel2`, `lveq`, and
-judgments in `J`. Each relation is a definition `R_j J`, each of the 49 clause axioms a
+judgments in `J`. Each relation is a definition `R_j J`, each of the 47 clause axioms a
 theorem `A_j` for every `J` (the spec's statement with `deq` read as `deq_j J`), followed by
 `lprog3_R_pr` and inversion `lrel3_R_cases`. The three clauses with more than 30 variables
 (`gcd_eqs_i`, `bitwise_eqs_i`, `bitop_eqs_i`) bind them as one sequence, read at the indices
@@ -1134,7 +1125,7 @@ The rest of the model is not yet the spec's `deq`, so it changes nothing that is
   of the value of `A`. `inh` is `minh` at the same hook, and each relation of Part II over
   `⊢` is lean-tg3's `R_j` at the class `jmod (mcv hfin)` of the judgment atoms that hold in
   the model. With these definitions, all 105 axioms of Parts II and III are theorems
-  with the spec's statements: the 48 clauses are instances of lean-tg3's, and the rules are
+  with the spec's statements: the 47 clauses are instances of lean-tg3's, and the rules are
   the model's theorems at `hfin`. As for `leqv`, replacing an axiomatized relation by a
   definition that satisfies its axioms is conservative for the certificate's proofs.
 - **The opaque constants** (`model-top.mm0`). The value of `cst a S` is

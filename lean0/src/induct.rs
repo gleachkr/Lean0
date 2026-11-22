@@ -1,12 +1,12 @@
-//! Stage B: inductive blocks certified by the spec's schema (audit §4).
+//! Inductive blocks certified by the spec's schema (audit §4).
 //!
 //! A block becomes a data term `def X_D (us): ind = ind_mk X_blk P T` (a nested block
 //! `ind_mkn X_blk P T N`: the kernel's mutual block with auxiliary types and the nested
 //! occurrences `N`, from nanoda's specialization; the statements restore the occurrences),
 //! and its types, constructors and recursors are the spec's `ind_ty (X_D us) i`,
 //! `ind_ctor (X_D us) i c` and `ind_rec (X_D us) i v`. Their typing lemmas (`X_df`),
-//! projection typing and reduction and structure eta keep the statements of stage A, and
-//! the iota rules (`X_rec_c_iota`) are closed equations (`iota_eq_lemma`); all are
+//! projection typing and reduction and structure eta,
+//! and the iota rules (`X_rec_c_iota`) are closed equations (`iota_eq_lemma`); all are
 //! theorems, proved from the schema's axioms by the Horn
 //! prover over the spec: `tys_ok` (the parameters and the types' types are types),
 //! `ind_wf` (the constructors are legal), `rec_ty`, `rec_rhs`, and so on. The typing facts
@@ -20,7 +20,7 @@
 //! the block's types). The recursor's derived type and each rule's derived right-hand side
 //! are compared with the export's, so the schema is checked against the kernel on every
 //! block. A block the schema cannot handle (a type or constructor whose shape needs `whnf`)
-//! is left to stage A, and counted.
+//! is an error: no axioms are generated for an inductive type.
 use crate::elab::{mm, Elab, R};
 use crate::gen::{add_term, add_thm, apps, ConstInfo, ConstKind, Gen, Nested, Sig, StructInfo, Vars};
 use crate::names::mangle;
@@ -246,21 +246,6 @@ pub(crate) fn strip_pis<'t>(el: &mut Elab<'_, '_, 't, '_>, ty: ExprPtr<'t>) -> E
     }
 }
 
-/// The levels of the type of a recursor's major premise (its head constant's): the levels
-/// the major premise's constructor has, up to `leqv` (the iota lemmas' premises).
-pub(crate) fn major_levels<'t>(el: &mut Elab<'_, '_, 't, '_>, rd: &RecursorData<'t>) -> R<nanoda_lib::util::LevelsPtr<'t>> {
-    let mut ty = rd.info.ty;
-    let n = rd.num_params as usize + rd.num_motives as usize + rd.num_minors as usize + rd.num_indices as usize;
-    for _ in 0..n {
-        let Expr::Pi { body, .. } = el.tc.ctx.read_expr(ty) else { return Err("recursor type: fewer binders than arguments".into()) };
-        ty = body;
-    }
-    let Expr::Pi { binder_type, .. } = el.tc.ctx.read_expr(ty) else { return Err("recursor type: no major premise".into()) };
-    let (h, _) = el.tc.ctx.unfold_apps(binder_type);
-    let Expr::Const { levels, .. } = el.tc.ctx.read_expr(h) else { return Err("recursor type: the major premise's type is not a constant's application".into()) };
-    Ok(levels)
-}
-
 /// A constructor's type at `levels` as the schema has it (annotations consumed; `ctor_ty`).
 pub(crate) fn ctor_type_at<'t>(el: &mut Elab<'_, '_, 't, '_>, cd: &nanoda_lib::env::ConstructorData<'t>, levels: nanoda_lib::util::LevelsPtr<'t>) -> ExprPtr<'t> {
     let ty = el.tc.ctx.subst_expr_levels(cd.info.ty, cd.info.uparams, levels);
@@ -427,21 +412,15 @@ fn emit_df<'t>(el: &mut Elab<'_, '_, 't, '_>, pv: &mut Prover, sig: &Sig, lean_n
             let p = mm(g.env.thm(th, &[gv, c, c2, t], &[p_ty, p_eq]))?;
             add_thm(&mut g.env, &df_name, df_args, hyps, concl, false, false, Some(p), &doc)
         }
-        Err(e) => {
-            g.stage_a.push((lean_name.to_string(), format!("level invariance not derived (`{}_df` is an axiom): {e}", sig.cname)));
-            add_thm(&mut g.env, &df_name, df_args, hyps, concl, true, false, None, &doc)
-        }
+        Err(e) => Err(format!("level invariance of `{lean_name}` by the schema: {e}")),
     }
 }
 
 /// The first type of a block: emit the block's data and the types' typing lemmas, if the
-/// schema handles the block. `Ok(false)`: not handled (stage A), with the reason recorded.
-pub(crate) fn block_head<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, id: &InductiveData<'t>, all: &DeclarMap<'t>, nested: Option<&Nested<'t>>) -> R<bool> {
+/// schema handles the block; an error otherwise (the caller takes the statements back).
+pub(crate) fn block_head<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, id: &InductiveData<'t>, all: &DeclarMap<'t>, nested: Option<&Nested<'t>>) -> R<()> {
     let lean_name = sig.lean_name.clone();
-    let reason = |el: &mut Elab<'_, '_, 't, '_>, why: String| -> R<bool> {
-        el.g.stage_a.push((lean_name.clone(), why));
-        Ok(false)
-    };
+    let reason = |_: &mut Elab<'_, '_, 't, '_>, why: String| -> R<()> { Err(why) };
     if id.is_nested && nested.is_none() {
         return reason(el, "nested (not specialized)".into())
     }
@@ -671,18 +650,18 @@ pub(crate) fn block_head<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, id: &Indu
         let df = emit_df(el, &mut pv, &tsig, &tname, c, c2, tys_s[i], h.ty)?;
         el.g.consts.get_mut(&tname).unwrap().ty_thm = df;
     }
-    // a nested block is checked here, where a failure still falls back to stage A (its types
-    // are all in the type checker's scope, through the temporary declarations)
+    // a nested block is checked here, where its types are all in the type checker's scope
+    // (through the temporary declarations)
     if nested.is_some() {
         ensure_wf(el, &mut pv, &block, id.info.name, all, nested)?;
     }
     el.g.stage_b += 1;
-    Ok(true)
+    Ok(())
 }
 
 /// Level congruence of the opaque constants in the block's data. `eeqv (c us) (c us2)` has
 /// no clause when `c` is a generated term that is not a public definition (an opaque, an
-/// axiom, a theorem, a stage-A constant), so a block whose data mentions one at its levels
+/// axiom, a theorem), so a block whose data mentions one at its levels
 /// gets `axiom c_eeqv (us us2): leqv u u2 > ... > eeqv (c us) (c us2)`, once per constant
 /// (audit §4; `lean0 check` checks the shape). The scan mirrors the prover: a subterm
 /// without level variables is `eeqv_refl`, a public definition is unfolded.
@@ -846,9 +825,17 @@ pub(crate) fn constructor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, cd: &nan
     Ok(true)
 }
 
-/// Projection typing and reduction and structure eta for a stage-B structure, with the
-/// statements of stage A (`gen::structure_axioms`) proved from `proj_ty`, `proj_mk` and
-/// `ind_eta`.
+/// Projections of a structure `S` (one constructor, no indices): per field `i` a typing
+/// lemma and a reduction lemma, plus structure eta when `S` is not recursive, proved from
+/// `proj_ty`, `proj_mk` and `ind_eta`.
+///
+/// The typing lemma substitutes the parameters and the earlier projections into the field
+/// type through `inst` premises, outermost first (the spec's `pinst` and `qinst`). When `S`
+/// may live in `Prop`, a field that is not a proposition (or follows one that is not) may
+/// only be projected from a structure whose sort is at least 1, so its lemma takes the
+/// premise `leqv (lmax (ls lz) L) L` (as nanoda's `infer_proj` checks). If the fields up to
+/// it are propositions at some levels only, a second lemma (`_dfp`) puts their sort levels
+/// at `lz`.
 fn structure<'t>(el: &mut Elab<'_, '_, 't, '_>, pv: &mut Prover, sig: &Sig, block: &Rc<Block>, j: usize, cd: &nanoda_lib::env::ConstructorData<'t>, fields: crate::gen::Fields) -> R<()> {
     let ind_lean = block.names[j].clone();
     let eta_ok = el.tc.env.can_be_struct(&cd.inductive_name);
