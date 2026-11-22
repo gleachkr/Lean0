@@ -1,222 +1,135 @@
 # Lean0
 
 Lean0 is an experimental tool for verifying Lean 4 proofs against an explicit 
-axiomatic presentation of Lean's type theory (about 1,100 lines, two fifths of 
-it the schema for inductive types), using [Metamath 
-Zero](https://github.com/digama0/mm0) as a minimal logical framework. It uses a 
-modified [nanoda](https://github.com/ammkrn/nanoda_lib) to record the steps 
-involved in checking types and definitional equality, and then translates these 
-to explicit proof steps within an `.mmb` binary (a Metamath Zero proof 
-certificate), which can then be verified against the axiomatic presentation of 
-Lean 4 using a small and inspectable MM0 verifier like `mm0-c`.
+axiomatic presentation of Lean's type theory, using [Metamath 
+Zero](https://github.com/digama0/mm0) as a minimal logical framework. A 
+modified [nanoda](https://github.com/ammkrn/nanoda_lib) records steps taken in 
+checking types and definitional equality; Lean0 then translates these steps to 
+a Metamath Zero (MM0) proof. A small and human-inspectable MM0 verifier like 
+`mm0-c` can then check the correctness of this proof against a fixed set of 
+axioms that aim to encode Lean's type theory. The verification shows that a 
+result that nanoda accepted can be derived, step-by-step, from Lean0's axioms.
 
-The idea originates with Mario Carneiro, as a project targeting Lean 
-3. [`examples/lean.mm1`](https://github.com/digama0/mm0/blob/master/examples/lean.mm1) 
+The Lean0 axioms have a set-theoretic model, constructed using 
+Tarski–Grothendieck set theory (with a choice operator) in MM0 itself, 
+establishing their consistency relative to that theory. The axioms were 
+initially based on [Lean4Lean](https://github.com/digama0/lean4lean)'s 
+`IsDefEq` judgment. They add a new schema for inductive types, derived from the 
+kernel, since Lean4Lean leaves inductive declarations unspecified. `propext`, 
+`Classical.choice`, and `Quot.sound` are also included, and hold in the model. 
+The model should also support soundness for arithmetic of every finite order - 
+this will need some more work.
+
+Nested inductive types (a prickly topic) are handled more or less as in the 
+kernel: the Lean0 axioms allow nested occurrences to be replaced by auxiliary 
+types in a larger mutual block, and the types and rules of the recursors to be 
+translated back. In the model, an auxiliary type denotes the same set as the 
+corresponding nested type, so this procedure is semantically correct.
+
+The basic idea comes from Mario Carneiro, who originally targeted Lean 3 in a 
+similar way. 
+[`examples/lean.mm1`](https://github.com/digama0/mm0/blob/master/examples/lean.mm1) 
 gives an MM1 axiomatization of Lean 3's type theory (levels, typing and 
 conversion, a general schema for inductive types including positivity and 
 elimination-level conditions, quotients). The idea of using nanoda for tracing 
 was [described by Chris Bailey in 
 2020](https://leanprover-community.github.io/archive/stream/236449-Program-verification/topic/Projects.html).
 
-Lean0 implements this idea for Lean 4, with axioms based on 
-[Lean4Lean](https://github.com/digama0/lean4lean)'s `IsDefEq` judgment, and a 
-schema for inductive types (positivity, universes, the elimination level, the 
-recursor's type and rules, projections and structure eta) transcribed from the 
-kernel, since Lean4Lean leaves inductive declarations unspecified.
-
-Nested inductive types are certified as the kernel does them: as the mutual 
-block with auxiliary types that the kernel checks in their place, with the 
-nested occurrences restored in what is stated. The accelerated `Nat` 
-operations are rules of the spec over the defining equations Lean4Lean checks 
-(a certificate derives `Nat.add x 0 ≡ x` and `Nat.add x (y+1) ≡ (Nat.add x y)+1` 
-once, and the arithmetic itself is proved bit by bit; for division, modulus, 
-gcd and the bitwise operations the equations are those of the fuel and 
-well-founded recursions Lean defines them by, with the conditionals and 
-decision procedures as variables). Quotients and the tie between literals and 
-`Nat` are part of the spec.
-
-## Trusted Base
-
-In order to trust that theorems certified by lean0 are correct, you need to 
-trust:
-
-- an MM0 verifier. The flake builds mm0-c with larger fixed
-  capacities (name tries, expression store, input buffer, unify stack), since 
-  large certificates overflow the defaults; every access to them is 
-  bounds-checked;
-- `spec/lean.mm0`, a transcription of Lean4Lean's typing judgment with a few 
-  pragmatic extensions (binary Nat literals, two admissible rules, 
-  side-relation shortcuts, the quotient primitives with their types and 
-  reduction rules), and the schema for inductive types: a declaration 
-  is a term of the spec, the certificate proves it legal (positivity, 
-  universes, elimination level), and the recursor's type and rules, 
-  projections and eta are derived from it. The computation rules (iota, the 
-  projection of a constructor, structure eta, `Quot.lift`) are closed 
-  equations: each is stated once, in the context of its own variables, 
-  without typing premises, and its instances follow by weakening and 
-  substitution. Its soundness argument is `notes/audit-lean-mm0.md` §4, and 
-  the whole spec is proved in a model in set theory (below); the kernel's 
-  recursors are compared with the 
-  derived ones on every block, and Lean's `Nat` and `Eq` are stated in the 
-  spec and compared with the export's. The spec is in three parts: syntax 
-  (relations that are functions or predicates on syntax), definitions over 
-  the judgment, and the 73 rules that are its semantic content; `lean0 modes` 
-  checks mechanically that the relations of the first two parts are the 
-  functions they are read as. This is where the kernel's soundness bugs have 
-  been (nested inductives: [#14576](https://github.com/leanprover/lean4/issues/14576),
-  [#14616](https://github.com/leanprover/lean4/pull/14616); the `Prop` test
-  guarding elimination and projection:
-  [#14613](https://github.com/leanprover/lean4/pull/14613),
-  [#14807](https://github.com/leanprover/lean4/pull/14807),
-  [#14843](https://github.com/leanprover/lean4/pull/14843));
-- axioms generated per declaration: one per accelerated `Nat` operation 
-  whose defining equations could not be derived (`Nat.add` on numerals is 
-  addition, and so on; none in Init), and one per theorem constant that an 
-  inductive declaration mentions at its universe levels (the constant at 
-  equivalent levels is the same expression; opaque constants and Lean axioms 
-  are atoms of the spec, `cst`, and need none). No inductive type has one: a 
-  block the schema does not certify is an error. The assumptions are 
-  inspectable in the generated `.mm0` file;
-- optionally, instead of the spec's rules: Tarski–Grothendieck set theory. 
-  `spec/tg/` defines every term of the spec in set theory and proves every 
-  axiom of the spec as a theorem (5,388 theorems in Aufbau, checked by both 
-  verifiers), over 76 axioms of logic and set theory, 48 axioms saying that 
-  the spec's syntax is freely generated, and an uninterpreted class for the 
-  opaque constants (audit §11). A certificate linked onto that library 
-  (`scripts/certify.sh --tg`) is a proof from those axioms alone, plus the 
-  generated axioms above;
-- that the `.mm0` file the verifier reads is in fact the spec followed by the 
-  certificate's statements (the verification targets). `lean0 joined` generates 
-  this file, and its output can be checked by inspection.
-
-In order to additionally trust that a certified theorem is the Lean theorem it 
-names, with the statement Lean gives it, you need to trust:
-
-- `lean4export`;
-- `nanoda`'s export parser;
-- either `lean0`'s translation of declarations into MM0 statements, or `lean0 
-  check` (the `lean0-check` crate, about 900 lines, independent of the 
-  generator), which reads `.mm0` statements and each inductive block's 
-  declaration back into Lean expressions (a nested block's with its 
-  occurrences restored) and compares them with the export (of the generated 
-  axioms above it checks only the shape of the syntactic ones, `closed` and 
-  `eeqv`, and that each opaque constant is an atom of its own).
-
 ## Prior Art
 
-Where does this fit into current approaches to higher assurance Lean 
-verification?
+### Independent kernels
 
-### Independent Kernels
+Checkers such as lean4checker, nanoda and Lean4Lean's checker implement
+Lean's kernel independently. Agreement between implementations provides
+evidence against errors specific to one of them.
 
-Independent kernels (lean4checker, nanoda, Lean4Lean's checker) guard against 
-bugs in Lean's kernel through redundancy. They implement an alternative kernel, 
-with functionality similar to the original kernel, in the expectation that it 
-will not have the same bugs as the original kernel. That requires a second 
-program of about the same size, with implementation choices potentially guided 
-by existing kernels.
+Lean0 uses nanoda to produce proof certificates, but does not trust nanoda's
+verdicts. Because an MM0 verifier checks the derivation against the rules in 
+the specification, incorrect proofs produced by nanoda won't verify. For 
+example, a conversion returned by an incorrect [cache lookup] still needs a 
+derivation; the cached result is not a proof. Similarly, each step of a numeral 
+computation must follow from the arithmetic rules, regardless of the result 
+returned by the kernel's [bignum library].
 
-A Lean0 certificate provides a different kind of assurance, by connecting 
-kernel output to a direct axiomatization of the underlying type theory.
-For example, no certificate could been generated for a buggy proof dependent on 
-issues with Lean's order-dependent conversion cache 
-([#14806](https://github.com/leanprover/lean4/pull/14806)), since there is no 
-derivation for a wrong conversion. Similarly, a certificate could not have been 
-generated for the proof of `False` through literal arithmetic 
-([#14833](https://github.com/leanprover/lean4/pull/14833)) that exploited a GMP 
-bug, since a certificate proves each numeral computation bit by bit from the 
-spec's rules rather than stating its result.
+[cache lookup]: https://github.com/leanprover/lean4/pull/14806
+[bignum library]: https://github.com/leanprover/lean4/pull/14833
+
+### Verified kernels
+
+A verified kernel comes with a proof about the checker across all inputs.
+The statement of that proof differs between projects:
+
+- [Lean4Lean] defines a typing and conversion judgment in Lean and is
+  developing a proof that its checker is sound for that judgment. Upstream
+  leaves inductive declarations unspecified. A [research fork] specifies
+  inductive blocks and proves that a successful declaration check preserves
+  well-formedness of the environment, assuming injectivity of Π and of
+  inductive type formers. The fork describes the work as unaudited and does
+  not claim a consistency result.
+- [con-leche] proves a semantic property directly, without a separate typing
+  judgment: an accepted environment using only Lean's three standard axioms
+  has a set-theoretic model. The [proof] uses ZF with a chain of Grothendieck
+  universes. The checker differs from Lean's kernel in some checks and in its
+  treatment of nested inductive types. Its Rust and x86 counterparts, con-ron
+  and [con-agua], are proved to accept only inputs that con-leche accepts.
+  The Rust proof uses Aeneas; the assembly proof uses an x86 semantics.
+
+Lean0 instead produces a proof for a *particular export*. Its MM0 specification
+adapts Lean4Lean's judgment and includes rules for inductive blocks, nested
+inductives, recursors, projections, structure eta, quotients and `Nat`
+literals. The set-theoretic model in `spec/tg/` validates each rule. A
+certificate derives typing and conversion judgments from those rules; it does
+not establish the consistency of additional axioms declared in the export.
+
+[Lean4Lean]: https://github.com/digama0/lean4lean
+[research fork]: https://github.com/typhdotcom/lean4lean
+[con-leche]: https://github.com/leanprover/con-leche
+[proof]: https://leanprover.github.io/con-leche/con-leche-proof-idea.html
+[con-agua]: https://github.com/leanprover/con-agua
 
 ### lean2dk
 
-Another project in a similar spirit to lean0 is lean2dk, which translates 
-Lean proofs to Dedukti ([Blanqui and Vaishnav, 
-2026](https://arxiv.org/abs/2609.24604);
-[lean2dk](https://github.com/Deducteam/lean2dk), following
-[Lean4Less](https://rish987.github.io/files/lean4less.pdf)). This approach also 
-moves Lean into a small checker. As of the paper, the Dedukti translation has 
-run on "specific test files and small mathematical libraries", with bignum 
-arithmetic and scale as future work.
+[lean2dk] translates Lean proofs into Dedukti, following [Lean4Less].
+Dedukti checks conversion by rewriting. This relies on the rewrite engine and
+on confluence and type preservation for the encoding's rules. [Blanqui and
+Vaishnav] give a paper proof for the representation of conversion and report
+tests on selected files and small mathematical libraries. They list bignum
+arithmetic and larger developments as future work.
 
-Dedukti is the λΠ-calculus *modulo rewriting*: conversion is done by its 
-checker's rewrite engine, so the trusted base includes that engine and the 
-confluence and type preservation of the encoding's rules. The correctness of 
-the conversion representation does have a paper proof, but has not been 
-formally verified. Lean0 carries conversion as explicit derivation steps 
-instead. This means certificates are quite large, but the verifier only needs 
-to check proof steps in a totally generic way.
+Lean0 records conversion steps in the proof object instead. This increases
+certificate size but does not require a Lean-specific conversion procedure
+in the verifier.
 
-## Status
-
-With the trust list above, conversion and typing have been certified for all 
-of Lean's `Init` and all of `Std`:
-
-- `Init` (59,423 declarations): 32 certificates, 107.1 GB, generated in 69 
-  minutes on 8 cores, each verified and deleted as it was made. That run 
-  predates the current spec (two nested types and the literal operations had 
-  generated axioms, and the computation rules had typing premises). With the 
-  current spec the generator derives every declaration of `Init` again (a run 
-  that counts proof steps without writing them: 2.4 billion, 48 minutes on 6 
-  cores): all 607 inductive blocks and all 16 literal operations by the 
-  spec's rules, with 20 generated axioms, the level congruence of theorem 
-  constants in inductive declarations;
-- `Std` (103,256 declarations with `Init`): 195 certificates, 335.7 GB, 
-  generated in 3 hours on 8 cores. This run predates the schema (it has the 
-  inductive types as generated axioms) and is not redone yet. One declaration
-  (`goCache_Inv_of_Inv._mutual`, in `Std`'s bit-blaster) has its statements but 
-  no proof: its proof alone is past the MMB format's 4 GiB of table data.
-
-Every conversion step nanoda took over those 103,256 declarations has a 
-derivation in the spec. The everyday case is smaller: chosen theorems of a Lake 
-project with their dependencies, for example `tests/lake/`'s two theorems (102 
-declarations in all), can be certified in a fraction of a second (5 MB).
-
-**Scale.** Certificates are large because conversion is explicit. Mathlib has 
-several times `Std`'s declarations with far heavier proof terms, so a linear
-guess puts it in the terabytes, optimistically. More work needs to be done on 
-efficiently handling these certificates, perhaps compressing them.
+[lean2dk]: https://github.com/Deducteam/lean2dk
+[Lean4Less]: https://rish987.github.io/files/lean4less.pdf
+[Blanqui and Vaishnav]: https://arxiv.org/abs/2609.24604
 
 ## Setup
 
-To use lean0, you need:
+- **Lean0:** Build with `nix build .#lean0`, or run the CLI with
+  `nix run .#lean0 -- ...`. To build with Cargo, run
+  `scripts/nanoda.sh apply` followed by `cargo build --release`. The script
+  prepares the patched nanoda source in `build/nanoda`; the resulting Lean0
+  binary is `target/release/lean0`.
+- **MM0 verifier:** Use `nix build .#mm0-c` or `nix build .#mm0-zig`.
+  The flake builds `mm0-c` with increased capacity for large certificates.
+  `mm0-zig` is distributed with [Aufbau](https://github.com/gleachkr/Aufbau).
+- **lean4export:** Build the exporter with the Lean version used by the
+  project whose `.olean` files it will read (see below).
 
-- **lean0**, built with `nix build .#lean0` (or `nix run .#lean0 -- ...`), or
-  `scripts/nanoda.sh apply && cargo build --release` (`target/release/lean0`). 
-  The `nanoda.sh` script builds a patched nanoda in `build/nanoda`, which the 
-  crates then build against.
-- **an MM0 verifier**: mm0-c (`nix build .#mm0-c`, the flake's build with the 
-  larger capacities large certificates need) or mm0-zig from 
-  [Aufbau](https://github.com/gleachkr/Aufbau) (`nix build .#mm0-zig`).
-- **lean4export**, built with your project's Lean (see "Theorems from a Lake 
-  project" below).
-
-**For development**, `nix develop` has Rust, elan, perf and the pinned verifiers (mm0-c,
-mm0-zig, and Aufbau's `abc` for the hand proofs). Then `scripts/test.sh` runs everything, with
-both verifiers, the mode check of the spec's relations (`lean0 modes`) and the negative
-tests (tampered certificates, a corrupted export, hand-made illegal inductive declarations,
-which the schema must reject, and a spec with an overlapping clause), and prints "all tests
-passed". It builds lean4export
-in `tests/lake`, as a Lake dependency at the pinned revision.
+For development, `nix develop` provides Rust, elan, perf, both MM0 verifiers
+and Aufbau's `abc` for the hand-written proofs. Run `scripts/test.sh` in that
+environment. It builds the pinned exporter in `tests/lake/`, verifies
+certificates with both verifiers and checks the modes of the specification's
+relations. Negative tests cover altered certificates, a corrupted export,
+illegal inductive declarations and overlapping clauses in the specification.
 
 ## Use
 
-For an export `x.ndjson` from lean4export:
+### Export theorems from a Lake project
 
-```sh
-lean0 gen x.ndjson OUT x                      # OUT/x.mm0 (statements), OUT/x.mmb (proofs)
-lean0 joined OUT/x.mm0 > OUT/x.joined.mm0     # the spec and the statements
-mm0-c OUT/x.mmb < OUT/x.joined.mm0            # the proofs prove the statements
-mm0-zig OUT/x.mmb < OUT/x.joined.mm0          # (a second verifier)
-lean0 check x.ndjson OUT/x.mm0                # the statements say what the export says,
-                                              # and the top-level theorems in Lean syntax
-```
-
-lean4export reads the project's `.olean` files, so it has to be built with the 
-project's own Lean version. So to generate an export, add lean4export to the 
-project at the revision corresponding to the lean version: lean4export has a 
-"bump toolchain" commit for each Lean release, and 
-`5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe` is the one for Lean v4.35.0, the 
-version lean0 is tested with. In `lakefile.toml`:
+Lean0 reads export format 3.1.x and is tested with Lean v4.35.0. For that
+version, add the following dependency to `lakefile.toml`:
 
 ```toml
 [[require]]
@@ -225,90 +138,137 @@ git = "https://github.com/leanprover/lean4export"
 rev = "5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe"
 ```
 
-(in a `lakefile.lean`: `require lean4export from git
-"https://github.com/leanprover/lean4export" @ "5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe"`).
-Then export the theorems you want certified, and continue with the steps above:
+For `lakefile.lean`, use:
+
+```lean
+require lean4export from git
+  "https://github.com/leanprover/lean4export" @
+  "5a9a355dc6c5fd82b69058d433e2ae2e8dfbf8fe"
+```
+
+For another Lean release, select the corresponding toolchain revision of
+lean4export. To export two theorems and their dependencies:
 
 ```sh
 lake update lean4export
 lake build
 lake exe lean4export MyProject -- MyProject.foo MyProject.bar > slice.ndjson
 ```
-The names after `--` restrict the export to those declarations and what they 
-depend on (typically tens to a few thousand declarations, certified in 
-seconds); without them the modules and everything they import are exported. To 
-leave the project unchanged instead, build lean4export separately at that 
-revision (`lake build` in a checkout) and run it from the
-project with `lake env PATH/TO/lean4export/.lake/build/bin/lean4export 
-MyProject -- ...`. lean0 reads export format 3.1.x. On a newer Lean, a 
-declaration using something lean0 does not support makes `lean0 gen` fail (or, 
-with `--keep-going`, skip it and what depends on it); it cannot make it certify 
-something false. `tests/lake/` is an example, certified by `scripts/test.sh`.
 
-### Additional usage examples
-
-**The pipeline** end to end (compile, export, generate, verify with both 
-verifiers, check the statements; lean4export, mm0-c and mm0-zig on PATH, or in 
-`LEAN4EXPORT`, `MM0_C`, `MM0_ZIG`):
+Omit `--` and the theorem names to export the entire module and its imports.
+To leave the project unchanged, build lean4export in a separate checkout
+with `lake build`, then invoke its binary from the project with `lake env`:
 
 ```sh
-scripts/certify.sh tests/lean/Induct.lean      # outputs in build/gen/induct/
+lake env /path/to/lean4export/.lake/build/bin/lean4export \
+  MyProject -- MyProject.foo MyProject.bar > slice.ndjson
 ```
 
-A `-- lean0-export: NAME...` line in the module restricts the export to those 
-declarations and what they depend on.
-
-**A large export**, such as all of `Init`, as several certificates that are 
-verified, and deleted, as they are made (so they never all have to be on disk):
+### Generate and verify a certificate
 
 ```sh
-cd build/lean && printf 'import Init\n' > InitAll.lean \
-  && lean +leanprover/lean4:v4.35.0 -o InitAll.olean InitAll.lean \
-  && LEAN_PATH=$PWD lean4export InitAll > initall.ndjson && cd ../..
-scripts/check-parts.sh --follow --delete --export build/lean/initall.ndjson OUT init &
-target/release/lean0 gen build/lean/initall.ndjson OUT init --parts 32 --jobs 8 --max-pending 8
+lean0 gen slice.ndjson OUT slice
+lean0 joined OUT/slice.mm0 > OUT/slice.joined.mm0
+mm0-c OUT/slice.mmb < OUT/slice.joined.mm0
+lean0 check slice.ndjson OUT/slice.mm0
 ```
 
-Each part `OUT/init.partK` keeps its statements (`.mm0`), and 
-`OUT/init.check.log` records the verification. `--max-pending 8` holds the next 
-part while 8 finished ones wait to be verified and deleted, so at most about 16 
-parts are on disk at once. `--balance STATS` divides the declarations by an 
-earlier run's stats file. mm0-zig reads files of at most 4 GiB, so give large 
-exports enough parts (`Init` in 32 parts has one larger; `Std` in 192 has 
-four).
+`gen` writes the statements (`.mm0`) and proofs (`.mmb`). `joined` combines
+the specification and statements into the input for the verifier. `mm0-c`
+checks the proofs against that text; `mm0-zig` can be used with the same
+arguments and input. `lean0 check` compares the statements with the export
+and prints the top-level theorems in Lean syntax.
 
-**A census** (stats only, no certificate): `lean0 gen EXPORT OUT NAME --stats-only
---keep-going --jobs 8`, with `LEAN0_PROGRESS=1` for a line per declaration and `LEAN0_COSTS=1`
-for where the proof bytes go.
+If `gen` reports a missing constant in the defining equations for a `Nat`
+operation, add the constant to the export list. For example, the derivations
+for `Nat.div` and `Nat.mod` require `instDecidableEqBool`. Unsupported
+declarations cause generation to fail. With `--keep-going`, Lean0 skips the
+unsupported declarations and those that depend on them.
+
+### Certify a standalone module
+
+```sh
+scripts/certify.sh tests/lean/Induct.lean
+```
+
+This compiles the module, exports it, generates a certificate, runs both
+verifiers and checks the statements. Output for this example is in
+`build/gen/induct/`. A comment of the form `-- lean0-export: NAME...` in the
+module restricts the export to the named declarations and their dependencies.
+The script looks for `lean4export`, `mm0-c` and `mm0-zig` on `PATH`; use
+`LEAN4EXPORT`, `MM0_C` and `MM0_ZIG` to specify other locations.
+
+### Split a large export
+
+For exports such as `Init`, Lean0 can generate certificates in parts. The
+following example uses the Cargo release binary and a fresh output directory.
+First create the export:
+
+```sh
+mkdir -p build/lean OUT
+(
+  cd build/lean || exit 1
+  export ELAN_TOOLCHAIN=leanprover/lean4:v4.35.0
+  printf 'import Init\n' > InitAll.lean
+  lean -o InitAll.olean InitAll.lean &&
+    LEAN_PATH="$PWD" lean4export InitAll > initall.ndjson
+)
+```
+
+Then start the verifier and generate the parts:
+
+```sh
+export_file=build/lean/initall.ndjson
+scripts/check-parts.sh --follow --delete --export "$export_file" OUT init &
+verifier=$!
+target/release/lean0 gen "$export_file" OUT init \
+  --parts 64 --jobs 8 --max-pending 8
+wait "$verifier"
+```
+
+`--delete` removes each `.mmb` file after checking, including rejected parts.
+The `.mm0` statements remain in `OUT/init.partK.mm0`; verification results
+are recorded in `OUT/init.check.log`. With eight workers, `--max-pending 8`
+limits the number of parts on disk to about 16. `--balance STATS` uses a
+previous run's statistics to choose part boundaries. Allow for `mm0-zig`'s
+4 GiB input limit: one part exceeded it in a 32-part `Init` run and four
+exceeded it in a 192-part `Std` run. Use more parts or adjust their balance
+when checking with that verifier.
+
+To collect statistics without writing certificates:
+
+```sh
+lean0 gen EXPORT OUT NAME --stats-only --keep-going --jobs 8
+```
+
+Set `LEAN0_PROGRESS=1` for per-declaration progress or `LEAN0_COSTS=1` for a
+breakdown of proof size.
 
 ## Layout
 
-- `spec/lean.mm0`: the trusted MM0 spec of LeanTT, which imports its four files: `lean-core.mm0`
-  (levels, expressions, contexts, the judgment and its rules), `lean-ind.mm0` (inductive types),
-  `lean-quot.mm0` (quotients) and `lean-lit.mm0` (Nat literals); `lean0 spec` prints them as one
-  text; `spec/lib.auf`: derived rules (untrusted);
-  `spec/examples/`: hand-proven certificates
-- `spec/tg/`: a Tarski–Grothendieck set-theory library in Aufbau (`tg.mm0` its
-  base) and the model of the spec in it: `lean-tg.mm0`, `lean-tg2.mm0`, `lean-tg3.mm0`, the
-  encoding of the spec's syntax, with the relations of Parts I and II defined there and their
-  clauses proved (generated by `scripts/tg-lean.py`); the `model-*.mm0` files, from level
-  values and the denotation (`model-levels.mm0`, `model-den.mm0`) through inductive types,
-  quotients and literals to `model-top.mm0` and `model-ci.mm0`, where the judgment is defined
-  and the spec's rules are theorems; and `lean-tg-rest.mm0`, what is left of the spec as
-  axioms over the model: nothing (audit §11). `scripts/tg-check.sh` verifies the chain. A certificate can be
-  verified against them instead of the spec (TG mode: `lean0 tg-link` and `lean0 joined --tg`;
-  `scripts/certify.sh --tg`)
-- `lean0/`: the elaborator and generator, and the `lean0` binary (`src/bin/lean0/`)
-- `lean0-check/`: the trusted side of `lean0`: the statement checker, the text the verifiers
-  check against, and the embedded spec and TG library
-- `patches/nanoda_lib.patch`: our changes to [nanoda](https://github.com/ammkrn/nanoda_lib),
-  the tracing hook and some visibility, applied to a pinned upstream commit by
-  `scripts/nanoda.sh apply` (into `build/nanoda`) and by the flake
-- `mm0kit/`: MM0 terms and proofs, provers for the spec's side relations and levels, the MMB
-  writer, the merge of sharded output and the link onto the TG library
-- `tests/lean/`: Lean modules certified by `scripts/test.sh`; `tests/lake/`: a Lake project
-  certified the way the README describes
-- `scripts/`: `nanoda.sh`, `certify.sh`, `check-parts.sh`, `test.sh`, `fetch-refs.sh` (the
-  verifiers and lean4export come from PATH, or from `MM0_C`, `MM0_ZIG`, `ABC`, `LEAN4EXPORT`)
-- `notes/audit-lean-mm0.md`: the soundness argument for the spec and every generated axiom,
-  and how the encoding departs from Lean4Lean's presentation
+- `spec/lean.mm0` imports the specification: `lean-core.mm0` (levels,
+  expressions, contexts and judgments), `lean-ind.mm0` (inductives),
+  `lean-quot.mm0` (quotients) and `lean-lit.mm0` (`Nat` literals).
+  `lean0 spec` prints the combined text. `spec/lib.auf` contains derived
+  rules; `spec/examples/` contains hand-written certificates.
+- `spec/tg/` contains the Tarski–Grothendieck library and the model.
+  `tg.mm0` gives the set-theoretic basis. `lean-tg.mm0`, `lean-tg2.mm0` and
+  `lean-tg3.mm0` encode the syntax and relations; `scripts/tg-lean.py`
+  generates these files. The `model-*.mm0` files interpret the judgment and
+  prove the specification's rules. `lean-tg-rest.mm0` adds no further Lean0
+  axioms. Run `scripts/tg-check.sh spec/tg/lean-tg-rest.mm0` to check the
+  library. `scripts/certify.sh --tg` uses `lean0 tg-link` and
+  `lean0 joined --tg` to verify a certificate against the model.
+- `lean0/` contains the elaborator, generator and CLI. `lean0-check/`
+  contains the statement checker, the embedded specification and model
+  library, and the code that prepares the verifier's input text.
+- `patches/nanoda_lib.patch` adds tracing hooks and exposes the required
+  nanoda interfaces. The flake and `scripts/nanoda.sh` apply it to the same
+  pinned revision.
+- `mm0kit/` implements MM0 terms and proofs, provers for levels and auxiliary
+  relations, the MMB writer, merging of parts and linking to the model.
+- `tests/lean/` contains standalone test modules; `tests/lake/` is an
+  example Lake project. `scripts/` contains the build, certification and test
+  scripts.
+- [`notes/audit-lean-mm0.md`](notes/audit-lean-mm0.md) documents the
+  soundness argument, and differences from Lean4Lean.
