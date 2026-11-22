@@ -1044,7 +1044,7 @@ fn spine_args(g: &Gen, mut e: E) -> Vec<E> {
 /// comes from Part I's `iota_eq`, `crst` and `rst` alone, so a replayed declaration states
 /// it without the proof.
 #[allow(clippy::too_many_arguments)]
-fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &str, rt: E, c: E, def_us: E, fixed: usize, nf: usize, elim: Option<ThId>, doc: &str) -> R<ThId> {
+fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &str, rt: E, c: E, def_us: E, fixed: usize, nf: usize, wf: (ThId, &[E]), elim: Option<ThId>, doc: &str) -> R<ThId> {
     let (d, i, v) = match g.env.head(rt) {
         Some((_, &[d, i, v])) => (d, i, v),
         _ => return Err("not a recursor term".into()),
@@ -1108,10 +1108,13 @@ fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &s
             let cq = g.env.concl(q);
             pv.horn.facts.insert(cq, q);
         }
-        // the block is read off `ind_wf`, the rule's first premise
-        let wf = g.env.app_n("ind_wf", &[dl, d]);
-        let p_wf = pv.prove(g, wf)?;
-        pv.horn.facts.insert(wf, p_wf);
+        // the block is read off `ind_wf`, the rule's first premise: the block's lemma at the
+        // rule's context
+        let mut wa = vec![dl];
+        wa.extend(wf.1);
+        let p_wf = mm(g.env.thm(wf.0, &wa, &[]))?;
+        let c_wf = g.env.concl(p_wf);
+        pv.horn.facts.insert(c_wf, p_wf);
         let goal_u = g.lean.deq(&mut g.env, dl, lhs, rhs_u, ty);
         let p0 = pv.apply(g, "ind_iota_eq", goal_u)?;
         let goal0 = g.lean.deq(&mut g.env, dl, lhs, rhs, ty);
@@ -1153,7 +1156,7 @@ pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &Recurs
         return Err("recursor levels".into())
     }
     let mut pv = Prover::new(el.g);
-    ensure_wf(el, &mut pv, &block, ind_name, all, nested)?;
+    let wf = ensure_wf(el, &mut pv, &block, ind_name, all, nested)?;
     if !el.g.replay {
         // `elim_ok` may need the fields' types (one constructor whose fields are propositions)
         let mut facts = std::mem::take(&mut pv.facts);
@@ -1274,7 +1277,7 @@ pub(crate) fn recursor<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, rd: &Recurs
             let c = g.lean.nat(&mut g.env, c);
             let du = g.env.app(def, &us);
             let la = g.g_args(&sig.lvl_names);
-            let th = iota_eq_lemma(g, &mut pv, la, &name, rt, c, du, counts[0] + counts[1] + counts[2], nf, elim,
+            let th = iota_eq_lemma(g, &mut pv, la, &name, rt, c, du, counts[0] + counts[1] + counts[2], nf, (wf, &us[nl - block.nlevels..]), elim,
                 &format!("Iota reduction of `{}` on `{ctor_lean}`, as a closed equation.", sig.lean_name))
                 .map_err(|e| format!("closed iota of `{}` on `{ctor_lean}`: {e}", sig.lean_name))?;
             g.iota_eq.insert((sig.lean_name.clone(), ctor_lean), th);
