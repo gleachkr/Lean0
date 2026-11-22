@@ -104,6 +104,9 @@ stmt_neg '0,/^theorem rfl_ty/s/(srt u) (pi (bvar nz)/(srt u) (pi (bvar (s nz))/'
 stmt_neg 's/^def rfl (u: lvl): expr = \$ lam (srt u) (lam (bvar nz)/def rfl (u: lvl): expr = $ lam (srt u) (lam (bvar (s nz))/'
 stmt_neg '/^theorem Eq_symm_ty/s/^theorem/axiom/'
 stmt_neg 's/Lean definition `rfl`/Lean definition `rfl2`/'
+# `Sort` is a notation token of the spec: a verifier reads it as `srt` wherever it stands, so a
+# statement may not use it as a name (audit §9).
+stmt_neg 's/\brfl_ty\b/Sort/g'
 # A nested block's occurrences restore its constructors' types: `S.node : Array S → S`
 # stated with the occurrence `List S` is caught.
 stmt_neg '/^def S_D/s/(cons (app (ind_ty (Array_D lz) nz) (bvar nz))/(cons (app (ind_ty (List_D lz) nz) (bvar nz))/' nested

@@ -23,68 +23,86 @@ term bd1: bin > bin;
 
 --| `bsucc a b`: a + 1 = b.
 term bsucc: bin > bin > wff;
-axiom bsucc_0: $ bsucc b0 (bd1 b0) $;
-axiom bsucc_d0 (a: bin): $ bsucc (bd0 a) (bd1 a) $;
-axiom bsucc_d1 (a b: bin): $ bsucc a b $ > $ bsucc (bd1 a) (bd0 b) $;
+notation bsucc (a b: bin): wff = (${s|$:0) a ($+$:0) ($1$:max) ($=$:0) b ($|}$:0);
+notation bsucc (a b: bin): wff = ($⟪ₛ$:0) a ($+$:0) ($1$:max) ($=$:0) b ($⟫$:0);
+axiom bsucc_0: $ ⟪ₛ b0 + 1 = bd1 b0 ⟫ $;
+axiom bsucc_d0 (a: bin): $ ⟪ₛ bd0 a + 1 = bd1 a ⟫ $;
+axiom bsucc_d1 (a b: bin): $ ⟪ₛ a + 1 = b ⟫ $ > $ ⟪ₛ bd1 a + 1 = bd0 b ⟫ $;
 
 --| `bdbl a b`: 2a = b (`bd0`, except that 2·0 is `b0`).
 term bdbl: bin > bin > wff;
-axiom bdbl_0: $ bdbl b0 b0 $;
-axiom bdbl_d0 (a: bin): $ bdbl (bd0 a) (bd0 (bd0 a)) $;
-axiom bdbl_d1 (a: bin): $ bdbl (bd1 a) (bd0 (bd1 a)) $;
+notation bdbl (a b: bin): wff = (${2|$:0) ($2$:max) ($*$:0) a ($=$:0) b ($|}$:0);
+notation bdbl (a b: bin): wff = ($⟪₂$:0) ($2$:max) ($*$:0) a ($=$:0) b ($⟫$:0);
+axiom bdbl_0: $ ⟪₂ 2 * b0 = b0 ⟫ $;
+axiom bdbl_d0 (a: bin): $ ⟪₂ 2 * bd0 a = bd0 (bd0 a) ⟫ $;
+axiom bdbl_d1 (a: bin): $ ⟪₂ 2 * bd1 a = bd0 (bd1 a) ⟫ $;
 
 --| `badd a b c`: a + b = c. `baddc a b c`: a + b + 1 = c (with carry).
 term badd: bin > bin > bin > wff;
 term baddc: bin > bin > bin > wff;
-axiom badd_0l (b: bin): $ badd b0 b b $;
-axiom badd_0r (a: bin): $ badd a b0 a $;
-axiom badd_00 (a b c: bin): $ badd a b c $ > $ badd (bd0 a) (bd0 b) (bd0 c) $;
-axiom badd_01 (a b c: bin): $ badd a b c $ > $ badd (bd0 a) (bd1 b) (bd1 c) $;
-axiom badd_10 (a b c: bin): $ badd a b c $ > $ badd (bd1 a) (bd0 b) (bd1 c) $;
-axiom badd_11 (a b c: bin): $ baddc a b c $ > $ badd (bd1 a) (bd1 b) (bd0 c) $;
-axiom baddc_0l (b c: bin): $ bsucc b c $ > $ baddc b0 b c $;
-axiom baddc_0r (a c: bin): $ bsucc a c $ > $ baddc a b0 c $;
-axiom baddc_00 (a b c: bin): $ badd a b c $ > $ baddc (bd0 a) (bd0 b) (bd1 c) $;
-axiom baddc_01 (a b c: bin): $ baddc a b c $ > $ baddc (bd0 a) (bd1 b) (bd0 c) $;
-axiom baddc_10 (a b c: bin): $ baddc a b c $ > $ baddc (bd1 a) (bd0 b) (bd0 c) $;
-axiom baddc_11 (a b c: bin): $ baddc a b c $ > $ baddc (bd1 a) (bd1 b) (bd1 c) $;
+notation badd (a b c: bin): wff = (${+|$:0) a ($+$:0) b ($=$:0) c ($|}$:0);
+notation badd (a b c: bin): wff = ($⟪$:0) a ($+$:0) b ($=$:0) c ($⟫$:0);
+notation baddc (a b c: bin): wff = (${+1|$:0) a ($+$:0) b ($+$:0) ($1$:max) ($=$:0) c ($|}$:0);
+notation baddc (a b c: bin): wff = ($⟪₁$:0) a ($+$:0) b ($+$:0) ($1$:max) ($=$:0) c ($⟫$:0);
+axiom badd_0l (b: bin): $ ⟪ b0 + b = b ⟫ $;
+axiom badd_0r (a: bin): $ ⟪ a + b0 = a ⟫ $;
+axiom badd_00 (a b c: bin): $ ⟪ a + b = c ⟫ $ > $ ⟪ bd0 a + bd0 b = bd0 c ⟫ $;
+axiom badd_01 (a b c: bin): $ ⟪ a + b = c ⟫ $ > $ ⟪ bd0 a + bd1 b = bd1 c ⟫ $;
+axiom badd_10 (a b c: bin): $ ⟪ a + b = c ⟫ $ > $ ⟪ bd1 a + bd0 b = bd1 c ⟫ $;
+axiom badd_11 (a b c: bin): $ ⟪₁ a + b + 1 = c ⟫ $ > $ ⟪ bd1 a + bd1 b = bd0 c ⟫ $;
+axiom baddc_0l (b c: bin): $ ⟪ₛ b + 1 = c ⟫ $ > $ ⟪₁ b0 + b + 1 = c ⟫ $;
+axiom baddc_0r (a c: bin): $ ⟪ₛ a + 1 = c ⟫ $ > $ ⟪₁ a + b0 + 1 = c ⟫ $;
+axiom baddc_00 (a b c: bin): $ ⟪ a + b = c ⟫ $ > $ ⟪₁ bd0 a + bd0 b + 1 = bd1 c ⟫ $;
+axiom baddc_01 (a b c: bin): $ ⟪₁ a + b + 1 = c ⟫ $ > $ ⟪₁ bd0 a + bd1 b + 1 = bd0 c ⟫ $;
+axiom baddc_10 (a b c: bin): $ ⟪₁ a + b + 1 = c ⟫ $ > $ ⟪₁ bd1 a + bd0 b + 1 = bd0 c ⟫ $;
+axiom baddc_11 (a b c: bin): $ ⟪₁ a + b + 1 = c ⟫ $ > $ ⟪₁ bd1 a + bd1 b + 1 = bd1 c ⟫ $;
 
 --| `bmul a b c`: a · b = c (by the bits of `b`).
 term bmul: bin > bin > bin > wff;
-axiom bmul_0 (a: bin): $ bmul a b0 b0 $;
-axiom bmul_d0 (a b c d: bin): $ bmul a b c $ > $ bdbl c d $ > $ bmul a (bd0 b) d $;
+notation bmul (a b c: bin): wff = (${*|$:0) a ($*$:0) b ($=$:0) c ($|}$:0);
+notation bmul (a b c: bin): wff = ($⟪ₘ$:0) a ($*$:0) b ($=$:0) c ($⟫$:0);
+axiom bmul_0 (a: bin): $ ⟪ₘ a * b0 = b0 ⟫ $;
+axiom bmul_d0 (a b c d: bin): $ ⟪ₘ a * b = c ⟫ $ > $ ⟪₂ 2 * c = d ⟫ $ > $ ⟪ₘ a * bd0 b = d ⟫ $;
 axiom bmul_d1 (a b c d e: bin):
-  $ bmul a b c $ > $ bdbl c d $ > $ badd d a e $ > $ bmul a (bd1 b) e $;
+  $ ⟪ₘ a * b = c ⟫ $ > $ ⟪₂ 2 * c = d ⟫ $ > $ ⟪ d + a = e ⟫ $ > $ ⟪ₘ a * bd1 b = e ⟫ $;
 
 --| `bpow a b c`: a ^ b = c (by the bits of `b`; 0 ^ 0 = 1).
 term bpow: bin > bin > bin > wff;
-axiom bpow_0 (a: bin): $ bpow a b0 (bd1 b0) $;
-axiom bpow_d0 (a b c d: bin): $ bpow a b c $ > $ bmul c c d $ > $ bpow a (bd0 b) d $;
+notation bpow (a b c: bin): wff = (${^|$:0) a ($^$:0) b ($=$:0) c ($|}$:0);
+notation bpow (a b c: bin): wff = ($⟪ₚ$:0) a ($^$:0) b ($=$:0) c ($⟫$:0);
+axiom bpow_0 (a: bin): $ ⟪ₚ a ^ b0 = bd1 b0 ⟫ $;
+axiom bpow_d0 (a b c d: bin): $ ⟪ₚ a ^ b = c ⟫ $ > $ ⟪ₘ c * c = d ⟫ $ > $ ⟪ₚ a ^ bd0 b = d ⟫ $;
 axiom bpow_d1 (a b c d e: bin):
-  $ bpow a b c $ > $ bmul c c d $ > $ bmul d a e $ > $ bpow a (bd1 b) e $;
+  $ ⟪ₚ a ^ b = c ⟫ $ > $ ⟪ₘ c * c = d ⟫ $ > $ ⟪ₘ d * a = e ⟫ $ > $ ⟪ₚ a ^ bd1 b = e ⟫ $;
 
 --| `band a b c`, `bor a b c`, `bxor a b c`: bitwise and, or and exclusive or.
 term band: bin > bin > bin > wff;
-axiom band_0l (b: bin): $ band b0 b b0 $;
-axiom band_0r (a: bin): $ band a b0 b0 $;
-axiom band_00 (a b c d: bin): $ band a b c $ > $ bdbl c d $ > $ band (bd0 a) (bd0 b) d $;
-axiom band_01 (a b c d: bin): $ band a b c $ > $ bdbl c d $ > $ band (bd0 a) (bd1 b) d $;
-axiom band_10 (a b c d: bin): $ band a b c $ > $ bdbl c d $ > $ band (bd1 a) (bd0 b) d $;
-axiom band_11 (a b c: bin): $ band a b c $ > $ band (bd1 a) (bd1 b) (bd1 c) $;
+notation band (a b c: bin): wff = (${and|$:0) a ($&&&$:0) b ($=$:0) c ($|}$:0);
+notation band (a b c: bin): wff = ($⟪ₐ$:0) a ($&&&$:0) b ($=$:0) c ($⟫$:0);
+axiom band_0l (b: bin): $ ⟪ₐ b0 &&& b = b0 ⟫ $;
+axiom band_0r (a: bin): $ ⟪ₐ a &&& b0 = b0 ⟫ $;
+axiom band_00 (a b c d: bin): $ ⟪ₐ a &&& b = c ⟫ $ > $ ⟪₂ 2 * c = d ⟫ $ > $ ⟪ₐ bd0 a &&& bd0 b = d ⟫ $;
+axiom band_01 (a b c d: bin): $ ⟪ₐ a &&& b = c ⟫ $ > $ ⟪₂ 2 * c = d ⟫ $ > $ ⟪ₐ bd0 a &&& bd1 b = d ⟫ $;
+axiom band_10 (a b c d: bin): $ ⟪ₐ a &&& b = c ⟫ $ > $ ⟪₂ 2 * c = d ⟫ $ > $ ⟪ₐ bd1 a &&& bd0 b = d ⟫ $;
+axiom band_11 (a b c: bin): $ ⟪ₐ a &&& b = c ⟫ $ > $ ⟪ₐ bd1 a &&& bd1 b = bd1 c ⟫ $;
 term bor: bin > bin > bin > wff;
-axiom bor_0l (b: bin): $ bor b0 b b $;
-axiom bor_0r (a: bin): $ bor a b0 a $;
-axiom bor_00 (a b c: bin): $ bor a b c $ > $ bor (bd0 a) (bd0 b) (bd0 c) $;
-axiom bor_01 (a b c: bin): $ bor a b c $ > $ bor (bd0 a) (bd1 b) (bd1 c) $;
-axiom bor_10 (a b c: bin): $ bor a b c $ > $ bor (bd1 a) (bd0 b) (bd1 c) $;
-axiom bor_11 (a b c: bin): $ bor a b c $ > $ bor (bd1 a) (bd1 b) (bd1 c) $;
+notation bor (a b c: bin): wff = (${or|$:0) a ($|||$:0) b ($=$:0) c ($|}$:0);
+notation bor (a b c: bin): wff = ($⟪ₒ$:0) a ($|||$:0) b ($=$:0) c ($⟫$:0);
+axiom bor_0l (b: bin): $ ⟪ₒ b0 ||| b = b ⟫ $;
+axiom bor_0r (a: bin): $ ⟪ₒ a ||| b0 = a ⟫ $;
+axiom bor_00 (a b c: bin): $ ⟪ₒ a ||| b = c ⟫ $ > $ ⟪ₒ bd0 a ||| bd0 b = bd0 c ⟫ $;
+axiom bor_01 (a b c: bin): $ ⟪ₒ a ||| b = c ⟫ $ > $ ⟪ₒ bd0 a ||| bd1 b = bd1 c ⟫ $;
+axiom bor_10 (a b c: bin): $ ⟪ₒ a ||| b = c ⟫ $ > $ ⟪ₒ bd1 a ||| bd0 b = bd1 c ⟫ $;
+axiom bor_11 (a b c: bin): $ ⟪ₒ a ||| b = c ⟫ $ > $ ⟪ₒ bd1 a ||| bd1 b = bd1 c ⟫ $;
 term bxor: bin > bin > bin > wff;
-axiom bxor_0l (b: bin): $ bxor b0 b b $;
-axiom bxor_0r (a: bin): $ bxor a b0 a $;
-axiom bxor_00 (a b c d: bin): $ bxor a b c $ > $ bdbl c d $ > $ bxor (bd0 a) (bd0 b) d $;
-axiom bxor_01 (a b c: bin): $ bxor a b c $ > $ bxor (bd0 a) (bd1 b) (bd1 c) $;
-axiom bxor_10 (a b c: bin): $ bxor a b c $ > $ bxor (bd1 a) (bd0 b) (bd1 c) $;
-axiom bxor_11 (a b c d: bin): $ bxor a b c $ > $ bdbl c d $ > $ bxor (bd1 a) (bd1 b) d $;
+notation bxor (a b c: bin): wff = (${xor|$:0) a ($^^^$:0) b ($=$:0) c ($|}$:0);
+notation bxor (a b c: bin): wff = ($⟪ₓ$:0) a ($^^^$:0) b ($=$:0) c ($⟫$:0);
+axiom bxor_0l (b: bin): $ ⟪ₓ b0 ^^^ b = b ⟫ $;
+axiom bxor_0r (a: bin): $ ⟪ₓ a ^^^ b0 = a ⟫ $;
+axiom bxor_00 (a b c d: bin): $ ⟪ₓ a ^^^ b = c ⟫ $ > $ ⟪₂ 2 * c = d ⟫ $ > $ ⟪ₓ bd0 a ^^^ bd0 b = d ⟫ $;
+axiom bxor_01 (a b c: bin): $ ⟪ₓ a ^^^ b = c ⟫ $ > $ ⟪ₓ bd0 a ^^^ bd1 b = bd1 c ⟫ $;
+axiom bxor_10 (a b c: bin): $ ⟪ₓ a ^^^ b = c ⟫ $ > $ ⟪ₓ bd1 a ^^^ bd0 b = bd1 c ⟫ $;
+axiom bxor_11 (a b c d: bin): $ ⟪ₓ a ^^^ b = c ⟫ $ > $ ⟪₂ 2 * c = d ⟫ $ > $ ⟪ₓ bd1 a ^^^ bd1 b = d ⟫ $;
 
 --| `lit n`: the Nat literal with value `n`, read as `Nat.succ^n Nat.zero`
 --| (Lean4Lean's translation of literals). `lit_zero` and `lit_succ` (Part III)
@@ -437,7 +455,7 @@ axiom bitwise_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub
   $ ⟦ ℕ :: ℕ :: (Π B. Π B. B) :: G ⊢
       fb @ #2 @ #1 @ #0 ≡ fix @ al @ motive @ hm @ (Fb @ #2) @ (pack @ #1 @ #0) : ℕ ⟧ $ >
   $ ⟦ ℕ :: ℕ :: G ⊢ hm @ (pack @ #1 @ #0) ≡ #1 : ℕ ⟧ $ >
-  $ ⟦ ℕ :: ℕ :: G ⊢ motive @ (pack @ #1 @ #0) ≡ ℕ : srt (ls lz) ⟧ $ >
+  $ ⟦ ℕ :: ℕ :: G ⊢ motive @ (pack @ #1 @ #0) ≡ ℕ : Sort (ls lz) ⟧ $ >
   $ ⟦ (T @ #1 @ #0) :: B :: Prop :: G ⊢ dec @ #2 @ (R @ #2 @ #1 @ #0) ≡ #1 : B ⟧ $ >
   $ ⟦ (Π al. Π (ltN @ (hm @ #0) @ (hm @ (pack @ #2 @ #1))). motive @ #1) :: ℕ :: ℕ :: (Π B. Π B. B) :: G ⊢
       Fb @ #3 @ (pack @ #2 @ #1) @ #0
@@ -482,57 +500,57 @@ axiom bitop_eqs_i (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p
 --| The literal `0` is `Nat.zero`, and `n+1` is `Nat.succ n`.
 axiom lit_zero (G: ctx): $ ⟦ G ⊢ lit b0 ≡ ind_ctor nat_D 0 0 : ind_ty nat_D 0 ⟧ $;
 axiom lit_succ (G: ctx) (a b: bin):
-  $ bsucc a b $ > $ ⟦ G ⊢ lit b ≡ ind_ctor nat_D 0 1 @ lit a : ind_ty nat_D 0 ⟧ $;
+  $ ⟪ₛ a + 1 = b ⟫ $ > $ ⟦ G ⊢ lit b ≡ ind_ctor nat_D 0 1 @ lit a : ind_ty nat_D 0 ⟧ $;
 
 --| `f a b ≡ a + b` on literals, with `f` Lean's `Nat.add` (`add_eqs`, Part II).
 axiom nat_add_lit (G: ctx) (f: expr) (a b c: bin):
-  $ add_eqs G f $ > $ badd a b c $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
+  $ add_eqs G f $ > $ ⟪ a + b = c ⟫ $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
 --| `f a b ≡ a - b` on literals: `c + b = a`, or `a + c = b` and the difference is 0.
 axiom nat_sub_lit (G: ctx) (f p: expr) (a b c: bin):
-  $ sub_eqs G f p $ > $ badd c b a $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
+  $ sub_eqs G f p $ > $ ⟪ c + b = a ⟫ $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
 axiom nat_sub_lit0 (G: ctx) (f p: expr) (a b c: bin):
-  $ sub_eqs G f p $ > $ badd a c b $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit b0 : ℕ ⟧ $;
+  $ sub_eqs G f p $ > $ ⟪ a + c = b ⟫ $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit b0 : ℕ ⟧ $;
 --| `f a b ≡ a · b` on literals.
 axiom nat_mul_lit (G: ctx) (f fa: expr) (a b c: bin):
-  $ mul_eqs G f fa $ > $ bmul a b c $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
+  $ mul_eqs G f fa $ > $ ⟪ₘ a * b = c ⟫ $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
 --| `f a b ≡ a ^ b` on literals.
 axiom nat_pow_lit (G: ctx) (f fm fa: expr) (a b c: bin):
-  $ pow_eqs G f fm fa $ > $ bpow a b c $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
+  $ pow_eqs G f fm fa $ > $ ⟪ₚ a ^ b = c ⟫ $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
 --| `f a a ≡ t`, and `f a b ≡ u` when `a + c + 1 = b` or `b + c + 1 = a`.
 axiom nat_beq_lit (G: ctx) (f B t u: expr) (a: bin):
   $ beq_eqs G f B t u $ > $ ⟦ G ⊢ f @ lit a @ lit a ≡ t : B ⟧ $;
 axiom nat_beq_lit_lt (G: ctx) (f B t u: expr) (a b c: bin):
-  $ beq_eqs G f B t u $ > $ baddc a c b $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ u : B ⟧ $;
+  $ beq_eqs G f B t u $ > $ ⟪₁ a + c + 1 = b ⟫ $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ u : B ⟧ $;
 axiom nat_beq_lit_gt (G: ctx) (f B t u: expr) (a b c: bin):
-  $ beq_eqs G f B t u $ > $ baddc b c a $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ u : B ⟧ $;
+  $ beq_eqs G f B t u $ > $ ⟪₁ b + c + 1 = a ⟫ $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ u : B ⟧ $;
 --| `f a b ≡ t` when `a + c = b`, and `≡ u` when `b + c + 1 = a`.
 axiom nat_ble_lit (G: ctx) (f B t u: expr) (a b c: bin):
-  $ ble_eqs G f B t u $ > $ badd a c b $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ t : B ⟧ $;
+  $ ble_eqs G f B t u $ > $ ⟪ a + c = b ⟫ $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ t : B ⟧ $;
 axiom nat_ble_lit_gt (G: ctx) (f B t u: expr) (a b c: bin):
-  $ ble_eqs G f B t u $ > $ baddc b c a $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ u : B ⟧ $;
+  $ ble_eqs G f B t u $ > $ ⟪₁ b + c + 1 = a ⟫ $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ u : B ⟧ $;
 --| `f a b ≡ a · 2^b` on literals.
 axiom nat_shl_lit (G: ctx) (f fm fa: expr) (a b p c: bin):
-  $ shl_eqs G f fm fa $ > $ bpow (bd0 (bd1 b0)) b p $ > $ bmul a p c $ >
+  $ shl_eqs G f fm fa $ > $ ⟪ₚ bd0 (bd1 b0) ^ b = p ⟫ $ > $ ⟪ₘ a * p = c ⟫ $ >
   $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
 --| `f a b` on literals, a shift at a time: `f a 0 ≡ a`, and `f a (b+1) ≡ c2` from
 --| `f a b ≡ c` and `fd c 2 ≡ c2` (the division by 2, as the certificate derives it).
 axiom nat_shr_lit_z (G: ctx) (f fd: expr) (a: bin):
   $ shr_eqs G f fd $ > $ ⟦ G ⊢ f @ lit a @ lit b0 ≡ lit a : ℕ ⟧ $;
 axiom nat_shr_lit_s (G: ctx) (f fd: expr) (a b b2 c c2: bin):
-  $ shr_eqs G f fd $ > $ bsucc b b2 $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $ >
+  $ shr_eqs G f fd $ > $ ⟪ₛ b + 1 = b2 ⟫ $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $ >
   $ ⟦ G ⊢ fd @ lit c @ lit (bd0 (bd1 b0)) ≡ lit c2 : ℕ ⟧ $ >
   $ ⟦ G ⊢ f @ lit a @ lit b2 ≡ lit c2 : ℕ ⟧ $;
 --| `f a b ≡ q` on literals when `q·b + r = a` and `r < b`, and `f a 0 ≡ 0`.
 axiom nat_div_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr) (a b q m r x: bin):
   $ div_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ >
-  $ bmul q b m $ > $ badd m r a $ > $ baddc r x b $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit q : ℕ ⟧ $;
+  $ ⟪ₘ q * b = m ⟫ $ > $ ⟪ m + r = a ⟫ $ > $ ⟪₁ r + x + 1 = b ⟫ $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit q : ℕ ⟧ $;
 axiom nat_div_lit0 (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr) (a: bin):
   $ div_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ >
   $ ⟦ G ⊢ f @ lit a @ lit0 ≡ lit0 : ℕ ⟧ $;
 --| `f a b ≡ r` on literals when `q·b + r = a` and `r < b`, and `f a 0 ≡ a`.
 axiom nat_mod_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr) (a b q m r x: bin):
   $ mod_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ >
-  $ bmul q b m $ > $ badd m r a $ > $ baddc r x b $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit r : ℕ ⟧ $;
+  $ ⟪ₘ q * b = m ⟫ $ > $ ⟪ m + r = a ⟫ $ > $ ⟪₁ r + x + 1 = b ⟫ $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit r : ℕ ⟧ $;
 axiom nat_mod_lit0 (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr) (a: bin):
   $ mod_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ >
   $ ⟦ G ⊢ f @ lit a @ lit0 ≡ lit a : ℕ ⟧ $;
@@ -540,19 +558,19 @@ axiom nat_mod_lit0 (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub 
 --| (or `y·b = x·a + g`).
 axiom nat_gcd_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr) (a b g p2 q x y m n: bin):
   $ gcd_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ >
-  $ bmul g p2 a $ > $ bmul g q b $ > $ bmul x a m $ > $ bmul y b n $ > $ badd n g m $ >
+  $ ⟪ₘ g * p2 = a ⟫ $ > $ ⟪ₘ g * q = b ⟫ $ > $ ⟪ₘ x * a = m ⟫ $ > $ ⟪ₘ y * b = n ⟫ $ > $ ⟪ n + g = m ⟫ $ >
   $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit g : ℕ ⟧ $;
 axiom nat_gcd_lit2 (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr) (a b g p2 q x y m n: bin):
   $ gcd_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ >
-  $ bmul g p2 a $ > $ bmul g q b $ > $ bmul x a m $ > $ bmul y b n $ > $ badd m g n $ >
+  $ ⟪ₘ g * p2 = a ⟫ $ > $ ⟪ₘ g * q = b ⟫ $ > $ ⟪ₘ x * a = m ⟫ $ > $ ⟪ₘ y * b = n ⟫ $ > $ ⟪ m + g = n ⟫ $ >
   $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit g : ℕ ⟧ $;
 --| `f a b` on literals for the truth tables of and, or and xor.
 axiom nat_land_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf: expr) (a b c: bin):
   $ bitop_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf t u u u $ >
-  $ band a b c $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
+  $ ⟪ₐ a &&& b = c ⟫ $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
 axiom nat_lor_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf: expr) (a b c: bin):
   $ bitop_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf t t t u $ >
-  $ bor a b c $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
+  $ ⟪ₒ a ||| b = c ⟫ $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
 axiom nat_xor_lit (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf: expr) (a b c: bin):
   $ bitop_eqs G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf u t t u $ >
-  $ bxor a b c $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;
+  $ ⟪ₓ a ^^^ b = c ⟫ $ > $ ⟦ G ⊢ f @ lit a @ lit b ≡ lit c : ℕ ⟧ $;

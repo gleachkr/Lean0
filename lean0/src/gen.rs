@@ -188,6 +188,10 @@ impl Gen {
         }
         let mut var_names = Names::default();
         var_names.reserve("G");
+        // `Sort` is a notation token of the spec (for `srt`): no generated name may be it
+        var_names.reserve("Sort");
+        terms.reserve("Sort");
+        thms.reserve("Sort");
         terms.reserve("G");
         let spec_len = env.order.len();
         let spec_thms = env.thms.len();

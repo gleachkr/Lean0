@@ -65,10 +65,18 @@ delimiter $ ( ) . # $;
 --| Notations: `⟦ Γ ⊢ e ≡ e2 : A ⟧` for the judgment and `⟨ Γ ⊢ e : A ⟩` for typing,
 --| `λ A. e`, `Π A. B`, `f @ a`, `#i` for a bound variable, `A :: Γ` and `[]`
 --| for contexts, `a ⊔ b` for `max`, `≤`, `<` and `≈` (level equivalence), the
---| numerals `0` to `9` (`nz` and the definitions `n1` to `n9`), `Prop` for
---| `srt lz`, and `ℕ` for `nat_ty`. The Unicode ones have an ASCII form too
---| (`[[ G |- e == e2 : A ]]`, `<< G |- e : A >>`, `\ A. e`, `\Pi A. B`, `\/`,
---| `<=`, `~=`), declared first; the Unicode one is declared last, the form
+--| numerals `0` to `9` (`nz` and the definitions `n1` to `n9`), `Sort u` for
+--| `srt u`, `Prop` for `Sort lz`, and `ℕ` for `nat_ty`. The arithmetic relations
+--| are written as equations in brackets, one opening bracket per relation:
+--| `⦃ i + n = j ⦄` for `add i n j` on the unary numerals, and on the binary ones
+--| `⟪ a + b = c ⟫` (`badd`), `⟪₁ a + b + 1 = c ⟫` (`baddc`), `⟪ₛ a + 1 = b ⟫`
+--| (`bsucc`), `⟪₂ 2 * a = b ⟫` (`bdbl`), `⟪ₘ a * b = c ⟫` (`bmul`),
+--| `⟪ₚ a ^ b = c ⟫` (`bpow`), and `⟪ₐ a &&& b = c ⟫`, `⟪ₒ a ||| b = c ⟫`,
+--| `⟪ₓ a ^^^ b = c ⟫` (`band`, `bor`, `bxor`). The Unicode ones have an ASCII form
+--| too (`[[ G |- e == e2 : A ]]`, `<< G |- e : A >>`, `\ A. e`, `\Pi A. B`, `\/`,
+--| `<=`, `~=`, `{| i + n = j |}`, and `{+| .. |}`, `{+1| .. |}`, `{s| .. |}`,
+--| `{2| .. |}`, `{*| .. |}`, `{^| .. |}`, `{and| .. |}`, `{or| .. |}`,
+--| `{xor| .. |}`), declared first; the Unicode one is declared last, the form
 --| Aufbau prints. A term with a notation can still be written as an application
 --| (`deq G e e2 A`), as the generated statements are.
 --|
@@ -115,8 +123,10 @@ infixl lt: $<$ prec 50;
 
 --| `add i n j`: i + n = j.
 term add: nat > nat > nat > wff;
-axiom add_z (i: nat): $ add i 0 i $;
-axiom add_s (i n j: nat): $ add i n j $ > $ add i (s n) (s j) $;
+notation add (i n j: nat): wff = (${|$:0) i ($+$:0) n ($=$:0) j ($|}$:0);
+notation add (i n j: nat): wff = ($⦃$:0) i ($+$:0) n ($=$:0) j ($⦄$:0);
+axiom add_z (i: nat): $ ⦃ i + 0 = i ⦄ $;
+axiom add_s (i n j: nat): $ ⦃ i + n = j ⦄ $ > $ ⦃ i + s n = s j ⦄ $;
 
 -- Universe levels (VLevel.lean:8-13) ---------------------------------------
 
@@ -174,8 +184,9 @@ strict free sort expr;
 term bvar: nat > expr;
 prefix bvar: $#$ prec max;
 term srt: lvl > expr;
+prefix srt: $Sort$ prec max;
 --| The sort of propositions.
-def Prop: expr = $ srt lz $;
+def Prop: expr = $ Sort lz $;
 term app: expr > expr > expr;
 infixl app: $@$ prec 1000;
 term lam: expr > expr > expr;
@@ -198,7 +209,7 @@ term cst: atom > lvls > expr;
 --| (`ClosedN e k`, VExpr.lean:99-104).
 term closed: nat > expr > wff;
 axiom closed_bvar (i k: nat): $ i < k $ > $ closed k #i $;
-axiom closed_srt (k: nat) (l: lvl): $ closed k (srt l) $;
+axiom closed_srt (k: nat) (l: lvl): $ closed k (Sort l) $;
 axiom closed_app (k: nat) (f a: expr):
   $ closed k f $ > $ closed k a $ > $ closed k (f @ a) $;
 axiom closed_lam (k: nat) (A b: expr):
@@ -211,8 +222,8 @@ axiom closed_cst (k: nat) (a: atom) (S: lvls): $ closed k (cst a S) $;
 term lift: nat > nat > expr > expr > wff;
 axiom lift_bvar_lt (n k i: nat): $ i < k $ > $ lift n k #i #i $;
 axiom lift_bvar_ge (n k i j: nat):
-  $ k ≤ i $ > $ add i n j $ > $ lift n k #i #j $;
-axiom lift_srt (n k: nat) (l: lvl): $ lift n k (srt l) (srt l) $;
+  $ k ≤ i $ > $ ⦃ i + n = j ⦄ $ > $ lift n k #i #j $;
+axiom lift_srt (n k: nat) (l: lvl): $ lift n k (Sort l) (Sort l) $;
 axiom lift_app (n k: nat) (f a f2 a2: expr):
   $ lift n k f f2 $ > $ lift n k a a2 $ > $ lift n k (f @ a) (f2 @ a2) $;
 axiom lift_lam (n k: nat) (A b A2 b2: expr):
@@ -229,7 +240,7 @@ axiom inst_bvar_lt (k i: nat) (a: expr): $ i < k $ > $ inst k #i a #i $;
 axiom inst_bvar_eq (k: nat) (a a2: expr): $ lift k 0 a a2 $ > $ inst k #k a a2 $;
 axiom inst_bvar_gt (k i: nat) (a: expr):
   $ k ≤ i $ > $ inst k #(s i) a #i $;
-axiom inst_srt (k: nat) (l: lvl) (a: expr): $ inst k (srt l) a (srt l) $;
+axiom inst_srt (k: nat) (l: lvl) (a: expr): $ inst k (Sort l) a (Sort l) $;
 axiom inst_app (k: nat) (f x a f2 x2: expr):
   $ inst k f a f2 $ > $ inst k x a x2 $ > $ inst k (f @ x) a (f2 @ x2) $;
 axiom inst_lam (k: nat) (A b a A2 b2: expr):
@@ -343,7 +354,7 @@ term eeqv: expr > expr > wff;
 axiom eeqv_refl (e: expr): $ eeqv e e $;
 term ceqv: ctx > ctx > wff;
 axiom eeqv_bvar (i: nat): $ eeqv #i #i $;
-axiom eeqv_srt (l l2: lvl): $ l ≈ l2 $ > $ eeqv (srt l) (srt l2) $;
+axiom eeqv_srt (l l2: lvl): $ l ≈ l2 $ > $ eeqv (Sort l) (Sort l2) $;
 axiom eeqv_app (f a f2 a2: expr): $ eeqv f f2 $ > $ eeqv a a2 $ > $ eeqv (f @ a) (f2 @ a2) $;
 axiom eeqv_lam (A b A2 b2: expr): $ eeqv A A2 $ > $ eeqv b b2 $ > $ eeqv (λ A. b) (λ A2. b2) $;
 axiom eeqv_pi (A b A2 b2: expr): $ eeqv A A2 $ > $ eeqv b b2 $ > $ eeqv (Π A. b) (Π A2. b2) $;
@@ -419,18 +430,18 @@ axiom symm (G: ctx) (e e2 A: expr):
 axiom trans (G: ctx) (e1 e2 e3 A: expr):
   $ ⟦ G ⊢ e1 ≡ e2 : A ⟧ $ > $ ⟦ G ⊢ e2 ≡ e3 : A ⟧ $ > $ ⟦ G ⊢ e1 ≡ e3 : A ⟧ $;
 axiom sortDF (G: ctx) (l l2: lvl):
-  $ l ≈ l2 $ > $ ⟦ G ⊢ srt l ≡ srt l2 : srt (ls l) ⟧ $;
+  $ l ≈ l2 $ > $ ⟦ G ⊢ Sort l ≡ Sort l2 : Sort (ls l) ⟧ $;
 axiom appDF (G: ctx) (f f2 A B a a2 R: expr):
   $ ⟦ G ⊢ f ≡ f2 : Π A. B ⟧ $ > $ ⟦ G ⊢ a ≡ a2 : A ⟧ $ > $ inst 0 B a R $ >
   $ ⟦ G ⊢ f @ a ≡ f2 @ a2 : R ⟧ $;
 axiom lamDF (G: ctx) (u: lvl) (A A2 b b2 B: expr):
-  $ ⟦ G ⊢ A ≡ A2 : srt u ⟧ $ > $ ⟦ A :: G ⊢ b ≡ b2 : B ⟧ $ >
+  $ ⟦ G ⊢ A ≡ A2 : Sort u ⟧ $ > $ ⟦ A :: G ⊢ b ≡ b2 : B ⟧ $ >
   $ ⟦ G ⊢ λ A. b ≡ λ A2. b2 : Π A. B ⟧ $;
 axiom forallEDF (G: ctx) (u v: lvl) (A A2 B B2: expr):
-  $ ⟦ G ⊢ A ≡ A2 : srt u ⟧ $ > $ ⟦ A :: G ⊢ B ≡ B2 : srt v ⟧ $ >
-  $ ⟦ G ⊢ Π A. B ≡ Π A2. B2 : srt (limax u v) ⟧ $;
+  $ ⟦ G ⊢ A ≡ A2 : Sort u ⟧ $ > $ ⟦ A :: G ⊢ B ≡ B2 : Sort v ⟧ $ >
+  $ ⟦ G ⊢ Π A. B ≡ Π A2. B2 : Sort (limax u v) ⟧ $;
 axiom defeqDF (G: ctx) (u: lvl) (A B e e2: expr):
-  $ ⟦ G ⊢ A ≡ B : srt u ⟧ $ > $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ ⟦ G ⊢ e ≡ e2 : B ⟧ $;
+  $ ⟦ G ⊢ A ≡ B : Sort u ⟧ $ > $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ ⟦ G ⊢ e ≡ e2 : B ⟧ $;
 axiom beta (G: ctx) (A e B a r R: expr):
   $ ⟨ A :: G ⊢ e : B ⟩ $ > $ ⟨ G ⊢ a : A ⟩ $ > $ inst 0 e a r $ > $ inst 0 B a R $ >
   $ ⟦ G ⊢ (λ A. e) @ a ≡ r : R ⟧ $;

@@ -295,12 +295,37 @@ pub struct Report {
     pub problems: Vec<String>,
 }
 
+/// The spec's notation tokens that look like identifiers (`Sort`): the `$tok$` of its `prefix`,
+/// `infixl`, `infixr` and `notation` declarations.
+fn notation_idents(spec: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    for line in spec.lines().filter(|l| ["prefix ", "infixl ", "infixr ", "notation "].iter().any(|k| l.contains(k)) && !l.starts_with("--")) {
+        for (i, part) in line.split('$').enumerate() {
+            let mut cs = part.chars();
+            let ident = cs.next().is_some_and(|c| c.is_ascii_alphabetic() || c == '_') && cs.all(|c| c.is_ascii_alphanumeric() || c == '_');
+            if i % 2 == 1 && ident && !out.iter().any(|t| t == part) {
+                out.push(part.to_string());
+            }
+        }
+    }
+    out
+}
+
 /// Check the statements against the export.
 pub fn check(export: &ExportFile<'_>, stmts: &[Stmt]) -> Report {
     let mut names = Names { lean: HashMap::new(), proj: HashMap::new(), blocks: Vec::new(), by_def: HashMap::new(), rec_large: HashMap::new() };
     // Lean name → what stands for it
     let mut by_lean: HashMap<String, Standing> = HashMap::new();
     let mut problems = Vec::new();
+    // a verifier reads a notation token of the spec as the notation, wherever it stands; this
+    // checker reads prefix form and would take it for the name (audit §9)
+    for tok in notation_idents(crate::spec()) {
+        for s in stmts.iter().filter(|s| !s.spec) {
+            if s.name == tok || s.binders.iter().any(|b| b.0 == tok) {
+                problems.push(format!("`{}`: uses the spec's notation token `{tok}` as a name", s.name));
+            }
+        }
+    }
     // the export's declarations by Lean name, its inductive blocks and recursors
     let (by_name, ind_types, ind_ctors, rec_large) = export.with_ctx(|ctx| {
         let mut by_name: HashMap<String, &Declar> = HashMap::new();

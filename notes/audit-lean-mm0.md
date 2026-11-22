@@ -873,10 +873,29 @@ Typing premises (2026-11-05): the core rules `bvar`, `beta`, `eta`, `proofIrrel`
 out the diagonal as Lean4Lean does. The statements are equivalent by unfolding. The generator
 converts at each use, which costs 0.38% on `Init.Prelude`.
 
+Arithmetic as equations, and `Sort` (2026-11-22): the relations read as sums and products are
+written as equations in brackets, `⦃ i + n = j ⦄` for `add i n j` on the unary numerals and, on
+the binary ones, `⟪ a + b = c ⟫` for `badd`, `⟪₁ a + b + 1 = c ⟫` for `baddc`, `⟪ₛ a + 1 = b ⟫`
+for `bsucc`, `⟪₂ 2 * a = b ⟫` for `bdbl`, `⟪ₘ a * b = c ⟫` for `bmul`, `⟪ₚ a ^ b = c ⟫` for
+`bpow`, and `⟪ₐ a &&& b = c ⟫`, `⟪ₒ a ||| b = c ⟫`, `⟪ₓ a ^^^ b = c ⟫` for `band`, `bor`, `bxor`
+(ASCII: `{| .. |}`, `{+| .. |}`, `{+1| .. |}`, `{s| .. |}`, `{2| .. |}`, `{*| .. |}`,
+`{^| .. |}`, `{and| .. |}`, `{or| .. |}`, `{xor| .. |}`); each relation has an opening bracket
+of its own because a notation must begin with a constant unique to it, and the `1` and `2` in
+the notations of `baddc`, `bsucc` and `bdbl` are tokens of the notation, not arguments. `Sort u` is a prefix notation for `srt u`. The terms are unchanged, so
+the statements are too: the certificates in `build/gen/` made before the change (`induct`,
+`lit`, `nested`) verify with both verifiers against the new text, and the set-theoretic
+encoding generated from the spec (`scripts/tg-lean.py --check`, which reads the notations with
+its own parser) is byte for byte the same. The block between the `lean0-check` marks keeps the
+prefix form.
+
 The generated statements keep the prefix form (`deq G e e2 A`), which MM0 allows for every
-term with or without a notation; the statement checker reads only that form. No notation
-token looks like an identifier (`[a-zA-Z_][a-zA-Z0-9_]*`), so none can collide with a
-generated name.
+term with or without a notation; the statement checker reads only that form. One notation
+token looks like an identifier (`[a-zA-Z_][a-zA-Z0-9_]*`): `Sort`. A verifier reads such a token
+as the notation wherever it stands, while the statement checker, which reads prefix form, would
+take it for a name. So the checker reports a statement whose name or bound variable is an
+identifier-like notation token of the spec (it collects them from the spec's declarations; a
+negative test in `scripts/test.sh`), and the generator never makes such a name. No other token
+can collide with a generated name.
 
 ## 10. The encoding: how the spec departs from Lean4Lean's presentation
 

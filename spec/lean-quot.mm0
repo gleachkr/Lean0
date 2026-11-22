@@ -89,20 +89,20 @@ axiom eeqv_quot_ind (u u2: lvl): $ leqv u u2 $ > $ eeqv (quot_ind u) (quot_ind u
 
 --| `Quot : Π (α : Sort u). (α → α → Prop) → Sort u`
 axiom quot_ty (G: ctx) (u: lvl):
-  $ ⟨ G ⊢ quot u : Π (srt u). Π (Π #0. Π #1. Prop). srt u ⟩ $;
+  $ ⟨ G ⊢ quot u : Π (Sort u). Π (Π #0. Π #1. Prop). Sort u ⟩ $;
 --| `Quot.mk : Π (α : Sort u) (r : α → α → Prop). α → Quot r`
 axiom quot_mk_ty (G: ctx) (u: lvl):
-  $ ⟨ G ⊢ quot_mk u : Π (srt u). Π (Π #0. Π #1. Prop). Π #1. quot u @ #2 @ #1 ⟩ $;
+  $ ⟨ G ⊢ quot_mk u : Π (Sort u). Π (Π #0. Π #1. Prop). Π #1. quot u @ #2 @ #1 ⟩ $;
 --| `Quot.lift : Π (α : Sort u) (r : α → α → Prop) (β : Sort v) (f : α → β).
 --|   (Π a b. r a b → Eq (f a) (f b)) → Quot r → β`
 axiom quot_lift_ty (G: ctx) (u v: lvl):
-  $ ⟨ G ⊢ quot_lift u v : Π (srt u). Π (Π #0. Π #1. Prop). Π (srt v). Π (Π #2. #1).
+  $ ⟨ G ⊢ quot_lift u v : Π (Sort u). Π (Π #0. Π #1. Prop). Π (Sort v). Π (Π #2. #1).
       Π (Π #3. Π #4. Π (#4 @ #1 @ #0). ind_ty (eq_D v) 0 @ #4 @ (#3 @ #2) @ (#3 @ #1)).
       Π (quot u @ #4 @ #3). #3 ⟩ $;
 --| `Quot.ind : Π (α : Sort u) (r : α → α → Prop) (β : Quot r → Prop).
 --|   (Π a. β (Quot.mk r a)) → Π q. β q`
 axiom quot_ind_ty (G: ctx) (u: lvl):
-  $ ⟨ G ⊢ quot_ind u : Π (srt u). Π (Π #0. Π #1. Prop). Π (Π (quot u @ #1 @ #0). Prop).
+  $ ⟨ G ⊢ quot_ind u : Π (Sort u). Π (Π #0. Π #1. Prop). Π (Π (quot u @ #1 @ #0). Prop).
       Π (Π #2. #1 @ (quot_mk u @ #3 @ #2 @ #0)). Π (quot u @ #3 @ #2). #2 @ #0 ⟩ $;
 
 --| `Quot.lift f h (Quot.mk r a) ≡ f a` as a closed equation: stated once, in
@@ -112,7 +112,7 @@ axiom quot_ind_ty (G: ctx) (u: lvl):
 --| by `weakBaseDF` and `instDF`.
 axiom quot_lift_mk (u v: lvl):
   $ ⟦ #4 :: (Π #3. Π #4. Π (#4 @ #1 @ #0). ind_ty (eq_D v) 0 @ #4 @ (#3 @ #2) @ (#3 @ #1)) ::
-      (Π #2. #1) :: srt v :: (Π #0. Π #1. Prop) :: srt u :: []
+      (Π #2. #1) :: Sort v :: (Π #0. Π #1. Prop) :: Sort u :: []
     ⊢ quot_lift u v @ #5 @ #4 @ #3 @ #2 @ #1 @ (quot_mk u @ #5 @ #4 @ #0) ≡ #2 @ #0 : #3 ⟧ $;
 
 -- Lean's axioms `propext`, `Quot.sound` and `Classical.choice` (audit §4) ----
@@ -125,8 +125,8 @@ axiom propext_ty (G: ctx):
 --| `Quot.sound : Π (α : Sort u) (r : α → α → Prop) (a b : α).
 --|   r a b → Quot.mk r a = Quot.mk r b`
 axiom quot_sound_ty (G: ctx) (u: lvl):
-  $ ⟨ G ⊢ quot_sound u : Π (srt u). Π (Π #0. Π #1. Prop). Π #1. Π #2. Π (#2 @ #1 @ #0).
+  $ ⟨ G ⊢ quot_sound u : Π (Sort u). Π (Π #0. Π #1. Prop). Π #1. Π #2. Π (#2 @ #1 @ #0).
       ind_ty (eq_D u) 0 @ (quot u @ #4 @ #3) @ (quot_mk u @ #4 @ #3 @ #2) @ (quot_mk u @ #4 @ #3 @ #1) ⟩ $;
 --| `Classical.choice : Π (α : Sort u). Nonempty α → α`
 axiom choice_ty (G: ctx) (u: lvl):
-  $ ⟨ G ⊢ choice u : Π (srt u). Π (ind_ty (nonempty_D u) 0 @ #0). #1 ⟩ $;
+  $ ⟨ G ⊢ choice u : Π (Sort u). Π (ind_ty (nonempty_D u) 0 @ #0). #1 ⟩ $;
