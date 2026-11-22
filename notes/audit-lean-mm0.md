@@ -162,7 +162,7 @@ means a sound admissible fact (lemma cited, hypotheses checked). **L** means a v
 | `beta` (187) | T | :45-47. Premises `A::Γ ⊢ e : B` and `Γ ⊢ a : A`. The result is `e.inst a : B.inst a`, both at `k=0` ✓ |
 | `eta` (190) | T | :48-50. `e.lift = liftN 1 e 0` is `lift 1 0 e e1` ✓. The binder type `A` of the λ is the one in `forallE A B` ✓ |
 | `proofIrrel` (193) | T | :51-53 (`sort .zero` = `srt lz`) |
-| (`constDF`, `extra`) | omitted | replaced by per-constant generated axioms and MM0 `def` unfolding (§10); not audited here |
+| (`constDF`, `extra`) | omitted | replaced by MM0 `def` unfolding, the schema for inductive types (§4) and, for an axiom the development itself declares, an axiom of the certificate (§10); not audited here |
 | `inh_i` (204) | sound, by definition | `inh` has this single introduction rule, so `inh G A` holds iff `∃ e. G ⊢ e : A`. The witness is built from the theorem's own variables (no dummies), which is fine for a closed Lean proof term |
 
 ## 3. Issues, ranked
