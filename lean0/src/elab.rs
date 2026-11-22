@@ -1676,8 +1676,15 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         }
         let (mf, margs) = self.tc.ctx.unfold_apps(major2);
         let Expr::Const { name: cname, .. } = self.read(mf) else { return Err("major premise is not a constructor application".into()) };
-        let p2 = if kind == Step::Quot {
-            // the closed equation of the primitive (`quot_lift_mk`, `quot_ind_mk`; audit §4)
+        let p2 = if kind == Step::Quot && fname == "Quot.ind" {
+            // both sides are proofs of `β (Quot.mk r a)`: proof irrelevance, no rule of its own
+            let Some(&ae) = margs.get(2) else { return Err("Quot.mk is not applied to its three arguments".into()) };
+            let rhs = self.tc.ctx.mk_app(args[3], ae);
+            let p = self.defeq_rule(lhs2, rhs, DefEqWhy::ProofIrrel).map_err(|e| format!("reduction of {fname}: {e}"))?;
+            let t2 = self.infer(lhs2)?.0;
+            self.cast(p, t2, tl)?
+        } else if kind == Step::Quot {
+            // the closed equation of the primitive (`quot_lift_mk`; audit §4)
             let th = self.g.quot_red[&fname];
             self.quot_closed(th, f, &a, &args2[..major_idx], &margs, cname, lhs2, tl).map_err(|e| format!("reduction of {fname}: {e}"))?
         } else {
@@ -1696,7 +1703,7 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         self.cast(pf, ft, tcur)
     }
 
-    /// The reduction of `Quot.lift` or `Quot.ind` (`f`, applied to `rargs` and to `Quot.mk`,
+    /// The reduction of `Quot.lift` (`f`, applied to `rargs` and to `Quot.mk`,
     /// `cname`, applied to `margs`) from the closed equation `th`: its variables are
     /// instantiated from the bottom of its context (`instDF`), the primitive's arguments each
     /// typed at its binder, then `a` at `α`. The instance has the primitive's `α`, `r` and
@@ -1704,7 +1711,7 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
     #[allow(clippy::too_many_arguments)]
     fn quot_closed(&mut self, th: mm0kit::env::ThId, f: ExprPtr<'t>, a: &[E], rargs: &[ExprPtr<'t>], margs: &[ExprPtr<'t>], cname: nanoda_lib::util::NamePtr<'t>, lhs2: ExprPtr<'t>, tl: ExprPtr<'t>) -> R<P> {
         let Some(&ae) = margs.get(2) else { return Err("Quot.mk is not applied to its three arguments".into()) };
-        if rargs.len() < 4 {
+        if rargs.len() != 5 {
             return Err("argument counts".into())
         }
         let mut subst = Vec::new();
@@ -1722,7 +1729,7 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         let mk = self.tc.ctx.mk_const(cname, ls);
         let major3 = self.tc.ctx.foldl_apps(mk, [rargs[0], rargs[1], ae].into_iter());
         let lhs3 = self.tc.ctx.foldl_apps(f, rargs.iter().copied().chain([major3]));
-        let tl3 = if rargs.len() == 5 { rargs[2] } else { self.tc.ctx.foldl_apps(rargs[2], [major3].into_iter()) };
+        let tl3 = rargs[2];
         let mut p = mm(self.g.env.thm(th, a, &[]))?;
         let n = subst.len();
         for (j, &(x, bt)) in subst.iter().enumerate() {

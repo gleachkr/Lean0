@@ -1187,7 +1187,7 @@ fn proj_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, hyps: Ve
 }
 
 /// The spec's closed equation `ax` at the levels `us` (a rule without premises whose context
-/// is closed: `quot_lift_mk`, `quot_ind_mk`), over any base context `G` (`weakBaseDF`): the
+/// is closed: `quot_lift_mk`), over any base context `G` (`weakBaseDF`): the
 /// theorem `name` over `args` (`G`, then the levels).
 pub(crate) fn closed_over_base(g: &mut Gen, ax: &str, us: &[E], name: &str, args: Vec<(String, u8)>, doc: &str) -> R<ThId> {
     let th = g.env.thm_id(ax);

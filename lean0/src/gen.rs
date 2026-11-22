@@ -87,7 +87,7 @@ pub struct Gen {
     /// Iota as a closed equation (`ind_iota_eq`) of the blocks certified by the schema, by
     /// (recursor, constructor).
     pub iota_eq: HashMap<(String, String), ThId>,
-    /// `Quot.lift` / `Quot.ind` reduction axioms.
+    /// `Quot.lift`'s reduction lemma.
     pub quot_red: HashMap<String, ThId>,
     /// Structures, by inductive type name.
     pub structs: HashMap<String, StructInfo>,
@@ -854,16 +854,17 @@ fn opaque<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::Ex
 }
 
 /// A quotient primitive as the spec's constant (`quot`, `quot_mk`, `quot_lift`, `quot_ind`,
-/// typed by `quot_ty` and so on, reducing by `quot_lift_mk`/`quot_ind_mk`; audit §4), when
+/// typed by `quot_ty` and so on, reducing by `quot_lift_mk`; audit §4), when
 /// the export's type is the spec's: `theorem Quot_df` (`constDF`, from `eeqv_df`), and for
-/// `Quot.lift` and `Quot.ind` the reduction lemma `Quot_lift_mk`, `Quot_ind_mk`. An error
+/// `Quot.lift` the reduction lemma `Quot_lift_mk` (`Quot.ind` on `Quot.mk` reduces to a proof
+/// of the same proposition: proof irrelevance). An error
 /// when the type differs: no axioms are generated for a quotient primitive.
 fn quot_spec<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::ExprPtr<'t>) -> R<()> {
     let (term, ty_ax, eqv_ax, red) = match sig.lean_name.as_str() {
         "Quot" => ("quot", "quot_ty", "eeqv_quot", None),
         "Quot.mk" => ("quot_mk", "quot_mk_ty", "eeqv_quot_mk", None),
         "Quot.lift" => ("quot_lift", "quot_lift_ty", "eeqv_quot_lift", Some("quot_lift_mk")),
-        "Quot.ind" => ("quot_ind", "quot_ind_ty", "eeqv_quot_ind", Some("quot_ind_mk")),
+        "Quot.ind" => ("quot_ind", "quot_ind_ty", "eeqv_quot_ind", None),
         n => return Err(format!("unknown quotient primitive {n}")),
     };
     if !el.g.env.has_term(term) || !el.g.env.has_thm(ty_ax) {

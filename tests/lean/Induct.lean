@@ -1,6 +1,6 @@
 /-! Milestone 4 test module: inductive types, structures, projections and quotients.
 Only the names on the `lean0-export` line (and what they depend on) are exported. -/
--- lean0-export: two_add_two len_ex proj_red prod_eta and_swap eq_symm k_ex unit_eta sigma_ex quot_ex ev_rec_ex opq_ex
+-- lean0-export: two_add_two len_ex proj_red prod_eta and_swap eq_symm k_ex unit_eta sigma_ex quot_ex quot_ind_ex ev_rec_ex opq_ex
 universe u v
 
 noncomputable section
@@ -29,6 +29,11 @@ theorem quot_ex {α : Sort u} {β : Sort v} (r : α → α → Prop) (f : α →
     Quot.lift f h (Quot.mk r a) = f a := rfl
 
 end
+-- `Quot.ind` on `Quot.mk` as a recursor's major premise: the kernel reduces it to reach the
+-- constructor (certified by proof irrelevance: both sides prove the same proposition)
+theorem quot_ind_ex (r : Nat → Nat → Prop) (a : Nat) (p q : Prop) (hp : p) (hq : q) :
+    And.rec (motive := fun _ => Nat) (fun _ _ => 5)
+      (Quot.ind (β := fun _ => p ∧ q) (fun _ => And.intro hp hq) (Quot.mk r a)) = 5 := rfl
 -- a mutual inductive: each recursor's rules mention the other recursor
 mutual
 inductive Ev : Type
