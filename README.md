@@ -74,12 +74,13 @@ The statement of that proof differs between projects:
   and [con-agua], are proved to accept only inputs that con-leche accepts.
   The Rust proof uses Aeneas; the assembly proof uses an x86 semantics.
 
-Lean0 instead produces a proof for a *particular export*. Its MM0 specification
-adapts Lean4Lean's judgment and includes rules for inductive blocks, nested
-inductives, recursors, projections, structure eta, quotients and `Nat`
-literals. The set-theoretic model in `spec/tg/` validates each rule. A
-certificate derives typing and conversion judgments from those rules; it does
-not establish the consistency of additional axioms declared in the export.
+Lean0 instead produces a proof for a *particular export*. While its MM0 
+specification adapts Lean4Lean's judgment, it also includes rules for inductive 
+blocks, nested inductives, recursors, projections, structure eta, quotients and 
+`Nat` literals. A certificate derives typing and conversion judgments from 
+those rules, and the certificate can be verified by an MM0 checker, but the 
+rust code for generating the certificate is not verified in any meaningful 
+sense.
 
 [Lean4Lean]: https://github.com/digama0/lean4lean
 [research fork]: https://github.com/typhdotcom/lean4lean
