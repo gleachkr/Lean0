@@ -960,20 +960,11 @@ fn structure<'t>(el: &mut Elab<'_, '_, 't, '_>, pv: &mut Prover, sig: &Sig, bloc
     }
     let eta = if eta_ok {
         let mut v = Vars::new();
-        let gv = v.add(&mut g.env, "G", "ctx");
+        v.add(&mut g.env, "G", "ctx");
         let us = v.lvls(&mut g.env, &sig.lvl_names, "");
-        let ps = v.many(&mut g.env, "p", "expr", np);
-        let e = v.add(&mut g.env, "e", "expr");
         let st = g.const_term(&ind_lean, &us).unwrap();
-        let st = apps(g, st, &ps);
-        let hyp = g.env.app_n("ty", &[gv, e, st]);
-        let projs: Vec<E> = (0..nf).map(|i| g.lean.proj(&mut g.env, proj, i, e)).collect();
-        let m = g.const_term(&sig.lean_name, &us).unwrap();
-        let m = apps(g, m, &[ps, projs].concat());
-        let concl = g.lean.deq(&mut g.env, gv, e, m, st);
         let name = g.thms.fresh(&format!("{}_eta", mangle(&ind_lean)));
-        let proof = prove_lemma(g, pv, "ind_eta", &[hyp], concl)?;
-        Some(add_thm(&mut g.env, &name, v.args, vec![hyp], concl, false, false, proof, &format!("Structure eta for `{ind_lean}`."))?)
+        Some(eta_eq_lemma(g, pv, v.args, &name, st, block.wf.get(), &us, &format!("Structure eta for `{ind_lean}`, as a closed equation."))?)
     } else {
         None
     };
@@ -1184,6 +1175,62 @@ fn proj_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, hyps: Ve
         Some(p)
     };
     add_thm(&mut g.env, name, args, hyps, concl, false, false, proof, doc)
+}
+
+/// Structure eta as a closed equation (`ind_eta`, audit §4): in the rule's context `Dl` (the
+/// parameters, then one variable of the type `st`, `ind_ty D j`, applied to them), over any
+/// base context `G` (`weakBaseDF`), the variable is the constructor applied to the parameters
+/// and its projections. The statement comes from Part I's `eta_eq` alone, so a replayed
+/// declaration states it without the proof.
+#[allow(clippy::too_many_arguments)]
+fn eta_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &str, st: E, wf: Option<ThId>, us: &[E], doc: &str) -> R<ThId> {
+    let (d, j) = match g.env.head(st) {
+        Some((_, &[d, j])) => (d, j),
+        _ => return Err("not a type term".into()),
+    };
+    pv.horn.facts.clear();
+    let p_eq = mm(pv.horn.prove_open(&mut g.env, &mut g.lean, &mut g.lv, &mut pv.facts, 3, |env, ms| env.app_n("eta_eq", &[d, j, ms[0], ms[1], ms[2]])))?;
+    let c_eq = g.env.concl(p_eq);
+    let (dl, m, ty) = g.env.head(c_eq).map(|(_, a)| (a[2], a[3], a[4])).ok_or("eta_eq")?;
+    let zero = g.lean.nat(&mut g.env, 0);
+    let lhs = g.env.app_n("bvar", &[zero]);
+    let mut entries = Vec::new();
+    let mut t = dl;
+    while let Some((h, &[a, rest])) = g.env.head(t) {
+        if h != g.lean.ids.cons {
+            break
+        }
+        entries.push(a);
+        t = rest;
+    }
+    let mut dlg = g.env.var(0);
+    for &a in entries.iter().rev() {
+        dlg = g.lean.cons(&mut g.env, a, dlg);
+    }
+    let concl = g.lean.deq(&mut g.env, dlg, lhs, m, ty);
+    let proof = if g.replay {
+        None
+    } else {
+        let ok_goal = g.env.app_n("eta_ok", &[d, j]);
+        let p_ok = pv.prove(g, ok_goal)?;
+        let mut la = vec![dl];
+        la.extend(us);
+        let Some(wf) = wf else { return Err("the block's well-formedness lemma is missing".into()) };
+        let q_wf = mm(g.env.thm(wf, &la, &[]))?;
+        pv.horn.facts.clear();
+        for q in [p_ok, q_wf, p_eq] {
+            let cq = g.env.concl(q);
+            pv.horn.facts.insert(cq, q);
+        }
+        let goal0 = g.lean.deq(&mut g.env, dl, lhs, m, ty);
+        let p0 = pv.apply(g, "ind_eta", goal0)?;
+        pv.horn.facts.clear();
+        pv.horn.facts.insert(goal0, p0);
+        let p = pv.apply(g, "weakBaseDF", concl)?;
+        pv.horn.facts.clear();
+        Some(p)
+    };
+    add_thm(&mut g.env, name, args, Vec::new(), concl, false, false, proof, doc)
 }
 
 /// The spec's closed equation `ax` at the levels `us` (a rule without premises whose context

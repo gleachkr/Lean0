@@ -1,8 +1,8 @@
 # Lean0
 
 Lean0 is an experimental tool for verifying Lean 4 proofs against an explicit 
-axiomatic presentation of Lean's type theory (about 900 lines, half of it the 
-schema for inductive types), using [Metamath 
+axiomatic presentation of Lean's type theory (about 1,100 lines, two fifths of 
+it the schema for inductive types), using [Metamath 
 Zero](https://github.com/digama0/mm0) as a minimal logical framework. It uses a 
 modified [nanoda](https://github.com/ammkrn/nanoda_lib) to record the steps 
 involved in checking types and definitional equality, and then translates these 
@@ -50,12 +50,17 @@ trust:
   reduction rules), and the schema for inductive types: a declaration 
   is a term of the spec, the certificate proves it legal (positivity, 
   universes, elimination level), and the recursor's type and rules, 
-  projections and eta are derived from it. Its soundness argument is 
-  `notes/audit-lean-mm0.md` §4; the kernel's recursors are compared with the 
+  projections and eta are derived from it. The computation rules (iota, the 
+  projection of a constructor, structure eta, `Quot.lift`) are closed 
+  equations: each is stated once, in the context of its own variables, 
+  without typing premises, and its instances follow by weakening and 
+  substitution. Its soundness argument is `notes/audit-lean-mm0.md` §4, and 
+  the whole spec is proved in a model in set theory (below); the kernel's 
+  recursors are compared with the 
   derived ones on every block, and Lean's `Nat` and `Eq` are stated in the 
   spec and compared with the export's. The spec is in three parts: syntax 
   (relations that are functions or predicates on syntax), definitions over 
-  the judgment, and the 74 rules that are its semantic content; `lean0 modes` 
+  the judgment, and the 73 rules that are its semantic content; `lean0 modes` 
   checks mechanically that the relations of the first two parts are the 
   functions they are read as. This is where the kernel's soundness bugs have 
   been (nested inductives: [#14576](https://github.com/leanprover/lean4/issues/14576),
@@ -72,6 +77,14 @@ trust:
   are atoms of the spec, `cst`, and need none). No inductive type has one: a 
   block the schema does not certify is an error. The assumptions are 
   inspectable in the generated `.mm0` file;
+- optionally, instead of the spec's rules: Tarski–Grothendieck set theory. 
+  `spec/tg/` defines every term of the spec in set theory and proves every 
+  axiom of the spec as a theorem (5,388 theorems in Aufbau, checked by both 
+  verifiers), over 76 axioms of logic and set theory, 48 axioms saying that 
+  the spec's syntax is freely generated, and an uninterpreted class for the 
+  opaque constants (audit §11). A certificate linked onto that library 
+  (`scripts/certify.sh --tg`) is a proof from those axioms alone, plus the 
+  generated axioms above;
 - that the `.mm0` file the verifier reads is in fact the spec followed by the 
   certificate's statements (the verification targets). `lean0 joined` generates 
   this file, and its output can be checked by inspection.
@@ -139,13 +152,14 @@ With the trust list above, conversion and typing have been certified for all
 of Lean's `Init` and all of `Std`:
 
 - `Init` (59,423 declarations): 32 certificates, 107.1 GB, generated in 69 
-  minutes on 8 cores, each verified and deleted as it was made. 605 of its 607 
-  inductive types are certified by the schema (the other two are nested); 577 
-  generated axioms remain, 521 of them the typing and closedness of 261 opaque 
-  constants and Lean axioms (`IO` and `Float` primitives, mostly), the rest 
-  the literal operations, the two nested types and level congruence for 24 
-  opaque constants in inductive declarations (since this run, opaque constants 
-  and Lean axioms are atoms of the spec, and their closedness is a theorem);
+  minutes on 8 cores, each verified and deleted as it was made. That run 
+  predates the current spec (two nested types and the literal operations had 
+  generated axioms, and the computation rules had typing premises). With the 
+  current spec the generator derives every declaration of `Init` again (a run 
+  that counts proof steps without writing them: 2.4 billion, 48 minutes on 6 
+  cores): all 607 inductive blocks and all 16 literal operations by the 
+  spec's rules, with 20 generated axioms, the level congruence of theorem 
+  constants in inductive declarations;
 - `Std` (103,256 declarations with `Init`): 195 certificates, 335.7 GB, 
   generated in 3 hours on 8 cores. This run predates the schema (it has the 
   inductive types as generated axioms) and is not redone yet. One declaration
@@ -275,14 +289,13 @@ for where the proof bytes go.
   text; `spec/lib.auf`: derived rules (untrusted);
   `spec/examples/`: hand-proven certificates
 - `spec/tg/`: a Tarski–Grothendieck set-theory library in Aufbau (`tg.mm0` its
-  base), toward a model of the spec in set theory, and `lean-tg.mm0`, the encoding of the
-  spec's syntax in it, with the relations of Part I defined there and their clauses proved;
-  the model over it (`model-levels.mm0`: level values, with `leqv` defined and the level
-  rules proved; `model-den.mm0`: the denotation, satisfaction and the judgments, for a
-  parameter that later files will define; `model-meta.mm0`: what closedness, lifting and
-  substitution do to the denotation); and `lean-tg-rest.mm0`, the rest of the spec over
-  the model, as axioms for now (`lean-tg.mm0` and `lean-tg-rest.mm0` are generated by
-  `scripts/tg-lean.py`; audit §11); `scripts/tg-check.sh` verifies them. A certificate can be
+  base) and the model of the spec in it: `lean-tg.mm0`, `lean-tg2.mm0`, `lean-tg3.mm0`, the
+  encoding of the spec's syntax, with the relations of Parts I and II defined there and their
+  clauses proved (generated by `scripts/tg-lean.py`); the `model-*.mm0` files, from level
+  values and the denotation (`model-levels.mm0`, `model-den.mm0`) through inductive types,
+  quotients and literals to `model-top.mm0` and `model-ci.mm0`, where the judgment is defined
+  and the spec's rules are theorems; and `lean-tg-rest.mm0`, what is left of the spec as
+  axioms over the model: nothing (audit §11). `scripts/tg-check.sh` verifies the chain. A certificate can be
   verified against them instead of the spec (TG mode: `lean0 tg-link` and `lean0 joined --tg`;
   `scripts/certify.sh --tg`)
 - `lean0/`: the elaborator and generator, and the `lean0` binary (`src/bin/lean0/`)

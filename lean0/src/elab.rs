@@ -995,11 +995,30 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         for &l in self.tc.ctx.read_levels(levels).to_vec().iter() {
             args.push(self.trl(l)?);
         }
+        // the closed equation (`ind_eta`, audit §4), its variables instantiated from the bottom
+        // of its context (`instDF`): the parameters, each typed at its binder in the type's
+        // type, then `x` at the structure type
+        let (tf, _) = self.tc.ctx.unfold_apps(w);
+        let mut ty = self.infer(tf)?.0;
+        let mut subst = Vec::new();
         for &p in &params {
-            args.push(self.tr(p)?);
+            let Expr::Pi { binder_type, body, .. } = self.read(ty) else { return Err("the structure type's type is not a telescope over its parameters".into()) };
+            subst.push((p, binder_type, None));
+            ty = self.tc.ctx.inst(body, &[p]);
         }
-        args.push(self.tr(x)?);
-        let p = mm(self.g.env.thm(eta, &args, &[px]))?;
+        subst.push((x, w, Some(px)));
+        let mut p = mm(self.g.env.thm(eta, &args, &[]))?;
+        let n = subst.len();
+        for (j, &(a, bt, pa)) in subst.iter().enumerate() {
+            let pa = match pa {
+                Some(pa) => pa,
+                None => {
+                    let (ta, pa) = self.infer(a)?;
+                    self.cast(pa, ta, bt)?
+                }
+            };
+            p = mm(self.g.lean.inst_df(&mut self.g.env, n - 1 - j, pa, p))?;
+        }
         let want = self.deq(x, expanded, w)?;
         Ok((expanded, w, mm(self.g.env.convert(p, want))?))
     }

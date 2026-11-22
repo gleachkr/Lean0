@@ -601,3 +601,21 @@ theorem proj_mk_eq_rule (G: hyps) (H J: class) (u w r tg tg1 td tN ti tfi tk tl 
 -- --------------------------------------------------------------------------
 
 theorem proj_mk (D: ind) (N: ctx) (j i k: nat) (Dl0 Dl: ctx) (lhs0 lhs T: expr): $ ind_wf Dl D $ > $ proj_ok Dl D j i $ > $ proj_eq D j i Dl0 lhs0 k $ > $ ind_nested D N $ > $ crst D N Dl0 Dl $ > $ rst D N lhs0 lhs $ > $ lookup Dl k T $ > $ deq Dl lhs (bvar k) T $;
+
+--| Structure eta as a closed equation in the model from the rule's premises (`ind_eta`): `eta_eq` inverted. At every
+--| valuation of the rule's context (the parameters and one variable of the structure type), the variable `#0` is an
+--| element of the value of its type (`lrel_lookup_sem`), so `ind_eta_rule` applies to it. No typing premise.
+theorem ind_eta_eq_rule (G: hyps) (H J: class) (u w r tg td ti tM tS: set):
+  $ G ⇒ iwf u H J tg td w r $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ ra_eta_ok td ti ∈ lrel $ >
+  $ G ⇒ ra_eta_eq td ti tg tM tS ∈ lrel $ >
+  $ G ⇒ tS ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ w r = dt u (mcv H) tM w r ∧ dt u (mcv H) ⟨ kc_bvar , scons ⟨ kc_nz , ∅ ⟩ ∅ ⟩ w r ∈ dt u (mcv H) tS w r $;
+
+
+-- --------------------------------------------------------------------------
+-- The spec's rule `ind_eta`
+-- --------------------------------------------------------------------------
+
+theorem ind_eta (D: ind) (j: nat) (Dl: ctx) (M S: expr): $ ind_wf Dl D $ > $ eta_ok D j $ > $ eta_eq D j Dl M S $ > $ deq Dl (bvar nz) M S $;

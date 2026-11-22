@@ -540,6 +540,18 @@ axiom proj_eq_i (D: ind) (b: blk) (P X Dl: ctx) (T: tys) (j i np n m nf k: nat) 
   $ sinst D 0 n np K K2 $ > $ psplit nf K2 [] X res $ > $ capp X P Dl $ >
   $ pargs (ind_ctor D j 0) nf np c1 $ > $ pargs c1 0 nf maj $ > $ add k (s i) nf $ >
   $ proj_eq D j i Dl (proj b i maj) k $;
+--| `eta_eq D j Dl M S`: structure eta for type `j` as a closed equation:
+--| `Dl` is the context of the parameters and then one variable of the type
+--| applied to them (`S0`), `S` is that type seen from inside `Dl`, and `M` is
+--| the constructor applied to the parameters and to the projections of `#0`.
+--| For `Prod`: the context is `Prod @ #1 @ #0 :: Sort v :: Sort u :: []`
+--| (`p`, `β`, `α`), `S` is `Prod @ #2 @ #1` and `M` is
+--| `mk @ #2 @ #1 @ proj b 0 #0 @ proj b 1 #0`.
+term eta_eq: ind > nat > ctx > expr > expr > wff;
+axiom eta_eq_i (D: ind) (b: blk) (P: ctx) (T: tys) (j np nf: nat) (S0 S Y M: expr):
+  $ ind_data D b P T $ > $ clen P np $ > $ pargs (ind_ty D j) 0 np S0 $ > $ lift 1 0 S0 S $ >
+  $ rehead (ind_ty D j) (ind_ctor D j 0) np S Y $ > $ nfields D j 0 nf $ > $ projs b #0 nf Y M $ >
+  $ eta_eq D j (S0 :: P) M S $;
 ---------------------------------------------------------------------------
 -- PART II: DEFINITIONS OVER LEVEL EQUIVALENCE AND THE JUDGMENT
 ---------------------------------------------------------------------------
@@ -764,6 +776,10 @@ axiom proj_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (j i np: nat) (e e2
 axiom proj_mk (D: ind) (N: ctx) (j i k: nat) (Dl0 Dl: ctx) (lhs0 lhs T: expr):
   $ ind_wf Dl D $ > $ proj_ok Dl D j i $ > $ proj_eq D j i Dl0 lhs0 k $ > $ ind_nested D N $ >
   $ crst D N Dl0 Dl $ > $ rst D N lhs0 lhs $ > $ lookup Dl k T $ > $ ⟦ Dl ⊢ lhs ≡ #k : T ⟧ $;
-axiom ind_eta (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (j np nf: nat) (e S Y M: expr):
-  $ ⟨ G ⊢ e : S ⟩ $ > $ spine (ind_ty D j) S np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ eta_ok D j $ > $ clen P np $ >
-  $ rehead (ind_ty D j) (ind_ctor D j 0) np S Y $ > $ nfields D j 0 nf $ > $ projs b e nf Y M $ > $ ⟦ G ⊢ e ≡ M : S ⟧ $;
+--| Structure eta, `e ≡ ind_ctor D j 0 @ ps @ (proj b 0 e) @ …`, when the type
+--| has it (`eta_ok`), as a closed equation: stated once (`eta_eq`), in the
+--| context of the parameters and one variable of the structure type, for
+--| that variable. No typing premise. Instances follow by `weakBaseDF` and
+--| `instDF`.
+axiom ind_eta (D: ind) (j: nat) (Dl: ctx) (M S: expr):
+  $ ind_wf Dl D $ > $ eta_ok D j $ > $ eta_eq D j Dl M S $ > $ ⟦ Dl ⊢ #0 ≡ M : S ⟧ $;
