@@ -940,3 +940,100 @@ theorem ctor_closed_add {a: set} (G: hyps) (J: class) (tg td tb tp tt tnp tn tm 
 
 --| A numeral is below itself (`add 0 n n` says that `n` is a numeral).
 theorem num_le_refl (G: hyps) (tb: set): $ G ⇒ ra_add ⟨ kc_nz , ∅ ⟩ tb tb ∈ lrel $ > $ G ⇒ ra_le tb tb ∈ lrel $;
+
+-- --------------------------------------------------------------------------
+-- Nested blocks: the closed iota rule (restoring its context, left-hand side, type and right-hand side)
+-- --------------------------------------------------------------------------
+
+
+--| Restoring the left-hand side and the type of the closed iota rule (the pieces of `iota_lhs`) keeps their values:
+--| at a valuation `m` of the context above the parameters (`cdm m` its length), a valuation `p` of the parameters and
+--| any base `s`, every `rst` result of either has the value of its source. Both are guarded: the recursor and the
+--| constructor sit on the parameters' variables, the indices are those of the constructor's result with the block's
+--| types put in.
+theorem iota_lhs_rst_val (G: hyps) (H J: class) (u w r0 tg td tb tp tt tnp tn tm tN ti tc tv tF tE tK0 tK2 tX tB tnf tmn tam td1 te1 te2 te3 tY tT2 tni tc1 tmj te4 tmo tT0 tl tT z1 z2 p s m: set):
+  $ G ⇒ iwf u H J tg td w r0 $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ind_nested td tN ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor tE tc tK0 ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tK0 tK2 ∈ lrel $ >
+  $ G ⇒ ra_pis tX tB tK2 ∈ lrel $ >
+  $ G ⇒ ra_clen tX tnf ∈ lrel $ >
+  $ G ⇒ ra_add tm tn tmn ∈ lrel $ >
+  $ G ⇒ ra_add tnf tm tam ∈ lrel $ >
+  $ G ⇒ ra_add tam tn td1 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ td1 tnp te1 ∈ lrel $ >
+  $ G ⇒ ra_pargs te1 tam tn te2 ∈ lrel $ >
+  $ G ⇒ ra_pargs te2 tnf tm te3 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ td1 tnp tY ∈ lrel $ >
+  $ G ⇒ ra_lift tmn tnf tB tT2 ∈ lrel $ >
+  $ G ⇒ ra_rehead tY te3 tni tT2 te4 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ td1 tnp tc1 ∈ lrel $ >
+  $ G ⇒ ra_pargs tc1 ⟨ kc_nz , ∅ ⟩ tnf tmj ∈ lrel $ >
+  $ G ⇒ ra_rehead tY ⟨ kc_bvar , scons tmo ∅ ⟩ tni tT2 tT0 ∈ lrel $ >
+  $ G ⇒ tl ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tT ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_rst td tN tl z1 ∈ lrel $ >
+  $ G ⇒ ra_rst td tN tT z2 ∈ lrel $ >
+  $ G ⇒ p ∊ esat u (dnf u (mcv H)) tp w $ >
+  $ G ⇒ s ∊ fseq u $ >
+  $ G ⇒ m ∊ fseq u $ >
+  $ G ⇒ cdm m = fv nvf td1 $ >
+  $ G ⇒ tl = ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ $ >
+  $ G ⇒ tT = ⟨ kc_app , scons tT0 (scons tmj ∅) ⟩ $ >
+  $ G ⇒ dt u (mcv H) z1 w (scat m (scat p s)) = dt u (mcv H) tl w (scat m (scat p s)) ∧ dt u (mcv H) z2 w (scat m (scat p s)) = dt u (mcv H) tT w (scat m (scat p s)) $;
+
+--| A restored right-hand side of a recursor rule (`rec_rhs`, then `rst`) has the value of the unrestored one.
+theorem rec_rhs_rst_val (G: hyps) (H J: class) (u w r tg tD tv ti tc tN tR0 tRr: set):
+  $ G ⇒ iwf u H J tg tD w r $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ ra_rec_rhs tD tv ti tc tR0 ∈ lrel $ >
+  $ G ⇒ ra_ind_nested tD tN ∈ lrel $ >
+  $ G ⇒ ra_rst tD tN tR0 tRr ∈ lrel $ >
+  $ G ⇒ tR0 ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ dt u (mcv H) tRr w r = dt u (mcv H) tR0 w r $;
+
+
+
+
+
+
+
+
+
+--| A valuation of the restored context of the closed iota rule is a valuation of the unrestored one (`iota_tel`'s
+--| pieces; `crst`): the context above the parameters is one Π type over the lifted result, guarded at depth 0
+--| (`fnx_mb`, `fnx_fl`), its restoration is the restored context's (`fnx_cp`, `fnx_pi`), and `f148_cx` gives equal
+--| valuations over the parameters' (`fnx_cc`, `fnx_cf`: they are not changed). It is a valuation `x8` of the parameters
+--| under one `x9` of the rest, as long as the context above them.
+theorem iota_tel_rst_sat {x8 x9: set} (G: hyps) (H J: class) (u w r r0 tgw td tb tp tt tnp tn tm tv ti tc tF tE tK0 tK2 tX tB tnf tXl tmn tM2 tN2 tQ1 tQ2 tg tg1 tT2 tN tam td1: set):
+  $ G ⇒ iwf u H J tgw td w r0 $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_motives td tnp tv ⟨ kc_nz , ∅ ⟩ tt tM2 ∈ lrel $ >
+  $ G ⇒ ra_minors td tnp tn ⟨ kc_nz , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ tt tN2 ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor tE tc tK0 ∈ lrel $ >
+  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tK0 tK2 ∈ lrel $ >
+  $ G ⇒ ra_pis tX tB tK2 ∈ lrel $ >
+  $ G ⇒ ra_clen tX tnf ∈ lrel $ >
+  $ G ⇒ ra_clift tmn tX tXl ∈ lrel $ >
+  $ G ⇒ ra_add tm tn tmn ∈ lrel $ >
+  $ G ⇒ ra_capp tM2 tp tQ1 ∈ lrel $ >
+  $ G ⇒ ra_capp tN2 tQ1 tQ2 ∈ lrel $ >
+  $ G ⇒ ra_capp tXl tQ2 tg ∈ lrel $ >
+  $ G ⇒ ra_lift tmn tnf tB tT2 ∈ lrel $ >
+  $ G ⇒ ra_ind_nested td tN ∈ lrel $ >
+  $ G ⇒ ra_crst td tN tg tg1 ∈ lrel $ >
+  $ G ⇒ r ∊ sat u (mcv H) tg1 w $ >
+  $ G ⇒ tg ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ tT2 ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_add tnf tm tam ∈ lrel $ >
+  $ G ⇒ ra_add tam tn td1 ∈ lrel $ >
+  $ G ⇒ r ∊ sat u (mcv H) tg w ∧ ∃ x8 ∃ x9 (x8 ∊ esat u (dnf u (mcv H)) tp w ∧ x9 ∊ fseq u ∧ cdm x9 = fv nvf td1 ∧ r = scat x9 x8) $;

@@ -285,13 +285,43 @@ theorem ci_wf1 (G: hyps) (H J: class) (u w r r0 tg tgw td tv ti tc tb tp tt tnp 
   $ G ⇒ ra_nidx td ti tni ∈ lrel $ >
   $ G ⇒ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r = dt u (mcv H) trhs w r ∧ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r ∈ dt u (mcv H) ⟨ kc_app , scons tT0 (scons tmj ∅) ⟩ w r $;
 
---| The two parts of a well-sorted appended context (`capp`) are contexts (the converse of `capp_ctx`).
-theorem capp_ctx_inv (G: hyps) (t1 t2 t3: set): $ G ⇒ ra_capp t1 t2 t3 ∈ lrel $ > $ G ⇒ t3 ∊ ofsort lsig lopen ks_ctx $ > $ G ⇒ t1 ∊ ofsort lsig lopen ks_ctx ∧ t2 ∊ ofsort lsig lopen ks_ctx $;
+--| The head of a well-sorted spine of variables (`pargs`) is an expression.
+theorem pargs_head_sort (G: hyps) (tX td tk te: set): $ G ⇒ ra_pargs tX td tk te ∈ lrel $ > $ G ⇒ te ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ tX ∊ ofsort lsig lopen ks_expr $;
 
---| `ci_wf1` with `iota_lhs` inverted: its counts are the block's (`ind_arity`), and the type is the motive's variable
---| at the indices applied to the major premise.
-theorem ci_wf2 (G: hyps) (H J: class) (u w r r0 tg tgw td tv ti tc tb tp tt tnp tn tm tF tE tK0 tK2 te4 tmj tM2 tN2 tR tc1 trhs0 tnf trhs ta te3 tQ1 tQ2 tXl tmn tX tQ tB tT: set):
-  $ G ⇒ iwf u H J tgw td w r0 $ >
+--| A spine of the same variables over another well-sorted head is an expression when the first is.
+theorem pargs_sort_eq (G: hyps) (tX tY td tk te te2: set): $ G ⇒ ra_pargs tX td tk te ∈ lrel $ > $ G ⇒ ra_pargs tY td tk te2 ∈ lrel $ > $ G ⇒ te ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ tY ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ te2 ∊ ofsort lsig lopen ks_expr $;
+
+--| The source of a re-headed spine is an expression when the result and the old head are.
+theorem rehead_src_sort (G: hyps) (tY tX tk te te2: set): $ G ⇒ ra_rehead tY tX tk te te2 ∈ lrel $ > $ G ⇒ te2 ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ tY ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ te ∊ ofsort lsig lopen ks_expr $;
+
+--| `lams` over any context of a λ is a λ.
+theorem lams_lam {g h x1 x2: set} (G: hyps) (ty tb tr: set): $ G ⇒ ra_lams ty tb tr ∈ lrel $ > $ G ⇒ ∃ x1 ∃ x2 (tb = ⟨ kc_lam , scons x1 (scons x2 ∅) ⟩) $ > $ G ⇒ ∃ g ∃ h (tr = ⟨ kc_lam , scons g (scons h ∅) ⟩) $;
+
+--| The right-hand side of a recursor rule (`rec_rhs`) is a λ: it binds the motives, of which there is one for each
+--| type of the block, and `nth_ty` finds a type.
+theorem rec_rhs_lam {g h: set} (G: hyps) (td tv ti tc tR: set): $ G ⇒ ra_rec_rhs td tv ti tc tR ∈ lrel $ > $ G ⇒ ∃ g ∃ h (tR = ⟨ kc_lam , scons g (scons h ∅) ⟩) $;
+
+--| Two spines of variables compose: variables `d1 ..` on a head, then `d ..` up to `d1`, are the variables from `d`.
+theorem pargs_trans (G: hyps) (tH td1 tk1 te1 td tk2 te tk: set): $ G ⇒ ra_pargs tH td1 tk1 te1 ∈ lrel $ > $ G ⇒ ra_pargs te1 td tk2 te ∈ lrel $ > $ G ⇒ ra_add td tk2 td1 ∈ lrel $ > $ G ⇒ ra_add tk1 tk2 tk ∈ lrel $ > $ G ⇒ ra_pargs tH td tk te ∈ lrel $;
+
+--| Re-heading a spine of variables gives the spine of the same variables on the new head.
+theorem pargs_rehead (G: hyps) (tH tX td tk te te2: set): $ G ⇒ ra_pargs tH td tk te ∈ lrel $ > $ G ⇒ ra_rehead tH tX tk te te2 ∈ lrel $ > $ G ⇒ ra_pargs tX td tk te2 ∈ lrel $;
+
+--| Restoring a variable gives the variable.
+theorem rst_bvar (G: hyps) (tD tN tx tz ti: set): $ G ⇒ ra_rst tD tN tx tz ∈ lrel $ > $ G ⇒ tx = ⟨ kc_bvar , scons ti ∅ ⟩ $ > $ G ⇒ tz = tx $;
+
+--| Restoring a spine of variables over a head that is no spine over a type or a constructor of the block: every
+--| `rst` result has the spine's value if every `rst` result of the head has the head's, and the spine is no spine
+--| over the block either (the variables are restored to themselves, `rst_bvar`).
+theorem pargs_rst_val {z x1 x2 x3 x4: set} (G: hyps) (M: class) (u w r tD tN tX td tk te: set): $ G ⇒ ra_pargs tX td tk te ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ ∀ z (ra_rst tD tN tX z ∈ lrel → dt u M z w r = dt u M tX w r) $ > $ G ⇒ ∀ x1 ∀ x2 (ra_spine x1 tX x2 ∈ lrel → ¬ ∃ x3 (x1 = ⟨ kc_ind_ty , scons tD (scons x3 ∅) ⟩) ∧ ¬ ∃ x3 ∃ x4 (x1 = ⟨ kc_ind_ctor , scons tD (scons x3 (scons x4 ∅)) ⟩)) $ > $ G ⇒ ∀ z (ra_rst tD tN te z ∈ lrel → dt u M z w r = dt u M te w r) ∧ ∀ x1 ∀ x2 (ra_spine x1 te x2 ∈ lrel → ¬ ∃ x3 (x1 = ⟨ kc_ind_ty , scons tD (scons x3 ∅) ⟩) ∧ ¬ ∃ x3 ∃ x4 (x1 = ⟨ kc_ind_ctor , scons tD (scons x3 (scons x4 ∅)) ⟩)) $;
+
+--| The closed iota rule in the model from its pieces, with the nested occurrences restored (`crst` of the context `tg`,
+--| `rst` of the two sides and the type): at a valuation `r` of the restored context `tg1`. It is a valuation of the
+--| unrestored one (`iota_tel_rst_sat`), where `ci_wf1` gives the equation; the left side and the type keep their
+--| values (`iota_lhs_rst_val`), and so does the right side, a spine of variables over the rule's term, a λ
+--| (`pargs_rst_val`, `rec_rhs_rst_val`, `rec_rhs_lam`).
+theorem ci_wf1n (G: hyps) (H J: class) (u w r tg td tv ti tc tb tp tt tnp tn tm tF tE tK0 tK2 tni te4 tmj tM2 tN2 tR tc1 trhs0 tnf trhs ta te3 tam tQ1 tQ2 tXl td1 te1 te2 tY tT2 tio tmo tT0 tmn tX tQ tB tsl tg1 tl tT tN ta0 z1 z2 z3: set):
+  $ G ⇒ iwf u H J tg1 td w r $ >
   $ G ⇒ hctor ⊆ H $ >
   $ G ⇒ hrec ⊆ H $ >
   $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
@@ -299,7 +329,75 @@ theorem ci_wf2 (G: hyps) (H J: class) (u w r r0 tg tgw td tv ti tc tb tp tt tnp 
   $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
   $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
   $ G ⇒ ra_nth_ctor tE tc tK0 ∈ lrel $ >
-  $ G ⇒ ra_elim_ok tgw td tv ∈ lrel3 J $ >
+  $ G ⇒ ra_elim_ok tg1 td tv ∈ lrel3 J $ >
+  $ G ⇒ te4 ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tmj ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tR ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_npis tK0 tnf ∈ lrel $ >
+  $ G ⇒ ra_add tnf tm tam ∈ lrel $ >
+  $ G ⇒ ra_rehead ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ tR ta te3 trhs0 ∈ lrel $ >
+  $ G ⇒ ra_rehead tc1 trhs0 tnf tmj trhs ∈ lrel $ >
+  $ G ⇒ ra_motives td tnp tv ⟨ kc_nz , ∅ ⟩ tt tM2 ∈ lrel $ >
+  $ G ⇒ ra_minors td tnp tn ⟨ kc_nz , ∅ ⟩ ⟨ kc_nz , ∅ ⟩ tt tN2 ∈ lrel $ >
+  $ G ⇒ tM2 ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ tN2 ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ ra_capp tM2 tp tQ1 ∈ lrel $ >
+  $ G ⇒ ra_capp tN2 tQ1 tQ2 ∈ lrel $ >
+  $ G ⇒ ra_capp tXl tQ2 tg ∈ lrel $ >
+  $ G ⇒ ra_add tam tn td1 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ td1 tnp te1 ∈ lrel $ >
+  $ G ⇒ ra_pargs te1 tam tn te2 ∈ lrel $ >
+  $ G ⇒ ra_pargs te2 tnf tm te3 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ td1 tnp tY ∈ lrel $ >
+  $ G ⇒ ra_rehead tY te3 tni tT2 te4 ∈ lrel $ >
+  $ G ⇒ ra_add tam tio tmo ∈ lrel $ >
+  $ G ⇒ ra_add tio ⟨ kc_s , scons ti ∅ ⟩ tn ∈ lrel $ >
+  $ G ⇒ ra_rehead tY ⟨ kc_bvar , scons tmo ∅ ⟩ tni tT2 tT0 ∈ lrel $ >
+  $ G ⇒ tT0 ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_clift tmn tX tXl ∈ lrel $ >
+  $ G ⇒ ra_clen tX tnf ∈ lrel $ >
+  $ G ⇒ ra_capp tX tp tQ ∈ lrel $ >
+  $ G ⇒ ra_pis tX tB tK2 ∈ lrel $ >
+  $ G ⇒ ra_closed tnp tK2 ∈ lrel $ >
+  $ G ⇒ ra_add tm tn tmn ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ td1 tnp tc1 ∈ lrel $ >
+  $ G ⇒ ra_pargs tc1 ⟨ kc_nz , ∅ ⟩ tnf tmj ∈ lrel $ >
+  $ G ⇒ ra_lift tmn tnf tB tT2 ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tB tsl ∈ lrel $ >
+  $ G ⇒ ra_add tnp tni tsl ∈ lrel $ >
+  $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tK0 tK2 ∈ lrel $ >
+  $ G ⇒ ra_rec_rhs td tv ti tc tR ∈ lrel $ >
+  $ G ⇒ ra_nidx td ti tni ∈ lrel $ >
+  $ G ⇒ tl = ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ $ >
+  $ G ⇒ tT = ⟨ kc_app , scons tT0 (scons tmj ∅) ⟩ $ >
+  $ G ⇒ tl ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tT ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_ind_nested td tN ∈ lrel $ >
+  $ G ⇒ ra_crst td tN tg tg1 ∈ lrel $ >
+  $ G ⇒ tg ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ ti ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ ra_add tnp tn ta0 ∈ lrel $ >
+  $ G ⇒ ra_add ta0 tm ta ∈ lrel $ >
+  $ G ⇒ ra_rst td tN tl z1 ∈ lrel $ >
+  $ G ⇒ ra_rst td tN tT z2 ∈ lrel $ >
+  $ G ⇒ ra_rst td tN trhs z3 ∈ lrel $ >
+  $ G ⇒ dt u (mcv H) z1 w r = dt u (mcv H) z3 w r ∧ dt u (mcv H) z1 w r ∈ dt u (mcv H) z2 w r $;
+
+--| The two parts of a well-sorted appended context (`capp`) are contexts (the converse of `capp_ctx`).
+theorem capp_ctx_inv (G: hyps) (t1 t2 t3: set): $ G ⇒ ra_capp t1 t2 t3 ∈ lrel $ > $ G ⇒ t3 ∊ ofsort lsig lopen ks_ctx $ > $ G ⇒ t1 ∊ ofsort lsig lopen ks_ctx ∧ t2 ∊ ofsort lsig lopen ks_ctx $;
+
+--| `ci_wf1n` with `iota_lhs` inverted: its counts are the block's (`ind_arity`), and the type is the motive's variable
+--| at the indices applied to the major premise.
+theorem ci_wf2 (G: hyps) (H J: class) (u w r tg tg1 tl tN ta0 z1 z2 z3 td tv ti tc tb tp tt tnp tn tm tF tE tK0 tK2 te4 tmj tM2 tN2 tR tc1 trhs0 tnf trhs ta te3 tQ1 tQ2 tXl tmn tX tQ tB tT: set):
+  $ G ⇒ iwf u H J tg1 td w r $ >
+  $ G ⇒ hctor ⊆ H $ >
+  $ G ⇒ hrec ⊆ H $ >
+  $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
+  $ G ⇒ ra_clen tp tnp ∈ lrel $ >
+  $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
+  $ G ⇒ ra_nth_ty tt ti tF tE ∈ lrel $ >
+  $ G ⇒ ra_nth_ctor tE tc tK0 ∈ lrel $ >
+  $ G ⇒ ra_elim_ok tg1 td tv ∈ lrel3 J $ >
   $ G ⇒ te4 ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ tmj ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ tR ∊ ofsort lsig lopen ks_expr $ >
@@ -320,49 +418,81 @@ theorem ci_wf2 (G: hyps) (H J: class) (u w r r0 tg tgw td tv ti tc tb tp tt tnp 
   $ G ⇒ ra_closed tnp tK2 ∈ lrel $ >
   $ G ⇒ ra_add tm tn tmn ∈ lrel $ >
   $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tK0 tK2 ∈ lrel $ >
-  $ G ⇒ r ∊ sat u (mcv H) tg w $ >
   $ G ⇒ ra_rec_rhs td tv ti tc tR ∈ lrel $ >
+  $ G ⇒ tl = ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ $ >
+  $ G ⇒ tl ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tT ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_ind_nested td tN ∈ lrel $ >
+  $ G ⇒ ra_crst td tN tg tg1 ∈ lrel $ >
+  $ G ⇒ tg ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ ti ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ ra_add tnp tn ta0 ∈ lrel $ >
+  $ G ⇒ ra_add ta0 tm ta ∈ lrel $ >
+  $ G ⇒ ra_rst td tN tl z1 ∈ lrel $ >
+  $ G ⇒ ra_rst td tN tT z2 ∈ lrel $ >
+  $ G ⇒ ra_rst td tN trhs z3 ∈ lrel $ >
   $ G ⇒ ra_iota_lhs td tv ti tc tnf tB te3 tc1 tmj te4 tT ∈ lrel $ >
   $ G ⇒ ra_ind_arity td tnp tn tm ∈ lrel $ >
-  $ G ⇒ tT ∊ ofsort lsig lopen ks_expr $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r = dt u (mcv H) trhs w r ∧ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r ∈ dt u (mcv H) tT w r $;
+  $ G ⇒ dt u (mcv H) z1 w r = dt u (mcv H) z3 w r ∧ dt u (mcv H) z1 w r ∈ dt u (mcv H) z2 w r $;
 
 --| `ci_wf2` with `iota_tel` and `ind_arity` inverted: the fields' context and the result from `psplit_pis`, the
 --| closedness of the constructor's type with the types put in from `ind_wf` (`ctor_closed_add`, `sinst_closed`).
-theorem ci_wf3 (G: hyps) (H J: class) (u w r r0 tg tgw td tv ti tc tnp tn tm te4 tmj tR tc1 trhs0 tnf trhs ta te3 tX tB tT: set):
-  $ G ⇒ iwf u H J tgw td w r0 $ >
+theorem ci_wf3 (G: hyps) (H J: class) (u w r tg tg1 tl tN ta0 z1 z2 z3 td tv ti tc tnp tn tm te4 tmj tR tc1 trhs0 tnf trhs ta te3 tX tB tT: set):
+  $ G ⇒ iwf u H J tg1 td w r $ >
   $ G ⇒ hctor ⊆ H $ >
   $ G ⇒ hrec ⊆ H $ >
-  $ G ⇒ ra_elim_ok tgw td tv ∈ lrel3 J $ >
+  $ G ⇒ ra_elim_ok tg1 td tv ∈ lrel3 J $ >
   $ G ⇒ te4 ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ tmj ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ tR ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ ra_rehead ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ tR ta te3 trhs0 ∈ lrel $ >
   $ G ⇒ ra_rehead tc1 trhs0 tnf tmj trhs ∈ lrel $ >
-  $ G ⇒ r ∊ sat u (mcv H) tg w $ >
   $ G ⇒ ra_rec_rhs td tv ti tc tR ∈ lrel $ >
+  $ G ⇒ tl = ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ $ >
+  $ G ⇒ tl ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ tT ∊ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ra_ind_nested td tN ∈ lrel $ >
+  $ G ⇒ ra_crst td tN tg tg1 ∈ lrel $ >
+  $ G ⇒ tg ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ ti ∊ ofsort lsig lopen ks_nat $ >
+  $ G ⇒ ra_add tnp tn ta0 ∈ lrel $ >
+  $ G ⇒ ra_add ta0 tm ta ∈ lrel $ >
+  $ G ⇒ ra_rst td tN tl z1 ∈ lrel $ >
+  $ G ⇒ ra_rst td tN tT z2 ∈ lrel $ >
+  $ G ⇒ ra_rst td tN trhs z3 ∈ lrel $ >
   $ G ⇒ ra_iota_lhs td tv ti tc tnf tB te3 tc1 tmj te4 tT ∈ lrel $ >
   $ G ⇒ ra_ind_arity td tnp tn tm ∈ lrel $ >
-  $ G ⇒ tT ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ ra_iota_tel td tv ti tc tX tB tnf tg ∈ lrel $ >
-  $ G ⇒ tg ∊ ofsort lsig lopen ks_ctx $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r = dt u (mcv H) trhs w r ∧ dt u (mcv H) ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ w r ∈ dt u (mcv H) tT w r $;
+  $ G ⇒ dt u (mcv H) z1 w r = dt u (mcv H) z3 w r ∧ dt u (mcv H) z1 w r ∈ dt u (mcv H) z2 w r $;
 
---| The closed iota rule in the model from the rule's premises (`ind_iota_eq`), for a block without nested occurrences:
---| `iota_eq` inverted, the sorts of its parts from those of the two sides, then `ci_wf3`. At every valuation of the
---| rule's context, the left-hand side has the value of the right-hand side, an element of the type's value. No typing
---| premise.
-theorem ind_iota_eq_rule (G: hyps) (H J: class) (u w r tg td tv ti tc tl trhs tT: set):
-  $ G ⇒ iwf u H J tg td w r $ >
+--| The closed iota rule in the model from the rule's premises (`ind_iota_eq`): `iota_eq` inverted, the sorts of its
+--| parts from those of the two sides, then `ci_wf3`. At every valuation of the rule's restored context `tg1`, the
+--| restored left-hand side has the value of the restored right-hand side, an element of the restored type's value.
+--| No typing premise.
+theorem ind_iota_eq_rule (G: hyps) (H J: class) (u w r tg tg1 td tv ti tc tN tl trhs tT z1 z2 z3: set):
+  $ G ⇒ iwf u H J tg1 td w r $ >
   $ G ⇒ hctor ⊆ H $ >
   $ G ⇒ hrec ⊆ H $ >
-  $ G ⇒ ra_elim_ok tg td tv ∈ lrel3 J $ >
+  $ G ⇒ ra_elim_ok tg1 td tv ∈ lrel3 J $ >
   $ G ⇒ tl ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ trhs ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ tT ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ tg ∊ ofsort lsig lopen ks_ctx $ >
+  $ G ⇒ ti ∊ ofsort lsig lopen ks_nat $ >
   $ G ⇒ ra_iota_eq td ti tc tv tg tl trhs tT ∈ lrel $ >
-  $ G ⇒ dt u (mcv H) tl w r = dt u (mcv H) trhs w r ∧ dt u (mcv H) tl w r ∈ dt u (mcv H) tT w r $;
+  $ G ⇒ ra_ind_nested td tN ∈ lrel $ >
+  $ G ⇒ ra_crst td tN tg tg1 ∈ lrel $ >
+  $ G ⇒ ra_rst td tN tl z1 ∈ lrel $ >
+  $ G ⇒ ra_rst td tN tT z2 ∈ lrel $ >
+  $ G ⇒ ra_rst td tN trhs z3 ∈ lrel $ >
+  $ G ⇒ dt u (mcv H) z1 w r = dt u (mcv H) z3 w r ∧ dt u (mcv H) z1 w r ∈ dt u (mcv H) z2 w r $;
+
+
+-- --------------------------------------------------------------------------
+-- The spec's rule
+-- --------------------------------------------------------------------------
+
+theorem ind_iota_eq (D: ind) (N: ctx) (i c: nat) (v: lvl) (Dl0 Dl: ctx) (lhs0 rhs0 T0 lhs rhs T: expr): $ ind_wf Dl D $ > $ elim_ok Dl D v $ > $ iota_eq D i c v Dl0 lhs0 rhs0 T0 $ > $ ind_nested D N $ > $ crst D N Dl0 Dl $ > $ rst D N lhs0 lhs $ > $ rst D N rhs0 rhs $ > $ rst D N T0 T $ > $ deq Dl lhs rhs T $;
 
 --| A valuation `r` of a closed context `tg` appended to a base context `tg0` begins with a valuation `c` of `tg`
 --| itself (`pis_esat_closed` at depth `0`), and every expression closed below `tg`'s length has the same value at
