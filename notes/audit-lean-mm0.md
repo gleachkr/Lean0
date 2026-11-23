@@ -888,6 +888,16 @@ encoding generated from the spec (`scripts/tg-lean.py --check`, which reads the 
 its own parser) is byte for byte the same. The block between the `lean0-check` marks keeps the
 prefix form.
 
+Substitution, lifting and lookup (2026-11-23), in the same manner: `⟮ e [ #k ↦ a ] = e2 ⟯` for
+`inst k e a e2`, `⟮ₗ e [ #k ↑ n ] = e2 ⟯` for `lift n k e e2` (the variables from `#k` up raised
+by `n`), `⟮ₖ G ∋ #k : A ⟯` for `lookup G k A`, and at levels `⟮ᵤ l [ n ↦ a ] = l2 ⟯` for
+`lsubst n l a l2` (ASCII: `{:=| e [ #k := a ] = e2 |}`, `{up| e [ #k ^ n ] = e2 |}`,
+`{at| G !! #k : A |}`, `{u:=| l [ n := a ] = l2 |}`). The `#` before `k` is a token of the
+notation (the delimiter that also writes a bound variable), not an application of `bvar`: the
+argument is the number `k`. Checked as before: a certificate made before the change (`induct`)
+verifies with both verifiers against the new text, in both modes, and `scripts/tg-lean.py
+--check` passes unchanged.
+
 The generated statements keep the prefix form (`deq G e e2 A`), which MM0 allows for every
 term with or without a notation; the statement checker reads only that form. One notation
 token looks like an identifier (`[a-zA-Z_][a-zA-Z0-9_]*`): `Sort`. A verifier reads such a token

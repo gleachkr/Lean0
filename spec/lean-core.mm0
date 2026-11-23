@@ -72,11 +72,15 @@ delimiter $ ( ) . # $;
 --| `⟪ a + b = c ⟫` (`badd`), `⟪₁ a + b + 1 = c ⟫` (`baddc`), `⟪ₛ a + 1 = b ⟫`
 --| (`bsucc`), `⟪₂ 2 * a = b ⟫` (`bdbl`), `⟪ₘ a * b = c ⟫` (`bmul`),
 --| `⟪ₚ a ^ b = c ⟫` (`bpow`), and `⟪ₐ a &&& b = c ⟫`, `⟪ₒ a ||| b = c ⟫`,
---| `⟪ₓ a ^^^ b = c ⟫` (`band`, `bor`, `bxor`). The Unicode ones have an ASCII form
+--| `⟪ₓ a ^^^ b = c ⟫` (`band`, `bor`, `bxor`). Likewise substitution, lifting
+--| and lookup: `⟮ e [ #k ↦ a ] = e2 ⟯` (`inst k e a e2`), `⟮ₗ e [ #k ↑ n ] = e2 ⟯`
+--| (`lift n k e e2`), `⟮ₖ G ∋ #k : A ⟯` (`lookup G k A`), and at levels
+--| `⟮ᵤ l [ n ↦ a ] = l2 ⟯` (`lsubst n l a l2`). The Unicode ones have an ASCII form
 --| too (`[[ G |- e == e2 : A ]]`, `<< G |- e : A >>`, `\ A. e`, `\Pi A. B`, `\/`,
 --| `<=`, `~=`, `{| i + n = j |}`, and `{+| .. |}`, `{+1| .. |}`, `{s| .. |}`,
 --| `{2| .. |}`, `{*| .. |}`, `{^| .. |}`, `{and| .. |}`, `{or| .. |}`,
---| `{xor| .. |}`), declared first; the Unicode one is declared last, the form
+--| `{xor| .. |}`, `{:=| e [ #k := a ] = e2 |}`, `{up| e [ #k ^ n ] = e2 |}`,
+--| `{at| G !! #k : A |}`, `{u:=| l [ n := a ] = l2 |}`), declared first; the Unicode one is declared last, the form
 --| Aufbau prints. A term with a notation can still be written as an application
 --| (`deq G e e2 A`), as the generated statements are.
 --|
@@ -165,17 +169,20 @@ axiom linst_imax (S: lvls) (a b a2 b2: lvl):
   $ linst S a a2 $ > $ linst S b b2 $ > $ linst S (limax a b) (limax a2 b2) $;
 axiom linst_param (S: lvls) (n: nat) (a: lvl): $ lnth S n a $ > $ linst S (lparam n) a $;
 
---| `lsubst n l a l2`: `l2` is `l` with `lparam n` replaced by `a`.
+--| `⟮ᵤ l [ n ↦ a ] = l2 ⟯` (`lsubst n l a l2`): `l2` is `l` with `lparam n`
+--| replaced by `a`.
 term lsubst: nat > lvl > lvl > lvl > wff;
-axiom lsubst_z (n: nat) (a: lvl): $ lsubst n lz a lz $;
-axiom lsubst_s (n: nat) (b a b2: lvl): $ lsubst n b a b2 $ > $ lsubst n (ls b) a (ls b2) $;
+notation lsubst (n: nat) (l a l2: lvl): wff = (${u:=|$:0) l ($[$:0) n ($:=$:0) a ($]$:0) ($=$:0) l2 ($|}$:0);
+notation lsubst (n: nat) (l a l2: lvl): wff = ($⟮ᵤ$:0) l ($[$:0) n ($↦$:0) a ($]$:0) ($=$:0) l2 ($⟯$:0);
+axiom lsubst_z (n: nat) (a: lvl): $ ⟮ᵤ lz [ n ↦ a ] = lz ⟯ $;
+axiom lsubst_s (n: nat) (b a b2: lvl): $ ⟮ᵤ b [ n ↦ a ] = b2 ⟯ $ > $ ⟮ᵤ ls b [ n ↦ a ] = ls b2 ⟯ $;
 axiom lsubst_max (n: nat) (b c a b2 c2: lvl):
-  $ lsubst n b a b2 $ > $ lsubst n c a c2 $ > $ lsubst n (b ⊔ c) a (b2 ⊔ c2) $;
+  $ ⟮ᵤ b [ n ↦ a ] = b2 ⟯ $ > $ ⟮ᵤ c [ n ↦ a ] = c2 ⟯ $ > $ ⟮ᵤ b ⊔ c [ n ↦ a ] = b2 ⊔ c2 ⟯ $;
 axiom lsubst_imax (n: nat) (b c a b2 c2: lvl):
-  $ lsubst n b a b2 $ > $ lsubst n c a c2 $ > $ lsubst n (limax b c) a (limax b2 c2) $;
-axiom lsubst_eq (n: nat) (a: lvl): $ lsubst n (lparam n) a a $;
-axiom lsubst_lt (n m: nat) (a: lvl): $ m < n $ > $ lsubst n (lparam m) a (lparam m) $;
-axiom lsubst_gt (n m: nat) (a: lvl): $ n < m $ > $ lsubst n (lparam m) a (lparam m) $;
+  $ ⟮ᵤ b [ n ↦ a ] = b2 ⟯ $ > $ ⟮ᵤ c [ n ↦ a ] = c2 ⟯ $ > $ ⟮ᵤ limax b c [ n ↦ a ] = limax b2 c2 ⟯ $;
+axiom lsubst_eq (n: nat) (a: lvl): $ ⟮ᵤ lparam n [ n ↦ a ] = a ⟯ $;
+axiom lsubst_lt (n m: nat) (a: lvl): $ m < n $ > $ ⟮ᵤ lparam m [ n ↦ a ] = lparam m ⟯ $;
+axiom lsubst_gt (n m: nat) (a: lvl): $ n < m $ > $ ⟮ᵤ lparam m [ n ↦ a ] = lparam m ⟯ $;
 
 -- Expressions (VExpr.lean:7-13), without `const` ---------------------------
 
@@ -218,38 +225,46 @@ axiom closed_pi (k: nat) (A b: expr):
   $ closed k A $ > $ closed (s k) b $ > $ closed k (Π A. b) $;
 axiom closed_cst (k: nat) (a: atom) (S: lvls): $ closed k (cst a S) $;
 
---| `lift n k e e2`: `e2 = liftN n e k` (VExpr.lean:17, 38-44).
+--| `⟮ₗ e [ #k ↑ n ] = e2 ⟯` (`lift n k e e2`): `e2` is `e` with the variables
+--| from `#k` up raised by `n`; those below the cutoff `k` are bound inside
+--| `e` and stay (`e2 = liftN n e k`, VExpr.lean:17, 38-44).
 term lift: nat > nat > expr > expr > wff;
-axiom lift_bvar_lt (n k i: nat): $ i < k $ > $ lift n k #i #i $;
+notation lift (n k: nat) (e e2: expr): wff = (${up|$:0) e ($[$:0) ($#$:max) k ($^$:0) n ($]$:0) ($=$:0) e2 ($|}$:0);
+notation lift (n k: nat) (e e2: expr): wff = ($⟮ₗ$:0) e ($[$:0) ($#$:max) k ($↑$:0) n ($]$:0) ($=$:0) e2 ($⟯$:0);
+axiom lift_bvar_lt (n k i: nat): $ i < k $ > $ ⟮ₗ #i [ #k ↑ n ] = #i ⟯ $;
 axiom lift_bvar_ge (n k i j: nat):
-  $ k ≤ i $ > $ ⦃ i + n = j ⦄ $ > $ lift n k #i #j $;
-axiom lift_srt (n k: nat) (l: lvl): $ lift n k (Sort l) (Sort l) $;
+  $ k ≤ i $ > $ ⦃ i + n = j ⦄ $ > $ ⟮ₗ #i [ #k ↑ n ] = #j ⟯ $;
+axiom lift_srt (n k: nat) (l: lvl): $ ⟮ₗ Sort l [ #k ↑ n ] = Sort l ⟯ $;
 axiom lift_app (n k: nat) (f a f2 a2: expr):
-  $ lift n k f f2 $ > $ lift n k a a2 $ > $ lift n k (f @ a) (f2 @ a2) $;
+  $ ⟮ₗ f [ #k ↑ n ] = f2 ⟯ $ > $ ⟮ₗ a [ #k ↑ n ] = a2 ⟯ $ > $ ⟮ₗ f @ a [ #k ↑ n ] = f2 @ a2 ⟯ $;
 axiom lift_lam (n k: nat) (A b A2 b2: expr):
-  $ lift n k A A2 $ > $ lift n (s k) b b2 $ > $ lift n k (λ A. b) (λ A2. b2) $;
+  $ ⟮ₗ A [ #k ↑ n ] = A2 ⟯ $ > $ ⟮ₗ b [ #(s k) ↑ n ] = b2 ⟯ $ > $ ⟮ₗ λ A. b [ #k ↑ n ] = λ A2. b2 ⟯ $;
 axiom lift_pi (n k: nat) (A b A2 b2: expr):
-  $ lift n k A A2 $ > $ lift n (s k) b b2 $ > $ lift n k (Π A. b) (Π A2. b2) $;
+  $ ⟮ₗ A [ #k ↑ n ] = A2 ⟯ $ > $ ⟮ₗ b [ #(s k) ↑ n ] = b2 ⟯ $ > $ ⟮ₗ Π A. b [ #k ↑ n ] = Π A2. b2 ⟯ $;
 --| Admissible (by induction on `e`): `ClosedN.liftN_eq`, VExpr.lean:117.
 axiom lift_closed (n j k: nat) (e: expr):
-  $ closed j e $ > $ j ≤ k $ > $ lift n k e e $;
+  $ closed j e $ > $ j ≤ k $ > $ ⟮ₗ e [ #k ↑ n ] = e ⟯ $;
 
---| `inst k e a e2`: `e2 = inst e a k` (VExpr.lean:187-188, 240-246).
+--| `⟮ e [ #k ↦ a ] = e2 ⟯` (`inst k e a e2`): `e2` is `e` with `a` for the
+--| variable `#k`, and the variables above it lowered by one
+--| (`e2 = inst e a k`, VExpr.lean:187-188, 240-246).
 term inst: nat > expr > expr > expr > wff;
-axiom inst_bvar_lt (k i: nat) (a: expr): $ i < k $ > $ inst k #i a #i $;
-axiom inst_bvar_eq (k: nat) (a a2: expr): $ lift k 0 a a2 $ > $ inst k #k a a2 $;
+notation inst (k: nat) (e a e2: expr): wff = (${:=|$:0) e ($[$:0) ($#$:max) k ($:=$:0) a ($]$:0) ($=$:0) e2 ($|}$:0);
+notation inst (k: nat) (e a e2: expr): wff = ($⟮$:0) e ($[$:0) ($#$:max) k ($↦$:0) a ($]$:0) ($=$:0) e2 ($⟯$:0);
+axiom inst_bvar_lt (k i: nat) (a: expr): $ i < k $ > $ ⟮ #i [ #k ↦ a ] = #i ⟯ $;
+axiom inst_bvar_eq (k: nat) (a a2: expr): $ ⟮ₗ a [ #0 ↑ k ] = a2 ⟯ $ > $ ⟮ #k [ #k ↦ a ] = a2 ⟯ $;
 axiom inst_bvar_gt (k i: nat) (a: expr):
-  $ k ≤ i $ > $ inst k #(s i) a #i $;
-axiom inst_srt (k: nat) (l: lvl) (a: expr): $ inst k (Sort l) a (Sort l) $;
+  $ k ≤ i $ > $ ⟮ #(s i) [ #k ↦ a ] = #i ⟯ $;
+axiom inst_srt (k: nat) (l: lvl) (a: expr): $ ⟮ Sort l [ #k ↦ a ] = Sort l ⟯ $;
 axiom inst_app (k: nat) (f x a f2 x2: expr):
-  $ inst k f a f2 $ > $ inst k x a x2 $ > $ inst k (f @ x) a (f2 @ x2) $;
+  $ ⟮ f [ #k ↦ a ] = f2 ⟯ $ > $ ⟮ x [ #k ↦ a ] = x2 ⟯ $ > $ ⟮ f @ x [ #k ↦ a ] = f2 @ x2 ⟯ $;
 axiom inst_lam (k: nat) (A b a A2 b2: expr):
-  $ inst k A a A2 $ > $ inst (s k) b a b2 $ > $ inst k (λ A. b) a (λ A2. b2) $;
+  $ ⟮ A [ #k ↦ a ] = A2 ⟯ $ > $ ⟮ b [ #(s k) ↦ a ] = b2 ⟯ $ > $ ⟮ λ A. b [ #k ↦ a ] = λ A2. b2 ⟯ $;
 axiom inst_pi (k: nat) (A b a A2 b2: expr):
-  $ inst k A a A2 $ > $ inst (s k) b a b2 $ > $ inst k (Π A. b) a (Π A2. b2) $;
+  $ ⟮ A [ #k ↦ a ] = A2 ⟯ $ > $ ⟮ b [ #(s k) ↦ a ] = b2 ⟯ $ > $ ⟮ Π A. b [ #k ↦ a ] = Π A2. b2 ⟯ $;
 --| Admissible (by induction on `e`): `ClosedN.instN_eq`, VExpr.lean:482.
 axiom inst_closed (j k: nat) (e a: expr):
-  $ closed j e $ > $ j ≤ k $ > $ inst k e a e $;
+  $ closed j e $ > $ j ≤ k $ > $ ⟮ e [ #k ↦ a ] = e ⟯ $;
 
 -- Contexts (Typing/Basic.lean:6-8) -----------------------------------------
 
@@ -261,11 +276,15 @@ prefix nil: $[]$ prec max;
 term cons: expr > ctx > ctx;
 infixr cons: $::$ prec 60;
 
+--| `⟮ₖ G ∋ #k : A ⟯` (`lookup G k A`): the variable `#k` of `G` has type `A`,
+--| its entry lifted over the entries up to it.
 term lookup: ctx > nat > expr > wff;
+notation lookup (G: ctx) (k: nat) (A: expr): wff = (${at|$:0) G ($!!$:0) ($#$:max) k ($:$:0) A ($|}$:0);
+notation lookup (G: ctx) (k: nat) (A: expr): wff = ($⟮ₖ$:0) G ($∋$:0) ($#$:max) k ($:$:0) A ($⟯$:0);
 axiom lookup_z (A A2: expr) (G: ctx):
-  $ lift 1 0 A A2 $ > $ lookup (A :: G) 0 A2 $;
+  $ ⟮ₗ A [ #0 ↑ 1 ] = A2 ⟯ $ > $ ⟮ₖ A :: G ∋ #0 : A2 ⟯ $;
 axiom lookup_s (A B B2: expr) (G: ctx) (n: nat):
-  $ lookup G n B $ > $ lift 1 0 B B2 $ > $ lookup (A :: G) (s n) B2 $;
+  $ ⟮ₖ G ∋ #n : B ⟯ $ > $ ⟮ₗ B [ #0 ↑ 1 ] = B2 ⟯ $ > $ ⟮ₖ A :: G ∋ #(s n) : B2 ⟯ $;
 
 --| `cinst k G0 A0 a G1 G`: `G1` is `G0` extended by `A0` and then `k` more
 --| entries, and `G` is `G1` without `A0`, with `a` substituted for it in the
@@ -273,7 +292,7 @@ axiom lookup_s (A B B2: expr) (G: ctx) (n: nat):
 term cinst: nat > ctx > expr > expr > ctx > ctx > wff;
 axiom cinst_z (G0: ctx) (A0 a: expr): $ cinst 0 G0 A0 a (A0 :: G0) G0 $;
 axiom cinst_s (k: nat) (G0 G1 G: ctx) (A0 a A A2: expr):
-  $ cinst k G0 A0 a G1 G $ > $ inst k A a A2 $ >
+  $ cinst k G0 A0 a G1 G $ > $ ⟮ A [ #k ↦ a ] = A2 ⟯ $ >
   $ cinst (s k) G0 A0 a (A :: G1) (A2 :: G) $;
 
 --| `cext n G G2`: `G2` is `G` extended by `n` more entries
@@ -342,7 +361,7 @@ notation ty (G: ctx) (e A: expr): wff = ($⟨$:0) G ($⊢$:0) e ($:$:0) A ($⟩$
 term sty: ctx > expr > expr > expr > expr > wff;
 axiom sty_nil (G: ctx) (h A: expr): $ sty G h A h A $;
 axiom sty_app (G: ctx) (h A f a B C C2: expr):
-  $ sty G h A f (Π B. C) $ > $ ⟨ G ⊢ a : B ⟩ $ > $ inst 0 C a C2 $ > $ sty G h A (f @ a) C2 $;
+  $ sty G h A f (Π B. C) $ > $ ⟨ G ⊢ a : B ⟩ $ > $ ⟮ C [ #0 ↦ a ] = C2 ⟯ $ > $ sty G h A (f @ a) C2 $;
 
 -- Level equivalence of expressions -----------------------------------------
 
@@ -404,18 +423,23 @@ axiom limax_zero_l (a: lvl): $ limax lz a ≈ a $;
 --| `imax 1 a = a`: if `a = 0` both are 0, otherwise `max 1 a = a`. nanoda's level `simplify`
 --| applies it (and `limax_zero_l`) whenever it puts a `Sort` in weak head normal form.
 axiom limax_one (a: lvl): $ limax (ls lz) a ≈ a $;
+--| `imax a (b+1) = max a (b+1)`: the second argument is not zero.
 axiom limax_succ (a b: lvl): $ limax a (ls b) ≈ a ⊔ ls b $;
 axiom limax_self (a: lvl): $ limax a a ≈ a $;
+--| `imax a (max b c) = max (imax a b) (imax a c)`: `max b c` is zero only
+--| when `b` and `c` are.
 axiom limax_max (a b c: lvl):
   $ limax a (b ⊔ c) ≈ limax a b ⊔ limax a c $;
+--| `imax a (imax b c) = max (imax a c) (imax b c)`: both sides are zero when
+--| `c` is, and `max a (max b c)` otherwise.
 axiom limax_imax (a b c: lvl):
   $ limax a (limax b c) ≈ limax a c ⊔ limax b c $;
 
 --| Case split on `lparam n`: zero, or the successor of some level (which is
 --| again called `lparam n`).
 axiom leqv_cases (n: nat) (l r l0 r0 l1 r1: lvl):
-  $ lsubst n l lz l0 $ > $ lsubst n r lz r0 $ > $ l0 ≈ r0 $ >
-  $ lsubst n l (ls (lparam n)) l1 $ > $ lsubst n r (ls (lparam n)) r1 $ > $ l1 ≈ r1 $ >
+  $ ⟮ᵤ l [ n ↦ lz ] = l0 ⟯ $ > $ ⟮ᵤ r [ n ↦ lz ] = r0 ⟯ $ > $ l0 ≈ r0 $ >
+  $ ⟮ᵤ l [ n ↦ ls (lparam n) ] = l1 ⟯ $ > $ ⟮ᵤ r [ n ↦ ls (lparam n) ] = r1 ⟯ $ > $ l1 ≈ r1 $ >
   $ l ≈ r $;
 --| Instantiating the parameters of an equivalence.
 axiom leqv_inst (S: lvls) (l r l2 r2: lvl):
@@ -423,31 +447,43 @@ axiom leqv_inst (S: lvls) (l r l2 r2: lvl):
 
 -- The judgment (IsDefEq, Typing/Basic.lean:18-56) --------------------------
 
+--| A variable has the type its context gives it.
 axiom bvar (G: ctx) (i: nat) (A: expr):
-  $ lookup G i A $ > $ ⟨ G ⊢ #i : A ⟩ $;
+  $ ⟮ₖ G ∋ #i : A ⟯ $ > $ ⟨ G ⊢ #i : A ⟩ $;
 axiom symm (G: ctx) (e e2 A: expr):
   $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ ⟦ G ⊢ e2 ≡ e : A ⟧ $;
 axiom trans (G: ctx) (e1 e2 e3 A: expr):
   $ ⟦ G ⊢ e1 ≡ e2 : A ⟧ $ > $ ⟦ G ⊢ e2 ≡ e3 : A ⟧ $ > $ ⟦ G ⊢ e1 ≡ e3 : A ⟧ $;
+--| `Sort l ≡ Sort l2 : Sort (l+1)` for equivalent levels `l`, `l2`.
 axiom sortDF (G: ctx) (l l2: lvl):
   $ l ≈ l2 $ > $ ⟦ G ⊢ Sort l ≡ Sort l2 : Sort (ls l) ⟧ $;
+--| `f a ≡ f2 a2 : B[a]` from `f ≡ f2 : (x : A) → B` and `a ≡ a2 : A`.
 axiom appDF (G: ctx) (f f2 A B a a2 R: expr):
-  $ ⟦ G ⊢ f ≡ f2 : Π A. B ⟧ $ > $ ⟦ G ⊢ a ≡ a2 : A ⟧ $ > $ inst 0 B a R $ >
+  $ ⟦ G ⊢ f ≡ f2 : Π A. B ⟧ $ > $ ⟦ G ⊢ a ≡ a2 : A ⟧ $ > $ ⟮ B [ #0 ↦ a ] = R ⟯ $ >
   $ ⟦ G ⊢ f @ a ≡ f2 @ a2 : R ⟧ $;
+--| `(fun x : A => b) ≡ (fun x : A2 => b2) : (x : A) → B` from
+--| `A ≡ A2 : Sort u` and, with `x : A`, `b ≡ b2 : B`.
 axiom lamDF (G: ctx) (u: lvl) (A A2 b b2 B: expr):
   $ ⟦ G ⊢ A ≡ A2 : Sort u ⟧ $ > $ ⟦ A :: G ⊢ b ≡ b2 : B ⟧ $ >
   $ ⟦ G ⊢ λ A. b ≡ λ A2. b2 : Π A. B ⟧ $;
+--| `((x : A) → B) ≡ ((x : A2) → B2) : Sort (imax u v)` from
+--| `A ≡ A2 : Sort u` and, with `x : A`, `B ≡ B2 : Sort v`.
 axiom forallEDF (G: ctx) (u v: lvl) (A A2 B B2: expr):
   $ ⟦ G ⊢ A ≡ A2 : Sort u ⟧ $ > $ ⟦ A :: G ⊢ B ≡ B2 : Sort v ⟧ $ >
   $ ⟦ G ⊢ Π A. B ≡ Π A2. B2 : Sort (limax u v) ⟧ $;
+--| Conversion: `e ≡ e2 : B` from `e ≡ e2 : A` and `A ≡ B : Sort u`.
 axiom defeqDF (G: ctx) (u: lvl) (A B e e2: expr):
   $ ⟦ G ⊢ A ≡ B : Sort u ⟧ $ > $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ ⟦ G ⊢ e ≡ e2 : B ⟧ $;
+--| Beta: `(fun x : A => e) a ≡ e[a] : B[a]`, for `e : B` with `x : A`, and
+--| `a : A`.
 axiom beta (G: ctx) (A e B a r R: expr):
-  $ ⟨ A :: G ⊢ e : B ⟩ $ > $ ⟨ G ⊢ a : A ⟩ $ > $ inst 0 e a r $ > $ inst 0 B a R $ >
+  $ ⟨ A :: G ⊢ e : B ⟩ $ > $ ⟨ G ⊢ a : A ⟩ $ > $ ⟮ e [ #0 ↦ a ] = r ⟯ $ > $ ⟮ B [ #0 ↦ a ] = R ⟯ $ >
   $ ⟦ G ⊢ (λ A. e) @ a ≡ r : R ⟧ $;
+--| Eta: `(fun x : A => e x) ≡ e : (x : A) → B`, for `e : (x : A) → B`.
 axiom eta (G: ctx) (A B e e1: expr):
-  $ ⟨ G ⊢ e : Π A. B ⟩ $ > $ lift 1 0 e e1 $ >
+  $ ⟨ G ⊢ e : Π A. B ⟩ $ > $ ⟮ₗ e [ #0 ↑ 1 ] = e1 ⟯ $ >
   $ ⟦ G ⊢ λ A. e1 @ #0 ≡ e : Π A. B ⟧ $;
+--| Proof irrelevance: `h ≡ h2 : p` for two proofs of a proposition `p`.
 axiom proofIrrel (G: ctx) (p h h2: expr):
   $ ⟨ G ⊢ p : Prop ⟩ $ > $ ⟨ G ⊢ h : p ⟩ $ > $ ⟨ G ⊢ h2 : p ⟩ $ >
   $ ⟦ G ⊢ h ≡ h2 : p ⟧ $;
@@ -458,14 +494,14 @@ axiom proofIrrel (G: ctx) (p h h2: expr):
 --| notes/audit-lean-mm0.md §6).
 axiom instDF (k: nat) (G0 G1 G: ctx) (A0 a e e2 A r r2 R: expr):
   $ ⟨ G0 ⊢ a : A0 ⟩ $ > $ cinst k G0 A0 a G1 G $ > $ ⟦ G1 ⊢ e ≡ e2 : A ⟧ $ >
-  $ inst k e a r $ > $ inst k e2 a r2 $ > $ inst k A a R $ >
+  $ ⟮ e [ #k ↦ a ] = r ⟯ $ > $ ⟮ e2 [ #k ↦ a ] = r2 ⟯ $ > $ ⟮ A [ #k ↦ a ] = R ⟯ $ >
   $ ⟦ G ⊢ r ≡ r2 : R ⟧ $;
 
 --| Weakening: `IsDefEq.weakN`, Typing/Lemmas.lean:501, for `Ctx.LiftN n 0`
 --| (see notes/audit-lean-mm0.md §6).
 axiom weakDF (n: nat) (G G2: ctx) (e e2 A r r2 R: expr):
   $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ cext n G G2 $ >
-  $ lift n 0 e r $ > $ lift n 0 e2 r2 $ > $ lift n 0 A R $ >
+  $ ⟮ₗ e [ #0 ↑ n ] = r ⟯ $ > $ ⟮ₗ e2 [ #0 ↑ n ] = r2 ⟯ $ > $ ⟮ₗ A [ #0 ↑ n ] = R ⟯ $ >
   $ ⟦ G2 ⊢ r ≡ r2 : R ⟧ $;
 
 -- Level equivalence of expressions -----------------------------------------
@@ -479,4 +515,5 @@ axiom eeqv_df (G: ctx) (e e2 A: expr): $ ⟨ G ⊢ e : A ⟩ $ > $ eeqv e e2 $ >
 --| `inh G A`: `A` is inhabited in `Γ`. Theorems are stated this way so that
 --| their proof terms stay inside the proof file.
 term inh: ctx > expr > wff;
+--| A type with a term is inhabited.
 axiom inh_i (G: ctx) (e A: expr): $ ⟨ G ⊢ e : A ⟩ $ > $ inh G A $;
