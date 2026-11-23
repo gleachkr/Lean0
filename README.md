@@ -180,10 +180,7 @@ checks the proofs against that text; `mm0-zig` can be used with the same
 arguments and input. `lean0 check` compares the statements with the export
 and prints the top-level theorems in Lean syntax.
 
-If `gen` reports a missing constant in the defining equations for a `Nat`
-operation, add the constant to the export list. For example, the derivations
-for `Nat.div` and `Nat.mod` require `instDecidableEqBool`. Unsupported
-declarations cause generation to fail. With `--keep-going`, Lean0 skips the
+Unsupported declarations cause generation to fail. With `--keep-going`, Lean0 skips the
 unsupported declarations and those that depend on them.
 
 ### Certify a standalone module

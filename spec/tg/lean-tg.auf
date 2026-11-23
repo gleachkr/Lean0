@@ -315,6 +315,11 @@ lemma v1_kc_choice_atom (G: hyps): $ G ⇒ kc_choice_atom ∈ ω $
 l1: $ G ⇒ kc_nonempty_blk ∈ ω $ by v1_kc_nonempty_blk
 l2: $ G ⇒ kc_choice_atom ∈ ω $ by omega_suc_c [l1]
 
+lemma v1_kc_le_blk (G: hyps): $ G ⇒ kc_le_blk ∈ ω $
+----
+l1: $ G ⇒ kc_choice_atom ∈ ω $ by v1_kc_choice_atom
+l2: $ G ⇒ kc_le_blk ∈ ω $ by omega_suc_c [l1]
+
 lemma v1_args_nz (G: hyps): $ G ⇒ ∅ ∈ fseq ω $
 ----
 l1: $ G ⇒ ∅ ∈ fseq ω $ by fseq_empty
@@ -587,8 +592,14 @@ lemma v1_args_choice_atom (G: hyps): $ G ⇒ ∅ ∈ fseq ω $
 ----
 l1: $ G ⇒ ∅ ∈ fseq ω $ by fseq_empty
 
+lemma v1_args_le_blk (G: hyps): $ G ⇒ ∅ ∈ fseq ω $
+----
+l1: $ G ⇒ ∅ ∈ fseq ω $ by fseq_empty
+
 -- The tails of the table `lsig`, from each constructor on.
-def v1_tl_choice_atom: class = $ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ $
+def v1_tl_le_blk: class = $ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ $
+
+def v1_tl_choice_atom: class = $ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ∪ v1_tl_le_blk $
 
 def v1_tl_nonempty_blk: class = $ csn ⟨ kc_nonempty_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ∪ v1_tl_choice_atom $
 
@@ -923,52 +934,59 @@ l248: $ G ⇒ ks_atom ∈ ω $ by v1_ks_atom
 l249: $ G ⇒ ∅ ∈ fseq ω $ by v1_args_choice_atom
 l250: $ G ⇒ ⟨ ks_atom , ∅ ⟩ ∈ ω × fseq ω $ by cxp_intro_c [l248, l249]
 l251: $ G ⇒ ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ∈ ω × (ω × fseq ω) $ by cxp_intro_c [l247, l250]
-l252: $ G ⇒ v1_tl_choice_atom ⊆ ω × (ω × fseq ω) $ by v1_cpr_subset_c [l251, l251]
-l253: $ G ⇒ v1_tl_nonempty_blk ⊆ ω × (ω × fseq ω) $ by cun_least [l246, l252]
-l254: $ G ⇒ v1_tl_quot_sound_atom ⊆ ω × (ω × fseq ω) $ by cun_least [l240, l253]
-l255: $ G ⇒ v1_tl_propext_atom ⊆ ω × (ω × fseq ω) $ by cun_least [l234, l254]
-l256: $ G ⇒ v1_tl_iff_blk ⊆ ω × (ω × fseq ω) $ by cun_least [l228, l255]
-l257: $ G ⇒ v1_tl_quot_ind ⊆ ω × (ω × fseq ω) $ by cun_least [l222, l256]
-l258: $ G ⇒ v1_tl_quot_lift ⊆ ω × (ω × fseq ω) $ by cun_least [l216, l257]
-l259: $ G ⇒ v1_tl_quot_mk ⊆ ω × (ω × fseq ω) $ by cun_least [l210, l258]
-l260: $ G ⇒ v1_tl_quot ⊆ ω × (ω × fseq ω) $ by cun_least [l204, l259]
-l261: $ G ⇒ v1_tl_eq_blk ⊆ ω × (ω × fseq ω) $ by cun_least [l198, l260]
-l262: $ G ⇒ v1_tl_nat_blk ⊆ ω × (ω × fseq ω) $ by cun_least [l192, l261]
-l263: $ G ⇒ v1_tl_proj ⊆ ω × (ω × fseq ω) $ by cun_least [l186, l262]
-l264: $ G ⇒ v1_tl_ind_rec ⊆ ω × (ω × fseq ω) $ by cun_least [l180, l263]
-l265: $ G ⇒ v1_tl_ind_ctor ⊆ ω × (ω × fseq ω) $ by cun_least [l174, l264]
-l266: $ G ⇒ v1_tl_ind_ty ⊆ ω × (ω × fseq ω) $ by cun_least [l168, l265]
-l267: $ G ⇒ v1_tl_ind_mkn ⊆ ω × (ω × fseq ω) $ by cun_least [l162, l266]
-l268: $ G ⇒ v1_tl_ccons ⊆ ω × (ω × fseq ω) $ by cun_least [l156, l267]
-l269: $ G ⇒ v1_tl_cnil ⊆ ω × (ω × fseq ω) $ by cun_least [l150, l268]
-l270: $ G ⇒ v1_tl_tcons ⊆ ω × (ω × fseq ω) $ by cun_least [l144, l269]
-l271: $ G ⇒ v1_tl_tnil ⊆ ω × (ω × fseq ω) $ by cun_least [l138, l270]
-l272: $ G ⇒ v1_tl_ind_mk ⊆ ω × (ω × fseq ω) $ by cun_least [l132, l271]
-l273: $ G ⇒ v1_tl_lit ⊆ ω × (ω × fseq ω) $ by cun_least [l126, l272]
-l274: $ G ⇒ v1_tl_bd1 ⊆ ω × (ω × fseq ω) $ by cun_least [l120, l273]
-l275: $ G ⇒ v1_tl_bd0 ⊆ ω × (ω × fseq ω) $ by cun_least [l114, l274]
-l276: $ G ⇒ v1_tl_b0 ⊆ ω × (ω × fseq ω) $ by cun_least [l108, l275]
-l277: $ G ⇒ v1_tl_cons ⊆ ω × (ω × fseq ω) $ by cun_least [l102, l276]
-l278: $ G ⇒ v1_tl_nil ⊆ ω × (ω × fseq ω) $ by cun_least [l96, l277]
-l279: $ G ⇒ v1_tl_cst ⊆ ω × (ω × fseq ω) $ by cun_least [l90, l278]
-l280: $ G ⇒ v1_tl_pi ⊆ ω × (ω × fseq ω) $ by cun_least [l84, l279]
-l281: $ G ⇒ v1_tl_lam ⊆ ω × (ω × fseq ω) $ by cun_least [l78, l280]
-l282: $ G ⇒ v1_tl_app ⊆ ω × (ω × fseq ω) $ by cun_least [l72, l281]
-l283: $ G ⇒ v1_tl_srt ⊆ ω × (ω × fseq ω) $ by cun_least [l66, l282]
-l284: $ G ⇒ v1_tl_bvar ⊆ ω × (ω × fseq ω) $ by cun_least [l60, l283]
-l285: $ G ⇒ v1_tl_lcons ⊆ ω × (ω × fseq ω) $ by cun_least [l54, l284]
-l286: $ G ⇒ v1_tl_lnil ⊆ ω × (ω × fseq ω) $ by cun_least [l48, l285]
-l287: $ G ⇒ v1_tl_lparam ⊆ ω × (ω × fseq ω) $ by cun_least [l42, l286]
-l288: $ G ⇒ v1_tl_limax ⊆ ω × (ω × fseq ω) $ by cun_least [l36, l287]
-l289: $ G ⇒ v1_tl_lmax ⊆ ω × (ω × fseq ω) $ by cun_least [l30, l288]
-l290: $ G ⇒ v1_tl_ls ⊆ ω × (ω × fseq ω) $ by cun_least [l24, l289]
-l291: $ G ⇒ v1_tl_lz ⊆ ω × (ω × fseq ω) $ by cun_least [l18, l290]
-l292: $ G ⇒ v1_tl_s ⊆ ω × (ω × fseq ω) $ by cun_least [l12, l291]
-l293: $ G ⇒ lsig ⊆ ω × (ω × fseq ω) $ by cun_least [l6, l292]
-l294: $ G ⇒ ks_blk ∈ ω $ by v1_ks_blk
-l295: $ G ⇒ ks_atom ∈ ω $ by v1_ks_atom
-l296: $ G ⇒ lopen ⊆ ω $ by v1_cpr_subset_c [l294, l295]
-l297: $ G ⇒ sig lsig lopen $ by sig_intro [l293, l296]
+l252: $ G ⇒ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ⊆ ω × (ω × fseq ω) $ by v1_cpr_subset_c [l251, l251]
+l253: $ G ⇒ kc_le_blk ∈ ω $ by v1_kc_le_blk
+l254: $ G ⇒ ks_blk ∈ ω $ by v1_ks_blk
+l255: $ G ⇒ ∅ ∈ fseq ω $ by v1_args_le_blk
+l256: $ G ⇒ ⟨ ks_blk , ∅ ⟩ ∈ ω × fseq ω $ by cxp_intro_c [l254, l255]
+l257: $ G ⇒ ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ∈ ω × (ω × fseq ω) $ by cxp_intro_c [l253, l256]
+l258: $ G ⇒ v1_tl_le_blk ⊆ ω × (ω × fseq ω) $ by v1_cpr_subset_c [l257, l257]
+l259: $ G ⇒ v1_tl_choice_atom ⊆ ω × (ω × fseq ω) $ by cun_least [l252, l258]
+l260: $ G ⇒ v1_tl_nonempty_blk ⊆ ω × (ω × fseq ω) $ by cun_least [l246, l259]
+l261: $ G ⇒ v1_tl_quot_sound_atom ⊆ ω × (ω × fseq ω) $ by cun_least [l240, l260]
+l262: $ G ⇒ v1_tl_propext_atom ⊆ ω × (ω × fseq ω) $ by cun_least [l234, l261]
+l263: $ G ⇒ v1_tl_iff_blk ⊆ ω × (ω × fseq ω) $ by cun_least [l228, l262]
+l264: $ G ⇒ v1_tl_quot_ind ⊆ ω × (ω × fseq ω) $ by cun_least [l222, l263]
+l265: $ G ⇒ v1_tl_quot_lift ⊆ ω × (ω × fseq ω) $ by cun_least [l216, l264]
+l266: $ G ⇒ v1_tl_quot_mk ⊆ ω × (ω × fseq ω) $ by cun_least [l210, l265]
+l267: $ G ⇒ v1_tl_quot ⊆ ω × (ω × fseq ω) $ by cun_least [l204, l266]
+l268: $ G ⇒ v1_tl_eq_blk ⊆ ω × (ω × fseq ω) $ by cun_least [l198, l267]
+l269: $ G ⇒ v1_tl_nat_blk ⊆ ω × (ω × fseq ω) $ by cun_least [l192, l268]
+l270: $ G ⇒ v1_tl_proj ⊆ ω × (ω × fseq ω) $ by cun_least [l186, l269]
+l271: $ G ⇒ v1_tl_ind_rec ⊆ ω × (ω × fseq ω) $ by cun_least [l180, l270]
+l272: $ G ⇒ v1_tl_ind_ctor ⊆ ω × (ω × fseq ω) $ by cun_least [l174, l271]
+l273: $ G ⇒ v1_tl_ind_ty ⊆ ω × (ω × fseq ω) $ by cun_least [l168, l272]
+l274: $ G ⇒ v1_tl_ind_mkn ⊆ ω × (ω × fseq ω) $ by cun_least [l162, l273]
+l275: $ G ⇒ v1_tl_ccons ⊆ ω × (ω × fseq ω) $ by cun_least [l156, l274]
+l276: $ G ⇒ v1_tl_cnil ⊆ ω × (ω × fseq ω) $ by cun_least [l150, l275]
+l277: $ G ⇒ v1_tl_tcons ⊆ ω × (ω × fseq ω) $ by cun_least [l144, l276]
+l278: $ G ⇒ v1_tl_tnil ⊆ ω × (ω × fseq ω) $ by cun_least [l138, l277]
+l279: $ G ⇒ v1_tl_ind_mk ⊆ ω × (ω × fseq ω) $ by cun_least [l132, l278]
+l280: $ G ⇒ v1_tl_lit ⊆ ω × (ω × fseq ω) $ by cun_least [l126, l279]
+l281: $ G ⇒ v1_tl_bd1 ⊆ ω × (ω × fseq ω) $ by cun_least [l120, l280]
+l282: $ G ⇒ v1_tl_bd0 ⊆ ω × (ω × fseq ω) $ by cun_least [l114, l281]
+l283: $ G ⇒ v1_tl_b0 ⊆ ω × (ω × fseq ω) $ by cun_least [l108, l282]
+l284: $ G ⇒ v1_tl_cons ⊆ ω × (ω × fseq ω) $ by cun_least [l102, l283]
+l285: $ G ⇒ v1_tl_nil ⊆ ω × (ω × fseq ω) $ by cun_least [l96, l284]
+l286: $ G ⇒ v1_tl_cst ⊆ ω × (ω × fseq ω) $ by cun_least [l90, l285]
+l287: $ G ⇒ v1_tl_pi ⊆ ω × (ω × fseq ω) $ by cun_least [l84, l286]
+l288: $ G ⇒ v1_tl_lam ⊆ ω × (ω × fseq ω) $ by cun_least [l78, l287]
+l289: $ G ⇒ v1_tl_app ⊆ ω × (ω × fseq ω) $ by cun_least [l72, l288]
+l290: $ G ⇒ v1_tl_srt ⊆ ω × (ω × fseq ω) $ by cun_least [l66, l289]
+l291: $ G ⇒ v1_tl_bvar ⊆ ω × (ω × fseq ω) $ by cun_least [l60, l290]
+l292: $ G ⇒ v1_tl_lcons ⊆ ω × (ω × fseq ω) $ by cun_least [l54, l291]
+l293: $ G ⇒ v1_tl_lnil ⊆ ω × (ω × fseq ω) $ by cun_least [l48, l292]
+l294: $ G ⇒ v1_tl_lparam ⊆ ω × (ω × fseq ω) $ by cun_least [l42, l293]
+l295: $ G ⇒ v1_tl_limax ⊆ ω × (ω × fseq ω) $ by cun_least [l36, l294]
+l296: $ G ⇒ v1_tl_lmax ⊆ ω × (ω × fseq ω) $ by cun_least [l30, l295]
+l297: $ G ⇒ v1_tl_ls ⊆ ω × (ω × fseq ω) $ by cun_least [l24, l296]
+l298: $ G ⇒ v1_tl_lz ⊆ ω × (ω × fseq ω) $ by cun_least [l18, l297]
+l299: $ G ⇒ v1_tl_s ⊆ ω × (ω × fseq ω) $ by cun_least [l12, l298]
+l300: $ G ⇒ lsig ⊆ ω × (ω × fseq ω) $ by cun_least [l6, l299]
+l301: $ G ⇒ ks_blk ∈ ω $ by v1_ks_blk
+l302: $ G ⇒ ks_atom ∈ ω $ by v1_ks_atom
+l303: $ G ⇒ lopen ⊆ ω $ by v1_cpr_subset_c [l301, l302]
+l304: $ G ⇒ sig lsig lopen $ by sig_intro [l300, l303]
 
 enc_nat_trees
 -------------
@@ -3094,8 +3112,8 @@ l5: $ G ⇒ ∅ ∈ fseq ω $ by v1_args_choice_atom
 l6: $ G ⇒ isset ∅ $ by wcel_isset [l5]
 l7: $ G ⇒ c = kc_choice_atom ∧ k = ks_atom ∧ a = ∅ $ by v1_ent [l2, l4, l6, #1]
 
-lemma v1_skip_choice_atom (G: hyps) (c k a: set) (p: fml):
-  $ G ⇒ k = ks_atom → ⊥ $ > $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ → p $
+lemma v1_skip_choice_atom (G: hyps) (c k a: set) (R: class) (p: fml):
+  $ G ⇒ k = ks_atom → ⊥ $ > $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ R → p $ > $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ∪ R → p $
 ----
 l1: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ $ by ax
 l2: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ⇒ c = kc_choice_atom ∧ k = ks_atom ∧ a = ∅ $ by v1_ent_choice_atom [l1]
@@ -3104,10 +3122,10 @@ l4: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , �
 l5: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ⇒ k = ks_atom → ⊥ $ by weaken [#1]
 l6: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ⇒ ⊥ $ by imp_elim [l5, l4]
 l7: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ⇒ p $ by bot_elim [l6]
-l8: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ → p $ by imp_intro [l7]
+l8: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ∪ R → p $ by v1_cun_imp [l7, #2]
 
-lemma v1_take_choice_atom (G: hyps) (c k a: set) (p: fml):
-  $ G , c = kc_choice_atom ∧ a = ∅ ⇒ p $ > $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ → p $
+lemma v1_take_choice_atom (G: hyps) (c k a: set) (R: class) (p: fml):
+  $ G , c = kc_choice_atom ∧ a = ∅ ⇒ p $ > $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ R → p $ > $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ∪ R → p $
 ----
 l1: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ $ by ax
 l2: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ⇒ c = kc_choice_atom ∧ k = ks_atom ∧ a = ∅ $ by v1_ent_choice_atom [l1]
@@ -3116,7 +3134,42 @@ l4: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , �
 l5: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ⇒ a = ∅ $ by and_elim_r [l4]
 l6: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ⇒ c = kc_choice_atom ∧ a = ∅ $ by and_intro [l3, l5]
 l7: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ⇒ p $ by cut [l6, #1]
-l8: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ → p $ by imp_intro [l7]
+l8: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ∪ R → p $ by v1_cun_imp [l7, #2]
+
+lemma v1_ent_le_blk (G: hyps) (c k a: set):
+  $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ $ > $ G ⇒ c = kc_le_blk ∧ k = ks_blk ∧ a = ∅ $
+----
+l1: $ G ⇒ kc_le_blk ∈ ω $ by v1_kc_le_blk
+l2: $ G ⇒ isset kc_le_blk $ by wcel_isset [l1]
+l3: $ G ⇒ ks_blk ∈ ω $ by v1_ks_blk
+l4: $ G ⇒ isset ks_blk $ by wcel_isset [l3]
+l5: $ G ⇒ ∅ ∈ fseq ω $ by v1_args_le_blk
+l6: $ G ⇒ isset ∅ $ by wcel_isset [l5]
+l7: $ G ⇒ c = kc_le_blk ∧ k = ks_blk ∧ a = ∅ $ by v1_ent [l2, l4, l6, #1]
+
+lemma v1_skip_le_blk (G: hyps) (c k a: set) (p: fml):
+  $ G ⇒ k = ks_blk → ⊥ $ > $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ → p $
+----
+l1: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ $ by ax
+l2: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ⇒ c = kc_le_blk ∧ k = ks_blk ∧ a = ∅ $ by v1_ent_le_blk [l1]
+l3: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ⇒ k = ks_blk ∧ a = ∅ $ by and_elim_r [l2]
+l4: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ⇒ k = ks_blk $ by and_elim_l [l3]
+l5: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ⇒ k = ks_blk → ⊥ $ by weaken [#1]
+l6: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ⇒ ⊥ $ by imp_elim [l5, l4]
+l7: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ⇒ p $ by bot_elim [l6]
+l8: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ → p $ by imp_intro [l7]
+
+lemma v1_take_le_blk (G: hyps) (c k a: set) (p: fml):
+  $ G , c = kc_le_blk ∧ a = ∅ ⇒ p $ > $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ → p $
+----
+l1: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ $ by ax
+l2: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ⇒ c = kc_le_blk ∧ k = ks_blk ∧ a = ∅ $ by v1_ent_le_blk [l1]
+l3: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ⇒ c = kc_le_blk $ by and_elim_l [l2]
+l4: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ⇒ k = ks_blk ∧ a = ∅ $ by and_elim_r [l2]
+l5: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ⇒ a = ∅ $ by and_elim_r [l4]
+l6: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ⇒ c = kc_le_blk ∧ a = ∅ $ by and_intro [l3, l5]
+l7: $ G , ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ⇒ p $ by cut [l6, #1]
+l8: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩ → p $ by imp_intro [l7]
 
 --| The cases of sort `nat`.
 def v1_d_nat {x: set} (t: set): fml = $ (t = ⟨ kc_nz , ∅ ⟩) ∨ ∃ x (t = ⟨ kc_s , scons x ∅ ⟩ ∧ x ∊ ofsort lsig lopen ks_nat) $
@@ -3158,49 +3211,50 @@ l29: $ G , c = kc_nz ∧ a = ∅ ⇒ v1_d_nat x t $ by imp_elim [l28, l27]
 l30: $ G , c = kc_s ∧ a = scons ks_nat ∅ ⇒ ∃ x (t = ⟨ kc_s , scons x ∅ ⟩ ∧ x ∊ ofsort lsig lopen ks_nat) $ by v1_build1 [l22, #3, #4, #5, #6]
 l31: $ G , c = kc_s ∧ a = scons ks_nat ∅ ⇒ (∃ x (t = ⟨ kc_s , scons x ∅ ⟩ ∧ x ∊ ofsort lsig lopen ks_nat)) → v1_d_nat x t $ by weaken [l26]
 l32: $ G , c = kc_s ∧ a = scons ks_nat ∅ ⇒ v1_d_nat x t $ by imp_elim [l31, l30]
-l33: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_nat x t $ by v1_skip_choice_atom [l8]
-l34: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_nat x t $ by v1_skip_nonempty_blk [l14, l33]
-l35: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_nat x t $ by v1_skip_quot_sound_atom [l8, l34]
-l36: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_nat x t $ by v1_skip_propext_atom [l8, l35]
-l37: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_nat x t $ by v1_skip_iff_blk [l14, l36]
-l38: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_nat x t $ by v1_skip_quot_ind [l6, l37]
-l39: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_nat x t $ by v1_skip_quot_lift [l6, l38]
-l40: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_nat x t $ by v1_skip_quot_mk [l6, l39]
-l41: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_nat x t $ by v1_skip_quot [l6, l40]
-l42: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_nat x t $ by v1_skip_eq_blk [l14, l41]
-l43: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_nat x t $ by v1_skip_nat_blk [l14, l42]
-l44: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_nat x t $ by v1_skip_proj [l6, l43]
-l45: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_nat x t $ by v1_skip_ind_rec [l6, l44]
-l46: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_nat x t $ by v1_skip_ind_ctor [l6, l45]
-l47: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_nat x t $ by v1_skip_ind_ty [l6, l46]
-l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_nat x t $ by v1_skip_ind_mkn [l16, l47]
-l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_nat x t $ by v1_skip_ccons [l20, l48]
-l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_nat x t $ by v1_skip_cnil [l20, l49]
-l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_nat x t $ by v1_skip_tcons [l18, l50]
-l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_nat x t $ by v1_skip_tnil [l18, l51]
-l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_nat x t $ by v1_skip_ind_mk [l16, l52]
-l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_nat x t $ by v1_skip_lit [l6, l53]
-l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_nat x t $ by v1_skip_bd1 [l12, l54]
-l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_nat x t $ by v1_skip_bd0 [l12, l55]
-l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_nat x t $ by v1_skip_b0 [l12, l56]
-l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_nat x t $ by v1_skip_cons [l10, l57]
-l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_nat x t $ by v1_skip_nil [l10, l58]
-l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_nat x t $ by v1_skip_cst [l6, l59]
-l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_nat x t $ by v1_skip_pi [l6, l60]
-l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_nat x t $ by v1_skip_lam [l6, l61]
-l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_nat x t $ by v1_skip_app [l6, l62]
-l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_nat x t $ by v1_skip_srt [l6, l63]
-l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_nat x t $ by v1_skip_bvar [l6, l64]
-l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_nat x t $ by v1_skip_lcons [l4, l65]
-l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_nat x t $ by v1_skip_lnil [l4, l66]
-l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_nat x t $ by v1_skip_lparam [l2, l67]
-l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_nat x t $ by v1_skip_limax [l2, l68]
-l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_nat x t $ by v1_skip_lmax [l2, l69]
-l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_nat x t $ by v1_skip_ls [l2, l70]
-l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_nat x t $ by v1_skip_lz [l2, l71]
-l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_nat x t $ by v1_take_s [l32, l72]
-l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_nat x t $ by v1_take_nz [l29, l73]
-l75: $ G ⇒ v1_d_nat x t $ by imp_elim [l74, #1]
+l33: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_le_blk → v1_d_nat x t $ by v1_skip_le_blk [l14]
+l34: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_nat x t $ by v1_skip_choice_atom [l8, l33]
+l35: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_nat x t $ by v1_skip_nonempty_blk [l14, l34]
+l36: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_nat x t $ by v1_skip_quot_sound_atom [l8, l35]
+l37: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_nat x t $ by v1_skip_propext_atom [l8, l36]
+l38: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_nat x t $ by v1_skip_iff_blk [l14, l37]
+l39: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_nat x t $ by v1_skip_quot_ind [l6, l38]
+l40: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_nat x t $ by v1_skip_quot_lift [l6, l39]
+l41: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_nat x t $ by v1_skip_quot_mk [l6, l40]
+l42: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_nat x t $ by v1_skip_quot [l6, l41]
+l43: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_nat x t $ by v1_skip_eq_blk [l14, l42]
+l44: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_nat x t $ by v1_skip_nat_blk [l14, l43]
+l45: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_nat x t $ by v1_skip_proj [l6, l44]
+l46: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_nat x t $ by v1_skip_ind_rec [l6, l45]
+l47: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_nat x t $ by v1_skip_ind_ctor [l6, l46]
+l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_nat x t $ by v1_skip_ind_ty [l6, l47]
+l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_nat x t $ by v1_skip_ind_mkn [l16, l48]
+l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_nat x t $ by v1_skip_ccons [l20, l49]
+l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_nat x t $ by v1_skip_cnil [l20, l50]
+l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_nat x t $ by v1_skip_tcons [l18, l51]
+l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_nat x t $ by v1_skip_tnil [l18, l52]
+l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_nat x t $ by v1_skip_ind_mk [l16, l53]
+l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_nat x t $ by v1_skip_lit [l6, l54]
+l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_nat x t $ by v1_skip_bd1 [l12, l55]
+l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_nat x t $ by v1_skip_bd0 [l12, l56]
+l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_nat x t $ by v1_skip_b0 [l12, l57]
+l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_nat x t $ by v1_skip_cons [l10, l58]
+l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_nat x t $ by v1_skip_nil [l10, l59]
+l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_nat x t $ by v1_skip_cst [l6, l60]
+l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_nat x t $ by v1_skip_pi [l6, l61]
+l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_nat x t $ by v1_skip_lam [l6, l62]
+l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_nat x t $ by v1_skip_app [l6, l63]
+l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_nat x t $ by v1_skip_srt [l6, l64]
+l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_nat x t $ by v1_skip_bvar [l6, l65]
+l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_nat x t $ by v1_skip_lcons [l4, l66]
+l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_nat x t $ by v1_skip_lnil [l4, l67]
+l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_nat x t $ by v1_skip_lparam [l2, l68]
+l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_nat x t $ by v1_skip_limax [l2, l69]
+l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_nat x t $ by v1_skip_lmax [l2, l70]
+l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_nat x t $ by v1_skip_ls [l2, l71]
+l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_nat x t $ by v1_skip_lz [l2, l72]
+l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_nat x t $ by v1_take_s [l32, l73]
+l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_nat x t $ by v1_take_nz [l29, l74]
+l76: $ G ⇒ v1_d_nat x t $ by imp_elim [l75, #1]
 
 ofsort_nat_cases
 ----------------
@@ -3300,49 +3354,50 @@ l46: $ G , c = kc_limax ∧ a = scons ks_lvl (scons ks_lvl ∅) ⇒ v1_d_lvl x y
 l47: $ G , c = kc_lparam ∧ a = scons ks_nat ∅ ⇒ ∃ x (t = ⟨ kc_lparam , scons x ∅ ⟩ ∧ x ∊ ofsort lsig lopen ks_nat) $ by v1_build1 [l24, #3, #4, #5, #6]
 l48: $ G , c = kc_lparam ∧ a = scons ks_nat ∅ ⇒ (∃ x (t = ⟨ kc_lparam , scons x ∅ ⟩ ∧ x ∊ ofsort lsig lopen ks_nat)) → v1_d_lvl x y t $ by weaken [l34]
 l49: $ G , c = kc_lparam ∧ a = scons ks_nat ∅ ⇒ v1_d_lvl x y t $ by imp_elim [l48, l47]
-l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_lvl x y t $ by v1_skip_choice_atom [l8]
-l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_lvl x y t $ by v1_skip_nonempty_blk [l14, l50]
-l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_lvl x y t $ by v1_skip_quot_sound_atom [l8, l51]
-l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_lvl x y t $ by v1_skip_propext_atom [l8, l52]
-l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_lvl x y t $ by v1_skip_iff_blk [l14, l53]
-l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_lvl x y t $ by v1_skip_quot_ind [l6, l54]
-l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_lvl x y t $ by v1_skip_quot_lift [l6, l55]
-l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_lvl x y t $ by v1_skip_quot_mk [l6, l56]
-l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_lvl x y t $ by v1_skip_quot [l6, l57]
-l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_lvl x y t $ by v1_skip_eq_blk [l14, l58]
-l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_lvl x y t $ by v1_skip_nat_blk [l14, l59]
-l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_lvl x y t $ by v1_skip_proj [l6, l60]
-l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_lvl x y t $ by v1_skip_ind_rec [l6, l61]
-l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_lvl x y t $ by v1_skip_ind_ctor [l6, l62]
-l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_lvl x y t $ by v1_skip_ind_ty [l6, l63]
-l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_lvl x y t $ by v1_skip_ind_mkn [l16, l64]
-l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_lvl x y t $ by v1_skip_ccons [l20, l65]
-l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_lvl x y t $ by v1_skip_cnil [l20, l66]
-l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_lvl x y t $ by v1_skip_tcons [l18, l67]
-l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_lvl x y t $ by v1_skip_tnil [l18, l68]
-l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_lvl x y t $ by v1_skip_ind_mk [l16, l69]
-l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_lvl x y t $ by v1_skip_lit [l6, l70]
-l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_lvl x y t $ by v1_skip_bd1 [l12, l71]
-l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_lvl x y t $ by v1_skip_bd0 [l12, l72]
-l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_lvl x y t $ by v1_skip_b0 [l12, l73]
-l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_lvl x y t $ by v1_skip_cons [l10, l74]
-l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_lvl x y t $ by v1_skip_nil [l10, l75]
-l77: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_lvl x y t $ by v1_skip_cst [l6, l76]
-l78: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_lvl x y t $ by v1_skip_pi [l6, l77]
-l79: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_lvl x y t $ by v1_skip_lam [l6, l78]
-l80: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_lvl x y t $ by v1_skip_app [l6, l79]
-l81: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_lvl x y t $ by v1_skip_srt [l6, l80]
-l82: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_lvl x y t $ by v1_skip_bvar [l6, l81]
-l83: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_lvl x y t $ by v1_skip_lcons [l4, l82]
-l84: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_lvl x y t $ by v1_skip_lnil [l4, l83]
-l85: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_lvl x y t $ by v1_take_lparam [l49, l84]
-l86: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_lvl x y t $ by v1_take_limax [l46, l85]
-l87: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_lvl x y t $ by v1_take_lmax [l43, l86]
-l88: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_lvl x y t $ by v1_take_ls [l40, l87]
-l89: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_lvl x y t $ by v1_take_lz [l37, l88]
-l90: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_lvl x y t $ by v1_skip_s [l2, l89]
-l91: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_lvl x y t $ by v1_skip_nz [l2, l90]
-l92: $ G ⇒ v1_d_lvl x y t $ by imp_elim [l91, #1]
+l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_le_blk → v1_d_lvl x y t $ by v1_skip_le_blk [l14]
+l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_lvl x y t $ by v1_skip_choice_atom [l8, l50]
+l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_lvl x y t $ by v1_skip_nonempty_blk [l14, l51]
+l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_lvl x y t $ by v1_skip_quot_sound_atom [l8, l52]
+l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_lvl x y t $ by v1_skip_propext_atom [l8, l53]
+l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_lvl x y t $ by v1_skip_iff_blk [l14, l54]
+l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_lvl x y t $ by v1_skip_quot_ind [l6, l55]
+l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_lvl x y t $ by v1_skip_quot_lift [l6, l56]
+l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_lvl x y t $ by v1_skip_quot_mk [l6, l57]
+l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_lvl x y t $ by v1_skip_quot [l6, l58]
+l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_lvl x y t $ by v1_skip_eq_blk [l14, l59]
+l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_lvl x y t $ by v1_skip_nat_blk [l14, l60]
+l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_lvl x y t $ by v1_skip_proj [l6, l61]
+l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_lvl x y t $ by v1_skip_ind_rec [l6, l62]
+l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_lvl x y t $ by v1_skip_ind_ctor [l6, l63]
+l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_lvl x y t $ by v1_skip_ind_ty [l6, l64]
+l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_lvl x y t $ by v1_skip_ind_mkn [l16, l65]
+l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_lvl x y t $ by v1_skip_ccons [l20, l66]
+l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_lvl x y t $ by v1_skip_cnil [l20, l67]
+l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_lvl x y t $ by v1_skip_tcons [l18, l68]
+l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_lvl x y t $ by v1_skip_tnil [l18, l69]
+l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_lvl x y t $ by v1_skip_ind_mk [l16, l70]
+l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_lvl x y t $ by v1_skip_lit [l6, l71]
+l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_lvl x y t $ by v1_skip_bd1 [l12, l72]
+l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_lvl x y t $ by v1_skip_bd0 [l12, l73]
+l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_lvl x y t $ by v1_skip_b0 [l12, l74]
+l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_lvl x y t $ by v1_skip_cons [l10, l75]
+l77: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_lvl x y t $ by v1_skip_nil [l10, l76]
+l78: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_lvl x y t $ by v1_skip_cst [l6, l77]
+l79: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_lvl x y t $ by v1_skip_pi [l6, l78]
+l80: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_lvl x y t $ by v1_skip_lam [l6, l79]
+l81: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_lvl x y t $ by v1_skip_app [l6, l80]
+l82: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_lvl x y t $ by v1_skip_srt [l6, l81]
+l83: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_lvl x y t $ by v1_skip_bvar [l6, l82]
+l84: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_lvl x y t $ by v1_skip_lcons [l4, l83]
+l85: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_lvl x y t $ by v1_skip_lnil [l4, l84]
+l86: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_lvl x y t $ by v1_take_lparam [l49, l85]
+l87: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_lvl x y t $ by v1_take_limax [l46, l86]
+l88: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_lvl x y t $ by v1_take_lmax [l43, l87]
+l89: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_lvl x y t $ by v1_take_ls [l40, l88]
+l90: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_lvl x y t $ by v1_take_lz [l37, l89]
+l91: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_lvl x y t $ by v1_skip_s [l2, l90]
+l92: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_lvl x y t $ by v1_skip_nz [l2, l91]
+l93: $ G ⇒ v1_d_lvl x y t $ by imp_elim [l92, #1]
 
 ofsort_lvl_cases
 ----------------
@@ -3427,49 +3482,50 @@ l31: $ G , c = kc_lnil ∧ a = ∅ ⇒ v1_d_lvls x y t $ by imp_elim [l30, l29]
 l32: $ G , c = kc_lcons ∧ a = scons ks_lvl (scons ks_lvls ∅) ⇒ ∃ x ∃ y (t = ⟨ kc_lcons , scons x (scons y ∅) ⟩ ∧ x ∊ ofsort lsig lopen ks_lvl ∧ y ∊ ofsort lsig lopen ks_lvls) $ by v1_build2 [l22, l24, #3, #4, #5, #6]
 l33: $ G , c = kc_lcons ∧ a = scons ks_lvl (scons ks_lvls ∅) ⇒ (∃ x ∃ y (t = ⟨ kc_lcons , scons x (scons y ∅) ⟩ ∧ x ∊ ofsort lsig lopen ks_lvl ∧ y ∊ ofsort lsig lopen ks_lvls)) → v1_d_lvls x y t $ by weaken [l28]
 l34: $ G , c = kc_lcons ∧ a = scons ks_lvl (scons ks_lvls ∅) ⇒ v1_d_lvls x y t $ by imp_elim [l33, l32]
-l35: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_lvls x y t $ by v1_skip_choice_atom [l8]
-l36: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_lvls x y t $ by v1_skip_nonempty_blk [l14, l35]
-l37: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_lvls x y t $ by v1_skip_quot_sound_atom [l8, l36]
-l38: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_lvls x y t $ by v1_skip_propext_atom [l8, l37]
-l39: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_lvls x y t $ by v1_skip_iff_blk [l14, l38]
-l40: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_lvls x y t $ by v1_skip_quot_ind [l6, l39]
-l41: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_lvls x y t $ by v1_skip_quot_lift [l6, l40]
-l42: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_lvls x y t $ by v1_skip_quot_mk [l6, l41]
-l43: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_lvls x y t $ by v1_skip_quot [l6, l42]
-l44: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_lvls x y t $ by v1_skip_eq_blk [l14, l43]
-l45: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_lvls x y t $ by v1_skip_nat_blk [l14, l44]
-l46: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_lvls x y t $ by v1_skip_proj [l6, l45]
-l47: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_lvls x y t $ by v1_skip_ind_rec [l6, l46]
-l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_lvls x y t $ by v1_skip_ind_ctor [l6, l47]
-l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_lvls x y t $ by v1_skip_ind_ty [l6, l48]
-l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_lvls x y t $ by v1_skip_ind_mkn [l16, l49]
-l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_lvls x y t $ by v1_skip_ccons [l20, l50]
-l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_lvls x y t $ by v1_skip_cnil [l20, l51]
-l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_lvls x y t $ by v1_skip_tcons [l18, l52]
-l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_lvls x y t $ by v1_skip_tnil [l18, l53]
-l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_lvls x y t $ by v1_skip_ind_mk [l16, l54]
-l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_lvls x y t $ by v1_skip_lit [l6, l55]
-l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_lvls x y t $ by v1_skip_bd1 [l12, l56]
-l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_lvls x y t $ by v1_skip_bd0 [l12, l57]
-l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_lvls x y t $ by v1_skip_b0 [l12, l58]
-l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_lvls x y t $ by v1_skip_cons [l10, l59]
-l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_lvls x y t $ by v1_skip_nil [l10, l60]
-l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_lvls x y t $ by v1_skip_cst [l6, l61]
-l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_lvls x y t $ by v1_skip_pi [l6, l62]
-l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_lvls x y t $ by v1_skip_lam [l6, l63]
-l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_lvls x y t $ by v1_skip_app [l6, l64]
-l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_lvls x y t $ by v1_skip_srt [l6, l65]
-l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_lvls x y t $ by v1_skip_bvar [l6, l66]
-l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_lvls x y t $ by v1_take_lcons [l34, l67]
-l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_lvls x y t $ by v1_take_lnil [l31, l68]
-l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_lvls x y t $ by v1_skip_lparam [l4, l69]
-l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_lvls x y t $ by v1_skip_limax [l4, l70]
-l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_lvls x y t $ by v1_skip_lmax [l4, l71]
-l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_lvls x y t $ by v1_skip_ls [l4, l72]
-l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_lvls x y t $ by v1_skip_lz [l4, l73]
-l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_lvls x y t $ by v1_skip_s [l2, l74]
-l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_lvls x y t $ by v1_skip_nz [l2, l75]
-l77: $ G ⇒ v1_d_lvls x y t $ by imp_elim [l76, #1]
+l35: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_le_blk → v1_d_lvls x y t $ by v1_skip_le_blk [l14]
+l36: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_lvls x y t $ by v1_skip_choice_atom [l8, l35]
+l37: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_lvls x y t $ by v1_skip_nonempty_blk [l14, l36]
+l38: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_lvls x y t $ by v1_skip_quot_sound_atom [l8, l37]
+l39: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_lvls x y t $ by v1_skip_propext_atom [l8, l38]
+l40: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_lvls x y t $ by v1_skip_iff_blk [l14, l39]
+l41: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_lvls x y t $ by v1_skip_quot_ind [l6, l40]
+l42: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_lvls x y t $ by v1_skip_quot_lift [l6, l41]
+l43: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_lvls x y t $ by v1_skip_quot_mk [l6, l42]
+l44: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_lvls x y t $ by v1_skip_quot [l6, l43]
+l45: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_lvls x y t $ by v1_skip_eq_blk [l14, l44]
+l46: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_lvls x y t $ by v1_skip_nat_blk [l14, l45]
+l47: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_lvls x y t $ by v1_skip_proj [l6, l46]
+l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_lvls x y t $ by v1_skip_ind_rec [l6, l47]
+l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_lvls x y t $ by v1_skip_ind_ctor [l6, l48]
+l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_lvls x y t $ by v1_skip_ind_ty [l6, l49]
+l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_lvls x y t $ by v1_skip_ind_mkn [l16, l50]
+l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_lvls x y t $ by v1_skip_ccons [l20, l51]
+l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_lvls x y t $ by v1_skip_cnil [l20, l52]
+l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_lvls x y t $ by v1_skip_tcons [l18, l53]
+l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_lvls x y t $ by v1_skip_tnil [l18, l54]
+l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_lvls x y t $ by v1_skip_ind_mk [l16, l55]
+l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_lvls x y t $ by v1_skip_lit [l6, l56]
+l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_lvls x y t $ by v1_skip_bd1 [l12, l57]
+l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_lvls x y t $ by v1_skip_bd0 [l12, l58]
+l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_lvls x y t $ by v1_skip_b0 [l12, l59]
+l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_lvls x y t $ by v1_skip_cons [l10, l60]
+l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_lvls x y t $ by v1_skip_nil [l10, l61]
+l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_lvls x y t $ by v1_skip_cst [l6, l62]
+l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_lvls x y t $ by v1_skip_pi [l6, l63]
+l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_lvls x y t $ by v1_skip_lam [l6, l64]
+l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_lvls x y t $ by v1_skip_app [l6, l65]
+l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_lvls x y t $ by v1_skip_srt [l6, l66]
+l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_lvls x y t $ by v1_skip_bvar [l6, l67]
+l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_lvls x y t $ by v1_take_lcons [l34, l68]
+l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_lvls x y t $ by v1_take_lnil [l31, l69]
+l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_lvls x y t $ by v1_skip_lparam [l4, l70]
+l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_lvls x y t $ by v1_skip_limax [l4, l71]
+l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_lvls x y t $ by v1_skip_lmax [l4, l72]
+l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_lvls x y t $ by v1_skip_ls [l4, l73]
+l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_lvls x y t $ by v1_skip_lz [l4, l74]
+l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_lvls x y t $ by v1_skip_s [l2, l75]
+l77: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_lvls x y t $ by v1_skip_nz [l2, l76]
+l78: $ G ⇒ v1_d_lvls x y t $ by imp_elim [l77, #1]
 
 ofsort_lvls_cases
 -----------------
@@ -3631,49 +3687,50 @@ l108: $ G , c = kc_quot_lift ∧ a = scons ks_lvl (scons ks_lvl ∅) ⇒ v1_d_ex
 l109: $ G , c = kc_quot_ind ∧ a = scons ks_lvl ∅ ⇒ ∃ x (t = ⟨ kc_quot_ind , scons x ∅ ⟩ ∧ x ∊ ofsort lsig lopen ks_lvl) $ by v1_build1 [l24, #3, #4, #5, #6]
 l110: $ G , c = kc_quot_ind ∧ a = scons ks_lvl ∅ ⇒ (∃ x (t = ⟨ kc_quot_ind , scons x ∅ ⟩ ∧ x ∊ ofsort lsig lopen ks_lvl)) → v1_d_expr u x y t $ by weaken [l66]
 l111: $ G , c = kc_quot_ind ∧ a = scons ks_lvl ∅ ⇒ v1_d_expr u x y t $ by imp_elim [l110, l109]
-l112: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_expr u x y t $ by v1_skip_choice_atom [l8]
-l113: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_expr u x y t $ by v1_skip_nonempty_blk [l14, l112]
-l114: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_expr u x y t $ by v1_skip_quot_sound_atom [l8, l113]
-l115: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_expr u x y t $ by v1_skip_propext_atom [l8, l114]
-l116: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_expr u x y t $ by v1_skip_iff_blk [l14, l115]
-l117: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_expr u x y t $ by v1_take_quot_ind [l111, l116]
-l118: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_expr u x y t $ by v1_take_quot_lift [l108, l117]
-l119: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_expr u x y t $ by v1_take_quot_mk [l105, l118]
-l120: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_expr u x y t $ by v1_take_quot [l102, l119]
-l121: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_expr u x y t $ by v1_skip_eq_blk [l14, l120]
-l122: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_expr u x y t $ by v1_skip_nat_blk [l14, l121]
-l123: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_expr u x y t $ by v1_take_proj [l99, l122]
-l124: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_expr u x y t $ by v1_take_ind_rec [l96, l123]
-l125: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_expr u x y t $ by v1_take_ind_ctor [l93, l124]
-l126: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_expr u x y t $ by v1_take_ind_ty [l90, l125]
-l127: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_expr u x y t $ by v1_skip_ind_mkn [l16, l126]
-l128: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_expr u x y t $ by v1_skip_ccons [l20, l127]
-l129: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_expr u x y t $ by v1_skip_cnil [l20, l128]
-l130: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_expr u x y t $ by v1_skip_tcons [l18, l129]
-l131: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_expr u x y t $ by v1_skip_tnil [l18, l130]
-l132: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_expr u x y t $ by v1_skip_ind_mk [l16, l131]
-l133: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_expr u x y t $ by v1_take_lit [l87, l132]
-l134: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_expr u x y t $ by v1_skip_bd1 [l12, l133]
-l135: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_expr u x y t $ by v1_skip_bd0 [l12, l134]
-l136: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_expr u x y t $ by v1_skip_b0 [l12, l135]
-l137: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_expr u x y t $ by v1_skip_cons [l10, l136]
-l138: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_expr u x y t $ by v1_skip_nil [l10, l137]
-l139: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_expr u x y t $ by v1_take_cst [l84, l138]
-l140: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_expr u x y t $ by v1_take_pi [l81, l139]
-l141: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_expr u x y t $ by v1_take_lam [l78, l140]
-l142: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_expr u x y t $ by v1_take_app [l75, l141]
-l143: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_expr u x y t $ by v1_take_srt [l72, l142]
-l144: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_expr u x y t $ by v1_take_bvar [l69, l143]
-l145: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_expr u x y t $ by v1_skip_lcons [l6, l144]
-l146: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_expr u x y t $ by v1_skip_lnil [l6, l145]
-l147: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_expr u x y t $ by v1_skip_lparam [l4, l146]
-l148: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_expr u x y t $ by v1_skip_limax [l4, l147]
-l149: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_expr u x y t $ by v1_skip_lmax [l4, l148]
-l150: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_expr u x y t $ by v1_skip_ls [l4, l149]
-l151: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_expr u x y t $ by v1_skip_lz [l4, l150]
-l152: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_expr u x y t $ by v1_skip_s [l2, l151]
-l153: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_expr u x y t $ by v1_skip_nz [l2, l152]
-l154: $ G ⇒ v1_d_expr u x y t $ by imp_elim [l153, #1]
+l112: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_le_blk → v1_d_expr u x y t $ by v1_skip_le_blk [l14]
+l113: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_expr u x y t $ by v1_skip_choice_atom [l8, l112]
+l114: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_expr u x y t $ by v1_skip_nonempty_blk [l14, l113]
+l115: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_expr u x y t $ by v1_skip_quot_sound_atom [l8, l114]
+l116: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_expr u x y t $ by v1_skip_propext_atom [l8, l115]
+l117: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_expr u x y t $ by v1_skip_iff_blk [l14, l116]
+l118: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_expr u x y t $ by v1_take_quot_ind [l111, l117]
+l119: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_expr u x y t $ by v1_take_quot_lift [l108, l118]
+l120: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_expr u x y t $ by v1_take_quot_mk [l105, l119]
+l121: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_expr u x y t $ by v1_take_quot [l102, l120]
+l122: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_expr u x y t $ by v1_skip_eq_blk [l14, l121]
+l123: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_expr u x y t $ by v1_skip_nat_blk [l14, l122]
+l124: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_expr u x y t $ by v1_take_proj [l99, l123]
+l125: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_expr u x y t $ by v1_take_ind_rec [l96, l124]
+l126: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_expr u x y t $ by v1_take_ind_ctor [l93, l125]
+l127: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_expr u x y t $ by v1_take_ind_ty [l90, l126]
+l128: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_expr u x y t $ by v1_skip_ind_mkn [l16, l127]
+l129: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_expr u x y t $ by v1_skip_ccons [l20, l128]
+l130: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_expr u x y t $ by v1_skip_cnil [l20, l129]
+l131: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_expr u x y t $ by v1_skip_tcons [l18, l130]
+l132: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_expr u x y t $ by v1_skip_tnil [l18, l131]
+l133: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_expr u x y t $ by v1_skip_ind_mk [l16, l132]
+l134: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_expr u x y t $ by v1_take_lit [l87, l133]
+l135: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_expr u x y t $ by v1_skip_bd1 [l12, l134]
+l136: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_expr u x y t $ by v1_skip_bd0 [l12, l135]
+l137: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_expr u x y t $ by v1_skip_b0 [l12, l136]
+l138: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_expr u x y t $ by v1_skip_cons [l10, l137]
+l139: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_expr u x y t $ by v1_skip_nil [l10, l138]
+l140: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_expr u x y t $ by v1_take_cst [l84, l139]
+l141: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_expr u x y t $ by v1_take_pi [l81, l140]
+l142: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_expr u x y t $ by v1_take_lam [l78, l141]
+l143: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_expr u x y t $ by v1_take_app [l75, l142]
+l144: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_expr u x y t $ by v1_take_srt [l72, l143]
+l145: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_expr u x y t $ by v1_take_bvar [l69, l144]
+l146: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_expr u x y t $ by v1_skip_lcons [l6, l145]
+l147: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_expr u x y t $ by v1_skip_lnil [l6, l146]
+l148: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_expr u x y t $ by v1_skip_lparam [l4, l147]
+l149: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_expr u x y t $ by v1_skip_limax [l4, l148]
+l150: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_expr u x y t $ by v1_skip_lmax [l4, l149]
+l151: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_expr u x y t $ by v1_skip_ls [l4, l150]
+l152: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_expr u x y t $ by v1_skip_lz [l4, l151]
+l153: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_expr u x y t $ by v1_skip_s [l2, l152]
+l154: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_expr u x y t $ by v1_skip_nz [l2, l153]
+l155: $ G ⇒ v1_d_expr u x y t $ by imp_elim [l154, #1]
 
 ofsort_expr_cases
 -----------------
@@ -3761,49 +3818,50 @@ l34: $ G , c = kc_quot_sound_atom ∧ a = ∅ ⇒ v1_d_atom n t $ by imp_elim [l
 l35: $ G , c = kc_choice_atom ∧ a = ∅ ⇒ (t = ⟨ kc_choice_atom , ∅ ⟩) $ by v1_build0 [#3, #4, #6]
 l36: $ G , c = kc_choice_atom ∧ a = ∅ ⇒ (t = ⟨ kc_choice_atom , ∅ ⟩) → v1_d_atom n t $ by weaken [l27]
 l37: $ G , c = kc_choice_atom ∧ a = ∅ ⇒ v1_d_atom n t $ by imp_elim [l36, l35]
-l38: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_atom n t $ by v1_take_choice_atom [l37]
-l39: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_atom n t $ by v1_skip_nonempty_blk [l14, l38]
-l40: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_atom n t $ by v1_take_quot_sound_atom [l34, l39]
-l41: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_atom n t $ by v1_take_propext_atom [l31, l40]
-l42: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_atom n t $ by v1_skip_iff_blk [l14, l41]
-l43: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_atom n t $ by v1_skip_quot_ind [l8, l42]
-l44: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_atom n t $ by v1_skip_quot_lift [l8, l43]
-l45: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_atom n t $ by v1_skip_quot_mk [l8, l44]
-l46: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_atom n t $ by v1_skip_quot [l8, l45]
-l47: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_atom n t $ by v1_skip_eq_blk [l14, l46]
-l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_atom n t $ by v1_skip_nat_blk [l14, l47]
-l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_atom n t $ by v1_skip_proj [l8, l48]
-l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_atom n t $ by v1_skip_ind_rec [l8, l49]
-l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_atom n t $ by v1_skip_ind_ctor [l8, l50]
-l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_atom n t $ by v1_skip_ind_ty [l8, l51]
-l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_atom n t $ by v1_skip_ind_mkn [l16, l52]
-l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_atom n t $ by v1_skip_ccons [l20, l53]
-l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_atom n t $ by v1_skip_cnil [l20, l54]
-l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_atom n t $ by v1_skip_tcons [l18, l55]
-l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_atom n t $ by v1_skip_tnil [l18, l56]
-l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_atom n t $ by v1_skip_ind_mk [l16, l57]
-l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_atom n t $ by v1_skip_lit [l8, l58]
-l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_atom n t $ by v1_skip_bd1 [l12, l59]
-l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_atom n t $ by v1_skip_bd0 [l12, l60]
-l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_atom n t $ by v1_skip_b0 [l12, l61]
-l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_atom n t $ by v1_skip_cons [l10, l62]
-l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_atom n t $ by v1_skip_nil [l10, l63]
-l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_atom n t $ by v1_skip_cst [l8, l64]
-l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_atom n t $ by v1_skip_pi [l8, l65]
-l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_atom n t $ by v1_skip_lam [l8, l66]
-l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_atom n t $ by v1_skip_app [l8, l67]
-l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_atom n t $ by v1_skip_srt [l8, l68]
-l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_atom n t $ by v1_skip_bvar [l8, l69]
-l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_atom n t $ by v1_skip_lcons [l6, l70]
-l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_atom n t $ by v1_skip_lnil [l6, l71]
-l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_atom n t $ by v1_skip_lparam [l4, l72]
-l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_atom n t $ by v1_skip_limax [l4, l73]
-l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_atom n t $ by v1_skip_lmax [l4, l74]
-l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_atom n t $ by v1_skip_ls [l4, l75]
-l77: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_atom n t $ by v1_skip_lz [l4, l76]
-l78: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_atom n t $ by v1_skip_s [l2, l77]
-l79: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_atom n t $ by v1_skip_nz [l2, l78]
-l80: $ G ⇒ v1_d_atom n t $ by imp_elim [l79, #1]
+l38: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_le_blk → v1_d_atom n t $ by v1_skip_le_blk [l14]
+l39: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_atom n t $ by v1_take_choice_atom [l37, l38]
+l40: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_atom n t $ by v1_skip_nonempty_blk [l14, l39]
+l41: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_atom n t $ by v1_take_quot_sound_atom [l34, l40]
+l42: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_atom n t $ by v1_take_propext_atom [l31, l41]
+l43: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_atom n t $ by v1_skip_iff_blk [l14, l42]
+l44: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_atom n t $ by v1_skip_quot_ind [l8, l43]
+l45: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_atom n t $ by v1_skip_quot_lift [l8, l44]
+l46: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_atom n t $ by v1_skip_quot_mk [l8, l45]
+l47: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_atom n t $ by v1_skip_quot [l8, l46]
+l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_atom n t $ by v1_skip_eq_blk [l14, l47]
+l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_atom n t $ by v1_skip_nat_blk [l14, l48]
+l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_atom n t $ by v1_skip_proj [l8, l49]
+l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_atom n t $ by v1_skip_ind_rec [l8, l50]
+l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_atom n t $ by v1_skip_ind_ctor [l8, l51]
+l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_atom n t $ by v1_skip_ind_ty [l8, l52]
+l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_atom n t $ by v1_skip_ind_mkn [l16, l53]
+l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_atom n t $ by v1_skip_ccons [l20, l54]
+l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_atom n t $ by v1_skip_cnil [l20, l55]
+l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_atom n t $ by v1_skip_tcons [l18, l56]
+l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_atom n t $ by v1_skip_tnil [l18, l57]
+l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_atom n t $ by v1_skip_ind_mk [l16, l58]
+l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_atom n t $ by v1_skip_lit [l8, l59]
+l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_atom n t $ by v1_skip_bd1 [l12, l60]
+l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_atom n t $ by v1_skip_bd0 [l12, l61]
+l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_atom n t $ by v1_skip_b0 [l12, l62]
+l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_atom n t $ by v1_skip_cons [l10, l63]
+l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_atom n t $ by v1_skip_nil [l10, l64]
+l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_atom n t $ by v1_skip_cst [l8, l65]
+l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_atom n t $ by v1_skip_pi [l8, l66]
+l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_atom n t $ by v1_skip_lam [l8, l67]
+l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_atom n t $ by v1_skip_app [l8, l68]
+l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_atom n t $ by v1_skip_srt [l8, l69]
+l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_atom n t $ by v1_skip_bvar [l8, l70]
+l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_atom n t $ by v1_skip_lcons [l6, l71]
+l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_atom n t $ by v1_skip_lnil [l6, l72]
+l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_atom n t $ by v1_skip_lparam [l4, l73]
+l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_atom n t $ by v1_skip_limax [l4, l74]
+l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_atom n t $ by v1_skip_lmax [l4, l75]
+l77: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_atom n t $ by v1_skip_ls [l4, l76]
+l78: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_atom n t $ by v1_skip_lz [l4, l77]
+l79: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_atom n t $ by v1_skip_s [l2, l78]
+l80: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_atom n t $ by v1_skip_nz [l2, l79]
+l81: $ G ⇒ v1_d_atom n t $ by imp_elim [l80, #1]
 
 ofsort_atom_cases
 -----------------
@@ -3885,49 +3943,50 @@ l31: $ G , c = kc_nil ∧ a = ∅ ⇒ v1_d_ctx x y t $ by imp_elim [l30, l29]
 l32: $ G , c = kc_cons ∧ a = scons ks_expr (scons ks_ctx ∅) ⇒ ∃ x ∃ y (t = ⟨ kc_cons , scons x (scons y ∅) ⟩ ∧ x ∊ ofsort lsig lopen ks_expr ∧ y ∊ ofsort lsig lopen ks_ctx) $ by v1_build2 [l22, l24, #3, #4, #5, #6]
 l33: $ G , c = kc_cons ∧ a = scons ks_expr (scons ks_ctx ∅) ⇒ (∃ x ∃ y (t = ⟨ kc_cons , scons x (scons y ∅) ⟩ ∧ x ∊ ofsort lsig lopen ks_expr ∧ y ∊ ofsort lsig lopen ks_ctx)) → v1_d_ctx x y t $ by weaken [l28]
 l34: $ G , c = kc_cons ∧ a = scons ks_expr (scons ks_ctx ∅) ⇒ v1_d_ctx x y t $ by imp_elim [l33, l32]
-l35: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_ctx x y t $ by v1_skip_choice_atom [l10]
-l36: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_ctx x y t $ by v1_skip_nonempty_blk [l14, l35]
-l37: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_ctx x y t $ by v1_skip_quot_sound_atom [l10, l36]
-l38: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_ctx x y t $ by v1_skip_propext_atom [l10, l37]
-l39: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_ctx x y t $ by v1_skip_iff_blk [l14, l38]
-l40: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_ctx x y t $ by v1_skip_quot_ind [l8, l39]
-l41: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_ctx x y t $ by v1_skip_quot_lift [l8, l40]
-l42: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_ctx x y t $ by v1_skip_quot_mk [l8, l41]
-l43: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_ctx x y t $ by v1_skip_quot [l8, l42]
-l44: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_ctx x y t $ by v1_skip_eq_blk [l14, l43]
-l45: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_ctx x y t $ by v1_skip_nat_blk [l14, l44]
-l46: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_ctx x y t $ by v1_skip_proj [l8, l45]
-l47: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_ctx x y t $ by v1_skip_ind_rec [l8, l46]
-l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_ctx x y t $ by v1_skip_ind_ctor [l8, l47]
-l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_ctx x y t $ by v1_skip_ind_ty [l8, l48]
-l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_ctx x y t $ by v1_skip_ind_mkn [l16, l49]
-l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_ctx x y t $ by v1_skip_ccons [l20, l50]
-l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_ctx x y t $ by v1_skip_cnil [l20, l51]
-l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_ctx x y t $ by v1_skip_tcons [l18, l52]
-l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_ctx x y t $ by v1_skip_tnil [l18, l53]
-l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_ctx x y t $ by v1_skip_ind_mk [l16, l54]
-l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_ctx x y t $ by v1_skip_lit [l8, l55]
-l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_ctx x y t $ by v1_skip_bd1 [l12, l56]
-l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_ctx x y t $ by v1_skip_bd0 [l12, l57]
-l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_ctx x y t $ by v1_skip_b0 [l12, l58]
-l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_ctx x y t $ by v1_take_cons [l34, l59]
-l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_ctx x y t $ by v1_take_nil [l31, l60]
-l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_ctx x y t $ by v1_skip_cst [l8, l61]
-l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_ctx x y t $ by v1_skip_pi [l8, l62]
-l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_ctx x y t $ by v1_skip_lam [l8, l63]
-l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_ctx x y t $ by v1_skip_app [l8, l64]
-l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_ctx x y t $ by v1_skip_srt [l8, l65]
-l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_ctx x y t $ by v1_skip_bvar [l8, l66]
-l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_ctx x y t $ by v1_skip_lcons [l6, l67]
-l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_ctx x y t $ by v1_skip_lnil [l6, l68]
-l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_ctx x y t $ by v1_skip_lparam [l4, l69]
-l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_ctx x y t $ by v1_skip_limax [l4, l70]
-l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_ctx x y t $ by v1_skip_lmax [l4, l71]
-l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_ctx x y t $ by v1_skip_ls [l4, l72]
-l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_ctx x y t $ by v1_skip_lz [l4, l73]
-l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_ctx x y t $ by v1_skip_s [l2, l74]
-l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_ctx x y t $ by v1_skip_nz [l2, l75]
-l77: $ G ⇒ v1_d_ctx x y t $ by imp_elim [l76, #1]
+l35: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_le_blk → v1_d_ctx x y t $ by v1_skip_le_blk [l14]
+l36: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_ctx x y t $ by v1_skip_choice_atom [l10, l35]
+l37: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_ctx x y t $ by v1_skip_nonempty_blk [l14, l36]
+l38: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_ctx x y t $ by v1_skip_quot_sound_atom [l10, l37]
+l39: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_ctx x y t $ by v1_skip_propext_atom [l10, l38]
+l40: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_ctx x y t $ by v1_skip_iff_blk [l14, l39]
+l41: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_ctx x y t $ by v1_skip_quot_ind [l8, l40]
+l42: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_ctx x y t $ by v1_skip_quot_lift [l8, l41]
+l43: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_ctx x y t $ by v1_skip_quot_mk [l8, l42]
+l44: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_ctx x y t $ by v1_skip_quot [l8, l43]
+l45: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_ctx x y t $ by v1_skip_eq_blk [l14, l44]
+l46: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_ctx x y t $ by v1_skip_nat_blk [l14, l45]
+l47: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_ctx x y t $ by v1_skip_proj [l8, l46]
+l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_ctx x y t $ by v1_skip_ind_rec [l8, l47]
+l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_ctx x y t $ by v1_skip_ind_ctor [l8, l48]
+l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_ctx x y t $ by v1_skip_ind_ty [l8, l49]
+l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_ctx x y t $ by v1_skip_ind_mkn [l16, l50]
+l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_ctx x y t $ by v1_skip_ccons [l20, l51]
+l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_ctx x y t $ by v1_skip_cnil [l20, l52]
+l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_ctx x y t $ by v1_skip_tcons [l18, l53]
+l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_ctx x y t $ by v1_skip_tnil [l18, l54]
+l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_ctx x y t $ by v1_skip_ind_mk [l16, l55]
+l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_ctx x y t $ by v1_skip_lit [l8, l56]
+l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_ctx x y t $ by v1_skip_bd1 [l12, l57]
+l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_ctx x y t $ by v1_skip_bd0 [l12, l58]
+l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_ctx x y t $ by v1_skip_b0 [l12, l59]
+l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_ctx x y t $ by v1_take_cons [l34, l60]
+l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_ctx x y t $ by v1_take_nil [l31, l61]
+l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_ctx x y t $ by v1_skip_cst [l8, l62]
+l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_ctx x y t $ by v1_skip_pi [l8, l63]
+l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_ctx x y t $ by v1_skip_lam [l8, l64]
+l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_ctx x y t $ by v1_skip_app [l8, l65]
+l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_ctx x y t $ by v1_skip_srt [l8, l66]
+l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_ctx x y t $ by v1_skip_bvar [l8, l67]
+l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_ctx x y t $ by v1_skip_lcons [l6, l68]
+l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_ctx x y t $ by v1_skip_lnil [l6, l69]
+l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_ctx x y t $ by v1_skip_lparam [l4, l70]
+l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_ctx x y t $ by v1_skip_limax [l4, l71]
+l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_ctx x y t $ by v1_skip_lmax [l4, l72]
+l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_ctx x y t $ by v1_skip_ls [l4, l73]
+l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_ctx x y t $ by v1_skip_lz [l4, l74]
+l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_ctx x y t $ by v1_skip_s [l2, l75]
+l77: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_ctx x y t $ by v1_skip_nz [l2, l76]
+l78: $ G ⇒ v1_d_ctx x y t $ by imp_elim [l77, #1]
 
 ofsort_ctx_cases
 ----------------
@@ -4015,49 +4074,50 @@ l34: $ G , c = kc_bd0 ∧ a = scons ks_bin ∅ ⇒ v1_d_bin x t $ by imp_elim [l
 l35: $ G , c = kc_bd1 ∧ a = scons ks_bin ∅ ⇒ ∃ x (t = ⟨ kc_bd1 , scons x ∅ ⟩ ∧ x ∊ ofsort lsig lopen ks_bin) $ by v1_build1 [l22, #3, #4, #5, #6]
 l36: $ G , c = kc_bd1 ∧ a = scons ks_bin ∅ ⇒ (∃ x (t = ⟨ kc_bd1 , scons x ∅ ⟩ ∧ x ∊ ofsort lsig lopen ks_bin)) → v1_d_bin x t $ by weaken [l28]
 l37: $ G , c = kc_bd1 ∧ a = scons ks_bin ∅ ⇒ v1_d_bin x t $ by imp_elim [l36, l35]
-l38: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_bin x t $ by v1_skip_choice_atom [l10]
-l39: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_bin x t $ by v1_skip_nonempty_blk [l14, l38]
-l40: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_bin x t $ by v1_skip_quot_sound_atom [l10, l39]
-l41: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_bin x t $ by v1_skip_propext_atom [l10, l40]
-l42: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_bin x t $ by v1_skip_iff_blk [l14, l41]
-l43: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_bin x t $ by v1_skip_quot_ind [l8, l42]
-l44: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_bin x t $ by v1_skip_quot_lift [l8, l43]
-l45: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_bin x t $ by v1_skip_quot_mk [l8, l44]
-l46: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_bin x t $ by v1_skip_quot [l8, l45]
-l47: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_bin x t $ by v1_skip_eq_blk [l14, l46]
-l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_bin x t $ by v1_skip_nat_blk [l14, l47]
-l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_bin x t $ by v1_skip_proj [l8, l48]
-l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_bin x t $ by v1_skip_ind_rec [l8, l49]
-l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_bin x t $ by v1_skip_ind_ctor [l8, l50]
-l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_bin x t $ by v1_skip_ind_ty [l8, l51]
-l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_bin x t $ by v1_skip_ind_mkn [l16, l52]
-l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_bin x t $ by v1_skip_ccons [l20, l53]
-l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_bin x t $ by v1_skip_cnil [l20, l54]
-l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_bin x t $ by v1_skip_tcons [l18, l55]
-l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_bin x t $ by v1_skip_tnil [l18, l56]
-l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_bin x t $ by v1_skip_ind_mk [l16, l57]
-l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_bin x t $ by v1_skip_lit [l8, l58]
-l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_bin x t $ by v1_take_bd1 [l37, l59]
-l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_bin x t $ by v1_take_bd0 [l34, l60]
-l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_bin x t $ by v1_take_b0 [l31, l61]
-l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_bin x t $ by v1_skip_cons [l12, l62]
-l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_bin x t $ by v1_skip_nil [l12, l63]
-l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_bin x t $ by v1_skip_cst [l8, l64]
-l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_bin x t $ by v1_skip_pi [l8, l65]
-l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_bin x t $ by v1_skip_lam [l8, l66]
-l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_bin x t $ by v1_skip_app [l8, l67]
-l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_bin x t $ by v1_skip_srt [l8, l68]
-l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_bin x t $ by v1_skip_bvar [l8, l69]
-l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_bin x t $ by v1_skip_lcons [l6, l70]
-l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_bin x t $ by v1_skip_lnil [l6, l71]
-l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_bin x t $ by v1_skip_lparam [l4, l72]
-l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_bin x t $ by v1_skip_limax [l4, l73]
-l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_bin x t $ by v1_skip_lmax [l4, l74]
-l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_bin x t $ by v1_skip_ls [l4, l75]
-l77: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_bin x t $ by v1_skip_lz [l4, l76]
-l78: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_bin x t $ by v1_skip_s [l2, l77]
-l79: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_bin x t $ by v1_skip_nz [l2, l78]
-l80: $ G ⇒ v1_d_bin x t $ by imp_elim [l79, #1]
+l38: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_le_blk → v1_d_bin x t $ by v1_skip_le_blk [l14]
+l39: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_bin x t $ by v1_skip_choice_atom [l10, l38]
+l40: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_bin x t $ by v1_skip_nonempty_blk [l14, l39]
+l41: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_bin x t $ by v1_skip_quot_sound_atom [l10, l40]
+l42: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_bin x t $ by v1_skip_propext_atom [l10, l41]
+l43: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_bin x t $ by v1_skip_iff_blk [l14, l42]
+l44: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_bin x t $ by v1_skip_quot_ind [l8, l43]
+l45: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_bin x t $ by v1_skip_quot_lift [l8, l44]
+l46: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_bin x t $ by v1_skip_quot_mk [l8, l45]
+l47: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_bin x t $ by v1_skip_quot [l8, l46]
+l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_bin x t $ by v1_skip_eq_blk [l14, l47]
+l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_bin x t $ by v1_skip_nat_blk [l14, l48]
+l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_bin x t $ by v1_skip_proj [l8, l49]
+l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_bin x t $ by v1_skip_ind_rec [l8, l50]
+l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_bin x t $ by v1_skip_ind_ctor [l8, l51]
+l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_bin x t $ by v1_skip_ind_ty [l8, l52]
+l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_bin x t $ by v1_skip_ind_mkn [l16, l53]
+l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_bin x t $ by v1_skip_ccons [l20, l54]
+l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_bin x t $ by v1_skip_cnil [l20, l55]
+l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_bin x t $ by v1_skip_tcons [l18, l56]
+l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_bin x t $ by v1_skip_tnil [l18, l57]
+l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_bin x t $ by v1_skip_ind_mk [l16, l58]
+l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_bin x t $ by v1_skip_lit [l8, l59]
+l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_bin x t $ by v1_take_bd1 [l37, l60]
+l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_bin x t $ by v1_take_bd0 [l34, l61]
+l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_bin x t $ by v1_take_b0 [l31, l62]
+l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_bin x t $ by v1_skip_cons [l12, l63]
+l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_bin x t $ by v1_skip_nil [l12, l64]
+l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_bin x t $ by v1_skip_cst [l8, l65]
+l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_bin x t $ by v1_skip_pi [l8, l66]
+l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_bin x t $ by v1_skip_lam [l8, l67]
+l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_bin x t $ by v1_skip_app [l8, l68]
+l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_bin x t $ by v1_skip_srt [l8, l69]
+l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_bin x t $ by v1_skip_bvar [l8, l70]
+l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_bin x t $ by v1_skip_lcons [l6, l71]
+l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_bin x t $ by v1_skip_lnil [l6, l72]
+l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_bin x t $ by v1_skip_lparam [l4, l73]
+l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_bin x t $ by v1_skip_limax [l4, l74]
+l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_bin x t $ by v1_skip_lmax [l4, l75]
+l77: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_bin x t $ by v1_skip_ls [l4, l76]
+l78: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_bin x t $ by v1_skip_lz [l4, l77]
+l79: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_bin x t $ by v1_skip_s [l2, l78]
+l80: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_bin x t $ by v1_skip_nz [l2, l79]
+l81: $ G ⇒ v1_d_bin x t $ by imp_elim [l80, #1]
 
 ofsort_bin_cases
 ----------------
@@ -4101,7 +4161,7 @@ l37: $ G , k = ks_bin ⇒ v1_d_bin x t $ by or_elim [l11, l28, l36]
 l38: $ G ⇒ (t = ⟨ kc_b0 , ∅ ⟩) ∨ ∃ x (t = ⟨ kc_bd0 , scons x ∅ ⟩ ∧ x ∊ ofsort lsig lopen ks_bin) ∨ ∃ x (t = ⟨ kc_bd1 , scons x ∅ ⟩ ∧ x ∊ ofsort lsig lopen ks_bin) $ by isset_elim [l3, l37]
 
 --| The cases of sort `blk`.
-def v1_d_blk {n: set} (t: set): fml = $ (t = ⟨ kc_nat_blk , ∅ ⟩) ∨ (t = ⟨ kc_eq_blk , ∅ ⟩) ∨ (t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) $
+def v1_d_blk {n: set} (t: set): fml = $ (t = ⟨ kc_nat_blk , ∅ ⟩) ∨ (t = ⟨ kc_eq_blk , ∅ ⟩) ∨ (t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ (t = ⟨ kc_le_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) $
 
 lemma v1_node_blk (G: hyps) {n: set} (c k a b t: set):
   $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig $ > $ G ⇒ k = ks_blk $ > $ G ⇒ b ∊ fseq (trees ω) $ >
@@ -4128,71 +4188,77 @@ l17: $ G ⇒ ks_blk ∈ ks_tys $ by v1_lt_blk_tys
 l18: $ G ⇒ k = ks_tys → ⊥ $ by v1_ne_lt [#2, l17]
 l19: $ G ⇒ ks_blk ∈ ks_ctors $ by v1_lt_blk_ctors
 l20: $ G ⇒ k = ks_ctors → ⊥ $ by v1_ne_lt [#2, l19]
-l21: $ G , (t = ⟨ kc_nat_blk , ∅ ⟩) ∨ (t = ⟨ kc_eq_blk , ∅ ⟩) ∨ (t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) ⇒ (t = ⟨ kc_nat_blk , ∅ ⟩) ∨ (t = ⟨ kc_eq_blk , ∅ ⟩) ∨ (t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) $ by ax
-l22: $ G ⇒ ((t = ⟨ kc_nat_blk , ∅ ⟩) ∨ (t = ⟨ kc_eq_blk , ∅ ⟩) ∨ (t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩)) → v1_d_blk n t $ by imp_intro [l21]
+l21: $ G , (t = ⟨ kc_nat_blk , ∅ ⟩) ∨ (t = ⟨ kc_eq_blk , ∅ ⟩) ∨ (t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ (t = ⟨ kc_le_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) ⇒ (t = ⟨ kc_nat_blk , ∅ ⟩) ∨ (t = ⟨ kc_eq_blk , ∅ ⟩) ∨ (t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ (t = ⟨ kc_le_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) $ by ax
+l22: $ G ⇒ ((t = ⟨ kc_nat_blk , ∅ ⟩) ∨ (t = ⟨ kc_eq_blk , ∅ ⟩) ∨ (t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ (t = ⟨ kc_le_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩)) → v1_d_blk n t $ by imp_intro [l21]
 l23: $ G ⇒ (t = ⟨ kc_nat_blk , ∅ ⟩) → v1_d_blk n t $ by v1_imp_or_l [l22]
-l24: $ G ⇒ ((t = ⟨ kc_eq_blk , ∅ ⟩) ∨ (t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩)) → v1_d_blk n t $ by v1_imp_or_r [l22]
+l24: $ G ⇒ ((t = ⟨ kc_eq_blk , ∅ ⟩) ∨ (t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ (t = ⟨ kc_le_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩)) → v1_d_blk n t $ by v1_imp_or_r [l22]
 l25: $ G ⇒ (t = ⟨ kc_eq_blk , ∅ ⟩) → v1_d_blk n t $ by v1_imp_or_l [l24]
-l26: $ G ⇒ ((t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩)) → v1_d_blk n t $ by v1_imp_or_r [l24]
+l26: $ G ⇒ ((t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ (t = ⟨ kc_le_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩)) → v1_d_blk n t $ by v1_imp_or_r [l24]
 l27: $ G ⇒ (t = ⟨ kc_iff_blk , ∅ ⟩) → v1_d_blk n t $ by v1_imp_or_l [l26]
-l28: $ G ⇒ ((t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩)) → v1_d_blk n t $ by v1_imp_or_r [l26]
+l28: $ G ⇒ ((t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ (t = ⟨ kc_le_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩)) → v1_d_blk n t $ by v1_imp_or_r [l26]
 l29: $ G ⇒ (t = ⟨ kc_nonempty_blk , ∅ ⟩) → v1_d_blk n t $ by v1_imp_or_l [l28]
-l30: $ G ⇒ (∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩)) → v1_d_blk n t $ by v1_imp_or_r [l28]
-l31: $ G , c = kc_nat_blk ∧ a = ∅ ⇒ (t = ⟨ kc_nat_blk , ∅ ⟩) $ by v1_build0 [#3, #4, #6]
-l32: $ G , c = kc_nat_blk ∧ a = ∅ ⇒ (t = ⟨ kc_nat_blk , ∅ ⟩) → v1_d_blk n t $ by weaken [l23]
-l33: $ G , c = kc_nat_blk ∧ a = ∅ ⇒ v1_d_blk n t $ by imp_elim [l32, l31]
-l34: $ G , c = kc_eq_blk ∧ a = ∅ ⇒ (t = ⟨ kc_eq_blk , ∅ ⟩) $ by v1_build0 [#3, #4, #6]
-l35: $ G , c = kc_eq_blk ∧ a = ∅ ⇒ (t = ⟨ kc_eq_blk , ∅ ⟩) → v1_d_blk n t $ by weaken [l25]
-l36: $ G , c = kc_eq_blk ∧ a = ∅ ⇒ v1_d_blk n t $ by imp_elim [l35, l34]
-l37: $ G , c = kc_iff_blk ∧ a = ∅ ⇒ (t = ⟨ kc_iff_blk , ∅ ⟩) $ by v1_build0 [#3, #4, #6]
-l38: $ G , c = kc_iff_blk ∧ a = ∅ ⇒ (t = ⟨ kc_iff_blk , ∅ ⟩) → v1_d_blk n t $ by weaken [l27]
-l39: $ G , c = kc_iff_blk ∧ a = ∅ ⇒ v1_d_blk n t $ by imp_elim [l38, l37]
-l40: $ G , c = kc_nonempty_blk ∧ a = ∅ ⇒ (t = ⟨ kc_nonempty_blk , ∅ ⟩) $ by v1_build0 [#3, #4, #6]
-l41: $ G , c = kc_nonempty_blk ∧ a = ∅ ⇒ (t = ⟨ kc_nonempty_blk , ∅ ⟩) → v1_d_blk n t $ by weaken [l29]
-l42: $ G , c = kc_nonempty_blk ∧ a = ∅ ⇒ v1_d_blk n t $ by imp_elim [l41, l40]
-l43: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_blk n t $ by v1_skip_choice_atom [l10]
-l44: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_blk n t $ by v1_take_nonempty_blk [l42, l43]
-l45: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_blk n t $ by v1_skip_quot_sound_atom [l10, l44]
-l46: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_blk n t $ by v1_skip_propext_atom [l10, l45]
-l47: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_blk n t $ by v1_take_iff_blk [l39, l46]
-l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_blk n t $ by v1_skip_quot_ind [l8, l47]
-l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_blk n t $ by v1_skip_quot_lift [l8, l48]
-l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_blk n t $ by v1_skip_quot_mk [l8, l49]
-l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_blk n t $ by v1_skip_quot [l8, l50]
-l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_blk n t $ by v1_take_eq_blk [l36, l51]
-l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_blk n t $ by v1_take_nat_blk [l33, l52]
-l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_blk n t $ by v1_skip_proj [l8, l53]
-l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_blk n t $ by v1_skip_ind_rec [l8, l54]
-l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_blk n t $ by v1_skip_ind_ctor [l8, l55]
-l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_blk n t $ by v1_skip_ind_ty [l8, l56]
-l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_blk n t $ by v1_skip_ind_mkn [l16, l57]
-l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_blk n t $ by v1_skip_ccons [l20, l58]
-l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_blk n t $ by v1_skip_cnil [l20, l59]
-l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_blk n t $ by v1_skip_tcons [l18, l60]
-l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_blk n t $ by v1_skip_tnil [l18, l61]
-l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_blk n t $ by v1_skip_ind_mk [l16, l62]
-l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_blk n t $ by v1_skip_lit [l8, l63]
-l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_blk n t $ by v1_skip_bd1 [l14, l64]
-l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_blk n t $ by v1_skip_bd0 [l14, l65]
-l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_blk n t $ by v1_skip_b0 [l14, l66]
-l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_blk n t $ by v1_skip_cons [l12, l67]
-l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_blk n t $ by v1_skip_nil [l12, l68]
-l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_blk n t $ by v1_skip_cst [l8, l69]
-l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_blk n t $ by v1_skip_pi [l8, l70]
-l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_blk n t $ by v1_skip_lam [l8, l71]
-l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_blk n t $ by v1_skip_app [l8, l72]
-l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_blk n t $ by v1_skip_srt [l8, l73]
-l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_blk n t $ by v1_skip_bvar [l8, l74]
-l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_blk n t $ by v1_skip_lcons [l6, l75]
-l77: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_blk n t $ by v1_skip_lnil [l6, l76]
-l78: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_blk n t $ by v1_skip_lparam [l4, l77]
-l79: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_blk n t $ by v1_skip_limax [l4, l78]
-l80: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_blk n t $ by v1_skip_lmax [l4, l79]
-l81: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_blk n t $ by v1_skip_ls [l4, l80]
-l82: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_blk n t $ by v1_skip_lz [l4, l81]
-l83: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_blk n t $ by v1_skip_s [l2, l82]
-l84: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_blk n t $ by v1_skip_nz [l2, l83]
-l85: $ G ⇒ v1_d_blk n t $ by imp_elim [l84, #1]
+l30: $ G ⇒ ((t = ⟨ kc_le_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩)) → v1_d_blk n t $ by v1_imp_or_r [l28]
+l31: $ G ⇒ (t = ⟨ kc_le_blk , ∅ ⟩) → v1_d_blk n t $ by v1_imp_or_l [l30]
+l32: $ G ⇒ (∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩)) → v1_d_blk n t $ by v1_imp_or_r [l30]
+l33: $ G , c = kc_nat_blk ∧ a = ∅ ⇒ (t = ⟨ kc_nat_blk , ∅ ⟩) $ by v1_build0 [#3, #4, #6]
+l34: $ G , c = kc_nat_blk ∧ a = ∅ ⇒ (t = ⟨ kc_nat_blk , ∅ ⟩) → v1_d_blk n t $ by weaken [l23]
+l35: $ G , c = kc_nat_blk ∧ a = ∅ ⇒ v1_d_blk n t $ by imp_elim [l34, l33]
+l36: $ G , c = kc_eq_blk ∧ a = ∅ ⇒ (t = ⟨ kc_eq_blk , ∅ ⟩) $ by v1_build0 [#3, #4, #6]
+l37: $ G , c = kc_eq_blk ∧ a = ∅ ⇒ (t = ⟨ kc_eq_blk , ∅ ⟩) → v1_d_blk n t $ by weaken [l25]
+l38: $ G , c = kc_eq_blk ∧ a = ∅ ⇒ v1_d_blk n t $ by imp_elim [l37, l36]
+l39: $ G , c = kc_iff_blk ∧ a = ∅ ⇒ (t = ⟨ kc_iff_blk , ∅ ⟩) $ by v1_build0 [#3, #4, #6]
+l40: $ G , c = kc_iff_blk ∧ a = ∅ ⇒ (t = ⟨ kc_iff_blk , ∅ ⟩) → v1_d_blk n t $ by weaken [l27]
+l41: $ G , c = kc_iff_blk ∧ a = ∅ ⇒ v1_d_blk n t $ by imp_elim [l40, l39]
+l42: $ G , c = kc_nonempty_blk ∧ a = ∅ ⇒ (t = ⟨ kc_nonempty_blk , ∅ ⟩) $ by v1_build0 [#3, #4, #6]
+l43: $ G , c = kc_nonempty_blk ∧ a = ∅ ⇒ (t = ⟨ kc_nonempty_blk , ∅ ⟩) → v1_d_blk n t $ by weaken [l29]
+l44: $ G , c = kc_nonempty_blk ∧ a = ∅ ⇒ v1_d_blk n t $ by imp_elim [l43, l42]
+l45: $ G , c = kc_le_blk ∧ a = ∅ ⇒ (t = ⟨ kc_le_blk , ∅ ⟩) $ by v1_build0 [#3, #4, #6]
+l46: $ G , c = kc_le_blk ∧ a = ∅ ⇒ (t = ⟨ kc_le_blk , ∅ ⟩) → v1_d_blk n t $ by weaken [l31]
+l47: $ G , c = kc_le_blk ∧ a = ∅ ⇒ v1_d_blk n t $ by imp_elim [l46, l45]
+l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_le_blk → v1_d_blk n t $ by v1_take_le_blk [l47]
+l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_blk n t $ by v1_skip_choice_atom [l10, l48]
+l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_blk n t $ by v1_take_nonempty_blk [l44, l49]
+l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_blk n t $ by v1_skip_quot_sound_atom [l10, l50]
+l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_blk n t $ by v1_skip_propext_atom [l10, l51]
+l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_blk n t $ by v1_take_iff_blk [l41, l52]
+l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_blk n t $ by v1_skip_quot_ind [l8, l53]
+l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_blk n t $ by v1_skip_quot_lift [l8, l54]
+l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_blk n t $ by v1_skip_quot_mk [l8, l55]
+l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_blk n t $ by v1_skip_quot [l8, l56]
+l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_blk n t $ by v1_take_eq_blk [l38, l57]
+l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_blk n t $ by v1_take_nat_blk [l35, l58]
+l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_blk n t $ by v1_skip_proj [l8, l59]
+l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_blk n t $ by v1_skip_ind_rec [l8, l60]
+l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_blk n t $ by v1_skip_ind_ctor [l8, l61]
+l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_blk n t $ by v1_skip_ind_ty [l8, l62]
+l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_blk n t $ by v1_skip_ind_mkn [l16, l63]
+l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_blk n t $ by v1_skip_ccons [l20, l64]
+l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_blk n t $ by v1_skip_cnil [l20, l65]
+l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_blk n t $ by v1_skip_tcons [l18, l66]
+l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_blk n t $ by v1_skip_tnil [l18, l67]
+l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_blk n t $ by v1_skip_ind_mk [l16, l68]
+l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_blk n t $ by v1_skip_lit [l8, l69]
+l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_blk n t $ by v1_skip_bd1 [l14, l70]
+l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_blk n t $ by v1_skip_bd0 [l14, l71]
+l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_blk n t $ by v1_skip_b0 [l14, l72]
+l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_blk n t $ by v1_skip_cons [l12, l73]
+l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_blk n t $ by v1_skip_nil [l12, l74]
+l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_blk n t $ by v1_skip_cst [l8, l75]
+l77: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_blk n t $ by v1_skip_pi [l8, l76]
+l78: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_blk n t $ by v1_skip_lam [l8, l77]
+l79: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_blk n t $ by v1_skip_app [l8, l78]
+l80: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_blk n t $ by v1_skip_srt [l8, l79]
+l81: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_blk n t $ by v1_skip_bvar [l8, l80]
+l82: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_blk n t $ by v1_skip_lcons [l6, l81]
+l83: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_blk n t $ by v1_skip_lnil [l6, l82]
+l84: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_blk n t $ by v1_skip_lparam [l4, l83]
+l85: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_blk n t $ by v1_skip_limax [l4, l84]
+l86: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_blk n t $ by v1_skip_lmax [l4, l85]
+l87: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_blk n t $ by v1_skip_ls [l4, l86]
+l88: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_blk n t $ by v1_skip_lz [l4, l87]
+l89: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_blk n t $ by v1_skip_s [l2, l88]
+l90: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_blk n t $ by v1_skip_nz [l2, l89]
+l91: $ G ⇒ v1_d_blk n t $ by imp_elim [l90, #1]
 
 ofsort_blk_cases
 ----------------
@@ -4226,12 +4292,13 @@ l27: $ G , k = ks_blk , ∃ c ∃ a ∃ b (⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig �
 l28: $ G , k = ks_blk , ∃ c ∃ a ∃ b (⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig ∧ b ∊ fseq (trees ω) ∧ cdm b = cdm a ∧ szip a b ⊆ sorted lsig lopen ∧ t = ⟨ c , b ⟩) ⇒ v1_d_blk n t $ by ex_elim [l27, l26]
 l29: $ G , k = ks_blk , k ∊ lopen ∧ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) ⇒ k ∊ lopen ∧ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) $ by ax
 l30: $ G , k = ks_blk , k ∊ lopen ∧ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) ⇒ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) $ by and_elim_r [l29]
-l31: $ G , k = ks_blk , k ∊ lopen ∧ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) ⇒ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) $ by or_intro_r [l30]
-l32: $ G , k = ks_blk , k ∊ lopen ∧ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) ⇒ (t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) $ by or_intro_r [l31]
-l33: $ G , k = ks_blk , k ∊ lopen ∧ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) ⇒ (t = ⟨ kc_eq_blk , ∅ ⟩) ∨ (t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) $ by or_intro_r [l32]
-l34: $ G , k = ks_blk , k ∊ lopen ∧ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) ⇒ v1_d_blk n t $ by or_intro_r [l33]
-l35: $ G , k = ks_blk ⇒ v1_d_blk n t $ by or_elim [l11, l28, l34]
-l36: $ G ⇒ (t = ⟨ kc_nat_blk , ∅ ⟩) ∨ (t = ⟨ kc_eq_blk , ∅ ⟩) ∨ (t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) $ by isset_elim [l3, l35]
+l31: $ G , k = ks_blk , k ∊ lopen ∧ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) ⇒ (t = ⟨ kc_le_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) $ by or_intro_r [l30]
+l32: $ G , k = ks_blk , k ∊ lopen ∧ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) ⇒ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ (t = ⟨ kc_le_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) $ by or_intro_r [l31]
+l33: $ G , k = ks_blk , k ∊ lopen ∧ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) ⇒ (t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ (t = ⟨ kc_le_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) $ by or_intro_r [l32]
+l34: $ G , k = ks_blk , k ∊ lopen ∧ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) ⇒ (t = ⟨ kc_eq_blk , ∅ ⟩) ∨ (t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ (t = ⟨ kc_le_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) $ by or_intro_r [l33]
+l35: $ G , k = ks_blk , k ∊ lopen ∧ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) ⇒ v1_d_blk n t $ by or_intro_r [l34]
+l36: $ G , k = ks_blk ⇒ v1_d_blk n t $ by or_elim [l11, l28, l35]
+l37: $ G ⇒ (t = ⟨ kc_nat_blk , ∅ ⟩) ∨ (t = ⟨ kc_eq_blk , ∅ ⟩) ∨ (t = ⟨ kc_iff_blk , ∅ ⟩) ∨ (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨ (t = ⟨ kc_le_blk , ∅ ⟩) ∨ ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) $ by isset_elim [l3, l36]
 
 --| The cases of sort `ind`.
 def v1_d_ind {u v x y: set} (t: set): fml = $ ∃ x ∃ y ∃ u (t = ⟨ kc_ind_mk , scons x (scons y (scons u ∅)) ⟩ ∧ x ∊ ofsort lsig lopen ks_blk ∧ y ∊ ofsort lsig lopen ks_ctx ∧ u ∊ ofsort lsig lopen ks_tys) ∨ ∃ x ∃ y ∃ u ∃ v (t = ⟨ kc_ind_mkn , scons x (scons y (scons u (scons v ∅))) ⟩ ∧ x ∊ ofsort lsig lopen ks_blk ∧ y ∊ ofsort lsig lopen ks_ctx ∧ u ∊ ofsort lsig lopen ks_tys ∧ v ∊ ofsort lsig lopen ks_ctx) $
@@ -4277,49 +4344,50 @@ l33: $ G , c = kc_ind_mk ∧ a = scons ks_blk (scons ks_ctx (scons ks_tys ∅)) 
 l34: $ G , c = kc_ind_mkn ∧ a = scons ks_blk (scons ks_ctx (scons ks_tys (scons ks_ctx ∅))) ⇒ ∃ x ∃ y ∃ u ∃ v (t = ⟨ kc_ind_mkn , scons x (scons y (scons u (scons v ∅))) ⟩ ∧ x ∊ ofsort lsig lopen ks_blk ∧ y ∊ ofsort lsig lopen ks_ctx ∧ u ∊ ofsort lsig lopen ks_tys ∧ v ∊ ofsort lsig lopen ks_ctx) $ by v1_build4 [l22, l24, l26, l24, #3, #4, #5, #6]
 l35: $ G , c = kc_ind_mkn ∧ a = scons ks_blk (scons ks_ctx (scons ks_tys (scons ks_ctx ∅))) ⇒ (∃ x ∃ y ∃ u ∃ v (t = ⟨ kc_ind_mkn , scons x (scons y (scons u (scons v ∅))) ⟩ ∧ x ∊ ofsort lsig lopen ks_blk ∧ y ∊ ofsort lsig lopen ks_ctx ∧ u ∊ ofsort lsig lopen ks_tys ∧ v ∊ ofsort lsig lopen ks_ctx)) → v1_d_ind u v x y t $ by weaken [l30]
 l36: $ G , c = kc_ind_mkn ∧ a = scons ks_blk (scons ks_ctx (scons ks_tys (scons ks_ctx ∅))) ⇒ v1_d_ind u v x y t $ by imp_elim [l35, l34]
-l37: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_ind u v x y t $ by v1_skip_choice_atom [l10]
-l38: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_ind u v x y t $ by v1_skip_nonempty_blk [l16, l37]
-l39: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_ind u v x y t $ by v1_skip_quot_sound_atom [l10, l38]
-l40: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_ind u v x y t $ by v1_skip_propext_atom [l10, l39]
-l41: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_ind u v x y t $ by v1_skip_iff_blk [l16, l40]
-l42: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_ind u v x y t $ by v1_skip_quot_ind [l8, l41]
-l43: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_ind u v x y t $ by v1_skip_quot_lift [l8, l42]
-l44: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_ind u v x y t $ by v1_skip_quot_mk [l8, l43]
-l45: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_ind u v x y t $ by v1_skip_quot [l8, l44]
-l46: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_ind u v x y t $ by v1_skip_eq_blk [l16, l45]
-l47: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_ind u v x y t $ by v1_skip_nat_blk [l16, l46]
-l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_ind u v x y t $ by v1_skip_proj [l8, l47]
-l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_ind u v x y t $ by v1_skip_ind_rec [l8, l48]
-l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_ind u v x y t $ by v1_skip_ind_ctor [l8, l49]
-l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_ind u v x y t $ by v1_skip_ind_ty [l8, l50]
-l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_ind u v x y t $ by v1_take_ind_mkn [l36, l51]
-l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_ind u v x y t $ by v1_skip_ccons [l20, l52]
-l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_ind u v x y t $ by v1_skip_cnil [l20, l53]
-l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_ind u v x y t $ by v1_skip_tcons [l18, l54]
-l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_ind u v x y t $ by v1_skip_tnil [l18, l55]
-l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_ind u v x y t $ by v1_take_ind_mk [l33, l56]
-l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_ind u v x y t $ by v1_skip_lit [l8, l57]
-l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_ind u v x y t $ by v1_skip_bd1 [l14, l58]
-l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_ind u v x y t $ by v1_skip_bd0 [l14, l59]
-l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_ind u v x y t $ by v1_skip_b0 [l14, l60]
-l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_ind u v x y t $ by v1_skip_cons [l12, l61]
-l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_ind u v x y t $ by v1_skip_nil [l12, l62]
-l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_ind u v x y t $ by v1_skip_cst [l8, l63]
-l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_ind u v x y t $ by v1_skip_pi [l8, l64]
-l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_ind u v x y t $ by v1_skip_lam [l8, l65]
-l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_ind u v x y t $ by v1_skip_app [l8, l66]
-l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_ind u v x y t $ by v1_skip_srt [l8, l67]
-l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_ind u v x y t $ by v1_skip_bvar [l8, l68]
-l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_ind u v x y t $ by v1_skip_lcons [l6, l69]
-l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_ind u v x y t $ by v1_skip_lnil [l6, l70]
-l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_ind u v x y t $ by v1_skip_lparam [l4, l71]
-l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_ind u v x y t $ by v1_skip_limax [l4, l72]
-l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_ind u v x y t $ by v1_skip_lmax [l4, l73]
-l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_ind u v x y t $ by v1_skip_ls [l4, l74]
-l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_ind u v x y t $ by v1_skip_lz [l4, l75]
-l77: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_ind u v x y t $ by v1_skip_s [l2, l76]
-l78: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_ind u v x y t $ by v1_skip_nz [l2, l77]
-l79: $ G ⇒ v1_d_ind u v x y t $ by imp_elim [l78, #1]
+l37: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_le_blk → v1_d_ind u v x y t $ by v1_skip_le_blk [l16]
+l38: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_ind u v x y t $ by v1_skip_choice_atom [l10, l37]
+l39: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_ind u v x y t $ by v1_skip_nonempty_blk [l16, l38]
+l40: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_ind u v x y t $ by v1_skip_quot_sound_atom [l10, l39]
+l41: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_ind u v x y t $ by v1_skip_propext_atom [l10, l40]
+l42: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_ind u v x y t $ by v1_skip_iff_blk [l16, l41]
+l43: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_ind u v x y t $ by v1_skip_quot_ind [l8, l42]
+l44: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_ind u v x y t $ by v1_skip_quot_lift [l8, l43]
+l45: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_ind u v x y t $ by v1_skip_quot_mk [l8, l44]
+l46: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_ind u v x y t $ by v1_skip_quot [l8, l45]
+l47: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_ind u v x y t $ by v1_skip_eq_blk [l16, l46]
+l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_ind u v x y t $ by v1_skip_nat_blk [l16, l47]
+l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_ind u v x y t $ by v1_skip_proj [l8, l48]
+l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_ind u v x y t $ by v1_skip_ind_rec [l8, l49]
+l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_ind u v x y t $ by v1_skip_ind_ctor [l8, l50]
+l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_ind u v x y t $ by v1_skip_ind_ty [l8, l51]
+l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_ind u v x y t $ by v1_take_ind_mkn [l36, l52]
+l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_ind u v x y t $ by v1_skip_ccons [l20, l53]
+l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_ind u v x y t $ by v1_skip_cnil [l20, l54]
+l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_ind u v x y t $ by v1_skip_tcons [l18, l55]
+l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_ind u v x y t $ by v1_skip_tnil [l18, l56]
+l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_ind u v x y t $ by v1_take_ind_mk [l33, l57]
+l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_ind u v x y t $ by v1_skip_lit [l8, l58]
+l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_ind u v x y t $ by v1_skip_bd1 [l14, l59]
+l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_ind u v x y t $ by v1_skip_bd0 [l14, l60]
+l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_ind u v x y t $ by v1_skip_b0 [l14, l61]
+l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_ind u v x y t $ by v1_skip_cons [l12, l62]
+l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_ind u v x y t $ by v1_skip_nil [l12, l63]
+l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_ind u v x y t $ by v1_skip_cst [l8, l64]
+l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_ind u v x y t $ by v1_skip_pi [l8, l65]
+l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_ind u v x y t $ by v1_skip_lam [l8, l66]
+l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_ind u v x y t $ by v1_skip_app [l8, l67]
+l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_ind u v x y t $ by v1_skip_srt [l8, l68]
+l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_ind u v x y t $ by v1_skip_bvar [l8, l69]
+l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_ind u v x y t $ by v1_skip_lcons [l6, l70]
+l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_ind u v x y t $ by v1_skip_lnil [l6, l71]
+l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_ind u v x y t $ by v1_skip_lparam [l4, l72]
+l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_ind u v x y t $ by v1_skip_limax [l4, l73]
+l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_ind u v x y t $ by v1_skip_lmax [l4, l74]
+l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_ind u v x y t $ by v1_skip_ls [l4, l75]
+l77: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_ind u v x y t $ by v1_skip_lz [l4, l76]
+l78: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_ind u v x y t $ by v1_skip_s [l2, l77]
+l79: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_ind u v x y t $ by v1_skip_nz [l2, l78]
+l80: $ G ⇒ v1_d_ind u v x y t $ by imp_elim [l79, #1]
 
 ofsort_ind_cases
 ----------------
@@ -4406,49 +4474,50 @@ l33: $ G , c = kc_tnil ∧ a = ∅ ⇒ v1_d_tys u x y t $ by imp_elim [l32, l31]
 l34: $ G , c = kc_tcons ∧ a = scons ks_expr (scons ks_ctors (scons ks_tys ∅)) ⇒ ∃ x ∃ y ∃ u (t = ⟨ kc_tcons , scons x (scons y (scons u ∅)) ⟩ ∧ x ∊ ofsort lsig lopen ks_expr ∧ y ∊ ofsort lsig lopen ks_ctors ∧ u ∊ ofsort lsig lopen ks_tys) $ by v1_build3 [l22, l24, l26, #3, #4, #5, #6]
 l35: $ G , c = kc_tcons ∧ a = scons ks_expr (scons ks_ctors (scons ks_tys ∅)) ⇒ (∃ x ∃ y ∃ u (t = ⟨ kc_tcons , scons x (scons y (scons u ∅)) ⟩ ∧ x ∊ ofsort lsig lopen ks_expr ∧ y ∊ ofsort lsig lopen ks_ctors ∧ u ∊ ofsort lsig lopen ks_tys)) → v1_d_tys u x y t $ by weaken [l30]
 l36: $ G , c = kc_tcons ∧ a = scons ks_expr (scons ks_ctors (scons ks_tys ∅)) ⇒ v1_d_tys u x y t $ by imp_elim [l35, l34]
-l37: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_tys u x y t $ by v1_skip_choice_atom [l10]
-l38: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_tys u x y t $ by v1_skip_nonempty_blk [l16, l37]
-l39: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_tys u x y t $ by v1_skip_quot_sound_atom [l10, l38]
-l40: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_tys u x y t $ by v1_skip_propext_atom [l10, l39]
-l41: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_tys u x y t $ by v1_skip_iff_blk [l16, l40]
-l42: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_tys u x y t $ by v1_skip_quot_ind [l8, l41]
-l43: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_tys u x y t $ by v1_skip_quot_lift [l8, l42]
-l44: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_tys u x y t $ by v1_skip_quot_mk [l8, l43]
-l45: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_tys u x y t $ by v1_skip_quot [l8, l44]
-l46: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_tys u x y t $ by v1_skip_eq_blk [l16, l45]
-l47: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_tys u x y t $ by v1_skip_nat_blk [l16, l46]
-l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_tys u x y t $ by v1_skip_proj [l8, l47]
-l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_tys u x y t $ by v1_skip_ind_rec [l8, l48]
-l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_tys u x y t $ by v1_skip_ind_ctor [l8, l49]
-l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_tys u x y t $ by v1_skip_ind_ty [l8, l50]
-l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_tys u x y t $ by v1_skip_ind_mkn [l18, l51]
-l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_tys u x y t $ by v1_skip_ccons [l20, l52]
-l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_tys u x y t $ by v1_skip_cnil [l20, l53]
-l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_tys u x y t $ by v1_take_tcons [l36, l54]
-l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_tys u x y t $ by v1_take_tnil [l33, l55]
-l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_tys u x y t $ by v1_skip_ind_mk [l18, l56]
-l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_tys u x y t $ by v1_skip_lit [l8, l57]
-l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_tys u x y t $ by v1_skip_bd1 [l14, l58]
-l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_tys u x y t $ by v1_skip_bd0 [l14, l59]
-l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_tys u x y t $ by v1_skip_b0 [l14, l60]
-l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_tys u x y t $ by v1_skip_cons [l12, l61]
-l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_tys u x y t $ by v1_skip_nil [l12, l62]
-l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_tys u x y t $ by v1_skip_cst [l8, l63]
-l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_tys u x y t $ by v1_skip_pi [l8, l64]
-l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_tys u x y t $ by v1_skip_lam [l8, l65]
-l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_tys u x y t $ by v1_skip_app [l8, l66]
-l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_tys u x y t $ by v1_skip_srt [l8, l67]
-l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_tys u x y t $ by v1_skip_bvar [l8, l68]
-l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_tys u x y t $ by v1_skip_lcons [l6, l69]
-l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_tys u x y t $ by v1_skip_lnil [l6, l70]
-l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_tys u x y t $ by v1_skip_lparam [l4, l71]
-l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_tys u x y t $ by v1_skip_limax [l4, l72]
-l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_tys u x y t $ by v1_skip_lmax [l4, l73]
-l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_tys u x y t $ by v1_skip_ls [l4, l74]
-l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_tys u x y t $ by v1_skip_lz [l4, l75]
-l77: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_tys u x y t $ by v1_skip_s [l2, l76]
-l78: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_tys u x y t $ by v1_skip_nz [l2, l77]
-l79: $ G ⇒ v1_d_tys u x y t $ by imp_elim [l78, #1]
+l37: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_le_blk → v1_d_tys u x y t $ by v1_skip_le_blk [l16]
+l38: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_tys u x y t $ by v1_skip_choice_atom [l10, l37]
+l39: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_tys u x y t $ by v1_skip_nonempty_blk [l16, l38]
+l40: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_tys u x y t $ by v1_skip_quot_sound_atom [l10, l39]
+l41: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_tys u x y t $ by v1_skip_propext_atom [l10, l40]
+l42: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_tys u x y t $ by v1_skip_iff_blk [l16, l41]
+l43: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_tys u x y t $ by v1_skip_quot_ind [l8, l42]
+l44: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_tys u x y t $ by v1_skip_quot_lift [l8, l43]
+l45: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_tys u x y t $ by v1_skip_quot_mk [l8, l44]
+l46: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_tys u x y t $ by v1_skip_quot [l8, l45]
+l47: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_tys u x y t $ by v1_skip_eq_blk [l16, l46]
+l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_tys u x y t $ by v1_skip_nat_blk [l16, l47]
+l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_tys u x y t $ by v1_skip_proj [l8, l48]
+l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_tys u x y t $ by v1_skip_ind_rec [l8, l49]
+l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_tys u x y t $ by v1_skip_ind_ctor [l8, l50]
+l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_tys u x y t $ by v1_skip_ind_ty [l8, l51]
+l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_tys u x y t $ by v1_skip_ind_mkn [l18, l52]
+l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_tys u x y t $ by v1_skip_ccons [l20, l53]
+l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_tys u x y t $ by v1_skip_cnil [l20, l54]
+l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_tys u x y t $ by v1_take_tcons [l36, l55]
+l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_tys u x y t $ by v1_take_tnil [l33, l56]
+l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_tys u x y t $ by v1_skip_ind_mk [l18, l57]
+l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_tys u x y t $ by v1_skip_lit [l8, l58]
+l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_tys u x y t $ by v1_skip_bd1 [l14, l59]
+l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_tys u x y t $ by v1_skip_bd0 [l14, l60]
+l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_tys u x y t $ by v1_skip_b0 [l14, l61]
+l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_tys u x y t $ by v1_skip_cons [l12, l62]
+l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_tys u x y t $ by v1_skip_nil [l12, l63]
+l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_tys u x y t $ by v1_skip_cst [l8, l64]
+l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_tys u x y t $ by v1_skip_pi [l8, l65]
+l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_tys u x y t $ by v1_skip_lam [l8, l66]
+l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_tys u x y t $ by v1_skip_app [l8, l67]
+l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_tys u x y t $ by v1_skip_srt [l8, l68]
+l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_tys u x y t $ by v1_skip_bvar [l8, l69]
+l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_tys u x y t $ by v1_skip_lcons [l6, l70]
+l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_tys u x y t $ by v1_skip_lnil [l6, l71]
+l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_tys u x y t $ by v1_skip_lparam [l4, l72]
+l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_tys u x y t $ by v1_skip_limax [l4, l73]
+l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_tys u x y t $ by v1_skip_lmax [l4, l74]
+l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_tys u x y t $ by v1_skip_ls [l4, l75]
+l77: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_tys u x y t $ by v1_skip_lz [l4, l76]
+l78: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_tys u x y t $ by v1_skip_s [l2, l77]
+l79: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_tys u x y t $ by v1_skip_nz [l2, l78]
+l80: $ G ⇒ v1_d_tys u x y t $ by imp_elim [l79, #1]
 
 ofsort_tys_cases
 ----------------
@@ -4533,49 +4602,50 @@ l31: $ G , c = kc_cnil ∧ a = ∅ ⇒ v1_d_ctors x y t $ by imp_elim [l30, l29]
 l32: $ G , c = kc_ccons ∧ a = scons ks_expr (scons ks_ctors ∅) ⇒ ∃ x ∃ y (t = ⟨ kc_ccons , scons x (scons y ∅) ⟩ ∧ x ∊ ofsort lsig lopen ks_expr ∧ y ∊ ofsort lsig lopen ks_ctors) $ by v1_build2 [l22, l24, #3, #4, #5, #6]
 l33: $ G , c = kc_ccons ∧ a = scons ks_expr (scons ks_ctors ∅) ⇒ (∃ x ∃ y (t = ⟨ kc_ccons , scons x (scons y ∅) ⟩ ∧ x ∊ ofsort lsig lopen ks_expr ∧ y ∊ ofsort lsig lopen ks_ctors)) → v1_d_ctors x y t $ by weaken [l28]
 l34: $ G , c = kc_ccons ∧ a = scons ks_expr (scons ks_ctors ∅) ⇒ v1_d_ctors x y t $ by imp_elim [l33, l32]
-l35: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_ctors x y t $ by v1_skip_choice_atom [l10]
-l36: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_ctors x y t $ by v1_skip_nonempty_blk [l16, l35]
-l37: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_ctors x y t $ by v1_skip_quot_sound_atom [l10, l36]
-l38: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_ctors x y t $ by v1_skip_propext_atom [l10, l37]
-l39: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_ctors x y t $ by v1_skip_iff_blk [l16, l38]
-l40: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_ctors x y t $ by v1_skip_quot_ind [l8, l39]
-l41: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_ctors x y t $ by v1_skip_quot_lift [l8, l40]
-l42: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_ctors x y t $ by v1_skip_quot_mk [l8, l41]
-l43: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_ctors x y t $ by v1_skip_quot [l8, l42]
-l44: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_ctors x y t $ by v1_skip_eq_blk [l16, l43]
-l45: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_ctors x y t $ by v1_skip_nat_blk [l16, l44]
-l46: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_ctors x y t $ by v1_skip_proj [l8, l45]
-l47: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_ctors x y t $ by v1_skip_ind_rec [l8, l46]
-l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_ctors x y t $ by v1_skip_ind_ctor [l8, l47]
-l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_ctors x y t $ by v1_skip_ind_ty [l8, l48]
-l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_ctors x y t $ by v1_skip_ind_mkn [l18, l49]
-l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_ctors x y t $ by v1_take_ccons [l34, l50]
-l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_ctors x y t $ by v1_take_cnil [l31, l51]
-l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_ctors x y t $ by v1_skip_tcons [l20, l52]
-l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_ctors x y t $ by v1_skip_tnil [l20, l53]
-l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_ctors x y t $ by v1_skip_ind_mk [l18, l54]
-l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_ctors x y t $ by v1_skip_lit [l8, l55]
-l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_ctors x y t $ by v1_skip_bd1 [l14, l56]
-l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_ctors x y t $ by v1_skip_bd0 [l14, l57]
-l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_ctors x y t $ by v1_skip_b0 [l14, l58]
-l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_ctors x y t $ by v1_skip_cons [l12, l59]
-l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_ctors x y t $ by v1_skip_nil [l12, l60]
-l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_ctors x y t $ by v1_skip_cst [l8, l61]
-l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_ctors x y t $ by v1_skip_pi [l8, l62]
-l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_ctors x y t $ by v1_skip_lam [l8, l63]
-l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_ctors x y t $ by v1_skip_app [l8, l64]
-l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_ctors x y t $ by v1_skip_srt [l8, l65]
-l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_ctors x y t $ by v1_skip_bvar [l8, l66]
-l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_ctors x y t $ by v1_skip_lcons [l6, l67]
-l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_ctors x y t $ by v1_skip_lnil [l6, l68]
-l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_ctors x y t $ by v1_skip_lparam [l4, l69]
-l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_ctors x y t $ by v1_skip_limax [l4, l70]
-l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_ctors x y t $ by v1_skip_lmax [l4, l71]
-l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_ctors x y t $ by v1_skip_ls [l4, l72]
-l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_ctors x y t $ by v1_skip_lz [l4, l73]
-l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_ctors x y t $ by v1_skip_s [l2, l74]
-l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_ctors x y t $ by v1_skip_nz [l2, l75]
-l77: $ G ⇒ v1_d_ctors x y t $ by imp_elim [l76, #1]
+l35: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_le_blk → v1_d_ctors x y t $ by v1_skip_le_blk [l16]
+l36: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_choice_atom → v1_d_ctors x y t $ by v1_skip_choice_atom [l10, l35]
+l37: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nonempty_blk → v1_d_ctors x y t $ by v1_skip_nonempty_blk [l16, l36]
+l38: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_sound_atom → v1_d_ctors x y t $ by v1_skip_quot_sound_atom [l10, l37]
+l39: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_propext_atom → v1_d_ctors x y t $ by v1_skip_propext_atom [l10, l38]
+l40: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_iff_blk → v1_d_ctors x y t $ by v1_skip_iff_blk [l16, l39]
+l41: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_ind → v1_d_ctors x y t $ by v1_skip_quot_ind [l8, l40]
+l42: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_lift → v1_d_ctors x y t $ by v1_skip_quot_lift [l8, l41]
+l43: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot_mk → v1_d_ctors x y t $ by v1_skip_quot_mk [l8, l42]
+l44: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_quot → v1_d_ctors x y t $ by v1_skip_quot [l8, l43]
+l45: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_eq_blk → v1_d_ctors x y t $ by v1_skip_eq_blk [l16, l44]
+l46: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nat_blk → v1_d_ctors x y t $ by v1_skip_nat_blk [l16, l45]
+l47: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_proj → v1_d_ctors x y t $ by v1_skip_proj [l8, l46]
+l48: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_rec → v1_d_ctors x y t $ by v1_skip_ind_rec [l8, l47]
+l49: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ctor → v1_d_ctors x y t $ by v1_skip_ind_ctor [l8, l48]
+l50: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_ty → v1_d_ctors x y t $ by v1_skip_ind_ty [l8, l49]
+l51: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mkn → v1_d_ctors x y t $ by v1_skip_ind_mkn [l18, l50]
+l52: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ccons → v1_d_ctors x y t $ by v1_take_ccons [l34, l51]
+l53: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cnil → v1_d_ctors x y t $ by v1_take_cnil [l31, l52]
+l54: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tcons → v1_d_ctors x y t $ by v1_skip_tcons [l20, l53]
+l55: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_tnil → v1_d_ctors x y t $ by v1_skip_tnil [l20, l54]
+l56: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ind_mk → v1_d_ctors x y t $ by v1_skip_ind_mk [l18, l55]
+l57: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lit → v1_d_ctors x y t $ by v1_skip_lit [l8, l56]
+l58: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd1 → v1_d_ctors x y t $ by v1_skip_bd1 [l14, l57]
+l59: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bd0 → v1_d_ctors x y t $ by v1_skip_bd0 [l14, l58]
+l60: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_b0 → v1_d_ctors x y t $ by v1_skip_b0 [l14, l59]
+l61: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cons → v1_d_ctors x y t $ by v1_skip_cons [l12, l60]
+l62: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_nil → v1_d_ctors x y t $ by v1_skip_nil [l12, l61]
+l63: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_cst → v1_d_ctors x y t $ by v1_skip_cst [l8, l62]
+l64: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_pi → v1_d_ctors x y t $ by v1_skip_pi [l8, l63]
+l65: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lam → v1_d_ctors x y t $ by v1_skip_lam [l8, l64]
+l66: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_app → v1_d_ctors x y t $ by v1_skip_app [l8, l65]
+l67: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_srt → v1_d_ctors x y t $ by v1_skip_srt [l8, l66]
+l68: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_bvar → v1_d_ctors x y t $ by v1_skip_bvar [l8, l67]
+l69: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lcons → v1_d_ctors x y t $ by v1_skip_lcons [l6, l68]
+l70: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lnil → v1_d_ctors x y t $ by v1_skip_lnil [l6, l69]
+l71: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lparam → v1_d_ctors x y t $ by v1_skip_lparam [l4, l70]
+l72: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_limax → v1_d_ctors x y t $ by v1_skip_limax [l4, l71]
+l73: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lmax → v1_d_ctors x y t $ by v1_skip_lmax [l4, l72]
+l74: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_ls → v1_d_ctors x y t $ by v1_skip_ls [l4, l73]
+l75: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_lz → v1_d_ctors x y t $ by v1_skip_lz [l4, l74]
+l76: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ v1_tl_s → v1_d_ctors x y t $ by v1_skip_s [l2, l75]
+l77: $ G ⇒ ⟨ c , ⟨ k , a ⟩ ⟩ ∈ lsig → v1_d_ctors x y t $ by v1_skip_nz [l2, l76]
+l78: $ G ⇒ v1_d_ctors x y t $ by imp_elim [l77, #1]
 
 ofsort_ctors_cases
 ------------------
@@ -4647,7 +4717,7 @@ l2: $ G ⇒ hprog lprog latoms $ by hprog_cin [l1]
 
 lemma x1_kr_le (G: hyps): $ G ⇒ kr_le ∈ ω $
 ----
-l1: $ G ⇒ kc_choice_atom ∈ ω $ by v1_kc_choice_atom
+l1: $ G ⇒ kc_le_blk ∈ ω $ by v1_kc_le_blk
 l2: $ G ⇒ kr_le ∈ ω $ by omega_suc_c [l1]
 
 lemma x1_kr_add (G: hyps): $ G ⇒ kr_add ∈ ω $
@@ -83409,9 +83479,14 @@ kc_choice_atom_omega
 l1: $ G ⇒ kc_nonempty_blk ∈ ω $ by kc_nonempty_blk_omega
 l2: $ G ⇒ kc_choice_atom ∈ ω $ by omega_suc_c [l1]
 
+kc_le_blk_omega
+---------------
+l1: $ G ⇒ kc_choice_atom ∈ ω $ by kc_choice_atom_omega
+l2: $ G ⇒ kc_le_blk ∈ ω $ by omega_suc_c [l1]
+
 kr_le_omega
 -----------
-l1: $ G ⇒ kc_choice_atom ∈ ω $ by kc_choice_atom_omega
+l1: $ G ⇒ kc_le_blk ∈ ω $ by kc_le_blk_omega
 l2: $ G ⇒ kr_le ∈ ω $ by omega_suc_c [l1]
 
 kr_add_omega
@@ -84363,6 +84438,19 @@ l3: $ G , kc_nz = kc_choice_atom ⇒ kc_nz = kc_choice_atom $ by ax
 l4: $ G , kc_nz = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_nz = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_nz_lt_le_blk (G: hyps): $ G ⇒ kc_nz ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_nz ∈ kc_choice_atom $ by lf1_nz_lt_choice_atom
+l2: $ G ⇒ kc_nz ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_nz_ne_le_blk
+---------------
+l1: $ G ⇒ kc_nz ∈ kc_le_blk $ by lf1_nz_lt_le_blk
+l2: $ G , kc_nz = kc_le_blk ⇒ kc_nz ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_nz = kc_le_blk ⇒ kc_nz = kc_le_blk $ by ax
+l4: $ G , kc_nz = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_nz = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_s_lt_lz (G: hyps): $ G ⇒ kc_s ∈ kc_lz $
 ----
 l1: $ G ⇒ kc_s ∈ ω $ by kc_s_omega
@@ -84884,6 +84972,19 @@ l3: $ G , kc_s = kc_choice_atom ⇒ kc_s = kc_choice_atom $ by ax
 l4: $ G , kc_s = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_s = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_s_lt_le_blk (G: hyps): $ G ⇒ kc_s ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_s ∈ kc_choice_atom $ by lf1_s_lt_choice_atom
+l2: $ G ⇒ kc_s ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_s_ne_le_blk
+--------------
+l1: $ G ⇒ kc_s ∈ kc_le_blk $ by lf1_s_lt_le_blk
+l2: $ G , kc_s = kc_le_blk ⇒ kc_s ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_s = kc_le_blk ⇒ kc_s = kc_le_blk $ by ax
+l4: $ G , kc_s = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_s = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_lz_lt_ls (G: hyps): $ G ⇒ kc_lz ∈ kc_ls $
 ----
 l1: $ G ⇒ kc_lz ∈ ω $ by kc_lz_omega
@@ -85392,6 +85493,19 @@ l3: $ G , kc_lz = kc_choice_atom ⇒ kc_lz = kc_choice_atom $ by ax
 l4: $ G , kc_lz = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_lz = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_lz_lt_le_blk (G: hyps): $ G ⇒ kc_lz ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_lz ∈ kc_choice_atom $ by lf1_lz_lt_choice_atom
+l2: $ G ⇒ kc_lz ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_lz_ne_le_blk
+---------------
+l1: $ G ⇒ kc_lz ∈ kc_le_blk $ by lf1_lz_lt_le_blk
+l2: $ G , kc_lz = kc_le_blk ⇒ kc_lz ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_lz = kc_le_blk ⇒ kc_lz = kc_le_blk $ by ax
+l4: $ G , kc_lz = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_lz = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_ls_lt_lmax (G: hyps): $ G ⇒ kc_ls ∈ kc_lmax $
 ----
 l1: $ G ⇒ kc_ls ∈ ω $ by kc_ls_omega
@@ -85887,6 +86001,19 @@ l3: $ G , kc_ls = kc_choice_atom ⇒ kc_ls = kc_choice_atom $ by ax
 l4: $ G , kc_ls = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_ls = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_ls_lt_le_blk (G: hyps): $ G ⇒ kc_ls ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_ls ∈ kc_choice_atom $ by lf1_ls_lt_choice_atom
+l2: $ G ⇒ kc_ls ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_ls_ne_le_blk
+---------------
+l1: $ G ⇒ kc_ls ∈ kc_le_blk $ by lf1_ls_lt_le_blk
+l2: $ G , kc_ls = kc_le_blk ⇒ kc_ls ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_ls = kc_le_blk ⇒ kc_ls = kc_le_blk $ by ax
+l4: $ G , kc_ls = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_ls = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_lmax_lt_limax (G: hyps): $ G ⇒ kc_lmax ∈ kc_limax $
 ----
 l1: $ G ⇒ kc_lmax ∈ ω $ by kc_lmax_omega
@@ -86369,6 +86496,19 @@ l3: $ G , kc_lmax = kc_choice_atom ⇒ kc_lmax = kc_choice_atom $ by ax
 l4: $ G , kc_lmax = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_lmax = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_lmax_lt_le_blk (G: hyps): $ G ⇒ kc_lmax ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_lmax ∈ kc_choice_atom $ by lf1_lmax_lt_choice_atom
+l2: $ G ⇒ kc_lmax ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_lmax_ne_le_blk
+-----------------
+l1: $ G ⇒ kc_lmax ∈ kc_le_blk $ by lf1_lmax_lt_le_blk
+l2: $ G , kc_lmax = kc_le_blk ⇒ kc_lmax ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_lmax = kc_le_blk ⇒ kc_lmax = kc_le_blk $ by ax
+l4: $ G , kc_lmax = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_lmax = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_limax_lt_lparam (G: hyps): $ G ⇒ kc_limax ∈ kc_lparam $
 ----
 l1: $ G ⇒ kc_limax ∈ ω $ by kc_limax_omega
@@ -86838,6 +86978,19 @@ l3: $ G , kc_limax = kc_choice_atom ⇒ kc_limax = kc_choice_atom $ by ax
 l4: $ G , kc_limax = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_limax = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_limax_lt_le_blk (G: hyps): $ G ⇒ kc_limax ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_limax ∈ kc_choice_atom $ by lf1_limax_lt_choice_atom
+l2: $ G ⇒ kc_limax ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_limax_ne_le_blk
+------------------
+l1: $ G ⇒ kc_limax ∈ kc_le_blk $ by lf1_limax_lt_le_blk
+l2: $ G , kc_limax = kc_le_blk ⇒ kc_limax ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_limax = kc_le_blk ⇒ kc_limax = kc_le_blk $ by ax
+l4: $ G , kc_limax = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_limax = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_lparam_lt_lnil (G: hyps): $ G ⇒ kc_lparam ∈ kc_lnil $
 ----
 l1: $ G ⇒ kc_lparam ∈ ω $ by kc_lparam_omega
@@ -87294,6 +87447,19 @@ l3: $ G , kc_lparam = kc_choice_atom ⇒ kc_lparam = kc_choice_atom $ by ax
 l4: $ G , kc_lparam = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_lparam = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_lparam_lt_le_blk (G: hyps): $ G ⇒ kc_lparam ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_lparam ∈ kc_choice_atom $ by lf1_lparam_lt_choice_atom
+l2: $ G ⇒ kc_lparam ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_lparam_ne_le_blk
+-------------------
+l1: $ G ⇒ kc_lparam ∈ kc_le_blk $ by lf1_lparam_lt_le_blk
+l2: $ G , kc_lparam = kc_le_blk ⇒ kc_lparam ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_lparam = kc_le_blk ⇒ kc_lparam = kc_le_blk $ by ax
+l4: $ G , kc_lparam = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_lparam = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_lnil_lt_lcons (G: hyps): $ G ⇒ kc_lnil ∈ kc_lcons $
 ----
 l1: $ G ⇒ kc_lnil ∈ ω $ by kc_lnil_omega
@@ -87737,6 +87903,19 @@ l3: $ G , kc_lnil = kc_choice_atom ⇒ kc_lnil = kc_choice_atom $ by ax
 l4: $ G , kc_lnil = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_lnil = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_lnil_lt_le_blk (G: hyps): $ G ⇒ kc_lnil ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_lnil ∈ kc_choice_atom $ by lf1_lnil_lt_choice_atom
+l2: $ G ⇒ kc_lnil ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_lnil_ne_le_blk
+-----------------
+l1: $ G ⇒ kc_lnil ∈ kc_le_blk $ by lf1_lnil_lt_le_blk
+l2: $ G , kc_lnil = kc_le_blk ⇒ kc_lnil ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_lnil = kc_le_blk ⇒ kc_lnil = kc_le_blk $ by ax
+l4: $ G , kc_lnil = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_lnil = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_lcons_lt_bvar (G: hyps): $ G ⇒ kc_lcons ∈ kc_bvar $
 ----
 l1: $ G ⇒ kc_lcons ∈ ω $ by kc_lcons_omega
@@ -88167,6 +88346,19 @@ l3: $ G , kc_lcons = kc_choice_atom ⇒ kc_lcons = kc_choice_atom $ by ax
 l4: $ G , kc_lcons = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_lcons = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_lcons_lt_le_blk (G: hyps): $ G ⇒ kc_lcons ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_lcons ∈ kc_choice_atom $ by lf1_lcons_lt_choice_atom
+l2: $ G ⇒ kc_lcons ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_lcons_ne_le_blk
+------------------
+l1: $ G ⇒ kc_lcons ∈ kc_le_blk $ by lf1_lcons_lt_le_blk
+l2: $ G , kc_lcons = kc_le_blk ⇒ kc_lcons ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_lcons = kc_le_blk ⇒ kc_lcons = kc_le_blk $ by ax
+l4: $ G , kc_lcons = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_lcons = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_bvar_lt_srt (G: hyps): $ G ⇒ kc_bvar ∈ kc_srt $
 ----
 l1: $ G ⇒ kc_bvar ∈ ω $ by kc_bvar_omega
@@ -88584,6 +88776,19 @@ l3: $ G , kc_bvar = kc_choice_atom ⇒ kc_bvar = kc_choice_atom $ by ax
 l4: $ G , kc_bvar = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_bvar = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_bvar_lt_le_blk (G: hyps): $ G ⇒ kc_bvar ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_bvar ∈ kc_choice_atom $ by lf1_bvar_lt_choice_atom
+l2: $ G ⇒ kc_bvar ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_bvar_ne_le_blk
+-----------------
+l1: $ G ⇒ kc_bvar ∈ kc_le_blk $ by lf1_bvar_lt_le_blk
+l2: $ G , kc_bvar = kc_le_blk ⇒ kc_bvar ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_bvar = kc_le_blk ⇒ kc_bvar = kc_le_blk $ by ax
+l4: $ G , kc_bvar = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_bvar = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_srt_lt_app (G: hyps): $ G ⇒ kc_srt ∈ kc_app $
 ----
 l1: $ G ⇒ kc_srt ∈ ω $ by kc_srt_omega
@@ -88988,6 +89193,19 @@ l3: $ G , kc_srt = kc_choice_atom ⇒ kc_srt = kc_choice_atom $ by ax
 l4: $ G , kc_srt = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_srt = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_srt_lt_le_blk (G: hyps): $ G ⇒ kc_srt ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_srt ∈ kc_choice_atom $ by lf1_srt_lt_choice_atom
+l2: $ G ⇒ kc_srt ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_srt_ne_le_blk
+----------------
+l1: $ G ⇒ kc_srt ∈ kc_le_blk $ by lf1_srt_lt_le_blk
+l2: $ G , kc_srt = kc_le_blk ⇒ kc_srt ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_srt = kc_le_blk ⇒ kc_srt = kc_le_blk $ by ax
+l4: $ G , kc_srt = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_srt = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_app_lt_lam (G: hyps): $ G ⇒ kc_app ∈ kc_lam $
 ----
 l1: $ G ⇒ kc_app ∈ ω $ by kc_app_omega
@@ -89379,6 +89597,19 @@ l3: $ G , kc_app = kc_choice_atom ⇒ kc_app = kc_choice_atom $ by ax
 l4: $ G , kc_app = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_app = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_app_lt_le_blk (G: hyps): $ G ⇒ kc_app ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_app ∈ kc_choice_atom $ by lf1_app_lt_choice_atom
+l2: $ G ⇒ kc_app ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_app_ne_le_blk
+----------------
+l1: $ G ⇒ kc_app ∈ kc_le_blk $ by lf1_app_lt_le_blk
+l2: $ G , kc_app = kc_le_blk ⇒ kc_app ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_app = kc_le_blk ⇒ kc_app = kc_le_blk $ by ax
+l4: $ G , kc_app = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_app = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_lam_lt_pi (G: hyps): $ G ⇒ kc_lam ∈ kc_pi $
 ----
 l1: $ G ⇒ kc_lam ∈ ω $ by kc_lam_omega
@@ -89757,6 +89988,19 @@ l3: $ G , kc_lam = kc_choice_atom ⇒ kc_lam = kc_choice_atom $ by ax
 l4: $ G , kc_lam = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_lam = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_lam_lt_le_blk (G: hyps): $ G ⇒ kc_lam ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_lam ∈ kc_choice_atom $ by lf1_lam_lt_choice_atom
+l2: $ G ⇒ kc_lam ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_lam_ne_le_blk
+----------------
+l1: $ G ⇒ kc_lam ∈ kc_le_blk $ by lf1_lam_lt_le_blk
+l2: $ G , kc_lam = kc_le_blk ⇒ kc_lam ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_lam = kc_le_blk ⇒ kc_lam = kc_le_blk $ by ax
+l4: $ G , kc_lam = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_lam = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_pi_lt_cst (G: hyps): $ G ⇒ kc_pi ∈ kc_cst $
 ----
 l1: $ G ⇒ kc_pi ∈ ω $ by kc_pi_omega
@@ -90122,6 +90366,19 @@ l3: $ G , kc_pi = kc_choice_atom ⇒ kc_pi = kc_choice_atom $ by ax
 l4: $ G , kc_pi = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_pi = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_pi_lt_le_blk (G: hyps): $ G ⇒ kc_pi ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_pi ∈ kc_choice_atom $ by lf1_pi_lt_choice_atom
+l2: $ G ⇒ kc_pi ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_pi_ne_le_blk
+---------------
+l1: $ G ⇒ kc_pi ∈ kc_le_blk $ by lf1_pi_lt_le_blk
+l2: $ G , kc_pi = kc_le_blk ⇒ kc_pi ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_pi = kc_le_blk ⇒ kc_pi = kc_le_blk $ by ax
+l4: $ G , kc_pi = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_pi = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_cst_lt_nil (G: hyps): $ G ⇒ kc_cst ∈ kc_nil $
 ----
 l1: $ G ⇒ kc_cst ∈ ω $ by kc_cst_omega
@@ -90474,6 +90731,19 @@ l3: $ G , kc_cst = kc_choice_atom ⇒ kc_cst = kc_choice_atom $ by ax
 l4: $ G , kc_cst = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_cst = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_cst_lt_le_blk (G: hyps): $ G ⇒ kc_cst ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_cst ∈ kc_choice_atom $ by lf1_cst_lt_choice_atom
+l2: $ G ⇒ kc_cst ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_cst_ne_le_blk
+----------------
+l1: $ G ⇒ kc_cst ∈ kc_le_blk $ by lf1_cst_lt_le_blk
+l2: $ G , kc_cst = kc_le_blk ⇒ kc_cst ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_cst = kc_le_blk ⇒ kc_cst = kc_le_blk $ by ax
+l4: $ G , kc_cst = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_cst = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_nil_lt_cons (G: hyps): $ G ⇒ kc_nil ∈ kc_cons $
 ----
 l1: $ G ⇒ kc_nil ∈ ω $ by kc_nil_omega
@@ -90813,6 +91083,19 @@ l3: $ G , kc_nil = kc_choice_atom ⇒ kc_nil = kc_choice_atom $ by ax
 l4: $ G , kc_nil = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_nil = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_nil_lt_le_blk (G: hyps): $ G ⇒ kc_nil ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_nil ∈ kc_choice_atom $ by lf1_nil_lt_choice_atom
+l2: $ G ⇒ kc_nil ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_nil_ne_le_blk
+----------------
+l1: $ G ⇒ kc_nil ∈ kc_le_blk $ by lf1_nil_lt_le_blk
+l2: $ G , kc_nil = kc_le_blk ⇒ kc_nil ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_nil = kc_le_blk ⇒ kc_nil = kc_le_blk $ by ax
+l4: $ G , kc_nil = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_nil = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_cons_lt_b0 (G: hyps): $ G ⇒ kc_cons ∈ kc_b0 $
 ----
 l1: $ G ⇒ kc_cons ∈ ω $ by kc_cons_omega
@@ -91139,6 +91422,19 @@ l3: $ G , kc_cons = kc_choice_atom ⇒ kc_cons = kc_choice_atom $ by ax
 l4: $ G , kc_cons = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_cons = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_cons_lt_le_blk (G: hyps): $ G ⇒ kc_cons ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_cons ∈ kc_choice_atom $ by lf1_cons_lt_choice_atom
+l2: $ G ⇒ kc_cons ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_cons_ne_le_blk
+-----------------
+l1: $ G ⇒ kc_cons ∈ kc_le_blk $ by lf1_cons_lt_le_blk
+l2: $ G , kc_cons = kc_le_blk ⇒ kc_cons ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_cons = kc_le_blk ⇒ kc_cons = kc_le_blk $ by ax
+l4: $ G , kc_cons = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_cons = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_b0_lt_bd0 (G: hyps): $ G ⇒ kc_b0 ∈ kc_bd0 $
 ----
 l1: $ G ⇒ kc_b0 ∈ ω $ by kc_b0_omega
@@ -91452,6 +91748,19 @@ l3: $ G , kc_b0 = kc_choice_atom ⇒ kc_b0 = kc_choice_atom $ by ax
 l4: $ G , kc_b0 = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_b0 = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_b0_lt_le_blk (G: hyps): $ G ⇒ kc_b0 ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_b0 ∈ kc_choice_atom $ by lf1_b0_lt_choice_atom
+l2: $ G ⇒ kc_b0 ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_b0_ne_le_blk
+---------------
+l1: $ G ⇒ kc_b0 ∈ kc_le_blk $ by lf1_b0_lt_le_blk
+l2: $ G , kc_b0 = kc_le_blk ⇒ kc_b0 ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_b0 = kc_le_blk ⇒ kc_b0 = kc_le_blk $ by ax
+l4: $ G , kc_b0 = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_b0 = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_bd0_lt_bd1 (G: hyps): $ G ⇒ kc_bd0 ∈ kc_bd1 $
 ----
 l1: $ G ⇒ kc_bd0 ∈ ω $ by kc_bd0_omega
@@ -91752,6 +92061,19 @@ l3: $ G , kc_bd0 = kc_choice_atom ⇒ kc_bd0 = kc_choice_atom $ by ax
 l4: $ G , kc_bd0 = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_bd0 = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_bd0_lt_le_blk (G: hyps): $ G ⇒ kc_bd0 ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_bd0 ∈ kc_choice_atom $ by lf1_bd0_lt_choice_atom
+l2: $ G ⇒ kc_bd0 ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_bd0_ne_le_blk
+----------------
+l1: $ G ⇒ kc_bd0 ∈ kc_le_blk $ by lf1_bd0_lt_le_blk
+l2: $ G , kc_bd0 = kc_le_blk ⇒ kc_bd0 ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_bd0 = kc_le_blk ⇒ kc_bd0 = kc_le_blk $ by ax
+l4: $ G , kc_bd0 = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_bd0 = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_bd1_lt_lit (G: hyps): $ G ⇒ kc_bd1 ∈ kc_lit $
 ----
 l1: $ G ⇒ kc_bd1 ∈ ω $ by kc_bd1_omega
@@ -92039,6 +92361,19 @@ l3: $ G , kc_bd1 = kc_choice_atom ⇒ kc_bd1 = kc_choice_atom $ by ax
 l4: $ G , kc_bd1 = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_bd1 = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_bd1_lt_le_blk (G: hyps): $ G ⇒ kc_bd1 ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_bd1 ∈ kc_choice_atom $ by lf1_bd1_lt_choice_atom
+l2: $ G ⇒ kc_bd1 ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_bd1_ne_le_blk
+----------------
+l1: $ G ⇒ kc_bd1 ∈ kc_le_blk $ by lf1_bd1_lt_le_blk
+l2: $ G , kc_bd1 = kc_le_blk ⇒ kc_bd1 ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_bd1 = kc_le_blk ⇒ kc_bd1 = kc_le_blk $ by ax
+l4: $ G , kc_bd1 = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_bd1 = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_lit_lt_ind_mk (G: hyps): $ G ⇒ kc_lit ∈ kc_ind_mk $
 ----
 l1: $ G ⇒ kc_lit ∈ ω $ by kc_lit_omega
@@ -92313,6 +92648,19 @@ l3: $ G , kc_lit = kc_choice_atom ⇒ kc_lit = kc_choice_atom $ by ax
 l4: $ G , kc_lit = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_lit = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_lit_lt_le_blk (G: hyps): $ G ⇒ kc_lit ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_lit ∈ kc_choice_atom $ by lf1_lit_lt_choice_atom
+l2: $ G ⇒ kc_lit ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_lit_ne_le_blk
+----------------
+l1: $ G ⇒ kc_lit ∈ kc_le_blk $ by lf1_lit_lt_le_blk
+l2: $ G , kc_lit = kc_le_blk ⇒ kc_lit ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_lit = kc_le_blk ⇒ kc_lit = kc_le_blk $ by ax
+l4: $ G , kc_lit = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_lit = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_ind_mk_lt_tnil (G: hyps): $ G ⇒ kc_ind_mk ∈ kc_tnil $
 ----
 l1: $ G ⇒ kc_ind_mk ∈ ω $ by kc_ind_mk_omega
@@ -92574,6 +92922,19 @@ l3: $ G , kc_ind_mk = kc_choice_atom ⇒ kc_ind_mk = kc_choice_atom $ by ax
 l4: $ G , kc_ind_mk = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_ind_mk = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_ind_mk_lt_le_blk (G: hyps): $ G ⇒ kc_ind_mk ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_ind_mk ∈ kc_choice_atom $ by lf1_ind_mk_lt_choice_atom
+l2: $ G ⇒ kc_ind_mk ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_ind_mk_ne_le_blk
+-------------------
+l1: $ G ⇒ kc_ind_mk ∈ kc_le_blk $ by lf1_ind_mk_lt_le_blk
+l2: $ G , kc_ind_mk = kc_le_blk ⇒ kc_ind_mk ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_ind_mk = kc_le_blk ⇒ kc_ind_mk = kc_le_blk $ by ax
+l4: $ G , kc_ind_mk = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_ind_mk = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_tnil_lt_tcons (G: hyps): $ G ⇒ kc_tnil ∈ kc_tcons $
 ----
 l1: $ G ⇒ kc_tnil ∈ ω $ by kc_tnil_omega
@@ -92822,6 +93183,19 @@ l3: $ G , kc_tnil = kc_choice_atom ⇒ kc_tnil = kc_choice_atom $ by ax
 l4: $ G , kc_tnil = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_tnil = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_tnil_lt_le_blk (G: hyps): $ G ⇒ kc_tnil ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_tnil ∈ kc_choice_atom $ by lf1_tnil_lt_choice_atom
+l2: $ G ⇒ kc_tnil ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_tnil_ne_le_blk
+-----------------
+l1: $ G ⇒ kc_tnil ∈ kc_le_blk $ by lf1_tnil_lt_le_blk
+l2: $ G , kc_tnil = kc_le_blk ⇒ kc_tnil ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_tnil = kc_le_blk ⇒ kc_tnil = kc_le_blk $ by ax
+l4: $ G , kc_tnil = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_tnil = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_tcons_lt_cnil (G: hyps): $ G ⇒ kc_tcons ∈ kc_cnil $
 ----
 l1: $ G ⇒ kc_tcons ∈ ω $ by kc_tcons_omega
@@ -93057,6 +93431,19 @@ l3: $ G , kc_tcons = kc_choice_atom ⇒ kc_tcons = kc_choice_atom $ by ax
 l4: $ G , kc_tcons = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_tcons = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_tcons_lt_le_blk (G: hyps): $ G ⇒ kc_tcons ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_tcons ∈ kc_choice_atom $ by lf1_tcons_lt_choice_atom
+l2: $ G ⇒ kc_tcons ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_tcons_ne_le_blk
+------------------
+l1: $ G ⇒ kc_tcons ∈ kc_le_blk $ by lf1_tcons_lt_le_blk
+l2: $ G , kc_tcons = kc_le_blk ⇒ kc_tcons ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_tcons = kc_le_blk ⇒ kc_tcons = kc_le_blk $ by ax
+l4: $ G , kc_tcons = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_tcons = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_cnil_lt_ccons (G: hyps): $ G ⇒ kc_cnil ∈ kc_ccons $
 ----
 l1: $ G ⇒ kc_cnil ∈ ω $ by kc_cnil_omega
@@ -93279,6 +93666,19 @@ l3: $ G , kc_cnil = kc_choice_atom ⇒ kc_cnil = kc_choice_atom $ by ax
 l4: $ G , kc_cnil = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_cnil = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_cnil_lt_le_blk (G: hyps): $ G ⇒ kc_cnil ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_cnil ∈ kc_choice_atom $ by lf1_cnil_lt_choice_atom
+l2: $ G ⇒ kc_cnil ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_cnil_ne_le_blk
+-----------------
+l1: $ G ⇒ kc_cnil ∈ kc_le_blk $ by lf1_cnil_lt_le_blk
+l2: $ G , kc_cnil = kc_le_blk ⇒ kc_cnil ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_cnil = kc_le_blk ⇒ kc_cnil = kc_le_blk $ by ax
+l4: $ G , kc_cnil = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_cnil = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_ccons_lt_ind_mkn (G: hyps): $ G ⇒ kc_ccons ∈ kc_ind_mkn $
 ----
 l1: $ G ⇒ kc_ccons ∈ ω $ by kc_ccons_omega
@@ -93488,6 +93888,19 @@ l3: $ G , kc_ccons = kc_choice_atom ⇒ kc_ccons = kc_choice_atom $ by ax
 l4: $ G , kc_ccons = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_ccons = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_ccons_lt_le_blk (G: hyps): $ G ⇒ kc_ccons ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_ccons ∈ kc_choice_atom $ by lf1_ccons_lt_choice_atom
+l2: $ G ⇒ kc_ccons ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_ccons_ne_le_blk
+------------------
+l1: $ G ⇒ kc_ccons ∈ kc_le_blk $ by lf1_ccons_lt_le_blk
+l2: $ G , kc_ccons = kc_le_blk ⇒ kc_ccons ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_ccons = kc_le_blk ⇒ kc_ccons = kc_le_blk $ by ax
+l4: $ G , kc_ccons = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_ccons = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_ind_mkn_lt_ind_ty (G: hyps): $ G ⇒ kc_ind_mkn ∈ kc_ind_ty $
 ----
 l1: $ G ⇒ kc_ind_mkn ∈ ω $ by kc_ind_mkn_omega
@@ -93684,6 +94097,19 @@ l3: $ G , kc_ind_mkn = kc_choice_atom ⇒ kc_ind_mkn = kc_choice_atom $ by ax
 l4: $ G , kc_ind_mkn = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_ind_mkn = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_ind_mkn_lt_le_blk (G: hyps): $ G ⇒ kc_ind_mkn ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_ind_mkn ∈ kc_choice_atom $ by lf1_ind_mkn_lt_choice_atom
+l2: $ G ⇒ kc_ind_mkn ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_ind_mkn_ne_le_blk
+--------------------
+l1: $ G ⇒ kc_ind_mkn ∈ kc_le_blk $ by lf1_ind_mkn_lt_le_blk
+l2: $ G , kc_ind_mkn = kc_le_blk ⇒ kc_ind_mkn ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_ind_mkn = kc_le_blk ⇒ kc_ind_mkn = kc_le_blk $ by ax
+l4: $ G , kc_ind_mkn = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_ind_mkn = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_ind_ty_lt_ind_ctor (G: hyps): $ G ⇒ kc_ind_ty ∈ kc_ind_ctor $
 ----
 l1: $ G ⇒ kc_ind_ty ∈ ω $ by kc_ind_ty_omega
@@ -93867,6 +94293,19 @@ l3: $ G , kc_ind_ty = kc_choice_atom ⇒ kc_ind_ty = kc_choice_atom $ by ax
 l4: $ G , kc_ind_ty = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_ind_ty = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_ind_ty_lt_le_blk (G: hyps): $ G ⇒ kc_ind_ty ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_ind_ty ∈ kc_choice_atom $ by lf1_ind_ty_lt_choice_atom
+l2: $ G ⇒ kc_ind_ty ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_ind_ty_ne_le_blk
+-------------------
+l1: $ G ⇒ kc_ind_ty ∈ kc_le_blk $ by lf1_ind_ty_lt_le_blk
+l2: $ G , kc_ind_ty = kc_le_blk ⇒ kc_ind_ty ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_ind_ty = kc_le_blk ⇒ kc_ind_ty = kc_le_blk $ by ax
+l4: $ G , kc_ind_ty = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_ind_ty = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_ind_ctor_lt_ind_rec (G: hyps): $ G ⇒ kc_ind_ctor ∈ kc_ind_rec $
 ----
 l1: $ G ⇒ kc_ind_ctor ∈ ω $ by kc_ind_ctor_omega
@@ -94037,6 +94476,19 @@ l3: $ G , kc_ind_ctor = kc_choice_atom ⇒ kc_ind_ctor = kc_choice_atom $ by ax
 l4: $ G , kc_ind_ctor = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_ind_ctor = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_ind_ctor_lt_le_blk (G: hyps): $ G ⇒ kc_ind_ctor ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_ind_ctor ∈ kc_choice_atom $ by lf1_ind_ctor_lt_choice_atom
+l2: $ G ⇒ kc_ind_ctor ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_ind_ctor_ne_le_blk
+---------------------
+l1: $ G ⇒ kc_ind_ctor ∈ kc_le_blk $ by lf1_ind_ctor_lt_le_blk
+l2: $ G , kc_ind_ctor = kc_le_blk ⇒ kc_ind_ctor ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_ind_ctor = kc_le_blk ⇒ kc_ind_ctor = kc_le_blk $ by ax
+l4: $ G , kc_ind_ctor = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_ind_ctor = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_ind_rec_lt_proj (G: hyps): $ G ⇒ kc_ind_rec ∈ kc_proj $
 ----
 l1: $ G ⇒ kc_ind_rec ∈ ω $ by kc_ind_rec_omega
@@ -94194,6 +94646,19 @@ l3: $ G , kc_ind_rec = kc_choice_atom ⇒ kc_ind_rec = kc_choice_atom $ by ax
 l4: $ G , kc_ind_rec = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_ind_rec = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_ind_rec_lt_le_blk (G: hyps): $ G ⇒ kc_ind_rec ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_ind_rec ∈ kc_choice_atom $ by lf1_ind_rec_lt_choice_atom
+l2: $ G ⇒ kc_ind_rec ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_ind_rec_ne_le_blk
+--------------------
+l1: $ G ⇒ kc_ind_rec ∈ kc_le_blk $ by lf1_ind_rec_lt_le_blk
+l2: $ G , kc_ind_rec = kc_le_blk ⇒ kc_ind_rec ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_ind_rec = kc_le_blk ⇒ kc_ind_rec = kc_le_blk $ by ax
+l4: $ G , kc_ind_rec = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_ind_rec = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_proj_lt_nat_blk (G: hyps): $ G ⇒ kc_proj ∈ kc_nat_blk $
 ----
 l1: $ G ⇒ kc_proj ∈ ω $ by kc_proj_omega
@@ -94338,6 +94803,19 @@ l3: $ G , kc_proj = kc_choice_atom ⇒ kc_proj = kc_choice_atom $ by ax
 l4: $ G , kc_proj = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_proj = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_proj_lt_le_blk (G: hyps): $ G ⇒ kc_proj ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_proj ∈ kc_choice_atom $ by lf1_proj_lt_choice_atom
+l2: $ G ⇒ kc_proj ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_proj_ne_le_blk
+-----------------
+l1: $ G ⇒ kc_proj ∈ kc_le_blk $ by lf1_proj_lt_le_blk
+l2: $ G , kc_proj = kc_le_blk ⇒ kc_proj ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_proj = kc_le_blk ⇒ kc_proj = kc_le_blk $ by ax
+l4: $ G , kc_proj = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_proj = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_nat_blk_lt_eq_blk (G: hyps): $ G ⇒ kc_nat_blk ∈ kc_eq_blk $
 ----
 l1: $ G ⇒ kc_nat_blk ∈ ω $ by kc_nat_blk_omega
@@ -94469,6 +94947,19 @@ l3: $ G , kc_nat_blk = kc_choice_atom ⇒ kc_nat_blk = kc_choice_atom $ by ax
 l4: $ G , kc_nat_blk = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_nat_blk = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_nat_blk_lt_le_blk (G: hyps): $ G ⇒ kc_nat_blk ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_nat_blk ∈ kc_choice_atom $ by lf1_nat_blk_lt_choice_atom
+l2: $ G ⇒ kc_nat_blk ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_nat_blk_ne_le_blk
+--------------------
+l1: $ G ⇒ kc_nat_blk ∈ kc_le_blk $ by lf1_nat_blk_lt_le_blk
+l2: $ G , kc_nat_blk = kc_le_blk ⇒ kc_nat_blk ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_nat_blk = kc_le_blk ⇒ kc_nat_blk = kc_le_blk $ by ax
+l4: $ G , kc_nat_blk = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_nat_blk = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_eq_blk_lt_quot (G: hyps): $ G ⇒ kc_eq_blk ∈ kc_quot $
 ----
 l1: $ G ⇒ kc_eq_blk ∈ ω $ by kc_eq_blk_omega
@@ -94587,6 +95078,19 @@ l3: $ G , kc_eq_blk = kc_choice_atom ⇒ kc_eq_blk = kc_choice_atom $ by ax
 l4: $ G , kc_eq_blk = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_eq_blk = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_eq_blk_lt_le_blk (G: hyps): $ G ⇒ kc_eq_blk ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_eq_blk ∈ kc_choice_atom $ by lf1_eq_blk_lt_choice_atom
+l2: $ G ⇒ kc_eq_blk ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_eq_blk_ne_le_blk
+-------------------
+l1: $ G ⇒ kc_eq_blk ∈ kc_le_blk $ by lf1_eq_blk_lt_le_blk
+l2: $ G , kc_eq_blk = kc_le_blk ⇒ kc_eq_blk ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_eq_blk = kc_le_blk ⇒ kc_eq_blk = kc_le_blk $ by ax
+l4: $ G , kc_eq_blk = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_eq_blk = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_quot_lt_quot_mk (G: hyps): $ G ⇒ kc_quot ∈ kc_quot_mk $
 ----
 l1: $ G ⇒ kc_quot ∈ ω $ by kc_quot_omega
@@ -94692,6 +95196,19 @@ l3: $ G , kc_quot = kc_choice_atom ⇒ kc_quot = kc_choice_atom $ by ax
 l4: $ G , kc_quot = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_quot = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_quot_lt_le_blk (G: hyps): $ G ⇒ kc_quot ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_quot ∈ kc_choice_atom $ by lf1_quot_lt_choice_atom
+l2: $ G ⇒ kc_quot ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_quot_ne_le_blk
+-----------------
+l1: $ G ⇒ kc_quot ∈ kc_le_blk $ by lf1_quot_lt_le_blk
+l2: $ G , kc_quot = kc_le_blk ⇒ kc_quot ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_quot = kc_le_blk ⇒ kc_quot = kc_le_blk $ by ax
+l4: $ G , kc_quot = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_quot = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_quot_mk_lt_quot_lift (G: hyps): $ G ⇒ kc_quot_mk ∈ kc_quot_lift $
 ----
 l1: $ G ⇒ kc_quot_mk ∈ ω $ by kc_quot_mk_omega
@@ -94784,6 +95301,19 @@ l3: $ G , kc_quot_mk = kc_choice_atom ⇒ kc_quot_mk = kc_choice_atom $ by ax
 l4: $ G , kc_quot_mk = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_quot_mk = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_quot_mk_lt_le_blk (G: hyps): $ G ⇒ kc_quot_mk ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_quot_mk ∈ kc_choice_atom $ by lf1_quot_mk_lt_choice_atom
+l2: $ G ⇒ kc_quot_mk ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_quot_mk_ne_le_blk
+--------------------
+l1: $ G ⇒ kc_quot_mk ∈ kc_le_blk $ by lf1_quot_mk_lt_le_blk
+l2: $ G , kc_quot_mk = kc_le_blk ⇒ kc_quot_mk ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_quot_mk = kc_le_blk ⇒ kc_quot_mk = kc_le_blk $ by ax
+l4: $ G , kc_quot_mk = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_quot_mk = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_quot_lift_lt_quot_ind (G: hyps): $ G ⇒ kc_quot_lift ∈ kc_quot_ind $
 ----
 l1: $ G ⇒ kc_quot_lift ∈ ω $ by kc_quot_lift_omega
@@ -94863,6 +95393,19 @@ l3: $ G , kc_quot_lift = kc_choice_atom ⇒ kc_quot_lift = kc_choice_atom $ by a
 l4: $ G , kc_quot_lift = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_quot_lift = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_quot_lift_lt_le_blk (G: hyps): $ G ⇒ kc_quot_lift ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_quot_lift ∈ kc_choice_atom $ by lf1_quot_lift_lt_choice_atom
+l2: $ G ⇒ kc_quot_lift ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_quot_lift_ne_le_blk
+----------------------
+l1: $ G ⇒ kc_quot_lift ∈ kc_le_blk $ by lf1_quot_lift_lt_le_blk
+l2: $ G , kc_quot_lift = kc_le_blk ⇒ kc_quot_lift ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_quot_lift = kc_le_blk ⇒ kc_quot_lift = kc_le_blk $ by ax
+l4: $ G , kc_quot_lift = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_quot_lift = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_quot_ind_lt_iff_blk (G: hyps): $ G ⇒ kc_quot_ind ∈ kc_iff_blk $
 ----
 l1: $ G ⇒ kc_quot_ind ∈ ω $ by kc_quot_ind_omega
@@ -94929,6 +95472,19 @@ l3: $ G , kc_quot_ind = kc_choice_atom ⇒ kc_quot_ind = kc_choice_atom $ by ax
 l4: $ G , kc_quot_ind = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_quot_ind = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_quot_ind_lt_le_blk (G: hyps): $ G ⇒ kc_quot_ind ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_quot_ind ∈ kc_choice_atom $ by lf1_quot_ind_lt_choice_atom
+l2: $ G ⇒ kc_quot_ind ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_quot_ind_ne_le_blk
+---------------------
+l1: $ G ⇒ kc_quot_ind ∈ kc_le_blk $ by lf1_quot_ind_lt_le_blk
+l2: $ G , kc_quot_ind = kc_le_blk ⇒ kc_quot_ind ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_quot_ind = kc_le_blk ⇒ kc_quot_ind = kc_le_blk $ by ax
+l4: $ G , kc_quot_ind = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_quot_ind = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_iff_blk_lt_propext_atom (G: hyps): $ G ⇒ kc_iff_blk ∈ kc_propext_atom $
 ----
 l1: $ G ⇒ kc_iff_blk ∈ ω $ by kc_iff_blk_omega
@@ -94982,6 +95538,19 @@ l3: $ G , kc_iff_blk = kc_choice_atom ⇒ kc_iff_blk = kc_choice_atom $ by ax
 l4: $ G , kc_iff_blk = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_iff_blk = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_iff_blk_lt_le_blk (G: hyps): $ G ⇒ kc_iff_blk ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_iff_blk ∈ kc_choice_atom $ by lf1_iff_blk_lt_choice_atom
+l2: $ G ⇒ kc_iff_blk ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_iff_blk_ne_le_blk
+--------------------
+l1: $ G ⇒ kc_iff_blk ∈ kc_le_blk $ by lf1_iff_blk_lt_le_blk
+l2: $ G , kc_iff_blk = kc_le_blk ⇒ kc_iff_blk ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_iff_blk = kc_le_blk ⇒ kc_iff_blk = kc_le_blk $ by ax
+l4: $ G , kc_iff_blk = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_iff_blk = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_propext_atom_lt_quot_sound_atom (G: hyps): $ G ⇒ kc_propext_atom ∈ kc_quot_sound_atom $
 ----
 l1: $ G ⇒ kc_propext_atom ∈ ω $ by kc_propext_atom_omega
@@ -95022,6 +95591,19 @@ l3: $ G , kc_propext_atom = kc_choice_atom ⇒ kc_propext_atom = kc_choice_atom 
 l4: $ G , kc_propext_atom = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_propext_atom = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_propext_atom_lt_le_blk (G: hyps): $ G ⇒ kc_propext_atom ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_propext_atom ∈ kc_choice_atom $ by lf1_propext_atom_lt_choice_atom
+l2: $ G ⇒ kc_propext_atom ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_propext_atom_ne_le_blk
+-------------------------
+l1: $ G ⇒ kc_propext_atom ∈ kc_le_blk $ by lf1_propext_atom_lt_le_blk
+l2: $ G , kc_propext_atom = kc_le_blk ⇒ kc_propext_atom ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_propext_atom = kc_le_blk ⇒ kc_propext_atom = kc_le_blk $ by ax
+l4: $ G , kc_propext_atom = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_propext_atom = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_quot_sound_atom_lt_nonempty_blk (G: hyps): $ G ⇒ kc_quot_sound_atom ∈ kc_nonempty_blk $
 ----
 l1: $ G ⇒ kc_quot_sound_atom ∈ ω $ by kc_quot_sound_atom_omega
@@ -95049,6 +95631,19 @@ l3: $ G , kc_quot_sound_atom = kc_choice_atom ⇒ kc_quot_sound_atom = kc_choice
 l4: $ G , kc_quot_sound_atom = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_quot_sound_atom = kc_choice_atom $ by not_intro [l4]
 
+lemma lf1_quot_sound_atom_lt_le_blk (G: hyps): $ G ⇒ kc_quot_sound_atom ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_quot_sound_atom ∈ kc_choice_atom $ by lf1_quot_sound_atom_lt_choice_atom
+l2: $ G ⇒ kc_quot_sound_atom ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_quot_sound_atom_ne_le_blk
+----------------------------
+l1: $ G ⇒ kc_quot_sound_atom ∈ kc_le_blk $ by lf1_quot_sound_atom_lt_le_blk
+l2: $ G , kc_quot_sound_atom = kc_le_blk ⇒ kc_quot_sound_atom ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_quot_sound_atom = kc_le_blk ⇒ kc_quot_sound_atom = kc_le_blk $ by ax
+l4: $ G , kc_quot_sound_atom = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_quot_sound_atom = kc_le_blk $ by not_intro [l4]
+
 lemma lf1_nonempty_blk_lt_choice_atom (G: hyps): $ G ⇒ kc_nonempty_blk ∈ kc_choice_atom $
 ----
 l1: $ G ⇒ kc_nonempty_blk ∈ ω $ by kc_nonempty_blk_omega
@@ -95062,6 +95657,33 @@ l2: $ G , kc_nonempty_blk = kc_choice_atom ⇒ kc_nonempty_blk ∈ kc_choice_ato
 l3: $ G , kc_nonempty_blk = kc_choice_atom ⇒ kc_nonempty_blk = kc_choice_atom $ by ax
 l4: $ G , kc_nonempty_blk = kc_choice_atom ⇒ ⊥ $ by mem_ne [l2, l3]
 l5: $ G ⇒ ¬ kc_nonempty_blk = kc_choice_atom $ by not_intro [l4]
+
+lemma lf1_nonempty_blk_lt_le_blk (G: hyps): $ G ⇒ kc_nonempty_blk ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_nonempty_blk ∈ kc_choice_atom $ by lf1_nonempty_blk_lt_choice_atom
+l2: $ G ⇒ kc_nonempty_blk ∈ kc_le_blk $ by suc_mem_r [l1]
+
+kc_nonempty_blk_ne_le_blk
+-------------------------
+l1: $ G ⇒ kc_nonempty_blk ∈ kc_le_blk $ by lf1_nonempty_blk_lt_le_blk
+l2: $ G , kc_nonempty_blk = kc_le_blk ⇒ kc_nonempty_blk ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_nonempty_blk = kc_le_blk ⇒ kc_nonempty_blk = kc_le_blk $ by ax
+l4: $ G , kc_nonempty_blk = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_nonempty_blk = kc_le_blk $ by not_intro [l4]
+
+lemma lf1_choice_atom_lt_le_blk (G: hyps): $ G ⇒ kc_choice_atom ∈ kc_le_blk $
+----
+l1: $ G ⇒ kc_choice_atom ∈ ω $ by kc_choice_atom_omega
+l2: $ G ⇒ isset kc_choice_atom $ by wcel_isset [l1]
+l3: $ G ⇒ kc_choice_atom ∈ kc_le_blk $ by suc_mem [l2]
+
+kc_choice_atom_ne_le_blk
+------------------------
+l1: $ G ⇒ kc_choice_atom ∈ kc_le_blk $ by lf1_choice_atom_lt_le_blk
+l2: $ G , kc_choice_atom = kc_le_blk ⇒ kc_choice_atom ∈ kc_le_blk $ by weaken [l1]
+l3: $ G , kc_choice_atom = kc_le_blk ⇒ kc_choice_atom = kc_le_blk $ by ax
+l4: $ G , kc_choice_atom = kc_le_blk ⇒ ⊥ $ by mem_ne [l2, l3]
+l5: $ G ⇒ ¬ kc_choice_atom = kc_le_blk $ by not_intro [l4]
 
 ra_le_congr
 -----------

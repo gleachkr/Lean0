@@ -171,17 +171,11 @@ pub const TABLE: &[(&str, Kind, &str)] = &[
     ("ble_eqs", Kind::Check, ""),
     ("shl_eqs", Kind::Check, ""),
     ("shr_eqs", Kind::Check, ""),
-    ("dec_eqs", Kind::Check, ""),
-    ("ite_eqs", Kind::Check, ""),
-    ("natle_dec", Kind::Check, ""),
-    ("nateq_dec", Kind::Check, ""),
-    ("bool_dec", Kind::Check, ""),
-    ("div_eqs", Kind::Check, ""),
-    ("mod_eqs", Kind::Check, ""),
-    ("fix_eqs", Kind::Check, ""),
+    ("divmod_eqs", Kind::Check, ""),
     ("gcd_eqs", Kind::Check, ""),
-    ("bitwise_eqs", Kind::Check, ""),
-    ("bitop_eqs", Kind::Check, ""),
+    ("land_eqs", Kind::Check, ""),
+    ("lor_eqs", Kind::Check, ""),
+    ("xor_eqs", Kind::Check, ""),
 ];
 
 /// The heads of the rules: axioms with these heads are the theory, not definitions.

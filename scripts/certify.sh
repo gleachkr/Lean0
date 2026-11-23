@@ -29,10 +29,8 @@ export ELAN_TOOLCHAIN="${ELAN_TOOLCHAIN:-leanprover/lean4:v4.35.0}"
 (cd "$work" && lean +leanprover/lean4:v4.35.0 -o "$mod.olean" "$mod.lean") || { echo "certify: lean failed on $src" >&2; exit 1; }
 # A `-- lean0-export: NAME...` line restricts the export to those declarations and their dependencies.
 names="$(sed -n 's/^-- lean0-export://p' "$src" | head -1)"
-# (`instDecidableEqBool`: the derivation of `Nat.div`'s and `Nat.mod`'s defining equations names it,
-# and it is not among their dependencies; no axioms are generated for a literal operation.)
 if [ -n "$names" ]; then
-  (cd "$work" && LEAN_PATH="$work" "$EXPORT" "$mod" -- $names instDecidableEqBool > "$name.ndjson")
+  (cd "$work" && LEAN_PATH="$work" "$EXPORT" "$mod" -- $names > "$name.ndjson")
 else
   (cd "$work" && LEAN_PATH="$work" "$EXPORT" "$mod" > "$name.ndjson")
 fi

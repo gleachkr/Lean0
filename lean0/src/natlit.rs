@@ -8,10 +8,9 @@
 //! variables when it is declared (`eqs_theorem`: the theorem `Nat_add_eqs: add_eqs G Nat_add`),
 //! and the operation's theorems on literals (`Nat_add_lit`, ...) follow from the spec's
 //! rules. `natrec` does the same for the division-like operations (`Nat.div`, `Nat.mod`,
-//! `Nat.gcd`, `Nat.bitwise` and the bitwise operations), whose relations are larger. The
-//! equations of an operation that cannot be derived are an error: no axioms are generated
-//! (a sliced export must include the constants the derivations name, e.g.
-//! `instDecidableEqBool` for `Nat.div` and `Nat.mod`).
+//! `Nat.gcd` and the bitwise operations), whose relations ask for proofs that lean0 carries
+//! (`baked`). The equations of an operation that cannot be derived are an error: no axioms
+//! are generated.
 //!
 //! One table (`OPS`) gives each operation's theorems. `op_axioms` states them, and the
 //! elaborator instantiates them with `witness`.
@@ -62,7 +61,7 @@ use A::{N, V};
 
 const ABC: &[&str] = &["a", "b", "c"];
 const DIVMOD: &[&str] = &["a", "b", "q", "m", "r", "x"];
-const DIVMOD_HYPS: &[(Rel, &[A])] = &[(Rel::Mul, &[V(2), V(1), V(3)]), (Rel::Add, &[V(3), V(4), V(0)]), (Rel::AddC, &[V(4), V(5), V(1)])];
+const DIVMOD_HYPS: &[(Rel, &[A])] = &[(Rel::Mul, &[V(1), V(2), V(3)]), (Rel::Add, &[V(3), V(4), V(0)]), (Rel::AddC, &[V(4), V(5), V(1)])];
 const GCD: &[&str] = &["a", "b", "g", "p", "q", "x", "y", "m", "n"];
 const GCD_DIV: [(Rel, &[A]); 4] =
     [(Rel::Mul, &[V(2), V(3), V(0)]), (Rel::Mul, &[V(2), V(4), V(1)]), (Rel::Mul, &[V(5), V(0), V(7)]), (Rel::Mul, &[V(6), V(1), V(8)])];
@@ -103,7 +102,7 @@ pub const OPS: &[Op] = &[
         lean: "Nat.div",
         to_bool: false,
         axs: &[
-            // q b = m, m + r = a, r < b
+            // b q = m, m + r = a, r < b
             OpAx { suffix: "lit", vars: DIVMOD, hyps: DIVMOD_HYPS, lhs: [V(0), V(1)], rhs: Rhs::Lit(V(2)), schema: Some("nat_div_lit") },
             OpAx { suffix: "lit0", vars: &["a"], hyps: &[], lhs: [V(0), N(0)], rhs: Rhs::Lit(N(0)), schema: Some("nat_div_lit0") },
         ],
@@ -610,10 +609,10 @@ fn term<'t>(el: &mut Elab<'_, '_, 't, '_>, e: &Eqs, t: &T) -> R<ExprPtr<'t>> {
     })
 }
 
-/// After the definition `lean` (MM0 constant `cname`, of type `ty`): if it has defining
-/// equations in the spec (`EQS`), derive them (`{cname}_eqs`); if it is one of the
+/// After the definition `lean` (MM0 constant `cname`, of type `ty`): if the spec has a
+/// relation for it (`EQS`, `natrec::OPS`), prove it (`{cname}_eqs`); if it is one of the
 /// operations the kernel computes on literals, with the expected type, state its theorems
-/// on literals, proved from the spec's rules. Equations that are not derived are an error.
+/// on literals, proved from the spec's rules. A relation that is not proved is an error.
 pub fn op_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, lean: &str, cname: &str, ty: ExprPtr<'t>) -> R<()> {
     if el.g.nat.is_none() {
         return Ok(())
@@ -635,7 +634,7 @@ pub fn op_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, lean: &str, cname: &str, ty:
                 Err(why) => {
                     el.g.rollback(order0, pfs0, &[]);
                     el.forget_proofs();
-                    return Err(format!("the defining equations of `{lean}` are not derived ({why}): no axioms are generated for a literal operation; if the export lacks a constant, add its name to the exported names"))
+                    return Err(format!("the equations of `{lean}` are not derived ({why}): no axioms are generated for a literal operation"))
                 }
             }
         } else {
@@ -655,7 +654,7 @@ pub fn op_axioms<'t>(el: &mut Elab<'_, '_, 't, '_>, lean: &str, cname: &str, ty:
     let eqs_th = el.g.nat_eqs.get(lean).copied();
     let rel_args = match (eqs(lean), rec_op) {
         (Some(e), _) => rel_args(el, e).unwrap_or_default(),
-        (None, Some(o)) => crate::natrec::lit_rule_args(el, o).unwrap_or_default(),
+        (None, Some(o)) => crate::natrec::rel_args(el, o).unwrap_or_default(),
         _ => Vec::new(),
     };
     let g = &mut *el.g;

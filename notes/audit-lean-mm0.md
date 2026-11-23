@@ -519,9 +519,9 @@ definition is added (`Primitive.lean`: e.g. `Nat.add x 0 ≡ x` and
 bitwise operations). A generated axiom, like nanoda and the C++ kernel, only checks the name
 and the type (`Nat → Nat → Nat`, or `→ Bool` for `beq`/`ble`). Every operation has rules in
 the spec (stage B, below), and a certificate has no such axiom: when the derivation of an
-operation's equations fails, `lean0 gen` fails. (A sliced export must then include the
-constants the derivation names; `instDecidableEqBool` is the one that `Nat.div` and `Nat.mod`
-do not depend on themselves.)
+operation's equations fails, `lean0 gen` fails. (A sliced export needs nothing beyond the
+operation: the structural operations' equations come from their own definitions, and lean0
+carries the proofs the division-like ones ask for, below.)
 
 ### The literal operations as rules over defining equations (`spec/lean.mm0`, "The defining equations of the literal operations" and Part III "Literals"; stage B)
 
@@ -536,8 +536,8 @@ equations of the environment's `Nat.add` (etc.) when it is declared, as ordinary
 statement as the stage-A axiom) is then a theorem, from `nat_add_lit`. So the kernel's claim
 "`Nat.add` computes addition on numerals" is reduced to the rule's soundness, argued here:
 Lean4Lean's `HasPrimitives` argument, done once in the model rather than trusted per
-environment. `Nat.div`, `Nat.mod`, `Nat.gcd` and the bitwise operations, whose equations go
-through fuel or well-founded recursion, `dite` and `Decidable` reflection, are the next
+environment. `Nat.div`, `Nat.mod`, `Nat.gcd` and the bitwise operations, whose definitions go
+through fuel or well-founded recursion and whose rules ask for proofs instead, are the next
 subsection.
 
 Conventions of the arguments: `n̄` is `lit n`, `N`, `Z` and `S` are `nat_ty`, `nat_zero` and
@@ -566,64 +566,59 @@ The equations are derived with the kernel's computation on literals switched off
 rule being established; the derivation then unfolds the definition (which is what the
 equations are about).
 
-### The division-like operations (`spec/lean.mm0`, "The division-like operations"; `lean0/src/natrec.rs`)
+### The division-like operations (`spec/lean-lit.mm0`, "The division-like operations"; `lean0/src/natrec.rs`, `lean0/baked/`)
 
-Lean4Lean's checks of `Nat.div`, `Nat.mod` (`checkNatFuelRec`), `Nat.gcd` (`checkNatGcd`)
-and `Nat.bitwise` with `land`/`lor`/`xor` (`checkNatBitwise`, `checkNatLAnd`, ...) go through
-`dite`/`ite` on decided propositions, the fuel recursions `Nat.div.go`/`Nat.modCore.go` and the
-well-founded fixpoint `WellFounded.Nat.fix` (fuel recursion again, with the measure as fuel).
-The spec states these checks as relations over variables standing for Lean's `@dite Nat`,
-`@ite Nat`, `Not`, `Decidable`, `Decidable.intro` (`R`), `Bool.Reflects` (`T`), `Nat.decLe`,
-`Nat.decEq`, the lemmas the recursive calls apply, and so on: nothing is assumed of them
-beyond the stated equations, all variables under binders are required closed, and every
-relation is introduced by its single `_i` rule, so only the `nat_*_lit` rules need an
-argument. The generator (`natrec.rs`) builds the terms by name (the reflection is the new
-`Decidable` structure: `T p b` is `Bool.Reflects b p`, `R` is `Decidable.intro`, `ofT`/`ofF` are
-`λ p H. H`, the proofs `pf x y` are `Decidable.reflects_decide`), reads the fixpoint's parts
-(`al`, `motive`, `hm`, `F`, the packing `pack`, the recursive call's lemma `pfF`/`pfB`) off the
-`_unary` definitions, derives each premise with nanoda (`Elab::defeq` over fresh locals) and
-states `Nat_div_eqs` etc.; the `_lit` theorems keep their stage-A statements.
+Lean defines `Nat.div` and `Nat.mod` by fuel recursion, and `Nat.gcd` and `Nat.bitwise` (with
+`land`/`lor`/`xor`) by the well-founded fixpoint `WellFounded.Nat.fix`. Lean4Lean checks their
+defining equations (`checkNatFuelRec`, `checkNatGcd`, `checkNatBitwise`), through `dite`/`ite`
+on decided propositions. Until 2026-11-23 the spec stated those checks as relations over
+variables for `dite`, `Decidable.intro`, `Nat.decLe`, the fuel functions and the proof terms
+(eleven relations, up to 50 parameters). It now asks for something else: **proofs, in the
+theory itself, of equations that determine the function**. A premise `⟨ G ⊢ h : T ⟩`, with `h`
+a variable of the relation's rule and not of the relation, says that the proposition `T` has a
+proof. `nat_eq x y` is Lean's `@Eq Nat x y` (the block `eq_D`) and `nat_lt x y` is
+`Nat.le (Nat.succ x) y` over the block `le_D`, Lean's `Nat.le` as the spec has it (compared with
+the export's like `nat_D`; `lean0 check`).
 
-Conventions, in addition to the previous subsection's: an equation whose context has
-hypotheses of propositional types (`hy : leN 1̄ ȳ`, `H : Not (eqN (S m̄) 0̄)`, `ih : Π y. ltN (hm y)
-(hm (pack ā b̄)) → motive y`) is instantiated at closed terms taken from the right-hand side of
-an earlier equation, whose types are premises of the relations (2026-11-04: `ofT`, `ofF` in
-`dec_eqs`; `leN`, `pf` and `eqN`, `pq` in `natle_dec`, `nateq_dec`; `go`, `pfs`, `lem` in
-`div_eqs`, `mod_eqs`; `ltN`, `go al motive hm`, `pfx`, `pfgo` in `fix_eqs`; the functional,
-`pack` and the call's lemma in `gcd_eqs`, `bitwise_eqs`; `bf` in `bitop_eqs`), so an
-instance's arguments are in the binders' types without inversion of any derivation (the
-generator derives each from the constant's Lean type by a cast). In particular the
-recursive call `λ y hy. go … t y (pfgo …)` is in the motive's `Π` type at every fuel,
-including `0`, by the typings of `go` and `pfgo`. By proof irrelevance which proof it is
-does not matter; `appDF` with
-`defeqDF` lets an argument's type be converted along a defeq (e.g. `pfx x : ltN (hm x) (eager
-(S (hm x)))` where `ltN (hm x) (S ā)` is needed). **The decision lemma:** for literals `a b`,
-`natle_dec`'s equation at `x := ā, y := b̄` gives `dleN ā b̄ ≡ R (leN ā b̄) (ble ā b̄) (pf ā b̄)`,
-and `ble ā b̄ ≡ t` if `a ≤ b` (`nat_ble_lit`) or `≡ u` (`nat_ble_lit_gt`), so by congruence
-(`pf ā b̄ : T (leN ā b̄) t` by conversion) and `dec_eqs`'s equation at `p := leN ā b̄`,
-`H := pf ā b̄`: `dite (leN ā b̄) (dleN ā b̄) f g ≡ f (ofT ..)` when `a ≤ b` and `≡ g (ofF ..)`
-otherwise, and by `ite_eqs` `ite (leN ā b̄) (dleN ā b̄) x y ≡ x` or `y`. The same with
-`nateq_dec`, `beq` and `nat_beq_lit`/`_lt`/`_gt`: `dite (eqN ā b̄) (deqN ā b̄) f g` reduces to
-the first branch iff `a = b`. **The Bool lemma:** by `bool_dec`, `dite (bp X) (bd X) (λ _. x)
-(λ _. y) ≡ x` when `X ≡ t` and `≡ y` when `X ≡ u` (congruence, then the equation at
-`a := x, b := y`), and likewise `ite`. **The fuel lemma** (`fix_eqs`): `go al motive hm F
-(S k̄) x H ≡ F x (λ y hy. go al motive hm F k̄ y (pfgo k̄ x H y hy))` is the third equation at
-`F, t := k̄, x, h := H`; `eager (S ā) ≡ ite (bp (beq (S ā) (S ā))) (bd ..) (S ā) (S ā) ≡ S ā`
-by the second equation, `lit_succ`, `nat_beq_lit` and the Bool lemma; so `fix al motive hm
-F x ≡ go al motive hm F (S ā) x (pfx x)` when `hm x ≡ ā` (the first equation, congruence).
+| relation | proofs of |
+|---|---|
+| `divmod_eqs G fd fm fmul fadd` | with `mul_eqs G fmul fadd`: `y * (x / y) + x % y = x`, `0 < y → x % y < y`, `x / 0 = 0`, for `fd` as `/`, `fm` as `%` |
+| `gcd_eqs G f fd fm fmul fadd` | with `divmod_eqs`: `f 0 y = y`, `f (x + 1) y = f (y % (x + 1)) (x + 1)` |
+| `land_eqs`, `lor_eqs`, `xor_eqs G f fd fm fmul fadd` | with `divmod_eqs`: `f x y = f (x/2) (y/2) + f (x/2) (y/2) + bit`, where `bit` is `(x%2 + y%2) / 2`, `(x%2 + y%2 + 1) / 2`, `(x%2 + y%2) % 2` |
+
+**Why a proof is enough.** The argument is semantic (it is the model's, §11, where these rules
+are theorems): every closed function of type `Nat → Nat → Nat` has a value on numerals,
+a proof of `Eq` exists only between equal values, and a proof of `Nat.le` at numerals only when
+the first is at most the second. So the three facts of `divmod_eqs` hold of the values of `fd`
+and `fm` at all numerals, with `fmul` and `fadd` multiplication and addition by `mul_eqs`
+(`nat_mul_lit`, `nat_add_lit`). Syntactically the same conclusion needs canonicity, which the
+spec does not otherwise rely on: a closed proof of `@Eq Nat a b` between numerals is
+`Eq.refl`, so `a` and `b` are the same numeral. The rules are therefore stronger than
+Lean4Lean's in one respect: they apply to any closed function with such proofs, not only to
+one that unfolds like Lean's definition; what they conclude is true of every such function.
 
 | rule | argument |
 |---|---|
-| `nat_div_lit`: `div_eqs G .. f go pfs lem > bmul q b m > badd m r a > baddc r x b > f ā b̄ ≡ q̄` | `b ≥ 1`. Lemma: for all `k`, all `a' < k` and any proofs `H : leN 1̄ b̄`, `H'`: `go b̄ H k̄ ā' H' ≡ (a' div b)‾`, by induction on `k = k'+1` (`k̄ ≡ S k̄'`): the `go` equation at `x := ā', y := b̄, hy := H, fuel := k̄', h := H'` gives `dite (leN b̄ ā') (dleN b̄ ā') (λ h2. S (go b̄ H k̄' (sub ā' b̄) (lem ..))) (λ _. 0̄)`; if `b ≤ a'`, the decision lemma, `nat_sub_lit` (`sub ā' b̄ ≡ (a'-b)‾`), the hypothesis (`a'-b < k'` as `a' ≤ k'` and `b ≥ 1`) and `lit_succ` give `((a'-b) div b + 1)‾ = (a' div b)‾`; otherwise `0̄`. Then the top equation at `x := ā, y := b̄`, the decision lemma (`1 ≤ b`), beta, `S ā ≡ (a+1)‾` and the lemma at `k = a+1` give `(a div b)‾`, and the premises make `q = a div b`. |
-| `nat_div_lit0`: `> f ā 0̄ ≡ 0̄` | the top equation at `y := 0̄`: `ble 1̄ 0̄ ≡ u` (`nat_ble_lit_gt`), so the second branch, `0̄`. |
-| `nat_mod_lit`: `mod_eqs .. > (the same premises) > f ā b̄ ≡ r̄`; `nat_mod_lit0`: `> f ā 0̄ ≡ ā` | the lemma as for `div` with `go b̄ H k̄ ā' H' ≡ (a' mod b)‾` (`(a'-b) mod b = a' mod b` when `b ≤ a'`; the second branch is `x`, so `a'` when `b > a'`). `a = 0`: the base equation, `f 0̄ b̄ ≡ 0̄`, and the premises force `r = 0`. `a = a'+1`: the top equation at `x := ā', y := b̄` is `ite (leN b̄ (S ā')) (dleN ..) (dite (leN 1̄ b̄) (dleN ..) (λ hy. go b̄ hy (S (S ā')) (S ā') (pfs ..)) (λ _. S ā')) (S ā')`; if `b ≤ a` the `ite` takes the `dite`, which (`1 ≤ b`) is `go .. (S (S ā')) (S ā') _ ≡ (a mod b)‾` by the lemma; if `b > a` it is `S ā' ≡ ā = (a mod b)‾`. For `b = 0`: `a = 0` by the base equation; `a = a'+1`: `ble 0̄ ā ≡ t` takes the `dite`, and `ble 1̄ 0̄ ≡ u` its second branch, `S ā' ≡ ā`. |
-| `nat_gcd_lit`: `gcd_eqs .. f pack F pfF > bmul g p a > bmul g q b > bmul x a m > bmul y b n > badd n g m > f ā b̄ ≡ ḡ`; `nat_gcd_lit2` with `badd m g n` | Lemma: for all `k`, all `a < k`, all `b` and any proof `H`: `go al motive hm F k̄ (pack ā b̄) H ≡ (gcd a b)‾`, by induction on `k = k'+1`: the fuel lemma gives `F (pack ā b̄) ih` with `ih = λ y hy. go .. k̄' y (pfgo ..)`, whose binder type is the probes' (`ltN (hm y) (hm (pack ā b̄))`). `a = 0`: the first probe at `n := b̄, ih` gives `b̄`. `a = a'+1` (`ā ≡ S ā'`): `beq (S ā') 0̄ ≡ u` (`nat_beq_lit_gt`), so `ofF (eqN (S ā') 0̄) (pq (S ā') 0̄) : Not (eqN (S ā') 0̄)` by conversion, and the second probe at `m := ā', n := b̄, H := that, ih` gives `ih (pack (fm b̄ (S ā')) (S ā')) (pfF ..)`, by beta `go .. k̄' (pack (fm b̄ ā) ā) _`, by `nat_mod_lit` and congruence `go .. k̄' (pack (b mod a)‾ ā) _`, by the hypothesis (`b mod a < a ≤ k'`) `(gcd (b mod a) a)‾ = (gcd a b)‾`. Then `f ā b̄ ≡ fix .. F (pack ā b̄)` (the top equation), `≡ go .. F (eager (S (hm (pack ā b̄)))) (pack ā b̄) (pfx ..)`, `≡ go .. (S ā) ..` (the measure equation `hm (pack ā b̄) ≡ ā`, the fuel lemma's `eager`), `≡ (gcd a b)‾` (the lemma at `k = a+1`). The premises make `g = gcd a b` as for the stage-A axiom (`g` divides both; `x·a = y·b + g` or `y·b = x·a + g` makes every common divisor divide `g`; `a = b = 0` forces `g = 0`). |
-| `nat_land_lit`: `bitop_eqs .. f bf t u u u > band a b c > f ā b̄ ≡ c̄`; `nat_lor_lit` with `t t t u` and `bor`; `nat_xor_lit` with `u t t u` and `bxor` | Let `φ` be the function the probe's right-hand side computes: `φ 0 b = b` if `bf u t ≡ t` else `0`; `φ a 0 = a` if `bf t u ≡ t` else `0`; otherwise `φ a b = 2·φ (a div 2) (b div 2) + [bf (a mod 2 = 1) (b mod 2 = 1) ≡ t]`. Lemma: for all `k`, all `a < k`, all `b`, any `H`: `go al motive hm (Fb bf) k̄ (pack ā b̄) H ≡ (φ a b)‾`, by induction on `k` as for `gcd`: the fuel lemma, the probe at `bf, n := ā, m := b̄, ih` (`bf : Π B. Π B. B` by inversion from `f ≡ fb bf` and `fb`'s type), then the right-hand side: `dite (eqN ā 0̄) (deqN ā 0̄) ..` by the decision lemma (`nat_beq_lit`/`_gt`); in the `a = 0` branch `dite (bp (bf u t)) (bd (bf u t)) (λ _. b̄) (λ _. 0̄)` with `bf u t ≡ r3` (the truth table) and the Bool lemma; `b = 0` likewise with `r2`; otherwise `dec (eqN (fm ā 2̄) 1̄) (deqN (fm ā 2̄) 1̄) ≡ t` or `u` by `nat_mod_lit`, `nateq_dec`'s equation, `nat_beq_lit`/`_lt`/`_gt`, and the `dec` equation at `p := eqN .., b := t/u, H := pq ..` (the low bits), so `bf b1 b2 ≡ r_i` by the truth table, the Bool lemma picks `fa (fa r r) 1̄` or `fa r r` with `r = ih (pack (fd ā 2̄) (fd b̄ 2̄)) (pfB ā b̄ _)`, `≡ go .. k̄' (pack (a div 2)‾ (b div 2)‾) _` by beta, `nat_div_lit` and congruence, `≡ (φ (a div 2) (b div 2))‾` by the hypothesis (`a div 2 < a ≤ k'` as `a ≥ 1`), and `nat_add_lit` twice gives `(φ a b)‾`. Then `f ā b̄ ≡ fb bf ā b̄ ≡ fix .. (Fb bf) (pack ā b̄)` (the `bitop` and top equations), and as for `gcd` (measure, `eager`, the lemma at `k = a+1`) `≡ (φ a b)‾`. For the table `t u u u` (`and`), `φ` is bitwise and (`φ 0 b = 0`, `φ a 0 = 0`, bit by bit `a ∧ b`), which `band` computes; for `t t t u` (`or`) bitwise or (`φ 0 b = b`, `φ a 0 = a`); for `u t t u` (`xor`) bitwise xor. The probe's last branch is typed only if the recursive call `r` is a numeral, and `r`'s type is `motive (pack ..)`: `bitwise_eqs` therefore has the premise `motive (pack n m) ≡ ℕ` (2026-11-20; beside `hm (pack n m) ≡ n`, in the same pointwise style; in Lean the motive is `fun _ => Nat` and the generator proves it by beta). Without it the rule is not valid in the set model (§11): nothing else bounds `motive`, and the branch must be typed even where it is not taken. |
+| `nat_div_lit`: `divmod_eqs G fd fm fmul fadd > bmul b q m > badd m r a > baddc r x b > fd ā b̄ ≡ q̄` | `b > r ≥ 0`, so `b ≥ 1`. The values `q' = fd ā b̄`, `r' = fm ā b̄` are numerals with `b·q' + r' = a` (the first proof at `x := ā, y := b̄`) and `r' < b` (the second, whose hypothesis `0 < b̄` has a proof). Quotient and remainder are unique, and the premises say `b·q + r = a`, `r < b`: `q' = q`. |
+| `nat_div_lit0`: `> fd ā 0̄ ≡ 0̄` | the third proof at `x := ā`. |
+| `nat_mod_lit`: `> (the same premises) > fm ā b̄ ≡ r̄` | as `nat_div_lit`: `r' = r`. |
+| `nat_mod_lit0`: `> fm ā 0̄ ≡ ā` | the first proof at `y := 0̄`: `0·q' + r' = a`, so `r' = a`. |
+| `nat_gcd_lit`: `gcd_eqs G f fd fm fmul fadd > bmul g p a > bmul g q b > bmul x a m > bmul y b n > badd n g m > f ā b̄ ≡ ḡ`; `nat_gcd_lit2` with `badd m g n` | By `divmod_eqs`, `fm` is the remainder at a positive divisor (as above). By induction on `a`, `f ā b̄` is `gcd a b`: `a = 0` is the first proof; for `a + 1` the second gives `f (b mod (a+1))‾ (a+1)‾`, and `b mod (a+1) ≤ a`. The premises make `g = gcd a b` (`g` divides both; `x·a = y·b + g` or `y·b = x·a + g` makes every common divisor divide `g`; `a = b = 0` forces `g = 0`). |
+| `nat_land_lit`: `land_eqs G f fd fm fmul fadd > band a b c > f ā b̄ ≡ c̄`; `nat_lor_lit`, `nat_xor_lit` with `lor_eqs`, `bor` and `xor_eqs`, `bxor` | By `divmod_eqs`, `fd x̄ 2̄` and `fm x̄ 2̄` are `x div 2` and `x mod 2`. The recurrence determines `f` on numerals, by induction on `a + b`: at `0, 0` it reads `v = v + v + bit(0,0)` with `bit(0,0) = 0` for all three, so `v = 0`; otherwise the halves are smaller. The function it determines is the bitwise operation: its value has low bit `bit(a mod 2, b mod 2)`, which is the and, the or and the exclusive or of the two low bits, and the rest is the value at the halves. `band`, `bor`, `bxor` compute the same on binary numerals. |
 
-Nothing is assumed of `Not`, `Dec`, `T`, `R`, `ofT`, `ofF`, `al`, `motive`, `ltN` and the proof
-terms beyond their occurrences in the equations; `Not`, `Dec` and `T` only type the
-contexts' hypotheses, and every instantiation above is at a term whose type the previous
-equations give.
+**What the generator supplies** (`natrec.rs`, not trusted): the proofs are those of
+`lean0/baked/Baked.lean`, written for Lean's definitions (Lean v4.35.0) and compiled by Lean;
+`scripts/baked.sh` exports their proof terms (`baked.ndjson`, embedded in lean0), and the
+elaborator types each like any proof term of the export, with the lemmas inlined, so the
+premise is a derivation the verifier checks. The functions a definition does not depend on are
+terms in the relation: the multiplication always (a `Nat.rec` over `Nat.add`, whose `mul_eqs`
+holds by unfolding), and a copy of Lean's `Nat.mod` for `Nat.div`, of `Nat.div` for `Nat.mod`
+and `Nat.gcd` (the copies are equal to the originals by unfolding, and the proofs are carried
+over along that equality). An export therefore needs nothing beyond the operation, `Eq` and
+`Nat.le`, which every one of these definitions depends on. The proofs of the three bitwise
+recurrences use `propext`, as Lean's `Nat.bitwise` itself does (`Nat.bitwise_rec_lemma`); the
+others use no axiom. A development whose `Nat.div` (say) is defined differently gets no proof
+from lean0, and its literal divisions are then errors; the rules would accept its own proofs.
 
 String literals have no axioms: a string literal is translated as its expansion
 `String.ofList [Char.ofNat n, …]` (Lean4Lean's translation; nanoda expands it in `def_eq`), so
@@ -782,9 +777,9 @@ itself, accepting only the forms lean0 writes. For every declaration of the expo
 * a theorem's and a definition's type is stated by a proved theorem, not an axiom;
 * a definition's body is its value;
 * the spec's own declarations of Lean constants (the statements between the spec's
-  `lean0-check` marks: the blocks `nat_D` and `eq_D` and the quotient primitives `quot`,
-  `quot_mk`, `quot_lift`, `quot_ind`) stand for `Nat`, `Eq`, `Quot`, `Quot.mk`, `Quot.lift`
-  and `Quot.ind` when the export declares them, and are compared the same way (a spec
+  `lean0-check` marks: the blocks `nat_D`, `eq_D`, `le_D` and the others stated there, and the
+  quotient primitives `quot`, `quot_mk`, `quot_lift`, `quot_ind`) stand for `Nat`, `Eq`,
+  `Nat.le`, ..., `Quot`, `Quot.mk`, `Quot.lift` and `Quot.ind` when the export declares them, and are compared the same way (a spec
   declaration the export lacks is ignored);
 * an opaque constant is `def c (us): expr = $ cst A (lcons u1 ... lnil) $` over its own
   levels in order, with `A` a `term A: atom` that no other definition uses (a shared or
@@ -952,8 +947,8 @@ The departures from the verbatim presentation:
   form, and a parameter under `imax` is split on until none is left.
 * **Nat literals** (§5): `lit : bin > expr` over binary numerals, tied to `Nat.zero` and
   `Nat.succ` by the spec (`lit_zero`, `lit_succ`), with the accelerated operations as rules
-  over their defining equations (`add_eqs`/`nat_add_lit`, ...; `div_eqs`, `gcd_eqs`,
-  `bitwise_eqs`, ... for the division-like ones). A **string literal** is translated as its `String.ofList` expansion and
+  over their defining equations (`add_eqs`/`nat_add_lit`, ...), or for the division-like
+  ones over proofs of characterizing equations (`divmod_eqs`, `gcd_eqs`, `land_eqs`, ...). A **string literal** is translated as its `String.ofList` expansion and
   needs no axiom.
 * **Inductives** (§4, stage B): a block is a data term, `def X_D (us): ind = ind_mk X_blk P T`,
   and its types, constructors and recursors are the spec's `ind_ty (X_D us) i`,
@@ -989,7 +984,7 @@ labels and the order of each relation's clauses follow it, and the model's proof
 them (no statement does: the order chooses among equivalent encodings). It imports the library
 (`all.mm0`, whose only axioms are those of `tg.mm0`) and declares the spec's sorts and
 constructors verbatim, without notations: every `term` of the spec whose sort is not `wff`,
-37 of them (`nat_blk`, `eq_blk` and the quotient primitives included). It also defines a
+54 of them (`nat_blk`, `eq_blk`, `le_blk` and the quotient primitives included). It also defines a
 natural-number label for each sort (`ks_S`) and each constructor (`kc_c`), each label the
 successor of the one before, and the signature `lsig`, one entry
 `⟨ kc_c , ⟨ ks_S , args ⟩ ⟩` per constructor, with `args` the sequence of its argument
@@ -1068,17 +1063,14 @@ axioms is a theorem with the spec's statement, followed by `lprog2_R_pr` and inv
 
 **Part II's relations over the judgment** (`spec/tg/lean-tg3.mm0`, 2026-11-11, generated and
 checked likewise). The other 35 relations of Part II (`sty`, `cwf`, `ind_wf`, `nst_ok`,
-`large`, `proj_ok`, the literal relations `*_eqs` and `*_dec`, ...) have premises of the
+`large`, `proj_ok`, the literal relations `*_eqs`, ...) have premises of the
 judgment `deq`, which is a term until the model defines it. They are a third program of the
 same form over a parameter `J`, a class of judgment atoms standing for `deq`: their side
 conditions are atoms of Part I in `lrel`, atoms of the second stratum in `lrel2`, `lveq`, and
-judgments in `J`. Each relation is a definition `R_j J`, each of the 47 clause axioms a
+judgments in `J`. Each relation is a definition `R_j J`, each of the 44 clause axioms a
 theorem `A_j` for every `J` (the spec's statement with `deq` read as `deq_j J`), followed by
-`lprog3_R_pr` and inversion `lrel3_R_cases`. The three clauses with more than 30 variables
-(`gcd_eqs_i`, `bitwise_eqs_i`, `bitop_eqs_i`) bind them as one sequence, read at the indices
-`ixK` (`fv s ixK`), because a proof could not name them one by one. Part II's definition
-`fix_fty` is stated here. The clauses' trees name the spec's large closed constants (`nat_D`,
-`nat_ty`, `nat_zero`, `nat_succ`) by definitions `tr_D`, and each of the spec's definitions of
+`lprog3_R_pr` and inversion `lrel3_R_cases`. The clauses' trees name the spec's large closed
+constants (`nat_D`, `nat_ty`, `nat_zero`, `nat_succ`, `le_D`) by definitions `tr_D`, and each of the spec's definitions of
 terms has a theorem `enc_D` giving its encoding. No axioms. The spec's relations and their clause axioms stay in the
 rest file until the judgment is defined, when they become `R_j` at the judgment's atoms.
 
@@ -1090,8 +1082,8 @@ as a definition, an axiom as a theorem; `lean0 tg-link` checks that each is the 
 statement). Until 2026-11-20 that was 38 terms, 1 definition and 105 axioms. Since the
 assembly (`model-top.mm0`, below) it is only the import of the model: every term of Parts
 II and III is a definition of the model and every axiom a theorem. The trusted base in TG
-mode (below) is `tg.mm0`'s 77 axioms and the 53 encoding axioms above, in place of the
-spec's 381, with one new term and no axiom about it: the environment `Env` of the opaque
+mode (below) is `tg.mm0`'s 77 axioms and the 54 encoding axioms above, in place of the
+spec's 386, with one new term and no axiom about it: the environment `Env` of the opaque
 constants (below).
 
 **The model** (`spec/tg/model-levels.mm0`, `spec/tg/model-den.mm0`, 2026-11-09, layer C of
@@ -1203,10 +1195,15 @@ The rest of the model is not yet the spec's `deq`, so it changes nothing that is
 - **The rules of the schema, the quotients and the literals** (`model-fold.mm0`,
   `model-nst.mm0`, `model-quot.mm0`, `model-lit.mm0`, 2026-11-15 to 2026-11-20, layers E to
   G): every rule of Part III holds in the model for a hook with the parts concerned, at every
-  block, nested or not. Definitions and theorems only. The three bitwise rules use
-  `bitwise_eqs`'s premise that `motive @ (pack @ #1 @ #0)` is `ℕ` over `ℕ :: ℕ :: G` (§5):
-  the untaken branch of a `dite` must be typed in the model, and that premise types the
-  recursive call there.
+  block, nested or not. Definitions and theorems only. The division-like rules (§5) read each
+  premise "a proof of `T` exists" as an element of the value of `T`, and two theorems turn
+  such elements into arithmetic: the model's `Eq` is equality (`meqs_i`), and the model's
+  `Nat.le` at two numerals is the truth value of `⊆` on their numbers (`mles_i`, over
+  `le_D_wf`: the constructors give an element by induction, the recursor at the motive
+  `nlev` gives the converse). So the functions of `divmod_eqs` are `ndiv` and `nmod` on the
+  numerals, that of `gcd_eqs` is `ngcd` (strong induction), and a function with the
+  recurrence of `land_eqs`, `lor_eqs` or `xor_eqs` computes `band`, `bor` or `bxor` on the
+  binary numerals (strong induction on the first argument, with the cases at zero apart).
 - **The assembly** (`model-top.mm0`, 2026-11-20). The hook is fixed: `hfin`, the union of the
   parts for the inductive types, their constructors and recursors, the quotient constants,
   the literals and the opaque constants. It is a function (the parts are, and their keys

@@ -580,13 +580,14 @@ pub(crate) fn block_head<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, id: &Indu
         shift.extend((0..n).map(|i| g.env.var(i as u16)));
         g.env.subst(body, &shift)
     };
-    // Lean's `Nat`, `Eq`, `Iff` and `Nonempty` are the spec's blocks `nat_D`, `eq_D`, `iff_D` and `nonempty_D` (audit §4) when the
+    // Lean's `Nat`, `Eq`, `Iff`, `Nonempty` and `Nat.le` are the spec's blocks `nat_D`, `eq_D`, `iff_D`, `nonempty_D` and `le_D` (audit §4, §5) when the
     // export declares them as the spec has them
     let spec = match lean_name.as_str() {
         "Nat" => Some(("nat_D", "nat_blk")),
         "Eq" => Some(("eq_D", "eq_blk")),
         "Iff" => Some(("iff_D", "iff_blk")),
         "Nonempty" => Some(("nonempty_D", "nonempty_blk")),
+        "Nat.le" => Some(("le_D", "le_blk")),
         _ => None,
     };
     let spec = spec.filter(|(d, b)| g.env.has_term(d) && g.env.has_term(b)).and_then(|(d, b)| {

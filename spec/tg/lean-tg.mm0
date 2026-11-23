@@ -82,6 +82,7 @@ term propext_atom: atom;
 term quot_sound_atom: atom;
 term nonempty_blk: blk;
 term choice_atom: atom;
+term le_blk: blk;
 
 -- --------------------------------------------------------------------------
 -- Labels and the signature
@@ -140,6 +141,7 @@ def kc_propext_atom: class = $ suc kc_iff_blk $;
 def kc_quot_sound_atom: class = $ suc kc_propext_atom $;
 def kc_nonempty_blk: class = $ suc kc_quot_sound_atom $;
 def kc_choice_atom: class = $ suc kc_nonempty_blk $;
+def kc_le_blk: class = $ suc kc_choice_atom $;
 
 --| The constructors: label, result sort, argument sorts.
 def lsig: class =
@@ -184,7 +186,8 @@ def lsig: class =
     (csn ⟨ kc_propext_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ∪
     (csn ⟨ kc_quot_sound_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ∪
     (csn ⟨ kc_nonempty_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ∪
-    (csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩))))))))))))))))))))))))))))))))))))))))) $;
+    (csn ⟨ kc_choice_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ∪
+    (csn ⟨ kc_le_blk , ⟨ ks_blk , ∅ ⟩ ⟩)))))))))))))))))))))))))))))))))))))))))) $;
 --| The open sorts.
 def lopen: class = $ cpr ks_blk ks_atom $;
 
@@ -288,6 +291,8 @@ axiom enc_quot_sound_atom: $ enc_atom quot_sound_atom ≐ ⟨ kc_quot_sound_atom
 axiom enc_nonempty_blk: $ enc_blk nonempty_blk ≐ ⟨ kc_nonempty_blk , ∅ ⟩ $;
 --| @rewrite
 axiom enc_choice_atom: $ enc_atom choice_atom ≐ ⟨ kc_choice_atom , ∅ ⟩ $;
+--| @rewrite
+axiom enc_le_blk: $ enc_blk le_blk ≐ ⟨ kc_le_blk , ∅ ⟩ $;
 
 axiom enc_nat_sorted (e: nat): $ _ ⇒ enc_nat e ∈ ofsort lsig lopen ks_nat $;
 axiom enc_lvl_sorted (e: lvl): $ _ ⇒ enc_lvl e ∈ ofsort lsig lopen ks_lvl $;
@@ -372,6 +377,7 @@ theorem ofsort_blk_cases (G: hyps) {n: set} (t: set):
       (t = ⟨ kc_eq_blk , ∅ ⟩) ∨
       (t = ⟨ kc_iff_blk , ∅ ⟩) ∨
       (t = ⟨ kc_nonempty_blk , ∅ ⟩) ∨
+      (t = ⟨ kc_le_blk , ∅ ⟩) ∨
       ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) $;
 theorem ofsort_ind_cases (G: hyps) {u v x y: set} (t: set):
   $ G ⇒ t ∊ ofsort lsig lopen ks_ind $ >
@@ -396,7 +402,7 @@ theorem ofsort_ctors_cases (G: hyps) {x y: set} (t: set):
 -- instances at all sets. The clause axioms are then theorems (below), and
 -- induction over the derivations is `horn_ind`.
 
-def kr_le: class = $ suc kc_choice_atom $;
+def kr_le: class = $ suc kc_le_blk $;
 def kr_add: class = $ suc kr_le $;
 def kr_lnth: class = $ suc kr_add $;
 def kr_linst: class = $ suc kr_lnth $;
@@ -1248,6 +1254,9 @@ def choice (u: lvl): expr = $ cst choice_atom (lcons u lnil) $;
 def nat_ty: expr = $ ind_ty nat_D nz $;
 def nat_zero: expr = $ ind_ctor nat_D nz nz $;
 def nat_succ: expr = $ ind_ctor nat_D nz n1 $;
+def le_D: ind = $ ind_mk le_blk (cons (ind_ty nat_D nz) nil) (tcons (pi (ind_ty nat_D nz) (srt lz)) (ccons (app (app (bvar (s nz)) (bvar nz)) (bvar nz)) (ccons (pi (ind_ty nat_D nz) (pi (app (app (bvar (s (s nz))) (bvar (s nz))) (bvar nz)) (app (app (bvar (s (s (s nz)))) (bvar (s (s nz)))) (app (ind_ctor nat_D nz (s nz)) (bvar (s nz)))))) cnil)) tnil) $;
+def nat_eq (x y: expr): expr = $ app (app (app (ind_ty (eq_D (ls lz)) nz) nat_ty) x) y $;
+def nat_lt (x y: expr): expr = $ app (app (ind_ty le_D nz) (app nat_succ x)) y $;
 
 theorem lprog_hprog (G: hyps): $ G ⇒ hprog lprog latoms $;
 
@@ -3517,6 +3526,7 @@ theorem kc_propext_atom_omega (G: hyps): $ G ⇒ kc_propext_atom ∈ ω $;
 theorem kc_quot_sound_atom_omega (G: hyps): $ G ⇒ kc_quot_sound_atom ∈ ω $;
 theorem kc_nonempty_blk_omega (G: hyps): $ G ⇒ kc_nonempty_blk ∈ ω $;
 theorem kc_choice_atom_omega (G: hyps): $ G ⇒ kc_choice_atom ∈ ω $;
+theorem kc_le_blk_omega (G: hyps): $ G ⇒ kc_le_blk ∈ ω $;
 theorem kr_le_omega (G: hyps): $ G ⇒ kr_le ∈ ω $;
 theorem kr_add_omega (G: hyps): $ G ⇒ kr_add ∈ ω $;
 theorem kr_lnth_omega (G: hyps): $ G ⇒ kr_lnth ∈ ω $;
@@ -3644,6 +3654,7 @@ theorem kc_nz_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_nz = kc_propext_atom $;
 theorem kc_nz_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_nz = kc_quot_sound_atom $;
 theorem kc_nz_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_nz = kc_nonempty_blk $;
 theorem kc_nz_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_nz = kc_choice_atom $;
+theorem kc_nz_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_nz = kc_le_blk $;
 theorem kc_s_ne_lz (G: hyps): $ G ⇒ ¬ kc_s = kc_lz $;
 theorem kc_s_ne_ls (G: hyps): $ G ⇒ ¬ kc_s = kc_ls $;
 theorem kc_s_ne_lmax (G: hyps): $ G ⇒ ¬ kc_s = kc_lmax $;
@@ -3684,6 +3695,7 @@ theorem kc_s_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_s = kc_propext_atom $;
 theorem kc_s_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_s = kc_quot_sound_atom $;
 theorem kc_s_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_s = kc_nonempty_blk $;
 theorem kc_s_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_s = kc_choice_atom $;
+theorem kc_s_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_s = kc_le_blk $;
 theorem kc_lz_ne_ls (G: hyps): $ G ⇒ ¬ kc_lz = kc_ls $;
 theorem kc_lz_ne_lmax (G: hyps): $ G ⇒ ¬ kc_lz = kc_lmax $;
 theorem kc_lz_ne_limax (G: hyps): $ G ⇒ ¬ kc_lz = kc_limax $;
@@ -3723,6 +3735,7 @@ theorem kc_lz_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_lz = kc_propext_atom $;
 theorem kc_lz_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_lz = kc_quot_sound_atom $;
 theorem kc_lz_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_lz = kc_nonempty_blk $;
 theorem kc_lz_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_lz = kc_choice_atom $;
+theorem kc_lz_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_lz = kc_le_blk $;
 theorem kc_ls_ne_lmax (G: hyps): $ G ⇒ ¬ kc_ls = kc_lmax $;
 theorem kc_ls_ne_limax (G: hyps): $ G ⇒ ¬ kc_ls = kc_limax $;
 theorem kc_ls_ne_lparam (G: hyps): $ G ⇒ ¬ kc_ls = kc_lparam $;
@@ -3761,6 +3774,7 @@ theorem kc_ls_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_ls = kc_propext_atom $;
 theorem kc_ls_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_ls = kc_quot_sound_atom $;
 theorem kc_ls_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_ls = kc_nonempty_blk $;
 theorem kc_ls_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_ls = kc_choice_atom $;
+theorem kc_ls_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_ls = kc_le_blk $;
 theorem kc_lmax_ne_limax (G: hyps): $ G ⇒ ¬ kc_lmax = kc_limax $;
 theorem kc_lmax_ne_lparam (G: hyps): $ G ⇒ ¬ kc_lmax = kc_lparam $;
 theorem kc_lmax_ne_lnil (G: hyps): $ G ⇒ ¬ kc_lmax = kc_lnil $;
@@ -3798,6 +3812,7 @@ theorem kc_lmax_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_lmax = kc_propext_atom 
 theorem kc_lmax_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_lmax = kc_quot_sound_atom $;
 theorem kc_lmax_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_lmax = kc_nonempty_blk $;
 theorem kc_lmax_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_lmax = kc_choice_atom $;
+theorem kc_lmax_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_lmax = kc_le_blk $;
 theorem kc_limax_ne_lparam (G: hyps): $ G ⇒ ¬ kc_limax = kc_lparam $;
 theorem kc_limax_ne_lnil (G: hyps): $ G ⇒ ¬ kc_limax = kc_lnil $;
 theorem kc_limax_ne_lcons (G: hyps): $ G ⇒ ¬ kc_limax = kc_lcons $;
@@ -3834,6 +3849,7 @@ theorem kc_limax_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_limax = kc_propext_ato
 theorem kc_limax_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_limax = kc_quot_sound_atom $;
 theorem kc_limax_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_limax = kc_nonempty_blk $;
 theorem kc_limax_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_limax = kc_choice_atom $;
+theorem kc_limax_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_limax = kc_le_blk $;
 theorem kc_lparam_ne_lnil (G: hyps): $ G ⇒ ¬ kc_lparam = kc_lnil $;
 theorem kc_lparam_ne_lcons (G: hyps): $ G ⇒ ¬ kc_lparam = kc_lcons $;
 theorem kc_lparam_ne_bvar (G: hyps): $ G ⇒ ¬ kc_lparam = kc_bvar $;
@@ -3869,6 +3885,7 @@ theorem kc_lparam_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_lparam = kc_propext_a
 theorem kc_lparam_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_lparam = kc_quot_sound_atom $;
 theorem kc_lparam_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_lparam = kc_nonempty_blk $;
 theorem kc_lparam_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_lparam = kc_choice_atom $;
+theorem kc_lparam_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_lparam = kc_le_blk $;
 theorem kc_lnil_ne_lcons (G: hyps): $ G ⇒ ¬ kc_lnil = kc_lcons $;
 theorem kc_lnil_ne_bvar (G: hyps): $ G ⇒ ¬ kc_lnil = kc_bvar $;
 theorem kc_lnil_ne_srt (G: hyps): $ G ⇒ ¬ kc_lnil = kc_srt $;
@@ -3903,6 +3920,7 @@ theorem kc_lnil_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_lnil = kc_propext_atom 
 theorem kc_lnil_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_lnil = kc_quot_sound_atom $;
 theorem kc_lnil_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_lnil = kc_nonempty_blk $;
 theorem kc_lnil_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_lnil = kc_choice_atom $;
+theorem kc_lnil_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_lnil = kc_le_blk $;
 theorem kc_lcons_ne_bvar (G: hyps): $ G ⇒ ¬ kc_lcons = kc_bvar $;
 theorem kc_lcons_ne_srt (G: hyps): $ G ⇒ ¬ kc_lcons = kc_srt $;
 theorem kc_lcons_ne_app (G: hyps): $ G ⇒ ¬ kc_lcons = kc_app $;
@@ -3936,6 +3954,7 @@ theorem kc_lcons_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_lcons = kc_propext_ato
 theorem kc_lcons_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_lcons = kc_quot_sound_atom $;
 theorem kc_lcons_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_lcons = kc_nonempty_blk $;
 theorem kc_lcons_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_lcons = kc_choice_atom $;
+theorem kc_lcons_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_lcons = kc_le_blk $;
 theorem kc_bvar_ne_srt (G: hyps): $ G ⇒ ¬ kc_bvar = kc_srt $;
 theorem kc_bvar_ne_app (G: hyps): $ G ⇒ ¬ kc_bvar = kc_app $;
 theorem kc_bvar_ne_lam (G: hyps): $ G ⇒ ¬ kc_bvar = kc_lam $;
@@ -3968,6 +3987,7 @@ theorem kc_bvar_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_bvar = kc_propext_atom 
 theorem kc_bvar_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_bvar = kc_quot_sound_atom $;
 theorem kc_bvar_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_bvar = kc_nonempty_blk $;
 theorem kc_bvar_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_bvar = kc_choice_atom $;
+theorem kc_bvar_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_bvar = kc_le_blk $;
 theorem kc_srt_ne_app (G: hyps): $ G ⇒ ¬ kc_srt = kc_app $;
 theorem kc_srt_ne_lam (G: hyps): $ G ⇒ ¬ kc_srt = kc_lam $;
 theorem kc_srt_ne_pi (G: hyps): $ G ⇒ ¬ kc_srt = kc_pi $;
@@ -3999,6 +4019,7 @@ theorem kc_srt_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_srt = kc_propext_atom $;
 theorem kc_srt_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_srt = kc_quot_sound_atom $;
 theorem kc_srt_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_srt = kc_nonempty_blk $;
 theorem kc_srt_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_srt = kc_choice_atom $;
+theorem kc_srt_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_srt = kc_le_blk $;
 theorem kc_app_ne_lam (G: hyps): $ G ⇒ ¬ kc_app = kc_lam $;
 theorem kc_app_ne_pi (G: hyps): $ G ⇒ ¬ kc_app = kc_pi $;
 theorem kc_app_ne_cst (G: hyps): $ G ⇒ ¬ kc_app = kc_cst $;
@@ -4029,6 +4050,7 @@ theorem kc_app_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_app = kc_propext_atom $;
 theorem kc_app_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_app = kc_quot_sound_atom $;
 theorem kc_app_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_app = kc_nonempty_blk $;
 theorem kc_app_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_app = kc_choice_atom $;
+theorem kc_app_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_app = kc_le_blk $;
 theorem kc_lam_ne_pi (G: hyps): $ G ⇒ ¬ kc_lam = kc_pi $;
 theorem kc_lam_ne_cst (G: hyps): $ G ⇒ ¬ kc_lam = kc_cst $;
 theorem kc_lam_ne_nil (G: hyps): $ G ⇒ ¬ kc_lam = kc_nil $;
@@ -4058,6 +4080,7 @@ theorem kc_lam_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_lam = kc_propext_atom $;
 theorem kc_lam_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_lam = kc_quot_sound_atom $;
 theorem kc_lam_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_lam = kc_nonempty_blk $;
 theorem kc_lam_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_lam = kc_choice_atom $;
+theorem kc_lam_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_lam = kc_le_blk $;
 theorem kc_pi_ne_cst (G: hyps): $ G ⇒ ¬ kc_pi = kc_cst $;
 theorem kc_pi_ne_nil (G: hyps): $ G ⇒ ¬ kc_pi = kc_nil $;
 theorem kc_pi_ne_cons (G: hyps): $ G ⇒ ¬ kc_pi = kc_cons $;
@@ -4086,6 +4109,7 @@ theorem kc_pi_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_pi = kc_propext_atom $;
 theorem kc_pi_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_pi = kc_quot_sound_atom $;
 theorem kc_pi_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_pi = kc_nonempty_blk $;
 theorem kc_pi_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_pi = kc_choice_atom $;
+theorem kc_pi_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_pi = kc_le_blk $;
 theorem kc_cst_ne_nil (G: hyps): $ G ⇒ ¬ kc_cst = kc_nil $;
 theorem kc_cst_ne_cons (G: hyps): $ G ⇒ ¬ kc_cst = kc_cons $;
 theorem kc_cst_ne_b0 (G: hyps): $ G ⇒ ¬ kc_cst = kc_b0 $;
@@ -4113,6 +4137,7 @@ theorem kc_cst_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_cst = kc_propext_atom $;
 theorem kc_cst_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_cst = kc_quot_sound_atom $;
 theorem kc_cst_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_cst = kc_nonempty_blk $;
 theorem kc_cst_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_cst = kc_choice_atom $;
+theorem kc_cst_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_cst = kc_le_blk $;
 theorem kc_nil_ne_cons (G: hyps): $ G ⇒ ¬ kc_nil = kc_cons $;
 theorem kc_nil_ne_b0 (G: hyps): $ G ⇒ ¬ kc_nil = kc_b0 $;
 theorem kc_nil_ne_bd0 (G: hyps): $ G ⇒ ¬ kc_nil = kc_bd0 $;
@@ -4139,6 +4164,7 @@ theorem kc_nil_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_nil = kc_propext_atom $;
 theorem kc_nil_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_nil = kc_quot_sound_atom $;
 theorem kc_nil_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_nil = kc_nonempty_blk $;
 theorem kc_nil_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_nil = kc_choice_atom $;
+theorem kc_nil_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_nil = kc_le_blk $;
 theorem kc_cons_ne_b0 (G: hyps): $ G ⇒ ¬ kc_cons = kc_b0 $;
 theorem kc_cons_ne_bd0 (G: hyps): $ G ⇒ ¬ kc_cons = kc_bd0 $;
 theorem kc_cons_ne_bd1 (G: hyps): $ G ⇒ ¬ kc_cons = kc_bd1 $;
@@ -4164,6 +4190,7 @@ theorem kc_cons_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_cons = kc_propext_atom 
 theorem kc_cons_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_cons = kc_quot_sound_atom $;
 theorem kc_cons_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_cons = kc_nonempty_blk $;
 theorem kc_cons_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_cons = kc_choice_atom $;
+theorem kc_cons_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_cons = kc_le_blk $;
 theorem kc_b0_ne_bd0 (G: hyps): $ G ⇒ ¬ kc_b0 = kc_bd0 $;
 theorem kc_b0_ne_bd1 (G: hyps): $ G ⇒ ¬ kc_b0 = kc_bd1 $;
 theorem kc_b0_ne_lit (G: hyps): $ G ⇒ ¬ kc_b0 = kc_lit $;
@@ -4188,6 +4215,7 @@ theorem kc_b0_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_b0 = kc_propext_atom $;
 theorem kc_b0_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_b0 = kc_quot_sound_atom $;
 theorem kc_b0_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_b0 = kc_nonempty_blk $;
 theorem kc_b0_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_b0 = kc_choice_atom $;
+theorem kc_b0_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_b0 = kc_le_blk $;
 theorem kc_bd0_ne_bd1 (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_bd1 $;
 theorem kc_bd0_ne_lit (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_lit $;
 theorem kc_bd0_ne_ind_mk (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_ind_mk $;
@@ -4211,6 +4239,7 @@ theorem kc_bd0_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_propext_atom $;
 theorem kc_bd0_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_quot_sound_atom $;
 theorem kc_bd0_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_nonempty_blk $;
 theorem kc_bd0_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_choice_atom $;
+theorem kc_bd0_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_le_blk $;
 theorem kc_bd1_ne_lit (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_lit $;
 theorem kc_bd1_ne_ind_mk (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_ind_mk $;
 theorem kc_bd1_ne_tnil (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_tnil $;
@@ -4233,6 +4262,7 @@ theorem kc_bd1_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_propext_atom $;
 theorem kc_bd1_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_quot_sound_atom $;
 theorem kc_bd1_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_nonempty_blk $;
 theorem kc_bd1_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_choice_atom $;
+theorem kc_bd1_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_le_blk $;
 theorem kc_lit_ne_ind_mk (G: hyps): $ G ⇒ ¬ kc_lit = kc_ind_mk $;
 theorem kc_lit_ne_tnil (G: hyps): $ G ⇒ ¬ kc_lit = kc_tnil $;
 theorem kc_lit_ne_tcons (G: hyps): $ G ⇒ ¬ kc_lit = kc_tcons $;
@@ -4254,6 +4284,7 @@ theorem kc_lit_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_lit = kc_propext_atom $;
 theorem kc_lit_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_lit = kc_quot_sound_atom $;
 theorem kc_lit_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_lit = kc_nonempty_blk $;
 theorem kc_lit_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_lit = kc_choice_atom $;
+theorem kc_lit_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_lit = kc_le_blk $;
 theorem kc_ind_mk_ne_tnil (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_tnil $;
 theorem kc_ind_mk_ne_tcons (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_tcons $;
 theorem kc_ind_mk_ne_cnil (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_cnil $;
@@ -4274,6 +4305,7 @@ theorem kc_ind_mk_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_propext_a
 theorem kc_ind_mk_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_quot_sound_atom $;
 theorem kc_ind_mk_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_nonempty_blk $;
 theorem kc_ind_mk_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_choice_atom $;
+theorem kc_ind_mk_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_le_blk $;
 theorem kc_tnil_ne_tcons (G: hyps): $ G ⇒ ¬ kc_tnil = kc_tcons $;
 theorem kc_tnil_ne_cnil (G: hyps): $ G ⇒ ¬ kc_tnil = kc_cnil $;
 theorem kc_tnil_ne_ccons (G: hyps): $ G ⇒ ¬ kc_tnil = kc_ccons $;
@@ -4293,6 +4325,7 @@ theorem kc_tnil_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_tnil = kc_propext_atom 
 theorem kc_tnil_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_tnil = kc_quot_sound_atom $;
 theorem kc_tnil_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_tnil = kc_nonempty_blk $;
 theorem kc_tnil_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_tnil = kc_choice_atom $;
+theorem kc_tnil_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_tnil = kc_le_blk $;
 theorem kc_tcons_ne_cnil (G: hyps): $ G ⇒ ¬ kc_tcons = kc_cnil $;
 theorem kc_tcons_ne_ccons (G: hyps): $ G ⇒ ¬ kc_tcons = kc_ccons $;
 theorem kc_tcons_ne_ind_mkn (G: hyps): $ G ⇒ ¬ kc_tcons = kc_ind_mkn $;
@@ -4311,6 +4344,7 @@ theorem kc_tcons_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_tcons = kc_propext_ato
 theorem kc_tcons_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_tcons = kc_quot_sound_atom $;
 theorem kc_tcons_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_tcons = kc_nonempty_blk $;
 theorem kc_tcons_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_tcons = kc_choice_atom $;
+theorem kc_tcons_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_tcons = kc_le_blk $;
 theorem kc_cnil_ne_ccons (G: hyps): $ G ⇒ ¬ kc_cnil = kc_ccons $;
 theorem kc_cnil_ne_ind_mkn (G: hyps): $ G ⇒ ¬ kc_cnil = kc_ind_mkn $;
 theorem kc_cnil_ne_ind_ty (G: hyps): $ G ⇒ ¬ kc_cnil = kc_ind_ty $;
@@ -4328,6 +4362,7 @@ theorem kc_cnil_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_cnil = kc_propext_atom 
 theorem kc_cnil_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_cnil = kc_quot_sound_atom $;
 theorem kc_cnil_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_cnil = kc_nonempty_blk $;
 theorem kc_cnil_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_cnil = kc_choice_atom $;
+theorem kc_cnil_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_cnil = kc_le_blk $;
 theorem kc_ccons_ne_ind_mkn (G: hyps): $ G ⇒ ¬ kc_ccons = kc_ind_mkn $;
 theorem kc_ccons_ne_ind_ty (G: hyps): $ G ⇒ ¬ kc_ccons = kc_ind_ty $;
 theorem kc_ccons_ne_ind_ctor (G: hyps): $ G ⇒ ¬ kc_ccons = kc_ind_ctor $;
@@ -4344,6 +4379,7 @@ theorem kc_ccons_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_ccons = kc_propext_ato
 theorem kc_ccons_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_ccons = kc_quot_sound_atom $;
 theorem kc_ccons_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_ccons = kc_nonempty_blk $;
 theorem kc_ccons_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_ccons = kc_choice_atom $;
+theorem kc_ccons_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_ccons = kc_le_blk $;
 theorem kc_ind_mkn_ne_ind_ty (G: hyps): $ G ⇒ ¬ kc_ind_mkn = kc_ind_ty $;
 theorem kc_ind_mkn_ne_ind_ctor (G: hyps): $ G ⇒ ¬ kc_ind_mkn = kc_ind_ctor $;
 theorem kc_ind_mkn_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_ind_mkn = kc_ind_rec $;
@@ -4359,6 +4395,7 @@ theorem kc_ind_mkn_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_ind_mkn = kc_propext
 theorem kc_ind_mkn_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_ind_mkn = kc_quot_sound_atom $;
 theorem kc_ind_mkn_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_ind_mkn = kc_nonempty_blk $;
 theorem kc_ind_mkn_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_ind_mkn = kc_choice_atom $;
+theorem kc_ind_mkn_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_ind_mkn = kc_le_blk $;
 theorem kc_ind_ty_ne_ind_ctor (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_ind_ctor $;
 theorem kc_ind_ty_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_ind_rec $;
 theorem kc_ind_ty_ne_proj (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_proj $;
@@ -4373,6 +4410,7 @@ theorem kc_ind_ty_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_propext_a
 theorem kc_ind_ty_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_quot_sound_atom $;
 theorem kc_ind_ty_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_nonempty_blk $;
 theorem kc_ind_ty_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_choice_atom $;
+theorem kc_ind_ty_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_le_blk $;
 theorem kc_ind_ctor_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_ind_rec $;
 theorem kc_ind_ctor_ne_proj (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_proj $;
 theorem kc_ind_ctor_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_nat_blk $;
@@ -4386,6 +4424,7 @@ theorem kc_ind_ctor_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_prope
 theorem kc_ind_ctor_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_quot_sound_atom $;
 theorem kc_ind_ctor_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_nonempty_blk $;
 theorem kc_ind_ctor_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_choice_atom $;
+theorem kc_ind_ctor_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_le_blk $;
 theorem kc_ind_rec_ne_proj (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_proj $;
 theorem kc_ind_rec_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_nat_blk $;
 theorem kc_ind_rec_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_eq_blk $;
@@ -4398,6 +4437,7 @@ theorem kc_ind_rec_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_propext
 theorem kc_ind_rec_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_quot_sound_atom $;
 theorem kc_ind_rec_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_nonempty_blk $;
 theorem kc_ind_rec_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_choice_atom $;
+theorem kc_ind_rec_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_le_blk $;
 theorem kc_proj_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_proj = kc_nat_blk $;
 theorem kc_proj_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_proj = kc_eq_blk $;
 theorem kc_proj_ne_quot (G: hyps): $ G ⇒ ¬ kc_proj = kc_quot $;
@@ -4409,6 +4449,7 @@ theorem kc_proj_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_proj = kc_propext_atom 
 theorem kc_proj_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_proj = kc_quot_sound_atom $;
 theorem kc_proj_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_proj = kc_nonempty_blk $;
 theorem kc_proj_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_proj = kc_choice_atom $;
+theorem kc_proj_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_proj = kc_le_blk $;
 theorem kc_nat_blk_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_eq_blk $;
 theorem kc_nat_blk_ne_quot (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_quot $;
 theorem kc_nat_blk_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_quot_mk $;
@@ -4419,6 +4460,7 @@ theorem kc_nat_blk_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_propext
 theorem kc_nat_blk_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_quot_sound_atom $;
 theorem kc_nat_blk_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_nonempty_blk $;
 theorem kc_nat_blk_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_choice_atom $;
+theorem kc_nat_blk_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_le_blk $;
 theorem kc_eq_blk_ne_quot (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_quot $;
 theorem kc_eq_blk_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_quot_mk $;
 theorem kc_eq_blk_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_quot_lift $;
@@ -4428,6 +4470,7 @@ theorem kc_eq_blk_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_propext_a
 theorem kc_eq_blk_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_quot_sound_atom $;
 theorem kc_eq_blk_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_nonempty_blk $;
 theorem kc_eq_blk_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_choice_atom $;
+theorem kc_eq_blk_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_le_blk $;
 theorem kc_quot_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_quot = kc_quot_mk $;
 theorem kc_quot_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_quot = kc_quot_lift $;
 theorem kc_quot_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_quot = kc_quot_ind $;
@@ -4436,6 +4479,7 @@ theorem kc_quot_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_quot = kc_propext_atom 
 theorem kc_quot_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_quot = kc_quot_sound_atom $;
 theorem kc_quot_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_quot = kc_nonempty_blk $;
 theorem kc_quot_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_quot = kc_choice_atom $;
+theorem kc_quot_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_quot = kc_le_blk $;
 theorem kc_quot_mk_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_quot_mk = kc_quot_lift $;
 theorem kc_quot_mk_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_quot_mk = kc_quot_ind $;
 theorem kc_quot_mk_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_quot_mk = kc_iff_blk $;
@@ -4443,27 +4487,35 @@ theorem kc_quot_mk_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_quot_mk = kc_propext
 theorem kc_quot_mk_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_quot_mk = kc_quot_sound_atom $;
 theorem kc_quot_mk_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_quot_mk = kc_nonempty_blk $;
 theorem kc_quot_mk_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_quot_mk = kc_choice_atom $;
+theorem kc_quot_mk_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_quot_mk = kc_le_blk $;
 theorem kc_quot_lift_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_quot_lift = kc_quot_ind $;
 theorem kc_quot_lift_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_quot_lift = kc_iff_blk $;
 theorem kc_quot_lift_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_quot_lift = kc_propext_atom $;
 theorem kc_quot_lift_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_quot_lift = kc_quot_sound_atom $;
 theorem kc_quot_lift_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_quot_lift = kc_nonempty_blk $;
 theorem kc_quot_lift_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_quot_lift = kc_choice_atom $;
+theorem kc_quot_lift_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_quot_lift = kc_le_blk $;
 theorem kc_quot_ind_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_quot_ind = kc_iff_blk $;
 theorem kc_quot_ind_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_quot_ind = kc_propext_atom $;
 theorem kc_quot_ind_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_quot_ind = kc_quot_sound_atom $;
 theorem kc_quot_ind_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_quot_ind = kc_nonempty_blk $;
 theorem kc_quot_ind_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_quot_ind = kc_choice_atom $;
+theorem kc_quot_ind_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_quot_ind = kc_le_blk $;
 theorem kc_iff_blk_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_iff_blk = kc_propext_atom $;
 theorem kc_iff_blk_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_iff_blk = kc_quot_sound_atom $;
 theorem kc_iff_blk_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_iff_blk = kc_nonempty_blk $;
 theorem kc_iff_blk_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_iff_blk = kc_choice_atom $;
+theorem kc_iff_blk_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_iff_blk = kc_le_blk $;
 theorem kc_propext_atom_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_propext_atom = kc_quot_sound_atom $;
 theorem kc_propext_atom_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_propext_atom = kc_nonempty_blk $;
 theorem kc_propext_atom_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_propext_atom = kc_choice_atom $;
+theorem kc_propext_atom_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_propext_atom = kc_le_blk $;
 theorem kc_quot_sound_atom_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_quot_sound_atom = kc_nonempty_blk $;
 theorem kc_quot_sound_atom_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_quot_sound_atom = kc_choice_atom $;
+theorem kc_quot_sound_atom_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_quot_sound_atom = kc_le_blk $;
 theorem kc_nonempty_blk_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_nonempty_blk = kc_choice_atom $;
+theorem kc_nonempty_blk_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_nonempty_blk = kc_le_blk $;
+theorem kc_choice_atom_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_choice_atom = kc_le_blk $;
 
 -- --------------------------------------------------------------------------
 -- Congruence of the atoms, substitution through them

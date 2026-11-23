@@ -4,8 +4,6 @@
 
 import "model-quot.mm0";
 
-
-
 -- --------------------------------------------------------------------------
 -- Literals (layer G): the hook's part and the rules `lit_zero`, `lit_succ`
 -- --------------------------------------------------------------------------
@@ -25,7 +23,6 @@ theorem dt_lit (G: hyps) (H B W R: class) (u: set):
 --| The rule `lit_zero` in the model, for a hook with the inductive types' and the literals' parts.
 theorem mlit_zero (H: class) (G: ctx): $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ mdeq (mcv H) G (lit b0) (ind_ctor nat_D nz nz) (ind_ty nat_D nz) $;
 
-
 -- --------------------------------------------------------------------------
 -- The successor of binary numerals; the rule `lit_succ`
 -- --------------------------------------------------------------------------
@@ -40,7 +37,6 @@ theorem bsucc_sem (G: hyps) (a b: bin): $ bsucc a b $ > $ G ⇒ fv nvf (enc_bin 
 --| The rule `lit_succ` in the model.
 theorem mlit_succ (H: class) (G: ctx) (a b: bin):
   $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ bsucc a b $ > $ mdeq (mcv H) G (lit b) (app (ind_ctor nat_D nz n1) (lit a)) (ind_ty nat_D nz) $;
-
 
 -- --------------------------------------------------------------------------
 -- The arithmetic of binary numerals in the model
@@ -67,8 +63,6 @@ theorem lrel_baddc_sem (G: hyps) (t1 t2 t3: set):
 --| `baddc a b c`: the number of `c` is the sum of `a`'s and `b`'s, plus one.
 theorem baddc_sem (G: hyps) (a b c: bin): $ baddc a b c $ > $ G ⇒ fv nvf (enc_bin c) = suc (nadd (fv nvf (enc_bin a)) (fv nvf (enc_bin b))) $;
 
-
-
 --| The semantics of `bmul`, by induction on the second tree and inversion.
 theorem lrel_bmul_sem (G: hyps) (t1 t2 t3: set):
   $ G ⇒ ra_bmul t1 t2 t3 ∈ lrel $ > $ G ⇒ fv nvf t3 = nmul (fv nvf t1) (fv nvf t2) $;
@@ -83,14 +77,12 @@ theorem lrel_bpow_sem (G: hyps) (t1 t2 t3: set):
 --| `bpow a b c`: the number of `c` is `a`'s to the power of `b`'s.
 theorem bpow_sem (G: hyps) (a b c: bin): $ bpow a b c $ > $ G ⇒ fv nvf (enc_bin c) = npow (fv nvf (enc_bin a)) (fv nvf (enc_bin b)) $;
 
-
 -- --------------------------------------------------------------------------
 -- The literal rules
 -- --------------------------------------------------------------------------
 
 --| An atom of `jmod` is a judgment of the model (the converse of `jmod_i`).
 theorem jmod_e (M: class) (G: ctx) (e e2 A: expr): $ deq_j (jmod M) G e e2 A $ > $ mdeq M G e e2 A $;
-
 
 --| The premises of the relations that state Lean's defining equations, back from the relations (their clauses
 --| inverted): `X_eqs_pk` is premise `k` of the clause `X_eqs_i`.
@@ -195,11 +187,6 @@ theorem shr_eqs_p4 (J: class) (G: ctx) (f fd: expr): $ shr_eqs_j J G f fd $ > $ 
 
 theorem shr_eqs_p5 (J: class) (G: ctx) (f fd: expr): $ shr_eqs_j J G f fd $ > $ deq_j J (cons nat_ty (cons nat_ty G)) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app (app fd (app (app f (bvar n1)) (bvar nz))) (lit (bd0 (bd1 b0)))) nat_ty $;
 
-
-
-
-
-
 --| The rule `nat_add_lit` in the model: a function with `Nat.add`'s defining equations adds literals.
 theorem madd_lit (H: class) (G: ctx) (f: expr) (a b c: bin):
   $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ add_eqs_j (jmod (mcv H)) G f $ > $ badd a b c $ >
@@ -215,8 +202,6 @@ theorem mpow_lit (H: class) (G: ctx) (f fm fa: expr) (a b c: bin):
   $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ pow_eqs_j (jmod (mcv H)) G f fm fa $ > $ bpow a b c $ >
   $ mdeq (mcv H) G (app (app f (lit a)) (lit b)) (lit c) nat_ty $;
 
-
-
 --| The rule `nat_sub_lit` in the model.
 theorem msub_lit (H: class) (G: ctx) (f fp: expr) (a b c: bin):
   $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ sub_eqs_j (jmod (mcv H)) G f fp $ > $ badd c b a $ >
@@ -226,8 +211,6 @@ theorem msub_lit (H: class) (G: ctx) (f fp: expr) (a b c: bin):
 theorem msub_lit0 (H: class) (G: ctx) (f fp: expr) (a b c: bin):
   $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ sub_eqs_j (jmod (mcv H)) G f fp $ > $ badd a c b $ >
   $ mdeq (mcv H) G (app (app f (lit a)) (lit b)) (lit b0) nat_ty $;
-
-
 
 --| The rule `nat_shr_lit_z` in the model.
 theorem mshr_lit_z (H: class) (G: ctx) (f fd: expr) (a: bin):
@@ -239,14 +222,10 @@ theorem mshr_lit_s (H: class) (G: ctx) (f fd: expr) (a b b2 c c2: bin):
   $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ shr_eqs_j (jmod (mcv H)) G f fd $ > $ bsucc b b2 $ > $ mdeq (mcv H) G (app (app f (lit a)) (lit b)) (lit c) nat_ty $ > $ mdeq (mcv H) G (app (app fd (lit c)) (lit (bd0 (bd1 b0)))) (lit c2) nat_ty $ >
   $ mdeq (mcv H) G (app (app f (lit a)) (lit b2)) (lit c2) nat_ty $;
 
-
-
 --| The rule `nat_shl_lit` in the model.
 theorem mshl_lit (H: class) (G: ctx) (f fm fa: expr) (a b pwr c: bin):
   $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ shl_eqs_j (jmod (mcv H)) G f fm fa $ > $ bpow (bd0 (bd1 b0)) b pwr $ > $ bmul a pwr c $ >
   $ mdeq (mcv H) G (app (app f (lit a)) (lit b)) (lit c) nat_ty $;
-
-
 
 --| The rule `nat_beq_lit` in the model.
 theorem mbeq_lit (H: class) (G: ctx) (f B vt vf: expr) (a: bin):
@@ -273,269 +252,6 @@ theorem mble_lit_gt (H: class) (G: ctx) (f B vt vf: expr) (a b c: bin):
   $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ ble_eqs_j (jmod (mcv H)) G f B vt vf $ > $ baddc b c a $ >
   $ mdeq (mcv H) G (app (app f (lit a)) (lit b)) (vf) (B) $;
 
-
-
-theorem dec_eqs_p1 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF: expr): $ dec_eqs_j J G B t u Not Dec dite T R ofT ofF $ > $ closed nz B $;
-
-theorem dec_eqs_p2 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF: expr): $ dec_eqs_j J G B t u Not Dec dite T R ofT ofF $ > $ closed nz t $;
-
-theorem dec_eqs_p3 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF: expr): $ dec_eqs_j J G B t u Not Dec dite T R ofT ofF $ > $ closed nz u $;
-
-theorem dec_eqs_p4 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF: expr): $ dec_eqs_j J G B t u Not Dec dite T R ofT ofF $ > $ closed nz Not $;
-
-theorem dec_eqs_p5 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF: expr): $ dec_eqs_j J G B t u Not Dec dite T R ofT ofF $ > $ closed nz Dec $;
-
-theorem dec_eqs_p6 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF: expr): $ dec_eqs_j J G B t u Not Dec dite T R ofT ofF $ > $ closed nz dite $;
-
-theorem dec_eqs_p7 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF: expr): $ dec_eqs_j J G B t u Not Dec dite T R ofT ofF $ > $ closed nz T $;
-
-theorem dec_eqs_p8 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF: expr): $ dec_eqs_j J G B t u Not Dec dite T R ofT ofF $ > $ closed nz R $;
-
-theorem dec_eqs_p9 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF: expr): $ dec_eqs_j J G B t u Not Dec dite T R ofT ofF $ > $ closed nz ofT $;
-
-theorem dec_eqs_p10 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF: expr): $ dec_eqs_j J G B t u Not Dec dite T R ofT ofF $ > $ closed nz ofF $;
-
-theorem dec_eqs_p11 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF: expr): $ dec_eqs_j J G B t u Not Dec dite T R ofT ofF $ > $ ty_j J G ofT (pi Prop (pi (app (app T (bvar nz)) t) (bvar n1))) $;
-
-theorem dec_eqs_p12 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF: expr): $ dec_eqs_j J G B t u Not Dec dite T R ofT ofF $ > $ ty_j J G ofF (pi Prop (pi (app (app T (bvar nz)) u) (app Not (bvar n1)))) $;
-
-theorem dec_eqs_p13 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF: expr): $ dec_eqs_j J G B t u Not Dec dite T R ofT ofF $ > $ deq_j J (cons (pi (app Not (bvar n2)) nat_ty) (cons (pi (bvar n1) nat_ty) (cons (app (app T (bvar nz)) t) (cons Prop G)))) (app (app (app (app dite (bvar n3)) (app (app (app R (bvar n3)) t) (bvar n2))) (bvar n1)) (bvar nz)) (app (bvar n1) (app (app ofT (bvar n3)) (bvar n2))) nat_ty $;
-
-theorem dec_eqs_p14 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF: expr): $ dec_eqs_j J G B t u Not Dec dite T R ofT ofF $ > $ deq_j J (cons (pi (app Not (bvar n2)) nat_ty) (cons (pi (bvar n1) nat_ty) (cons (app (app T (bvar nz)) u) (cons Prop G)))) (app (app (app (app dite (bvar n3)) (app (app (app R (bvar n3)) u) (bvar n2))) (bvar n1)) (bvar nz)) (app (bvar nz) (app (app ofF (bvar n3)) (bvar n2))) nat_ty $;
-
-theorem ite_eqs_p1 (J: class) (G: ctx) (B t u T R ite: expr): $ ite_eqs_j J G B t u T R ite $ > $ closed nz B $;
-
-theorem ite_eqs_p2 (J: class) (G: ctx) (B t u T R ite: expr): $ ite_eqs_j J G B t u T R ite $ > $ closed nz t $;
-
-theorem ite_eqs_p3 (J: class) (G: ctx) (B t u T R ite: expr): $ ite_eqs_j J G B t u T R ite $ > $ closed nz u $;
-
-theorem ite_eqs_p4 (J: class) (G: ctx) (B t u T R ite: expr): $ ite_eqs_j J G B t u T R ite $ > $ closed nz T $;
-
-theorem ite_eqs_p5 (J: class) (G: ctx) (B t u T R ite: expr): $ ite_eqs_j J G B t u T R ite $ > $ closed nz R $;
-
-theorem ite_eqs_p6 (J: class) (G: ctx) (B t u T R ite: expr): $ ite_eqs_j J G B t u T R ite $ > $ closed nz ite $;
-
-theorem ite_eqs_p7 (J: class) (G: ctx) (B t u T R ite: expr): $ ite_eqs_j J G B t u T R ite $ > $ deq_j J (cons nat_ty (cons nat_ty (cons (app (app T (bvar nz)) t) (cons Prop G)))) (app (app (app (app ite (bvar n3)) (app (app (app R (bvar n3)) t) (bvar n2))) (bvar n1)) (bvar nz)) (bvar n1) nat_ty $;
-
-theorem ite_eqs_p8 (J: class) (G: ctx) (B t u T R ite: expr): $ ite_eqs_j J G B t u T R ite $ > $ deq_j J (cons nat_ty (cons nat_ty (cons (app (app T (bvar nz)) u) (cons Prop G)))) (app (app (app (app ite (bvar n3)) (app (app (app R (bvar n3)) u) (bvar n2))) (bvar n1)) (bvar nz)) (bvar nz) nat_ty $;
-
-theorem natle_dec_p1 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf: expr): $ natle_dec_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf $ > $ dec_eqs_j J G B t u Not Dec dite T R ofT ofF $;
-
-theorem natle_dec_p2 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf: expr): $ natle_dec_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf $ > $ ble_eqs_j J G ble B t u $;
-
-theorem natle_dec_p3 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf: expr): $ natle_dec_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf $ > $ closed nz leN $;
-
-theorem natle_dec_p4 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf: expr): $ natle_dec_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf $ > $ closed nz dleN $;
-
-theorem natle_dec_p5 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf: expr): $ natle_dec_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf $ > $ closed nz pf $;
-
-theorem natle_dec_p6 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf: expr): $ natle_dec_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf $ > $ ty_j J G leN (pi nat_ty (pi nat_ty Prop)) $;
-
-theorem natle_dec_p7 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf: expr): $ natle_dec_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf $ > $ ty_j J G pf (pi nat_ty (pi nat_ty (app (app T (app (app leN (bvar n1)) (bvar nz))) (app (app ble (bvar n1)) (bvar nz))))) $;
-
-theorem natle_dec_p8 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf: expr): $ natle_dec_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf $ > $ deq_j J (cons nat_ty (cons nat_ty G)) (app (app dleN (bvar n1)) (bvar nz)) (app (app (app R (app (app leN (bvar n1)) (bvar nz))) (app (app ble (bvar n1)) (bvar nz))) (app (app pf (bvar n1)) (bvar nz))) (app Dec (app (app leN (bvar n1)) (bvar nz))) $;
-
-theorem nateq_dec_p1 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF eqN deqN beq pq: expr): $ nateq_dec_j J G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $ > $ dec_eqs_j J G B t u Not Dec dite T R ofT ofF $;
-
-theorem nateq_dec_p2 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF eqN deqN beq pq: expr): $ nateq_dec_j J G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $ > $ beq_eqs_j J G beq B t u $;
-
-theorem nateq_dec_p3 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF eqN deqN beq pq: expr): $ nateq_dec_j J G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $ > $ closed nz eqN $;
-
-theorem nateq_dec_p4 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF eqN deqN beq pq: expr): $ nateq_dec_j J G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $ > $ closed nz deqN $;
-
-theorem nateq_dec_p5 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF eqN deqN beq pq: expr): $ nateq_dec_j J G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $ > $ closed nz pq $;
-
-theorem nateq_dec_p6 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF eqN deqN beq pq: expr): $ nateq_dec_j J G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $ > $ ty_j J G eqN (pi nat_ty (pi nat_ty Prop)) $;
-
-theorem nateq_dec_p7 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF eqN deqN beq pq: expr): $ nateq_dec_j J G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $ > $ ty_j J G pq (pi nat_ty (pi nat_ty (app (app T (app (app eqN (bvar n1)) (bvar nz))) (app (app beq (bvar n1)) (bvar nz))))) $;
-
-theorem nateq_dec_p8 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF eqN deqN beq pq: expr): $ nateq_dec_j J G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $ > $ deq_j J (cons nat_ty (cons nat_ty G)) (app (app deqN (bvar n1)) (bvar nz)) (app (app (app R (app (app eqN (bvar n1)) (bvar nz))) (app (app beq (bvar n1)) (bvar nz))) (app (app pq (bvar n1)) (bvar nz))) (app Dec (app (app eqN (bvar n1)) (bvar nz))) $;
-
-theorem bool_dec_p1 (J: class) (G: ctx) (B t u Not dite ite bp bd: expr): $ bool_dec_j J G B t u Not dite ite bp bd $ > $ closed nz B $;
-
-theorem bool_dec_p2 (J: class) (G: ctx) (B t u Not dite ite bp bd: expr): $ bool_dec_j J G B t u Not dite ite bp bd $ > $ closed nz t $;
-
-theorem bool_dec_p3 (J: class) (G: ctx) (B t u Not dite ite bp bd: expr): $ bool_dec_j J G B t u Not dite ite bp bd $ > $ closed nz u $;
-
-theorem bool_dec_p4 (J: class) (G: ctx) (B t u Not dite ite bp bd: expr): $ bool_dec_j J G B t u Not dite ite bp bd $ > $ closed nz Not $;
-
-theorem bool_dec_p5 (J: class) (G: ctx) (B t u Not dite ite bp bd: expr): $ bool_dec_j J G B t u Not dite ite bp bd $ > $ closed nz dite $;
-
-theorem bool_dec_p6 (J: class) (G: ctx) (B t u Not dite ite bp bd: expr): $ bool_dec_j J G B t u Not dite ite bp bd $ > $ closed nz ite $;
-
-theorem bool_dec_p7 (J: class) (G: ctx) (B t u Not dite ite bp bd: expr): $ bool_dec_j J G B t u Not dite ite bp bd $ > $ closed nz bp $;
-
-theorem bool_dec_p8 (J: class) (G: ctx) (B t u Not dite ite bp bd: expr): $ bool_dec_j J G B t u Not dite ite bp bd $ > $ closed nz bd $;
-
-theorem bool_dec_p9 (J: class) (G: ctx) (B t u Not dite ite bp bd: expr): $ bool_dec_j J G B t u Not dite ite bp bd $ > $ deq_j J (cons nat_ty (cons nat_ty G)) (app (app (app (app dite (app bp t)) (app bd t)) (lam (app bp t) (bvar n2))) (lam (app Not (app bp t)) (bvar n1))) (bvar n1) nat_ty $;
-
-theorem bool_dec_p10 (J: class) (G: ctx) (B t u Not dite ite bp bd: expr): $ bool_dec_j J G B t u Not dite ite bp bd $ > $ deq_j J (cons nat_ty (cons nat_ty G)) (app (app (app (app dite (app bp u)) (app bd u)) (lam (app bp u) (bvar n2))) (lam (app Not (app bp u)) (bvar n1))) (bvar nz) nat_ty $;
-
-theorem bool_dec_p11 (J: class) (G: ctx) (B t u Not dite ite bp bd: expr): $ bool_dec_j J G B t u Not dite ite bp bd $ > $ deq_j J (cons nat_ty (cons nat_ty G)) (app (app (app (app ite (app bp t)) (app bd t)) (bvar n1)) (bvar nz)) (bvar n1) nat_ty $;
-
-theorem bool_dec_p12 (J: class) (G: ctx) (B t u Not dite ite bp bd: expr): $ bool_dec_j J G B t u Not dite ite bp bd $ > $ deq_j J (cons nat_ty (cons nat_ty G)) (app (app (app (app ite (app bp u)) (app bd u)) (bvar n1)) (bvar nz)) (bvar nz) nat_ty $;
-
-theorem div_eqs_p1 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr): $ div_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ > $ natle_dec_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf $;
-
-theorem div_eqs_p2 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr): $ div_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ > $ sub_eqs_j J G sub p $;
-
-theorem div_eqs_p3 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr): $ div_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ > $ closed nz f $;
-
-theorem div_eqs_p4 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr): $ div_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ > $ closed nz go $;
-
-theorem div_eqs_p5 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr): $ div_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ > $ closed nz pfs $;
-
-theorem div_eqs_p6 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr): $ div_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ > $ closed nz lem $;
-
-theorem div_eqs_p7 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr): $ div_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ > $ ty_j J G f (pi nat_ty (pi nat_ty nat_ty)) $;
-
-theorem div_eqs_p8 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr): $ div_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ > $ ty_j J G go (pi nat_ty (pi (app (app leN lit1) (bvar nz)) (pi nat_ty (pi nat_ty (pi (app (app leN (app nat_succ (bvar nz))) (bvar n1)) nat_ty))))) $;
-
-theorem div_eqs_p9 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr): $ div_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ > $ ty_j J G pfs (pi nat_ty (app (app leN (app nat_succ (bvar nz))) (app nat_succ (bvar nz)))) $;
-
-theorem div_eqs_p10 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr): $ div_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ > $ ty_j J G lem (pi nat_ty (pi nat_ty (pi nat_ty (pi (app (app leN lit1) (bvar n1)) (pi (app (app leN (bvar n2)) (bvar n3)) (pi (app (app leN (app nat_succ (bvar n4))) (app nat_succ (bvar n2))) (app (app leN (app nat_succ (app (app sub (bvar n5)) (bvar n4)))) (bvar n3)))))))) $;
-
-theorem div_eqs_p11 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr): $ div_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ > $ deq_j J (cons nat_ty (cons nat_ty G)) (app (app f (bvar n1)) (bvar nz)) (app (app (app (app dite (app (app leN lit1) (bvar nz))) (app (app dleN lit1) (bvar nz))) (lam (app (app leN lit1) (bvar nz)) (app (app (app (app (app go (bvar n1)) (bvar nz)) (app nat_succ (bvar n2))) (bvar n2)) (app pfs (bvar n2))))) (lam (app Not (app (app leN lit1) (bvar nz))) lit0)) nat_ty $;
-
-theorem div_eqs_p12 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem: expr): $ div_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p f go pfs lem $ > $ deq_j J (cons (app (app leN (app nat_succ (bvar n3))) (app nat_succ (bvar nz))) (cons nat_ty (cons (app (app leN lit1) (bvar nz)) (cons nat_ty (cons nat_ty G))))) (app (app (app (app (app go (bvar n3)) (bvar n2)) (app nat_succ (bvar n1))) (bvar n4)) (bvar nz)) (app (app (app (app dite (app (app leN (bvar n3)) (bvar n4))) (app (app dleN (bvar n3)) (bvar n4))) (lam (app (app leN (bvar n3)) (bvar n4)) (app nat_succ (app (app (app (app (app go (bvar n4)) (bvar n3)) (bvar n2)) (app (app sub (bvar n5)) (bvar n4))) (app (app (app (app (app (app lem (bvar n5)) (bvar n4)) (bvar n2)) (bvar n3)) (bvar nz)) (bvar n1)))))) (lam (app Not (app (app leN (bvar n3)) (bvar n4))) lit0)) nat_ty $;
-
-theorem mod_eqs_p1 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr): $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ > $ natle_dec_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf $;
-
-theorem mod_eqs_p2 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr): $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ > $ sub_eqs_j J G sub p $;
-
-theorem mod_eqs_p3 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr): $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ > $ ite_eqs_j J G B t u T R ite $;
-
-theorem mod_eqs_p4 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr): $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ > $ closed nz f $;
-
-theorem mod_eqs_p5 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr): $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ > $ closed nz go $;
-
-theorem mod_eqs_p6 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr): $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ > $ closed nz pfs $;
-
-theorem mod_eqs_p7 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr): $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ > $ closed nz lem $;
-
-theorem mod_eqs_p8 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr): $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ > $ ty_j J G f (pi nat_ty (pi nat_ty nat_ty)) $;
-
-theorem mod_eqs_p9 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr): $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ > $ ty_j J G go (pi nat_ty (pi (app (app leN lit1) (bvar nz)) (pi nat_ty (pi nat_ty (pi (app (app leN (app nat_succ (bvar nz))) (bvar n1)) nat_ty))))) $;
-
-theorem mod_eqs_p10 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr): $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ > $ ty_j J G pfs (pi nat_ty (app (app leN (app nat_succ (bvar nz))) (app nat_succ (bvar nz)))) $;
-
-theorem mod_eqs_p11 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr): $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ > $ ty_j J G lem (pi nat_ty (pi nat_ty (pi nat_ty (pi (app (app leN lit1) (bvar n1)) (pi (app (app leN (bvar n2)) (bvar n3)) (pi (app (app leN (app nat_succ (bvar n4))) (app nat_succ (bvar n2))) (app (app leN (app nat_succ (app (app sub (bvar n5)) (bvar n4)))) (bvar n3)))))))) $;
-
-theorem mod_eqs_p12 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr): $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ > $ deq_j J (cons nat_ty G) (app (app f lit0) (bvar nz)) lit0 nat_ty $;
-
-theorem mod_eqs_p13 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr): $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ > $ deq_j J (cons nat_ty (cons nat_ty G)) (app (app f (app nat_succ (bvar n1))) (bvar nz)) (app (app (app (app ite (app (app leN (bvar nz)) (app nat_succ (bvar n1)))) (app (app dleN (bvar nz)) (app nat_succ (bvar n1)))) (app (app (app (app dite (app (app leN lit1) (bvar nz))) (app (app dleN lit1) (bvar nz))) (lam (app (app leN lit1) (bvar nz)) (app (app (app (app (app go (bvar n1)) (bvar nz)) (app nat_succ (app nat_succ (bvar n2)))) (app nat_succ (bvar n2))) (app pfs (app nat_succ (bvar n2)))))) (lam (app Not (app (app leN lit1) (bvar nz))) (app nat_succ (bvar n2))))) (app nat_succ (bvar n1))) nat_ty $;
-
-theorem mod_eqs_p14 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem: expr): $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite f go pfs lem $ > $ deq_j J (cons (app (app leN (app nat_succ (bvar n3))) (app nat_succ (bvar nz))) (cons nat_ty (cons (app (app leN lit1) (bvar nz)) (cons nat_ty (cons nat_ty G))))) (app (app (app (app (app go (bvar n3)) (bvar n2)) (app nat_succ (bvar n1))) (bvar n4)) (bvar nz)) (app (app (app (app dite (app (app leN (bvar n3)) (bvar n4))) (app (app dleN (bvar n3)) (bvar n4))) (lam (app (app leN (bvar n3)) (bvar n4)) (app (app (app (app (app go (bvar n4)) (bvar n3)) (bvar n2)) (app (app sub (bvar n5)) (bvar n4))) (app (app (app (app (app (app lem (bvar n5)) (bvar n4)) (bvar n2)) (bvar n3)) (bvar nz)) (bvar n1))))) (lam (app Not (app (app leN (bvar n3)) (bvar n4))) (bvar n5))) nat_ty $;
-
-theorem fix_eqs_p1 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ closed nz ite $;
-
-theorem fix_eqs_p2 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ closed nz bp $;
-
-theorem fix_eqs_p3 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ closed nz bd $;
-
-theorem fix_eqs_p4 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ closed nz beq $;
-
-theorem fix_eqs_p5 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ closed nz fix $;
-
-theorem fix_eqs_p6 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ closed nz go $;
-
-theorem fix_eqs_p7 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ closed nz eager $;
-
-theorem fix_eqs_p8 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ closed nz al $;
-
-theorem fix_eqs_p9 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ closed nz motive $;
-
-theorem fix_eqs_p10 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ closed nz hm $;
-
-theorem fix_eqs_p11 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ closed nz ltN $;
-
-theorem fix_eqs_p12 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ closed nz pfx $;
-
-theorem fix_eqs_p13 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ closed nz pfgo $;
-
-theorem fix_eqs_p14 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ ty_j J G ltN (pi nat_ty (pi nat_ty Prop)) $;
-
-theorem fix_eqs_p15 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ ty_j J G (app (app (app go al) motive) hm) (pi (fix_fty al motive hm ltN) (pi nat_ty (pi al (pi (app (app ltN (app hm (bvar nz))) (bvar n1)) (app motive (bvar n1)))))) $;
-
-theorem fix_eqs_p16 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ ty_j J G pfx (pi al (app (app ltN (app hm (bvar nz))) (app eager (app nat_succ (app hm (bvar nz)))))) $;
-
-theorem fix_eqs_p17 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ ty_j J G pfgo (pi nat_ty (pi al (pi (app (app ltN (app hm (bvar nz))) (app nat_succ (bvar n1))) (pi al (pi (app (app ltN (app hm (bvar nz))) (app hm (bvar n2))) (app (app ltN (app hm (bvar n1))) (bvar n4))))))) $;
-
-theorem fix_eqs_p18 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ deq_j J (cons al (cons (fix_fty al motive hm ltN) G)) (app (app (app (app (app fix al) motive) hm) (bvar n1)) (bvar nz)) (app (app (app (app (app (app (app go al) motive) hm) (bvar n1)) (app eager (app nat_succ (app hm (bvar nz))))) (bvar nz)) (app pfx (bvar nz))) (app motive (bvar nz)) $;
-
-theorem fix_eqs_p19 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ deq_j J (cons nat_ty G) (app eager (bvar nz)) (app (app (app (app ite (app bp (app (app beq (bvar nz)) (bvar nz)))) (app bd (app (app beq (bvar nz)) (bvar nz)))) (bvar nz)) (bvar nz)) nat_ty $;
-
-theorem fix_eqs_p20 (J: class) (G: ctx) (ite bp bd beq fix go eager al motive hm ltN pfx pfgo: expr): $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $ > $ deq_j J (cons (app (app ltN (app hm (bvar nz))) (app nat_succ (bvar n1))) (cons al (cons nat_ty (cons (fix_fty al motive hm ltN) G)))) (app (app (app (app (app (app (app go al) motive) hm) (bvar n3)) (app nat_succ (bvar n2))) (bvar n1)) (bvar nz)) (app (app (bvar n3) (bvar n1)) (lam al (lam (app (app ltN (app hm (bvar nz))) (app hm (bvar n2))) (app (app (app (app (app (app (app go al) motive) hm) (bvar n5)) (bvar n4)) (bvar n1)) (app (app (app (app (app pfgo (bvar n4)) (bvar n3)) (bvar n2)) (bvar n1)) (bvar nz)))))) (app motive (bvar n1)) $;
-
-theorem gcd_eqs_p1 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr): $ gcd_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem $;
-
-theorem gcd_eqs_p2 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr): $ gcd_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ nateq_dec_j J G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $;
-
-theorem gcd_eqs_p3 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr): $ gcd_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ bool_dec_j J G B t u Not dite ite bp bd $;
-
-theorem gcd_eqs_p4 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr): $ gcd_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $;
-
-theorem gcd_eqs_p5 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr): $ gcd_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ closed nz f $;
-
-theorem gcd_eqs_p6 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr): $ gcd_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ closed nz pack $;
-
-theorem gcd_eqs_p7 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr): $ gcd_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ closed nz F $;
-
-theorem gcd_eqs_p8 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr): $ gcd_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ closed nz pfF $;
-
-theorem gcd_eqs_p9 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr): $ gcd_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ ty_j J G f (pi nat_ty (pi nat_ty nat_ty)) $;
-
-theorem gcd_eqs_p10 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr): $ gcd_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ ty_j J G F (fix_fty al motive hm ltN) $;
-
-theorem gcd_eqs_p11 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr): $ gcd_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ ty_j J G pack (pi nat_ty (pi nat_ty al)) $;
-
-theorem gcd_eqs_p12 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr): $ gcd_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ ty_j J G pfF (pi nat_ty (pi nat_ty (pi (app Not (app (app eqN (bvar n1)) lit0)) (app (app ltN (app hm (app (app pack (app (app fm (bvar n1)) (bvar n2))) (bvar n2)))) (app hm (app (app pack (bvar n2)) (bvar n1))))))) $;
-
-theorem gcd_eqs_p13 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr): $ gcd_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ deq_j J (cons nat_ty (cons nat_ty G)) (app (app f (bvar n1)) (bvar nz)) (app (app (app (app (app fix al) motive) hm) F) (app (app pack (bvar n1)) (bvar nz))) nat_ty $;
-
-theorem gcd_eqs_p14 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr): $ gcd_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ deq_j J (cons nat_ty (cons nat_ty G)) (app hm (app (app pack (bvar n1)) (bvar nz))) (bvar n1) nat_ty $;
-
-theorem gcd_eqs_p15 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr): $ gcd_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ deq_j J (cons (pi al (pi (app (app ltN (app hm (bvar nz))) (app hm (app (app pack lit0) (bvar n1)))) (app motive (bvar n1)))) (cons nat_ty G)) (app (app F (app (app pack lit0) (bvar n1))) (bvar nz)) (bvar n1) (app motive (app (app pack lit0) (bvar n1))) $;
-
-theorem gcd_eqs_p16 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr): $ gcd_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ deq_j J (cons (pi al (pi (app (app ltN (app hm (bvar nz))) (app hm (app (app pack (app nat_succ (bvar n3))) (bvar n2)))) (app motive (bvar n1)))) (cons (app Not (app (app eqN (app nat_succ (bvar n1))) lit0)) (cons nat_ty (cons nat_ty G)))) (app (app F (app (app pack (app nat_succ (bvar n3))) (bvar n2))) (bvar nz)) (app (app (bvar nz) (app (app pack (app (app fm (bvar n2)) (app nat_succ (bvar n3)))) (app nat_succ (bvar n3)))) (app (app (app pfF (app nat_succ (bvar n3))) (bvar n2)) (bvar n1))) (app motive (app (app pack (app nat_succ (bvar n3))) (bvar n2))) $;
-
-
-
---| The rule `nat_div_lit` in the model.
-theorem mdiv_lit (H: class) (G: ctx) (B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp f go pfs lem: expr) (ba bb bq bm br bx: bin):
-  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ div_eqs_j (jmod (mcv H)) G B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp f go pfs lem $ > $ bmul bq bb bm $ > $ badd bm br ba $ > $ baddc br bx bb $ >
-  $ mdeq (mcv H) G (app (app f (lit ba)) (lit bb)) (lit bq) nat_ty $;
-
---| The rule `nat_div_lit0` in the model.
-theorem mdiv_lit0 (H: class) (G: ctx) (B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp f go pfs lem: expr) (ba: bin):
-  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ div_eqs_j (jmod (mcv H)) G B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp f go pfs lem $ >
-  $ mdeq (mcv H) G (app (app f (lit ba)) (lit b0)) (lit b0) nat_ty $;
-
-
-
---| The rule `nat_mod_lit` in the model.
-theorem mmod_lit (H: class) (G: ctx) (B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp ite f go pfs lem: expr) (ba bb bq bm br bx: bin):
-  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ mod_eqs_j (jmod (mcv H)) G B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp ite f go pfs lem $ > $ bmul bq bb bm $ > $ badd bm br ba $ > $ baddc br bx bb $ >
-  $ mdeq (mcv H) G (app (app f (lit ba)) (lit bb)) (lit br) nat_ty $;
-
---| The rule `nat_mod_lit0` in the model.
-theorem mmod_lit0 (H: class) (G: ctx) (B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp ite f go pfs lem: expr) (ba: bin):
-  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ mod_eqs_j (jmod (mcv H)) G B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp ite f go pfs lem $ >
-  $ mdeq (mcv H) G (app (app f (lit ba)) (lit b0)) (lit ba) nat_ty $;
-
-
-
---| The rule `nat_gcd_lit` in the model.
-theorem mgcd_lit (H: class) (G: ctx) (B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr) (ba bb bg bc bq bx bz bm bn: bin):
-  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ gcd_eqs_j (jmod (mcv H)) G B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ bmul bg bc ba $ > $ bmul bg bq bb $ > $ bmul bx ba bm $ > $ bmul bz bb bn $ > $ badd bn bg bm $ >
-  $ mdeq (mcv H) G (app (app f (lit ba)) (lit bb)) (lit bg) nat_ty $;
-
---| The rule `nat_gcd_lit2` in the model.
-theorem mgcd_lit2 (H: class) (G: ctx) (B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF: expr) (ba bb bg bc bq bx bz bm bn: bin):
-  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ gcd_eqs_j (jmod (mcv H)) G B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp ite fm gom pfs lem eqN deqN beq pq bp bd fix go eager al motive hm ltN pfx pfgo f pack F pfF $ > $ bmul bg bc ba $ > $ bmul bg bq bb $ > $ bmul bx ba bm $ > $ bmul bz bb bn $ > $ badd bm bg bn $ >
-  $ mdeq (mcv H) G (app (app f (lit ba)) (lit bb)) (lit bg) nat_ty $;
-
-
 -- --------------------------------------------------------------------------
 -- Invariance of the literals' values (D4): a `lit` node is `eeqv` only to itself
 -- --------------------------------------------------------------------------
@@ -544,69 +260,6 @@ theorem mgcd_lit2 (H: class) (G: ctx) (B vt vf Not Dec dite T R ofT ofF leN dleN
 theorem mcv_inv_node_lit (G: hyps) (M: class) (u w d z y t: set):
   $ G ⇒ z = ⟨ kc_lit , y ⟩ $ > $ G ⇒ ra_eeqv z t ∈ lrel2 $ >
   $ G ⇒ dt u M z w d = dt u M t w d $;
-
-
-
-theorem bitwise_eqs_p1 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ div_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god pfs lem $;
-
-theorem bitwise_eqs_p2 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ mod_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p ite fm gom pfs lem $;
-
-theorem bitwise_eqs_p3 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ nateq_dec_j J G B t u Not Dec dite T R ofT ofF eqN deqN beq pq $;
-
-theorem bitwise_eqs_p4 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ bool_dec_j J G B t u Not dite ite bp bd $;
-
-theorem bitwise_eqs_p5 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ add_eqs_j J G fa $;
-
-theorem bitwise_eqs_p6 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ fix_eqs_j J G ite bp bd beq fix go eager al motive hm ltN pfx pfgo $;
-
-theorem bitwise_eqs_p7 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ closed nz fb $;
-
-theorem bitwise_eqs_p8 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ closed nz pack $;
-
-theorem bitwise_eqs_p9 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ closed nz Fb $;
-
-theorem bitwise_eqs_p10 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ closed nz pfB $;
-
-theorem bitwise_eqs_p11 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ closed nz dec $;
-
-theorem bitwise_eqs_p12 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ ty_j J G fb (pi (pi B (pi B B)) (pi nat_ty (pi nat_ty nat_ty))) $;
-
-theorem bitwise_eqs_p13 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ ty_j J G Fb (pi (pi B (pi B B)) (fix_fty al motive hm ltN)) $;
-
-theorem bitwise_eqs_p14 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ ty_j J G pack (pi nat_ty (pi nat_ty al)) $;
-
-theorem bitwise_eqs_p15 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ ty_j J G pfB (pi nat_ty (pi nat_ty (pi (app Not (app (app eqN (bvar n1)) lit0)) (app (app ltN (app hm (app (app pack (app (app fd (bvar n2)) lit2)) (app (app fd (bvar n1)) lit2)))) (app hm (app (app pack (bvar n2)) (bvar n1))))))) $;
-
-theorem bitwise_eqs_p16 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ deq_j J (cons nat_ty (cons nat_ty (cons (pi B (pi B B)) G))) (app (app (app fb (bvar n2)) (bvar n1)) (bvar nz)) (app (app (app (app (app fix al) motive) hm) (app Fb (bvar n2))) (app (app pack (bvar n1)) (bvar nz))) nat_ty $;
-
-theorem bitwise_eqs_p17 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ deq_j J (cons nat_ty (cons nat_ty G)) (app hm (app (app pack (bvar n1)) (bvar nz))) (bvar n1) nat_ty $;
-
-theorem bitwise_eqs_p18 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ deq_j J (cons nat_ty (cons nat_ty G)) (app motive (app (app pack (bvar n1)) (bvar nz))) nat_ty (srt (ls lz)) $;
-
-theorem bitwise_eqs_p19 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ deq_j J (cons (app (app T (bvar n1)) (bvar nz)) (cons B (cons Prop G))) (app (app dec (bvar n2)) (app (app (app R (bvar n2)) (bvar n1)) (bvar nz))) (bvar n1) B $;
-
-theorem bitwise_eqs_p20 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec: expr): $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $ > $ deq_j J (cons (pi al (pi (app (app ltN (app hm (bvar nz))) (app hm (app (app pack (bvar n2)) (bvar n1)))) (app motive (bvar n1)))) (cons nat_ty (cons nat_ty (cons (pi B (pi B B)) G)))) (app (app (app Fb (bvar n3)) (app (app pack (bvar n2)) (bvar n1))) (bvar nz)) (app (app (app (app dite (app (app eqN (bvar n2)) lit0)) (app (app deqN (bvar n2)) lit0)) (lam (app (app eqN (bvar n2)) lit0) (app (app (app (app dite (app bp (app (app (bvar n4) u) t))) (app bd (app (app (bvar n4) u) t))) (lam (app bp (app (app (bvar n4) u) t)) (bvar n3))) (lam (app Not (app bp (app (app (bvar n4) u) t))) lit0)))) (lam (app Not (app (app eqN (bvar n2)) lit0)) (app (app (app (app dite (app (app eqN (bvar n2)) lit0)) (app (app deqN (bvar n2)) lit0)) (lam (app (app eqN (bvar n2)) lit0) (app (app (app (app dite (app bp (app (app (bvar n5) t) u))) (app bd (app (app (bvar n5) t) u))) (lam (app bp (app (app (bvar n5) t) u)) (bvar n5))) (lam (app Not (app bp (app (app (bvar n5) t) u))) lit0)))) (lam (app Not (app (app eqN (bvar n2)) lit0)) (app (app (app (app dite (app bp (app (app (bvar n5) (app (app dec (app (app eqN (app (app fm (bvar n4)) lit2)) lit1)) (app (app deqN (app (app fm (bvar n4)) lit2)) lit1))) (app (app dec (app (app eqN (app (app fm (bvar n3)) lit2)) lit1)) (app (app deqN (app (app fm (bvar n3)) lit2)) lit1))))) (app bd (app (app (bvar n5) (app (app dec (app (app eqN (app (app fm (bvar n4)) lit2)) lit1)) (app (app deqN (app (app fm (bvar n4)) lit2)) lit1))) (app (app dec (app (app eqN (app (app fm (bvar n3)) lit2)) lit1)) (app (app deqN (app (app fm (bvar n3)) lit2)) lit1))))) (lam (app bp (app (app (bvar n5) (app (app dec (app (app eqN (app (app fm (bvar n4)) lit2)) lit1)) (app (app deqN (app (app fm (bvar n4)) lit2)) lit1))) (app (app dec (app (app eqN (app (app fm (bvar n3)) lit2)) lit1)) (app (app deqN (app (app fm (bvar n3)) lit2)) lit1)))) (app (app fa (app (app fa (app (app (bvar n3) (app (app pack (app (app fd (bvar n5)) lit2)) (app (app fd (bvar n4)) lit2))) (app (app (app pfB (bvar n5)) (bvar n4)) (bvar n2)))) (app (app (bvar n3) (app (app pack (app (app fd (bvar n5)) lit2)) (app (app fd (bvar n4)) lit2))) (app (app (app pfB (bvar n5)) (bvar n4)) (bvar n2))))) lit1))) (lam (app Not (app bp (app (app (bvar n5) (app (app dec (app (app eqN (app (app fm (bvar n4)) lit2)) lit1)) (app (app deqN (app (app fm (bvar n4)) lit2)) lit1))) (app (app dec (app (app eqN (app (app fm (bvar n3)) lit2)) lit1)) (app (app deqN (app (app fm (bvar n3)) lit2)) lit1))))) (app (app fa (app (app (bvar n3) (app (app pack (app (app fd (bvar n5)) lit2)) (app (app fd (bvar n4)) lit2))) (app (app (app pfB (bvar n5)) (bvar n4)) (bvar n2)))) (app (app (bvar n3) (app (app pack (app (app fd (bvar n5)) lit2)) (app (app fd (bvar n4)) lit2))) (app (app (app pfB (bvar n5)) (bvar n4)) (bvar n2)))))))))) (app motive (app (app pack (bvar n2)) (bvar n1))) $;
-
-theorem bitop_eqs_p1 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4: expr): $ bitop_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4 $ > $ bitwise_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec $;
-
-theorem bitop_eqs_p2 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4: expr): $ bitop_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4 $ > $ closed nz f $;
-
-theorem bitop_eqs_p3 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4: expr): $ bitop_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4 $ > $ closed nz bf $;
-
-theorem bitop_eqs_p4 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4: expr): $ bitop_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4 $ > $ ty_j J G f (pi nat_ty (pi nat_ty nat_ty)) $;
-
-theorem bitop_eqs_p5 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4: expr): $ bitop_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4 $ > $ ty_j J G bf (pi B (pi B B)) $;
-
-theorem bitop_eqs_p6 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4: expr): $ bitop_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4 $ > $ deq_j J G f (app fb bf) (pi nat_ty (pi nat_ty nat_ty)) $;
-
-theorem bitop_eqs_p7 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4: expr): $ bitop_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4 $ > $ deq_j J G (app (app bf t) t) r1 B $;
-
-theorem bitop_eqs_p8 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4: expr): $ bitop_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4 $ > $ deq_j J G (app (app bf t) u) r2 B $;
-
-theorem bitop_eqs_p9 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4: expr): $ bitop_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4 $ > $ deq_j J G (app (app bf u) t) r3 B $;
-
-theorem bitop_eqs_p10 (J: class) (G: ctx) (B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4: expr): $ bitop_eqs_j J G B t u Not Dec dite T R ofT ofF leN dleN ble pf sub p fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf r1 r2 r3 r4 $ > $ deq_j J G (app (app bf u) u) r4 B $;
-
 
 -- --------------------------------------------------------------------------
 -- The bitwise relations on binary numerals: zeros, and the digits of an instance
@@ -649,20 +302,157 @@ theorem lrel_bxor_digits {x y z: set} (G: hyps) (t1 t2 t3: set):
   $ G ⇒ fv nvf t1 = ∅ ∨ fv nvf t2 = ∅ ∨ ∃ x ∃ y ∃ z (ra_bxor x y z ∈ lrel ∧ ((fv nvf t1 = ndbl (fv nvf x) ∧ fv nvf t2 = ndbl (fv nvf y) ∧ fv nvf t3 = ndbl (fv nvf z)) ∨ (fv nvf t1 = ndbl (fv nvf x) ∧ fv nvf t2 = suc (ndbl (fv nvf y)) ∧ fv nvf t3 = suc (ndbl (fv nvf z))) ∨ (fv nvf t1 = suc (ndbl (fv nvf x)) ∧ fv nvf t2 = ndbl (fv nvf y) ∧ fv nvf t3 = suc (ndbl (fv nvf z))) ∨ (fv nvf t1 = suc (ndbl (fv nvf x)) ∧ fv nvf t2 = suc (ndbl (fv nvf y)) ∧ fv nvf t3 = ndbl (fv nvf z)))) $;
 
 
+-- --------------------------------------------------------------------------
+-- The block of `Nat.le` in the model
+-- --------------------------------------------------------------------------
+
+--| The block of `Nat.le` is well formed, over the judgment atoms that hold in the model of a hook with the
+--| inductive types' parts.
+theorem le_D_wf (H: class): $ _ ⇒ hind H $ > $ ind_wf_j (jmod (mcv H)) nil le_D $;
+
+
+-- --------------------------------------------------------------------------
+-- The order of the numerals
+-- --------------------------------------------------------------------------
+
+--| The numerals are distinct: `nnf` is injective on `ω`.
+theorem nnf_inj (G: hyps) (a b: set): $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ fv nnf a = fv nnf b $ > $ G ⇒ a = b $;
+
+--| The truth value of `A ≤ B` for numerals `A` and `B` of the model: `csn ∅` when they are the numerals of numbers
+--| `c ⊆ d`, else `∅`.
+def nlev (A B: class) (.e .c .d: set): class =
+  $ {e | (e = ∅) ∧ (∃ c (∃ d ((c ∊ ω) ∧ ((d ∊ ω) ∧ ((A = (fv nnf c)) ∧ ((B = (fv nnf d)) ∧ (c ⊆ d)))))))} $;
+--| @congr
+theorem nlev_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ nlev A C ≐ nlev B D $;
+--| @rewrite
+theorem sb_c_nlev {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (nlev A B)) ≐ nlev (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+
+theorem nlev_eq (G: hyps) (A B C D: class): $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ nlev A C = nlev B D $;
+
+--| The truth value of `≤` is a truth value.
+theorem nlev_two (G: hyps) (A B: class): $ G ⇒ nlev A B ∈ two $;
+
+--| It holds at the numerals of `a ⊆ b`.
+theorem nlev_intro (G: hyps) (a b: set): $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ a ⊆ b $ > $ G ⇒ ∅ ∈ nlev (fv nnf a) (fv nnf b) $;
+
+--| An element of it at two numerals gives `⊆` of their numbers.
+theorem nlev_elim (G: hyps) (X: class) (a b: set): $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ X ∈ nlev (fv nnf a) (fv nnf b) $ > $ G ⇒ a ⊆ b $;
+
+
+-- --------------------------------------------------------------------------
+-- The model's `Nat.le` is the order of the numerals
+-- --------------------------------------------------------------------------
+
+--| The model's `Nat.le` is the order of the numerals: at the numerals of two numbers the value of `ind_ty le_D 0` is the
+--| truth value of `⊆`.
+def mles (M: class) (.u .w .a .b: set): fml =
+  $ ∀ u (∀ w ((uadm u) → ((w ∊ lvals) → (∀ a (∀ b ((a ∊ ω) → ((b ∊ ω) → ((ap (ap (dt u M (enc_expr (ind_ty le_D nz)) w ∅) (fv nnf a)) (fv nnf b)) = (nlev (fv nnf a) (fv nnf b)))))))))) $;
+--| @congr
+theorem mles_congr (A B: class): $ A ≐ B $ > $ mles A ⟺ mles B $;
+--| @rewrite
+theorem sb_f_mles {x: set} (t: set x) (A: class x):
+  $ [x/t] (mles A) ⟺ mles (⟦ x / t ⟧ A) $;
+
+--| The model's `Nat.le` is the order of the numerals, for a hook with the inductive types' parts: by induction, the
+--| constructors give an element at the numerals of `x ⊆ y`; the recursor at the motive `nlev` turns an element into `x ⊆ y`.
+theorem mles_i (H: class): $ _ ⇒ hind H $ > $ _ ⇒ mles (mcv H) $;
+
+
+-- --------------------------------------------------------------------------
+-- The division-like relations: their premises
+-- --------------------------------------------------------------------------
+
+theorem divmod_eqs_p1 (J: class) (G: ctx) (fd fm fmul fadd: expr): $ divmod_eqs_j J G fd fm fmul fadd $ > $ mul_eqs_j J G fmul fadd $;
+
+theorem divmod_eqs_p2 (J: class) (G: ctx) (fd fm fmul fadd: expr): $ divmod_eqs_j J G fd fm fmul fadd $ > $ closed nz fd $;
+
+theorem divmod_eqs_p3 (J: class) (G: ctx) (fd fm fmul fadd: expr): $ divmod_eqs_j J G fd fm fmul fadd $ > $ closed nz fm $;
+
+theorem divmod_eqs_p4 (J: class) (G: ctx) (fd fm fmul fadd: expr): $ divmod_eqs_j J G fd fm fmul fadd $ > $ ty_j J G fd (pi nat_ty (pi nat_ty nat_ty)) $;
+
+theorem divmod_eqs_p5 (J: class) (G: ctx) (fd fm fmul fadd: expr): $ divmod_eqs_j J G fd fm fmul fadd $ > $ ty_j J G fm (pi nat_ty (pi nat_ty nat_ty)) $;
+
+theorem gcd_eqs_p1 (J: class) (G: ctx) (f fd fm fmul fadd: expr): $ gcd_eqs_j J G f fd fm fmul fadd $ > $ divmod_eqs_j J G fd fm fmul fadd $;
+
+theorem gcd_eqs_p2 (J: class) (G: ctx) (f fd fm fmul fadd: expr): $ gcd_eqs_j J G f fd fm fmul fadd $ > $ closed nz f $;
+
+theorem gcd_eqs_p3 (J: class) (G: ctx) (f fd fm fmul fadd: expr): $ gcd_eqs_j J G f fd fm fmul fadd $ > $ ty_j J G f (pi nat_ty (pi nat_ty nat_ty)) $;
+
+theorem land_eqs_p1 (J: class) (G: ctx) (f fd fm fmul fadd: expr): $ land_eqs_j J G f fd fm fmul fadd $ > $ divmod_eqs_j J G fd fm fmul fadd $;
+
+theorem land_eqs_p2 (J: class) (G: ctx) (f fd fm fmul fadd: expr): $ land_eqs_j J G f fd fm fmul fadd $ > $ closed nz f $;
+
+theorem land_eqs_p3 (J: class) (G: ctx) (f fd fm fmul fadd: expr): $ land_eqs_j J G f fd fm fmul fadd $ > $ ty_j J G f (pi nat_ty (pi nat_ty nat_ty)) $;
+
+theorem lor_eqs_p1 (J: class) (G: ctx) (f fd fm fmul fadd: expr): $ lor_eqs_j J G f fd fm fmul fadd $ > $ divmod_eqs_j J G fd fm fmul fadd $;
+
+theorem lor_eqs_p2 (J: class) (G: ctx) (f fd fm fmul fadd: expr): $ lor_eqs_j J G f fd fm fmul fadd $ > $ closed nz f $;
+
+theorem lor_eqs_p3 (J: class) (G: ctx) (f fd fm fmul fadd: expr): $ lor_eqs_j J G f fd fm fmul fadd $ > $ ty_j J G f (pi nat_ty (pi nat_ty nat_ty)) $;
+
+theorem xor_eqs_p1 (J: class) (G: ctx) (f fd fm fmul fadd: expr): $ xor_eqs_j J G f fd fm fmul fadd $ > $ divmod_eqs_j J G fd fm fmul fadd $;
+
+theorem xor_eqs_p2 (J: class) (G: ctx) (f fd fm fmul fadd: expr): $ xor_eqs_j J G f fd fm fmul fadd $ > $ closed nz f $;
+
+theorem xor_eqs_p3 (J: class) (G: ctx) (f fd fm fmul fadd: expr): $ xor_eqs_j J G f fd fm fmul fadd $ > $ ty_j J G f (pi nat_ty (pi nat_ty nat_ty)) $;
+
+
+
+
+-- --------------------------------------------------------------------------
+-- The division-like rules
+-- --------------------------------------------------------------------------
+
+
+
+--| The rule `nat_div_lit` in the model.
+theorem mdiv_lit (H: class) (G: ctx) (fd fm fmul fadd: expr) (ba bb bq bm br bx: bin):
+  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ _ ⇒ meqs (mcv H) (ls lz) $ > $ _ ⇒ mles (mcv H) $ > $ divmod_eqs_j (jmod (mcv H)) G fd fm fmul fadd $ > $ bmul bb bq bm $ > $ badd bm br ba $ > $ baddc br bx bb $ >
+  $ mdeq (mcv H) G (app (app fd (lit ba)) (lit bb)) (lit bq) nat_ty $;
+
+--| The rule `nat_div_lit0` in the model.
+theorem mdiv_lit0 (H: class) (G: ctx) (fd fm fmul fadd: expr) (ba: bin):
+  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ _ ⇒ meqs (mcv H) (ls lz) $ > $ _ ⇒ mles (mcv H) $ > $ divmod_eqs_j (jmod (mcv H)) G fd fm fmul fadd $ >
+  $ mdeq (mcv H) G (app (app fd (lit ba)) (lit b0)) (lit b0) nat_ty $;
+
+--| The rule `nat_mod_lit` in the model.
+theorem mmod_lit (H: class) (G: ctx) (fd fm fmul fadd: expr) (ba bb bq bm br bx: bin):
+  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ _ ⇒ meqs (mcv H) (ls lz) $ > $ _ ⇒ mles (mcv H) $ > $ divmod_eqs_j (jmod (mcv H)) G fd fm fmul fadd $ > $ bmul bb bq bm $ > $ badd bm br ba $ > $ baddc br bx bb $ >
+  $ mdeq (mcv H) G (app (app fm (lit ba)) (lit bb)) (lit br) nat_ty $;
+
+--| The rule `nat_mod_lit0` in the model.
+theorem mmod_lit0 (H: class) (G: ctx) (fd fm fmul fadd: expr) (ba: bin):
+  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ _ ⇒ meqs (mcv H) (ls lz) $ > $ _ ⇒ mles (mcv H) $ > $ divmod_eqs_j (jmod (mcv H)) G fd fm fmul fadd $ >
+  $ mdeq (mcv H) G (app (app fm (lit ba)) (lit b0)) (lit ba) nat_ty $;
+
+
+
+--| The rule `nat_gcd_lit` in the model.
+theorem mgcd_lit (H: class) (G: ctx) (f fd fm fmul fadd: expr) (ba bb bg bc bq bx bz bm bn: bin):
+  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ _ ⇒ meqs (mcv H) (ls lz) $ > $ _ ⇒ mles (mcv H) $ > $ gcd_eqs_j (jmod (mcv H)) G f fd fm fmul fadd $ > $ bmul bg bc ba $ > $ bmul bg bq bb $ > $ bmul bx ba bm $ > $ bmul bz bb bn $ > $ badd bn bg bm $ >
+  $ mdeq (mcv H) G (app (app f (lit ba)) (lit bb)) (lit bg) nat_ty $;
+
+--| The rule `nat_gcd_lit2` in the model.
+theorem mgcd_lit2 (H: class) (G: ctx) (f fd fm fmul fadd: expr) (ba bb bg bc bq bx bz bm bn: bin):
+  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ _ ⇒ meqs (mcv H) (ls lz) $ > $ _ ⇒ mles (mcv H) $ > $ gcd_eqs_j (jmod (mcv H)) G f fd fm fmul fadd $ > $ bmul bg bc ba $ > $ bmul bg bq bb $ > $ bmul bx ba bm $ > $ bmul bz bb bn $ > $ badd bm bg bn $ >
+  $ mdeq (mcv H) G (app (app f (lit ba)) (lit bb)) (lit bg) nat_ty $;
+
+
 
 
 
 --| The rule `nat_land_lit` in the model.
-theorem mland_lit (H: class) (G: ctx) (B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf: expr) (ba bb bc: bin):
-  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ bitop_eqs_j (jmod (mcv H)) G B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf vt vf vf vf $ > $ band ba bb bc $ >
+theorem mland_lit (H: class) (G: ctx) (f fd fm fmul fadd: expr) (ba bb bc: bin):
+  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ _ ⇒ meqs (mcv H) (ls lz) $ > $ _ ⇒ mles (mcv H) $ > $ land_eqs_j (jmod (mcv H)) G f fd fm fmul fadd $ > $ band ba bb bc $ >
   $ mdeq (mcv H) G (app (app f (lit ba)) (lit bb)) (lit bc) nat_ty $;
 
 --| The rule `nat_lor_lit` in the model.
-theorem mlor_lit (H: class) (G: ctx) (B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf: expr) (ba bb bc: bin):
-  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ bitop_eqs_j (jmod (mcv H)) G B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf vt vt vt vf $ > $ bor ba bb bc $ >
+theorem mlor_lit (H: class) (G: ctx) (f fd fm fmul fadd: expr) (ba bb bc: bin):
+  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ _ ⇒ meqs (mcv H) (ls lz) $ > $ _ ⇒ mles (mcv H) $ > $ lor_eqs_j (jmod (mcv H)) G f fd fm fmul fadd $ > $ bor ba bb bc $ >
   $ mdeq (mcv H) G (app (app f (lit ba)) (lit bb)) (lit bc) nat_ty $;
 
 --| The rule `nat_xor_lit` in the model.
-theorem mxor_lit (H: class) (G: ctx) (B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf: expr) (ba bb bc: bin):
-  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ bitop_eqs_j (jmod (mcv H)) G B vt vf Not Dec dite T R ofT ofF leN dleN ble pf sub fp fd god fm gom pfs lem ite eqN deqN beq pq bp bd fa fix go eager al motive hm ltN pfx pfgo fb pack Fb pfB dec f bf vf vt vt vf $ > $ bxor ba bb bc $ >
+theorem mxor_lit (H: class) (G: ctx) (f fd fm fmul fadd: expr) (ba bb bc: bin):
+  $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ _ ⇒ meqs (mcv H) (ls lz) $ > $ _ ⇒ mles (mcv H) $ > $ xor_eqs_j (jmod (mcv H)) G f fd fm fmul fadd $ > $ bxor ba bb bc $ >
   $ mdeq (mcv H) G (app (app f (lit ba)) (lit bb)) (lit bc) nat_ty $;

@@ -56,6 +56,10 @@ cargo run -q --release --bin lean0 -- spec > build/out/lean.mm0
 cargo run -q --release -p mm0kit --example selftest -- build/out/lean.mm0 build/out/selftest.mm0 build/out/selftest.mmb > /dev/null
 [ "$(accepted_by build/out/selftest.mmb build/out/selftest.mm0)" = 2 ] && echo "selftest: ok" || { echo "FAIL: selftest"; fail=1; }
 
+# The proofs lean0 carries for the division-like literal operations (audit §5): the embedded
+# export is what lean0/baked/Baked.lean gives.
+LEAN4EXPORT="$LEAN4EXPORT" scripts/baked.sh --check && echo "baked: lean0/baked/baked.ndjson is current" || { echo "FAIL: scripts/baked.sh --check"; fail=1; }
+
 # The spec's relations are the functions and predicates they are read as (mm0kit/src/modes.rs):
 # well-moded, and the clauses of each function pairwise exclusive. A spec with an extra clause
 # for `lift` must be rejected.
@@ -221,19 +225,18 @@ tamper nested rejected --tamper-theorem tree_size_ex_ty
 for ax in crst_cons rst_ty nst_hit_z aux_data_i spz_hit ndecl_cons; do tamper nested rejected --tamper-axiom "$ax"; done
 tamper nested accepted --tamper-axiom spz_proj
 # Literals: the ties, the operations' rules over their defining equations (the derived
-# `_eqs` and `_lit` theorems, including the division-like operations' relations over the
-# decision reflection, the fuel recursions and the well-founded fixpoint), and the
-# binary-arithmetic relations.
+# `_eqs` and `_lit` theorems, including the division-like operations' relations, which ask
+# for proofs of the equations that determine them), and the binary-arithmetic relations.
 tamper lit rejected --tamper-theorem lit_mul_big_ty
 tamper lit rejected --tamper-theorem dbl_ex_ty
 for th in Nat_add_eqs Nat_pred_eqs Nat_beq_eqs Nat_shiftRight_eqs Nat_div_eqs Nat_mod_eqs Nat_gcd_eqs \
-          Nat_bitwise_eqs Nat_xor_eqs Nat_add_lit Nat_sub_lit0 Nat_ble_lit_gt Nat_shiftLeft_lit Nat_div_lit \
+          Nat_land_divmod Nat_land_eqs Nat_xor_eqs Nat_add_lit Nat_sub_lit0 Nat_ble_lit_gt Nat_shiftLeft_lit Nat_div_lit \
           Nat_mod_lit Nat_gcd_lit Nat_gcd_lit2 Nat_land_lit Nat_lor_lit; do
   tamper lit rejected --tamper-theorem "$th"
 done
 for ax in lit_zero lit_succ nat_add_lit add_eqs_i pred_eqs_i sub_eqs_i nat_mul_lit nat_pow_lit nat_beq_lit_gt \
-          nat_ble_lit nat_shl_lit nat_shr_lit_z nat_shr_lit_s dec_eqs_i ite_eqs_i natle_dec_i nateq_dec_i \
-          bool_dec_i div_eqs_i mod_eqs_i fix_eqs_i gcd_eqs_i bitwise_eqs_i bitop_eqs_i nat_div_lit nat_mod_lit \
+          nat_ble_lit nat_shl_lit nat_shr_lit_z nat_shr_lit_s divmod_eqs_i gcd_eqs_i land_eqs_i lor_eqs_i \
+          xor_eqs_i nat_div_lit nat_mod_lit \
           nat_gcd_lit nat_gcd_lit2 nat_land_lit nat_lor_lit nat_xor_lit \
           closed_lit bsucc_d1 badd_11 baddc_11 bmul_d1 bpow_d1 bdbl_d1 bxor_11; do
   tamper lit rejected --tamper-axiom "$ax"
