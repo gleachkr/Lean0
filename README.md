@@ -232,8 +232,8 @@ The `.mm0` statements remain in `OUT/init.partK.mm0`; verification results
 are recorded in `OUT/init.check.log`. With eight workers, `--max-pending 8`
 limits the number of parts on disk to about 16. `--balance STATS` uses a
 previous run's statistics to choose part boundaries. Allow for `mm0-zig`'s
-4 GiB input limit: one part exceeded it in a 32-part `Init` run and four
-exceeded it in a 192-part `Std` run. Use more parts or adjust their balance
+4 GiB input limit: one part exceeded it in a 32-part `Init` run and three
+exceeded it in a 224-part `Std` run. Use more parts or adjust their balance
 when checking with that verifier.
 
 To collect statistics without writing certificates:

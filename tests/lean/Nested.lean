@@ -1,6 +1,6 @@
 /-! Nested inductive types: certified as the kernel's mutual block with auxiliary types, the
 occurrences restored in the statements (audit §4). -/
--- lean0-export: tree_size_ex two_ex rose_kids_ex rose_val_ex forest_ex ab_ex w_ex
+-- lean0-export: tree_size_ex two_ex rose_kids_ex rose_val_ex forest_ex ab_ex w_ex Pat.ctorElim
 universe u
 
 -- a nested occurrence whose arguments mention a parameter
@@ -52,3 +52,11 @@ inductive Vec (α : Type u) : Nat → Type u where
 inductive W where
   | mk : Vec W 2 → W
 theorem w_ex (v : Vec W 2) : W.mk v = W.mk v := rfl
+
+-- a field whose type has a literal: its definitions are not unfolded when the constructor's
+-- type is restored, and the iota step takes the field at that type
+structure Tag (k : Nat) where
+  n : Nat
+inductive Pat where
+  | one (name : Tag 0)
+  | tuple (args : List Pat)

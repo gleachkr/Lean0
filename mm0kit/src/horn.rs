@@ -102,6 +102,15 @@ pub struct Horn {
     /// Refuse a cyclic binding (the mode checker unifies arbitrary clause heads; the
     /// prover's goals and patterns never need it).
     pub occurs_check: bool,
+    /// Whether a term has no metavariable at all (terms are DAGs: walked once).
+    meta_free: HashMap<E, bool>,
+    /// The goals without metavariables decided under the current top-level goal: the proof, or
+    /// `None` for a failure. A term with shared subterms (a proof term with inlined `let`s, a
+    /// big inductive declaration) asks the same goal many times.
+    memo: HashMap<E, Option<P>>,
+    /// Terms whose bound metavariables were replaced leaving none, with the result: valid
+    /// until a binding is undone.
+    zonked: HashMap<E, E>,
 }
 
 /// A solved goal whose proof is built once the search is over (`Horn::finish`).
@@ -131,6 +140,9 @@ impl Horn {
             fail: None,
             trace: std::env::var_os("LEAN0_HORN").is_some(),
             occurs_check: false,
+            meta_free: HashMap::default(),
+            memo: HashMap::default(),
+            zonked: HashMap::default(),
         }
     }
 
@@ -170,6 +182,9 @@ impl Horn {
     }
 
     fn undo(&mut self, mark: usize) {
+        if self.trail.len() > mark {
+            self.zonked.clear();
+        }
         while self.trail.len() > mark {
             let i = self.trail.pop().unwrap();
             self.binds[i as usize] = None;
@@ -193,6 +208,12 @@ impl Horn {
 
     fn zonk_aux(&mut self, env: &mut Env, e: E, memo: &mut HashMap<E, E>) -> E {
         let e = self.deref(env, e);
+        if self.no_metas(env, e) {
+            return e
+        }
+        if let Some(&r) = self.zonked.get(&e) {
+            return r
+        }
         if let Some(&r) = memo.get(&e) {
             return r
         }
@@ -204,12 +225,19 @@ impl Horn {
                 if ys == xs { e } else { env.app(t, &ys) }
             }
         };
-        memo.insert(e, r);
+        if self.no_metas(env, r) {
+            self.zonked.insert(e, r);
+        } else {
+            memo.insert(e, r);
+        }
         r
     }
 
-    pub fn is_ground(&self, env: &Env, e: E) -> bool {
+    pub fn is_ground(&mut self, env: &Env, e: E) -> bool {
         let e = self.deref(env, e);
+        if self.no_metas(env, e) {
+            return true
+        }
         match env.node(e) {
             Node::Var(_) => true,
             Node::Meta(_) => false,
@@ -345,6 +373,23 @@ impl Horn {
         self.fail = None;
         self.binds.clear();
         self.trail.clear();
+        self.meta_free.clear();
+        self.memo.clear();
+        self.zonked.clear();
+    }
+
+    /// `e` has no metavariable, bound or not.
+    fn no_metas(&mut self, env: &Env, e: E) -> bool {
+        if let Some(&b) = self.meta_free.get(&e) {
+            return b
+        }
+        let b = match env.node(e) {
+            Node::Var(_) => true,
+            Node::Meta(_) => false,
+            Node::App(_, xs) => xs.to_vec().iter().all(|&x| self.no_metas(env, x)),
+        };
+        self.meta_free.insert(e, b);
+        b
     }
 
     fn note_fail(&mut self, env: &mut Env, goal: E, why: &str) {
@@ -385,13 +430,35 @@ impl Horn {
         }
     }
 
+    /// A goal without metavariables is decided once (`memo`): its proof is built at once,
+    /// since nothing outside it can bind a metavariable of its derivation.
     fn solve(&mut self, env: &mut Env, lean: &mut Lean, lv: &mut Levels, hooks: &mut dyn Hooks, goal: E) -> Result<Pending> {
-        self.steps += 1;
-        if self.steps > MAX_STEPS {
-            bail!("too many steps")
+        let goal = self.zonk(env, goal);
+        if !self.no_metas(env, goal) {
+            return self.solve1(env, lean, lv, hooks, goal)
         }
-        if self.depth > MAX_DEPTH {
-            bail!("too deep")
+        match self.memo.get(&goal) {
+            Some(Some(p)) => return Ok(Pending::Done(*p)),
+            Some(None) => bail!("failed before"),
+            None => {}
+        }
+        let r = self.solve1(env, lean, lv, hooks, goal).and_then(|pd| self.finish(env, pd));
+        self.memo.insert(goal, r.as_ref().ok().copied());
+        r.map(Pending::Done)
+    }
+
+    fn solve1(&mut self, env: &mut Env, lean: &mut Lean, lv: &mut Levels, hooks: &mut dyn Hooks, goal: E) -> Result<Pending> {
+        self.steps += 1;
+        if self.steps > MAX_STEPS || self.depth > MAX_DEPTH {
+            // reported as the deepest failure whatever its depth: the search stops here
+            let why = if self.steps > MAX_STEPS { "too many steps" } else { "too deep" };
+            if self.fail.as_ref().is_none_or(|(d, _)| *d != usize::MAX) {
+                let g = self.zonk(env, goal);
+                let mut t = env.show(g, &[]);
+                t.truncate(t.char_indices().nth(300).map_or(t.len(), |x| x.0));
+                self.fail = Some((usize::MAX, format!("{t} ({why}: {} steps, depth {})", self.steps, self.depth)));
+            }
+            bail!("{why}")
         }
         let goal = self.deref(env, goal);
         if self.trace {

@@ -693,9 +693,21 @@ impl Lean {
         let (g0a, a, _, a0a) = self.deq_parts(env, pa);
         let (g1, e, e2, ty) = self.deq_parts(env, p);
         let (g0, a0, g, pc) = self.cinst(env, k, g1, a)?;
-        if (g0, a0) != (g0a, a0a) {
-            bail!("instDF: the argument's context or type does not match the substituted entry")
+        if g0 != g0a {
+            bail!("instDF: the argument's context does not match the substituted entry's")
         }
+        // the entry may be the argument's type up to definitions (a type that went through
+        // the schema's relations has its definitions unfolded)
+        let pa = if a0 == a0a {
+            pa
+        } else {
+            let c = env.concl(pa);
+            let (t, xs) = env.head(c).unwrap();
+            let mut xs = xs.to_vec();
+            *xs.last_mut().unwrap() = a0;
+            let target = env.app(t, &xs);
+            env.convert(pa, target).map_err(|_| Mm0Error("instDF: the argument's type does not match the substituted entry".into()))?
+        };
         let ((r, pr), (r2, pr2), (rt, prt)) = (self.inst(env, k, e, a)?, self.inst(env, k, e2, a)?, self.inst(env, k, ty, a)?);
         let ke = self.nat(env, k);
         env.thm_n("instDF", &[ke, g0, g1, g, a0, a, e, e2, ty, r, r2, rt], &[pa, pc, p, pr, pr2, prt])

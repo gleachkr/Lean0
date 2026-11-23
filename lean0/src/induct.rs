@@ -68,11 +68,32 @@ impl Block {
 struct Facts {
     tys: HashMap<(E, E), (E, P)>,
     stys: HashMap<(E, E), P>,
+    /// The number of the spec's terms: later ones are generated.
+    spec_terms: usize,
 }
 
 impl Hooks for Facts {
     fn prove(&mut self, h: &mut Horn, env: &mut Env, lean: &mut Lean, lv: &mut Levels, goal: E) -> Option<mm0kit::env::Result<P>> {
         let (t, args) = env.head(goal)?;
+        // `rst D N (c us) ?`: a Lean constant declared before the block `D` cannot mention it,
+        // so it is restored to itself (`rst_refl`) without unfolding its definition
+        if t == env.term_id("rst") {
+            let args = args.to_vec();
+            let (d, n, e) = (h.zonk(env, args[0]), h.zonk(env, args[1]), h.zonk(env, args[2]));
+            let (td, _) = env.head(d)?;
+            let (te, _) = env.head(e)?;
+            if (te.0 as usize) < self.spec_terms || te.0 >= td.0 || !h.is_ground(env, d) || !h.is_ground(env, n) || !h.is_ground(env, e) {
+                return None
+            }
+            let p = env.thm_n("rst_refl", &[d, n, e], &[]).ok()?;
+            let c = env.concl(p);
+            let mark = h.save();
+            if h.unify(env, goal, c) {
+                return Some(Ok(p))
+            }
+            h.restore(mark);
+            return None
+        }
         if t == env.term_id("sty") {
             let (a0, a3) = (args[0], args[3]);
             let (ctx, e) = (h.zonk(env, a0), h.zonk(env, a3));
@@ -135,7 +156,7 @@ impl Prover {
         for &th in g.eeqv_axioms.values() {
             horn.add_clause(&g.env, th);
         }
-        Prover { horn, facts: Facts::default() }
+        Prover { horn, facts: Facts { spec_terms: g.spec_terms, ..Default::default() } }
     }
 
     fn prove(&mut self, g: &mut Gen, goal: E) -> R<P> {

@@ -742,7 +742,7 @@ nothing proves. That is an explicit, named gap of the same kind as a generated a
 claim for that declaration rests on nanoda (which checked it) and not on a verifier. `lean0
 check` still compares its statements with the export, so they say what Lean's declaration
 says. A report of a multi-part run must list such parts. In Std's certificate there is one:
-`goCache_Inv_of_Inv._mutual`, `std.part53bbbb.mm0`.
+`goCache_Inv_of_Inv._mutual`, `std.part62bbbbbbb.mm0`.
 
 ## 8. From the certificate to Lean: the statement checker
 
