@@ -1,8 +1,8 @@
 //! Inductive blocks certified by the spec's schema (audit §4).
 //!
-//! A block becomes a data term `def X_D (us): ind = ind_mk X_blk P T` (a nested block
-//! `ind_mkn X_blk P T N`: the kernel's mutual block with auxiliary types and the nested
-//! occurrences `N`, from nanoda's specialization; the statements restore the occurrences),
+//! A block becomes a data term `def X_D (us): ind = ind_mk X_blk P T N` (a nested block
+//! is the kernel's mutual block with auxiliary types and the nested occurrences `N`, from
+//! nanoda's specialization; the statements restore the occurrences; otherwise `N` is `nil`),
 //! and its types, constructors and recursors are the spec's `ind_ty (X_D us) i`,
 //! `ind_ctor (X_D us) i c` and `ind_rec (X_D us) i v`. Their typing lemmas (`X_df`),
 //! projection typing and reduction and structure eta,
@@ -561,7 +561,7 @@ pub(crate) fn block_head<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, id: &Indu
     // from here on statements are emitted; a failure is rolled back by the caller
     let g = &mut *el.g;
     let n = sig.lvl_names.len();
-    // the data body `ind_mk atom P T` as the definition's body (the levels are its only
+    // the data body `ind_mk atom P T N` as the definition's body (the levels are its only
     // arguments: Var(i+1) shifted to Var(i))
     let mk_body = |g: &mut Gen, atom: E| -> E {
         let mut t = g.env.app_n("tnil", &[]);
@@ -572,10 +572,8 @@ pub(crate) fn block_head<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, id: &Indu
             }
             t = g.env.app_n("tcons", &[fs[i], c, t]);
         }
-        let body = match nctx {
-            Some(nc) => g.env.app_n("ind_mkn", &[atom, pctx, t, nc]),
-            None => g.env.app_n("ind_mk", &[atom, pctx, t]),
-        };
+        let nc = nctx.unwrap_or_else(|| g.env.app_n("nil", &[]));
+        let body = g.env.app_n("ind_mk", &[atom, pctx, t, nc]);
         let mut shift = vec![g.env.var(0)];
         shift.extend((0..n).map(|i| g.env.var(i as u16)));
         g.env.subst(body, &shift)

@@ -18,11 +18,12 @@ import "lean-core.mm0";
 -- `Inductive/Add.lean` is the port read for this): every one is
 -- syntax-directed over the declaration.
 --
--- A block `ind_mk b P T` has an atom `b` (a `term` of sort `blk` per block,
+-- A block `ind_mk b P T N` has an atom `b` (a `term` of sort `blk` per block,
 -- so that structurally equal declarations stay distinct), the parameters as
 -- a telescope `P` (a `ctx`: innermost parameter first, each type under the
 -- earlier ones) and the types `T`: for each type its type `F` (under `P`:
--- `Π indices. srt l`) and the types of its constructors. A constructor's
+-- `Π indices. srt l`) and the types of its constructors; `N` lists its nested
+-- occurrences (below; `[]` for a block without any). A constructor's
 -- type `K` is written under `P` and, outside `P`, under the block's `n`
 -- types themselves: at depth `d` inside `K`, parameter `q` (0 outermost) is
 -- `#(d + np - 1 - q)` and type `j` is `#(d + np + j)`. So "no occurrence
@@ -41,14 +42,13 @@ strict free sort ind;
 strict free sort tys;
 --| @hole _ctors
 strict free sort ctors;
-term ind_mk: blk > ctx > tys > ind;
 term tnil: tys;
 --| `tcons F C T`: a type whose type is `F`, with constructors `C`, then `T`.
 term tcons: expr > ctors > tys > tys;
 term cnil: ctors;
 term ccons: expr > ctors > ctors;
 
---| A nested block `ind_mkn b P T N` is the mutual block the kernel checks in
+--| A block `ind_mk b P T N`. A nested block is the mutual block the kernel checks in
 --| its place: `T` lists the declared types and then one auxiliary type per
 --| nested occurrence `I Ds` of an earlier block `I` in the constructors (in
 --| the kernel's order), and `N` lists the occurrences, each `ind_ty I i @ Ds`
@@ -63,7 +63,7 @@ term ccons: expr > ctors > ctors;
 --| `ind_ctor D j c ps fs` as `ind_ctor I i c Ds[ps] fs`. Its recursor is the
 --| block's (`X.rec_k` for the `k`th auxiliary type) and reduces on `I`'s
 --| constructors (`ind_iota_nst`).
-term ind_mkn: blk > ctx > tys > ctx > ind;
+term ind_mk: blk > ctx > tys > ctx > ind;
 
 --| Type `i`, constructor `c` of type `i`, and the recursor of type `i` with
 --| motives in `srt v`, of a block.
@@ -88,12 +88,10 @@ axiom inst_proj (k: nat) (b: blk) (i: nat) (e a e2: expr):
 --| The parts of a block. (Clauses take a variable `D` and read it through
 --| `ind_data`, so that a block named by a definition stays folded.)
 term ind_data: ind > blk > ctx > tys > wff;
-axiom ind_data_i (b: blk) (P: ctx) (T: tys): $ ind_data (ind_mk b P T) b P T $;
-axiom ind_data_n (b: blk) (P: ctx) (T: tys) (N: ctx): $ ind_data (ind_mkn b P T N) b P T $;
---| `ind_nested D N`: the occurrences of `D` (none for `ind_mk`).
+axiom ind_data_i (b: blk) (P: ctx) (T: tys) (N: ctx): $ ind_data (ind_mk b P T N) b P T $;
+--| `ind_nested D N`: the nested occurrences of `D`.
 term ind_nested: ind > ctx > wff;
-axiom ind_nested_mk (b: blk) (P: ctx) (T: tys): $ ind_nested (ind_mk b P T) [] $;
-axiom ind_nested_mkn (b: blk) (P: ctx) (T: tys) (N: ctx): $ ind_nested (ind_mkn b P T N) N $;
+axiom ind_nested_i (b: blk) (P: ctx) (T: tys) (N: ctx): $ ind_nested (ind_mk b P T N) N $;
 
 --| `nth_ty T i F C`: type `i` of `T` has type `F` and constructors `C`.
 term nth_ty: tys > nat > expr > ctors > wff;

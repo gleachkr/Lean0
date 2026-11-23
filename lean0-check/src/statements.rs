@@ -11,7 +11,7 @@
 //! as the translation does. Every theorem must have a proved (not assumed) type statement.
 //!
 //! An inductive block certified by the spec's schema (audit §4) has no term per constant: its
-//! data definition `def X_D (us): ind = ind_mk X_blk P T` (doc "The inductive block of
+//! data definition `def X_D (us): ind = ind_mk X_blk P T N` (doc "The inductive block of
 //! `X`...") is compared with the export's declaration (the parameters, each type's type and
 //! each constructor's type, with the binders' type annotations consumed as the kernel does,
 //! and the block's types as variables outside the parameters), and its types, constructors
@@ -212,10 +212,10 @@ struct BlockData<'s> {
     /// The parameters, outermost first.
     params: Vec<&'s M>,
     /// Each type's type and its constructors' types: the declared types, then the auxiliary
-    /// types of a nested block (`ind_mkn`; audit §4).
+    /// types of a nested block (audit §4).
     types: Vec<(&'s M, Vec<&'s M>)>,
     /// The nested occurrences, one per auxiliary type, written like a constructor type at
-    /// depth 0 (`ind_mkn`'s last argument).
+    /// depth 0 (`ind_mk`'s last argument).
     nested: Vec<&'s M>,
     /// The Lean names of its declared types and of each one's constructors (from the export).
     type_names: Vec<String>,
@@ -379,7 +379,7 @@ pub fn check(export: &ExportFile<'_>, stmts: &[Stmt]) -> Report {
                 continue
             };
             let Some(bd) = block_data(s, body, n, tn, &ind_ctors) else {
-                problems.push(format!("`{}`: not of the form `ind_mk X_blk P T` or `ind_mkn X_blk P T N`", s.name));
+                problems.push(format!("`{}`: not of the form `ind_mk X_blk P T N`", s.name));
                 continue
             };
             let b = names.blocks.len();
@@ -644,11 +644,10 @@ pub fn check(export: &ExportFile<'_>, stmts: &[Stmt]) -> Report {
     Report { checked, problems }
 }
 
-/// Read a block's data definition `ind_mk X_blk P T`.
+/// Read a block's data definition `ind_mk X_blk P T N`.
 fn block_data<'s>(stmt: &'s Stmt, body: &'s M, lean: &str, type_names: &[String], ctors: &HashMap<String, Vec<String>>) -> Option<BlockData<'s>> {
     let (atom, p, t, n) = match (body.head.as_str(), body.args.as_slice()) {
-        ("ind_mk", [atom, p, t]) => (atom, p, t, None),
-        ("ind_mkn", [atom, p, t, n]) => (atom, p, t, Some(n)),
+        ("ind_mk", [atom, p, t, n]) => (atom, p, t, n),
         _ => return None,
     };
     if !atom.args.is_empty() {
@@ -658,10 +657,7 @@ fn block_data<'s>(stmt: &'s Stmt, body: &'s M, lean: &str, type_names: &[String]
     let mut params = ctx_list(p)?;
     params.reverse();
     // the occurrences: the first entry is the first auxiliary type
-    let nested = match n {
-        Some(n) => ctx_list(n)?,
-        None => Vec::new(),
-    };
+    let nested = ctx_list(n)?;
     let mut types = Vec::new();
     let mut t = t;
     loop {

@@ -12,7 +12,7 @@
 //! facts it already has), `leqv` to the level engine, and `lift`, `inst` and `closed`
 //! with literal indices to the memoized provers in [`Lean`]. Unification unfolds a public
 //! definition when its head meets a different head, so a block named by a definition
-//! (`List_D u`) matches the clause pattern `ind_mk b P T`; the proof's conclusion is then
+//! (`List_D u`) matches the clause pattern `ind_mk b P T N`; the proof's conclusion is then
 //! converted back to the goal as stated.
 use crate::env::*;
 use crate::bail;

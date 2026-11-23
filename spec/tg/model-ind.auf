@@ -6682,50 +6682,27 @@ k3: $ … ⇒ b ∈ fv tsub ⟨ K , scons a (scons b (scons e (scons h ∅))) �
 
 lemma c4_iprt_tsub_s (G: hyps) (d b p t: set): $ G ⇒ ra_ind_data d b p t ∈ lrel $ > $ G ⇒ p ∈ fv tsub d ∧ t ∈ fv tsub d $
 ----
-a1: $ … ⇒ ∃ x ∃ y ∃ z (d = ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ ∧ b = x ∧ p = y ∧ t = z) ∨ ∃ x ∃ y ∃ z ∃ w (d = ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z) $ by lrel_ind_data_cases [#1]
+a1: $ … ⇒ ∃ x ∃ y ∃ z ∃ w (d = ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z) $ by lrel_ind_data_cases [#1]
 a2: $ G ⇒ kr_ind_data ∈ ω $ by kr_ind_data_omega
 a3: $ … ⇒ isset kr_ind_data $ by wcel_isset [a2]
 a4: $ … ⇒ d ∊ trees ω ∧ b ∊ trees ω ∧ p ∊ trees ω ∧ t ∊ trees ω $ by lrel_args4 [#1, a3]
 a5: $ … ⇒ d ∊ trees ω $ by and_elim_l [a4]
 a6: $ … ⇒ d ∈ trees ω $ by welc_wcel [a5]
-c1: $ G , d = ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ ∧ b = x ∧ p = y ∧ t = z ⇒ d = ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ ∧ b = x ∧ p = y ∧ t = z $ by ax
-c2: $ … ⇒ d = ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ $ by and_elim_l [c1]
-c3: $ … ⇒ b = x ∧ p = y ∧ t = z $ by and_elim_r [c1]
-c4: $ … ⇒ p = y ∧ t = z $ by and_elim_r [c3]
-c5: $ … ⇒ p = y $ by and_elim_l [c4]
-c6: $ … ⇒ t = z $ by and_elim_r [c4]
-c7: $ G , d = ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ ∧ b = x ∧ p = y ∧ t = z ⇒ d ∈ trees ω $ by weaken [a6]
-c8: $ … ⇒ ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ ∈ trees ω $ by wcel_eq_l [c2, c7]
-c9: $ G , d = ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ ∧ b = x ∧ p = y ∧ t = z ⇒ kc_ind_mk ∈ ω $ by kc_ind_mk_omega
-c10: $ … ⇒ x ∈ fv tsub ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ ∧ y ∈ fv tsub ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ ∧ z ∈ fv tsub ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ $ by c4_node3 [c9, c8]
-c11: $ … ⇒ y ∈ fv tsub ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ ∧ z ∈ fv tsub ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ $ by and_elim_r [c10]
-c12: $ … ⇒ y ∈ fv tsub ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ $ by and_elim_l [c11]
-c13: $ … ⇒ z ∈ fv tsub ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ $ by and_elim_r [c11]
-c14: $ … ⇒ ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ = d $ by eq_sym [c2]
-c15: $ G , d = ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ ∧ b = x ∧ p = y ∧ t = z ⇒ tsub = tsub $ by eq_refl
-c16: $ … ⇒ fv tsub ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ = fv tsub d $ by fv_eq [c15, c14]
-c17: $ … ⇒ y ∈ fv tsub d $ by wcel_eq_r [c16, c12]
-c18: $ … ⇒ z ∈ fv tsub d $ by wcel_eq_r [c16, c13]
-c19: $ … ⇒ y = p $ by eq_sym [c5]
-c20: $ … ⇒ p ∈ fv tsub d $ by wcel_eq_l [c19, c17]
-c21: $ … ⇒ z = t $ by eq_sym [c6]
-c22: $ … ⇒ t ∈ fv tsub d $ by wcel_eq_l [c21, c18]
-c23: $ … ⇒ p ∈ fv tsub d ∧ t ∈ fv tsub d $ by and_intro [c20, c22]
-e1: $ G , d = ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z ⇒ d = ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z $ by ax
-e2: $ … ⇒ d = ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ $ by and_elim_l [e1]
+e1: $ G , d = ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z ⇒ d = ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z $ by ax
+e2: $ … ⇒ d = ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ $ by and_elim_l [e1]
 e3: $ … ⇒ b = x ∧ p = y ∧ t = z $ by and_elim_r [e1]
 e4: $ … ⇒ p = y ∧ t = z $ by and_elim_r [e3]
 e5: $ … ⇒ p = y $ by and_elim_l [e4]
 e6: $ … ⇒ t = z $ by and_elim_r [e4]
-e7: $ G , d = ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z ⇒ d ∈ trees ω $ by weaken [a6]
-e8: $ … ⇒ ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ ∈ trees ω $ by wcel_eq_l [e2, e7]
-e9: $ G , d = ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z ⇒ kc_ind_mkn ∈ ω $ by kc_ind_mkn_omega
-e11: $ … ⇒ y ∈ fv tsub ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ z ∈ fv tsub ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ $ by c4_node4 [e9, e8]
-e12: $ … ⇒ y ∈ fv tsub ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ $ by and_elim_l [e11]
-e13: $ … ⇒ z ∈ fv tsub ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ $ by and_elim_r [e11]
-e14: $ … ⇒ ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ = d $ by eq_sym [e2]
-e15: $ G , d = ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z ⇒ tsub = tsub $ by eq_refl
-e16: $ … ⇒ fv tsub ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ = fv tsub d $ by fv_eq [e15, e14]
+e7: $ G , d = ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z ⇒ d ∈ trees ω $ by weaken [a6]
+e8: $ … ⇒ ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ ∈ trees ω $ by wcel_eq_l [e2, e7]
+e9: $ G , d = ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z ⇒ kc_ind_mk ∈ ω $ by kc_ind_mk_omega
+e11: $ … ⇒ y ∈ fv tsub ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ z ∈ fv tsub ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ $ by c4_node4 [e9, e8]
+e12: $ … ⇒ y ∈ fv tsub ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ $ by and_elim_l [e11]
+e13: $ … ⇒ z ∈ fv tsub ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ $ by and_elim_r [e11]
+e14: $ … ⇒ ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ = d $ by eq_sym [e2]
+e15: $ G , d = ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z ⇒ tsub = tsub $ by eq_refl
+e16: $ … ⇒ fv tsub ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ = fv tsub d $ by fv_eq [e15, e14]
 e17: $ … ⇒ y ∈ fv tsub d $ by wcel_eq_r [e16, e12]
 e18: $ … ⇒ z ∈ fv tsub d $ by wcel_eq_r [e16, e13]
 e19: $ … ⇒ y = p $ by eq_sym [e5]
@@ -6733,21 +6710,13 @@ e20: $ … ⇒ p ∈ fv tsub d $ by wcel_eq_l [e19, e17]
 e21: $ … ⇒ z = t $ by eq_sym [e6]
 e22: $ … ⇒ t ∈ fv tsub d $ by wcel_eq_l [e21, e18]
 e23: $ … ⇒ p ∈ fv tsub d ∧ t ∈ fv tsub d $ by and_intro [e20, e22]
-fa2: $ G , ∃ z (d = ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ ∧ b = x ∧ p = y ∧ t = z) ⇒ ∃ z (d = ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ ∧ b = x ∧ p = y ∧ t = z) $ by ax
-fb2: $ … ⇒ p ∈ fv tsub d ∧ t ∈ fv tsub d $ by ex_elim [fa2, c23]
-fa1: $ G , ∃ y ∃ z (d = ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ ∧ b = x ∧ p = y ∧ t = z) ⇒ ∃ y ∃ z (d = ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ ∧ b = x ∧ p = y ∧ t = z) $ by ax
-fb1: $ … ⇒ p ∈ fv tsub d ∧ t ∈ fv tsub d $ by ex_elim [fa1, fb2]
-fa0: $ G , ∃ x ∃ y ∃ z (d = ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ ∧ b = x ∧ p = y ∧ t = z) ⇒ ∃ x ∃ y ∃ z (d = ⟨ kc_ind_mk , scons x (scons y (scons z ∅)) ⟩ ∧ b = x ∧ p = y ∧ t = z) $ by ax
-fb0: $ … ⇒ p ∈ fv tsub d ∧ t ∈ fv tsub d $ by ex_elim [fa0, fb1]
-ga3: $ G , ∃ w (d = ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z) ⇒ ∃ w (d = ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z) $ by ax
+ga3: $ G , ∃ w (d = ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z) ⇒ ∃ w (d = ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z) $ by ax
 gb3: $ … ⇒ p ∈ fv tsub d ∧ t ∈ fv tsub d $ by ex_elim [ga3, e23]
-ga2: $ G , ∃ z ∃ w (d = ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z) ⇒ ∃ z ∃ w (d = ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z) $ by ax
+ga2: $ G , ∃ z ∃ w (d = ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z) ⇒ ∃ z ∃ w (d = ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z) $ by ax
 gb2: $ … ⇒ p ∈ fv tsub d ∧ t ∈ fv tsub d $ by ex_elim [ga2, gb3]
-ga1: $ G , ∃ y ∃ z ∃ w (d = ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z) ⇒ ∃ y ∃ z ∃ w (d = ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z) $ by ax
+ga1: $ G , ∃ y ∃ z ∃ w (d = ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z) ⇒ ∃ y ∃ z ∃ w (d = ⟨ kc_ind_mk , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z) $ by ax
 gb1: $ … ⇒ p ∈ fv tsub d ∧ t ∈ fv tsub d $ by ex_elim [ga1, gb2]
-ga0: $ G , ∃ x ∃ y ∃ z ∃ w (d = ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z) ⇒ ∃ x ∃ y ∃ z ∃ w (d = ⟨ kc_ind_mkn , scons x (scons y (scons z (scons w ∅))) ⟩ ∧ b = x ∧ p = y ∧ t = z) $ by ax
-gb0: $ … ⇒ p ∈ fv tsub d ∧ t ∈ fv tsub d $ by ex_elim [ga0, gb1]
-z1: $ … ⇒ p ∈ fv tsub d ∧ t ∈ fv tsub d $ by or_elim [a1, fb0, gb0]
+z1: $ G ⇒ p ∈ fv tsub d ∧ t ∈ fv tsub d $ by ex_elim [a1, gb1]
 
 iprt_tsub
 ---------
