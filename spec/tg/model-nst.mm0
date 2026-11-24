@@ -899,3 +899,17 @@ theorem proj_res_spine {x9: set} (G: hyps) (J: class) (tg td tb tp tt tnp tn tm 
   $ G ⇒ ra_clen tX tnf ∈ lrel $ >
   $ G ⇒ ra_npis tK tnf ∈ lrel $ >
   $ G ⇒ ∃ x9 (ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tB x9 ∈ lrel) $;
+
+-- --------------------------------------------------------------------------
+-- The transitive closure: its elements, and induction on membership through it
+-- --------------------------------------------------------------------------
+
+--| An element of a set is in its transitive closure.
+theorem tcl_sub (G: hyps) (x a: set): $ G ⇒ a ∊ x $ > $ G ⇒ a ∊ tcl x $;
+--| An element of an element of the transitive closure is in it.
+theorem tcl_tr (G: hyps) (x a b: set): $ G ⇒ a ∊ tcl x $ > $ G ⇒ b ∊ a $ > $ G ⇒ b ∊ tcl x $;
+--| The transitive closure of an element of the transitive closure is inside it.
+theorem tcl_mono (G: hyps) (x y: set): $ G ⇒ y ∊ tcl x $ > $ G ⇒ tcl y ⊆ tcl x $;
+--| Induction on membership through the transitive closure: a class that has every set whose transitive closure
+--| is inside it has every set.
+theorem tcl_ind {h i: set} (G: hyps) (P: class): $ G ⇒ ∀ h (∀ i (i ∊ tcl h → i ∊ P) → h ∊ P) $ > $ G ⇒ ∀ h (h ∊ P) $;

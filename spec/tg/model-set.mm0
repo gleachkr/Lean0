@@ -1,0 +1,170 @@
+-- model-set.mm0: the model's value of Lean's pre-sets is the universe `fv uni 1`.
+import "model-ci.mm0";
+
+-- The spec's notations for terms (its delimiters are not available here, so `#` and `.` stand alone).
+prefix nz: $0$ prec max;
+prefix n1: $1$ prec max;
+prefix n2: $2$ prec max;
+prefix n3: $3$ prec max;
+prefix n4: $4$ prec max;
+prefix n5: $5$ prec max;
+prefix bvar: $#$ prec max;
+prefix srt: $Sort$ prec max;
+infixl app: $@$ prec 1000;
+notation pi (A B: expr): expr = ($Π$:20) A ($.$:0) B;
+
+--| Lean's `PSet.{0}` as block data, for any tag: one type in `Sort 2`, one constructor
+--| `mk : (α : Sort 1) → (α → PSet) → PSet`.
+def pset_D (b: blk): ind =
+  $ ind_mk b nil (tcons (srt (ls (ls lz))) (ccons (pi (srt (ls lz)) (pi (pi (bvar nz) (bvar n2)) (bvar n2))) cnil) tnil) nil $;
+def pset (b: blk): expr = $ ind_ty (pset_D b) nz $;
+def pset_mk (b: blk): expr = $ ind_ctor (pset_D b) nz nz $;
+
+--| `False` as `∀ p : Prop, p`, `¬ A`, and `∃ x : A, B` as `¬ ∀ x : A, ¬ B` (`B` under the binder).
+def lfalse: expr = $ Π Prop . # 0 $;
+def lnot (A: expr): expr = $ Π A . lfalse $;
+def lex (A B: expr): expr = $ lnot (Π A . lnot B) $;
+
+--| `E (mk α A) (mk β B) → ∀ a, ∃ b, E (A a) (B b)`
+def pset_e1 (b: blk) (E: expr): expr =
+  $ Π Sort (ls lz) .
+      Π (Π # 0 . pset b) .
+      Π Sort (ls lz) .
+      Π (Π # 0 . pset b) .
+      Π E @ (pset_mk b @ # 3 @ # 2) @ (pset_mk b @ # 1 @ # 0) .
+      Π # 4 . lex (# 3) (E @ (# 5 @ # 1) @ (# 3 @ # 0)) $;
+--| `E (mk α A) (mk β B) → ∀ b, ∃ a, E (A a) (B b)`
+def pset_e2 (b: blk) (E: expr): expr =
+  $ Π Sort (ls lz) .
+      Π (Π # 0 . pset b) .
+      Π Sort (ls lz) .
+      Π (Π # 0 . pset b) .
+      Π E @ (pset_mk b @ # 3 @ # 2) @ (pset_mk b @ # 1 @ # 0) .
+      Π # 2 . lex (# 5) (E @ (# 5 @ # 0) @ (# 3 @ # 1)) $;
+--| `(∀ a, ∃ b, E (A a) (B b)) → (∀ b, ∃ a, E (A a) (B b)) → E (mk α A) (mk β B)`
+def pset_e3 (b: blk) (E: expr): expr =
+  $ Π Sort (ls lz) .
+      Π (Π # 0 . pset b) .
+      Π Sort (ls lz) .
+      Π (Π # 0 . pset b) .
+      Π (Π # 3 . lex (# 2) (E @ (# 4 @ # 1) @ (# 2 @ # 0))) .
+      Π (Π # 2 . lex (# 5) (E @ (# 5 @ # 0) @ (# 3 @ # 1))) . E @ (pset_mk b @ # 5 @ # 4) @ (pset_mk b @ # 3 @ # 2) $;
+--| `M x (mk β B) → ∃ b, E x (B b)`
+def pset_m1 (b: blk) (E M: expr): expr =
+  $ Π pset b .
+      Π Sort (ls lz) .
+      Π (Π # 0 . pset b) .
+      Π M @ # 2 @ (pset_mk b @ # 1 @ # 0) . lex (# 2) (E @ # 4 @ (# 2 @ # 0)) $;
+--| `∀ b, E x (B b) → M x (mk β B)`
+def pset_m2 (b: blk) (E M: expr): expr =
+  $ Π pset b .
+      Π Sort (ls lz) .
+      Π (Π # 0 . pset b) .
+      Π # 1 .
+      Π E @ # 3 @ (# 1 @ # 0) . M @ # 4 @ (pset_mk b @ # 3 @ # 2) $;
+
+
+-- --------------------------------------------------------------------------
+-- The values and the collapse: definitions
+-- --------------------------------------------------------------------------
+
+--| The value of the type of pre-sets in the universe `U` at the level valuation `W`.
+def psv (U W: class) (b: blk): class = $ dt U (mcv hfin) (enc_expr (pset b)) W ∅ $;
+--| The value of the constructor of pre-sets.
+def pmk (U W: class) (b: blk): class = $ dt U (mcv hfin) (enc_expr (pset_mk b)) W ∅ $;
+--| The value of a closed term.
+def cval (U W: class) (e: expr): class = $ dt U (mcv hfin) (enc_expr e) W ∅ $;
+
+--| One step of the collapse of the points over `X` (`0 :: i :: f` with `i` in `U_1` and `f` from `i` into `X`), on a graph
+--| `C`: a point with a set `m` of `U_1` whose elements are the values `C` has at the `ap f n`, all of them.
+def pcop (X C: class) (.i .f .m .n .y .z .a: set): class =
+  $ {z | ∃ i (∃ f (∃ m ((i ∊ (fv uni (suc ∅))) ∧ ((f ∊ (cpi a i X)) ∧ ((m ∊ (fv uni (suc ∅))) ∧ ((∀ n ((n ∊ i) → (∃ y ((y ∊ m) ∧ ((opair (ap f n) y) ∈ C))))) ∧ ((∀ y ((y ∊ m) → (∃ n ((n ∊ i) ∧ ((opair (ap f n) y) ∈ C))))) ∧ (z = (opair (scons ∅ (scons i (scons f ∅))) m)))))))))} $;
+--| @congr
+theorem pcop_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ pcop A C ≐ pcop B D $;
+--| @rewrite
+theorem sb_c_pcop {x: set} (t: set x) (A B: class x):
+  $ (⟦ x / t ⟧ (pcop A B)) ≐ pcop (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+
+--| The least graph closed under the step over `X`.
+def plf (X: class) (.c: set): class = $ lfp c (pcop X c) $;
+--| @congr
+theorem plf_congr (A B: class): $ A ≐ B $ > $ plf A ≐ plf B $;
+--| @rewrite
+theorem sb_c_plf {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (plf A)) ≐ plf (⟦ x / t ⟧ A) $;
+--| The collapse of the pre-sets.
+def pcol (U W: class) (b: blk): class = $ plf (psv U W b) $;
+
+
+-- --------------------------------------------------------------------------
+-- The block of pre-sets in the model
+-- --------------------------------------------------------------------------
+
+--| The block of pre-sets is well formed, over the judgment atoms that hold in the model of a hook with the
+--| inductive types' parts.
+theorem pset_D_wf (H: class) (b: blk): $ _ ⇒ hind H $ > $ ind_wf_j (jmod (mcv H)) nil (pset_D b) $;
+
+
+
+
+
+
+
+
+
+
+
+
+-- --------------------------------------------------------------------------
+-- The collapse of the pre-sets onto `U_1`
+-- --------------------------------------------------------------------------
+
+--| The collapse sends a pre-set to an element of `U_1`.
+theorem pcol_val (G: hyps) (b: blk) (u w x: set):
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ x ∊ psv u w b $ > $ G ⇒ fv (pcol u w b) x ∈ fv uni (suc ∅) $;
+
+--| Every pre-set is the constructor's value at an index type of `U_1` and a function from it into the pre-sets.
+--| @freshen G i
+--| @freshen G f
+--| @freshen G a
+theorem pcol_cases {i f a: set} (G: hyps) (b: blk) (u w x: set):
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ x ∊ psv u w b $ >
+  $ G ⇒ ∃ i ∃ f (i ∊ fv uni (suc ∅) ∧ f ∊ cpi a i (psv u w b) ∧ x = ap (ap (pmk u w b) i) f) $;
+
+--| The collapse is onto `U_1`.
+--| @freshen G x
+theorem pcol_onto {x: set} (G: hyps) (b: blk) (u w y: set):
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ y ∊ fv uni (suc ∅) $ > $ G ⇒ ∃ x (x ∊ psv u w b ∧ fv (pcol u w b) x = y) $;
+
+--| The collapse's equation: the constructor's value at `i` and `f` is a pre-set, sent to the set of the collapses of
+--| the `ap f n`.
+--| @freshen G a
+--| @freshen G y
+--| @freshen G n
+theorem pcol_mk {a y n: set} (G: hyps) (b: blk) (u w i f: set):
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ i ∊ fv uni (suc ∅) $ > $ G ⇒ f ∊ cpi a i (psv u w b) $ >
+  $ G ⇒ ap (ap (pmk u w b) i) f ∈ psv u w b ∧ fv (pcol u w b) (ap (ap (pmk u w b) i) f) = {y | ∃ n (n ∊ i ∧ y = fv (pcol u w b) (ap f n))} $;
+
+
+
+
+
+-- --------------------------------------------------------------------------
+-- The relations: equality and membership of the collapses
+-- --------------------------------------------------------------------------
+
+--| A relation with `Equiv`'s characterization (`pset_e1`, `pset_e2`, `pset_e3`) holds at two pre-sets exactly when their
+--| collapses are equal.
+--| @freshen G z
+theorem pcol_equiv {z: set} (G: hyps) (b: blk) (E: expr) (u w x y: set):
+  $ closed nz E $ > $ ty nil E (pi (pset b) (pi (pset b) Prop)) $ > $ inh nil (pset_e1 b E) $ > $ inh nil (pset_e2 b E) $ > $ inh nil (pset_e3 b E) $ >
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ x ∊ psv u w b $ > $ G ⇒ y ∊ psv u w b $ >
+  $ G ⇒ (∃ z (z ∊ ap (ap (cval u w E) x) y) ↔ fv (pcol u w b) x = fv (pcol u w b) y) $;
+
+--| A relation with `Mem`'s characterization (`pset_m1`, `pset_m2`, over a relation with `Equiv`'s) holds at two pre-sets
+--| exactly when the collapse of the first is an element of the collapse of the second.
+--| @freshen G z
+theorem pcol_mem {z: set} (G: hyps) (b: blk) (E M: expr) (u w x y: set):
+  $ closed nz E $ > $ closed nz M $ > $ ty nil E (pi (pset b) (pi (pset b) Prop)) $ > $ ty nil M (pi (pset b) (pi (pset b) Prop)) $ >
+  $ inh nil (pset_e1 b E) $ > $ inh nil (pset_e2 b E) $ > $ inh nil (pset_e3 b E) $ > $ inh nil (pset_m1 b E M) $ > $ inh nil (pset_m2 b E M) $ >
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ x ∊ psv u w b $ > $ G ⇒ y ∊ psv u w b $ >
+  $ G ⇒ (∃ z (z ∊ ap (ap (cval u w M) x) y) ↔ fv (pcol u w b) x ∈ fv (pcol u w b) y) $;

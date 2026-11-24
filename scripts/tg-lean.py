@@ -299,11 +299,24 @@ def library_names():
     return names
 
 
+def model_files():
+    """The model's files: `model.mm0` and the `model*.mm0` files it imports, directly
+    or not (a `model*.mm0` file outside that chain is not part of the model)."""
+    seen, todo = [], [MODEL]
+    while todo:
+        n = todo.pop()
+        if n in seen:
+            continue
+        seen.append(n)
+        todo += re.findall(r'^import "([^"]+)";', (ROOT / "spec/tg" / n).read_text(encoding="utf-8"), re.M)
+    return sorted(ROOT / "spec/tg" / n for n in seen if n.startswith("model"))
+
+
 def model_decls(strata):
     """The model's declarations (the `model*.mm0` files, and `strata`, the texts of
     lean-tg2.mm0 and lean-tg3.mm0): (is a theorem, kind, name)."""
     out = []
-    texts = [f.read_text(encoding="utf-8") for f in sorted((ROOT / "spec/tg").glob("model*.mm0"))]
+    texts = [f.read_text(encoding="utf-8") for f in model_files()]
     for t in texts + strata:
         for kind, name in re.findall(r"^(?:(?:pure|strict|provable|free|local|abstract|pub)\s+)*"
                                      r"(theorem|axiom|def|term)\s+(\w+)", t, re.M):
@@ -1252,7 +1265,7 @@ def render_rest(text, strata):
     # by definitions; its proof must then still compile)
     wrong = []
     strata_thms = set(re.findall(r"^theorem (\w+)", "\n".join(strata), re.M))
-    files = {f: f.read_text(encoding="utf-8") for f in sorted((ROOT / "spec/tg").glob("model*.mm0"))}
+    files = {f: f.read_text(encoding="utf-8") for f in model_files()}
     for d in decls:
         if not thm(d) or d[1] not in proved:
             continue
