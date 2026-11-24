@@ -86,7 +86,7 @@ pub struct Lean {
 }
 
 impl Lean {
-    /// The spec's numerals and `Prop` become abbreviations (`Env::set_abbreviations`): proofs
+    /// The spec's numerals, `Prop`, `lift0` and `snoc` become abbreviations (`Env::set_abbreviations`): proofs
     /// only see `s` chains and `srt lz`, as `nat` and the elaborator build them.
     pub fn new(env: &mut Env) -> Self {
         let t = |n: &str| env.term_id(n);
@@ -125,7 +125,9 @@ impl Lean {
             inst: env.thm_id("inst_proj"),
         });
         let mut abbreviations: Vec<TId> = numerals.keys().copied().collect();
-        abbreviations.extend(env.has_term("Prop").then(|| t("Prop")));
+        for name in ["Prop", "lift0", "snoc"] {
+            abbreviations.extend(env.has_term(name).then(|| t(name)));
+        }
         env.set_abbreviations(&abbreviations);
         Lean {
             ids,

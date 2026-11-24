@@ -251,6 +251,10 @@ pub fn check(spec: &str) -> Result<Report> {
         nat: env.sort_names["nat"],
         rule_heads: RULE_HEADS.iter().map(|n| env.term_id(n)).collect(),
     };
+    // the notation definitions are read unfolded (`G ▷ A` as `cons A G`, the lift at cutoff 0)
+    let notation_defs: Vec<TId> =
+        ["snoc", "lift0"].iter().filter(|n| env.has_term(n)).map(|n| env.term_id(n)).collect();
+    env.unfold_in_statements(&notation_defs);
     // the clauses, in order; the rules are counted
     let mut n_rules = 0;
     let mut counts = [0usize; 3];

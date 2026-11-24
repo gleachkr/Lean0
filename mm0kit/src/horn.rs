@@ -532,14 +532,16 @@ impl Horn {
         let nmeta = self.binds.len();
         let d = env.thms[th.0 as usize].clone();
         let metas: Vec<E> = (0..d.args.len()).map(|_| self.meta(env)).collect();
-        let concl = env.subst(d.concl, &metas);
+        let plain_concl = env.plain_concl(th);
+        let concl = env.subst(plain_concl, &metas);
+        let plain_hyps = env.plain_hyps(th);
         let r = (|| {
             if !self.unify(env, concl, goal) {
                 bail!("{}: conclusion does not match", d.name)
             }
             let mut hyps = Vec::with_capacity(d.hyps.len());
             self.depth += 1;
-            for &h in d.hyps.iter() {
+            for &h in plain_hyps.iter() {
                 let hg = env.subst(h, &metas);
                 match self.solve(env, lean, lv, hooks, hg) {
                     Ok(p) => hyps.push(p),

@@ -163,6 +163,10 @@ pub struct Env {
     /// For each theorem whose conclusion mentions an abbreviation (`set_abbreviations`), the
     /// conclusion with the abbreviations unfolded.
     plain_concls: Vec<Option<E>>,
+    /// Likewise the hypotheses of a theorem that mention one.
+    plain_hyps: HashMap<u32, Box<[E]>>,
+    /// For such a theorem, once used: the local lemma that states it unfolded (`plain_thm`).
+    plain_thms: HashMap<u32, ThId>,
 }
 
 /// A lemma signature: argument sorts and hypotheses.
@@ -439,6 +443,8 @@ impl Env {
         if decl.args.len() != args.len() || decl.hyps.len() != hyps.len() {
             bail!("{}: expected {} args and {} hyps, got {} and {}", self.thm_label(thm), decl.args.len(), decl.hyps.len(), args.len(), hyps.len())
         }
+        let thm = self.plain_thm(thm)?;
+        let decl = &self.thms[thm.0 as usize];
         let pat_hyps = decl.hyps.clone();
         let pat_concl = decl.concl;
         let mut hs = Vec::with_capacity(hyps.len());
@@ -458,6 +464,35 @@ impl Env {
         self.convert(p, target)
     }
 
+    /// For a theorem whose statement mentions an abbreviation: a local lemma with the same
+    /// arguments that states it with the abbreviations unfolded (made at its first use, from
+    /// the theorem by conversions), so that each use needs no conversion. Else the theorem.
+    fn plain_thm(&mut self, thm: ThId) -> Result<ThId> {
+        let plain = self.plain_concl(thm);
+        let d = &self.thms[thm.0 as usize];
+        if plain == d.concl && !self.plain_hyps.contains_key(&thm.0) {
+            return Ok(thm)
+        }
+        if let Some(&id) = self.plain_thms.get(&thm.0) {
+            return Ok(id)
+        }
+        let (args, hyps, concl) = (d.args.clone(), d.hyps.clone(), d.concl);
+        let name = format!("{}plain_{}", crate::lean::FACT_PREFIX, d.name);
+        let plain_hyps = self.plain_hyps(thm);
+        let vars: Vec<E> = (0..args.len()).map(|i| self.var(i as u16)).collect();
+        let mut hs = Vec::with_capacity(hyps.len());
+        for (i, (&h, &want)) in plain_hyps.iter().zip(hyps.iter()).enumerate() {
+            let p = self.hyp(i as u16, h);
+            hs.push(self.convert(p, want)?);
+        }
+        let p = self.mk_pf(Pf::Thm { thm, args: vars.into(), hyps: hs.into(), concl }, concl);
+        let proof = self.convert(p, plain)?;
+        let decl = ThmDecl { name: name.into(), args, hyps: plain_hyps, concl: plain, axiom: false, local: true, proof: Some(proof), doc: None };
+        let id = self.add_thm(decl)?;
+        self.plain_thms.insert(thm.0, id);
+        Ok(id)
+    }
+
     /// A theorem's conclusion with the abbreviations unfolded, as `thm` proves it.
     pub fn plain_concl(&self, thm: ThId) -> E {
         self.plain_concls.get(thm.0 as usize).copied().flatten().unwrap_or(self.thms[thm.0 as usize].concl)
@@ -474,6 +509,30 @@ impl Env {
                 (c2 != c).then_some(c2)
             })
             .collect();
+        self.plain_hyps.clear();
+        for i in 0..self.thms.len() {
+            let hyps = self.thms[i].hyps.clone();
+            let plain: Box<[E]> = hyps.iter().map(|&h| self.expand(h, defs)).collect();
+            if plain != hyps {
+                self.plain_hyps.insert(i as u32, plain);
+            }
+        }
+    }
+
+    /// A theorem's hypotheses with the abbreviations unfolded (`thm` accepts proofs of them).
+    pub fn plain_hyps(&self, thm: ThId) -> Box<[E]> {
+        self.plain_hyps.get(&thm.0).cloned().unwrap_or_else(|| self.thms[thm.0 as usize].hyps.clone())
+    }
+
+    /// Rewrite every statement declared so far with the definitions `defs` unfolded, in its
+    /// hypotheses too (for an analysis of the statements, not for proofs).
+    pub fn unfold_in_statements(&mut self, defs: &[TId]) {
+        for i in 0..self.thms.len() {
+            let hyps: Vec<E> = self.thms[i].hyps.to_vec().into_iter().map(|h| self.expand(h, defs)).collect();
+            let concl = self.thms[i].concl;
+            self.thms[i].concl = self.expand(concl, defs);
+            self.thms[i].hyps = hyps.into();
+        }
     }
 
     /// `e` with the definitions `defs` unfolded (a statement: a small tree).
@@ -723,6 +782,7 @@ impl Env {
         self.thms.truncate(nthms);
         self.order.truncate(from);
         self.split_lemmas.retain(|_, id| (id.0 as usize) < nthms);
+        self.plain_thms.retain(|_, id| (id.0 as usize) < nthms);
         let keep = self.split_lemmas.clone();
         self.recent_lemmas.retain(|k| keep.contains_key(k));
     }

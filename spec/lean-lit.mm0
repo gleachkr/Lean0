@@ -180,39 +180,39 @@ axiom eeqv_lit (n: bin): $ eeqv (lit n) (lit n) $;
 term add_eqs: ctx > expr > wff;
 axiom add_eqs_i (G: ctx) (f: expr):
   $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
-  $ ⟦ ℕ :: G ⊢ f @ #0 @ nat_zero ≡ #0 : ℕ ⟧ $ >
-  $ ⟦ ℕ :: ℕ :: G ⊢ f @ #1 @ (nat_succ @ #0) ≡ nat_succ @ (f @ #1 @ #0) : ℕ ⟧ $ >
+  $ ⟦ G ▷ ℕ ⊢ f @ #0 @ nat_zero ≡ #0 : ℕ ⟧ $ >
+  $ ⟦ G ▷ ℕ ▷ ℕ ⊢ f @ #1 @ (nat_succ @ #0) ≡ nat_succ @ (f @ #1 @ #0) : ℕ ⟧ $ >
   $ add_eqs G f $;
 --| `pred_eqs G p`: `p 0 ≡ 0` and `p (succ x) ≡ x`: Lean's `Nat.pred`.
 term pred_eqs: ctx > expr > wff;
 axiom pred_eqs_i (G: ctx) (p: expr):
   $ closed 0 p $ > $ ⟨ G ⊢ p : Π ℕ. ℕ ⟩ $ >
   $ ⟦ G ⊢ p @ nat_zero ≡ nat_zero : ℕ ⟧ $ >
-  $ ⟦ ℕ :: G ⊢ p @ (nat_succ @ #0) ≡ #0 : ℕ ⟧ $ >
+  $ ⟦ G ▷ ℕ ⊢ p @ (nat_succ @ #0) ≡ #0 : ℕ ⟧ $ >
   $ pred_eqs G p $;
 --| `sub_eqs G f p`: with `pred_eqs G p`, `f x 0 ≡ x` and `f x (succ y) ≡ p (f x y)`:
 --| Lean's `Nat.sub`.
 term sub_eqs: ctx > expr > expr > wff;
 axiom sub_eqs_i (G: ctx) (f p: expr):
   $ pred_eqs G p $ > $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
-  $ ⟦ ℕ :: G ⊢ f @ #0 @ nat_zero ≡ #0 : ℕ ⟧ $ >
-  $ ⟦ ℕ :: ℕ :: G ⊢ f @ #1 @ (nat_succ @ #0) ≡ p @ (f @ #1 @ #0) : ℕ ⟧ $ >
+  $ ⟦ G ▷ ℕ ⊢ f @ #0 @ nat_zero ≡ #0 : ℕ ⟧ $ >
+  $ ⟦ G ▷ ℕ ▷ ℕ ⊢ f @ #1 @ (nat_succ @ #0) ≡ p @ (f @ #1 @ #0) : ℕ ⟧ $ >
   $ sub_eqs G f p $;
 --| `mul_eqs G f fa`: with `add_eqs G fa`, `f x 0 ≡ 0` and `f x (succ y) ≡ fa (f x y) x`:
 --| Lean's `Nat.mul`.
 term mul_eqs: ctx > expr > expr > wff;
 axiom mul_eqs_i (G: ctx) (f fa: expr):
   $ add_eqs G fa $ > $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
-  $ ⟦ ℕ :: G ⊢ f @ #0 @ nat_zero ≡ nat_zero : ℕ ⟧ $ >
-  $ ⟦ ℕ :: ℕ :: G ⊢ f @ #1 @ (nat_succ @ #0) ≡ fa @ (f @ #1 @ #0) @ #1 : ℕ ⟧ $ >
+  $ ⟦ G ▷ ℕ ⊢ f @ #0 @ nat_zero ≡ nat_zero : ℕ ⟧ $ >
+  $ ⟦ G ▷ ℕ ▷ ℕ ⊢ f @ #1 @ (nat_succ @ #0) ≡ fa @ (f @ #1 @ #0) @ #1 : ℕ ⟧ $ >
   $ mul_eqs G f fa $;
 --| `pow_eqs G f fm fa`: with `mul_eqs G fm fa`, `f x 0 ≡ succ 0` and
 --| `f x (succ y) ≡ fm (f x y) x`: Lean's `Nat.pow`.
 term pow_eqs: ctx > expr > expr > expr > wff;
 axiom pow_eqs_i (G: ctx) (f fm fa: expr):
   $ mul_eqs G fm fa $ > $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
-  $ ⟦ ℕ :: G ⊢ f @ #0 @ nat_zero ≡ nat_succ @ nat_zero : ℕ ⟧ $ >
-  $ ⟦ ℕ :: ℕ :: G ⊢ f @ #1 @ (nat_succ @ #0) ≡ fm @ (f @ #1 @ #0) @ #1 : ℕ ⟧ $ >
+  $ ⟦ G ▷ ℕ ⊢ f @ #0 @ nat_zero ≡ nat_succ @ nat_zero : ℕ ⟧ $ >
+  $ ⟦ G ▷ ℕ ▷ ℕ ⊢ f @ #1 @ (nat_succ @ #0) ≡ fm @ (f @ #1 @ #0) @ #1 : ℕ ⟧ $ >
   $ pow_eqs G f fm fa $;
 --| `beq_eqs G f B t u`: `f : Nat → Nat → B` with `f 0 0 ≡ t`, `f 0 (succ y) ≡ u`,
 --| `f (succ x) 0 ≡ u` and `f (succ x) (succ y) ≡ f x y`, where `B`, `t` and `u` are
@@ -222,9 +222,9 @@ axiom beq_eqs_i (G: ctx) (f B t u: expr):
   $ closed 0 f $ > $ closed 0 B $ > $ closed 0 t $ > $ closed 0 u $ >
   $ ⟨ G ⊢ f : Π ℕ. Π ℕ. B ⟩ $ >
   $ ⟦ G ⊢ f @ nat_zero @ nat_zero ≡ t : B ⟧ $ >
-  $ ⟦ ℕ :: G ⊢ f @ nat_zero @ (nat_succ @ #0) ≡ u : B ⟧ $ >
-  $ ⟦ ℕ :: G ⊢ f @ (nat_succ @ #0) @ nat_zero ≡ u : B ⟧ $ >
-  $ ⟦ ℕ :: ℕ :: G ⊢ f @ (nat_succ @ #1) @ (nat_succ @ #0) ≡ f @ #1 @ #0 : B ⟧ $ >
+  $ ⟦ G ▷ ℕ ⊢ f @ nat_zero @ (nat_succ @ #0) ≡ u : B ⟧ $ >
+  $ ⟦ G ▷ ℕ ⊢ f @ (nat_succ @ #0) @ nat_zero ≡ u : B ⟧ $ >
+  $ ⟦ G ▷ ℕ ▷ ℕ ⊢ f @ (nat_succ @ #1) @ (nat_succ @ #0) ≡ f @ #1 @ #0 : B ⟧ $ >
   $ beq_eqs G f B t u $;
 --| `ble_eqs G f B t u`: `f 0 y ≡ t`, `f (succ x) 0 ≡ u` and `f (succ x) (succ y) ≡ f x y`:
 --| Lean's `Nat.ble`.
@@ -232,25 +232,25 @@ term ble_eqs: ctx > expr > expr > expr > expr > wff;
 axiom ble_eqs_i (G: ctx) (f B t u: expr):
   $ closed 0 f $ > $ closed 0 B $ > $ closed 0 t $ > $ closed 0 u $ >
   $ ⟨ G ⊢ f : Π ℕ. Π ℕ. B ⟩ $ >
-  $ ⟦ ℕ :: G ⊢ f @ nat_zero @ #0 ≡ t : B ⟧ $ >
-  $ ⟦ ℕ :: G ⊢ f @ (nat_succ @ #0) @ nat_zero ≡ u : B ⟧ $ >
-  $ ⟦ ℕ :: ℕ :: G ⊢ f @ (nat_succ @ #1) @ (nat_succ @ #0) ≡ f @ #1 @ #0 : B ⟧ $ >
+  $ ⟦ G ▷ ℕ ⊢ f @ nat_zero @ #0 ≡ t : B ⟧ $ >
+  $ ⟦ G ▷ ℕ ⊢ f @ (nat_succ @ #0) @ nat_zero ≡ u : B ⟧ $ >
+  $ ⟦ G ▷ ℕ ▷ ℕ ⊢ f @ (nat_succ @ #1) @ (nat_succ @ #0) ≡ f @ #1 @ #0 : B ⟧ $ >
   $ ble_eqs G f B t u $;
 --| `shl_eqs G f fm fa`: with `mul_eqs G fm fa`, `f x 0 ≡ x` and
 --| `f x (succ y) ≡ f (fm 2 x) y`: Lean's `Nat.shiftLeft`.
 term shl_eqs: ctx > expr > expr > expr > wff;
 axiom shl_eqs_i (G: ctx) (f fm fa: expr):
   $ mul_eqs G fm fa $ > $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
-  $ ⟦ ℕ :: G ⊢ f @ #0 @ nat_zero ≡ #0 : ℕ ⟧ $ >
-  $ ⟦ ℕ :: ℕ :: G ⊢ f @ #1 @ (nat_succ @ #0) ≡ f @ (fm @ lit (bd0 (bd1 b0)) @ #1) @ #0 : ℕ ⟧ $ >
+  $ ⟦ G ▷ ℕ ⊢ f @ #0 @ nat_zero ≡ #0 : ℕ ⟧ $ >
+  $ ⟦ G ▷ ℕ ▷ ℕ ⊢ f @ #1 @ (nat_succ @ #0) ≡ f @ (fm @ lit (bd0 (bd1 b0)) @ #1) @ #0 : ℕ ⟧ $ >
   $ shl_eqs G f fm fa $;
 --| `shr_eqs G f fd`: `f x 0 ≡ x` and `f x (succ y) ≡ fd (f x y) 2`, with `fd` closed:
 --| Lean's `Nat.shiftRight`, with `Nat.div`.
 term shr_eqs: ctx > expr > expr > wff;
 axiom shr_eqs_i (G: ctx) (f fd: expr):
   $ closed 0 f $ > $ closed 0 fd $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
-  $ ⟦ ℕ :: G ⊢ f @ #0 @ nat_zero ≡ #0 : ℕ ⟧ $ >
-  $ ⟦ ℕ :: ℕ :: G ⊢ f @ #1 @ (nat_succ @ #0) ≡ fd @ (f @ #1 @ #0) @ lit (bd0 (bd1 b0)) : ℕ ⟧ $ >
+  $ ⟦ G ▷ ℕ ⊢ f @ #0 @ nat_zero ≡ #0 : ℕ ⟧ $ >
+  $ ⟦ G ▷ ℕ ▷ ℕ ⊢ f @ #1 @ (nat_succ @ #0) ≡ fd @ (f @ #1 @ #0) @ lit (bd0 (bd1 b0)) : ℕ ⟧ $ >
   $ shr_eqs G f fd $;
 
 -- The division-like operations (audit §5) ----------------------------------

@@ -66,8 +66,9 @@ delimiter $ ( ) . # $;
 --|   definitionally equal (generalizing `sortDF` and `constDF`).
 --|
 --| Notations: `⟦ Γ ⊢ e ≡ e2 : A ⟧` for the judgment and `⟨ Γ ⊢ e : A ⟩` for typing,
---| `λ A. e`, `Π A. B`, `f @ a`, `#i` for a bound variable, `A :: Γ` and `[]`
---| for contexts, `a ⊔ b` for `max`, `≤`, `<` and `≈` (level equivalence), the
+--| `λ A. e`, `Π A. B`, `f @ a`, `#i` for a bound variable, `Γ ▷ A` and `[]`
+--| for contexts (`Γ ▷ A` is the definition `snoc`, `A :: Γ`; the other lists
+--| are written with `::`), `a ⊔ b` for `max`, `≤`, `<` and `≈` (level equivalence), the
 --| numerals `0` to `9` (`nz` and the definitions `n1` to `n9`), `Sort u` for
 --| `srt u`, `Prop` for `Sort lz`, and `ℕ` for `nat_ty`. The arithmetic relations
 --| are written as equations in brackets, one opening bracket per relation:
@@ -234,6 +235,11 @@ axiom closed_cst (k: nat) (a: atom) (S: lvls): $ closed k (cst a S) $;
 term lift: nat > nat > expr > expr > wff;
 notation lift (n k: nat) (e e2: expr): wff = (${up|$:0) e ($[$:0) ($#$:max) k ($^$:0) n ($]$:0) ($=$:0) e2 ($|}$:0);
 notation lift (n k: nat) (e e2: expr): wff = ($⟮ₗ$:0) e ($[$:0) ($#$:max) k ($↑$:0) n ($]$:0) ($=$:0) e2 ($⟯$:0);
+--| `⟮₀ e ↑ n = e2 ⟯` (`lift0 n e e2`): the lift at the cutoff `0`, which raises
+--| every free variable of `e` by `n`.
+def lift0 (n: nat) (e e2: expr): wff = $ ⟮ₗ e [ #0 ↑ n ] = e2 ⟯ $;
+notation lift0 (n: nat) (e e2: expr): wff = (${up0|$:0) e ($^$:0) n ($=$:0) e2 ($|}$:0);
+notation lift0 (n: nat) (e e2: expr): wff = ($⟮₀$:0) e ($↑$:0) n ($=$:0) e2 ($⟯$:0);
 axiom lift_bvar_lt (n k i: nat): $ i < k $ > $ ⟮ₗ #i [ #k ↑ n ] = #i ⟯ $;
 axiom lift_bvar_ge (n k i j: nat):
   $ k ≤ i $ > $ ⦃ i + n = j ⦄ $ > $ ⟮ₗ #i [ #k ↑ n ] = #j ⟯ $;
@@ -255,7 +261,7 @@ term inst: nat > expr > expr > expr > wff;
 notation inst (k: nat) (e a e2: expr): wff = (${:=|$:0) e ($[$:0) ($#$:max) k ($:=$:0) a ($]$:0) ($=$:0) e2 ($|}$:0);
 notation inst (k: nat) (e a e2: expr): wff = ($⟮$:0) e ($[$:0) ($#$:max) k ($↦$:0) a ($]$:0) ($=$:0) e2 ($⟯$:0);
 axiom inst_bvar_lt (k i: nat) (a: expr): $ i < k $ > $ ⟮ #i [ #k ↦ a ] = #i ⟯ $;
-axiom inst_bvar_eq (k: nat) (a a2: expr): $ ⟮ₗ a [ #0 ↑ k ] = a2 ⟯ $ > $ ⟮ #k [ #k ↦ a ] = a2 ⟯ $;
+axiom inst_bvar_eq (k: nat) (a a2: expr): $ ⟮₀ a ↑ k = a2 ⟯ $ > $ ⟮ #k [ #k ↦ a ] = a2 ⟯ $;
 axiom inst_bvar_gt (k i: nat) (a: expr):
   $ k ≤ i $ > $ ⟮ #(s i) [ #k ↦ a ] = #i ⟯ $;
 axiom inst_srt (k: nat) (l: lvl) (a: expr): $ ⟮ Sort l [ #k ↦ a ] = Sort l ⟯ $;
@@ -278,6 +284,13 @@ term nil: ctx;
 prefix nil: $[]$ prec max;
 term cons: expr > ctx > ctx;
 infixr cons: $::$ prec 60;
+--| `G ▷ A` (`snoc G A`) is `A :: G`: the context `G` extended by a variable of
+--| type `A`. A context is written with `▷`, outermost variable first, so that
+--| each type stands to the right of the variables it mentions; `#0` is the
+--| last entry.
+def snoc (G: ctx) (A: expr): ctx = $ A :: G $;
+infixl snoc: $|>$ prec 62;
+infixl snoc: $▷$ prec 62;
 
 --| `⟮ₖ G ∋ #k : A ⟯` (`lookup G k A`): the variable `#k` of `G` has type `A`,
 --| its entry lifted over the entries up to it.
@@ -285,37 +298,37 @@ term lookup: ctx > nat > expr > wff;
 notation lookup (G: ctx) (k: nat) (A: expr): wff = (${at|$:0) G ($!!$:0) ($#$:max) k ($:$:0) A ($|}$:0);
 notation lookup (G: ctx) (k: nat) (A: expr): wff = ($⟮ₖ$:0) G ($∋$:0) ($#$:max) k ($:$:0) A ($⟯$:0);
 axiom lookup_z (A A2: expr) (G: ctx):
-  $ ⟮ₗ A [ #0 ↑ 1 ] = A2 ⟯ $ > $ ⟮ₖ A :: G ∋ #0 : A2 ⟯ $;
+  $ ⟮₀ A ↑ 1 = A2 ⟯ $ > $ ⟮ₖ G ▷ A ∋ #0 : A2 ⟯ $;
 axiom lookup_s (A B B2: expr) (G: ctx) (n: nat):
-  $ ⟮ₖ G ∋ #n : B ⟯ $ > $ ⟮ₗ B [ #0 ↑ 1 ] = B2 ⟯ $ > $ ⟮ₖ A :: G ∋ #(s n) : B2 ⟯ $;
+  $ ⟮ₖ G ∋ #n : B ⟯ $ > $ ⟮₀ B ↑ 1 = B2 ⟯ $ > $ ⟮ₖ G ▷ A ∋ #(s n) : B2 ⟯ $;
 
 --| `cinst k G0 A0 a G1 G`: `G1` is `G0` extended by `A0` and then `k` more
 --| entries, and `G` is `G1` without `A0`, with `a` substituted for it in the
 --| `k` entries above it (`Ctx.InstN`, Typing/Lemmas.lean:86).
 term cinst: nat > ctx > expr > expr > ctx > ctx > wff;
-axiom cinst_z (G0: ctx) (A0 a: expr): $ cinst 0 G0 A0 a (A0 :: G0) G0 $;
+axiom cinst_z (G0: ctx) (A0 a: expr): $ cinst 0 G0 A0 a (G0 ▷ A0) G0 $;
 axiom cinst_s (k: nat) (G0 G1 G: ctx) (A0 a A A2: expr):
   $ cinst k G0 A0 a G1 G $ > $ ⟮ A [ #k ↦ a ] = A2 ⟯ $ >
-  $ cinst (s k) G0 A0 a (A :: G1) (A2 :: G) $;
+  $ cinst (s k) G0 A0 a (G1 ▷ A) (G ▷ A2) $;
 
 --| `cext n G G2`: `G2` is `G` extended by `n` more entries
 --| (`Ctx.LiftN n 0 G G2`, the `zero` case, Typing/Lemmas.lean:9).
 term cext: nat > ctx > ctx > wff;
 axiom cext_z (G: ctx): $ cext 0 G G $;
 axiom cext_s (n: nat) (G G2: ctx) (A: expr):
-  $ cext n G G2 $ > $ cext (s n) G (A :: G2) $;
+  $ cext n G G2 $ > $ cext (s n) G (G2 ▷ A) $;
 
 --| Contexts as lists: `clen G n` is the length, `cnth G n A` entry `n` as
 --| written (`lookup` lifts it), `capp P G G2` the concatenation `P ++ G`.
 term clen: ctx > nat > wff;
 axiom clen_nil: $ clen [] 0 $;
-axiom clen_cons (A: expr) (G: ctx) (n: nat): $ clen G n $ > $ clen (A :: G) (s n) $;
+axiom clen_cons (A: expr) (G: ctx) (n: nat): $ clen G n $ > $ clen (G ▷ A) (s n) $;
 term cnth: ctx > nat > expr > wff;
-axiom cnth_z (A: expr) (G: ctx): $ cnth (A :: G) 0 A $;
-axiom cnth_s (A B: expr) (G: ctx) (n: nat): $ cnth G n B $ > $ cnth (A :: G) (s n) B $;
+axiom cnth_z (A: expr) (G: ctx): $ cnth (G ▷ A) 0 A $;
+axiom cnth_s (A B: expr) (G: ctx) (n: nat): $ cnth G n B $ > $ cnth (G ▷ A) (s n) B $;
 term capp: ctx > ctx > ctx > wff;
 axiom capp_nil (G: ctx): $ capp [] G G $;
-axiom capp_cons (A: expr) (P G G2: ctx): $ capp P G G2 $ > $ capp (A :: P) G (A :: G2) $;
+axiom capp_cons (A: expr) (P G G2: ctx): $ capp P G G2 $ > $ capp (P ▷ A) G (G2 ▷ A) $;
 
 ---------------------------------------------------------------------------
 -- PART II: DEFINITIONS OVER LEVEL EQUIVALENCE AND THE JUDGMENT
@@ -386,7 +399,7 @@ axiom lseqv_nil: $ lseqv lnil lnil $;
 axiom lseqv_cons (l l2: lvl) (S S2: lvls): $ l ≈ l2 $ > $ lseqv S S2 $ > $ lseqv (lcons l S) (lcons l2 S2) $;
 axiom eeqv_cst (a: atom) (S S2: lvls): $ lseqv S S2 $ > $ eeqv (cst a S) (cst a S2) $;
 axiom ceqv_nil: $ ceqv [] [] $;
-axiom ceqv_cons (A A2: expr) (G G2: ctx): $ eeqv A A2 $ > $ ceqv G G2 $ > $ ceqv (A :: G) (A2 :: G2) $;
+axiom ceqv_cons (A A2: expr) (G G2: ctx): $ eeqv A A2 $ > $ ceqv G G2 $ > $ ceqv (G ▷ A) (G2 ▷ A2) $;
 
 ---------------------------------------------------------------------------
 -- PART III: THE RULES
@@ -467,12 +480,12 @@ axiom appDF (G: ctx) (f f2 A B a a2 R: expr):
 --| `(fun x : A => b) ≡ (fun x : A2 => b2) : (x : A) → B` from
 --| `A ≡ A2 : Sort u` and, with `x : A`, `b ≡ b2 : B`.
 axiom lamDF (G: ctx) (u: lvl) (A A2 b b2 B: expr):
-  $ ⟦ G ⊢ A ≡ A2 : Sort u ⟧ $ > $ ⟦ A :: G ⊢ b ≡ b2 : B ⟧ $ >
+  $ ⟦ G ⊢ A ≡ A2 : Sort u ⟧ $ > $ ⟦ G ▷ A ⊢ b ≡ b2 : B ⟧ $ >
   $ ⟦ G ⊢ λ A. b ≡ λ A2. b2 : Π A. B ⟧ $;
 --| `((x : A) → B) ≡ ((x : A2) → B2) : Sort (imax u v)` from
 --| `A ≡ A2 : Sort u` and, with `x : A`, `B ≡ B2 : Sort v`.
 axiom forallEDF (G: ctx) (u v: lvl) (A A2 B B2: expr):
-  $ ⟦ G ⊢ A ≡ A2 : Sort u ⟧ $ > $ ⟦ A :: G ⊢ B ≡ B2 : Sort v ⟧ $ >
+  $ ⟦ G ⊢ A ≡ A2 : Sort u ⟧ $ > $ ⟦ G ▷ A ⊢ B ≡ B2 : Sort v ⟧ $ >
   $ ⟦ G ⊢ Π A. B ≡ Π A2. B2 : Sort (limax u v) ⟧ $;
 --| Conversion: `e ≡ e2 : B` from `e ≡ e2 : A` and `A ≡ B : Sort u`.
 axiom defeqDF (G: ctx) (u: lvl) (A B e e2: expr):
@@ -480,11 +493,11 @@ axiom defeqDF (G: ctx) (u: lvl) (A B e e2: expr):
 --| Beta: `(fun x : A => e) a ≡ e[a] : B[a]`, for `e : B` with `x : A`, and
 --| `a : A`.
 axiom beta (G: ctx) (A e B a r R: expr):
-  $ ⟨ A :: G ⊢ e : B ⟩ $ > $ ⟨ G ⊢ a : A ⟩ $ > $ ⟮ e [ #0 ↦ a ] = r ⟯ $ > $ ⟮ B [ #0 ↦ a ] = R ⟯ $ >
+  $ ⟨ G ▷ A ⊢ e : B ⟩ $ > $ ⟨ G ⊢ a : A ⟩ $ > $ ⟮ e [ #0 ↦ a ] = r ⟯ $ > $ ⟮ B [ #0 ↦ a ] = R ⟯ $ >
   $ ⟦ G ⊢ (λ A. e) @ a ≡ r : R ⟧ $;
 --| Eta: `(fun x : A => e x) ≡ e : (x : A) → B`, for `e : (x : A) → B`.
 axiom eta (G: ctx) (A B e e1: expr):
-  $ ⟨ G ⊢ e : Π A. B ⟩ $ > $ ⟮ₗ e [ #0 ↑ 1 ] = e1 ⟯ $ >
+  $ ⟨ G ⊢ e : Π A. B ⟩ $ > $ ⟮₀ e ↑ 1 = e1 ⟯ $ >
   $ ⟦ G ⊢ λ A. e1 @ #0 ≡ e : Π A. B ⟧ $;
 --| Proof irrelevance: `h ≡ h2 : p` for two proofs of a proposition `p`.
 axiom proofIrrel (G: ctx) (p h h2: expr):
@@ -504,7 +517,7 @@ axiom instDF (k: nat) (G0 G1 G: ctx) (A0 a e e2 A r r2 R: expr):
 --| (see notes/audit-lean-mm0.md §6).
 axiom weakDF (n: nat) (G G2: ctx) (e e2 A r r2 R: expr):
   $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ cext n G G2 $ >
-  $ ⟮ₗ e [ #0 ↑ n ] = r ⟯ $ > $ ⟮ₗ e2 [ #0 ↑ n ] = r2 ⟯ $ > $ ⟮ₗ A [ #0 ↑ n ] = R ⟯ $ >
+  $ ⟮₀ e ↑ n = r ⟯ $ > $ ⟮₀ e2 ↑ n = r2 ⟯ $ > $ ⟮₀ A ↑ n = R ⟯ $ >
   $ ⟦ G2 ⊢ r ≡ r2 : R ⟧ $;
 
 -- Level equivalence of expressions -----------------------------------------

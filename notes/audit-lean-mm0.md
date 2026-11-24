@@ -809,7 +809,8 @@ plays no part in the check: what is checked is every declaration, as above.
 
 `spec/lean.mm0` declares notations, and its formulas are written with them: `⟦ G ⊢ e ≡ e2 : A ⟧`
 for `deq G e e2 A`, `⟨ G ⊢ e : A ⟩` for `ty G e A`, `λ A. e` and `Π A. B` for `lam` and `pi`,
-`f @ a` for `app`, `#i` for `bvar`, `A :: G` and `[]` for `cons` and `nil`, `a ⊔ b` for
+`f @ a` for `app`, `#i` for `bvar`, `A :: G` and `[]` for `cons` and `nil` (contexts are
+written `G ▷ A` since 2026-11-23, below), `a ⊔ b` for
 `lmax`, and `≤`, `<` and `≈` for `le`, `lt` and `leqv`. Each has an ASCII form as well,
 declared first (`[[ G |- e == e2 : A ]]`, `<< G |- e : A >>`, `\ A. e`, `\Pi A. B`, `\/`, `<=`, `~=`);
 the Unicode form is declared last. The delimiters are `( ) . #`.
@@ -893,6 +894,22 @@ notation (the delimiter that also writes a bound variable), not an application o
 argument is the number `k`. Checked as before: a certificate made before the change (`induct`)
 verifies with both verifiers against the new text, in both modes, and `scripts/tg-lean.py
 --check` passes unchanged.
+
+Contexts left to right, and the lift at cutoff 0 (2026-11-23): two definitions with notations.
+`G ▷ A` (`snoc G A`, ASCII `G |> A`) is defined as `A :: G`, and contexts are written with it,
+so a context reads in the order of its binders, each type to the right of the variables it
+mentions (`[] ▷ Sort u ▷ (Π #0. Π #1. Prop)` for `α`, then `r : α → α → Prop`); `#0` is the last
+entry. An infix notation cannot exchange its arguments, hence the definition. The lists that
+are not contexts (the nested occurrences) keep `::`. `⟮₀ e ↑ n = e2 ⟯` (`lift0 n e e2`, ASCII
+`{up0| e ^ n = e2 |}`) is defined as `⟮ₗ e [ #0 ↑ n ] = e2 ⟯`. As with the numerals and `Prop`,
+definitions change the statements but not their content: unfolding the two gives back the old
+formulas. Checked by the encoding, which unfolds the spec's definitions: the classes of clauses
+that `scripts/tg-lean.py` generates from the new text (and every `lrel_A` statement) are those
+generated from the old one, and the model's proofs are unchanged. (A certificate made before
+does not verify against the new text, since a certificate restates the spec's statements.) The
+generator proves, once per certificate and rule it uses, a lemma that states the rule with the
+definitions unfolded, and works with the unfolded forms; certificates grow by 0.1 to 0.4%.
+`lean0 modes` reads the clauses with the two definitions unfolded.
 
 The generated statements keep the prefix form (`deq G e e2 A`), which MM0 allows for every
 term with or without a notation; the statement checker reads only that form. One notation

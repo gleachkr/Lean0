@@ -136,11 +136,11 @@ theorem sty_nil (G: ctx) (h A: expr): $ sty G h A h A $;
 
 theorem sty_app (G: ctx) (h A f a B C C2: expr): $ sty G h A f (pi B C) $ > $ ty G a B $ > $ inst nz C a C2 $ > $ sty G h A (app f a) C2 $;
 
-theorem cwf_pi (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (A B A2: expr) (u: lvl): $ add d np k $ > $ closed k A $ > $ sinst D nz n k A A2 $ > $ ty Ctx A2 (srt u) $ > $ ulevel l u $ > $ cwf D n np l i (cons A2 Ctx) (s d) B $ > $ cwf D n np l i Ctx d (pi A B) $;
+theorem cwf_pi (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (A B A2: expr) (u: lvl): $ add d np k $ > $ closed k A $ > $ sinst D nz n k A A2 $ > $ ty Ctx A2 (srt u) $ > $ ulevel l u $ > $ cwf D n np l i (snoc Ctx A2) (s d) B $ > $ cwf D n np l i Ctx d (pi A B) $;
 
-theorem cwf_pi_rec (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (A B A2 B2: expr) (u: lvl): $ add d np k $ > $ sinst D nz n k A A2 $ > $ ty Ctx A2 (srt u) $ > $ ulevel l u $ > $ ipos D n np d A $ > $ inst nz B (srt lz) B2 $ > $ lift n1 nz B2 B $ > $ cwf D n np l i (cons A2 Ctx) (s d) B $ > $ cwf D n np l i Ctx d (pi A B) $;
+theorem cwf_pi_rec (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (A B A2 B2: expr) (u: lvl): $ add d np k $ > $ sinst D nz n k A A2 $ > $ ty Ctx A2 (srt u) $ > $ ulevel l u $ > $ ipos D n np d A $ > $ inst nz B (srt lz) B2 $ > $ lift0 n1 B2 B $ > $ cwf D n np l i (snoc Ctx A2) (s d) B $ > $ cwf D n np l i Ctx d (pi A B) $;
 
-theorem cwf_res (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (K K2: expr) (b: blk) (P: ctx) (T: tys) (F: expr) (C: ctors) (R R2 S: expr): $ indapp D n np d K i $ > $ add d np k $ > $ sinst D nz n k K K2 $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ pis P F R $ > $ lift k nz R R2 $ > $ sty Ctx (ind_ty D i) R2 K2 S $ > $ cwf D n np l i Ctx d K $;
+theorem cwf_res (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (K K2: expr) (b: blk) (P: ctx) (T: tys) (F: expr) (C: ctors) (R R2 S: expr): $ indapp D n np d K i $ > $ add d np k $ > $ sinst D nz n k K K2 $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ pis P F R $ > $ lift0 k R R2 $ > $ sty Ctx (ind_ty D i) R2 K2 S $ > $ cwf D n np l i Ctx d K $;
 
 theorem ctors_wf_nil (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx): $ ctors_wf D n np l i Ctx cnil $;
 
@@ -152,7 +152,7 @@ theorem tys_wf_cons (D: ind) (n np: nat) (l l2: lvl) (i k: nat) (Ctx: ctx) (F: e
 
 theorem ctx_wf_nil (G: ctx): $ ctx_wf G nil $;
 
-theorem ctx_wf_cons (G P G2: ctx) (A: expr) (u: lvl): $ ctx_wf G P $ > $ capp P G G2 $ > $ ty G2 A (srt u) $ > $ ctx_wf G (cons A P) $;
+theorem ctx_wf_cons (G P G2: ctx) (A: expr) (u: lvl): $ ctx_wf G P $ > $ capp P G G2 $ > $ ty G2 A (srt u) $ > $ ctx_wf G (snoc P A) $;
 
 theorem tys_ty_nil (Ctx: ctx): $ tys_ty Ctx tnil $;
 
@@ -180,9 +180,9 @@ theorem large_single (G G2: ctx) (D: ind) (b: blk) (P: ctx) (F K: expr) (np: nat
 
 theorem fir_res (D: ind) (np: nat) (Ctx: ctx) (d: nat) (K: expr): $ indapp D n1 np d K nz $ > $ fir D np Ctx d K $;
 
-theorem fir_arg (D: ind) (np: nat) (Ctx: ctx) (d k: nat) (A A2 B: expr): $ leaf_has nz B $ > $ add d np k $ > $ sinst D nz n1 k A A2 $ > $ fir D np (cons A2 Ctx) (s d) B $ > $ fir D np Ctx d (pi A B) $;
+theorem fir_arg (D: ind) (np: nat) (Ctx: ctx) (d k: nat) (A A2 B: expr): $ leaf_has nz B $ > $ add d np k $ > $ sinst D nz n1 k A A2 $ > $ fir D np (snoc Ctx A2) (s d) B $ > $ fir D np Ctx d (pi A B) $;
 
-theorem fir_prop (D: ind) (np: nat) (Ctx: ctx) (d k: nat) (A A2 B: expr): $ add d np k $ > $ sinst D nz n1 k A A2 $ > $ ty Ctx A2 Prop $ > $ fir D np (cons A2 Ctx) (s d) B $ > $ fir D np Ctx d (pi A B) $;
+theorem fir_prop (D: ind) (np: nat) (Ctx: ctx) (d k: nat) (A A2 B: expr): $ add d np k $ > $ sinst D nz n1 k A A2 $ > $ ty Ctx A2 Prop $ > $ fir D np (snoc Ctx A2) (s d) B $ > $ fir D np Ctx d (pi A B) $;
 
 theorem proj_ok_sort (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (j i: nat) (F: expr) (C: ctors) (l: lvl): $ ind_data D b P T $ > $ nth_ty T j F C $ > $ isort F nz l $ > $ leqv (lmax (ls lz) l) l $ > $ proj_ok G D j i $;
 
@@ -190,25 +190,25 @@ theorem proj_ok_prop (G G2: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (j i np n m
 
 theorem fprops_z (D: ind) (n np: nat) (Ctx: ctx) (d: nat) (K: expr): $ fprops D n np Ctx d nz K $;
 
-theorem fprops_s (D: ind) (n np: nat) (Ctx: ctx) (d cnt k: nat) (A A2 B: expr): $ add d np k $ > $ sinst D nz n k A A2 $ > $ ty Ctx A2 Prop $ > $ fprops D n np (cons A2 Ctx) (s d) cnt B $ > $ fprops D n np Ctx d (s cnt) (pi A B) $;
+theorem fprops_s (D: ind) (n np: nat) (Ctx: ctx) (d cnt k: nat) (A A2 B: expr): $ add d np k $ > $ sinst D nz n k A A2 $ > $ ty Ctx A2 Prop $ > $ fprops D n np (snoc Ctx A2) (s d) cnt B $ > $ fprops D n np Ctx d (s cnt) (pi A B) $;
 
-theorem add_eqs_i (G: ctx) (f: expr): $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (cons nat_ty G) (app (app f (bvar nz)) nat_zero) (bvar nz) nat_ty $ > $ deq (cons nat_ty (cons nat_ty G)) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app nat_succ (app (app f (bvar n1)) (bvar nz))) nat_ty $ > $ add_eqs G f $;
+theorem add_eqs_i (G: ctx) (f: expr): $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (snoc G nat_ty) (app (app f (bvar nz)) nat_zero) (bvar nz) nat_ty $ > $ deq (snoc (snoc G nat_ty) nat_ty) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app nat_succ (app (app f (bvar n1)) (bvar nz))) nat_ty $ > $ add_eqs G f $;
 
-theorem pred_eqs_i (G: ctx) (p: expr): $ closed nz p $ > $ ty G p (pi nat_ty nat_ty) $ > $ deq G (app p nat_zero) nat_zero nat_ty $ > $ deq (cons nat_ty G) (app p (app nat_succ (bvar nz))) (bvar nz) nat_ty $ > $ pred_eqs G p $;
+theorem pred_eqs_i (G: ctx) (p: expr): $ closed nz p $ > $ ty G p (pi nat_ty nat_ty) $ > $ deq G (app p nat_zero) nat_zero nat_ty $ > $ deq (snoc G nat_ty) (app p (app nat_succ (bvar nz))) (bvar nz) nat_ty $ > $ pred_eqs G p $;
 
-theorem sub_eqs_i (G: ctx) (f p: expr): $ pred_eqs G p $ > $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (cons nat_ty G) (app (app f (bvar nz)) nat_zero) (bvar nz) nat_ty $ > $ deq (cons nat_ty (cons nat_ty G)) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app p (app (app f (bvar n1)) (bvar nz))) nat_ty $ > $ sub_eqs G f p $;
+theorem sub_eqs_i (G: ctx) (f p: expr): $ pred_eqs G p $ > $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (snoc G nat_ty) (app (app f (bvar nz)) nat_zero) (bvar nz) nat_ty $ > $ deq (snoc (snoc G nat_ty) nat_ty) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app p (app (app f (bvar n1)) (bvar nz))) nat_ty $ > $ sub_eqs G f p $;
 
-theorem mul_eqs_i (G: ctx) (f fa: expr): $ add_eqs G fa $ > $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (cons nat_ty G) (app (app f (bvar nz)) nat_zero) nat_zero nat_ty $ > $ deq (cons nat_ty (cons nat_ty G)) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app (app fa (app (app f (bvar n1)) (bvar nz))) (bvar n1)) nat_ty $ > $ mul_eqs G f fa $;
+theorem mul_eqs_i (G: ctx) (f fa: expr): $ add_eqs G fa $ > $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (snoc G nat_ty) (app (app f (bvar nz)) nat_zero) nat_zero nat_ty $ > $ deq (snoc (snoc G nat_ty) nat_ty) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app (app fa (app (app f (bvar n1)) (bvar nz))) (bvar n1)) nat_ty $ > $ mul_eqs G f fa $;
 
-theorem pow_eqs_i (G: ctx) (f fm fa: expr): $ mul_eqs G fm fa $ > $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (cons nat_ty G) (app (app f (bvar nz)) nat_zero) (app nat_succ nat_zero) nat_ty $ > $ deq (cons nat_ty (cons nat_ty G)) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app (app fm (app (app f (bvar n1)) (bvar nz))) (bvar n1)) nat_ty $ > $ pow_eqs G f fm fa $;
+theorem pow_eqs_i (G: ctx) (f fm fa: expr): $ mul_eqs G fm fa $ > $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (snoc G nat_ty) (app (app f (bvar nz)) nat_zero) (app nat_succ nat_zero) nat_ty $ > $ deq (snoc (snoc G nat_ty) nat_ty) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app (app fm (app (app f (bvar n1)) (bvar nz))) (bvar n1)) nat_ty $ > $ pow_eqs G f fm fa $;
 
-theorem beq_eqs_i (G: ctx) (f B t u: expr): $ closed nz f $ > $ closed nz B $ > $ closed nz t $ > $ closed nz u $ > $ ty G f (pi nat_ty (pi nat_ty B)) $ > $ deq G (app (app f nat_zero) nat_zero) t B $ > $ deq (cons nat_ty G) (app (app f nat_zero) (app nat_succ (bvar nz))) u B $ > $ deq (cons nat_ty G) (app (app f (app nat_succ (bvar nz))) nat_zero) u B $ > $ deq (cons nat_ty (cons nat_ty G)) (app (app f (app nat_succ (bvar n1))) (app nat_succ (bvar nz))) (app (app f (bvar n1)) (bvar nz)) B $ > $ beq_eqs G f B t u $;
+theorem beq_eqs_i (G: ctx) (f B t u: expr): $ closed nz f $ > $ closed nz B $ > $ closed nz t $ > $ closed nz u $ > $ ty G f (pi nat_ty (pi nat_ty B)) $ > $ deq G (app (app f nat_zero) nat_zero) t B $ > $ deq (snoc G nat_ty) (app (app f nat_zero) (app nat_succ (bvar nz))) u B $ > $ deq (snoc G nat_ty) (app (app f (app nat_succ (bvar nz))) nat_zero) u B $ > $ deq (snoc (snoc G nat_ty) nat_ty) (app (app f (app nat_succ (bvar n1))) (app nat_succ (bvar nz))) (app (app f (bvar n1)) (bvar nz)) B $ > $ beq_eqs G f B t u $;
 
-theorem ble_eqs_i (G: ctx) (f B t u: expr): $ closed nz f $ > $ closed nz B $ > $ closed nz t $ > $ closed nz u $ > $ ty G f (pi nat_ty (pi nat_ty B)) $ > $ deq (cons nat_ty G) (app (app f nat_zero) (bvar nz)) t B $ > $ deq (cons nat_ty G) (app (app f (app nat_succ (bvar nz))) nat_zero) u B $ > $ deq (cons nat_ty (cons nat_ty G)) (app (app f (app nat_succ (bvar n1))) (app nat_succ (bvar nz))) (app (app f (bvar n1)) (bvar nz)) B $ > $ ble_eqs G f B t u $;
+theorem ble_eqs_i (G: ctx) (f B t u: expr): $ closed nz f $ > $ closed nz B $ > $ closed nz t $ > $ closed nz u $ > $ ty G f (pi nat_ty (pi nat_ty B)) $ > $ deq (snoc G nat_ty) (app (app f nat_zero) (bvar nz)) t B $ > $ deq (snoc G nat_ty) (app (app f (app nat_succ (bvar nz))) nat_zero) u B $ > $ deq (snoc (snoc G nat_ty) nat_ty) (app (app f (app nat_succ (bvar n1))) (app nat_succ (bvar nz))) (app (app f (bvar n1)) (bvar nz)) B $ > $ ble_eqs G f B t u $;
 
-theorem shl_eqs_i (G: ctx) (f fm fa: expr): $ mul_eqs G fm fa $ > $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (cons nat_ty G) (app (app f (bvar nz)) nat_zero) (bvar nz) nat_ty $ > $ deq (cons nat_ty (cons nat_ty G)) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app (app f (app (app fm (lit (bd0 (bd1 b0)))) (bvar n1))) (bvar nz)) nat_ty $ > $ shl_eqs G f fm fa $;
+theorem shl_eqs_i (G: ctx) (f fm fa: expr): $ mul_eqs G fm fa $ > $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (snoc G nat_ty) (app (app f (bvar nz)) nat_zero) (bvar nz) nat_ty $ > $ deq (snoc (snoc G nat_ty) nat_ty) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app (app f (app (app fm (lit (bd0 (bd1 b0)))) (bvar n1))) (bvar nz)) nat_ty $ > $ shl_eqs G f fm fa $;
 
-theorem shr_eqs_i (G: ctx) (f fd: expr): $ closed nz f $ > $ closed nz fd $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (cons nat_ty G) (app (app f (bvar nz)) nat_zero) (bvar nz) nat_ty $ > $ deq (cons nat_ty (cons nat_ty G)) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app (app fd (app (app f (bvar n1)) (bvar nz))) (lit (bd0 (bd1 b0)))) nat_ty $ > $ shr_eqs G f fd $;
+theorem shr_eqs_i (G: ctx) (f fd: expr): $ closed nz f $ > $ closed nz fd $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (snoc G nat_ty) (app (app f (bvar nz)) nat_zero) (bvar nz) nat_ty $ > $ deq (snoc (snoc G nat_ty) nat_ty) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app (app fd (app (app f (bvar n1)) (bvar nz))) (lit (bd0 (bd1 b0)))) nat_ty $ > $ shr_eqs G f fd $;
 
 theorem bvar (G: ctx) (i: nat) (A: expr): $ lookup G i A $ > $ ty G (bvar i) A $;
 
@@ -220,21 +220,21 @@ theorem sortDF (G: ctx) (l l2: lvl): $ leqv l l2 $ > $ deq G (srt l) (srt l2) (s
 
 theorem appDF (G: ctx) (f f2 A B a a2 R: expr): $ deq G f f2 (pi A B) $ > $ deq G a a2 A $ > $ inst nz B a R $ > $ deq G (app f a) (app f2 a2) R $;
 
-theorem lamDF (G: ctx) (u: lvl) (A A2 b b2 B: expr): $ deq G A A2 (srt u) $ > $ deq (cons A G) b b2 B $ > $ deq G (lam A b) (lam A2 b2) (pi A B) $;
+theorem lamDF (G: ctx) (u: lvl) (A A2 b b2 B: expr): $ deq G A A2 (srt u) $ > $ deq (snoc G A) b b2 B $ > $ deq G (lam A b) (lam A2 b2) (pi A B) $;
 
-theorem forallEDF (G: ctx) (u v: lvl) (A A2 B B2: expr): $ deq G A A2 (srt u) $ > $ deq (cons A G) B B2 (srt v) $ > $ deq G (pi A B) (pi A2 B2) (srt (limax u v)) $;
+theorem forallEDF (G: ctx) (u v: lvl) (A A2 B B2: expr): $ deq G A A2 (srt u) $ > $ deq (snoc G A) B B2 (srt v) $ > $ deq G (pi A B) (pi A2 B2) (srt (limax u v)) $;
 
 theorem defeqDF (G: ctx) (u: lvl) (A B e e2: expr): $ deq G A B (srt u) $ > $ deq G e e2 A $ > $ deq G e e2 B $;
 
-theorem beta (G: ctx) (A e B a r R: expr): $ ty (cons A G) e B $ > $ ty G a A $ > $ inst nz e a r $ > $ inst nz B a R $ > $ deq G (app (lam A e) a) r R $;
+theorem beta (G: ctx) (A e B a r R: expr): $ ty (snoc G A) e B $ > $ ty G a A $ > $ inst nz e a r $ > $ inst nz B a R $ > $ deq G (app (lam A e) a) r R $;
 
-theorem eta (G: ctx) (A B e e1: expr): $ ty G e (pi A B) $ > $ lift n1 nz e e1 $ > $ deq G (lam A (app e1 (bvar nz))) e (pi A B) $;
+theorem eta (G: ctx) (A B e e1: expr): $ ty G e (pi A B) $ > $ lift0 n1 e e1 $ > $ deq G (lam A (app e1 (bvar nz))) e (pi A B) $;
 
 theorem proofIrrel (G: ctx) (p h h2: expr): $ ty G p Prop $ > $ ty G h p $ > $ ty G h2 p $ > $ deq G h h2 p $;
 
 theorem instDF (k: nat) (G0 G1 G: ctx) (A0 a e e2 A r r2 R: expr): $ ty G0 a A0 $ > $ cinst k G0 A0 a G1 G $ > $ deq G1 e e2 A $ > $ inst k e a r $ > $ inst k e2 a r2 $ > $ inst k A a R $ > $ deq G r r2 R $;
 
-theorem weakDF (n: nat) (G G2: ctx) (e e2 A r r2 R: expr): $ deq G e e2 A $ > $ cext n G G2 $ > $ lift n nz e r $ > $ lift n nz e2 r2 $ > $ lift n nz A R $ > $ deq G2 r r2 R $;
+theorem weakDF (n: nat) (G G2: ctx) (e e2 A r r2 R: expr): $ deq G e e2 A $ > $ cext n G G2 $ > $ lift0 n e r $ > $ lift0 n e2 r2 $ > $ lift0 n A R $ > $ deq G2 r r2 R $;
 
 theorem eeqv_df (G: ctx) (e e2 A: expr): $ ty G e A $ > $ eeqv e e2 $ > $ deq G e e2 A $;
 
@@ -248,7 +248,7 @@ theorem quot_ind_ty (G: ctx) (u: lvl): $ ty G (quot_ind u) (pi (srt u) (pi (pi (
 
 theorem quot_lift_mk_sty (G: ctx) (u v: lvl) (x1 x2 x3 x4 x5: expr) (v1: lvl) (y1 y2 a T: expr): $ sty G (quot_lift u v) (pi (srt u) (pi (pi (bvar nz) (pi (bvar n1) Prop)) (pi (srt v) (pi (pi (bvar n2) (bvar n1)) (pi (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (pi (app (app (quot u) (bvar n4)) (bvar n3)) (bvar n3))))))) (app (app (app (app (app (app (quot_lift u v) x1) x2) x3) x4) x5) (app (app (app (quot_mk v1) y1) y2) a)) T $ > $ ty G a x1 $ > $ deq G (app (app (app (app (app (app (quot_lift u v) x1) x2) x3) x4) x5) (app (app (app (quot_mk v1) y1) y2) a)) (app x4 a) T $;
 
-theorem quot_lift_mk (u v: lvl): $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (app (app (app (app (app (app (quot_lift u v) (bvar n5)) (bvar n4)) (bvar n3)) (bvar n2)) (bvar n1)) (app (app (app (quot_mk u) (bvar n5)) (bvar n4)) (bvar nz))) (app (bvar n2) (bvar nz)) (bvar n3) $;
+theorem quot_lift_mk (u v: lvl): $ deq (snoc (snoc (snoc (snoc (snoc (snoc nil (srt u)) (pi (bvar nz) (pi (bvar n1) Prop))) (srt v)) (pi (bvar n2) (bvar n1))) (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1))))))) (bvar n4)) (app (app (app (app (app (app (quot_lift u v) (bvar n5)) (bvar n4)) (bvar n3)) (bvar n2)) (bvar n1)) (app (app (app (quot_mk u) (bvar n5)) (bvar n4)) (bvar nz))) (app (bvar n2) (bvar nz)) (bvar n3) $;
 
 theorem lit_zero (G: ctx): $ deq G (lit b0) (ind_ctor nat_D nz nz) (ind_ty nat_D nz) $;
 
