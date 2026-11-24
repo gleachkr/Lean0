@@ -925,66 +925,30 @@ fn eeqv_needed<'t>(g: &Gen, tc: &TypeChecker<'_, 't, '_>, all: &DeclarMap<'t>) -
     out
 }
 
-/// A quotient primitive as the spec's constant (`quot`, `quot_mk`, `quot_lift`, `quot_ind`,
-/// typed by `quot_ty` and so on, reducing by `quot_lift_mk`; audit §4), when
-/// the export's type is the spec's: `theorem Quot_df` (`constDF`, from `eeqv_df`), and for
+/// A quotient primitive as the spec's constant (`quot`, `quot_mk`, `quot_lift`, `quot_ind`: `cst` of an
+/// atom of the spec, typed by `quot_ty` and so on, reducing by `quot_lift_mk`; audit §4), when
+/// the export's type is the spec's: `theorem Quot_df` and `Quot_closed` (`spec_axiom`), and for
 /// `Quot.lift` the reduction lemma `Quot_lift_mk` (`Quot.ind` on `Quot.mk` reduces to a proof
 /// of the same proposition: proof irrelevance). An error
 /// when the type differs: no axioms are generated for a quotient primitive.
 fn quot_spec<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, ty: nanoda_lib::util::ExprPtr<'t>) -> R<()> {
-    let (term, ty_ax, eqv_ax, red) = match sig.lean_name.as_str() {
-        "Quot" => ("quot", "quot_ty", "eeqv_quot", None),
-        "Quot.mk" => ("quot_mk", "quot_mk_ty", "eeqv_quot_mk", None),
-        "Quot.lift" => ("quot_lift", "quot_lift_ty", "eeqv_quot_lift", Some("quot_lift_mk")),
-        "Quot.ind" => ("quot_ind", "quot_ind_ty", "eeqv_quot_ind", None),
+    let (term, ty_ax, red) = match sig.lean_name.as_str() {
+        "Quot" => ("quot", "quot_ty", None),
+        "Quot.mk" => ("quot_mk", "quot_mk_ty", None),
+        "Quot.lift" => ("quot_lift", "quot_lift_ty", Some("quot_lift_mk")),
+        "Quot.ind" => ("quot_ind", "quot_ind_ty", None),
         n => return Err(format!("unknown quotient primitive {n}")),
     };
     if !el.g.env.has_term(term) || !el.g.env.has_thm(ty_ax) {
         return Err("the spec has no such quotient primitive".into())
     }
-    let t = el.tr(ty)?;
+    // a constant of the spec like `propext`: `c_df` and `c_closed`
+    if !spec_axiom(el, sig, ty, term, ty_ax)? {
+        return Err("the quotient primitive's type or universe parameters are not the spec's".into())
+    }
     let g = &mut *el.g;
-    let term = g.env.term_id(term);
-    let n = g.env.terms[term.0 as usize].args.len();
-    if n != sig.lvl_names.len() {
-        return Err("the quotient primitive's universe parameters are not the spec's".into())
-    }
-    let gv = g.env.var(0);
+    let n = sig.lvl_names.len();
     let us: Vec<E> = (0..n).map(|i| g.env.var(1 + i as u16)).collect();
-    let us2: Vec<E> = (0..n).map(|i| g.env.var(1 + (n + i) as u16)).collect();
-    // the spec's typing axiom at `G, us`: `ty G (c us) T`
-    let ty_th = g.env.thm_id(ty_ax);
-    let concl = g.env.plain_concl(ty_th);
-    let args: Vec<E> = std::iter::once(gv).chain(us.iter().copied()).collect();
-    let stmt = g.env.subst(concl, &args);
-    let Some((_, [_, c1, spec_t])) = g.env.head(stmt) else { return Err(format!("{ty_ax}: not a typing")) };
-    let (c1, spec_t) = (*c1, *spec_t);
-    if spec_t != t {
-        return Err("the quotient primitive's type is not the spec's".into())
-    }
-    let c2 = g.env.app(term, &us2);
-    let hyps: Vec<E> = us.iter().zip(&us2).map(|(&a, &b)| g.env.app_n("leqv", &[a, b])).collect();
-    let concl = g.lean.deq(&mut g.env, gv, c1, c2, t);
-    let mut df_args = g.g_args(&sig.lvl_names);
-    let lvl_s = g.env.sort_names["lvl"];
-    for s in &sig.lvl_names {
-        let s2 = g.var_names_fresh2(s, &sig.lvl_names);
-        df_args.push((s2, lvl_s));
-    }
-    let proof = if g.replay {
-        None
-    } else {
-        let p_ty = g.env.thm(ty_th, &args, &[]).map_err(|e| e.0)?;
-        let hs: Vec<mm0kit::env::P> = hyps.iter().enumerate().map(|(i, &h)| g.env.hyp(i as u16, h)).collect();
-        let eqv_args: Vec<E> = us.iter().chain(&us2).copied().collect();
-        let p_eq = g.env.thm_n(eqv_ax, &eqv_args, &hs).map_err(|e| e.0)?;
-        Some(g.env.thm_n("eeqv_df", &[gv, c1, c2, t], &[p_ty, p_eq]).map_err(|e| e.0)?)
-    };
-    let spec_name = g.env.terms[term.0 as usize].name.clone();
-    let df_name = g.thms.fresh(&format!("{}_df", sig.cname));
-    let df = add_thm(&mut g.env, &df_name, df_args, hyps, concl, false, false, proof,
-        &format!("`{}` (the spec's `{spec_name}`) has its type, at any equivalent levels (`constDF`).", sig.lean_name))?;
-    g.consts.insert(sig.lean_name.clone(), ConstInfo { term, kind: ConstKind::Opaque, nlevels: n, ty_thm: df });
     if let Some(r) = red {
         // the spec's closed equation over any base context
         let name = g.thms.fresh(&format!("{}_mk", sig.cname));

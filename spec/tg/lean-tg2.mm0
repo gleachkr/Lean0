@@ -127,14 +127,6 @@ def cl_eeqv_ind_rec (.D .D2 .i .v .v2 .w: set): class =
   $ {w | ∃ D ∃ D2 ∃ i ∃ v ∃ v2 (w = ⟨ scons (ra_ind_eqv D D2) ∅ , ra_eeqv ⟨ kc_ind_rec , scons D (scons i (scons v ∅)) ⟩ ⟨ kc_ind_rec , scons D2 (scons i (scons v2 ∅)) ⟩ ⟩ ∧ lveq v v2)} $;
 def cl_eeqv_proj (.b .i .e .e2 .w: set): class =
   $ {w | ∃ b ∃ i ∃ e ∃ e2 (w = ⟨ scons (ra_eeqv e e2) ∅ , ra_eeqv ⟨ kc_proj , scons b (scons i (scons e ∅)) ⟩ ⟨ kc_proj , scons b (scons i (scons e2 ∅)) ⟩ ⟩)} $;
-def cl_eeqv_quot (.u .u2 .w: set): class =
-  $ {w | ∃ u ∃ u2 (w = ⟨ ∅ , ra_eeqv ⟨ kc_quot , scons u ∅ ⟩ ⟨ kc_quot , scons u2 ∅ ⟩ ⟩ ∧ lveq u u2)} $;
-def cl_eeqv_quot_mk (.u .u2 .w: set): class =
-  $ {w | ∃ u ∃ u2 (w = ⟨ ∅ , ra_eeqv ⟨ kc_quot_mk , scons u ∅ ⟩ ⟨ kc_quot_mk , scons u2 ∅ ⟩ ⟩ ∧ lveq u u2)} $;
-def cl_eeqv_quot_lift (.u .v .u2 .v2 .w: set): class =
-  $ {w | ∃ u ∃ v ∃ u2 ∃ v2 (w = ⟨ ∅ , ra_eeqv ⟨ kc_quot_lift , scons u (scons v ∅) ⟩ ⟨ kc_quot_lift , scons u2 (scons v2 ∅) ⟩ ⟩ ∧ lveq u u2 ∧ lveq v v2)} $;
-def cl_eeqv_quot_ind (.u .u2 .w: set): class =
-  $ {w | ∃ u ∃ u2 (w = ⟨ ∅ , ra_eeqv ⟨ kc_quot_ind , scons u ∅ ⟩ ⟨ kc_quot_ind , scons u2 ∅ ⟩ ⟩ ∧ lveq u u2)} $;
 def cl_ind_eqv_i (.D .D2 .b .P .P2 .N .N2 .T .T2 .w: set): class =
   $ {w | ∃ D ∃ D2 ∃ b ∃ P ∃ P2 ∃ N ∃ N2 ∃ T ∃ T2 (w = ⟨ scons (ra_ceqv P P2) (scons (ra_teqv T T2) (scons (ra_ceqv N N2) ∅)) , ra_ind_eqv D D2 ⟩ ∧ ra_ind_data D b P T ∈ lrel ∧ ra_ind_data D2 b P2 T2 ∈ lrel ∧ ra_ind_nested D N ∈ lrel ∧ ra_ind_nested D2 N2 ∈ lrel)} $;
 def cl_ceqv_nil (.w: set): class =
@@ -160,7 +152,7 @@ def cl_nst_group_cons (.G .D .I .X0 .X .j .i .ni .npi .N .N2 .w: set): class =
 
 --| The clauses of each relation.
 def pr_ulevel: class = $ cl_ulevel_prop ∪ cl_ulevel_le $;
-def pr_eeqv: class = $ cl_eeqv_refl ∪ (cl_eeqv_bvar ∪ (cl_eeqv_srt ∪ (cl_eeqv_app ∪ (cl_eeqv_lam ∪ (cl_eeqv_pi ∪ (cl_eeqv_lit ∪ (cl_eeqv_cst ∪ (cl_eeqv_ind_ty ∪ (cl_eeqv_ind_ctor ∪ (cl_eeqv_ind_rec ∪ (cl_eeqv_proj ∪ (cl_eeqv_quot ∪ (cl_eeqv_quot_mk ∪ (cl_eeqv_quot_lift ∪ cl_eeqv_quot_ind)))))))))))))) $;
+def pr_eeqv: class = $ cl_eeqv_refl ∪ (cl_eeqv_bvar ∪ (cl_eeqv_srt ∪ (cl_eeqv_app ∪ (cl_eeqv_lam ∪ (cl_eeqv_pi ∪ (cl_eeqv_lit ∪ (cl_eeqv_cst ∪ (cl_eeqv_ind_ty ∪ (cl_eeqv_ind_ctor ∪ (cl_eeqv_ind_rec ∪ cl_eeqv_proj)))))))))) $;
 def pr_ind_eqv: class = $ cl_ind_eqv_i $;
 def pr_ceqv: class = $ cl_ceqv_nil ∪ cl_ceqv_cons $;
 def pr_teqv: class = $ cl_teqv_nil ∪ cl_teqv_cons $;
@@ -248,23 +240,6 @@ theorem lrel2_eeqv_proj (G: hyps) (A1 A2 A3 A4: class):
   $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
   $ G ⇒ ra_eeqv A3 A4 ∈ lrel2 $ >
   $ G ⇒ ra_eeqv ⟨ kc_proj , scons A1 (scons A2 (scons A3 ∅)) ⟩ ⟨ kc_proj , scons A1 (scons A2 (scons A4 ∅)) ⟩ ∈ lrel2 $;
-theorem lrel2_eeqv_quot (G: hyps) (A1 A2: class):
-  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ lveq A1 A2 $ >
-  $ G ⇒ ra_eeqv ⟨ kc_quot , scons A1 ∅ ⟩ ⟨ kc_quot , scons A2 ∅ ⟩ ∈ lrel2 $;
-theorem lrel2_eeqv_quot_mk (G: hyps) (A1 A2: class):
-  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ lveq A1 A2 $ >
-  $ G ⇒ ra_eeqv ⟨ kc_quot_mk , scons A1 ∅ ⟩ ⟨ kc_quot_mk , scons A2 ∅ ⟩ ∈ lrel2 $;
-theorem lrel2_eeqv_quot_lift (G: hyps) (A1 A2 A3 A4: class):
-  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
-  $ G ⇒ lveq A1 A3 $ >
-  $ G ⇒ lveq A2 A4 $ >
-  $ G ⇒ ra_eeqv ⟨ kc_quot_lift , scons A1 (scons A2 ∅) ⟩ ⟨ kc_quot_lift , scons A3 (scons A4 ∅) ⟩ ∈ lrel2 $;
-theorem lrel2_eeqv_quot_ind (G: hyps) (A1 A2: class):
-  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ lveq A1 A2 $ >
-  $ G ⇒ ra_eeqv ⟨ kc_quot_ind , scons A1 ∅ ⟩ ⟨ kc_quot_ind , scons A2 ∅ ⟩ ∈ lrel2 $;
 theorem lrel2_ind_eqv_i (G: hyps) (A1 A2 A3 A4 A5 A6 A7 A8 A9: class):
   $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
   $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ > $ G ⇒ A7 ∈ trees ω $ > $ G ⇒ A8 ∈ trees ω $ >
@@ -337,10 +312,6 @@ theorem eeqv_ind_ty (D D2: ind) (i: nat): $ ind_eqv D D2 $ > $ eeqv (ind_ty D i)
 theorem eeqv_ind_ctor (D D2: ind) (i c: nat): $ ind_eqv D D2 $ > $ eeqv (ind_ctor D i c) (ind_ctor D2 i c) $;
 theorem eeqv_ind_rec (D D2: ind) (i: nat) (v v2: lvl): $ ind_eqv D D2 $ > $ leqv v v2 $ > $ eeqv (ind_rec D i v) (ind_rec D2 i v2) $;
 theorem eeqv_proj (b: blk) (i: nat) (e e2: expr): $ eeqv e e2 $ > $ eeqv (proj b i e) (proj b i e2) $;
-theorem eeqv_quot (u u2: lvl): $ leqv u u2 $ > $ eeqv (quot u) (quot u2) $;
-theorem eeqv_quot_mk (u u2: lvl): $ leqv u u2 $ > $ eeqv (quot_mk u) (quot_mk u2) $;
-theorem eeqv_quot_lift (u v u2 v2: lvl): $ leqv u u2 $ > $ leqv v v2 $ > $ eeqv (quot_lift u v) (quot_lift u2 v2) $;
-theorem eeqv_quot_ind (u u2: lvl): $ leqv u u2 $ > $ eeqv (quot_ind u) (quot_ind u2) $;
 theorem ind_eqv_i (D D2: ind) (b: blk) (P P2 N N2: ctx) (T T2: tys): $ ind_data D b P T $ > $ ind_data D2 b P2 T2 $ > $ ceqv P P2 $ > $ teqv T T2 $ > $ ind_nested D N $ > $ ind_nested D2 N2 $ > $ ceqv N N2 $ > $ ind_eqv D D2 $;
 theorem ceqv_nil: $ ceqv nil nil $;
 theorem ceqv_cons (A A2: expr) (G G2: ctx): $ eeqv A A2 $ > $ ceqv G G2 $ > $ ceqv (cons A G) (cons A2 G2) $;
@@ -378,7 +349,7 @@ theorem lrel2_ulevel_cases (G: hyps) {l_v u_v: set} (t1 t2: set):
   $ G ⇒ ra_ulevel t1 t2 ∈ lrel2 $ >
   $ G ⇒ ∃ l_v ∃ u_v (t1 = l_v ∧ t2 = u_v ∧ lveq l_v ⟨ kc_lz , ∅ ⟩) ∨
       ∃ l_v ∃ u_v (t1 = l_v ∧ t2 = u_v ∧ lveq ⟨ kc_lmax , scons l_v (scons u_v ∅) ⟩ l_v) $;
-theorem lrel2_eeqv_cases (G: hyps) {e_v i_v l_v l2 f_v a_v f2 a2 A b_v A2 b2 n_v S S2 D D2 c_v v_v v2 e2 u_v u2: set} (t1 t2: set):
+theorem lrel2_eeqv_cases (G: hyps) {e_v i_v l_v l2 f_v a_v f2 a2 A b_v A2 b2 n_v S S2 D D2 c_v v_v v2 e2: set} (t1 t2: set):
   $ G ⇒ ra_eeqv t1 t2 ∈ lrel2 $ >
   $ G ⇒ ∃ e_v (t1 = e_v ∧ t2 = e_v) ∨
       ∃ i_v (t1 = ⟨ kc_bvar , scons i_v ∅ ⟩ ∧ t2 = ⟨ kc_bvar , scons i_v ∅ ⟩) ∨
@@ -391,11 +362,7 @@ theorem lrel2_eeqv_cases (G: hyps) {e_v i_v l_v l2 f_v a_v f2 a2 A b_v A2 b2 n_v
       ∃ D ∃ D2 ∃ i_v (t1 = ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩ ∧ t2 = ⟨ kc_ind_ty , scons D2 (scons i_v ∅) ⟩ ∧ ra_ind_eqv D D2 ∈ lrel2) ∨
       ∃ D ∃ D2 ∃ i_v ∃ c_v (t1 = ⟨ kc_ind_ctor , scons D (scons i_v (scons c_v ∅)) ⟩ ∧ t2 = ⟨ kc_ind_ctor , scons D2 (scons i_v (scons c_v ∅)) ⟩ ∧ ra_ind_eqv D D2 ∈ lrel2) ∨
       ∃ D ∃ D2 ∃ i_v ∃ v_v ∃ v2 (t1 = ⟨ kc_ind_rec , scons D (scons i_v (scons v_v ∅)) ⟩ ∧ t2 = ⟨ kc_ind_rec , scons D2 (scons i_v (scons v2 ∅)) ⟩ ∧ ra_ind_eqv D D2 ∈ lrel2 ∧ lveq v_v v2) ∨
-      ∃ b_v ∃ i_v ∃ e_v ∃ e2 (t1 = ⟨ kc_proj , scons b_v (scons i_v (scons e_v ∅)) ⟩ ∧ t2 = ⟨ kc_proj , scons b_v (scons i_v (scons e2 ∅)) ⟩ ∧ ra_eeqv e_v e2 ∈ lrel2) ∨
-      ∃ u_v ∃ u2 (t1 = ⟨ kc_quot , scons u_v ∅ ⟩ ∧ t2 = ⟨ kc_quot , scons u2 ∅ ⟩ ∧ lveq u_v u2) ∨
-      ∃ u_v ∃ u2 (t1 = ⟨ kc_quot_mk , scons u_v ∅ ⟩ ∧ t2 = ⟨ kc_quot_mk , scons u2 ∅ ⟩ ∧ lveq u_v u2) ∨
-      ∃ u_v ∃ v_v ∃ u2 ∃ v2 (t1 = ⟨ kc_quot_lift , scons u_v (scons v_v ∅) ⟩ ∧ t2 = ⟨ kc_quot_lift , scons u2 (scons v2 ∅) ⟩ ∧ lveq u_v u2 ∧ lveq v_v v2) ∨
-      ∃ u_v ∃ u2 (t1 = ⟨ kc_quot_ind , scons u_v ∅ ⟩ ∧ t2 = ⟨ kc_quot_ind , scons u2 ∅ ⟩ ∧ lveq u_v u2) $;
+      ∃ b_v ∃ i_v ∃ e_v ∃ e2 (t1 = ⟨ kc_proj , scons b_v (scons i_v (scons e_v ∅)) ⟩ ∧ t2 = ⟨ kc_proj , scons b_v (scons i_v (scons e2 ∅)) ⟩ ∧ ra_eeqv e_v e2 ∈ lrel2) $;
 theorem lrel2_ind_eqv_cases (G: hyps) {D D2 b_v P P2 N N2 T T2: set} (t1 t2: set):
   $ G ⇒ ra_ind_eqv t1 t2 ∈ lrel2 $ >
   $ G ⇒ ∃ D ∃ D2 ∃ b_v ∃ P ∃ P2 ∃ N ∃ N2 ∃ T ∃ T2 (t1 = D ∧ t2 = D2 ∧ ra_ind_data D b_v P T ∈ lrel ∧ ra_ind_data D2 b_v P2 T2 ∈ lrel ∧ ra_ceqv P P2 ∈ lrel2 ∧ ra_teqv T T2 ∈ lrel2 ∧ ra_ind_nested D N ∈ lrel ∧ ra_ind_nested D2 N2 ∈ lrel ∧ ra_ceqv N N2 ∈ lrel2) $;

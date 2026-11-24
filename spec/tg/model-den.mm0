@@ -13,12 +13,12 @@
 --   `pi A B`     the dependent function space (`cpi`) likewise;
 --   `proj b i e` the component `i + 1` of the value of `e` (a tuple: a
 --                constructor tag, then the fields);
--- and at the other expression constructors (`kexa`: opaque constants,
--- literals, the inductive constants, the quotient primitives) the value the
+-- and at the other expression constructors (`kexa`: constants, literals, the
+-- inductive constants) the value the
 -- hook `M` gives at `w`, the same at every `r` and cut to `u` (`mclip`); every
 -- other node gets `M`'s value (a set or `∅`, `sclip`). `M` is a parameter
--- here; the later layers define the inductive types, quotients, numerals and
--- the environment `Env` as one hook. Every expression denotes an element of
+-- here; the later layers define the inductive types, numerals and the
+-- environment `Env` (with the quotients' values) as one hook. Every expression denotes an element of
 -- `u` (`den_in_u`), so extending a valuation by the value of a typed term stays
 -- in `fseq u`. A context's tree denotes, at `w`, the set of valuations that
 -- satisfy it (`sat`). The judgments (`mdeq`, `minh`) quantify over every
@@ -87,8 +87,7 @@ def mclip (U A: class) (.y: set): class = $ {y | y ∊ A ∧ A ∈ U} $;
 def sclip (A: class) (.y: set): class = $ {y | y ∊ A ∧ isset A} $;
 --| The labels of the expression constructors the hook interprets.
 def kexa: class =
-  $ csn kc_cst ∪ (csn kc_lit ∪ (csn kc_ind_ty ∪ (csn kc_ind_ctor ∪ (csn kc_ind_rec ∪
-    (csn kc_quot ∪ (csn kc_quot_mk ∪ (csn kc_quot_lift ∪ csn kc_quot_ind))))))) $;
+  $ csn kc_cst ∪ (csn kc_lit ∪ (csn kc_ind_ty ∪ (csn kc_ind_ctor ∪ csn kc_ind_rec))) $;
 --| The labels of the expression constructors.
 def kstr: class =
   $ csn kc_bvar ∪ (csn kc_srt ∪ (csn kc_app ∪ (csn kc_lam ∪ (csn kc_pi ∪ (csn kc_proj ∪ kexa))))) $;
@@ -175,10 +174,6 @@ theorem kexa_lit (G: hyps): $ G ⇒ kc_lit ∈ kexa $;
 theorem kexa_ind_ty (G: hyps): $ G ⇒ kc_ind_ty ∈ kexa $;
 theorem kexa_ind_ctor (G: hyps): $ G ⇒ kc_ind_ctor ∈ kexa $;
 theorem kexa_ind_rec (G: hyps): $ G ⇒ kc_ind_rec ∈ kexa $;
-theorem kexa_quot (G: hyps): $ G ⇒ kc_quot ∈ kexa $;
-theorem kexa_quot_mk (G: hyps): $ G ⇒ kc_quot_mk ∈ kexa $;
-theorem kexa_quot_lift (G: hyps): $ G ⇒ kc_quot_lift ∈ kexa $;
-theorem kexa_quot_ind (G: hyps): $ G ⇒ kc_quot_ind ∈ kexa $;
 --| The labels of the expression constructors are in `kstr`, those of `kexa`
 --| with them; the labels below `kc_cst` and `kc_proj` are not in `kexa`.
 theorem kstr_bvar (G: hyps): $ G ⇒ kc_bvar ∈ kstr $;

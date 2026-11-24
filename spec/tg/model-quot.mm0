@@ -1,7 +1,9 @@
 -- model-quot.mm0: the quotient primitives (layer F of the reduction, audit §11):
--- the classes of the equivalence a relation generates, the values of `Quot`,
--- `Quot.mk`, `Quot.lift` and `Quot.ind` as parts of the hook, and their rules in
--- the model. Imports model-nst.mm0; proofs in model-quot.auf.
+-- the classes of the equivalence a relation generates, the environment of the
+-- constants (`Env`, `Envx`) and their part of the hook (`hcst`), the values of
+-- `Quot`, `Quot.mk`, `Quot.lift` and `Quot.ind` as the environment's at their
+-- atoms, and their rules in the model. Imports model-nst.mm0; proofs in
+-- model-quot.auf.
 
 import "model-nst.mm0";
 
@@ -155,77 +157,115 @@ theorem qlift_mk (G: hyps) (A R F: class) (a: set):
 
 
 -- --------------------------------------------------------------------------
--- The hook's parts for the quotient constants
+-- The environment of the constants
 -- --------------------------------------------------------------------------
--- The values of `quot u`, `quot_mk u`, `quot_lift u v` and `quot_ind u` at a
--- level valuation are traces over the types of their arguments: a type `a` of
--- `U_n` (`n` the value of `u`), a relation `r` on it, and then the quotient
--- `qty a r`, the class `qmk a r c` of `c`, and the lift `qlift a f q` of `f` (a
--- trace into a type `b` of `U_k`; the proof `h` that `f` respects `r` ranges
--- over `qhd a r f`). `quot_ind` is a proof: `∅`.
+-- A constant `cst a S` has the value the environment gives its atom at the
+-- values of the levels `S`. For a certificate's opaque and axiomatic constants
+-- that is a parameter of the model, a class `Env` with no axioms; at the seven
+-- atoms of the spec (the quotient primitives, `propext`, `Quot.sound`,
+-- `Classical.choice`) the environment `Envx` has the values the rules need.
 
---| At `quot l`: the quotients.
-def hquot (.u .l .e .z .w .y .n .a .r .i .j: set): class =
-  $ {z | ∃ u ∃ l ∃ e (z = ⟨ ⟨ u , ⟨ kc_quot , ⟨ scons l ∅ , e ⟩ ⟩ ⟩ , clam w lvals (sclip {y | ∃ n (n = lv l w ∧ y ∊ clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (qty a r)))}) ⟩)} $;
+--| The truth value of "`A` has an element".
+def tne (A: class) (.h .y: set): class =
+  $ {h | (h = ∅) ∧ (∃ y (y ∊ A))} $;
+--| @congr
+theorem tne_congr (A B: class): $ A ≐ B $ > $ tne A ≐ tne B $;
+--| @rewrite
+theorem sb_c_tne {x: set} (t: set x) (A: class x):
+  $ (⟦ x / t ⟧ (tne A)) ≐ tne (⟦ x / t ⟧ A) $;
 
---| The denotation of `quot`, for a hook `mcv H` with `H` extending `hquot`, at the level value `n`.
---| @freshen G a
---| @freshen G r
---| @freshen G i
---| @freshen G j
+--| The value of `Classical.choice` at the level value `N`: at a type `a` of that universe and a proof that `a` has an
+--| element, the choice operator's element of `a`.
+def chv (N: class) (.a .h: set): class = $ clam a (fv uni N) (clam h (tne a) (ch a)) $;
+--| @congr
+theorem chv_congr (A B: class): $ A ≐ B $ > $ chv A ≐ chv B $;
+--| @rewrite
+theorem sb_c_chv {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (chv A)) ≐ chv (⟦ x / t ⟧ A) $;
+
+theorem chv_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ chv A = chv B $;
+
+--| The environment of the opaque constants. No axiom mentions it.
+term Env: class;
+
+--| The graph of the choice function at the atom of `Classical.choice`: the value at a universe and a list of level values is
+--| `chv` at the list's first.
+def Envc (.e .x .y: set): class = $ {e | ∃ x ∃ y (e = ⟨ ⟨ x , ⟨ ⟨ kc_choice_atom , ∅ ⟩ , y ⟩ ⟩ , chv (fv y ∅) ⟩)} $;
+
+--| The graph of the quotients at the atom of `Quot`: at a list of level values, the trace over the types `a` of the
+--| universe of the list's first and the relations `r` on `a`, of the quotient `qty a r`.
+def Envq (.e .x .y .a .r .i .j: set): class = $ {e | ∃ x ∃ y (e = ⟨ ⟨ x , ⟨ ⟨ kc_quot_atom , ∅ ⟩ , y ⟩ ⟩ , sclip (clam a (fv uni (fv y ∅)) (clam r (cpi i a (cpi j a (fv uni ∅))) (qty a r))) ⟩)} $;
+
+--| The graph at the atom of `Quot.mk`: the trace of the classes `qmk a r c`.
+def Envqm (.e .x .y .a .r .i .j .c: set): class = $ {e | ∃ x ∃ y (e = ⟨ ⟨ x , ⟨ ⟨ kc_quot_mk_atom , ∅ ⟩ , y ⟩ ⟩ , sclip (clam a (fv uni (fv y ∅)) (clam r (cpi i a (cpi j a (fv uni ∅))) (clam c a (qmk a r c)))) ⟩)} $;
+
+--| The graph at the atom of `Quot.lift`: the trace of the lifts `qlift a f q` (the type `b` in the universe of the list's second).
+def Envql (.e .x .y .a .r .i .j .b .f .h .q: set): class = $ {e | ∃ x ∃ y (e = ⟨ ⟨ x , ⟨ ⟨ kc_quot_lift_atom , ∅ ⟩ , y ⟩ ⟩ , sclip (clam a (fv uni (fv y ∅)) (clam r (cpi i a (cpi j a (fv uni ∅))) (clam b (fv uni (fv y (suc ∅))) (clam f (cpi i a b) (clam h (qhd a r f) (clam q (qty a r) (qlift a f q))))))) ⟩)} $;
+
+--| The environment without its entries at the seven atoms of the spec (the quotient primitives, `propext`, `Quot.sound`,
+--| `Classical.choice`), and with the graphs above: the values at `propext`, `Quot.sound` and `Quot.ind` are `∅`, the
+--| proof of a true proposition, and the others are the quotients, their classes, the lifts and the choice function.
+def Envx (.e .x .y .v: set): class =
+  $ {e | (e ∊ Env ∧ ¬ ∃ x ∃ y ∃ v (e = ⟨ ⟨ x , ⟨ ⟨ kc_propext_atom , ∅ ⟩ , y ⟩ ⟩ , v ⟩ ∨ (e = ⟨ ⟨ x , ⟨ ⟨ kc_quot_sound_atom , ∅ ⟩ , y ⟩ ⟩ , v ⟩ ∨ (e = ⟨ ⟨ x , ⟨ ⟨ kc_choice_atom , ∅ ⟩ , y ⟩ ⟩ , v ⟩ ∨ (e = ⟨ ⟨ x , ⟨ ⟨ kc_quot_atom , ∅ ⟩ , y ⟩ ⟩ , v ⟩ ∨ (e = ⟨ ⟨ x , ⟨ ⟨ kc_quot_mk_atom , ∅ ⟩ , y ⟩ ⟩ , v ⟩ ∨ (e = ⟨ ⟨ x , ⟨ ⟨ kc_quot_lift_atom , ∅ ⟩ , y ⟩ ⟩ , v ⟩ ∨ (e = ⟨ ⟨ x , ⟨ ⟨ kc_quot_ind_atom , ∅ ⟩ , y ⟩ ⟩ , v ⟩)))))))) ∨ (e ∊ Envc ∨ (e ∊ Envq ∨ (e ∊ Envqm ∨ (e ∊ Envql))))} $;
+
+--| At `cst a S`: the environment's value at the universe, the atom and the values of the levels.
+def hcst (.u .a .l .e .z .w: set): class =
+  $ {z | ∃ u ∃ a ∃ l ∃ e (z = ⟨ ⟨ u , ⟨ kc_cst , ⟨ scons a (scons l ∅) , e ⟩ ⟩ ⟩ , clam w lvals (sclip (fv Envx ⟨ u , ⟨ a , lsv l w ⟩ ⟩)) ⟩)} $;
+
+--| The denotation of `cst a S`, for a hook `mcv H` with `H` extending `hcst`: the environment's value at the
+--| universe, the atom and the values of the levels, if it is an element of the universe.
+theorem dt_cst (G: hyps) (H A S W R: class) (u: set):
+  $ G ⇒ hcst ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ A ∈ trees ω $ > $ G ⇒ S ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_cst , scons A (scons S ∅) ⟩ W R = mclip u (sclip (fv Envx ⟨ u , ⟨ A , lsv S W ⟩ ⟩)) $;
+
+--| The value at the atom of `Quot`: the quotients, over the universe of the first level value.
+theorem envx_quot {a r i j: set} (G: hyps) (u s: set): $ G ⇒ fv Envx ⟨ u , ⟨ ⟨ kc_quot_atom , ∅ ⟩ , s ⟩ ⟩ = sclip (clam a (fv uni (fv s ∅)) (clam r (cpi i a (cpi j a (fv uni ∅))) (qty a r))) $;
+--| The value at the atom of `Quot.mk`: the classes.
+theorem envx_quot_mk {a r i j c: set} (G: hyps) (u s: set): $ G ⇒ fv Envx ⟨ u , ⟨ ⟨ kc_quot_mk_atom , ∅ ⟩ , s ⟩ ⟩ = sclip (clam a (fv uni (fv s ∅)) (clam r (cpi i a (cpi j a (fv uni ∅))) (clam c a (qmk a r c)))) $;
+--| The value at the atom of `Quot.lift`: the lifts, into the universe of the second level value.
+theorem envx_quot_lift {a r i j b f h q: set} (G: hyps) (u s: set): $ G ⇒ fv Envx ⟨ u , ⟨ ⟨ kc_quot_lift_atom , ∅ ⟩ , s ⟩ ⟩ = sclip (clam a (fv uni (fv s ∅)) (clam r (cpi i a (cpi j a (fv uni ∅))) (clam b (fv uni (fv s (suc ∅))) (clam f (cpi i a b) (clam h (qhd a r f) (clam q (qty a r) (qlift a f q))))))) $;
+--| The value at the atom of `Quot.ind` is `∅`.
+theorem envx_quot_ind (G: hyps) (u s: set): $ G ⇒ fv Envx ⟨ u , ⟨ ⟨ kc_quot_ind_atom , ∅ ⟩ , s ⟩ ⟩ = ∅ $;
+
+-- --------------------------------------------------------------------------
+-- The quotient constants' values
+-- --------------------------------------------------------------------------
+-- `quot u`, `quot_mk u`, `quot_lift u v` and `quot_ind u` are constants at the
+-- spec's atoms, so their values are the environment's: traces over the types
+-- of their arguments, a type `a` of `U_n` (`n` the value of `u`), a relation
+-- `r` on it, and then the quotient `qty a r`, the class `qmk a r c` of `c`,
+-- and the lift `qlift a f q` of `f` (a trace into a type `b` of `U_k`; the
+-- proof `h` that `f` respects `r` ranges over `qhd a r f`). `quot_ind` is a
+-- proof: `∅`.
+
+--| The denotation of `quot l`, for a hook `mcv H` with `H` extending `hcst`, at the level value `n`.
 theorem dt_quot {a r i j: set} (G: hyps) (H L W R: class) (u n: set):
-  $ G ⇒ hquot ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ L ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ lv L W = n $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_quot , scons L ∅ ⟩ W R = mclip u (sclip (clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (qty a r)))) $;
+  $ G ⇒ hcst ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ L ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ lv L W = n $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_cst , scons ⟨ kc_quot_atom , ∅ ⟩ (scons ⟨ kc_lcons , scons L (scons ⟨ kc_lnil , ∅ ⟩ ∅) ⟩ ∅) ⟩ W R = mclip u (sclip (clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (qty a r)))) $;
 
---| At `quot_mk l`: the classes.
-def hqmk (.u .l .e .z .w .y .n .a .r .i .j .c: set): class =
-  $ {z | ∃ u ∃ l ∃ e (z = ⟨ ⟨ u , ⟨ kc_quot_mk , ⟨ scons l ∅ , e ⟩ ⟩ ⟩ , clam w lvals (sclip {y | ∃ n (n = lv l w ∧ y ∊ clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (clam c a (qmk a r c))))}) ⟩)} $;
-
---| The denotation of `quot_mk`, for a hook `mcv H` with `H` extending `hqmk`, at the level value `n`.
---| @freshen G a
---| @freshen G r
---| @freshen G i
---| @freshen G j
---| @freshen G c
+--| The denotation of `quot_mk l`, at the level value `n`.
 theorem dt_quot_mk {a r i j c: set} (G: hyps) (H L W R: class) (u n: set):
-  $ G ⇒ hqmk ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ L ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ lv L W = n $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_quot_mk , scons L ∅ ⟩ W R = mclip u (sclip (clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (clam c a (qmk a r c))))) $;
+  $ G ⇒ hcst ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ L ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ lv L W = n $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_cst , scons ⟨ kc_quot_mk_atom , ∅ ⟩ (scons ⟨ kc_lcons , scons L (scons ⟨ kc_lnil , ∅ ⟩ ∅) ⟩ ∅) ⟩ W R = mclip u (sclip (clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (clam c a (qmk a r c))))) $;
 
---| At `quot_lift l m`: the lifts.
-def hqlift (.u .l .m .e .z .w .y .n .k .a .r .i .j .b .f .h .q: set): class =
-  $ {z | ∃ u ∃ l ∃ m ∃ e (z = ⟨ ⟨ u , ⟨ kc_quot_lift , ⟨ scons l (scons m ∅) , e ⟩ ⟩ ⟩ , clam w lvals (sclip {y | ∃ n ∃ k (n = lv l w ∧ k = lv m w ∧ y ∊ clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (clam b (fv uni k) (clam f (cpi i a b) (clam h (qhd a r f) (clam q (qty a r) (qlift a f q)))))))}) ⟩)} $;
-
---| The denotation of `quot_lift`, for a hook `mcv H` with `H` extending `hqlift`, at the level values `n`, `k`.
---| @freshen G a
---| @freshen G r
---| @freshen G i
---| @freshen G j
---| @freshen G b
---| @freshen G f
---| @freshen G h
---| @freshen G q
+--| The denotation of `quot_lift l m`, at the level values `n`, `k`.
 theorem dt_quot_lift {a r i j b f h q: set} (G: hyps) (H L M W R: class) (u n k: set):
-  $ G ⇒ hqlift ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ L ∈ trees ω $ > $ G ⇒ M ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ lv L W = n $ > $ G ⇒ lv M W = k $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_quot_lift , scons L (scons M ∅) ⟩ W R = mclip u (sclip (clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (clam b (fv uni k) (clam f (cpi i a b) (clam h (qhd a r f) (clam q (qty a r) (qlift a f q)))))))) $;
+  $ G ⇒ hcst ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ L ∈ trees ω $ > $ G ⇒ M ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ lv L W = n $ > $ G ⇒ lv M W = k $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_cst , scons ⟨ kc_quot_lift_atom , ∅ ⟩ (scons ⟨ kc_lcons , scons L (scons ⟨ kc_lcons , scons M (scons ⟨ kc_lnil , ∅ ⟩ ∅) ⟩ ∅) ⟩ ∅) ⟩ W R = mclip u (sclip (clam a (fv uni n) (clam r (cpi i a (cpi j a (fv uni ∅))) (clam b (fv uni k) (clam f (cpi i a b) (clam h (qhd a r f) (clam q (qty a r) (qlift a f q)))))))) $;
 
---| At `quot_ind l`: `∅`.
-def hqind (.u .l .e .z: set): class =
-  $ {z | ∃ u ∃ l ∃ e (z = ⟨ ⟨ u , ⟨ kc_quot_ind , ⟨ scons l ∅ , e ⟩ ⟩ ⟩ , ∅ ⟩)} $;
-
---| The denotation of `quot_ind`, for a hook `mcv H` with `H` extending `hqind`.
+--| The denotation of `quot_ind l`.
 theorem dt_quot_ind (G: hyps) (H L W R: class) (u: set):
-  $ G ⇒ hqind ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ L ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_quot_ind , scons L ∅ ⟩ W R = ∅ $;
+  $ G ⇒ hcst ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ L ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_cst , scons ⟨ kc_quot_ind_atom , ∅ ⟩ (scons ⟨ kc_lcons , scons L (scons ⟨ kc_lnil , ∅ ⟩ ∅) ⟩ ∅) ⟩ W R = ∅ $;
 
---| A hook with the quotient constants' parts.
-def hqu (H: class): fml = $ hquot ⊆ H ∧ hqmk ⊆ H ∧ hqlift ⊆ H ∧ hqind ⊆ H ∧ functional H $;
+--| A hook that gives the quotient constants their values: it has the constants' part and is a function.
+def hqu (H: class): fml = $ hcst ⊆ H ∧ functional H $;
 
 
 -- --------------------------------------------------------------------------
 -- The quotient constants' rules: `quot_ty`
 -- --------------------------------------------------------------------------
 
---| The value of `quot` for a hook with the quotients' parts, in an admissible universe: the trace of the quotients over the types of `U_n` and their relations.
+--| The value of `quot` for a hook with the constants' part, in an admissible universe: the trace of the quotients over the types of `U_n` and their relations.
 --| @freshen G a
 --| @freshen G r
 --| @freshen G i
@@ -243,7 +283,7 @@ theorem mquot_ty (H: class) (G: ctx) (l: lvl):
 -- The quotient constants' rules: `quot_mk_ty`
 -- --------------------------------------------------------------------------
 
---| The value of `quot_mk` for a hook with the quotients' parts, in an admissible universe: the trace of the classes.
+--| The value of `quot_mk` for a hook with the constants' part, in an admissible universe: the trace of the classes.
 --| @freshen G a
 --| @freshen G r
 --| @freshen G i
@@ -280,7 +320,7 @@ def meqs (M: class) (v: lvl) (.u .w .b .x .y: set): fml =
 
 theorem teq_eq (G: hyps) (A B C D: class): $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ teq A C = teq B D $;
 
---| The value of `quot_lift` for a hook with the quotients' parts, in an admissible universe: the trace of the lifts.
+--| The value of `quot_lift` for a hook with the constants' part, in an admissible universe: the trace of the lifts.
 --| @freshen G a
 --| @freshen G r
 --| @freshen G i
@@ -310,31 +350,6 @@ theorem mquot_lift_mk {u: set} (H J: class) (G: ctx) (l l2: lvl) (e1 e2 e3 e4 e5
   $ _ ⇒ hqu H $ > $ _ ⇒ meqs (mcv H) l2 $ > $ _ ⇒ ∀ u (uadm u → jval u (mcv H) J) $ >
   $ sty_j J G (quot_lift l l2) (pi (srt l) (pi (pi (bvar nz) (pi (bvar n1) (Prop))) (pi (srt l2) (pi (pi (bvar n2) (bvar n1)) (pi (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D l2) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (pi (app (app (quot l) (bvar n4)) (bvar n3)) (bvar n3))))))) (app (app (app (app (app (app (quot_lift l l2) (e1)) (e2)) (e3)) (e4)) (e5)) (app (app (app (quot_mk l1) f1) f2) ea)) T $ > $ ty_j J G ea e1 $ >
   $ mdeq (mcv H) G (app (app (app (app (app (app (quot_lift l l2) (e1)) (e2)) (e3)) (e4)) (e5)) (app (app (app (quot_mk l1) f1) f2) ea)) (app e4 ea) T $;
-
-
--- --------------------------------------------------------------------------
--- Invariance of the quotient constants' values (D4): the hook at their nodes
--- --------------------------------------------------------------------------
-
---| `minv_intro`'s step at the nodes `quot`: equivalent levels have the same values, so the node denotes as every tree it is `eeqv` to.
-theorem mcv_inv_node_quot (G: hyps) (H: class) (u w d z y t: set):
-  $ G ⇒ hquot ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ d ∊ fseq u $ > $ G ⇒ z = ⟨ kc_quot , y ⟩ $ > $ G ⇒ ra_eeqv z t ∈ lrel2 $ >
-  $ G ⇒ dt u (mcv H) z w d = dt u (mcv H) t w d $;
-
---| `minv_intro`'s step at the nodes `quot_mk`: equivalent levels have the same values, so the node denotes as every tree it is `eeqv` to.
-theorem mcv_inv_node_quot_mk (G: hyps) (H: class) (u w d z y t: set):
-  $ G ⇒ hqmk ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ d ∊ fseq u $ > $ G ⇒ z = ⟨ kc_quot_mk , y ⟩ $ > $ G ⇒ ra_eeqv z t ∈ lrel2 $ >
-  $ G ⇒ dt u (mcv H) z w d = dt u (mcv H) t w d $;
-
---| `minv_intro`'s step at the nodes `quot_lift`: equivalent levels have the same values, so the node denotes as every tree it is `eeqv` to.
-theorem mcv_inv_node_quot_lift (G: hyps) (H: class) (u w d z y t: set):
-  $ G ⇒ hqlift ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ d ∊ fseq u $ > $ G ⇒ z = ⟨ kc_quot_lift , y ⟩ $ > $ G ⇒ ra_eeqv z t ∈ lrel2 $ >
-  $ G ⇒ dt u (mcv H) z w d = dt u (mcv H) t w d $;
-
---| `minv_intro`'s step at the nodes `quot_ind`: equivalent levels have the same values, so the node denotes as every tree it is `eeqv` to.
-theorem mcv_inv_node_quot_ind (G: hyps) (H: class) (u w d z y t: set):
-  $ G ⇒ hqind ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ d ∊ fseq u $ > $ G ⇒ z = ⟨ kc_quot_ind , y ⟩ $ > $ G ⇒ ra_eeqv z t ∈ lrel2 $ >
-  $ G ⇒ dt u (mcv H) z w d = dt u (mcv H) t w d $;
 
 
 -- --------------------------------------------------------------------------
@@ -416,25 +431,6 @@ theorem propext_inh (H: class) (G: ctx) (u w t: set):
 
 --| The block of `Nonempty` is well formed, over the judgment atoms that hold in the model.
 theorem nonempty_D_wf (M: class) (v: lvl): $ ind_wf_j (jmod M) nil (nonempty_D v) $;
-
---| The truth value of "`A` has an element".
-def tne (A: class) (.h .y: set): class =
-  $ {h | (h = ∅) ∧ (∃ y (y ∊ A))} $;
---| @congr
-theorem tne_congr (A B: class): $ A ≐ B $ > $ tne A ≐ tne B $;
---| @rewrite
-theorem sb_c_tne {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (tne A)) ≐ tne (⟦ x / t ⟧ A) $;
-
---| The value of `Classical.choice` at the level value `N`: at a type `a` of that universe and a proof that `a` has an
---| element, the choice operator's element of `a`.
-def chv (N: class) (.a .h: set): class = $ clam a (fv uni N) (clam h (tne a) (ch a)) $;
---| @congr
-theorem chv_congr (A B: class): $ A ≐ B $ > $ chv A ≐ chv B $;
---| @rewrite
-theorem sb_c_chv {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (chv A)) ≐ chv (⟦ x / t ⟧ A) $;
-
-theorem chv_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ chv A = chv B $;
 
 --| The choice function is an element of the dependent product over the types `a` of the universe and the proofs that
 --| `a` has an element.

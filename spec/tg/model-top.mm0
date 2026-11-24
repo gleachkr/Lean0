@@ -1,31 +1,19 @@
--- model-top.mm0: the model's hook and the assembly (audit §11): the opaque
--- constants' part of the hook over an environment `Env`, the hook `hfin` of all
--- the parts, its invariance under `eeqv`. Imports model-lit.mm0; proofs in
--- model-top.auf.
+-- model-top.mm0: the model's hook and the assembly (audit §11): the
+-- environment's values at the three axioms' atoms, the constants' invariance
+-- under `eeqv`, the hook `hfin` of all the parts, its invariance. Imports
+-- model-lit.mm0; proofs in model-top.auf.
 
 import "model-lit.mm0";
 
 -- --------------------------------------------------------------------------
--- The opaque constants: the environment, the hook's part
+-- The constants: the environment at the axioms' atoms, invariance
 -- --------------------------------------------------------------------------
 -- A certificate's opaque and axiomatic constants are `cst a S` over generated
 -- atoms; the spec says nothing of them but `closed_cst` and `eeqv_cst`. Their
--- values are a parameter of the model: a class `Env` with no axioms (cut to
--- `Envx` at the three atoms of the spec whose constants have rules). The
--- certificate's typing axioms for its constants are the constraints on it.
-
---| The environment of the opaque constants. No axiom mentions it.
-term Env: class;
-
---| The graph of the choice function at the atom of `Classical.choice`: the value at a universe and a list of level values is
---| `chv` at the list's first.
-def Envc (.c .x .y: set): class = $ {c | ∃ x ∃ y (c = ⟨ ⟨ x , ⟨ ⟨ kc_choice_atom , ∅ ⟩ , y ⟩ ⟩ , chv (fv y ∅) ⟩)} $;
-
---| The environment without its entries at the atoms of `propext`, `Quot.sound` and `Classical.choice`, the spec's own, and
---| with the choice function at the last: the values at the first two are `∅`, the proof of a true proposition
---| (`propext_ty`, `quot_sound_ty`), and at the third the choice function (`choice_ty`).
-def Envx (.c .x .y .v: set): class =
-  $ {c | (c ∊ Env ∧ ¬ ∃ x ∃ y ∃ v ((c = ⟨ ⟨ x , ⟨ ⟨ kc_propext_atom , ∅ ⟩ , y ⟩ ⟩ , v ⟩ ∨ c = ⟨ ⟨ x , ⟨ ⟨ kc_quot_sound_atom , ∅ ⟩ , y ⟩ ⟩ , v ⟩) ∨ c = ⟨ ⟨ x , ⟨ ⟨ kc_choice_atom , ∅ ⟩ , y ⟩ ⟩ , v ⟩)) ∨ c ∊ Envc} $;
+-- values are a parameter of the model, the class `Env` of model-quot.mm0,
+-- which has no axioms; the certificate's typing axioms for its constants are
+-- the constraints on it. `Envx` (model-quot.mm0) fixes the values at the
+-- spec's own atoms: here those of `propext`, `Quot.sound`, `Classical.choice`.
 
 --| The value at the atom of `propext` is `∅`.
 theorem envx_propext (G: hyps) (u s: set): $ G ⇒ fv Envx ⟨ u , ⟨ ⟨ kc_propext_atom , ∅ ⟩ , s ⟩ ⟩ = ∅ $;
@@ -33,16 +21,6 @@ theorem envx_propext (G: hyps) (u s: set): $ G ⇒ fv Envx ⟨ u , ⟨ ⟨ kc_pr
 theorem envx_quot_sound (G: hyps) (u s: set): $ G ⇒ fv Envx ⟨ u , ⟨ ⟨ kc_quot_sound_atom , ∅ ⟩ , s ⟩ ⟩ = ∅ $;
 --| The value at the atom of `Classical.choice` is the choice function at the first level value.
 theorem envx_choice (G: hyps) (u s: set): $ G ⇒ fv Envx ⟨ u , ⟨ ⟨ kc_choice_atom , ∅ ⟩ , s ⟩ ⟩ = chv (fv s ∅) $;
-
---| At `cst a S`: the environment's value at the universe, the atom and the values of the levels.
-def hcst (.u .a .l .e .z .w: set): class =
-  $ {z | ∃ u ∃ a ∃ l ∃ e (z = ⟨ ⟨ u , ⟨ kc_cst , ⟨ scons a (scons l ∅) , e ⟩ ⟩ ⟩ , clam w lvals (sclip (fv Envx ⟨ u , ⟨ a , lsv l w ⟩ ⟩)) ⟩)} $;
-
---| The denotation of `cst a S`, for a hook `mcv H` with `H` extending `hcst`: the environment's value at the
---| universe, the atom and the values of the levels, if it is an element of the universe.
-theorem dt_cst (G: hyps) (H A S W R: class) (u: set):
-  $ G ⇒ hcst ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ A ∈ trees ω $ > $ G ⇒ S ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_cst , scons A (scons S ∅) ⟩ W R = mclip u (sclip (fv Envx ⟨ u , ⟨ A , lsv S W ⟩ ⟩)) $;
 
 -- --------------------------------------------------------------------------
 -- Equivalent level lists have the same values; the hook at the nodes `cst`
@@ -62,50 +40,28 @@ theorem mcv_inv_node_cst (G: hyps) (H: class) (u w d z y t: set):
 -- --------------------------------------------------------------------------
 
 --| The hook of the model before the course of values: the parts for the inductive types, their
---| constructors and recursors, the quotient constants, the literals and the opaque constants.
-def hfin: class = $ hty ∪ (hctor ∪ (hrec ∪ (hquot ∪ (hqmk ∪ (hqlift ∪ (hqind ∪ (hlit ∪ hcst))))))) $;
-
+--| constructors and recursors, the literals and the constants (the quotient primitives among them).
+def hfin: class = $ hty ∪ (hctor ∪ (hrec ∪ (hlit ∪ hcst))) $;
 --| The hook is a function: the parts are, and their keys have different labels.
 theorem hfin_functional (G: hyps): $ G ⇒ functional hfin $;
-
 --| The hook has the part `hty`.
 theorem hfin_hty (G: hyps): $ G ⇒ hty ⊆ hfin $;
-
 --| The hook has the part `hctor`.
 theorem hfin_hctor (G: hyps): $ G ⇒ hctor ⊆ hfin $;
-
 --| The hook has the part `hrec`.
 theorem hfin_hrec (G: hyps): $ G ⇒ hrec ⊆ hfin $;
-
---| The hook has the part `hquot`.
-theorem hfin_hquot (G: hyps): $ G ⇒ hquot ⊆ hfin $;
-
---| The hook has the part `hqmk`.
-theorem hfin_hqmk (G: hyps): $ G ⇒ hqmk ⊆ hfin $;
-
---| The hook has the part `hqlift`.
-theorem hfin_hqlift (G: hyps): $ G ⇒ hqlift ⊆ hfin $;
-
---| The hook has the part `hqind`.
-theorem hfin_hqind (G: hyps): $ G ⇒ hqind ⊆ hfin $;
-
 --| The hook has the part `hlit`.
 theorem hfin_hlit (G: hyps): $ G ⇒ hlit ⊆ hfin $;
-
 --| The hook has the part `hcst`.
 theorem hfin_hcst (G: hyps): $ G ⇒ hcst ⊆ hfin $;
-
 --| The hook has the parts of the inductive types.
 theorem hfin_hind (G: hyps): $ G ⇒ hind hfin $;
-
---| The hook has the parts of the quotient constants.
+--| The hook gives the quotient constants their values: it has the constants' part.
 theorem hfin_hqu (G: hyps): $ G ⇒ hqu hfin $;
-
 -- --------------------------------------------------------------------------
 -- The hook is invariant under `eeqv`
 -- --------------------------------------------------------------------------
-
---| The hook is invariant under `eeqv`: `minv_intro` at the nine labels it interprets.
+--| The hook is invariant under `eeqv`: `minv_intro` at the five labels it interprets.
 theorem hfin_minv (G: hyps): $ G ⇒ minv (mcv hfin) $;
 
 -- --------------------------------------------------------------------------

@@ -72,10 +72,10 @@ term ind_rec: ind > nat > lvl > expr;
 term proj: blk > nat > expr > expr;
 term nat_blk: blk;
 term eq_blk: blk;
-term quot (u: lvl): expr;
-term quot_mk (u: lvl): expr;
-term quot_lift (u v: lvl): expr;
-term quot_ind (u: lvl): expr;
+term quot_atom: atom;
+term quot_mk_atom: atom;
+term quot_lift_atom: atom;
+term quot_ind_atom: atom;
 term iff_blk: blk;
 term propext_atom: atom;
 term quot_sound_atom: atom;
@@ -130,11 +130,11 @@ def kc_ind_rec: class = $ suc kc_ind_ctor $;
 def kc_proj: class = $ suc kc_ind_rec $;
 def kc_nat_blk: class = $ suc kc_proj $;
 def kc_eq_blk: class = $ suc kc_nat_blk $;
-def kc_quot: class = $ suc kc_eq_blk $;
-def kc_quot_mk: class = $ suc kc_quot $;
-def kc_quot_lift: class = $ suc kc_quot_mk $;
-def kc_quot_ind: class = $ suc kc_quot_lift $;
-def kc_iff_blk: class = $ suc kc_quot_ind $;
+def kc_quot_atom: class = $ suc kc_eq_blk $;
+def kc_quot_mk_atom: class = $ suc kc_quot_atom $;
+def kc_quot_lift_atom: class = $ suc kc_quot_mk_atom $;
+def kc_quot_ind_atom: class = $ suc kc_quot_lift_atom $;
+def kc_iff_blk: class = $ suc kc_quot_ind_atom $;
 def kc_propext_atom: class = $ suc kc_iff_blk $;
 def kc_quot_sound_atom: class = $ suc kc_propext_atom $;
 def kc_nonempty_blk: class = $ suc kc_quot_sound_atom $;
@@ -175,10 +175,10 @@ def lsig: class =
     (csn ⟨ kc_proj , ⟨ ks_expr , scons ks_blk (scons ks_nat (scons ks_expr ∅)) ⟩ ⟩ ∪
     (csn ⟨ kc_nat_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ∪
     (csn ⟨ kc_eq_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ∪
-    (csn ⟨ kc_quot , ⟨ ks_expr , scons ks_lvl ∅ ⟩ ⟩ ∪
-    (csn ⟨ kc_quot_mk , ⟨ ks_expr , scons ks_lvl ∅ ⟩ ⟩ ∪
-    (csn ⟨ kc_quot_lift , ⟨ ks_expr , scons ks_lvl (scons ks_lvl ∅) ⟩ ⟩ ∪
-    (csn ⟨ kc_quot_ind , ⟨ ks_expr , scons ks_lvl ∅ ⟩ ⟩ ∪
+    (csn ⟨ kc_quot_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ∪
+    (csn ⟨ kc_quot_mk_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ∪
+    (csn ⟨ kc_quot_lift_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ∪
+    (csn ⟨ kc_quot_ind_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ∪
     (csn ⟨ kc_iff_blk , ⟨ ks_blk , ∅ ⟩ ⟩ ∪
     (csn ⟨ kc_propext_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ∪
     (csn ⟨ kc_quot_sound_atom , ⟨ ks_atom , ∅ ⟩ ⟩ ∪
@@ -269,13 +269,13 @@ axiom enc_nat_blk: $ enc_blk nat_blk ≐ ⟨ kc_nat_blk , ∅ ⟩ $;
 --| @rewrite
 axiom enc_eq_blk: $ enc_blk eq_blk ≐ ⟨ kc_eq_blk , ∅ ⟩ $;
 --| @rewrite
-axiom enc_quot (a1: lvl): $ enc_expr (quot a1) ≐ ⟨ kc_quot , scons (enc_lvl a1) ∅ ⟩ $;
+axiom enc_quot_atom: $ enc_atom quot_atom ≐ ⟨ kc_quot_atom , ∅ ⟩ $;
 --| @rewrite
-axiom enc_quot_mk (a1: lvl): $ enc_expr (quot_mk a1) ≐ ⟨ kc_quot_mk , scons (enc_lvl a1) ∅ ⟩ $;
+axiom enc_quot_mk_atom: $ enc_atom quot_mk_atom ≐ ⟨ kc_quot_mk_atom , ∅ ⟩ $;
 --| @rewrite
-axiom enc_quot_lift (a1: lvl) (a2: lvl): $ enc_expr (quot_lift a1 a2) ≐ ⟨ kc_quot_lift , scons (enc_lvl a1) (scons (enc_lvl a2) ∅) ⟩ $;
+axiom enc_quot_lift_atom: $ enc_atom quot_lift_atom ≐ ⟨ kc_quot_lift_atom , ∅ ⟩ $;
 --| @rewrite
-axiom enc_quot_ind (a1: lvl): $ enc_expr (quot_ind a1) ≐ ⟨ kc_quot_ind , scons (enc_lvl a1) ∅ ⟩ $;
+axiom enc_quot_ind_atom: $ enc_atom quot_ind_atom ≐ ⟨ kc_quot_ind_atom , ∅ ⟩ $;
 --| @rewrite
 axiom enc_iff_blk: $ enc_blk iff_blk ≐ ⟨ kc_iff_blk , ∅ ⟩ $;
 --| @rewrite
@@ -346,14 +346,14 @@ theorem ofsort_expr_cases (G: hyps) {u x y: set} (t: set):
       ∃ x ∃ y (t = ⟨ kc_ind_ty , scons x (scons y ∅) ⟩ ∧ x ∊ ofsort lsig lopen ks_ind ∧ y ∊ ofsort lsig lopen ks_nat) ∨
       ∃ x ∃ y ∃ u (t = ⟨ kc_ind_ctor , scons x (scons y (scons u ∅)) ⟩ ∧ x ∊ ofsort lsig lopen ks_ind ∧ y ∊ ofsort lsig lopen ks_nat ∧ u ∊ ofsort lsig lopen ks_nat) ∨
       ∃ x ∃ y ∃ u (t = ⟨ kc_ind_rec , scons x (scons y (scons u ∅)) ⟩ ∧ x ∊ ofsort lsig lopen ks_ind ∧ y ∊ ofsort lsig lopen ks_nat ∧ u ∊ ofsort lsig lopen ks_lvl) ∨
-      ∃ x ∃ y ∃ u (t = ⟨ kc_proj , scons x (scons y (scons u ∅)) ⟩ ∧ x ∊ ofsort lsig lopen ks_blk ∧ y ∊ ofsort lsig lopen ks_nat ∧ u ∊ ofsort lsig lopen ks_expr) ∨
-      ∃ x (t = ⟨ kc_quot , scons x ∅ ⟩ ∧ x ∊ ofsort lsig lopen ks_lvl) ∨
-      ∃ x (t = ⟨ kc_quot_mk , scons x ∅ ⟩ ∧ x ∊ ofsort lsig lopen ks_lvl) ∨
-      ∃ x ∃ y (t = ⟨ kc_quot_lift , scons x (scons y ∅) ⟩ ∧ x ∊ ofsort lsig lopen ks_lvl ∧ y ∊ ofsort lsig lopen ks_lvl) ∨
-      ∃ x (t = ⟨ kc_quot_ind , scons x ∅ ⟩ ∧ x ∊ ofsort lsig lopen ks_lvl) $;
+      ∃ x ∃ y ∃ u (t = ⟨ kc_proj , scons x (scons y (scons u ∅)) ⟩ ∧ x ∊ ofsort lsig lopen ks_blk ∧ y ∊ ofsort lsig lopen ks_nat ∧ u ∊ ofsort lsig lopen ks_expr) $;
 theorem ofsort_atom_cases (G: hyps) {n: set} (t: set):
   $ G ⇒ t ∊ ofsort lsig lopen ks_atom $ >
-  $ G ⇒ (t = ⟨ kc_propext_atom , ∅ ⟩) ∨
+  $ G ⇒ (t = ⟨ kc_quot_atom , ∅ ⟩) ∨
+      (t = ⟨ kc_quot_mk_atom , ∅ ⟩) ∨
+      (t = ⟨ kc_quot_lift_atom , ∅ ⟩) ∨
+      (t = ⟨ kc_quot_ind_atom , ∅ ⟩) ∨
+      (t = ⟨ kc_propext_atom , ∅ ⟩) ∨
       (t = ⟨ kc_quot_sound_atom , ∅ ⟩) ∨
       (t = ⟨ kc_choice_atom , ∅ ⟩) ∨
       ∃ n (n ∊ ω ∧ t = ⟨ n , ∅ ⟩) $;
@@ -857,14 +857,6 @@ def cl_pinst_head_c (.i .D .j .c .A .w: set): class =
   $ {w | ∃ i ∃ D ∃ j ∃ c ∃ A (w = ⟨ ∅ , ra_pinst i ⟨ kc_ind_ctor , scons D (scons j (scons c ∅)) ⟩ A A ⟩)} $;
 def cl_pinst_app (.i .S .a .A .A1 .R .w: set): class =
   $ {w | ∃ i ∃ S ∃ a ∃ A ∃ A1 ∃ R (w = ⟨ scons (ra_pinst ⟨ kc_s , scons i ∅ ⟩ S A A1) (scons (ra_inst i A1 a R) ∅) , ra_pinst i ⟨ kc_app , scons S (scons a ∅) ⟩ A R ⟩)} $;
-def cl_closed_quot (.k .u .w: set): class =
-  $ {w | ∃ k ∃ u (w = ⟨ ∅ , ra_closed k ⟨ kc_quot , scons u ∅ ⟩ ⟩)} $;
-def cl_closed_quot_mk (.k .u .w: set): class =
-  $ {w | ∃ k ∃ u (w = ⟨ ∅ , ra_closed k ⟨ kc_quot_mk , scons u ∅ ⟩ ⟩)} $;
-def cl_closed_quot_lift (.k .u .v .w: set): class =
-  $ {w | ∃ k ∃ u ∃ v (w = ⟨ ∅ , ra_closed k ⟨ kc_quot_lift , scons u (scons v ∅) ⟩ ⟩)} $;
-def cl_closed_quot_ind (.k .u .w: set): class =
-  $ {w | ∃ k ∃ u (w = ⟨ ∅ , ra_closed k ⟨ kc_quot_ind , scons u ∅ ⟩ ⟩)} $;
 def cl_sinst_done (.D .n .k .e .w: set): class =
   $ {w | ∃ D ∃ n ∃ k ∃ e (w = ⟨ ∅ , ra_sinst D n n k e e ⟩)} $;
 def cl_sinst_step (.D .j .n .k .e .e1 .e2 .w: set): class =
@@ -939,14 +931,6 @@ def cl_afree_ind_rec (.D .i .v .w: set): class =
   $ {w | ∃ D ∃ i ∃ v (w = ⟨ ∅ , ra_afree ⟨ kc_ind_rec , scons D (scons i (scons v ∅)) ⟩ ⟩)} $;
 def cl_afree_proj (.b .i .e .w: set): class =
   $ {w | ∃ b ∃ i ∃ e (w = ⟨ scons (ra_afree e) ∅ , ra_afree ⟨ kc_proj , scons b (scons i (scons e ∅)) ⟩ ⟩)} $;
-def cl_afree_quot (.u .w: set): class =
-  $ {w | ∃ u (w = ⟨ ∅ , ra_afree ⟨ kc_quot , scons u ∅ ⟩ ⟩)} $;
-def cl_afree_quot_mk (.u .w: set): class =
-  $ {w | ∃ u (w = ⟨ ∅ , ra_afree ⟨ kc_quot_mk , scons u ∅ ⟩ ⟩)} $;
-def cl_afree_quot_lift (.u .v .w: set): class =
-  $ {w | ∃ u ∃ v (w = ⟨ ∅ , ra_afree ⟨ kc_quot_lift , scons u (scons v ∅) ⟩ ⟩)} $;
-def cl_afree_quot_ind (.u .w: set): class =
-  $ {w | ∃ u (w = ⟨ ∅ , ra_afree ⟨ kc_quot_ind , scons u ∅ ⟩ ⟩)} $;
 def cl_spz_ctors_nil (.D .N .I .X .ni .npi .w: set): class =
   $ {w | ∃ D ∃ N ∃ I ∃ X ∃ ni ∃ npi (w = ⟨ ∅ , ra_spz_ctors D N I X ni npi ⟨ kc_cnil , ∅ ⟩ ⟨ kc_cnil , ∅ ⟩ ⟩)} $;
 def cl_spz_ctors_cons (.D .I .N .NI .X .K .K1 .K2 .K3 .K4 .ni .npi .C .C2 .w: set): class =
@@ -1046,7 +1030,7 @@ def pr_add: class = $ cl_add_z ∪ cl_add_s $;
 def pr_lnth: class = $ cl_lnth_z ∪ cl_lnth_s $;
 def pr_linst: class = $ cl_linst_z ∪ (cl_linst_s ∪ (cl_linst_max ∪ (cl_linst_imax ∪ cl_linst_param))) $;
 def pr_lsubst: class = $ cl_lsubst_z ∪ (cl_lsubst_s ∪ (cl_lsubst_max ∪ (cl_lsubst_imax ∪ (cl_lsubst_eq ∪ (cl_lsubst_lt ∪ cl_lsubst_gt))))) $;
-def pr_closed: class = $ cl_closed_bvar ∪ (cl_closed_srt ∪ (cl_closed_app ∪ (cl_closed_lam ∪ (cl_closed_pi ∪ (cl_closed_cst ∪ (cl_closed_lit ∪ (cl_closed_ind_ty ∪ (cl_closed_ind_ctor ∪ (cl_closed_ind_rec ∪ (cl_closed_proj ∪ (cl_closed_quot ∪ (cl_closed_quot_mk ∪ (cl_closed_quot_lift ∪ cl_closed_quot_ind))))))))))))) $;
+def pr_closed: class = $ cl_closed_bvar ∪ (cl_closed_srt ∪ (cl_closed_app ∪ (cl_closed_lam ∪ (cl_closed_pi ∪ (cl_closed_cst ∪ (cl_closed_lit ∪ (cl_closed_ind_ty ∪ (cl_closed_ind_ctor ∪ (cl_closed_ind_rec ∪ cl_closed_proj))))))))) $;
 def pr_lift: class = $ cl_lift_bvar_lt ∪ (cl_lift_bvar_ge ∪ (cl_lift_srt ∪ (cl_lift_app ∪ (cl_lift_lam ∪ (cl_lift_pi ∪ (cl_lift_closed ∪ cl_lift_proj)))))) $;
 def pr_inst: class = $ cl_inst_bvar_lt ∪ (cl_inst_bvar_eq ∪ (cl_inst_bvar_gt ∪ (cl_inst_srt ∪ (cl_inst_app ∪ (cl_inst_lam ∪ (cl_inst_pi ∪ (cl_inst_closed ∪ cl_inst_proj))))))) $;
 def pr_lookup: class = $ cl_lookup_z ∪ cl_lookup_s $;
@@ -1096,7 +1080,7 @@ def pr_recfield: class = $ cl_recfield_pi ∪ cl_recfield_app $;
 def pr_rst: class = $ cl_rst_nil ∪ (cl_rst_ty ∪ (cl_rst_ctor ∪ (cl_rst_app ∪ (cl_rst_lam ∪ (cl_rst_pi ∪ (cl_rst_proj ∪ cl_rst_refl)))))) $;
 def pr_nst_hit: class = $ cl_nst_hit_z ∪ cl_nst_hit_s $;
 def pr_spz: class = $ cl_spz_refl ∪ (cl_spz_hit ∪ (cl_spz_app ∪ (cl_spz_lam ∪ (cl_spz_pi ∪ cl_spz_proj)))) $;
-def pr_afree: class = $ cl_afree_bvar ∪ (cl_afree_srt ∪ (cl_afree_app ∪ (cl_afree_lam ∪ (cl_afree_pi ∪ (cl_afree_cst ∪ (cl_afree_lit ∪ (cl_afree_ind_ty ∪ (cl_afree_ind_ctor ∪ (cl_afree_ind_rec ∪ (cl_afree_proj ∪ (cl_afree_quot ∪ (cl_afree_quot_mk ∪ (cl_afree_quot_lift ∪ cl_afree_quot_ind))))))))))))) $;
+def pr_afree: class = $ cl_afree_bvar ∪ (cl_afree_srt ∪ (cl_afree_app ∪ (cl_afree_lam ∪ (cl_afree_pi ∪ (cl_afree_cst ∪ (cl_afree_lit ∪ (cl_afree_ind_ty ∪ (cl_afree_ind_ctor ∪ (cl_afree_ind_rec ∪ cl_afree_proj))))))))) $;
 def pr_spz_ctors: class = $ cl_spz_ctors_nil ∪ cl_spz_ctors_cons $;
 def pr_aux_data: class = $ cl_aux_data_i $;
 def pr_mty: class = $ cl_mty_pi ∪ cl_mty_srt $;
@@ -1236,6 +1220,10 @@ def lit1: expr = $ lit (bd1 b0) $;
 def lit2: expr = $ lit (bd0 (bd1 b0)) $;
 def nat_D: ind = $ ind_mk nat_blk nil (tcons (srt (ls lz)) (ccons (bvar nz) (ccons (pi (bvar nz) (bvar (s nz))) cnil)) tnil) nil $;
 def eq_D (u: lvl): ind = $ ind_mk eq_blk (cons (bvar nz) (cons (srt u) nil)) (tcons (pi (bvar (s nz)) (srt lz)) (ccons (app (app (app (bvar (s (s nz))) (bvar (s nz))) (bvar nz)) (bvar nz)) cnil) tnil) nil $;
+def quot (u: lvl): expr = $ cst quot_atom (lcons u lnil) $;
+def quot_mk (u: lvl): expr = $ cst quot_mk_atom (lcons u lnil) $;
+def quot_lift (u v: lvl): expr = $ cst quot_lift_atom (lcons u (lcons v lnil)) $;
+def quot_ind (u: lvl): expr = $ cst quot_ind_atom (lcons u lnil) $;
 def iff_D: ind = $ ind_mk iff_blk (cons (srt lz) (cons (srt lz) nil)) (tcons (srt lz) (ccons (pi (pi (bvar (s nz)) (bvar (s nz))) (pi (pi (bvar (s nz)) (bvar (s (s (s nz))))) (app (app (bvar (s (s (s (s nz))))) (bvar (s (s (s nz))))) (bvar (s (s nz)))))) cnil) tnil) nil $;
 def propext: expr = $ cst propext_atom lnil $;
 def quot_sound (u: lvl): expr = $ cst quot_sound_atom (lcons u lnil) $;
@@ -1845,18 +1833,6 @@ theorem lrel_pinst_app (G: hyps) (A1 A2 A3 A4 A5 A6: class):
   $ G ⇒ ra_pinst ⟨ kc_s , scons A1 ∅ ⟩ A2 A4 A5 ∈ lrel $ >
   $ G ⇒ ra_inst A1 A5 A3 A6 ∈ lrel $ >
   $ G ⇒ ra_pinst A1 ⟨ kc_app , scons A2 (scons A3 ∅) ⟩ A4 A6 ∈ lrel $;
-theorem lrel_closed_quot (G: hyps) (A1 A2: class):
-  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ ra_closed A1 ⟨ kc_quot , scons A2 ∅ ⟩ ∈ lrel $;
-theorem lrel_closed_quot_mk (G: hyps) (A1 A2: class):
-  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ ra_closed A1 ⟨ kc_quot_mk , scons A2 ∅ ⟩ ∈ lrel $;
-theorem lrel_closed_quot_lift (G: hyps) (A1 A2 A3: class):
-  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
-  $ G ⇒ ra_closed A1 ⟨ kc_quot_lift , scons A2 (scons A3 ∅) ⟩ ∈ lrel $;
-theorem lrel_closed_quot_ind (G: hyps) (A1 A2: class):
-  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ ra_closed A1 ⟨ kc_quot_ind , scons A2 ∅ ⟩ ∈ lrel $;
 theorem lrel_sinst_done (G: hyps) (A1 A2 A3 A4: class):
   $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
   $ G ⇒ ra_sinst A1 A2 A2 A3 A4 A4 ∈ lrel $;
@@ -2080,18 +2056,6 @@ theorem lrel_afree_proj (G: hyps) (A1 A2 A3: class):
   $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ >
   $ G ⇒ ra_afree A3 ∈ lrel $ >
   $ G ⇒ ra_afree ⟨ kc_proj , scons A1 (scons A2 (scons A3 ∅)) ⟩ ∈ lrel $;
-theorem lrel_afree_quot (G: hyps) (A1: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ ra_afree ⟨ kc_quot , scons A1 ∅ ⟩ ∈ lrel $;
-theorem lrel_afree_quot_mk (G: hyps) (A1: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ ra_afree ⟨ kc_quot_mk , scons A1 ∅ ⟩ ∈ lrel $;
-theorem lrel_afree_quot_lift (G: hyps) (A1 A2: class):
-  $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ >
-  $ G ⇒ ra_afree ⟨ kc_quot_lift , scons A1 (scons A2 ∅) ⟩ ∈ lrel $;
-theorem lrel_afree_quot_ind (G: hyps) (A1: class):
-  $ G ⇒ A1 ∈ trees ω $ >
-  $ G ⇒ ra_afree ⟨ kc_quot_ind , scons A1 ∅ ⟩ ∈ lrel $;
 theorem lrel_spz_ctors_nil (G: hyps) (A1 A2 A3 A4 A5 A6: class):
   $ G ⇒ A1 ∈ trees ω $ > $ G ⇒ A2 ∈ trees ω $ > $ G ⇒ A3 ∈ trees ω $ > $ G ⇒ A4 ∈ trees ω $ >
   $ G ⇒ A5 ∈ trees ω $ > $ G ⇒ A6 ∈ trees ω $ >
@@ -2715,10 +2679,6 @@ theorem leaf_has_app (j: nat) (e: expr): $ has_arg e (bvar j) $ > $ leaf_has j e
 theorem pinst_head (i: nat) (D: ind) (j: nat) (A: expr): $ pinst i (ind_ty D j) A A $;
 theorem pinst_head_c (i: nat) (D: ind) (j c: nat) (A: expr): $ pinst i (ind_ctor D j c) A A $;
 theorem pinst_app (i: nat) (S a A A1 R: expr): $ pinst (s i) S A A1 $ > $ inst i A1 a R $ > $ pinst i (app S a) A R $;
-theorem closed_quot (k: nat) (u: lvl): $ closed k (quot u) $;
-theorem closed_quot_mk (k: nat) (u: lvl): $ closed k (quot_mk u) $;
-theorem closed_quot_lift (k: nat) (u v: lvl): $ closed k (quot_lift u v) $;
-theorem closed_quot_ind (k: nat) (u: lvl): $ closed k (quot_ind u) $;
 theorem sinst_done (D: ind) (n k: nat) (e: expr): $ sinst D n n k e e $;
 theorem sinst_step (D: ind) (j n k: nat) (e e1 e2: expr): $ lt j n $ > $ inst k e (ind_ty D j) e1 $ > $ sinst D (s j) n k e1 e2 $ > $ sinst D j n k e e2 $;
 theorem iargs_z (k: nat) (X: expr): $ iargs k nz X X $;
@@ -2756,10 +2716,6 @@ theorem afree_ind_ty (D: ind) (N: ctx) (j np n m n0: nat): $ ind_nested D N $ > 
 theorem afree_ind_ctor (D: ind) (N: ctx) (j c np n m n0: nat): $ ind_nested D N $ > $ ind_arity D np n m $ > $ ndecl N n n0 $ > $ lt j n0 $ > $ afree (ind_ctor D j c) $;
 theorem afree_ind_rec (D: ind) (i: nat) (v: lvl): $ afree (ind_rec D i v) $;
 theorem afree_proj (b: blk) (i: nat) (e: expr): $ afree e $ > $ afree (proj b i e) $;
-theorem afree_quot (u: lvl): $ afree (quot u) $;
-theorem afree_quot_mk (u: lvl): $ afree (quot_mk u) $;
-theorem afree_quot_lift (u v: lvl): $ afree (quot_lift u v) $;
-theorem afree_quot_ind (u: lvl): $ afree (quot_ind u) $;
 theorem spz_ctors_nil (D: ind) (N: ctx) (I: ind) (X: expr) (ni npi: nat): $ spz_ctors D N I X ni npi cnil cnil $;
 theorem spz_ctors_cons (D I: ind) (N NI: ctx) (X K K1 K2 K3 K4: expr) (ni npi: nat) (C C2: ctors): $ sinst I nz ni npi K K1 $ > $ ind_nested I NI $ > $ rst I NI K1 K2 $ > $ afree K2 $ > $ pinst nz X K2 K3 $ > $ spz D N nz K3 K4 $ > $ spz_ctors D N I X ni npi C C2 $ > $ spz_ctors D N I X ni npi (ccons K C) (ccons K4 C2) $;
 theorem aux_data_i (D I: ind) (b bi_v: blk) (P Pi N: ctx) (T Ti: tys) (j i npi ni mi: nat) (X F Fi: expr) (C Ci: ctors): $ ind_data D b P T $ > $ ind_nested D N $ > $ ind_data I bi_v Pi Ti $ > $ nth_ty T j F C $ > $ nth_ty Ti i Fi Ci $ > $ pinst nz X Fi F $ > $ ind_arity I npi ni mi $ > $ spz_ctors D N I X ni npi Ci C $ > $ aux_data D I X j i $;
@@ -3009,7 +2965,7 @@ theorem lrel_lsubst_cases (G: hyps) {n_v a_v b_v b2 c_v c2 m_v: set} (t1 t2 t3 t
       ∃ n_v ∃ a_v (t1 = n_v ∧ t2 = ⟨ kc_lparam , scons n_v ∅ ⟩ ∧ t3 = a_v ∧ t4 = a_v) ∨
       ∃ n_v ∃ m_v ∃ a_v (t1 = n_v ∧ t2 = ⟨ kc_lparam , scons m_v ∅ ⟩ ∧ t3 = a_v ∧ t4 = ⟨ kc_lparam , scons m_v ∅ ⟩ ∧ ra_le ⟨ kc_s , scons m_v ∅ ⟩ n_v ∈ lrel) ∨
       ∃ n_v ∃ m_v ∃ a_v (t1 = n_v ∧ t2 = ⟨ kc_lparam , scons m_v ∅ ⟩ ∧ t3 = a_v ∧ t4 = ⟨ kc_lparam , scons m_v ∅ ⟩ ∧ ra_le ⟨ kc_s , scons n_v ∅ ⟩ m_v ∈ lrel) $;
-theorem lrel_closed_cases (G: hyps) {i_v k_v l_v f_v a_v A b_v S n_v D c_v v_v e_v u_v: set} (t1 t2: set):
+theorem lrel_closed_cases (G: hyps) {i_v k_v l_v f_v a_v A b_v S n_v D c_v v_v e_v: set} (t1 t2: set):
   $ G ⇒ ra_closed t1 t2 ∈ lrel $ >
   $ G ⇒ ∃ i_v ∃ k_v (t1 = k_v ∧ t2 = ⟨ kc_bvar , scons i_v ∅ ⟩ ∧ ra_le ⟨ kc_s , scons i_v ∅ ⟩ k_v ∈ lrel) ∨
       ∃ k_v ∃ l_v (t1 = k_v ∧ t2 = ⟨ kc_srt , scons l_v ∅ ⟩) ∨
@@ -3021,11 +2977,7 @@ theorem lrel_closed_cases (G: hyps) {i_v k_v l_v f_v a_v A b_v S n_v D c_v v_v e
       ∃ k_v ∃ D ∃ i_v (t1 = k_v ∧ t2 = ⟨ kc_ind_ty , scons D (scons i_v ∅) ⟩) ∨
       ∃ k_v ∃ D ∃ i_v ∃ c_v (t1 = k_v ∧ t2 = ⟨ kc_ind_ctor , scons D (scons i_v (scons c_v ∅)) ⟩) ∨
       ∃ k_v ∃ D ∃ i_v ∃ v_v (t1 = k_v ∧ t2 = ⟨ kc_ind_rec , scons D (scons i_v (scons v_v ∅)) ⟩) ∨
-      ∃ k_v ∃ b_v ∃ i_v ∃ e_v (t1 = k_v ∧ t2 = ⟨ kc_proj , scons b_v (scons i_v (scons e_v ∅)) ⟩ ∧ ra_closed k_v e_v ∈ lrel) ∨
-      ∃ k_v ∃ u_v (t1 = k_v ∧ t2 = ⟨ kc_quot , scons u_v ∅ ⟩) ∨
-      ∃ k_v ∃ u_v (t1 = k_v ∧ t2 = ⟨ kc_quot_mk , scons u_v ∅ ⟩) ∨
-      ∃ k_v ∃ u_v ∃ v_v (t1 = k_v ∧ t2 = ⟨ kc_quot_lift , scons u_v (scons v_v ∅) ⟩) ∨
-      ∃ k_v ∃ u_v (t1 = k_v ∧ t2 = ⟨ kc_quot_ind , scons u_v ∅ ⟩) $;
+      ∃ k_v ∃ b_v ∃ i_v ∃ e_v (t1 = k_v ∧ t2 = ⟨ kc_proj , scons b_v (scons i_v (scons e_v ∅)) ⟩ ∧ ra_closed k_v e_v ∈ lrel) $;
 theorem lrel_lift_cases (G: hyps) {n_v k_v i_v j_v l_v f_v a_v f2 a2 A b_v A2 b2 e_v e2: set} (t1 t2 t3 t4: set):
   $ G ⇒ ra_lift t1 t2 t3 t4 ∈ lrel $ >
   $ G ⇒ ∃ n_v ∃ k_v ∃ i_v (t1 = n_v ∧ t2 = k_v ∧ t3 = ⟨ kc_bvar , scons i_v ∅ ⟩ ∧ t4 = ⟨ kc_bvar , scons i_v ∅ ⟩ ∧ ra_le ⟨ kc_s , scons i_v ∅ ⟩ k_v ∈ lrel) ∨
@@ -3265,7 +3217,7 @@ theorem lrel_spz_cases (G: hyps) {D N d_v e_v np n_v m_v n0 e2 f_v a_v f2 a2 A b
       ∃ D ∃ N ∃ d_v ∃ A ∃ b_v ∃ A2 ∃ b2 (t1 = D ∧ t2 = N ∧ t3 = d_v ∧ t4 = ⟨ kc_lam , scons A (scons b_v ∅) ⟩ ∧ t5 = ⟨ kc_lam , scons A2 (scons b2 ∅) ⟩ ∧ ra_spz D N d_v A A2 ∈ lrel ∧ ra_spz D N ⟨ kc_s , scons d_v ∅ ⟩ b_v b2 ∈ lrel) ∨
       ∃ D ∃ N ∃ d_v ∃ A ∃ b_v ∃ A2 ∃ b2 (t1 = D ∧ t2 = N ∧ t3 = d_v ∧ t4 = ⟨ kc_pi , scons A (scons b_v ∅) ⟩ ∧ t5 = ⟨ kc_pi , scons A2 (scons b2 ∅) ⟩ ∧ ra_spz D N d_v A A2 ∈ lrel ∧ ra_spz D N ⟨ kc_s , scons d_v ∅ ⟩ b_v b2 ∈ lrel) ∨
       ∃ D ∃ N ∃ d_v ∃ b_v ∃ i_v ∃ e_v ∃ e2 (t1 = D ∧ t2 = N ∧ t3 = d_v ∧ t4 = ⟨ kc_proj , scons b_v (scons i_v (scons e_v ∅)) ⟩ ∧ t5 = ⟨ kc_proj , scons b_v (scons i_v (scons e2 ∅)) ⟩ ∧ ra_spz D N d_v e_v e2 ∈ lrel) $;
-theorem lrel_afree_cases (G: hyps) {i_v l_v f_v a_v A b_v S n_v D N j_v np m_v n0 c_v v_v e_v u_v: set} (t1: set):
+theorem lrel_afree_cases (G: hyps) {i_v l_v f_v a_v A b_v S n_v D N j_v np m_v n0 c_v v_v e_v: set} (t1: set):
   $ G ⇒ ra_afree t1 ∈ lrel $ >
   $ G ⇒ ∃ i_v (t1 = ⟨ kc_bvar , scons i_v ∅ ⟩) ∨
       ∃ l_v (t1 = ⟨ kc_srt , scons l_v ∅ ⟩) ∨
@@ -3277,11 +3229,7 @@ theorem lrel_afree_cases (G: hyps) {i_v l_v f_v a_v A b_v S n_v D N j_v np m_v n
       ∃ D ∃ N ∃ j_v ∃ np ∃ n_v ∃ m_v ∃ n0 (t1 = ⟨ kc_ind_ty , scons D (scons j_v ∅) ⟩ ∧ ra_ind_nested D N ∈ lrel ∧ ra_ind_arity D np n_v m_v ∈ lrel ∧ ra_ndecl N n_v n0 ∈ lrel ∧ ra_le ⟨ kc_s , scons j_v ∅ ⟩ n0 ∈ lrel) ∨
       ∃ D ∃ N ∃ j_v ∃ c_v ∃ np ∃ n_v ∃ m_v ∃ n0 (t1 = ⟨ kc_ind_ctor , scons D (scons j_v (scons c_v ∅)) ⟩ ∧ ra_ind_nested D N ∈ lrel ∧ ra_ind_arity D np n_v m_v ∈ lrel ∧ ra_ndecl N n_v n0 ∈ lrel ∧ ra_le ⟨ kc_s , scons j_v ∅ ⟩ n0 ∈ lrel) ∨
       ∃ D ∃ i_v ∃ v_v (t1 = ⟨ kc_ind_rec , scons D (scons i_v (scons v_v ∅)) ⟩) ∨
-      ∃ b_v ∃ i_v ∃ e_v (t1 = ⟨ kc_proj , scons b_v (scons i_v (scons e_v ∅)) ⟩ ∧ ra_afree e_v ∈ lrel) ∨
-      ∃ u_v (t1 = ⟨ kc_quot , scons u_v ∅ ⟩) ∨
-      ∃ u_v (t1 = ⟨ kc_quot_mk , scons u_v ∅ ⟩) ∨
-      ∃ u_v ∃ v_v (t1 = ⟨ kc_quot_lift , scons u_v (scons v_v ∅) ⟩) ∨
-      ∃ u_v (t1 = ⟨ kc_quot_ind , scons u_v ∅ ⟩) $;
+      ∃ b_v ∃ i_v ∃ e_v (t1 = ⟨ kc_proj , scons b_v (scons i_v (scons e_v ∅)) ⟩ ∧ ra_afree e_v ∈ lrel) $;
 theorem lrel_spz_ctors_cases (G: hyps) {D N I X ni npi NI K K1 K2 K3 K4 C C2: set} (t1 t2 t3 t4 t5 t6 t7 t8: set):
   $ G ⇒ ra_spz_ctors t1 t2 t3 t4 t5 t6 t7 t8 ∈ lrel $ >
   $ G ⇒ ∃ D ∃ N ∃ I ∃ X ∃ ni ∃ npi (t1 = D ∧ t2 = N ∧ t3 = I ∧ t4 = X ∧ t5 = ni ∧ t6 = npi ∧ t7 = ⟨ kc_cnil , ∅ ⟩ ∧ t8 = ⟨ kc_cnil , ∅ ⟩) ∨
@@ -3496,10 +3444,10 @@ theorem kc_ind_rec_omega (G: hyps): $ G ⇒ kc_ind_rec ∈ ω $;
 theorem kc_proj_omega (G: hyps): $ G ⇒ kc_proj ∈ ω $;
 theorem kc_nat_blk_omega (G: hyps): $ G ⇒ kc_nat_blk ∈ ω $;
 theorem kc_eq_blk_omega (G: hyps): $ G ⇒ kc_eq_blk ∈ ω $;
-theorem kc_quot_omega (G: hyps): $ G ⇒ kc_quot ∈ ω $;
-theorem kc_quot_mk_omega (G: hyps): $ G ⇒ kc_quot_mk ∈ ω $;
-theorem kc_quot_lift_omega (G: hyps): $ G ⇒ kc_quot_lift ∈ ω $;
-theorem kc_quot_ind_omega (G: hyps): $ G ⇒ kc_quot_ind ∈ ω $;
+theorem kc_quot_atom_omega (G: hyps): $ G ⇒ kc_quot_atom ∈ ω $;
+theorem kc_quot_mk_atom_omega (G: hyps): $ G ⇒ kc_quot_mk_atom ∈ ω $;
+theorem kc_quot_lift_atom_omega (G: hyps): $ G ⇒ kc_quot_lift_atom ∈ ω $;
+theorem kc_quot_ind_atom_omega (G: hyps): $ G ⇒ kc_quot_ind_atom ∈ ω $;
 theorem kc_iff_blk_omega (G: hyps): $ G ⇒ kc_iff_blk ∈ ω $;
 theorem kc_propext_atom_omega (G: hyps): $ G ⇒ kc_propext_atom ∈ ω $;
 theorem kc_quot_sound_atom_omega (G: hyps): $ G ⇒ kc_quot_sound_atom ∈ ω $;
@@ -3623,10 +3571,10 @@ theorem kc_nz_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_nz = kc_ind_rec $;
 theorem kc_nz_ne_proj (G: hyps): $ G ⇒ ¬ kc_nz = kc_proj $;
 theorem kc_nz_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_nz = kc_nat_blk $;
 theorem kc_nz_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_nz = kc_eq_blk $;
-theorem kc_nz_ne_quot (G: hyps): $ G ⇒ ¬ kc_nz = kc_quot $;
-theorem kc_nz_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_nz = kc_quot_mk $;
-theorem kc_nz_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_nz = kc_quot_lift $;
-theorem kc_nz_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_nz = kc_quot_ind $;
+theorem kc_nz_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_nz = kc_quot_atom $;
+theorem kc_nz_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_nz = kc_quot_mk_atom $;
+theorem kc_nz_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_nz = kc_quot_lift_atom $;
+theorem kc_nz_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_nz = kc_quot_ind_atom $;
 theorem kc_nz_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_nz = kc_iff_blk $;
 theorem kc_nz_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_nz = kc_propext_atom $;
 theorem kc_nz_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_nz = kc_quot_sound_atom $;
@@ -3663,10 +3611,10 @@ theorem kc_s_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_s = kc_ind_rec $;
 theorem kc_s_ne_proj (G: hyps): $ G ⇒ ¬ kc_s = kc_proj $;
 theorem kc_s_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_s = kc_nat_blk $;
 theorem kc_s_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_s = kc_eq_blk $;
-theorem kc_s_ne_quot (G: hyps): $ G ⇒ ¬ kc_s = kc_quot $;
-theorem kc_s_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_s = kc_quot_mk $;
-theorem kc_s_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_s = kc_quot_lift $;
-theorem kc_s_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_s = kc_quot_ind $;
+theorem kc_s_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_s = kc_quot_atom $;
+theorem kc_s_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_s = kc_quot_mk_atom $;
+theorem kc_s_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_s = kc_quot_lift_atom $;
+theorem kc_s_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_s = kc_quot_ind_atom $;
 theorem kc_s_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_s = kc_iff_blk $;
 theorem kc_s_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_s = kc_propext_atom $;
 theorem kc_s_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_s = kc_quot_sound_atom $;
@@ -3702,10 +3650,10 @@ theorem kc_lz_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_lz = kc_ind_rec $;
 theorem kc_lz_ne_proj (G: hyps): $ G ⇒ ¬ kc_lz = kc_proj $;
 theorem kc_lz_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_lz = kc_nat_blk $;
 theorem kc_lz_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_lz = kc_eq_blk $;
-theorem kc_lz_ne_quot (G: hyps): $ G ⇒ ¬ kc_lz = kc_quot $;
-theorem kc_lz_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_lz = kc_quot_mk $;
-theorem kc_lz_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_lz = kc_quot_lift $;
-theorem kc_lz_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_lz = kc_quot_ind $;
+theorem kc_lz_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_lz = kc_quot_atom $;
+theorem kc_lz_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_lz = kc_quot_mk_atom $;
+theorem kc_lz_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_lz = kc_quot_lift_atom $;
+theorem kc_lz_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_lz = kc_quot_ind_atom $;
 theorem kc_lz_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_lz = kc_iff_blk $;
 theorem kc_lz_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_lz = kc_propext_atom $;
 theorem kc_lz_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_lz = kc_quot_sound_atom $;
@@ -3740,10 +3688,10 @@ theorem kc_ls_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_ls = kc_ind_rec $;
 theorem kc_ls_ne_proj (G: hyps): $ G ⇒ ¬ kc_ls = kc_proj $;
 theorem kc_ls_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_ls = kc_nat_blk $;
 theorem kc_ls_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_ls = kc_eq_blk $;
-theorem kc_ls_ne_quot (G: hyps): $ G ⇒ ¬ kc_ls = kc_quot $;
-theorem kc_ls_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_ls = kc_quot_mk $;
-theorem kc_ls_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_ls = kc_quot_lift $;
-theorem kc_ls_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_ls = kc_quot_ind $;
+theorem kc_ls_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_ls = kc_quot_atom $;
+theorem kc_ls_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_ls = kc_quot_mk_atom $;
+theorem kc_ls_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_ls = kc_quot_lift_atom $;
+theorem kc_ls_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_ls = kc_quot_ind_atom $;
 theorem kc_ls_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_ls = kc_iff_blk $;
 theorem kc_ls_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_ls = kc_propext_atom $;
 theorem kc_ls_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_ls = kc_quot_sound_atom $;
@@ -3777,10 +3725,10 @@ theorem kc_lmax_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_lmax = kc_ind_rec $;
 theorem kc_lmax_ne_proj (G: hyps): $ G ⇒ ¬ kc_lmax = kc_proj $;
 theorem kc_lmax_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_lmax = kc_nat_blk $;
 theorem kc_lmax_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_lmax = kc_eq_blk $;
-theorem kc_lmax_ne_quot (G: hyps): $ G ⇒ ¬ kc_lmax = kc_quot $;
-theorem kc_lmax_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_lmax = kc_quot_mk $;
-theorem kc_lmax_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_lmax = kc_quot_lift $;
-theorem kc_lmax_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_lmax = kc_quot_ind $;
+theorem kc_lmax_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_lmax = kc_quot_atom $;
+theorem kc_lmax_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_lmax = kc_quot_mk_atom $;
+theorem kc_lmax_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_lmax = kc_quot_lift_atom $;
+theorem kc_lmax_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_lmax = kc_quot_ind_atom $;
 theorem kc_lmax_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_lmax = kc_iff_blk $;
 theorem kc_lmax_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_lmax = kc_propext_atom $;
 theorem kc_lmax_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_lmax = kc_quot_sound_atom $;
@@ -3813,10 +3761,10 @@ theorem kc_limax_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_limax = kc_ind_rec $;
 theorem kc_limax_ne_proj (G: hyps): $ G ⇒ ¬ kc_limax = kc_proj $;
 theorem kc_limax_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_limax = kc_nat_blk $;
 theorem kc_limax_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_limax = kc_eq_blk $;
-theorem kc_limax_ne_quot (G: hyps): $ G ⇒ ¬ kc_limax = kc_quot $;
-theorem kc_limax_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_limax = kc_quot_mk $;
-theorem kc_limax_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_limax = kc_quot_lift $;
-theorem kc_limax_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_limax = kc_quot_ind $;
+theorem kc_limax_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_limax = kc_quot_atom $;
+theorem kc_limax_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_limax = kc_quot_mk_atom $;
+theorem kc_limax_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_limax = kc_quot_lift_atom $;
+theorem kc_limax_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_limax = kc_quot_ind_atom $;
 theorem kc_limax_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_limax = kc_iff_blk $;
 theorem kc_limax_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_limax = kc_propext_atom $;
 theorem kc_limax_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_limax = kc_quot_sound_atom $;
@@ -3848,10 +3796,10 @@ theorem kc_lparam_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_lparam = kc_ind_rec $;
 theorem kc_lparam_ne_proj (G: hyps): $ G ⇒ ¬ kc_lparam = kc_proj $;
 theorem kc_lparam_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_lparam = kc_nat_blk $;
 theorem kc_lparam_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_lparam = kc_eq_blk $;
-theorem kc_lparam_ne_quot (G: hyps): $ G ⇒ ¬ kc_lparam = kc_quot $;
-theorem kc_lparam_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_lparam = kc_quot_mk $;
-theorem kc_lparam_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_lparam = kc_quot_lift $;
-theorem kc_lparam_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_lparam = kc_quot_ind $;
+theorem kc_lparam_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_lparam = kc_quot_atom $;
+theorem kc_lparam_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_lparam = kc_quot_mk_atom $;
+theorem kc_lparam_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_lparam = kc_quot_lift_atom $;
+theorem kc_lparam_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_lparam = kc_quot_ind_atom $;
 theorem kc_lparam_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_lparam = kc_iff_blk $;
 theorem kc_lparam_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_lparam = kc_propext_atom $;
 theorem kc_lparam_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_lparam = kc_quot_sound_atom $;
@@ -3882,10 +3830,10 @@ theorem kc_lnil_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_lnil = kc_ind_rec $;
 theorem kc_lnil_ne_proj (G: hyps): $ G ⇒ ¬ kc_lnil = kc_proj $;
 theorem kc_lnil_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_lnil = kc_nat_blk $;
 theorem kc_lnil_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_lnil = kc_eq_blk $;
-theorem kc_lnil_ne_quot (G: hyps): $ G ⇒ ¬ kc_lnil = kc_quot $;
-theorem kc_lnil_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_lnil = kc_quot_mk $;
-theorem kc_lnil_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_lnil = kc_quot_lift $;
-theorem kc_lnil_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_lnil = kc_quot_ind $;
+theorem kc_lnil_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_lnil = kc_quot_atom $;
+theorem kc_lnil_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_lnil = kc_quot_mk_atom $;
+theorem kc_lnil_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_lnil = kc_quot_lift_atom $;
+theorem kc_lnil_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_lnil = kc_quot_ind_atom $;
 theorem kc_lnil_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_lnil = kc_iff_blk $;
 theorem kc_lnil_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_lnil = kc_propext_atom $;
 theorem kc_lnil_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_lnil = kc_quot_sound_atom $;
@@ -3915,10 +3863,10 @@ theorem kc_lcons_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_lcons = kc_ind_rec $;
 theorem kc_lcons_ne_proj (G: hyps): $ G ⇒ ¬ kc_lcons = kc_proj $;
 theorem kc_lcons_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_lcons = kc_nat_blk $;
 theorem kc_lcons_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_lcons = kc_eq_blk $;
-theorem kc_lcons_ne_quot (G: hyps): $ G ⇒ ¬ kc_lcons = kc_quot $;
-theorem kc_lcons_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_lcons = kc_quot_mk $;
-theorem kc_lcons_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_lcons = kc_quot_lift $;
-theorem kc_lcons_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_lcons = kc_quot_ind $;
+theorem kc_lcons_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_lcons = kc_quot_atom $;
+theorem kc_lcons_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_lcons = kc_quot_mk_atom $;
+theorem kc_lcons_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_lcons = kc_quot_lift_atom $;
+theorem kc_lcons_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_lcons = kc_quot_ind_atom $;
 theorem kc_lcons_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_lcons = kc_iff_blk $;
 theorem kc_lcons_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_lcons = kc_propext_atom $;
 theorem kc_lcons_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_lcons = kc_quot_sound_atom $;
@@ -3947,10 +3895,10 @@ theorem kc_bvar_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_bvar = kc_ind_rec $;
 theorem kc_bvar_ne_proj (G: hyps): $ G ⇒ ¬ kc_bvar = kc_proj $;
 theorem kc_bvar_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_bvar = kc_nat_blk $;
 theorem kc_bvar_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_bvar = kc_eq_blk $;
-theorem kc_bvar_ne_quot (G: hyps): $ G ⇒ ¬ kc_bvar = kc_quot $;
-theorem kc_bvar_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_bvar = kc_quot_mk $;
-theorem kc_bvar_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_bvar = kc_quot_lift $;
-theorem kc_bvar_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_bvar = kc_quot_ind $;
+theorem kc_bvar_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_bvar = kc_quot_atom $;
+theorem kc_bvar_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_bvar = kc_quot_mk_atom $;
+theorem kc_bvar_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_bvar = kc_quot_lift_atom $;
+theorem kc_bvar_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_bvar = kc_quot_ind_atom $;
 theorem kc_bvar_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_bvar = kc_iff_blk $;
 theorem kc_bvar_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_bvar = kc_propext_atom $;
 theorem kc_bvar_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_bvar = kc_quot_sound_atom $;
@@ -3978,10 +3926,10 @@ theorem kc_srt_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_srt = kc_ind_rec $;
 theorem kc_srt_ne_proj (G: hyps): $ G ⇒ ¬ kc_srt = kc_proj $;
 theorem kc_srt_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_srt = kc_nat_blk $;
 theorem kc_srt_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_srt = kc_eq_blk $;
-theorem kc_srt_ne_quot (G: hyps): $ G ⇒ ¬ kc_srt = kc_quot $;
-theorem kc_srt_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_srt = kc_quot_mk $;
-theorem kc_srt_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_srt = kc_quot_lift $;
-theorem kc_srt_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_srt = kc_quot_ind $;
+theorem kc_srt_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_srt = kc_quot_atom $;
+theorem kc_srt_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_srt = kc_quot_mk_atom $;
+theorem kc_srt_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_srt = kc_quot_lift_atom $;
+theorem kc_srt_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_srt = kc_quot_ind_atom $;
 theorem kc_srt_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_srt = kc_iff_blk $;
 theorem kc_srt_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_srt = kc_propext_atom $;
 theorem kc_srt_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_srt = kc_quot_sound_atom $;
@@ -4008,10 +3956,10 @@ theorem kc_app_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_app = kc_ind_rec $;
 theorem kc_app_ne_proj (G: hyps): $ G ⇒ ¬ kc_app = kc_proj $;
 theorem kc_app_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_app = kc_nat_blk $;
 theorem kc_app_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_app = kc_eq_blk $;
-theorem kc_app_ne_quot (G: hyps): $ G ⇒ ¬ kc_app = kc_quot $;
-theorem kc_app_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_app = kc_quot_mk $;
-theorem kc_app_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_app = kc_quot_lift $;
-theorem kc_app_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_app = kc_quot_ind $;
+theorem kc_app_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_app = kc_quot_atom $;
+theorem kc_app_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_app = kc_quot_mk_atom $;
+theorem kc_app_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_app = kc_quot_lift_atom $;
+theorem kc_app_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_app = kc_quot_ind_atom $;
 theorem kc_app_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_app = kc_iff_blk $;
 theorem kc_app_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_app = kc_propext_atom $;
 theorem kc_app_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_app = kc_quot_sound_atom $;
@@ -4037,10 +3985,10 @@ theorem kc_lam_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_lam = kc_ind_rec $;
 theorem kc_lam_ne_proj (G: hyps): $ G ⇒ ¬ kc_lam = kc_proj $;
 theorem kc_lam_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_lam = kc_nat_blk $;
 theorem kc_lam_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_lam = kc_eq_blk $;
-theorem kc_lam_ne_quot (G: hyps): $ G ⇒ ¬ kc_lam = kc_quot $;
-theorem kc_lam_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_lam = kc_quot_mk $;
-theorem kc_lam_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_lam = kc_quot_lift $;
-theorem kc_lam_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_lam = kc_quot_ind $;
+theorem kc_lam_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_lam = kc_quot_atom $;
+theorem kc_lam_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_lam = kc_quot_mk_atom $;
+theorem kc_lam_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_lam = kc_quot_lift_atom $;
+theorem kc_lam_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_lam = kc_quot_ind_atom $;
 theorem kc_lam_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_lam = kc_iff_blk $;
 theorem kc_lam_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_lam = kc_propext_atom $;
 theorem kc_lam_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_lam = kc_quot_sound_atom $;
@@ -4065,10 +4013,10 @@ theorem kc_pi_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_pi = kc_ind_rec $;
 theorem kc_pi_ne_proj (G: hyps): $ G ⇒ ¬ kc_pi = kc_proj $;
 theorem kc_pi_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_pi = kc_nat_blk $;
 theorem kc_pi_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_pi = kc_eq_blk $;
-theorem kc_pi_ne_quot (G: hyps): $ G ⇒ ¬ kc_pi = kc_quot $;
-theorem kc_pi_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_pi = kc_quot_mk $;
-theorem kc_pi_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_pi = kc_quot_lift $;
-theorem kc_pi_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_pi = kc_quot_ind $;
+theorem kc_pi_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_pi = kc_quot_atom $;
+theorem kc_pi_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_pi = kc_quot_mk_atom $;
+theorem kc_pi_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_pi = kc_quot_lift_atom $;
+theorem kc_pi_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_pi = kc_quot_ind_atom $;
 theorem kc_pi_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_pi = kc_iff_blk $;
 theorem kc_pi_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_pi = kc_propext_atom $;
 theorem kc_pi_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_pi = kc_quot_sound_atom $;
@@ -4092,10 +4040,10 @@ theorem kc_cst_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_cst = kc_ind_rec $;
 theorem kc_cst_ne_proj (G: hyps): $ G ⇒ ¬ kc_cst = kc_proj $;
 theorem kc_cst_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_cst = kc_nat_blk $;
 theorem kc_cst_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_cst = kc_eq_blk $;
-theorem kc_cst_ne_quot (G: hyps): $ G ⇒ ¬ kc_cst = kc_quot $;
-theorem kc_cst_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_cst = kc_quot_mk $;
-theorem kc_cst_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_cst = kc_quot_lift $;
-theorem kc_cst_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_cst = kc_quot_ind $;
+theorem kc_cst_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_cst = kc_quot_atom $;
+theorem kc_cst_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_cst = kc_quot_mk_atom $;
+theorem kc_cst_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_cst = kc_quot_lift_atom $;
+theorem kc_cst_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_cst = kc_quot_ind_atom $;
 theorem kc_cst_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_cst = kc_iff_blk $;
 theorem kc_cst_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_cst = kc_propext_atom $;
 theorem kc_cst_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_cst = kc_quot_sound_atom $;
@@ -4118,10 +4066,10 @@ theorem kc_nil_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_nil = kc_ind_rec $;
 theorem kc_nil_ne_proj (G: hyps): $ G ⇒ ¬ kc_nil = kc_proj $;
 theorem kc_nil_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_nil = kc_nat_blk $;
 theorem kc_nil_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_nil = kc_eq_blk $;
-theorem kc_nil_ne_quot (G: hyps): $ G ⇒ ¬ kc_nil = kc_quot $;
-theorem kc_nil_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_nil = kc_quot_mk $;
-theorem kc_nil_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_nil = kc_quot_lift $;
-theorem kc_nil_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_nil = kc_quot_ind $;
+theorem kc_nil_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_nil = kc_quot_atom $;
+theorem kc_nil_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_nil = kc_quot_mk_atom $;
+theorem kc_nil_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_nil = kc_quot_lift_atom $;
+theorem kc_nil_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_nil = kc_quot_ind_atom $;
 theorem kc_nil_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_nil = kc_iff_blk $;
 theorem kc_nil_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_nil = kc_propext_atom $;
 theorem kc_nil_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_nil = kc_quot_sound_atom $;
@@ -4143,10 +4091,10 @@ theorem kc_cons_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_cons = kc_ind_rec $;
 theorem kc_cons_ne_proj (G: hyps): $ G ⇒ ¬ kc_cons = kc_proj $;
 theorem kc_cons_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_cons = kc_nat_blk $;
 theorem kc_cons_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_cons = kc_eq_blk $;
-theorem kc_cons_ne_quot (G: hyps): $ G ⇒ ¬ kc_cons = kc_quot $;
-theorem kc_cons_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_cons = kc_quot_mk $;
-theorem kc_cons_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_cons = kc_quot_lift $;
-theorem kc_cons_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_cons = kc_quot_ind $;
+theorem kc_cons_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_cons = kc_quot_atom $;
+theorem kc_cons_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_cons = kc_quot_mk_atom $;
+theorem kc_cons_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_cons = kc_quot_lift_atom $;
+theorem kc_cons_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_cons = kc_quot_ind_atom $;
 theorem kc_cons_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_cons = kc_iff_blk $;
 theorem kc_cons_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_cons = kc_propext_atom $;
 theorem kc_cons_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_cons = kc_quot_sound_atom $;
@@ -4167,10 +4115,10 @@ theorem kc_b0_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_b0 = kc_ind_rec $;
 theorem kc_b0_ne_proj (G: hyps): $ G ⇒ ¬ kc_b0 = kc_proj $;
 theorem kc_b0_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_b0 = kc_nat_blk $;
 theorem kc_b0_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_b0 = kc_eq_blk $;
-theorem kc_b0_ne_quot (G: hyps): $ G ⇒ ¬ kc_b0 = kc_quot $;
-theorem kc_b0_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_b0 = kc_quot_mk $;
-theorem kc_b0_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_b0 = kc_quot_lift $;
-theorem kc_b0_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_b0 = kc_quot_ind $;
+theorem kc_b0_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_b0 = kc_quot_atom $;
+theorem kc_b0_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_b0 = kc_quot_mk_atom $;
+theorem kc_b0_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_b0 = kc_quot_lift_atom $;
+theorem kc_b0_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_b0 = kc_quot_ind_atom $;
 theorem kc_b0_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_b0 = kc_iff_blk $;
 theorem kc_b0_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_b0 = kc_propext_atom $;
 theorem kc_b0_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_b0 = kc_quot_sound_atom $;
@@ -4190,10 +4138,10 @@ theorem kc_bd0_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_ind_rec $;
 theorem kc_bd0_ne_proj (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_proj $;
 theorem kc_bd0_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_nat_blk $;
 theorem kc_bd0_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_eq_blk $;
-theorem kc_bd0_ne_quot (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_quot $;
-theorem kc_bd0_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_quot_mk $;
-theorem kc_bd0_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_quot_lift $;
-theorem kc_bd0_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_quot_ind $;
+theorem kc_bd0_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_quot_atom $;
+theorem kc_bd0_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_quot_mk_atom $;
+theorem kc_bd0_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_quot_lift_atom $;
+theorem kc_bd0_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_quot_ind_atom $;
 theorem kc_bd0_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_iff_blk $;
 theorem kc_bd0_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_propext_atom $;
 theorem kc_bd0_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_bd0 = kc_quot_sound_atom $;
@@ -4212,10 +4160,10 @@ theorem kc_bd1_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_ind_rec $;
 theorem kc_bd1_ne_proj (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_proj $;
 theorem kc_bd1_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_nat_blk $;
 theorem kc_bd1_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_eq_blk $;
-theorem kc_bd1_ne_quot (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_quot $;
-theorem kc_bd1_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_quot_mk $;
-theorem kc_bd1_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_quot_lift $;
-theorem kc_bd1_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_quot_ind $;
+theorem kc_bd1_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_quot_atom $;
+theorem kc_bd1_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_quot_mk_atom $;
+theorem kc_bd1_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_quot_lift_atom $;
+theorem kc_bd1_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_quot_ind_atom $;
 theorem kc_bd1_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_iff_blk $;
 theorem kc_bd1_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_propext_atom $;
 theorem kc_bd1_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_bd1 = kc_quot_sound_atom $;
@@ -4233,10 +4181,10 @@ theorem kc_lit_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_lit = kc_ind_rec $;
 theorem kc_lit_ne_proj (G: hyps): $ G ⇒ ¬ kc_lit = kc_proj $;
 theorem kc_lit_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_lit = kc_nat_blk $;
 theorem kc_lit_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_lit = kc_eq_blk $;
-theorem kc_lit_ne_quot (G: hyps): $ G ⇒ ¬ kc_lit = kc_quot $;
-theorem kc_lit_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_lit = kc_quot_mk $;
-theorem kc_lit_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_lit = kc_quot_lift $;
-theorem kc_lit_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_lit = kc_quot_ind $;
+theorem kc_lit_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_lit = kc_quot_atom $;
+theorem kc_lit_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_lit = kc_quot_mk_atom $;
+theorem kc_lit_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_lit = kc_quot_lift_atom $;
+theorem kc_lit_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_lit = kc_quot_ind_atom $;
 theorem kc_lit_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_lit = kc_iff_blk $;
 theorem kc_lit_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_lit = kc_propext_atom $;
 theorem kc_lit_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_lit = kc_quot_sound_atom $;
@@ -4253,10 +4201,10 @@ theorem kc_tnil_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_tnil = kc_ind_rec $;
 theorem kc_tnil_ne_proj (G: hyps): $ G ⇒ ¬ kc_tnil = kc_proj $;
 theorem kc_tnil_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_tnil = kc_nat_blk $;
 theorem kc_tnil_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_tnil = kc_eq_blk $;
-theorem kc_tnil_ne_quot (G: hyps): $ G ⇒ ¬ kc_tnil = kc_quot $;
-theorem kc_tnil_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_tnil = kc_quot_mk $;
-theorem kc_tnil_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_tnil = kc_quot_lift $;
-theorem kc_tnil_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_tnil = kc_quot_ind $;
+theorem kc_tnil_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_tnil = kc_quot_atom $;
+theorem kc_tnil_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_tnil = kc_quot_mk_atom $;
+theorem kc_tnil_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_tnil = kc_quot_lift_atom $;
+theorem kc_tnil_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_tnil = kc_quot_ind_atom $;
 theorem kc_tnil_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_tnil = kc_iff_blk $;
 theorem kc_tnil_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_tnil = kc_propext_atom $;
 theorem kc_tnil_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_tnil = kc_quot_sound_atom $;
@@ -4272,10 +4220,10 @@ theorem kc_tcons_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_tcons = kc_ind_rec $;
 theorem kc_tcons_ne_proj (G: hyps): $ G ⇒ ¬ kc_tcons = kc_proj $;
 theorem kc_tcons_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_tcons = kc_nat_blk $;
 theorem kc_tcons_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_tcons = kc_eq_blk $;
-theorem kc_tcons_ne_quot (G: hyps): $ G ⇒ ¬ kc_tcons = kc_quot $;
-theorem kc_tcons_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_tcons = kc_quot_mk $;
-theorem kc_tcons_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_tcons = kc_quot_lift $;
-theorem kc_tcons_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_tcons = kc_quot_ind $;
+theorem kc_tcons_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_tcons = kc_quot_atom $;
+theorem kc_tcons_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_tcons = kc_quot_mk_atom $;
+theorem kc_tcons_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_tcons = kc_quot_lift_atom $;
+theorem kc_tcons_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_tcons = kc_quot_ind_atom $;
 theorem kc_tcons_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_tcons = kc_iff_blk $;
 theorem kc_tcons_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_tcons = kc_propext_atom $;
 theorem kc_tcons_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_tcons = kc_quot_sound_atom $;
@@ -4290,10 +4238,10 @@ theorem kc_cnil_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_cnil = kc_ind_rec $;
 theorem kc_cnil_ne_proj (G: hyps): $ G ⇒ ¬ kc_cnil = kc_proj $;
 theorem kc_cnil_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_cnil = kc_nat_blk $;
 theorem kc_cnil_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_cnil = kc_eq_blk $;
-theorem kc_cnil_ne_quot (G: hyps): $ G ⇒ ¬ kc_cnil = kc_quot $;
-theorem kc_cnil_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_cnil = kc_quot_mk $;
-theorem kc_cnil_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_cnil = kc_quot_lift $;
-theorem kc_cnil_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_cnil = kc_quot_ind $;
+theorem kc_cnil_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_cnil = kc_quot_atom $;
+theorem kc_cnil_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_cnil = kc_quot_mk_atom $;
+theorem kc_cnil_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_cnil = kc_quot_lift_atom $;
+theorem kc_cnil_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_cnil = kc_quot_ind_atom $;
 theorem kc_cnil_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_cnil = kc_iff_blk $;
 theorem kc_cnil_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_cnil = kc_propext_atom $;
 theorem kc_cnil_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_cnil = kc_quot_sound_atom $;
@@ -4307,10 +4255,10 @@ theorem kc_ccons_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_ccons = kc_ind_rec $;
 theorem kc_ccons_ne_proj (G: hyps): $ G ⇒ ¬ kc_ccons = kc_proj $;
 theorem kc_ccons_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_ccons = kc_nat_blk $;
 theorem kc_ccons_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_ccons = kc_eq_blk $;
-theorem kc_ccons_ne_quot (G: hyps): $ G ⇒ ¬ kc_ccons = kc_quot $;
-theorem kc_ccons_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_ccons = kc_quot_mk $;
-theorem kc_ccons_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_ccons = kc_quot_lift $;
-theorem kc_ccons_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_ccons = kc_quot_ind $;
+theorem kc_ccons_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_ccons = kc_quot_atom $;
+theorem kc_ccons_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_ccons = kc_quot_mk_atom $;
+theorem kc_ccons_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_ccons = kc_quot_lift_atom $;
+theorem kc_ccons_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_ccons = kc_quot_ind_atom $;
 theorem kc_ccons_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_ccons = kc_iff_blk $;
 theorem kc_ccons_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_ccons = kc_propext_atom $;
 theorem kc_ccons_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_ccons = kc_quot_sound_atom $;
@@ -4323,10 +4271,10 @@ theorem kc_ind_mk_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_ind_rec $;
 theorem kc_ind_mk_ne_proj (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_proj $;
 theorem kc_ind_mk_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_nat_blk $;
 theorem kc_ind_mk_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_eq_blk $;
-theorem kc_ind_mk_ne_quot (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_quot $;
-theorem kc_ind_mk_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_quot_mk $;
-theorem kc_ind_mk_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_quot_lift $;
-theorem kc_ind_mk_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_quot_ind $;
+theorem kc_ind_mk_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_quot_atom $;
+theorem kc_ind_mk_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_quot_mk_atom $;
+theorem kc_ind_mk_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_quot_lift_atom $;
+theorem kc_ind_mk_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_quot_ind_atom $;
 theorem kc_ind_mk_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_iff_blk $;
 theorem kc_ind_mk_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_propext_atom $;
 theorem kc_ind_mk_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_ind_mk = kc_quot_sound_atom $;
@@ -4338,10 +4286,10 @@ theorem kc_ind_ty_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_ind_rec $;
 theorem kc_ind_ty_ne_proj (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_proj $;
 theorem kc_ind_ty_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_nat_blk $;
 theorem kc_ind_ty_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_eq_blk $;
-theorem kc_ind_ty_ne_quot (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_quot $;
-theorem kc_ind_ty_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_quot_mk $;
-theorem kc_ind_ty_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_quot_lift $;
-theorem kc_ind_ty_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_quot_ind $;
+theorem kc_ind_ty_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_quot_atom $;
+theorem kc_ind_ty_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_quot_mk_atom $;
+theorem kc_ind_ty_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_quot_lift_atom $;
+theorem kc_ind_ty_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_quot_ind_atom $;
 theorem kc_ind_ty_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_iff_blk $;
 theorem kc_ind_ty_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_propext_atom $;
 theorem kc_ind_ty_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_ind_ty = kc_quot_sound_atom $;
@@ -4352,10 +4300,10 @@ theorem kc_ind_ctor_ne_ind_rec (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_ind_rec $;
 theorem kc_ind_ctor_ne_proj (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_proj $;
 theorem kc_ind_ctor_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_nat_blk $;
 theorem kc_ind_ctor_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_eq_blk $;
-theorem kc_ind_ctor_ne_quot (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_quot $;
-theorem kc_ind_ctor_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_quot_mk $;
-theorem kc_ind_ctor_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_quot_lift $;
-theorem kc_ind_ctor_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_quot_ind $;
+theorem kc_ind_ctor_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_quot_atom $;
+theorem kc_ind_ctor_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_quot_mk_atom $;
+theorem kc_ind_ctor_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_quot_lift_atom $;
+theorem kc_ind_ctor_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_quot_ind_atom $;
 theorem kc_ind_ctor_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_iff_blk $;
 theorem kc_ind_ctor_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_propext_atom $;
 theorem kc_ind_ctor_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_quot_sound_atom $;
@@ -4365,10 +4313,10 @@ theorem kc_ind_ctor_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_ind_ctor = kc_le_blk $;
 theorem kc_ind_rec_ne_proj (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_proj $;
 theorem kc_ind_rec_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_nat_blk $;
 theorem kc_ind_rec_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_eq_blk $;
-theorem kc_ind_rec_ne_quot (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_quot $;
-theorem kc_ind_rec_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_quot_mk $;
-theorem kc_ind_rec_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_quot_lift $;
-theorem kc_ind_rec_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_quot_ind $;
+theorem kc_ind_rec_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_quot_atom $;
+theorem kc_ind_rec_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_quot_mk_atom $;
+theorem kc_ind_rec_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_quot_lift_atom $;
+theorem kc_ind_rec_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_quot_ind_atom $;
 theorem kc_ind_rec_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_iff_blk $;
 theorem kc_ind_rec_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_propext_atom $;
 theorem kc_ind_rec_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_quot_sound_atom $;
@@ -4377,10 +4325,10 @@ theorem kc_ind_rec_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_choice_a
 theorem kc_ind_rec_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_ind_rec = kc_le_blk $;
 theorem kc_proj_ne_nat_blk (G: hyps): $ G ⇒ ¬ kc_proj = kc_nat_blk $;
 theorem kc_proj_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_proj = kc_eq_blk $;
-theorem kc_proj_ne_quot (G: hyps): $ G ⇒ ¬ kc_proj = kc_quot $;
-theorem kc_proj_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_proj = kc_quot_mk $;
-theorem kc_proj_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_proj = kc_quot_lift $;
-theorem kc_proj_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_proj = kc_quot_ind $;
+theorem kc_proj_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_proj = kc_quot_atom $;
+theorem kc_proj_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_proj = kc_quot_mk_atom $;
+theorem kc_proj_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_proj = kc_quot_lift_atom $;
+theorem kc_proj_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_proj = kc_quot_ind_atom $;
 theorem kc_proj_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_proj = kc_iff_blk $;
 theorem kc_proj_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_proj = kc_propext_atom $;
 theorem kc_proj_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_proj = kc_quot_sound_atom $;
@@ -4388,56 +4336,56 @@ theorem kc_proj_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_proj = kc_nonempty_blk 
 theorem kc_proj_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_proj = kc_choice_atom $;
 theorem kc_proj_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_proj = kc_le_blk $;
 theorem kc_nat_blk_ne_eq_blk (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_eq_blk $;
-theorem kc_nat_blk_ne_quot (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_quot $;
-theorem kc_nat_blk_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_quot_mk $;
-theorem kc_nat_blk_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_quot_lift $;
-theorem kc_nat_blk_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_quot_ind $;
+theorem kc_nat_blk_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_quot_atom $;
+theorem kc_nat_blk_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_quot_mk_atom $;
+theorem kc_nat_blk_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_quot_lift_atom $;
+theorem kc_nat_blk_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_quot_ind_atom $;
 theorem kc_nat_blk_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_iff_blk $;
 theorem kc_nat_blk_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_propext_atom $;
 theorem kc_nat_blk_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_quot_sound_atom $;
 theorem kc_nat_blk_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_nonempty_blk $;
 theorem kc_nat_blk_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_choice_atom $;
 theorem kc_nat_blk_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_nat_blk = kc_le_blk $;
-theorem kc_eq_blk_ne_quot (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_quot $;
-theorem kc_eq_blk_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_quot_mk $;
-theorem kc_eq_blk_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_quot_lift $;
-theorem kc_eq_blk_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_quot_ind $;
+theorem kc_eq_blk_ne_quot_atom (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_quot_atom $;
+theorem kc_eq_blk_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_quot_mk_atom $;
+theorem kc_eq_blk_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_quot_lift_atom $;
+theorem kc_eq_blk_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_quot_ind_atom $;
 theorem kc_eq_blk_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_iff_blk $;
 theorem kc_eq_blk_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_propext_atom $;
 theorem kc_eq_blk_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_quot_sound_atom $;
 theorem kc_eq_blk_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_nonempty_blk $;
 theorem kc_eq_blk_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_choice_atom $;
 theorem kc_eq_blk_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_eq_blk = kc_le_blk $;
-theorem kc_quot_ne_quot_mk (G: hyps): $ G ⇒ ¬ kc_quot = kc_quot_mk $;
-theorem kc_quot_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_quot = kc_quot_lift $;
-theorem kc_quot_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_quot = kc_quot_ind $;
-theorem kc_quot_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_quot = kc_iff_blk $;
-theorem kc_quot_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_quot = kc_propext_atom $;
-theorem kc_quot_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_quot = kc_quot_sound_atom $;
-theorem kc_quot_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_quot = kc_nonempty_blk $;
-theorem kc_quot_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_quot = kc_choice_atom $;
-theorem kc_quot_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_quot = kc_le_blk $;
-theorem kc_quot_mk_ne_quot_lift (G: hyps): $ G ⇒ ¬ kc_quot_mk = kc_quot_lift $;
-theorem kc_quot_mk_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_quot_mk = kc_quot_ind $;
-theorem kc_quot_mk_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_quot_mk = kc_iff_blk $;
-theorem kc_quot_mk_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_quot_mk = kc_propext_atom $;
-theorem kc_quot_mk_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_quot_mk = kc_quot_sound_atom $;
-theorem kc_quot_mk_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_quot_mk = kc_nonempty_blk $;
-theorem kc_quot_mk_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_quot_mk = kc_choice_atom $;
-theorem kc_quot_mk_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_quot_mk = kc_le_blk $;
-theorem kc_quot_lift_ne_quot_ind (G: hyps): $ G ⇒ ¬ kc_quot_lift = kc_quot_ind $;
-theorem kc_quot_lift_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_quot_lift = kc_iff_blk $;
-theorem kc_quot_lift_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_quot_lift = kc_propext_atom $;
-theorem kc_quot_lift_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_quot_lift = kc_quot_sound_atom $;
-theorem kc_quot_lift_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_quot_lift = kc_nonempty_blk $;
-theorem kc_quot_lift_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_quot_lift = kc_choice_atom $;
-theorem kc_quot_lift_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_quot_lift = kc_le_blk $;
-theorem kc_quot_ind_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_quot_ind = kc_iff_blk $;
-theorem kc_quot_ind_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_quot_ind = kc_propext_atom $;
-theorem kc_quot_ind_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_quot_ind = kc_quot_sound_atom $;
-theorem kc_quot_ind_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_quot_ind = kc_nonempty_blk $;
-theorem kc_quot_ind_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_quot_ind = kc_choice_atom $;
-theorem kc_quot_ind_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_quot_ind = kc_le_blk $;
+theorem kc_quot_atom_ne_quot_mk_atom (G: hyps): $ G ⇒ ¬ kc_quot_atom = kc_quot_mk_atom $;
+theorem kc_quot_atom_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_quot_atom = kc_quot_lift_atom $;
+theorem kc_quot_atom_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_quot_atom = kc_quot_ind_atom $;
+theorem kc_quot_atom_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_quot_atom = kc_iff_blk $;
+theorem kc_quot_atom_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_quot_atom = kc_propext_atom $;
+theorem kc_quot_atom_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_quot_atom = kc_quot_sound_atom $;
+theorem kc_quot_atom_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_quot_atom = kc_nonempty_blk $;
+theorem kc_quot_atom_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_quot_atom = kc_choice_atom $;
+theorem kc_quot_atom_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_quot_atom = kc_le_blk $;
+theorem kc_quot_mk_atom_ne_quot_lift_atom (G: hyps): $ G ⇒ ¬ kc_quot_mk_atom = kc_quot_lift_atom $;
+theorem kc_quot_mk_atom_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_quot_mk_atom = kc_quot_ind_atom $;
+theorem kc_quot_mk_atom_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_quot_mk_atom = kc_iff_blk $;
+theorem kc_quot_mk_atom_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_quot_mk_atom = kc_propext_atom $;
+theorem kc_quot_mk_atom_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_quot_mk_atom = kc_quot_sound_atom $;
+theorem kc_quot_mk_atom_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_quot_mk_atom = kc_nonempty_blk $;
+theorem kc_quot_mk_atom_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_quot_mk_atom = kc_choice_atom $;
+theorem kc_quot_mk_atom_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_quot_mk_atom = kc_le_blk $;
+theorem kc_quot_lift_atom_ne_quot_ind_atom (G: hyps): $ G ⇒ ¬ kc_quot_lift_atom = kc_quot_ind_atom $;
+theorem kc_quot_lift_atom_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_quot_lift_atom = kc_iff_blk $;
+theorem kc_quot_lift_atom_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_quot_lift_atom = kc_propext_atom $;
+theorem kc_quot_lift_atom_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_quot_lift_atom = kc_quot_sound_atom $;
+theorem kc_quot_lift_atom_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_quot_lift_atom = kc_nonempty_blk $;
+theorem kc_quot_lift_atom_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_quot_lift_atom = kc_choice_atom $;
+theorem kc_quot_lift_atom_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_quot_lift_atom = kc_le_blk $;
+theorem kc_quot_ind_atom_ne_iff_blk (G: hyps): $ G ⇒ ¬ kc_quot_ind_atom = kc_iff_blk $;
+theorem kc_quot_ind_atom_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_quot_ind_atom = kc_propext_atom $;
+theorem kc_quot_ind_atom_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_quot_ind_atom = kc_quot_sound_atom $;
+theorem kc_quot_ind_atom_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_quot_ind_atom = kc_nonempty_blk $;
+theorem kc_quot_ind_atom_ne_choice_atom (G: hyps): $ G ⇒ ¬ kc_quot_ind_atom = kc_choice_atom $;
+theorem kc_quot_ind_atom_ne_le_blk (G: hyps): $ G ⇒ ¬ kc_quot_ind_atom = kc_le_blk $;
 theorem kc_iff_blk_ne_propext_atom (G: hyps): $ G ⇒ ¬ kc_iff_blk = kc_propext_atom $;
 theorem kc_iff_blk_ne_quot_sound_atom (G: hyps): $ G ⇒ ¬ kc_iff_blk = kc_quot_sound_atom $;
 theorem kc_iff_blk_ne_nonempty_blk (G: hyps): $ G ⇒ ¬ kc_iff_blk = kc_nonempty_blk $;
