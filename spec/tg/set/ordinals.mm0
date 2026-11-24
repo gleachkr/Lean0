@@ -3,7 +3,7 @@
 -- induction, trichotomy, suprema, Burali-Forti, the application `cap` and the
 -- graph `cgr` of a class operation `x ↦ B`, and the recursion theorem on the
 -- ordinals: `trec F` is the function on the ordinals with
--- `fv (trec F) a = fv F (cres (trec F) a)` (the value at `a` is `F` applied
+-- `(trec F)' a = F' (cres (trec F) a)` (the value at `a` is `F` applied
 -- to the restriction to `a`). Imports omega.mm0; proofs in ordinals.auf.
 
 import "omega.mm0";
@@ -182,13 +182,13 @@ theorem cgr_cdm_elim {x: set} (G: hyps x) (B: class x) (a: set):
   $ G ⇒ a ∊ cdm (cgr x B) $ > $ G ⇒ isset (⟦ x / a ⟧ B) $;
 --| The value of the graph is the operation.
 theorem fv_cgr {x: set} (G: hyps x) (B: class x) (a: set):
-  $ G ⇒ isset (⟦ x / a ⟧ B) $ > $ G ⇒ fv (cgr x B) a = (⟦ x / a ⟧ B) $;
+  $ G ⇒ isset (⟦ x / a ⟧ B) $ > $ G ⇒ (cgr x B)' a = (⟦ x / a ⟧ B) $;
 --| The graph of an operation with values in `C` on `A` is a function on `A` into `C`.
 theorem cgr_fn_into {x: set} (G: hyps x) (A C: class) (B: class x):
   $ G ⇒ ∀ x (x ∊ A → B ∈ C) $ > $ G ⇒ fn_into (cgr x B) A C $;
 --| The identity function on `A` is the graph of `x ↦ x` restricted to `A`.
 theorem cgr_id_fn_into {x: set} (G: hyps x) (A B: class):
-  $ G ⇒ A ⊆ B $ > $ G ⇒ fn_into (cres (cgr x x) A) A B $;
+  $ G ⇒ A ⊆ B $ > $ G ⇒ fn_into (cgr x x ↾ A) A B $;
 theorem img_cgr_id {x: set} (G: hyps x) (A: class): $ G ⇒ img (cgr x x) A = A $;
 --| @congr
 theorem cgr_congr {x: set} (B D: class x): $ B ≐ D $ > $ cgr x B ≐ cgr x D $;
@@ -211,7 +211,7 @@ theorem sb_c_cgr {x y: set} (t: set y) (B: class x y):
 --| `k ∊ a` is `F` applied to the restriction of `g` to `k`.
 def trapx (F: class) (.g .a .k: set): class =
   $ {g | ∃ a (ord a ∧ functional g ∧ rel g ∧ cdm g = a ∧
-      ∀ k (k ∊ a → fv g k = fv F (cres g k)))} $;
+      ∀ k (k ∊ a → g' k = F' (g ↾ k)))} $;
 --| The approximations indexed by their domains, as a functional class.
 def trapxd (F: class) (.a .g .z: set): class =
   $ {z | ∃ a ∃ g (z = ⟨ a , g ⟩ ∧ g ∊ trapx F ∧ cdm g = a)} $;
@@ -219,19 +219,19 @@ def trapxd (F: class) (.a .g .z: set): class =
 def trec (F: class): class = $ ⋃ (trapx F) $;
 
 --| Restricting a relation to its domain, and cutting a new pair off.
-theorem cres_cdm_self (G: hyps) (R: class): $ G ⇒ rel R $ > $ G ⇒ cres R (cdm R) = R $;
+theorem cres_cdm_self (G: hyps) (R: class): $ G ⇒ rel R $ > $ G ⇒ R ↾ cdm R = R $;
 theorem cres_subset_cdm (G: hyps) (R A: class):
-  $ G ⇒ rel R $ > $ G ⇒ cdm R ⊆ A $ > $ G ⇒ cres R A = R $;
+  $ G ⇒ rel R $ > $ G ⇒ cdm R ⊆ A $ > $ G ⇒ R ↾ A = R $;
 theorem cres_cres (G: hyps) (R A B: class):
-  $ G ⇒ A ⊆ B $ > $ G ⇒ cres (cres R B) A = cres R A $;
+  $ G ⇒ A ⊆ B $ > $ G ⇒ R ↾ B ↾ A = R ↾ A $;
 theorem cres_mono (G: hyps) (R S A: class):
-  $ G ⇒ R ⊆ S $ > $ G ⇒ cres R A ⊆ cres S A $;
+  $ G ⇒ R ⊆ S $ > $ G ⇒ R ↾ A ⊆ S ↾ A $;
 theorem cres_cun_csn_self (G: hyps) (R: class) (a c: set):
-  $ G ⇒ rel R $ > $ G ⇒ cdm R = a $ > $ G ⇒ cres (R ∪ csn ⟨ a , c ⟩) a = R $;
+  $ G ⇒ rel R $ > $ G ⇒ cdm R = a $ > $ G ⇒ (R ∪ csn ⟨ a , c ⟩) ↾ a = R $;
 theorem cdm_cun_csn (G: hyps) (R: class) (a c: set):
   $ G ⇒ cdm (R ∪ csn ⟨ a , c ⟩) = cdm R ∪ csn a $;
 theorem fv_cun_csn_self (G: hyps) (R: class) (a c: set):
-  $ G ⇒ cdm R = a $ > $ G ⇒ fv (R ∪ csn ⟨ a , c ⟩) a = c $;
+  $ G ⇒ cdm R = a $ > $ G ⇒ (R ∪ csn ⟨ a , c ⟩)' a = c $;
 theorem functional_cun_csn (G: hyps) (R: class) (a c: set):
   $ G ⇒ functional R $ > $ G ⇒ ¬ a ∊ cdm R $ > $ G ⇒ functional (R ∪ csn ⟨ a , c ⟩) $;
 theorem rel_cun_csn (G: hyps) (R: class) (a c: set):
@@ -248,49 +248,49 @@ theorem cdm_cuni {x: set} (G: hyps x) (A: class):
   $ G ⇒ cdm (⋃ A) = ⋃ (img (cgr x (cdm x)) A) $;
 --| The value of a subfunction is the value of the function.
 theorem fv_subset (G: hyps) (F H: class) (a: set):
-  $ G ⇒ functional H $ > $ G ⇒ F ⊆ H $ > $ G ⇒ a ∊ cdm F $ > $ G ⇒ fv F a = fv H a $;
+  $ G ⇒ functional H $ > $ G ⇒ F ⊆ H $ > $ G ⇒ a ∊ cdm F $ > $ G ⇒ F' a = H' a $;
 theorem fv_cres (G: hyps) (F A: class) (a: set):
-  $ G ⇒ functional F $ > $ G ⇒ a ∊ A $ > $ G ⇒ fv (cres F A) a = fv F a $;
+  $ G ⇒ functional F $ > $ G ⇒ a ∊ A $ > $ G ⇒ (F ↾ A)' a = F' a $;
 --| The value of a restricted graph.
 theorem fv_cres_cgr {x: set} (G: hyps x) (B: class x) (A: class) (b: set):
-  $ G ⇒ b ∊ A $ > $ G ⇒ isset (⟦ x / b ⟧ B) $ > $ G ⇒ fv (cres (cgr x B) A) b = (⟦ x / b ⟧ B) $;
+  $ G ⇒ b ∊ A $ > $ G ⇒ isset (⟦ x / b ⟧ B) $ > $ G ⇒ (cgr x B ↾ A)' b = (⟦ x / b ⟧ B) $;
 --| A function and a subfunction agree on part of the subfunction's domain.
 theorem cres_subfun (G: hyps) (R S A: class):
-  $ G ⇒ functional S $ > $ G ⇒ R ⊆ S $ > $ G ⇒ A ⊆ cdm R $ > $ G ⇒ cres S A = cres R A $;
+  $ G ⇒ functional S $ > $ G ⇒ R ⊆ S $ > $ G ⇒ A ⊆ cdm R $ > $ G ⇒ S ↾ A = R ↾ A $;
 
 --| @freshen H a
 --| @freshen c a
 theorem trapx_elim {a k: set} (G: hyps a k) (H: hyps k) (F: class) (g: set) (c: fml k):
   $ G ⇒ g ∊ trapx F $ >
-  $ H , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → fv g k = fv F (cres g k)) ⇒ c $ >
+  $ H , ord a , functional g , rel g , cdm g = a , ∀ k (k ∊ a → g' k = F' (g ↾ k)) ⇒ c $ >
   $ G , H ⇒ c $;
 theorem trapx_intro {k: set} (G: hyps k) (F B: class) (a: set):
   $ G ⇒ isset B $ > $ G ⇒ ord a $ > $ G ⇒ functional B $ > $ G ⇒ rel B $ > $ G ⇒ cdm B = a $ >
-  $ G ⇒ ∀ k (k ∊ a → fv B k = fv F (cres B k)) $ > $ G ⇒ B ∈ trapx F $;
+  $ G ⇒ ∀ k (k ∊ a → B' k = F' (B ↾ k)) $ > $ G ⇒ B ∈ trapx F $;
 theorem trapx_functional (G: hyps) (F: class) (g: set):
   $ G ⇒ g ∊ trapx F $ > $ G ⇒ functional g $;
 theorem trapx_rel (G: hyps) (F: class) (g: set): $ G ⇒ g ∊ trapx F $ > $ G ⇒ rel g $;
 theorem trapx_ord (G: hyps) (F: class) (g: set): $ G ⇒ g ∊ trapx F $ > $ G ⇒ ord (cdm g) $;
 theorem trapx_step (G: hyps) (F: class) (g a: set):
-  $ G ⇒ g ∊ trapx F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ fv g a = fv F (cres g a) $;
+  $ G ⇒ g ∊ trapx F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ g' a = F' (g ↾ a) $;
 --| Two approximations agree where both are defined (transfinite induction).
 theorem trapx_agree (G: hyps) (F: class) (g h a: set):
   $ G ⇒ g ∊ trapx F $ > $ G ⇒ h ∊ trapx F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ a ∊ cdm h $ >
-  $ G ⇒ fv g a = fv h a $;
+  $ G ⇒ g' a = h' a $;
 theorem trapx_agree_cres (G: hyps) (F: class) (g h a: set):
   $ G ⇒ g ∊ trapx F $ > $ G ⇒ h ∊ trapx F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ a ∊ cdm h $ >
-  $ G ⇒ cres g a = cres h a $;
+  $ G ⇒ g ↾ a = h ↾ a $;
 theorem trapx_subset (G: hyps) (F: class) (g h: set):
   $ G ⇒ g ∊ trapx F $ > $ G ⇒ h ∊ trapx F $ > $ G ⇒ cdm g ⊆ cdm h $ > $ G ⇒ g ⊆ h $;
 theorem trapx_chain (G: hyps) (F: class) (g h: set):
   $ G ⇒ g ∊ trapx F $ > $ G ⇒ h ∊ trapx F $ > $ G ⇒ g ⊆ h ∨ h ⊆ g $;
 --| The restriction of an approximation to an element of its domain is one.
 theorem trapx_cres (G: hyps) (F: class) (g a: set):
-  $ G ⇒ g ∊ trapx F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ cres g a ∈ trapx F $;
+  $ G ⇒ g ∊ trapx F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ g ↾ a ∈ trapx F $;
 --| Extending an approximation on `a` by its value at `a`.
 theorem trapx_extend (G: hyps) (F: class) (g a: set):
   $ G ⇒ functional F $ > $ G ⇒ g ∊ trapx F $ > $ G ⇒ cdm g = a $ >
-  $ G ⇒ g ∪ csn ⟨ a , fv F g ⟩ ∈ trapx F $;
+  $ G ⇒ g ∪ csn ⟨ a , F' g ⟩ ∈ trapx F $;
 theorem trapxd_intro (G: hyps) (F: class) (g a: set):
   $ G ⇒ g ∊ trapx F $ > $ G ⇒ cdm g = a $ > $ G ⇒ ⟨ a , g ⟩ ∈ trapxd F $;
 theorem trapxd_elim (G: hyps) (F: class) (g a: set):
@@ -330,19 +330,19 @@ theorem trec_cdm_ord (G: hyps) (F: class) (a: set):
 theorem trec_cdm (G: hyps) (F: class) (a: set):
   $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ a ∊ cdm (trec F) $;
 theorem trec_fv (G: hyps) (F: class) (g a: set):
-  $ G ⇒ g ∊ trapx F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ fv (trec F) a = fv g a $;
+  $ G ⇒ g ∊ trapx F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ (trec F)' a = g' a $;
 theorem trec_cres (G: hyps) (F: class) (g a: set):
-  $ G ⇒ g ∊ trapx F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ cres (trec F) a = cres g a $;
+  $ G ⇒ g ∊ trapx F $ > $ G ⇒ a ∊ cdm g $ > $ G ⇒ trec F ↾ a = g ↾ a $;
 theorem trec_cres_apx (G: hyps) (F: class) (a: set):
-  $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ cres (trec F) a ∈ trapx F $;
+  $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ trec F ↾ a ∈ trapx F $;
 --| The recursion equation.
 theorem trec_eq (G: hyps) (F: class) (a: set):
-  $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ fv (trec F) a = fv F (cres (trec F) a) $;
+  $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ (trec F)' a = F' (trec F ↾ a) $;
 --| Uniqueness: a function on the ordinals satisfying the equation is `trec F`.
 theorem trec_unique {x: set} (G: hyps x) (F H: class):
   $ G ⇒ functional F $ > $ G ⇒ functional H $ > $ G ⇒ rel H $ >
   $ G ⇒ ∀ x (x ∊ cdm H ↔ ord x) $ >
-  $ G ⇒ ∀ x (ord x → fv H x = fv F (cres H x)) $ > $ G ⇒ H = trec F $;
+  $ G ⇒ ∀ x (ord x → H' x = F' (H ↾ x)) $ > $ G ⇒ H = trec F $;
 --| @congr
 theorem trec_congr (F H: class): $ F ≐ H $ > $ trec F ≐ trec H $;
 --| (`trec_eq` is the recursion equation.)

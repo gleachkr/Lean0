@@ -47,20 +47,20 @@ theorem consistency (e: expr): $ ⟮ nil ⊢ e : Π Prop . # 0 ⟯ $ > $ _ ⇒ �
 -- says that `E` and `M` are closed relations on it that provably satisfy the
 -- characterizations of `PSet.Equiv` and `PSet.Mem`. `c ∊ fm ∅` is a sentence of the
 -- language of set theory (a tree), `lsent b E M c` its Lean form, and `A ⊨ c` its
--- truth in `(A, ∈)`. `fv uni (suc ∅)` is the first universe, `U_1`.
+-- truth in `(A, ∈)`. `U₁` is the first universe (`uni' (suc ∅)`, set/universe.mm0).
 
 --| Standardness (`pset_truth`, readback/model-fo.mm0). In every admissible universe
 --| `u` and at every valuation `w` of the levels, the value of a sentence's Lean form
---| is inhabited exactly when the sentence is true in `(U_1, ∈)`.
+--| is inhabited exactly when the sentence is true in `(U₁, ∈)`.
 theorem standardness {z: set} (G: hyps) (b: blk) (E M: expr) (u w c: set):
   $ pset_rels b E M $ > $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ c ∊ fm ∅ $ >
-  $ G ⇒ (∃ z (z ∊ dt u (mcv hfin) (lsent b E M c) w ∅) ↔ fv uni (suc ∅) ⊨ c) $;
+  $ G ⇒ (∃ z (z ∊ dt u (mcv hfin) (lsent b E M c) w ∅) ↔ U₁ ⊨ c) $;
 
 --| Readback (`pset_readback`). A sentence of set theory whose Lean form is provable
---| is true in `(U_1, ∈)`.
+--| is true in `(U₁, ∈)`.
 theorem readback (b: blk) (E M T: expr) (c: set):
   $ pset_rels b E M $ > $ _ ⇒ c ∊ fm ∅ $ > $ enc_expr T ≐ lsent b E M c $ > $ inh nil T $ >
-  $ _ ⇒ fv uni (suc ∅) ⊨ c $;
+  $ _ ⇒ U₁ ⊨ c $;
 
 -- --------------------------------------------------------------------------
 -- 3. The continuum hypothesis
@@ -72,13 +72,13 @@ theorem readback (b: blk) (E M T: expr) (c: set):
 --| What the sentence means (`ch_sat`).
 theorem ch_meaning (G: hyps) (U: class): $ G ⇒ isset U $ > $ G ⇒ (U ⊨ ch_code ↔ r_ch U) $;
 
---| If Lean proves the continuum hypothesis of its pre-sets, it holds in `U_1`
+--| If Lean proves the continuum hypothesis of its pre-sets, it holds in `U₁`
 --| (`ch_readback`).
 theorem ch_proved (b: blk) (E M T: expr):
   $ pset_rels b E M $ > $ enc_expr T ≐ lsent b E M ch_code $ > $ inh nil T $ >
-  $ _ ⇒ r_ch (fv uni (suc ∅)) $;
+  $ _ ⇒ r_ch U₁ $;
 
---| If Lean refutes it, it fails in `U_1` (`nch_readback`).
+--| If Lean refutes it, it fails in `U₁` (`nch_readback`).
 theorem ch_refuted (b: blk) (E M T: expr):
   $ pset_rels b E M $ > $ enc_expr T ≐ lsent b E M (¬ₒ ch_code) $ > $ inh nil T $ >
-  $ _ ⇒ ¬ r_ch (fv uni (suc ∅)) $;
+  $ _ ⇒ ¬ r_ch U₁ $;

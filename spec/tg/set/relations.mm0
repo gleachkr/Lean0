@@ -144,6 +144,8 @@ def ccom (S R: class) (.x .y .z .w: set): class =
   $ {w | ∃ x ∃ z (w = ⟨ x , z ⟩ ∧ ∃ y (⟨ x , y ⟩ ∈ R ∧ ⟨ y , z ⟩ ∈ S))} $;
 def cres (R A: class) (.x .y .z: set): class =
   $ {z | ∃ x ∃ y (z = ⟨ x , y ⟩ ∧ x ∊ A ∧ ⟨ x , y ⟩ ∈ R)} $;
+--| `R ↾ A`: the restriction of `R` to `A`.
+infixl cres: $↾$ prec 70;
 
 theorem ccnv_intro (G: hyps) (R: class) (a b: set):
   $ G ⇒ ⟨ a , b ⟩ ∈ R $ > $ G ⇒ ⟨ b , a ⟩ ∈ ccnv R $;
@@ -183,32 +185,32 @@ theorem sb_c_ccom {x: set} (t: set x) (R S: class x):
   $ (⟦ x / t ⟧ (ccom R S)) ≐ ccom (⟦ x / t ⟧ R) (⟦ x / t ⟧ S) $;
 
 theorem cres_intro (G: hyps) (R A: class) (a b: set):
-  $ G ⇒ a ∊ A $ > $ G ⇒ ⟨ a , b ⟩ ∈ R $ > $ G ⇒ ⟨ a , b ⟩ ∈ cres R A $;
+  $ G ⇒ a ∊ A $ > $ G ⇒ ⟨ a , b ⟩ ∈ R $ > $ G ⇒ ⟨ a , b ⟩ ∈ R ↾ A $;
 theorem cres_elim (G: hyps) (R A: class) (a b: set):
-  $ G ⇒ ⟨ a , b ⟩ ∈ cres R A $ > $ G ⇒ a ∊ A ∧ ⟨ a , b ⟩ ∈ R $;
-theorem cres_rel (G: hyps) (R A: class): $ G ⇒ rel (cres R A) $;
-theorem cres_subset (G: hyps) (R A: class): $ G ⇒ cres R A ⊆ R $;
-theorem cres_cdm (G: hyps) (R A: class): $ G ⇒ cdm (cres R A) ⊆ A $;
+  $ G ⇒ ⟨ a , b ⟩ ∈ R ↾ A $ > $ G ⇒ a ∊ A ∧ ⟨ a , b ⟩ ∈ R $;
+theorem cres_rel (G: hyps) (R A: class): $ G ⇒ rel (R ↾ A) $;
+theorem cres_subset (G: hyps) (R A: class): $ G ⇒ R ↾ A ⊆ R $;
+theorem cres_cdm (G: hyps) (R A: class): $ G ⇒ cdm (R ↾ A) ⊆ A $;
 --| An element of the domain in the restricting class is in the restriction's domain.
 theorem cdm_cres_intro (G: hyps) (R A: class) (w: set):
-  $ G ⇒ w ∊ A $ > $ G ⇒ w ∊ cdm R $ > $ G ⇒ w ∊ cdm (cres R A) $;
+  $ G ⇒ w ∊ A $ > $ G ⇒ w ∊ cdm R $ > $ G ⇒ w ∊ cdm (R ↾ A) $;
 --| A restriction lies in the product of the restricting class and the image.
-theorem cres_subset_cxp (G: hyps) (F A: class): $ G ⇒ cres F A ⊆ A × img F A $;
+theorem cres_subset_cxp (G: hyps) (F A: class): $ G ⇒ F ↾ A ⊆ A × img F A $;
 theorem cres_set (G: hyps) (F A: class):
-  $ G ⇒ functional F $ > $ G ⇒ isset A $ > $ G ⇒ isset (cres F A) $;
+  $ G ⇒ functional F $ > $ G ⇒ isset A $ > $ G ⇒ isset (F ↾ A) $;
 --| @congr
 theorem cres_congr (R S A B: class):
-  $ R ≐ S $ > $ A ≐ B $ > $ cres R A ≐ cres S B $;
-theorem welc_cres_eq (G: hyps) (R S A B: class) (a: set): $ G ⇒ R = S $ > $ G ⇒ A = B $ > $ G ⇒ a ∊ cres R A $ > $ G ⇒ a ∊ cres S B $;
+  $ R ≐ S $ > $ A ≐ B $ > $ R ↾ A ≐ S ↾ B $;
+theorem welc_cres_eq (G: hyps) (R S A B: class) (a: set): $ G ⇒ R = S $ > $ G ⇒ A = B $ > $ G ⇒ a ∊ R ↾ A $ > $ G ⇒ a ∊ S ↾ B $;
 theorem cres_eq (G: hyps) (R S A B: class):
-  $ G ⇒ R = S $ > $ G ⇒ A = B $ > $ G ⇒ cres R A = cres S B $;
+  $ G ⇒ R = S $ > $ G ⇒ A = B $ > $ G ⇒ R ↾ A = S ↾ B $;
 --| The restriction to `∅` is empty.
-theorem cres_empty (G: hyps) (R: class): $ G ⇒ cres R ∅ = ∅ $;
+theorem cres_empty (G: hyps) (R: class): $ G ⇒ R ↾ ∅ = ∅ $;
 --| @rewrite
 theorem sb_c_cres {x: set} (t: set x) (R A: class x):
-  $ (⟦ x / t ⟧ (cres R A)) ≐ cres (⟦ x / t ⟧ R) (⟦ x / t ⟧ A) $;
+  $ (⟦ x / t ⟧ (R ↾ A)) ≐ (⟦ x / t ⟧ R) ↾ (⟦ x / t ⟧ A) $;
 --| The image of `A` under a restriction to `A`.
-theorem img_cres (G: hyps) (F A: class): $ G ⇒ img (cres F A) A = img F A $;
+theorem img_cres (G: hyps) (F A: class): $ G ⇒ img (F ↾ A) A = img F A $;
 
 -- --------------------------------------------------------------------------
 -- Functional classes and functions into a class
@@ -217,7 +219,7 @@ theorem img_cres (G: hyps) (F A: class): $ G ⇒ img (cres F A) A = img F A $;
 theorem functional_subset (G: hyps) (F H: class):
   $ G ⇒ functional H $ > $ G ⇒ F ⊆ H $ > $ G ⇒ functional F $;
 theorem functional_cres (G: hyps) (F A: class):
-  $ G ⇒ functional F $ > $ G ⇒ functional (cres F A) $;
+  $ G ⇒ functional F $ > $ G ⇒ functional (F ↾ A) $;
 --| @freshen G x
 theorem fn_into_intro {x y: set} (G: hyps y) (F A B: class):
   $ G ⇒ functional F $ > $ G , x ∊ A ⇒ ∃ y (y ∊ B ∧ ⟨ x , y ⟩ ∈ F) $ >
@@ -232,7 +234,7 @@ theorem fn_into_elim {y: set} (G: hyps y) (H: hyps) (F A B: class) (a: set) (c: 
 theorem fn_into_cdm (G: hyps) (F A B: class):
   $ G ⇒ fn_into F A B $ > $ G ⇒ A ⊆ cdm F $;
 --| A function on `A` restricted to `A` is still a function on `A`.
-theorem fn_into_cres (G: hyps) (F A B: class): $ G ⇒ fn_into F A B $ > $ G ⇒ fn_into (cres F A) A B $;
+theorem fn_into_cres (G: hyps) (F A B: class): $ G ⇒ fn_into F A B $ > $ G ⇒ fn_into (F ↾ A) A B $;
 --| A function into `B` is a function into any superclass of `B`.
 theorem fn_into_subset_cod (G: hyps) (F A B C: class):
   $ G ⇒ fn_into F A B $ > $ G ⇒ B ⊆ C $ > $ G ⇒ fn_into F A C $;

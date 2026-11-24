@@ -3,8 +3,8 @@
 -- images of functions and of class operations, traces and `cpi`; the
 -- intersection of a nonempty class; the universes containing a set and the
 -- least of them (`nextu`); and the sequence `uni` of the universes of the
--- model: `fv uni ∅ = two` and `fv uni (suc n)` is the least universe
--- containing `fv uni n` and `ω`, so that each is an element and a subset of
+-- model: `uni' ∅ = two` and `uni' (suc n)` is the least universe
+-- containing `uni' n` and `ω`, so that each is an element and a subset of
 -- the next. The closure rules take set variables, with class forms (`_c`,
 -- under `A ∈ U` or `isset A` premises) beside them. Imports lfp.mm0; proofs
 -- in universe.auf.
@@ -91,12 +91,12 @@ theorem universe_ap (G: hyps) (U: class) (a b: set):
 theorem universe_ap_c (G: hyps) (U A B: class):
   $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ isset B $ > $ G ⇒ ap A B ∈ U $;
 theorem universe_fv (G: hyps) (U: class) (a b: set):
-  $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ fv a b ∈ U $;
+  $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ a' b ∈ U $;
 --| Class form of `universe_fv`.
 theorem universe_fv_c (G: hyps) (U A B: class):
-  $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ isset B $ > $ G ⇒ fv A B ∈ U $;
+  $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ isset B $ > $ G ⇒ A' B ∈ U $;
 theorem universe_cres (G: hyps) (U A: class) (a: set):
-  $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ cres a A ∈ U $;
+  $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ a ↾ A ∈ U $;
 --| The image of an element under a function into the universe.
 theorem universe_img_fn (G: hyps) (U: class) (a f: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ fn_into f a U $ > $ G ⇒ img f a ∈ U $;
@@ -201,32 +201,35 @@ theorem nextu_least_c (G: hyps) (U A: class):
 --| `U_0 = two`, the truth values; `U_{n+1}` is the least universe containing
 --| the pair `{U_n, ω}` (so `U_n` and `ω` as elements).
 def uni (.x: set): class = $ omrec two (cgr x (nextu (cpr x ω))) $;
+--| The first universe, `U₁`: the least universe with the truth values and `ω` as elements.
+def uni1: class = $ uni' (suc ∅) $;
+prefix uni1: $U₁$ prec max;
 
 theorem two_subset_omega (G: hyps): $ G ⇒ two ⊆ ω $;
 theorem uni_functional (G: hyps): $ G ⇒ functional uni $;
 theorem uni_cdm (G: hyps): $ G ⇒ cdm uni = ω $;
-theorem uni_set (G: hyps) (n: set): $ G ⇒ isset (fv uni n) $;
-theorem uni_zero (G: hyps): $ G ⇒ fv uni ∅ = two $;
+theorem uni_set (G: hyps) (n: set): $ G ⇒ isset (uni' n) $;
+theorem uni_zero (G: hyps): $ G ⇒ uni' ∅ = two $;
 theorem uni_suc (G: hyps) (n: set):
-  $ G ⇒ n ∊ ω $ > $ G ⇒ fv uni (suc n) = nextu (cpr (fv uni n) ω) $;
+  $ G ⇒ n ∊ ω $ > $ G ⇒ uni' (suc n) = nextu (cpr (uni' n) ω) $;
 theorem uni_universe (G: hyps) (n: set):
-  $ G ⇒ n ∊ ω $ > $ G ⇒ universe (fv uni (suc n)) $;
+  $ G ⇒ n ∊ ω $ > $ G ⇒ universe (uni' (suc n)) $;
 theorem uni_elem (G: hyps) (n: set):
-  $ G ⇒ n ∊ ω $ > $ G ⇒ fv uni n ∈ fv uni (suc n) $;
+  $ G ⇒ n ∊ ω $ > $ G ⇒ uni' n ∈ uni' (suc n) $;
 --| Class form of `uni_elem`.
-theorem uni_elem_c (G: hyps) (A: class): $ G ⇒ A ∈ ω $ > $ G ⇒ fv uni A ∈ fv uni (suc A) $;
+theorem uni_elem_c (G: hyps) (A: class): $ G ⇒ A ∈ ω $ > $ G ⇒ uni' A ∈ uni' (suc A) $;
 theorem uni_omega (G: hyps) (n: set):
-  $ G ⇒ n ∊ ω $ > $ G ⇒ ω ∈ fv uni (suc n) $;
+  $ G ⇒ n ∊ ω $ > $ G ⇒ ω ∈ uni' (suc n) $;
 theorem uni_subset (G: hyps) (n: set):
-  $ G ⇒ n ∊ ω $ > $ G ⇒ fv uni n ⊆ fv uni (suc n) $;
+  $ G ⇒ n ∊ ω $ > $ G ⇒ uni' n ⊆ uni' (suc n) $;
 theorem uni_two (G: hyps) (n: set):
-  $ G ⇒ n ∊ ω $ > $ G ⇒ two ∈ fv uni (suc n) $;
+  $ G ⇒ n ∊ ω $ > $ G ⇒ two ∈ uni' (suc n) $;
 --| The sequence is cumulative.
 theorem uni_mono (G: hyps) (m n: set):
-  $ G ⇒ n ∊ ω $ > $ G ⇒ m ∊ n $ > $ G ⇒ fv uni m ∈ fv uni n $;
+  $ G ⇒ n ∊ ω $ > $ G ⇒ m ∊ n $ > $ G ⇒ uni' m ∈ uni' n $;
 theorem uni_mono_subset (G: hyps) (m n: set):
-  $ G ⇒ m ∊ ω $ > $ G ⇒ n ∊ ω $ > $ G ⇒ m ⊆ n $ > $ G ⇒ fv uni m ⊆ fv uni n $;
+  $ G ⇒ m ∊ ω $ > $ G ⇒ n ∊ ω $ > $ G ⇒ m ⊆ n $ > $ G ⇒ uni' m ⊆ uni' n $;
 --| `U_{n+1}` is contained in every universe containing `U_n` and `ω`.
 theorem uni_least (G: hyps) (U: class) (n: set):
-  $ G ⇒ n ∊ ω $ > $ G ⇒ universe U $ > $ G ⇒ fv uni n ∈ U $ > $ G ⇒ ω ∈ U $ >
-  $ G ⇒ fv uni (suc n) ⊆ U $;
+  $ G ⇒ n ∊ ω $ > $ G ⇒ universe U $ > $ G ⇒ uni' n ∈ U $ > $ G ⇒ ω ∈ U $ >
+  $ G ⇒ uni' (suc n) ⊆ U $;

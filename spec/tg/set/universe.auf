@@ -93,19 +93,19 @@ universe_cuni_fn_c
 ------------------
 l1: $ … ⇒ functional F $ by fn_into_functional [#3]
 l1a: $ G ⇒ isset a $ by isset_var
-l2: $ … ⇒ isset (cres F a) $ by cres_set [l1, l1a]
-l3: $ … ⇒ fn_into (cres F a) a U $ by fn_into_cres [#3]
-l4: $ G , f = cres F a ⇒ f = cres F a $ by ax
-l5: $ … ⇒ cres F a = f $ by eq_sym [l4]
-l6: $ G , f = cres F a ⇒ a = a $ by eq_refl
-l7: $ G , f = cres F a ⇒ U = U $ by eq_refl
-l8: $ G , f = cres F a ⇒ fn_into (cres F a) a U $ by weaken [l3]
+l2: $ … ⇒ isset (F ↾ a) $ by cres_set [l1, l1a]
+l3: $ … ⇒ fn_into (F ↾ a) a U $ by fn_into_cres [#3]
+l4: $ G , f = F ↾ a ⇒ f = F ↾ a $ by ax
+l5: $ … ⇒ F ↾ a = f $ by eq_sym [l4]
+l6: $ G , f = F ↾ a ⇒ a = a $ by eq_refl
+l7: $ G , f = F ↾ a ⇒ U = U $ by eq_refl
+l8: $ G , f = F ↾ a ⇒ fn_into (F ↾ a) a U $ by weaken [l3]
 l9: $ … ⇒ fn_into f a U $ by fn_into_eq [l5, l6, l7, l8]
-l10: $ G , f = cres F a ⇒ universe U $ by weaken [#1]
-l11: $ G , f = cres F a ⇒ a ∊ U $ by weaken [#2]
+l10: $ G , f = F ↾ a ⇒ universe U $ by weaken [#1]
+l11: $ G , f = F ↾ a ⇒ a ∊ U $ by weaken [#2]
 l12: $ … ⇒ ⋃ (img f a) ∈ U $ by universe_cuni_fn [l10, l11, l9]
-l13: $ … ⇒ img f a = img (cres F a) a $ by img_eq [l4, l6]
-l14: $ G , f = cres F a ⇒ img (cres F a) a = img F a $ by img_cres
+l13: $ … ⇒ img f a = img (F ↾ a) a $ by img_eq [l4, l6]
+l14: $ G , f = F ↾ a ⇒ img (F ↾ a) a = img F a $ by img_cres
 l15: $ … ⇒ img f a = img F a $ by eq_trans [l13, l14]
 l16: $ … ⇒ ⋃ (img f a) = ⋃ (img F a) $ by cuni_eq [l15]
 l17: $ … ⇒ ⋃ (img F a) ∈ U $ by wcel_eq_l [l16, l12]
@@ -192,12 +192,12 @@ l2: $ … ⇒ ∅ ∈ U $ by universe_subset [#1, #2, l1]
 universe_cuni
 -------------
 l1: $ … ⇒ a ⊆ U $ by universe_elem_subset [#1, #2]
-l2: $ … ⇒ fn_into (cres (cgr y y) a) a U $ by cgr_id_fn_into [l1]
-l3: $ … ⇒ ⋃ (img (cres (cgr y y) a) a) ∈ U $ by universe_cuni_fn_c [#1, #2, l2]
-l4: $ G ⇒ img (cres (cgr y y) a) a = img (cgr y y) a $ by img_cres
+l2: $ … ⇒ fn_into (cgr y y ↾ a) a U $ by cgr_id_fn_into [l1]
+l3: $ … ⇒ ⋃ (img (cgr y y ↾ a) a) ∈ U $ by universe_cuni_fn_c [#1, #2, l2]
+l4: $ G ⇒ img (cgr y y ↾ a) a = img (cgr y y) a $ by img_cres
 l5: $ G ⇒ img (cgr y y) a = a $ by img_cgr_id
-l6: $ … ⇒ img (cres (cgr y y) a) a = a $ by eq_trans [l4, l5]
-l7: $ … ⇒ ⋃ (img (cres (cgr y y) a) a) = ⋃ a $ by cuni_eq [l6]
+l6: $ … ⇒ img (cgr y y ↾ a) a = a $ by eq_trans [l4, l5]
+l7: $ … ⇒ ⋃ (img (cgr y y ↾ a) a) = ⋃ a $ by cuni_eq [l6]
 l8: $ … ⇒ ⋃ a ∈ U $ by wcel_eq_l [l7, l3]
 
 universe_cuni_c
@@ -376,18 +376,18 @@ universe_fv_c
 -------------
 l1: $ G , v = A , v ∊ U , i = B ⇒ universe U $ by weaken [#1]
 l2: $ G , v = A , v ∊ U , i = B ⇒ v ∊ U $ by ax
-l3: $ … ⇒ fv v i ∈ U $ by universe_fv [l1, l2]
+l3: $ … ⇒ v' i ∈ U $ by universe_fv [l1, l2]
 l4: $ G , v = A , v ∊ U , i = B ⇒ v = A $ by ax
 l5: $ G , v = A , v ∊ U , i = B ⇒ i = B $ by ax
-l6: $ … ⇒ fv v i = fv A B $ by fv_eq [l4, l5]
-l7: $ … ⇒ fv A B ∈ U $ by wcel_eq_l [l6, l3]
-l8: $ … ⇒ fv A B ∈ U $ by isset_elim [#3, l7]
-l9: $ … ⇒ fv A B ∈ U $ by wcel_elim [#2, l8]
+l6: $ … ⇒ v' i = A' B $ by fv_eq [l4, l5]
+l7: $ … ⇒ A' B ∈ U $ by wcel_eq_l [l6, l3]
+l8: $ … ⇒ A' B ∈ U $ by isset_elim [#3, l7]
+l9: $ … ⇒ A' B ∈ U $ by wcel_elim [#2, l8]
 
 universe_cres
 -------------
-l1: $ G ⇒ cres a A ⊆ a $ by cres_subset
-l2: $ … ⇒ cres a A ∈ U $ by universe_subset [#1, #2, l1]
+l1: $ G ⇒ a ↾ A ⊆ a $ by cres_subset
+l2: $ … ⇒ a ↾ A ∈ U $ by universe_subset [#1, #2, l1]
 
 universe_img_fn
 ---------------
@@ -431,19 +431,19 @@ universe_img_fn_c
 -----------------
 l1: $ … ⇒ functional F $ by fn_into_functional [#3]
 l1a: $ G ⇒ isset a $ by isset_var
-l2: $ … ⇒ isset (cres F a) $ by cres_set [l1, l1a]
-l3: $ … ⇒ fn_into (cres F a) a U $ by fn_into_cres [#3]
-l4: $ G , f = cres F a ⇒ f = cres F a $ by ax
-l5: $ … ⇒ cres F a = f $ by eq_sym [l4]
-l6: $ G , f = cres F a ⇒ a = a $ by eq_refl
-l7: $ G , f = cres F a ⇒ U = U $ by eq_refl
-l8: $ G , f = cres F a ⇒ fn_into (cres F a) a U $ by weaken [l3]
+l2: $ … ⇒ isset (F ↾ a) $ by cres_set [l1, l1a]
+l3: $ … ⇒ fn_into (F ↾ a) a U $ by fn_into_cres [#3]
+l4: $ G , f = F ↾ a ⇒ f = F ↾ a $ by ax
+l5: $ … ⇒ F ↾ a = f $ by eq_sym [l4]
+l6: $ G , f = F ↾ a ⇒ a = a $ by eq_refl
+l7: $ G , f = F ↾ a ⇒ U = U $ by eq_refl
+l8: $ G , f = F ↾ a ⇒ fn_into (F ↾ a) a U $ by weaken [l3]
 l9: $ … ⇒ fn_into f a U $ by fn_into_eq [l5, l6, l7, l8]
-l10: $ G , f = cres F a ⇒ universe U $ by weaken [#1]
-l11: $ G , f = cres F a ⇒ a ∊ U $ by weaken [#2]
+l10: $ G , f = F ↾ a ⇒ universe U $ by weaken [#1]
+l11: $ G , f = F ↾ a ⇒ a ∊ U $ by weaken [#2]
 l12: $ … ⇒ img f a ∈ U $ by universe_img_fn [l10, l11, l9]
-l13: $ … ⇒ img f a = img (cres F a) a $ by img_eq [l4, l6]
-l14: $ G , f = cres F a ⇒ img (cres F a) a = img F a $ by img_cres
+l13: $ … ⇒ img f a = img (F ↾ a) a $ by img_eq [l4, l6]
+l14: $ G , f = F ↾ a ⇒ img (F ↾ a) a = img F a $ by img_cres
 l15: $ … ⇒ img f a = img F a $ by eq_trans [l13, l14]
 l16: $ … ⇒ img F a ∈ U $ by wcel_eq_l [l15, l12]
 l17: $ … ⇒ img F a ∈ U $ by isset_elim [l2, l16]
@@ -971,101 +971,101 @@ l3: $ … ⇒ cdm (omrec two (cgr x (nextu (cpr x ω)))) = ω $ by omrec_cdm [l1
 uni_set
 -------
 l1: $ G ⇒ functional uni $ by uni_functional
-l2: $ … ⇒ isset (fv uni n) $ by fv_set [l1]
+l2: $ … ⇒ isset (uni' n) $ by fv_set [l1]
 
 uni_zero
 --------
 l1: $ G ⇒ isset two $ by two_set
 l2: $ G ⇒ functional (cgr x (nextu (cpr x ω))) $ by cgr_functional
-l3: $ … ⇒ fv (omrec two (cgr x (nextu (cpr x ω)))) ∅ = two $ by omrec_zero [l1, l2]
+l3: $ … ⇒ (omrec two (cgr x (nextu (cpr x ω))))' ∅ = two $ by omrec_zero [l1, l2]
 
 uni_suc
 -------
 l1: $ G ⇒ isset two $ by two_set
 l2: $ G ⇒ functional (cgr x (nextu (cpr x ω))) $ by cgr_functional
-l3: $ … ⇒ fv (omrec two (cgr x (nextu (cpr x ω)))) (suc n) = fv (cgr x (nextu (cpr x ω))) (fv (omrec two (cgr x (nextu (cpr x ω)))) n) $ by omrec_suc [l1, l2, #1]
-l4: $ G ⇒ isset (fv uni n) $ by uni_set
-m1: $ G , v = fv uni n ⇒ v = fv uni n $ by ax
-m2: $ … ⇒ fv uni n = v $ by eq_sym [m1]
-m3: $ G , v = fv uni n ⇒ cgr x (nextu (cpr x ω)) = cgr x (nextu (cpr x ω)) $ by eq_refl
-m4: $ … ⇒ fv (cgr x (nextu (cpr x ω))) (fv uni n) = fv (cgr x (nextu (cpr x ω))) v $ by fv_eq [m3, m2]
-m5a: $ G , v = fv uni n ⇒ isset v $ by isset_var
-m5b: $ G , v = fv uni n ⇒ isset ω $ by omega_set
+l3: $ … ⇒ (omrec two (cgr x (nextu (cpr x ω))))' (suc n) = (cgr x (nextu (cpr x ω)))' (omrec two (cgr x (nextu (cpr x ω))))' n $ by omrec_suc [l1, l2, #1]
+l4: $ G ⇒ isset (uni' n) $ by uni_set
+m1: $ G , v = uni' n ⇒ v = uni' n $ by ax
+m2: $ … ⇒ uni' n = v $ by eq_sym [m1]
+m3: $ G , v = uni' n ⇒ cgr x (nextu (cpr x ω)) = cgr x (nextu (cpr x ω)) $ by eq_refl
+m4: $ … ⇒ (cgr x (nextu (cpr x ω)))' uni' n = (cgr x (nextu (cpr x ω)))' v $ by fv_eq [m3, m2]
+m5a: $ G , v = uni' n ⇒ isset v $ by isset_var
+m5b: $ G , v = uni' n ⇒ isset ω $ by omega_set
 m5: $ … ⇒ isset (cpr v ω) $ by cpr_set [m5a, m5b]
 m6: $ … ⇒ isset (nextu (cpr v ω)) $ by nextu_set_c [m5]
-m7: $ G , v = fv uni n ⇒ fv (cgr x (nextu (cpr x ω))) v = nextu (cpr v ω) $ by fv_cgr [m6]
-m8: $ G , v = fv uni n ⇒ ω = ω $ by eq_refl
-m9: $ … ⇒ cpr v ω = cpr (fv uni n) ω $ by cpr_eq [m1, m8]
-m10: $ … ⇒ nextu (cpr v ω) = nextu (cpr (fv uni n) ω) $ by nextu_eq [m9]
-m11: $ G , v = fv uni n ⇒ fv uni (suc n) = fv (cgr x (nextu (cpr x ω))) (fv uni n) $ by weaken [l3]
-m12: $ … ⇒ fv uni (suc n) = fv (cgr x (nextu (cpr x ω))) v $ by eq_trans [m11, m4]
-m13: $ … ⇒ fv uni (suc n) = nextu (cpr v ω) $ by eq_trans [m12, m7]
-m14: $ … ⇒ fv uni (suc n) = nextu (cpr (fv uni n) ω) $ by eq_trans [m13, m10]
-m15: $ … ⇒ fv uni (suc n) = nextu (cpr (fv uni n) ω) $ by isset_elim [l4, m14]
+m7: $ G , v = uni' n ⇒ (cgr x (nextu (cpr x ω)))' v = nextu (cpr v ω) $ by fv_cgr [m6]
+m8: $ G , v = uni' n ⇒ ω = ω $ by eq_refl
+m9: $ … ⇒ cpr v ω = cpr (uni' n) ω $ by cpr_eq [m1, m8]
+m10: $ … ⇒ nextu (cpr v ω) = nextu (cpr (uni' n) ω) $ by nextu_eq [m9]
+m11: $ G , v = uni' n ⇒ uni' (suc n) = (cgr x (nextu (cpr x ω)))' uni' n $ by weaken [l3]
+m12: $ … ⇒ uni' (suc n) = (cgr x (nextu (cpr x ω)))' v $ by eq_trans [m11, m4]
+m13: $ … ⇒ uni' (suc n) = nextu (cpr v ω) $ by eq_trans [m12, m7]
+m14: $ … ⇒ uni' (suc n) = nextu (cpr (uni' n) ω) $ by eq_trans [m13, m10]
+m15: $ … ⇒ uni' (suc n) = nextu (cpr (uni' n) ω) $ by isset_elim [l4, m14]
 
 uni_universe
 ------------
-l1: $ … ⇒ fv uni (suc n) = nextu (cpr (fv uni n) ω) $ by uni_suc [#1]
-l2: $ G ⇒ isset (fv uni n) $ by uni_set
+l1: $ … ⇒ uni' (suc n) = nextu (cpr (uni' n) ω) $ by uni_suc [#1]
+l2: $ G ⇒ isset (uni' n) $ by uni_set
 l3: $ G ⇒ isset ω $ by omega_set
-l4: $ … ⇒ isset (cpr (fv uni n) ω) $ by cpr_set [l2, l3]
-l5: $ … ⇒ universe (nextu (cpr (fv uni n) ω)) $ by nextu_universe_c [l4]
-l6: $ … ⇒ nextu (cpr (fv uni n) ω) = fv uni (suc n) $ by eq_sym [l1]
-l7: $ … ⇒ universe (fv uni (suc n)) $ by universe_eq [l6, l5]
+l4: $ … ⇒ isset (cpr (uni' n) ω) $ by cpr_set [l2, l3]
+l5: $ … ⇒ universe (nextu (cpr (uni' n) ω)) $ by nextu_universe_c [l4]
+l6: $ … ⇒ nextu (cpr (uni' n) ω) = uni' (suc n) $ by eq_sym [l1]
+l7: $ … ⇒ universe (uni' (suc n)) $ by universe_eq [l6, l5]
 
 uni_elem
 --------
-l1: $ … ⇒ fv uni (suc n) = nextu (cpr (fv uni n) ω) $ by uni_suc [#1]
-l2: $ G ⇒ isset (fv uni n) $ by uni_set
+l1: $ … ⇒ uni' (suc n) = nextu (cpr (uni' n) ω) $ by uni_suc [#1]
+l2: $ G ⇒ isset (uni' n) $ by uni_set
 l3: $ G ⇒ isset ω $ by omega_set
-l4: $ … ⇒ isset (cpr (fv uni n) ω) $ by cpr_set [l2, l3]
-l5: $ … ⇒ cpr (fv uni n) ω ∈ nextu (cpr (fv uni n) ω) $ by nextu_elem_c [l4]
-l6: $ … ⇒ nextu (cpr (fv uni n) ω) = fv uni (suc n) $ by eq_sym [l1]
-l7: $ … ⇒ cpr (fv uni n) ω ∈ fv uni (suc n) $ by wcel_eq_r [l6, l5]
-l8: $ … ⇒ universe (fv uni (suc n)) $ by uni_universe [#1]
-l9: $ … ⇒ fv uni n ∈ cpr (fv uni n) ω $ by cpr_intro_l_c [l2]
-l10: $ … ⇒ fv uni n ∈ fv uni (suc n) $ by universe_elem_elem_c [l8, l7, l9]
+l4: $ … ⇒ isset (cpr (uni' n) ω) $ by cpr_set [l2, l3]
+l5: $ … ⇒ cpr (uni' n) ω ∈ nextu (cpr (uni' n) ω) $ by nextu_elem_c [l4]
+l6: $ … ⇒ nextu (cpr (uni' n) ω) = uni' (suc n) $ by eq_sym [l1]
+l7: $ … ⇒ cpr (uni' n) ω ∈ uni' (suc n) $ by wcel_eq_r [l6, l5]
+l8: $ … ⇒ universe (uni' (suc n)) $ by uni_universe [#1]
+l9: $ … ⇒ uni' n ∈ cpr (uni' n) ω $ by cpr_intro_l_c [l2]
+l10: $ … ⇒ uni' n ∈ uni' (suc n) $ by universe_elem_elem_c [l8, l7, l9]
 
 uni_elem_c
 ----------
 l1: $ G , n = A , n ∊ ω ⇒ n ∊ ω $ by ax
-l2: $ … ⇒ fv uni n ∈ fv uni (suc n) $ by uni_elem [l1]
+l2: $ … ⇒ uni' n ∈ uni' (suc n) $ by uni_elem [l1]
 l3: $ G , n = A , n ∊ ω ⇒ n = A $ by ax
 l4: $ G , n = A , n ∊ ω ⇒ uni = uni $ by eq_refl
-l5: $ … ⇒ fv uni n = fv uni A $ by fv_eq [l4, l3]
+l5: $ … ⇒ uni' n = uni' A $ by fv_eq [l4, l3]
 l6: $ … ⇒ suc n = suc A $ by suc_eq [l3]
-l7: $ … ⇒ fv uni (suc n) = fv uni (suc A) $ by fv_eq [l4, l6]
-l8: $ … ⇒ fv uni A ∈ fv uni (suc n) $ by wcel_eq_l [l5, l2]
-l9: $ … ⇒ fv uni A ∈ fv uni (suc A) $ by wcel_eq_r [l7, l8]
-l10: $ … ⇒ fv uni A ∈ fv uni (suc A) $ by wcel_elim [#1, l9]
+l7: $ … ⇒ uni' (suc n) = uni' (suc A) $ by fv_eq [l4, l6]
+l8: $ … ⇒ uni' A ∈ uni' (suc n) $ by wcel_eq_l [l5, l2]
+l9: $ … ⇒ uni' A ∈ uni' (suc A) $ by wcel_eq_r [l7, l8]
+l10: $ … ⇒ uni' A ∈ uni' (suc A) $ by wcel_elim [#1, l9]
 
 uni_omega
 ---------
-l1: $ … ⇒ fv uni (suc n) = nextu (cpr (fv uni n) ω) $ by uni_suc [#1]
-l2: $ G ⇒ isset (fv uni n) $ by uni_set
+l1: $ … ⇒ uni' (suc n) = nextu (cpr (uni' n) ω) $ by uni_suc [#1]
+l2: $ G ⇒ isset (uni' n) $ by uni_set
 l3: $ G ⇒ isset ω $ by omega_set
-l4: $ … ⇒ isset (cpr (fv uni n) ω) $ by cpr_set [l2, l3]
-l5: $ … ⇒ cpr (fv uni n) ω ∈ nextu (cpr (fv uni n) ω) $ by nextu_elem_c [l4]
-l6: $ … ⇒ nextu (cpr (fv uni n) ω) = fv uni (suc n) $ by eq_sym [l1]
-l7: $ … ⇒ cpr (fv uni n) ω ∈ fv uni (suc n) $ by wcel_eq_r [l6, l5]
-l8: $ … ⇒ universe (fv uni (suc n)) $ by uni_universe [#1]
-l9: $ … ⇒ ω ∈ cpr (fv uni n) ω $ by cpr_intro_r_c [l3]
-l10: $ … ⇒ ω ∈ fv uni (suc n) $ by universe_elem_elem_c [l8, l7, l9]
+l4: $ … ⇒ isset (cpr (uni' n) ω) $ by cpr_set [l2, l3]
+l5: $ … ⇒ cpr (uni' n) ω ∈ nextu (cpr (uni' n) ω) $ by nextu_elem_c [l4]
+l6: $ … ⇒ nextu (cpr (uni' n) ω) = uni' (suc n) $ by eq_sym [l1]
+l7: $ … ⇒ cpr (uni' n) ω ∈ uni' (suc n) $ by wcel_eq_r [l6, l5]
+l8: $ … ⇒ universe (uni' (suc n)) $ by uni_universe [#1]
+l9: $ … ⇒ ω ∈ cpr (uni' n) ω $ by cpr_intro_r_c [l3]
+l10: $ … ⇒ ω ∈ uni' (suc n) $ by universe_elem_elem_c [l8, l7, l9]
 
 uni_subset
 ----------
-l1: $ … ⇒ universe (fv uni (suc n)) $ by uni_universe [#1]
-l2: $ … ⇒ fv uni n ∈ fv uni (suc n) $ by uni_elem [#1]
-l3: $ … ⇒ fv uni n ⊆ fv uni (suc n) $ by universe_elem_subset_c [l1, l2]
+l1: $ … ⇒ universe (uni' (suc n)) $ by uni_universe [#1]
+l2: $ … ⇒ uni' n ∈ uni' (suc n) $ by uni_elem [#1]
+l3: $ … ⇒ uni' n ⊆ uni' (suc n) $ by universe_elem_subset_c [l1, l2]
 
 uni_two
 -------
-l1: $ … ⇒ universe (fv uni (suc n)) $ by uni_universe [#1]
-l2: $ … ⇒ fv uni n ∈ fv uni (suc n) $ by uni_elem [#1]
-l3: $ G , v = fv uni n , v ∊ fv uni (suc n) ⇒ v ∊ fv uni (suc n) $ by ax
-l4: $ G , v = fv uni n , v ∊ fv uni (suc n) ⇒ universe (fv uni (suc n)) $ by weaken [l1]
-l5: $ … ⇒ two ∈ fv uni (suc n) $ by universe_two [l4, l3]
-l6: $ … ⇒ two ∈ fv uni (suc n) $ by wcel_elim [l2, l5]
+l1: $ … ⇒ universe (uni' (suc n)) $ by uni_universe [#1]
+l2: $ … ⇒ uni' n ∈ uni' (suc n) $ by uni_elem [#1]
+l3: $ G , v = uni' n , v ∊ uni' (suc n) ⇒ v ∊ uni' (suc n) $ by ax
+l4: $ G , v = uni' n , v ∊ uni' (suc n) ⇒ universe (uni' (suc n)) $ by weaken [l1]
+l5: $ … ⇒ two ∈ uni' (suc n) $ by universe_two [l4, l3]
+l6: $ … ⇒ two ∈ uni' (suc n) $ by wcel_elim [l2, l5]
 
 uni_mono
 --------
@@ -1074,103 +1074,103 @@ b2: $ G , c = ∅ , m ∊ c ⇒ m ∊ c $ by ax
 b3: $ G , c = ∅ , m ∊ c ⇒ c = ∅ $ by ax
 b4: $ … ⇒ m ∊ ∅ $ by welc_eq [b3, b2]
 b5: $ … ⇒ ⊥ $ by empty_elim [b4]
-b6: $ … ⇒ fv uni m ∈ fv uni c $ by bot_elim [b5]
-b7: $ … ⇒ m ∊ c → fv uni m ∈ fv uni c $ by imp_intro [b6]
-b8: $ … ⇒ c ∊ {x | m ∊ x → fv uni m ∈ fv uni x} $ by cab_intro [b7]
-b9: $ … ⇒ ∅ ∈ {x | m ∊ x → fv uni m ∈ fv uni x} $ by wcel_intro [b1, b8]
+b6: $ … ⇒ uni' m ∈ uni' c $ by bot_elim [b5]
+b7: $ … ⇒ m ∊ c → uni' m ∈ uni' c $ by imp_intro [b6]
+b8: $ … ⇒ c ∊ {x | m ∊ x → uni' m ∈ uni' x} $ by cab_intro [b7]
+b9: $ … ⇒ ∅ ∈ {x | m ∊ x → uni' m ∈ uni' x} $ by wcel_intro [b1, b8]
 b10: $ G ⇒ isset ∅ $ by ax_empty
-b11: $ … ⇒ ∅ ∈ {x | m ∊ x → fv uni m ∈ fv uni x} $ by isset_elim [b10, b9]
-s1: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w ⇒ m ∊ w $ by ax
-s2: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w ⇒ w = suc k $ by ax
+b11: $ … ⇒ ∅ ∈ {x | m ∊ x → uni' m ∈ uni' x} $ by isset_elim [b10, b9]
+s1: $ G , k ∊ ω , (m ∊ k → uni' m ∈ uni' k) , w = suc k , m ∊ w ⇒ m ∊ w $ by ax
+s2: $ G , k ∊ ω , (m ∊ k → uni' m ∈ uni' k) , w = suc k , m ∊ w ⇒ w = suc k $ by ax
 s3: $ … ⇒ m ∊ suc k $ by welc_eq [s2, s1]
 s4: $ … ⇒ m ∊ k ∨ m = k $ by suc_elim [s3]
-s5: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w ⇒ k ∊ ω $ by ax
-s6: $ … ⇒ universe (fv uni (suc k)) $ by uni_universe [s5]
-s7: $ … ⇒ fv uni k ∈ fv uni (suc k) $ by uni_elem [s5]
-a1: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m ∊ k ⇒ m ∊ k $ by ax
-a2: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m ∊ k ⇒ m ∊ k → fv uni m ∈ fv uni k $ by ax
-a3: $ … ⇒ fv uni m ∈ fv uni k $ by imp_elim [a2, a1]
-a4: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m ∊ k ⇒ universe (fv uni (suc k)) $ by weaken [s6]
-a5: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m ∊ k ⇒ fv uni k ∈ fv uni (suc k) $ by weaken [s7]
-a6: $ … ⇒ fv uni m ∈ fv uni (suc k) $ by universe_elem_elem_c [a4, a5, a3]
-c1: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m = k ⇒ m = k $ by ax
-c2: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m = k ⇒ uni = uni $ by eq_refl
-c3: $ … ⇒ fv uni m = fv uni k $ by fv_eq [c2, c1]
-c4: $ … ⇒ fv uni k = fv uni m $ by eq_sym [c3]
-c5: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w , m = k ⇒ fv uni k ∈ fv uni (suc k) $ by weaken [s7]
-c6: $ … ⇒ fv uni m ∈ fv uni (suc k) $ by wcel_eq_l [c4, c5]
-s8: $ … ⇒ fv uni m ∈ fv uni (suc k) $ by or_elim [s4, a6, c6]
+s5: $ G , k ∊ ω , (m ∊ k → uni' m ∈ uni' k) , w = suc k , m ∊ w ⇒ k ∊ ω $ by ax
+s6: $ … ⇒ universe (uni' (suc k)) $ by uni_universe [s5]
+s7: $ … ⇒ uni' k ∈ uni' (suc k) $ by uni_elem [s5]
+a1: $ G , k ∊ ω , (m ∊ k → uni' m ∈ uni' k) , w = suc k , m ∊ w , m ∊ k ⇒ m ∊ k $ by ax
+a2: $ G , k ∊ ω , (m ∊ k → uni' m ∈ uni' k) , w = suc k , m ∊ w , m ∊ k ⇒ m ∊ k → uni' m ∈ uni' k $ by ax
+a3: $ … ⇒ uni' m ∈ uni' k $ by imp_elim [a2, a1]
+a4: $ G , k ∊ ω , (m ∊ k → uni' m ∈ uni' k) , w = suc k , m ∊ w , m ∊ k ⇒ universe (uni' (suc k)) $ by weaken [s6]
+a5: $ G , k ∊ ω , (m ∊ k → uni' m ∈ uni' k) , w = suc k , m ∊ w , m ∊ k ⇒ uni' k ∈ uni' (suc k) $ by weaken [s7]
+a6: $ … ⇒ uni' m ∈ uni' (suc k) $ by universe_elem_elem_c [a4, a5, a3]
+c1: $ G , k ∊ ω , (m ∊ k → uni' m ∈ uni' k) , w = suc k , m ∊ w , m = k ⇒ m = k $ by ax
+c2: $ G , k ∊ ω , (m ∊ k → uni' m ∈ uni' k) , w = suc k , m ∊ w , m = k ⇒ uni = uni $ by eq_refl
+c3: $ … ⇒ uni' m = uni' k $ by fv_eq [c2, c1]
+c4: $ … ⇒ uni' k = uni' m $ by eq_sym [c3]
+c5: $ G , k ∊ ω , (m ∊ k → uni' m ∈ uni' k) , w = suc k , m ∊ w , m = k ⇒ uni' k ∈ uni' (suc k) $ by weaken [s7]
+c6: $ … ⇒ uni' m ∈ uni' (suc k) $ by wcel_eq_l [c4, c5]
+s8: $ … ⇒ uni' m ∈ uni' (suc k) $ by or_elim [s4, a6, c6]
 s9: $ … ⇒ suc k = w $ by eq_sym [s2]
-s10: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k , m ∊ w ⇒ uni = uni $ by eq_refl
-s11: $ … ⇒ fv uni (suc k) = fv uni w $ by fv_eq [s10, s9]
-s12: $ … ⇒ fv uni m ∈ fv uni w $ by wcel_eq_r [s11, s8]
-s13: $ … ⇒ m ∊ w → fv uni m ∈ fv uni w $ by imp_intro [s12]
-s14: $ … ⇒ w ∊ {x | m ∊ x → fv uni m ∈ fv uni x} $ by cab_intro [s13]
-s15: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) , w = suc k ⇒ w = suc k $ by ax
-s16: $ … ⇒ suc k ∈ {x | m ∊ x → fv uni m ∈ fv uni x} $ by wcel_intro [s15, s14]
-s17: $ G , k ∊ ω , (m ∊ k → fv uni m ∈ fv uni k) ⇒ isset k $ by isset_var
+s10: $ G , k ∊ ω , (m ∊ k → uni' m ∈ uni' k) , w = suc k , m ∊ w ⇒ uni = uni $ by eq_refl
+s11: $ … ⇒ uni' (suc k) = uni' w $ by fv_eq [s10, s9]
+s12: $ … ⇒ uni' m ∈ uni' w $ by wcel_eq_r [s11, s8]
+s13: $ … ⇒ m ∊ w → uni' m ∈ uni' w $ by imp_intro [s12]
+s14: $ … ⇒ w ∊ {x | m ∊ x → uni' m ∈ uni' x} $ by cab_intro [s13]
+s15: $ G , k ∊ ω , (m ∊ k → uni' m ∈ uni' k) , w = suc k ⇒ w = suc k $ by ax
+s16: $ … ⇒ suc k ∈ {x | m ∊ x → uni' m ∈ uni' x} $ by wcel_intro [s15, s14]
+s17: $ G , k ∊ ω , (m ∊ k → uni' m ∈ uni' k) ⇒ isset k $ by isset_var
 s18: $ … ⇒ isset (suc k) $ by suc_set [s17]
-s19: $ … ⇒ suc k ∈ {x | m ∊ x → fv uni m ∈ fv uni x} $ by isset_elim [s18, s16]
-s20: $ … ⇒ (m ∊ k → fv uni m ∈ fv uni k) → suc k ∈ {x | m ∊ x → fv uni m ∈ fv uni x} $ by imp_intro [s19]
-s21: $ … ⇒ k ∊ ω → (m ∊ k → fv uni m ∈ fv uni k) → suc k ∈ {x | m ∊ x → fv uni m ∈ fv uni x} $ by imp_intro [s20]
-s22: $ … ⇒ ∀ k (k ∊ ω → (m ∊ k → fv uni m ∈ fv uni k) → suc k ∈ {x | m ∊ x → fv uni m ∈ fv uni x}) $ by all_intro [s21]
-f1: $ … ⇒ ∀ x (x ∊ ω → m ∊ x → fv uni m ∈ fv uni x) $ by omega_ind_f [b11, s22]
-f2: $ … ⇒ n ∊ ω → m ∊ n → fv uni m ∈ fv uni n $ by all_elim [f1]
-f3: $ … ⇒ m ∊ n → fv uni m ∈ fv uni n $ by imp_elim [f2, #1]
-f4: $ … ⇒ fv uni m ∈ fv uni n $ by imp_elim [f3, #2]
+s19: $ … ⇒ suc k ∈ {x | m ∊ x → uni' m ∈ uni' x} $ by isset_elim [s18, s16]
+s20: $ … ⇒ (m ∊ k → uni' m ∈ uni' k) → suc k ∈ {x | m ∊ x → uni' m ∈ uni' x} $ by imp_intro [s19]
+s21: $ … ⇒ k ∊ ω → (m ∊ k → uni' m ∈ uni' k) → suc k ∈ {x | m ∊ x → uni' m ∈ uni' x} $ by imp_intro [s20]
+s22: $ … ⇒ ∀ k (k ∊ ω → (m ∊ k → uni' m ∈ uni' k) → suc k ∈ {x | m ∊ x → uni' m ∈ uni' x}) $ by all_intro [s21]
+f1: $ … ⇒ ∀ x (x ∊ ω → m ∊ x → uni' m ∈ uni' x) $ by omega_ind_f [b11, s22]
+f2: $ … ⇒ n ∊ ω → m ∊ n → uni' m ∈ uni' n $ by all_elim [f1]
+f3: $ … ⇒ m ∊ n → uni' m ∈ uni' n $ by imp_elim [f2, #1]
+f4: $ … ⇒ uni' m ∈ uni' n $ by imp_elim [f3, #2]
 
 uni_mono_subset
 ---------------
 t1: $ … ⇒ m ∊ n ∨ m = n ∨ n ∊ m $ by omega_tricho [#1, #2]
 g1: $ G , m ∊ n ⇒ m ∊ n $ by ax
 g2b: $ G , m ∊ n ⇒ n ∊ ω $ by weaken [#2]
-g2: $ … ⇒ fv uni m ∈ fv uni n $ by uni_mono [g2b, g1]
+g2: $ … ⇒ uni' m ∈ uni' n $ by uni_mono [g2b, g1]
 g4: $ … ⇒ n = ∅ ∨ ∃ k (k ∊ ω ∧ n = suc k) $ by omega_cases [g2b]
 h1: $ G , m ∊ n , n = ∅ ⇒ n = ∅ $ by ax
 h2: $ G , m ∊ n , n = ∅ ⇒ m ∊ n $ by ax
 h3: $ … ⇒ m ∊ ∅ $ by welc_eq [h1, h2]
 h4: $ … ⇒ ⊥ $ by empty_elim [h3]
-h5: $ … ⇒ fv uni m ⊆ fv uni n $ by bot_elim [h4]
+h5: $ … ⇒ uni' m ⊆ uni' n $ by bot_elim [h4]
 i1: $ G , m ∊ n , k ∊ ω ∧ n = suc k ⇒ k ∊ ω ∧ n = suc k $ by ax
 i2: $ … ⇒ k ∊ ω $ by and_elim_l [i1]
 i3: $ … ⇒ n = suc k $ by and_elim_r [i1]
-i4: $ … ⇒ universe (fv uni (suc k)) $ by uni_universe [i2]
+i4: $ … ⇒ universe (uni' (suc k)) $ by uni_universe [i2]
 i5: $ … ⇒ suc k = n $ by eq_sym [i3]
 i6: $ G , m ∊ n , k ∊ ω ∧ n = suc k ⇒ uni = uni $ by eq_refl
-i7: $ … ⇒ fv uni (suc k) = fv uni n $ by fv_eq [i6, i5]
-i8: $ … ⇒ universe (fv uni n) $ by universe_eq [i7, i4]
-i9: $ G , m ∊ n , k ∊ ω ∧ n = suc k ⇒ fv uni m ∈ fv uni n $ by weaken [g2]
-i10: $ … ⇒ fv uni m ⊆ fv uni n $ by universe_elem_subset_c [i8, i9]
+i7: $ … ⇒ uni' (suc k) = uni' n $ by fv_eq [i6, i5]
+i8: $ … ⇒ universe (uni' n) $ by universe_eq [i7, i4]
+i9: $ G , m ∊ n , k ∊ ω ∧ n = suc k ⇒ uni' m ∈ uni' n $ by weaken [g2]
+i10: $ … ⇒ uni' m ⊆ uni' n $ by universe_elem_subset_c [i8, i9]
 j1: $ G , m ∊ n , ∃ k (k ∊ ω ∧ n = suc k) ⇒ ∃ k (k ∊ ω ∧ n = suc k) $ by ax
-j2: $ … ⇒ fv uni m ⊆ fv uni n $ by ex_elim [j1, i10]
-j3: $ … ⇒ fv uni m ⊆ fv uni n $ by or_elim [g4, h5, j2]
+j2: $ … ⇒ uni' m ⊆ uni' n $ by ex_elim [j1, i10]
+j3: $ … ⇒ uni' m ⊆ uni' n $ by or_elim [g4, h5, j2]
 e0: $ G , (m = n ∨ n ∊ m) ⇒ m = n ∨ n ∊ m $ by ax
 e1: $ G , (m = n ∨ n ∊ m) , m = n ⇒ m = n $ by ax
 e2: $ G , (m = n ∨ n ∊ m) , m = n ⇒ uni = uni $ by eq_refl
-e3: $ … ⇒ fv uni m = fv uni n $ by fv_eq [e2, e1]
-e4: $ … ⇒ fv uni m ⊆ fv uni n $ by eq_subset [e3]
+e3: $ … ⇒ uni' m = uni' n $ by fv_eq [e2, e1]
+e4: $ … ⇒ uni' m ⊆ uni' n $ by eq_subset [e3]
 n1: $ G , (m = n ∨ n ∊ m) , n ∊ m ⇒ n ∊ m $ by ax
 n2: $ G , (m = n ∨ n ∊ m) , n ∊ m ⇒ m ⊆ n $ by weaken [#3]
 n3: $ … ⇒ n ∊ n $ by subset_elim [n2, n1]
 n4: $ … ⇒ ⊥ $ by notin_self [n3]
-n5: $ … ⇒ fv uni m ⊆ fv uni n $ by bot_elim [n4]
-k1: $ … ⇒ fv uni m ⊆ fv uni n $ by or_elim [e0, e4, n5]
-k2: $ … ⇒ fv uni m ⊆ fv uni n $ by or_elim [t1, j3, k1]
+n5: $ … ⇒ uni' m ⊆ uni' n $ by bot_elim [n4]
+k1: $ … ⇒ uni' m ⊆ uni' n $ by or_elim [e0, e4, n5]
+k2: $ … ⇒ uni' m ⊆ uni' n $ by or_elim [t1, j3, k1]
 
 uni_least
 ---------
-k1: $ G , v = fv uni n , v ∊ U , z = ω , z ∊ U ⇒ v ∊ U $ by ax
-k2: $ G , v = fv uni n , v ∊ U , z = ω , z ∊ U ⇒ z ∊ U $ by ax
-k3: $ G , v = fv uni n , v ∊ U , z = ω , z ∊ U ⇒ universe U $ by weaken [#2]
+k1: $ G , v = uni' n , v ∊ U , z = ω , z ∊ U ⇒ v ∊ U $ by ax
+k2: $ G , v = uni' n , v ∊ U , z = ω , z ∊ U ⇒ z ∊ U $ by ax
+k3: $ G , v = uni' n , v ∊ U , z = ω , z ∊ U ⇒ universe U $ by weaken [#2]
 k4: $ … ⇒ cpr v z ∈ U $ by universe_cpr [k3, k1, k2]
-k5: $ G , v = fv uni n , v ∊ U , z = ω , z ∊ U ⇒ v = fv uni n $ by ax
-k6: $ G , v = fv uni n , v ∊ U , z = ω , z ∊ U ⇒ z = ω $ by ax
-k7: $ … ⇒ cpr v z = cpr (fv uni n) ω $ by cpr_eq [k5, k6]
-k8: $ … ⇒ cpr (fv uni n) ω ∈ U $ by wcel_eq_l [k7, k4]
-k9a: $ G , v = fv uni n , v ∊ U ⇒ ω ∈ U $ by weaken [#4]
-k9: $ … ⇒ cpr (fv uni n) ω ∈ U $ by wcel_elim [k9a, k8]
-k10: $ … ⇒ cpr (fv uni n) ω ∈ U $ by wcel_elim [#3, k9]
-k11: $ … ⇒ nextu (cpr (fv uni n) ω) ⊆ U $ by nextu_least_c [#2, k10]
-k12: $ … ⇒ fv uni (suc n) = nextu (cpr (fv uni n) ω) $ by uni_suc [#1]
-k13: $ … ⇒ nextu (cpr (fv uni n) ω) = fv uni (suc n) $ by eq_sym [k12]
-k14: $ … ⇒ fv uni (suc n) ⊆ U $ by subset_eq_l [k13, k11]
+k5: $ G , v = uni' n , v ∊ U , z = ω , z ∊ U ⇒ v = uni' n $ by ax
+k6: $ G , v = uni' n , v ∊ U , z = ω , z ∊ U ⇒ z = ω $ by ax
+k7: $ … ⇒ cpr v z = cpr (uni' n) ω $ by cpr_eq [k5, k6]
+k8: $ … ⇒ cpr (uni' n) ω ∈ U $ by wcel_eq_l [k7, k4]
+k9a: $ G , v = uni' n , v ∊ U ⇒ ω ∈ U $ by weaken [#4]
+k9: $ … ⇒ cpr (uni' n) ω ∈ U $ by wcel_elim [k9a, k8]
+k10: $ … ⇒ cpr (uni' n) ω ∈ U $ by wcel_elim [#3, k9]
+k11: $ … ⇒ nextu (cpr (uni' n) ω) ⊆ U $ by nextu_least_c [#2, k10]
+k12: $ … ⇒ uni' (suc n) = nextu (cpr (uni' n) ω) $ by uni_suc [#1]
+k13: $ … ⇒ nextu (cpr (uni' n) ω) = uni' (suc n) $ by eq_sym [k12]
+k14: $ … ⇒ uni' (suc n) ⊆ U $ by subset_eq_l [k13, k11]

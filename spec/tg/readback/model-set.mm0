@@ -1,4 +1,4 @@
--- model-set.mm0: the model's value of Lean's pre-sets is the universe `fv uni 1`.
+-- model-set.mm0: the model's value of Lean's pre-sets is the universe `uni' 1`.
 import "../model/model-ci.mm0";
 
 -- The spec's notations for terms (its delimiters are not available here, so `#` and `.` stand alone).
@@ -75,10 +75,10 @@ def pmk (U W: class) (b: blk): class = $ dt U (mcv hfin) (enc_expr (pset_mk b)) 
 --| The value of a closed term.
 def cval (U W: class) (e: expr): class = $ dt U (mcv hfin) (enc_expr e) W ∅ $;
 
---| One step of the collapse of the points over `X` (`0 :: i :: f` with `i` in `U_1` and `f` from `i` into `X`), on a graph
---| `C`: a point with a set `m` of `U_1` whose elements are the values `C` has at the `ap f n`, all of them.
+--| One step of the collapse of the points over `X` (`0 :: i :: f` with `i` in `U₁` and `f` from `i` into `X`), on a graph
+--| `C`: a point with a set `m` of `U₁` whose elements are the values `C` has at the `ap f n`, all of them.
 def pcop (X C: class) (.i .f .m .n .y .z .a: set): class =
-  $ {z | ∃ i (∃ f (∃ m ((i ∊ (fv uni (suc ∅))) ∧ ((f ∊ (cpi a i X)) ∧ ((m ∊ (fv uni (suc ∅))) ∧ ((∀ n ((n ∊ i) → (∃ y ((y ∊ m) ∧ ((opair (ap f n) y) ∈ C))))) ∧ ((∀ y ((y ∊ m) → (∃ n ((n ∊ i) ∧ ((opair (ap f n) y) ∈ C))))) ∧ (z = (opair (scons ∅ (scons i (scons f ∅))) m)))))))))} $;
+  $ {z | ∃ i (∃ f (∃ m ((i ∊ U₁) ∧ ((f ∊ (cpi a i X)) ∧ ((m ∊ U₁) ∧ ((∀ n ((n ∊ i) → (∃ y ((y ∊ m) ∧ ((opair (ap f n) y) ∈ C))))) ∧ ((∀ y ((y ∊ m) → (∃ n ((n ∊ i) ∧ ((opair (ap f n) y) ∈ C))))) ∧ (z = (opair (scons ∅ (scons i (scons f ∅))) m)))))))))} $;
 --| @congr
 theorem pcop_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ pcop A C ≐ pcop B D $;
 --| @rewrite
@@ -115,25 +115,25 @@ theorem pset_D_wf (H: class) (b: blk): $ _ ⇒ hind H $ > $ ind_wf_j (jmod (mcv 
 
 
 -- --------------------------------------------------------------------------
--- The collapse of the pre-sets onto `U_1`
+-- The collapse of the pre-sets onto `U₁`
 -- --------------------------------------------------------------------------
 
---| The collapse sends a pre-set to an element of `U_1`.
+--| The collapse sends a pre-set to an element of `U₁`.
 theorem pcol_val (G: hyps) (b: blk) (u w x: set):
-  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ x ∊ psv u w b $ > $ G ⇒ fv (pcol u w b) x ∈ fv uni (suc ∅) $;
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ x ∊ psv u w b $ > $ G ⇒ (pcol u w b)' x ∈ U₁ $;
 
---| Every pre-set is the constructor's value at an index type of `U_1` and a function from it into the pre-sets.
+--| Every pre-set is the constructor's value at an index type of `U₁` and a function from it into the pre-sets.
 --| @freshen G i
 --| @freshen G f
 --| @freshen G a
 theorem pcol_cases {i f a: set} (G: hyps) (b: blk) (u w x: set):
   $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ x ∊ psv u w b $ >
-  $ G ⇒ ∃ i ∃ f (i ∊ fv uni (suc ∅) ∧ f ∊ cpi a i (psv u w b) ∧ x = ap (ap (pmk u w b) i) f) $;
+  $ G ⇒ ∃ i ∃ f (i ∊ U₁ ∧ f ∊ cpi a i (psv u w b) ∧ x = ap (ap (pmk u w b) i) f) $;
 
---| The collapse is onto `U_1`.
+--| The collapse is onto `U₁`.
 --| @freshen G x
 theorem pcol_onto {x: set} (G: hyps) (b: blk) (u w y: set):
-  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ y ∊ fv uni (suc ∅) $ > $ G ⇒ ∃ x (x ∊ psv u w b ∧ fv (pcol u w b) x = y) $;
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ y ∊ U₁ $ > $ G ⇒ ∃ x (x ∊ psv u w b ∧ (pcol u w b)' x = y) $;
 
 --| The collapse's equation: the constructor's value at `i` and `f` is a pre-set, sent to the set of the collapses of
 --| the `ap f n`.
@@ -141,8 +141,8 @@ theorem pcol_onto {x: set} (G: hyps) (b: blk) (u w y: set):
 --| @freshen G y
 --| @freshen G n
 theorem pcol_mk {a y n: set} (G: hyps) (b: blk) (u w i f: set):
-  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ i ∊ fv uni (suc ∅) $ > $ G ⇒ f ∊ cpi a i (psv u w b) $ >
-  $ G ⇒ ap (ap (pmk u w b) i) f ∈ psv u w b ∧ fv (pcol u w b) (ap (ap (pmk u w b) i) f) = {y | ∃ n (n ∊ i ∧ y = fv (pcol u w b) (ap f n))} $;
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ i ∊ U₁ $ > $ G ⇒ f ∊ cpi a i (psv u w b) $ >
+  $ G ⇒ ap (ap (pmk u w b) i) f ∈ psv u w b ∧ (pcol u w b)' (ap (ap (pmk u w b) i) f) = {y | ∃ n (n ∊ i ∧ y = (pcol u w b)' (ap f n))} $;
 
 
 
@@ -158,7 +158,7 @@ theorem pcol_mk {a y n: set} (G: hyps) (b: blk) (u w i f: set):
 theorem pcol_equiv {z: set} (G: hyps) (b: blk) (E: expr) (u w x y: set):
   $ closed nz E $ > $ ty nil E (pi (pset b) (pi (pset b) Prop)) $ > $ inh nil (pset_e1 b E) $ > $ inh nil (pset_e2 b E) $ > $ inh nil (pset_e3 b E) $ >
   $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ x ∊ psv u w b $ > $ G ⇒ y ∊ psv u w b $ >
-  $ G ⇒ (∃ z (z ∊ ap (ap (cval u w E) x) y) ↔ fv (pcol u w b) x = fv (pcol u w b) y) $;
+  $ G ⇒ (∃ z (z ∊ ap (ap (cval u w E) x) y) ↔ (pcol u w b)' x = (pcol u w b)' y) $;
 
 --| A relation with `Mem`'s characterization (`pset_m1`, `pset_m2`, over a relation with `Equiv`'s) holds at two pre-sets
 --| exactly when the collapse of the first is an element of the collapse of the second.
@@ -167,4 +167,4 @@ theorem pcol_mem {z: set} (G: hyps) (b: blk) (E M: expr) (u w x y: set):
   $ closed nz E $ > $ closed nz M $ > $ ty nil E (pi (pset b) (pi (pset b) Prop)) $ > $ ty nil M (pi (pset b) (pi (pset b) Prop)) $ >
   $ inh nil (pset_e1 b E) $ > $ inh nil (pset_e2 b E) $ > $ inh nil (pset_e3 b E) $ > $ inh nil (pset_m1 b E M) $ > $ inh nil (pset_m2 b E M) $ >
   $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ x ∊ psv u w b $ > $ G ⇒ y ∊ psv u w b $ >
-  $ G ⇒ (∃ z (z ∊ ap (ap (cval u w M) x) y) ↔ fv (pcol u w b) x ∈ fv (pcol u w b) y) $;
+  $ G ⇒ (∃ z (z ∊ ap (ap (cval u w M) x) y) ↔ (pcol u w b)' x ∈ (pcol u w b)' y) $;

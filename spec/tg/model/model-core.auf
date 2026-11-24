@@ -7,9 +7,9 @@ a2: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w ⇒ r ∊ sat u M (enc_
 s1: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w ⇒ sat u M (enc_ctx G) w ⊆ fseq u $ by sat_fseq
 s2: $ … ⇒ r ∊ fseq u $ by subset_elim [s1, a2]
 t1: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w ⇒ enc_nat i ∈ trees ω $ by enc_nat_trees
-d1: $ … ⇒ dt u M ⟨ kc_bvar , scons (enc_nat i) ∅ ⟩ w r = fv r (fv nvf (enc_nat i)) $ by dt_bvar [t1, a1, s2]
-d2: $ … ⇒ fv r (fv nvf (enc_nat i)) = dt u M (enc_expr (bvar i)) w r $ by eq_sym [d1]
-l1: $ … ⇒ fv r (fv nvf (enc_nat i)) ∈ dt u M (enc_expr A) w r $ by lookup_den [#1, a1, a2]
+d1: $ … ⇒ dt u M ⟨ kc_bvar , scons (enc_nat i) ∅ ⟩ w r = r' nvf' (enc_nat i) $ by dt_bvar [t1, a1, s2]
+d2: $ … ⇒ r' nvf' (enc_nat i) = dt u M (enc_expr (bvar i)) w r $ by eq_sym [d1]
+l1: $ … ⇒ r' nvf' (enc_nat i) ∈ dt u M (enc_expr A) w r $ by lookup_den [#1, a1, a2]
 m1: $ … ⇒ dt u M (enc_expr (bvar i)) w r ∈ dt u M (enc_expr A) w r $ by wcel_eq_l [d2, l1]
 e1: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w ⇒ dt u M (enc_expr (bvar i)) w r = dt u M (enc_expr (bvar i)) w r $ by eq_refl
 r1: $ mdeq M G (bvar i) (bvar i) A $ by mdeq_i [e1, m1]
@@ -153,28 +153,28 @@ tE1: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w , x ∊ dt u M (enc_ex
 tb: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w , x ∊ dt u M (enc_expr A) w r ⇒ enc_expr (bvar nz) ∈ trees ω $ by enc_expr_trees
 tz: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w , x ∊ dt u M (enc_expr A) w r ⇒ enc_nat nz ∈ trees ω $ by enc_nat_trees
 b6: $ … ⇒ dt u M (enc_expr (app e1 (bvar nz))) w (scons x r) = ap (dt u M (enc_expr e1) w (scons x r)) (dt u M (enc_expr (bvar nz)) w (scons x r)) $ by dt_app_c [tE1, tb, b5, b4]
-b7: $ … ⇒ dt u M (enc_expr (bvar nz)) w (scons x r) = fv (scons x r) (fv nvf (enc_nat nz)) $ by dt_bvar_c [tz, b5, b4]
-b8: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w , x ∊ dt u M (enc_expr A) w r ⇒ fv nvf (enc_nat nz) = ∅ $ by nvf_nz
+b7: $ … ⇒ dt u M (enc_expr (bvar nz)) w (scons x r) = (scons x r)' nvf' (enc_nat nz) $ by dt_bvar_c [tz, b5, b4]
+b8: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w , x ∊ dt u M (enc_expr A) w r ⇒ nvf' (enc_nat nz) = ∅ $ by nvf_nz
 b9: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w , x ∊ dt u M (enc_expr A) w r ⇒ scons x r = scons x r $ by eq_refl
-b10: $ … ⇒ fv (scons x r) (fv nvf (enc_nat nz)) = fv (scons x r) ∅ $ by fv_eq [b9, b8]
-b11: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w , x ∊ dt u M (enc_expr A) w r ⇒ fv (scons x r) ∅ = x $ by scons_fv_zero
-b12a: $ … ⇒ dt u M (enc_expr (bvar nz)) w (scons x r) = fv (scons x r) ∅ $ by eq_trans [b7, b10]
+b10: $ … ⇒ (scons x r)' nvf' (enc_nat nz) = (scons x r)' ∅ $ by fv_eq [b9, b8]
+b11: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w , x ∊ dt u M (enc_expr A) w r ⇒ (scons x r)' ∅ = x $ by scons_fv_zero
+b12a: $ … ⇒ dt u M (enc_expr (bvar nz)) w (scons x r) = (scons x r)' ∅ $ by eq_trans [b7, b10]
 b12: $ … ⇒ dt u M (enc_expr (bvar nz)) w (scons x r) = x $ by eq_trans [b12a, b11]
 b13: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w , x ∊ dt u M (enc_expr A) w r ⇒ ∅ ∈ fseq u $ by fseq_empty
 b14: $ … ⇒ scons x ∅ ∈ fseq u $ by scons_fseq_c [b2, b13]
 b15: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w , x ∊ dt u M (enc_expr A) w r ⇒ cdm (scons x ∅) = suc ∅ $ by scons_empty_len
-b16: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w , x ∊ dt u M (enc_expr A) w r ⇒ fv nvf (enc_nat (s nz)) = suc ∅ $ by nvf_n1
-b16a: $ … ⇒ suc ∅ = fv nvf (enc_nat (s nz)) $ by eq_sym [b16]
-b17: $ … ⇒ cdm (scons x ∅) = fv nvf (enc_nat n1) $ by eq_trans [b15, b16a]
+b16: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w , x ∊ dt u M (enc_expr A) w r ⇒ nvf' (enc_nat (s nz)) = suc ∅ $ by nvf_n1
+b16a: $ … ⇒ suc ∅ = nvf' (enc_nat (s nz)) $ by eq_sym [b16]
+b17: $ … ⇒ cdm (scons x ∅) = nvf' (enc_nat n1) $ by eq_trans [b15, b16a]
 b18: $ … ⇒ r ∈ fseq u $ by welc_wcel [b0c]
-b19: $ … ⇒ dt u M (enc_expr e1) w (scat (scons x ∅) r) = dt u M (enc_expr e) w r $ by lift0_den_c [#2, b5, b14, b17, b18]
-b20: $ … ⇒ scat (scons x ∅) r = scons x r $ by scat_scons_empty [b0c]
-b20a: $ … ⇒ scons x r = scat (scons x ∅) r $ by eq_sym [b20]
+b19: $ … ⇒ dt u M (enc_expr e1) w ((scons x ∅) ++ r) = dt u M (enc_expr e) w r $ by lift0_den_c [#2, b5, b14, b17, b18]
+b20: $ … ⇒ (scons x ∅) ++ r = scons x r $ by scat_scons_empty [b0c]
+b20a: $ … ⇒ scons x r = (scons x ∅) ++ r $ by eq_sym [b20]
 r1: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w , x ∊ dt u M (enc_expr A) w r ⇒ u = u $ by eq_refl
 r2: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w , x ∊ dt u M (enc_expr A) w r ⇒ M = M $ by eq_refl
 r3: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w , x ∊ dt u M (enc_expr A) w r ⇒ enc_expr e1 = enc_expr e1 $ by eq_refl
 r4: $ uadm u , w ∊ lvals , r ∊ sat u M (enc_ctx G) w , x ∊ dt u M (enc_expr A) w r ⇒ w = w $ by eq_refl
-b21: $ … ⇒ dt u M (enc_expr e1) w (scons x r) = dt u M (enc_expr e1) w (scat (scons x ∅) r) $ by dt_eq [r1, r2, r3, r4, b20a]
+b21: $ … ⇒ dt u M (enc_expr e1) w (scons x r) = dt u M (enc_expr e1) w ((scons x ∅) ++ r) $ by dt_eq [r1, r2, r3, r4, b20a]
 b22: $ … ⇒ dt u M (enc_expr e1) w (scons x r) = dt u M (enc_expr e) w r $ by eq_trans [b21, b19]
 b23: $ … ⇒ ap (dt u M (enc_expr e1) w (scons x r)) (dt u M (enc_expr (bvar nz)) w (scons x r)) = ap (dt u M (enc_expr e) w r) x $ by ap_eq [b22, b12]
 b24: $ … ⇒ dt u M (enc_expr (app e1 (bvar nz))) w (scons x r) = ap (dt u M (enc_expr e) w r) x $ by eq_trans [b6, b23]
@@ -208,49 +208,49 @@ minstDF
 a1: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w ⇒ uadm u $ by ax
 a2: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w ⇒ w ∊ lvals $ by ax
 a3: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w ⇒ q ∊ sat u M (enc_ctx G) w $ by ax
-c1: $ … ⇒ ∃ x7 ∃ x8 (x7 ∊ fseq u ∧ cdm x7 = fv nvf (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = scat x7 x8 ∧ scat x7 (scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w) $ by cinst_den [#1, #2, a1, a2, a3]
-b0: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = fv nvf (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = scat x7 x8 ∧ scat x7 (scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w ⇒ x7 ∊ fseq u ∧ cdm x7 = fv nvf (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = scat x7 x8 ∧ scat x7 (scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w $ by ax
+c1: $ … ⇒ ∃ x7 ∃ x8 (x7 ∊ fseq u ∧ cdm x7 = nvf' (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = x7 ++ x8 ∧ x7 ++ scons (dt u M (enc_expr a) w x8) x8 ∈ sat u M (enc_ctx G1) w) $ by cinst_den [#1, #2, a1, a2, a3]
+b0: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = nvf' (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = x7 ++ x8 ∧ x7 ++ scons (dt u M (enc_expr a) w x8) x8 ∈ sat u M (enc_ctx G1) w ⇒ x7 ∊ fseq u ∧ cdm x7 = nvf' (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = x7 ++ x8 ∧ x7 ++ scons (dt u M (enc_expr a) w x8) x8 ∈ sat u M (enc_ctx G1) w $ by ax
 d1: $ … ⇒ x7 ∊ fseq u $ by and_elim_l [b0]
-b1: $ … ⇒ cdm x7 = fv nvf (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = scat x7 x8 ∧ (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) ∈ sat u M (enc_ctx G1) w $ by and_elim_r [b0]
-d2: $ … ⇒ cdm x7 = fv nvf (enc_nat k) $ by and_elim_l [b1]
-b2: $ … ⇒ x8 ∊ sat u M (enc_ctx G0) w ∧ q = scat x7 x8 ∧ (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) ∈ sat u M (enc_ctx G1) w $ by and_elim_r [b1]
+b1: $ … ⇒ cdm x7 = nvf' (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = x7 ++ x8 ∧ (x7 ++ scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w $ by and_elim_r [b0]
+d2: $ … ⇒ cdm x7 = nvf' (enc_nat k) $ by and_elim_l [b1]
+b2: $ … ⇒ x8 ∊ sat u M (enc_ctx G0) w ∧ q = x7 ++ x8 ∧ (x7 ++ scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w $ by and_elim_r [b1]
 d3: $ … ⇒ x8 ∊ sat u M (enc_ctx G0) w $ by and_elim_l [b2]
-b3: $ … ⇒ q = scat x7 x8 ∧ (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) ∈ sat u M (enc_ctx G1) w $ by and_elim_r [b2]
-d4: $ … ⇒ q = scat x7 x8 $ by and_elim_l [b3]
-d5: $ … ⇒ (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) ∈ sat u M (enc_ctx G1) w $ by and_elim_r [b3]
-e1: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = fv nvf (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = scat x7 x8 ∧ scat x7 (scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w ⇒ uadm u $ by ax
-e2: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = fv nvf (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = scat x7 x8 ∧ scat x7 (scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w ⇒ w ∊ lvals $ by ax
+b3: $ … ⇒ q = x7 ++ x8 ∧ (x7 ++ scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w $ by and_elim_r [b2]
+d4: $ … ⇒ q = x7 ++ x8 $ by and_elim_l [b3]
+d5: $ … ⇒ (x7 ++ scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w $ by and_elim_r [b3]
+e1: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = nvf' (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = x7 ++ x8 ∧ x7 ++ scons (dt u M (enc_expr a) w x8) x8 ∈ sat u M (enc_ctx G1) w ⇒ uadm u $ by ax
+e2: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = nvf' (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = x7 ++ x8 ∧ x7 ++ scons (dt u M (enc_expr a) w x8) x8 ∈ sat u M (enc_ctx G1) w ⇒ w ∊ lvals $ by ax
 e3: $ … ⇒ w ∈ lvals $ by welc_wcel [e2]
 e4: $ … ⇒ x7 ∈ fseq u $ by welc_wcel [d1]
-e5a: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = fv nvf (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = scat x7 x8 ∧ scat x7 (scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w ⇒ sat u M (enc_ctx G0) w ⊆ fseq u $ by sat_fseq
+e5a: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = nvf' (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = x7 ++ x8 ∧ x7 ++ scons (dt u M (enc_expr a) w x8) x8 ∈ sat u M (enc_ctx G1) w ⇒ sat u M (enc_ctx G0) w ⊆ fseq u $ by sat_fseq
 e5b: $ … ⇒ x8 ∊ fseq u $ by subset_elim [e5a, d3]
 e5: $ … ⇒ x8 ∈ fseq u $ by welc_wcel [e5b]
-m1: $ … ⇒ dt u M (enc_expr e) w (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) = dt u M (enc_expr e2) w (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) $ by mdeq_e_c [#3, e1, e2, d5]
-m2: $ … ⇒ dt u M (enc_expr e) w (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) ∈ dt u M (enc_expr A) w (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) $ by mdeq_mem_c [#3, e1, e2, d5]
-i1: $ … ⇒ dt u M (enc_expr r) w (scat x7 x8) = dt u M (enc_expr e) w (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) $ by inst_den_c [#4, e1, e3, e4, d2, e5]
-i2: $ … ⇒ dt u M (enc_expr r2) w (scat x7 x8) = dt u M (enc_expr e2) w (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) $ by inst_den_c [#5, e1, e3, e4, d2, e5]
-i3: $ … ⇒ dt u M (enc_expr R) w (scat x7 x8) = dt u M (enc_expr A) w (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) $ by inst_den_c [#6, e1, e3, e4, d2, e5]
-fu: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = fv nvf (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = scat x7 x8 ∧ scat x7 (scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w ⇒ u = u $ by eq_refl
-fM: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = fv nvf (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = scat x7 x8 ∧ scat x7 (scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w ⇒ M = M $ by eq_refl
-fw: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = fv nvf (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = scat x7 x8 ∧ scat x7 (scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w ⇒ w = w $ by eq_refl
-fr: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = fv nvf (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = scat x7 x8 ∧ scat x7 (scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w ⇒ enc_expr r = enc_expr r $ by eq_refl
-fr2: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = fv nvf (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = scat x7 x8 ∧ scat x7 (scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w ⇒ enc_expr r2 = enc_expr r2 $ by eq_refl
-fR: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = fv nvf (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = scat x7 x8 ∧ scat x7 (scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w ⇒ enc_expr R = enc_expr R $ by eq_refl
-j1: $ … ⇒ dt u M (enc_expr r) w q = dt u M (enc_expr r) w (scat x7 x8) $ by dt_eq [fu, fM, fr, fw, d4]
-j2: $ … ⇒ dt u M (enc_expr r2) w q = dt u M (enc_expr r2) w (scat x7 x8) $ by dt_eq [fu, fM, fr2, fw, d4]
-j3: $ … ⇒ dt u M (enc_expr R) w q = dt u M (enc_expr R) w (scat x7 x8) $ by dt_eq [fu, fM, fR, fw, d4]
-k1: $ … ⇒ dt u M (enc_expr r) w q = dt u M (enc_expr e) w (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) $ by eq_trans [j1, i1]
-k2: $ … ⇒ dt u M (enc_expr r2) w q = dt u M (enc_expr e2) w (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) $ by eq_trans [j2, i2]
-k3: $ … ⇒ dt u M (enc_expr R) w q = dt u M (enc_expr A) w (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) $ by eq_trans [j3, i3]
-k4: $ … ⇒ dt u M (enc_expr e2) w (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) = dt u M (enc_expr r2) w q $ by eq_sym [k2]
-k5: $ … ⇒ dt u M (enc_expr r) w q = dt u M (enc_expr e2) w (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) $ by eq_trans [k1, m1]
+m1: $ … ⇒ dt u M (enc_expr e) w (x7 ++ scons (dt u M (enc_expr a) w x8) x8) = dt u M (enc_expr e2) w (x7 ++ scons (dt u M (enc_expr a) w x8) x8) $ by mdeq_e_c [#3, e1, e2, d5]
+m2: $ … ⇒ dt u M (enc_expr e) w (x7 ++ scons (dt u M (enc_expr a) w x8) x8) ∈ dt u M (enc_expr A) w (x7 ++ scons (dt u M (enc_expr a) w x8) x8) $ by mdeq_mem_c [#3, e1, e2, d5]
+i1: $ … ⇒ dt u M (enc_expr r) w (x7 ++ x8) = dt u M (enc_expr e) w (x7 ++ scons (dt u M (enc_expr a) w x8) x8) $ by inst_den_c [#4, e1, e3, e4, d2, e5]
+i2: $ … ⇒ dt u M (enc_expr r2) w (x7 ++ x8) = dt u M (enc_expr e2) w (x7 ++ scons (dt u M (enc_expr a) w x8) x8) $ by inst_den_c [#5, e1, e3, e4, d2, e5]
+i3: $ … ⇒ dt u M (enc_expr R) w (x7 ++ x8) = dt u M (enc_expr A) w (x7 ++ scons (dt u M (enc_expr a) w x8) x8) $ by inst_den_c [#6, e1, e3, e4, d2, e5]
+fu: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = nvf' (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = x7 ++ x8 ∧ x7 ++ scons (dt u M (enc_expr a) w x8) x8 ∈ sat u M (enc_ctx G1) w ⇒ u = u $ by eq_refl
+fM: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = nvf' (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = x7 ++ x8 ∧ x7 ++ scons (dt u M (enc_expr a) w x8) x8 ∈ sat u M (enc_ctx G1) w ⇒ M = M $ by eq_refl
+fw: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = nvf' (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = x7 ++ x8 ∧ x7 ++ scons (dt u M (enc_expr a) w x8) x8 ∈ sat u M (enc_ctx G1) w ⇒ w = w $ by eq_refl
+fr: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = nvf' (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = x7 ++ x8 ∧ x7 ++ scons (dt u M (enc_expr a) w x8) x8 ∈ sat u M (enc_ctx G1) w ⇒ enc_expr r = enc_expr r $ by eq_refl
+fr2: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = nvf' (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = x7 ++ x8 ∧ x7 ++ scons (dt u M (enc_expr a) w x8) x8 ∈ sat u M (enc_ctx G1) w ⇒ enc_expr r2 = enc_expr r2 $ by eq_refl
+fR: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , x7 ∊ fseq u ∧ cdm x7 = nvf' (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = x7 ++ x8 ∧ x7 ++ scons (dt u M (enc_expr a) w x8) x8 ∈ sat u M (enc_ctx G1) w ⇒ enc_expr R = enc_expr R $ by eq_refl
+j1: $ … ⇒ dt u M (enc_expr r) w q = dt u M (enc_expr r) w (x7 ++ x8) $ by dt_eq [fu, fM, fr, fw, d4]
+j2: $ … ⇒ dt u M (enc_expr r2) w q = dt u M (enc_expr r2) w (x7 ++ x8) $ by dt_eq [fu, fM, fr2, fw, d4]
+j3: $ … ⇒ dt u M (enc_expr R) w q = dt u M (enc_expr R) w (x7 ++ x8) $ by dt_eq [fu, fM, fR, fw, d4]
+k1: $ … ⇒ dt u M (enc_expr r) w q = dt u M (enc_expr e) w (x7 ++ scons (dt u M (enc_expr a) w x8) x8) $ by eq_trans [j1, i1]
+k2: $ … ⇒ dt u M (enc_expr r2) w q = dt u M (enc_expr e2) w (x7 ++ scons (dt u M (enc_expr a) w x8) x8) $ by eq_trans [j2, i2]
+k3: $ … ⇒ dt u M (enc_expr R) w q = dt u M (enc_expr A) w (x7 ++ scons (dt u M (enc_expr a) w x8) x8) $ by eq_trans [j3, i3]
+k4: $ … ⇒ dt u M (enc_expr e2) w (x7 ++ scons (dt u M (enc_expr a) w x8) x8) = dt u M (enc_expr r2) w q $ by eq_sym [k2]
+k5: $ … ⇒ dt u M (enc_expr r) w q = dt u M (enc_expr e2) w (x7 ++ scons (dt u M (enc_expr a) w x8) x8) $ by eq_trans [k1, m1]
 k6: $ … ⇒ dt u M (enc_expr r) w q = dt u M (enc_expr r2) w q $ by eq_trans [k5, k4]
-k7: $ … ⇒ dt u M (enc_expr e) w (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) = dt u M (enc_expr r) w q $ by eq_sym [k1]
-k8: $ … ⇒ dt u M (enc_expr r) w q ∈ dt u M (enc_expr A) w (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) $ by wcel_eq_l [k7, m2]
-k9: $ … ⇒ dt u M (enc_expr A) w (scat x7 (scons (dt u M (enc_expr a) w x8) x8)) = dt u M (enc_expr R) w q $ by eq_sym [k3]
+k7: $ … ⇒ dt u M (enc_expr e) w (x7 ++ scons (dt u M (enc_expr a) w x8) x8) = dt u M (enc_expr r) w q $ by eq_sym [k1]
+k8: $ … ⇒ dt u M (enc_expr r) w q ∈ dt u M (enc_expr A) w (x7 ++ scons (dt u M (enc_expr a) w x8) x8) $ by wcel_eq_l [k7, m2]
+k9: $ … ⇒ dt u M (enc_expr A) w (x7 ++ scons (dt u M (enc_expr a) w x8) x8) = dt u M (enc_expr R) w q $ by eq_sym [k3]
 k10: $ … ⇒ dt u M (enc_expr r) w q ∈ dt u M (enc_expr R) w q $ by wcel_eq_r [k9, k8]
 k11: $ … ⇒ dt u M (enc_expr r) w q = dt u M (enc_expr r2) w q ∧ dt u M (enc_expr r) w q ∈ dt u M (enc_expr R) w q $ by and_intro [k6, k10]
-x1a: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , ∃ x8 (x7 ∊ fseq u ∧ cdm x7 = fv nvf (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = scat x7 x8 ∧ scat x7 (scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w) ⇒ ∃ x8 (x7 ∊ fseq u ∧ cdm x7 = fv nvf (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = scat x7 x8 ∧ scat x7 (scons (dt u M (enc_expr a) w x8) x8) ∈ sat u M (enc_ctx G1) w) $ by ax
+x1a: $ uadm u , w ∊ lvals , q ∊ sat u M (enc_ctx G) w , ∃ x8 (x7 ∊ fseq u ∧ cdm x7 = nvf' (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = x7 ++ x8 ∧ x7 ++ scons (dt u M (enc_expr a) w x8) x8 ∈ sat u M (enc_ctx G1) w) ⇒ ∃ x8 (x7 ∊ fseq u ∧ cdm x7 = nvf' (enc_nat k) ∧ x8 ∊ sat u M (enc_ctx G0) w ∧ q = x7 ++ x8 ∧ x7 ++ scons (dt u M (enc_expr a) w x8) x8 ∈ sat u M (enc_ctx G1) w) $ by ax
 x1: $ … ⇒ dt u M (enc_expr r) w q = dt u M (enc_expr r2) w q ∧ dt u M (enc_expr r) w q ∈ dt u M (enc_expr R) w q $ by ex_elim [x1a, k11]
 x2: $ … ⇒ dt u M (enc_expr r) w q = dt u M (enc_expr r2) w q ∧ dt u M (enc_expr r) w q ∈ dt u M (enc_expr R) w q $ by ex_elim [c1, x1]
 x3: $ … ⇒ dt u M (enc_expr r) w q = dt u M (enc_expr r2) w q $ by and_elim_l [x2]
@@ -261,48 +261,48 @@ mweakDF
 -------
 a2: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w ⇒ w ∊ lvals $ by ax
 a3: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w ⇒ v ∊ sat x0 M (enc_ctx G2) w $ by ax
-a4: $ … ⇒ ∃ x1 ∃ x2 (x1 ∊ fseq x0 ∧ cdm x1 = fv nvf (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = scat x1 x2) $ by cext_den [#2, a2, a3]
-k0: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = fv nvf (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = scat x1 x2 ⇒ x1 ∊ fseq x0 ∧ cdm x1 = fv nvf (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = scat x1 x2 $ by ax
+a4: $ … ⇒ ∃ x1 ∃ x2 (x1 ∊ fseq x0 ∧ cdm x1 = nvf' (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = x1 ++ x2) $ by cext_den [#2, a2, a3]
+k0: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = nvf' (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = x1 ++ x2 ⇒ x1 ∊ fseq x0 ∧ cdm x1 = nvf' (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = x1 ++ x2 $ by ax
 k1: $ … ⇒ x1 ∊ fseq x0 $ by and_elim_l [k0]
-k2a: $ … ⇒ cdm x1 = fv nvf (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = scat x1 x2 $ by and_elim_r [k0]
-k2: $ … ⇒ cdm x1 = fv nvf (enc_nat n) $ by and_elim_l [k2a]
-k3a: $ … ⇒ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = scat x1 x2 $ by and_elim_r [k2a]
+k2a: $ … ⇒ cdm x1 = nvf' (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = x1 ++ x2 $ by and_elim_r [k0]
+k2: $ … ⇒ cdm x1 = nvf' (enc_nat n) $ by and_elim_l [k2a]
+k3a: $ … ⇒ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = x1 ++ x2 $ by and_elim_r [k2a]
 k3: $ … ⇒ x2 ∊ sat x0 M (enc_ctx G) w $ by and_elim_l [k3a]
-k4: $ … ⇒ v = scat x1 x2 $ by and_elim_r [k3a]
-k5: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = fv nvf (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = scat x1 x2 ⇒ sat x0 M (enc_ctx G) w ⊆ fseq x0 $ by sat_fseq
+k4: $ … ⇒ v = x1 ++ x2 $ by and_elim_r [k3a]
+k5: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = nvf' (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = x1 ++ x2 ⇒ sat x0 M (enc_ctx G) w ⊆ fseq x0 $ by sat_fseq
 k6: $ … ⇒ x2 ∊ fseq x0 $ by subset_elim [k5, k3]
-k7: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = fv nvf (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = scat x1 x2 ⇒ uadm x0 $ by ax
-k8: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = fv nvf (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = scat x1 x2 ⇒ w ∊ lvals $ by ax
-e1: $ … ⇒ dt x0 M (enc_expr r) w (scat x1 x2) = dt x0 M (enc_expr e) w x2 $ by lift0_den [#3, k8, k1, k2, k6]
-e2: $ … ⇒ dt x0 M (enc_expr r2) w (scat x1 x2) = dt x0 M (enc_expr e2) w x2 $ by lift0_den [#4, k8, k1, k2, k6]
-e3: $ … ⇒ dt x0 M (enc_expr R) w (scat x1 x2) = dt x0 M (enc_expr A) w x2 $ by lift0_den [#5, k8, k1, k2, k6]
+k7: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = nvf' (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = x1 ++ x2 ⇒ uadm x0 $ by ax
+k8: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = nvf' (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = x1 ++ x2 ⇒ w ∊ lvals $ by ax
+e1: $ … ⇒ dt x0 M (enc_expr r) w (x1 ++ x2) = dt x0 M (enc_expr e) w x2 $ by lift0_den [#3, k8, k1, k2, k6]
+e2: $ … ⇒ dt x0 M (enc_expr r2) w (x1 ++ x2) = dt x0 M (enc_expr e2) w x2 $ by lift0_den [#4, k8, k1, k2, k6]
+e3: $ … ⇒ dt x0 M (enc_expr R) w (x1 ++ x2) = dt x0 M (enc_expr A) w x2 $ by lift0_den [#5, k8, k1, k2, k6]
 m1: $ … ⇒ dt x0 M (enc_expr e) w x2 = dt x0 M (enc_expr e2) w x2 $ by mdeq_e [#1, k7, k8, k3]
 m2: $ … ⇒ dt x0 M (enc_expr e) w x2 ∈ dt x0 M (enc_expr A) w x2 $ by mdeq_mem [#1, k7, k8, k3]
-g1: $ … ⇒ dt x0 M (enc_expr r) w (scat x1 x2) = dt x0 M (enc_expr e2) w x2 $ by eq_trans [e1, m1]
-g2: $ … ⇒ dt x0 M (enc_expr e2) w x2 = dt x0 M (enc_expr r2) w (scat x1 x2) $ by eq_sym [e2]
-g3: $ … ⇒ dt x0 M (enc_expr r) w (scat x1 x2) = dt x0 M (enc_expr r2) w (scat x1 x2) $ by eq_trans [g1, g2]
-g4: $ … ⇒ dt x0 M (enc_expr e) w x2 = dt x0 M (enc_expr r) w (scat x1 x2) $ by eq_sym [e1]
-g5: $ … ⇒ dt x0 M (enc_expr r) w (scat x1 x2) ∈ dt x0 M (enc_expr A) w x2 $ by wcel_eq_l [g4, m2]
-g6: $ … ⇒ dt x0 M (enc_expr A) w x2 = dt x0 M (enc_expr R) w (scat x1 x2) $ by eq_sym [e3]
-g7: $ … ⇒ dt x0 M (enc_expr r) w (scat x1 x2) ∈ dt x0 M (enc_expr R) w (scat x1 x2) $ by wcel_eq_r [g6, g5]
-q1: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = fv nvf (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = scat x1 x2 ⇒ x0 = x0 $ by eq_refl
-q2: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = fv nvf (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = scat x1 x2 ⇒ M = M $ by eq_refl
-q3: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = fv nvf (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = scat x1 x2 ⇒ w = w $ by eq_refl
-q4: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = fv nvf (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = scat x1 x2 ⇒ enc_expr r = enc_expr r $ by eq_refl
-q5: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = fv nvf (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = scat x1 x2 ⇒ enc_expr r2 = enc_expr r2 $ by eq_refl
-q6: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = fv nvf (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = scat x1 x2 ⇒ enc_expr R = enc_expr R $ by eq_refl
-v1: $ … ⇒ dt x0 M (enc_expr r) w v = dt x0 M (enc_expr r) w (scat x1 x2) $ by dt_eq [q1, q2, q4, q3, k4]
-v2: $ … ⇒ dt x0 M (enc_expr r2) w v = dt x0 M (enc_expr r2) w (scat x1 x2) $ by dt_eq [q1, q2, q5, q3, k4]
-v3: $ … ⇒ dt x0 M (enc_expr R) w v = dt x0 M (enc_expr R) w (scat x1 x2) $ by dt_eq [q1, q2, q6, q3, k4]
-w1: $ … ⇒ dt x0 M (enc_expr r) w v = dt x0 M (enc_expr r2) w (scat x1 x2) $ by eq_trans [v1, g3]
-w2: $ … ⇒ dt x0 M (enc_expr r2) w (scat x1 x2) = dt x0 M (enc_expr r2) w v $ by eq_sym [v2]
+g1: $ … ⇒ dt x0 M (enc_expr r) w (x1 ++ x2) = dt x0 M (enc_expr e2) w x2 $ by eq_trans [e1, m1]
+g2: $ … ⇒ dt x0 M (enc_expr e2) w x2 = dt x0 M (enc_expr r2) w (x1 ++ x2) $ by eq_sym [e2]
+g3: $ … ⇒ dt x0 M (enc_expr r) w (x1 ++ x2) = dt x0 M (enc_expr r2) w (x1 ++ x2) $ by eq_trans [g1, g2]
+g4: $ … ⇒ dt x0 M (enc_expr e) w x2 = dt x0 M (enc_expr r) w (x1 ++ x2) $ by eq_sym [e1]
+g5: $ … ⇒ dt x0 M (enc_expr r) w (x1 ++ x2) ∈ dt x0 M (enc_expr A) w x2 $ by wcel_eq_l [g4, m2]
+g6: $ … ⇒ dt x0 M (enc_expr A) w x2 = dt x0 M (enc_expr R) w (x1 ++ x2) $ by eq_sym [e3]
+g7: $ … ⇒ dt x0 M (enc_expr r) w (x1 ++ x2) ∈ dt x0 M (enc_expr R) w (x1 ++ x2) $ by wcel_eq_r [g6, g5]
+q1: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = nvf' (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = x1 ++ x2 ⇒ x0 = x0 $ by eq_refl
+q2: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = nvf' (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = x1 ++ x2 ⇒ M = M $ by eq_refl
+q3: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = nvf' (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = x1 ++ x2 ⇒ w = w $ by eq_refl
+q4: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = nvf' (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = x1 ++ x2 ⇒ enc_expr r = enc_expr r $ by eq_refl
+q5: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = nvf' (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = x1 ++ x2 ⇒ enc_expr r2 = enc_expr r2 $ by eq_refl
+q6: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , x1 ∊ fseq x0 ∧ cdm x1 = nvf' (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = x1 ++ x2 ⇒ enc_expr R = enc_expr R $ by eq_refl
+v1: $ … ⇒ dt x0 M (enc_expr r) w v = dt x0 M (enc_expr r) w (x1 ++ x2) $ by dt_eq [q1, q2, q4, q3, k4]
+v2: $ … ⇒ dt x0 M (enc_expr r2) w v = dt x0 M (enc_expr r2) w (x1 ++ x2) $ by dt_eq [q1, q2, q5, q3, k4]
+v3: $ … ⇒ dt x0 M (enc_expr R) w v = dt x0 M (enc_expr R) w (x1 ++ x2) $ by dt_eq [q1, q2, q6, q3, k4]
+w1: $ … ⇒ dt x0 M (enc_expr r) w v = dt x0 M (enc_expr r2) w (x1 ++ x2) $ by eq_trans [v1, g3]
+w2: $ … ⇒ dt x0 M (enc_expr r2) w (x1 ++ x2) = dt x0 M (enc_expr r2) w v $ by eq_sym [v2]
 w3: $ … ⇒ dt x0 M (enc_expr r) w v = dt x0 M (enc_expr r2) w v $ by eq_trans [w1, w2]
-w4: $ … ⇒ dt x0 M (enc_expr r) w (scat x1 x2) = dt x0 M (enc_expr r) w v $ by eq_sym [v1]
-w5: $ … ⇒ dt x0 M (enc_expr r) w v ∈ dt x0 M (enc_expr R) w (scat x1 x2) $ by wcel_eq_l [w4, g7]
-w6: $ … ⇒ dt x0 M (enc_expr R) w (scat x1 x2) = dt x0 M (enc_expr R) w v $ by eq_sym [v3]
+w4: $ … ⇒ dt x0 M (enc_expr r) w (x1 ++ x2) = dt x0 M (enc_expr r) w v $ by eq_sym [v1]
+w5: $ … ⇒ dt x0 M (enc_expr r) w v ∈ dt x0 M (enc_expr R) w (x1 ++ x2) $ by wcel_eq_l [w4, g7]
+w6: $ … ⇒ dt x0 M (enc_expr R) w (x1 ++ x2) = dt x0 M (enc_expr R) w v $ by eq_sym [v3]
 w7: $ … ⇒ dt x0 M (enc_expr r) w v ∈ dt x0 M (enc_expr R) w v $ by wcel_eq_r [w6, w5]
 w8: $ … ⇒ dt x0 M (enc_expr r) w v = dt x0 M (enc_expr r2) w v ∧ dt x0 M (enc_expr r) w v ∈ dt x0 M (enc_expr R) w v $ by and_intro [w3, w7]
-x1a: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , ∃ x2 (x1 ∊ fseq x0 ∧ cdm x1 = fv nvf (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = scat x1 x2) ⇒ ∃ x2 (x1 ∊ fseq x0 ∧ cdm x1 = fv nvf (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = scat x1 x2) $ by ax
+x1a: $ uadm x0 , w ∊ lvals , v ∊ sat x0 M (enc_ctx G2) w , ∃ x2 (x1 ∊ fseq x0 ∧ cdm x1 = nvf' (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = x1 ++ x2) ⇒ ∃ x2 (x1 ∊ fseq x0 ∧ cdm x1 = nvf' (enc_nat n) ∧ x2 ∊ sat x0 M (enc_ctx G) w ∧ v = x1 ++ x2) $ by ax
 x1b: $ … ⇒ dt x0 M (enc_expr r) w v = dt x0 M (enc_expr r2) w v ∧ dt x0 M (enc_expr r) w v ∈ dt x0 M (enc_expr R) w v $ by ex_elim [x1a, w8]
 x1c: $ … ⇒ dt x0 M (enc_expr r) w v = dt x0 M (enc_expr r2) w v ∧ dt x0 M (enc_expr r) w v ∈ dt x0 M (enc_expr R) w v $ by ex_elim [a4, x1b]
 f1: $ … ⇒ dt x0 M (enc_expr r) w v = dt x0 M (enc_expr r2) w v $ by and_elim_l [x1c]
@@ -615,13 +615,13 @@ k1c: $ … ⇒ l ∈ trees ω $ by welc_wcel [k1]
 k2: $ … ⇒ m ∊ trees ω $ by trees_kids1 [b4, b3t, b5]
 k2c: $ … ⇒ m ∈ trees ω $ by welc_wcel [k2]
 v0: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ lveq l m $ by weaken [r1]
-d1: $ … ⇒ dt u M ⟨ kc_srt , scons l ∅ ⟩ w r = fv uni (lv l w) $ by dt_srt [k1c, b8, b9]
-d2: $ … ⇒ dt u M ⟨ kc_srt , scons m ∅ ⟩ w r = fv uni (lv m w) $ by dt_srt [k2c, b8, b9]
+d1: $ … ⇒ dt u M ⟨ kc_srt , scons l ∅ ⟩ w r = uni' (lv l w) $ by dt_srt [k1c, b8, b9]
+d2: $ … ⇒ dt u M ⟨ kc_srt , scons m ∅ ⟩ w r = uni' (lv m w) $ by dt_srt [k2c, b8, b9]
 v1: $ … ⇒ lv l w = lv m w $ by g3_lveq [v0, b8]
 v2: $ H , z = ⟨ kc_srt , scons l ∅ ⟩ ∧ t = ⟨ kc_srt , scons m ∅ ⟩ ∧ lveq l m , r ∊ fseq u ⇒ uni = uni $ by eq_refl
-h3: $ … ⇒ fv uni (lv l w) = fv uni (lv m w) $ by fv_eq [v2, v1]
-v4: $ … ⇒ dt u M ⟨ kc_srt , scons l ∅ ⟩ w r = fv uni (lv m w) $ by eq_trans [d1, h3]
-v5: $ … ⇒ fv uni (lv m w) = dt u M ⟨ kc_srt , scons m ∅ ⟩ w r $ by eq_sym [d2]
+h3: $ … ⇒ uni' (lv l w) = uni' (lv m w) $ by fv_eq [v2, v1]
+v4: $ … ⇒ dt u M ⟨ kc_srt , scons l ∅ ⟩ w r = uni' (lv m w) $ by eq_trans [d1, h3]
+v5: $ … ⇒ uni' (lv m w) = dt u M ⟨ kc_srt , scons m ∅ ⟩ w r $ by eq_sym [d2]
 v6: $ … ⇒ dt u M ⟨ kc_srt , scons l ∅ ⟩ w r = dt u M ⟨ kc_srt , scons m ∅ ⟩ w r $ by eq_trans [v4, v5]
 br: $ … ⇒ dt u M z w r = dt u M t w r $ by g3_rw [b1, b1t, v6]
 s3: $ … ⇒ dt u M z w r = dt u M t w r $ by g3_split [p6, e0, kz, iz0, tt, e1, kz, it0, br]
@@ -1039,12 +1039,12 @@ m2s: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc
 m2m: $ … ⇒ e ∈ einv u M w $ by crn_scons_head [m2s, m2t1]
 m2w: $ … ⇒ e ∊ einv u M w $ by wcel_welc [m2m]
 h1: $ … ⇒ dt u M e w r = dt u M x9 w r $ by g3_P_e [m2w, a0, ir]
-d1: $ … ⇒ dt u M ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ w r = fv (dt u M e w r) (suc (fv nvf i)) $ by dt_proj [k4a, k4b, k4c, b8, b9]
-d2: $ … ⇒ dt u M ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ w r = fv (dt u M x9 w r) (suc (fv nvf i)) $ by dt_proj [k4a, k4b, a0rc, b8, b9]
-h2: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ suc (fv nvf i) = suc (fv nvf i) $ by eq_refl
-h3: $ … ⇒ fv (dt u M e w r) (suc (fv nvf i)) = fv (dt u M x9 w r) (suc (fv nvf i)) $ by fv_eq [h1, h2]
-v4: $ … ⇒ dt u M ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ w r = fv (dt u M x9 w r) (suc (fv nvf i)) $ by eq_trans [d1, h3]
-v5: $ … ⇒ fv (dt u M x9 w r) (suc (fv nvf i)) = dt u M ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ w r $ by eq_sym [d2]
+d1: $ … ⇒ dt u M ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ w r = (dt u M e w r)' (suc (nvf' i)) $ by dt_proj [k4a, k4b, k4c, b8, b9]
+d2: $ … ⇒ dt u M ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ w r = (dt u M x9 w r)' (suc (nvf' i)) $ by dt_proj [k4a, k4b, a0rc, b8, b9]
+h2: $ H , z = ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ ∧ t = ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ ∧ ra_eeqv e x9 ∈ lrel2 , r ∊ fseq u ⇒ suc (nvf' i) = suc (nvf' i) $ by eq_refl
+h3: $ … ⇒ (dt u M e w r)' (suc (nvf' i)) = (dt u M x9 w r)' (suc (nvf' i)) $ by fv_eq [h1, h2]
+v4: $ … ⇒ dt u M ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ w r = (dt u M x9 w r)' (suc (nvf' i)) $ by eq_trans [d1, h3]
+v5: $ … ⇒ (dt u M x9 w r)' (suc (nvf' i)) = dt u M ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ w r $ by eq_sym [d2]
 v6: $ … ⇒ dt u M ⟨ kc_proj , scons x1 (scons i (scons e ∅)) ⟩ w r = dt u M ⟨ kc_proj , scons x1 (scons i (scons x9 ∅)) ⟩ w r $ by eq_trans [v4, v5]
 br: $ … ⇒ dt u M z w r = dt u M t w r $ by g3_rw [b1, b1t, v6]
 s3: $ … ⇒ dt u M z w r = dt u M t w r $ by g3_split [p6, e0, kz, iz2, tt, e1, kz, it2, br]

@@ -8,17 +8,17 @@ import "model-quot.mm0";
 -- Literals (layer G): the hook's part and the rules `lit_zero`, `lit_succ`
 -- --------------------------------------------------------------------------
 -- The value of `lit b` is the numeral of `Nat`'s family for the number of `b`
--- (`nvf` reads binary numerals too): `fv nnf (fv nvf b)`.
+-- (`nvf` reads binary numerals too): `nnf' nvf' b`.
 
 --| At `lit b`: the numeral of `b`'s number.
 def hlit (.u .l .e .z .w: set): class =
-  $ {z | ∃ u ∃ l ∃ e (z = ⟨ ⟨ u , ⟨ kc_lit , ⟨ scons l ∅ , e ⟩ ⟩ ⟩ , clam w lvals (sclip (fv nnf (fv nvf l))) ⟩)} $;
+  $ {z | ∃ u ∃ l ∃ e (z = ⟨ ⟨ u , ⟨ kc_lit , ⟨ scons l ∅ , e ⟩ ⟩ ⟩ , clam w lvals (sclip (nnf' nvf' l)) ⟩)} $;
 
 --| The denotation of `lit b`, for a hook `mcv H` with `H` extending `hlit`, in an admissible universe: the numeral of
 --| `b`'s number.
 theorem dt_lit (G: hyps) (H B W R: class) (u: set):
   $ G ⇒ hlit ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ B ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ uadm u $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_lit , scons B ∅ ⟩ W R = fv nnf (fv nvf B) $;
+  $ G ⇒ dt u (mcv H) ⟨ kc_lit , scons B ∅ ⟩ W R = nnf' nvf' B $;
 
 --| The rule `lit_zero` in the model, for a hook with the inductive types' and the literals' parts.
 theorem mlit_zero (H: class) (G: ctx): $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ mdeq (mcv H) G (lit b0) (ind_ctor nat_D nz nz) (ind_ty nat_D nz) $;
@@ -29,10 +29,10 @@ theorem mlit_zero (H: class) (G: ctx): $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ >
 
 --| The semantics of `bsucc`, by induction on the tree and inversion.
 theorem lrel_bsucc_sem (G: hyps) (t1 t2: set):
-  $ G ⇒ ra_bsucc t1 t2 ∈ lrel $ > $ G ⇒ fv nvf t2 = suc (fv nvf t1) $;
+  $ G ⇒ ra_bsucc t1 t2 ∈ lrel $ > $ G ⇒ nvf' t2 = suc (nvf' t1) $;
 
 --| `bsucc a b`: the number of `b` is the successor of `a`'s.
-theorem bsucc_sem (G: hyps) (a b: bin): $ bsucc a b $ > $ G ⇒ fv nvf (enc_bin b) = suc (fv nvf (enc_bin a)) $;
+theorem bsucc_sem (G: hyps) (a b: bin): $ bsucc a b $ > $ G ⇒ nvf' (enc_bin b) = suc (nvf' (enc_bin a)) $;
 
 --| The rule `lit_succ` in the model.
 theorem mlit_succ (H: class) (G: ctx) (a b: bin):
@@ -44,38 +44,38 @@ theorem mlit_succ (H: class) (G: ctx) (a b: bin):
 
 --| The semantics of `bdbl`, by inversion.
 theorem lrel_bdbl_sem (G: hyps) (t1 t2: set):
-  $ G ⇒ ra_bdbl t1 t2 ∈ lrel $ > $ G ⇒ fv nvf t2 = ndbl (fv nvf t1) $;
+  $ G ⇒ ra_bdbl t1 t2 ∈ lrel $ > $ G ⇒ nvf' t2 = ndbl (nvf' t1) $;
 
 --| `bdbl a b`: the number of `b` is twice `a`'s.
-theorem bdbl_sem (G: hyps) (a b: bin): $ bdbl a b $ > $ G ⇒ fv nvf (enc_bin b) = ndbl (fv nvf (enc_bin a)) $;
+theorem bdbl_sem (G: hyps) (a b: bin): $ bdbl a b $ > $ G ⇒ nvf' (enc_bin b) = ndbl (nvf' (enc_bin a)) $;
 
 --| The semantics of `badd`, by induction on the first tree and inversion.
 theorem lrel_badd_sem (G: hyps) (t1 t2 t3: set):
-  $ G ⇒ ra_badd t1 t2 t3 ∈ lrel $ > $ G ⇒ fv nvf t3 = nadd (fv nvf t1) (fv nvf t2) $;
+  $ G ⇒ ra_badd t1 t2 t3 ∈ lrel $ > $ G ⇒ nvf' t3 = nadd (nvf' t1) (nvf' t2) $;
 
 --| `badd a b c`: the number of `c` is the sum of `a`'s and `b`'s.
-theorem badd_sem (G: hyps) (a b c: bin): $ badd a b c $ > $ G ⇒ fv nvf (enc_bin c) = nadd (fv nvf (enc_bin a)) (fv nvf (enc_bin b)) $;
+theorem badd_sem (G: hyps) (a b c: bin): $ badd a b c $ > $ G ⇒ nvf' (enc_bin c) = nadd (nvf' (enc_bin a)) (nvf' (enc_bin b)) $;
 
 --| The semantics of `baddc` (addition with a carry), by induction on the first tree and inversion.
 theorem lrel_baddc_sem (G: hyps) (t1 t2 t3: set):
-  $ G ⇒ ra_baddc t1 t2 t3 ∈ lrel $ > $ G ⇒ fv nvf t3 = suc (nadd (fv nvf t1) (fv nvf t2)) $;
+  $ G ⇒ ra_baddc t1 t2 t3 ∈ lrel $ > $ G ⇒ nvf' t3 = suc (nadd (nvf' t1) (nvf' t2)) $;
 
 --| `baddc a b c`: the number of `c` is the sum of `a`'s and `b`'s, plus one.
-theorem baddc_sem (G: hyps) (a b c: bin): $ baddc a b c $ > $ G ⇒ fv nvf (enc_bin c) = suc (nadd (fv nvf (enc_bin a)) (fv nvf (enc_bin b))) $;
+theorem baddc_sem (G: hyps) (a b c: bin): $ baddc a b c $ > $ G ⇒ nvf' (enc_bin c) = suc (nadd (nvf' (enc_bin a)) (nvf' (enc_bin b))) $;
 
 --| The semantics of `bmul`, by induction on the second tree and inversion.
 theorem lrel_bmul_sem (G: hyps) (t1 t2 t3: set):
-  $ G ⇒ ra_bmul t1 t2 t3 ∈ lrel $ > $ G ⇒ fv nvf t3 = nmul (fv nvf t1) (fv nvf t2) $;
+  $ G ⇒ ra_bmul t1 t2 t3 ∈ lrel $ > $ G ⇒ nvf' t3 = nmul (nvf' t1) (nvf' t2) $;
 
 --| `bmul a b c`: the number of `c` is the product of `a`'s and `b`'s.
-theorem bmul_sem (G: hyps) (a b c: bin): $ bmul a b c $ > $ G ⇒ fv nvf (enc_bin c) = nmul (fv nvf (enc_bin a)) (fv nvf (enc_bin b)) $;
+theorem bmul_sem (G: hyps) (a b c: bin): $ bmul a b c $ > $ G ⇒ nvf' (enc_bin c) = nmul (nvf' (enc_bin a)) (nvf' (enc_bin b)) $;
 
 --| The semantics of `bpow`, by induction on the second tree and inversion.
 theorem lrel_bpow_sem (G: hyps) (t1 t2 t3: set):
-  $ G ⇒ ra_bpow t1 t2 t3 ∈ lrel $ > $ G ⇒ fv nvf t3 = npow (fv nvf t1) (fv nvf t2) $;
+  $ G ⇒ ra_bpow t1 t2 t3 ∈ lrel $ > $ G ⇒ nvf' t3 = npow (nvf' t1) (nvf' t2) $;
 
 --| `bpow a b c`: the number of `c` is `a`'s to the power of `b`'s.
-theorem bpow_sem (G: hyps) (a b c: bin): $ bpow a b c $ > $ G ⇒ fv nvf (enc_bin c) = npow (fv nvf (enc_bin a)) (fv nvf (enc_bin b)) $;
+theorem bpow_sem (G: hyps) (a b c: bin): $ bpow a b c $ > $ G ⇒ nvf' (enc_bin c) = npow (nvf' (enc_bin a)) (nvf' (enc_bin b)) $;
 
 -- --------------------------------------------------------------------------
 -- The literal rules
@@ -267,7 +267,7 @@ theorem mcv_inv_node_lit (G: hyps) (M: class) (u w d z y t: set):
 
 --| `band` at a zero: the result is zero (by induction on the first tree and inversion).
 theorem lrel_band_zero (G: hyps) (t1 t2 t3: set):
-  $ G ⇒ ra_band t1 t2 t3 ∈ lrel $ > $ G ⇒ (fv nvf t1 = ∅ → fv nvf t3 = ∅) ∧ (fv nvf t2 = ∅ → fv nvf t3 = ∅) $;
+  $ G ⇒ ra_band t1 t2 t3 ∈ lrel $ > $ G ⇒ (nvf' t1 = ∅ → nvf' t3 = ∅) ∧ (nvf' t2 = ∅ → nvf' t3 = ∅) $;
 
 --| An instance of `band` has a zero argument, or it is a smaller instance with a digit on each argument (by inversion).
 --| @freshen G x
@@ -275,11 +275,11 @@ theorem lrel_band_zero (G: hyps) (t1 t2 t3: set):
 --| @freshen G z
 theorem lrel_band_digits {x y z: set} (G: hyps) (t1 t2 t3: set):
   $ G ⇒ ra_band t1 t2 t3 ∈ lrel $ >
-  $ G ⇒ fv nvf t1 = ∅ ∨ fv nvf t2 = ∅ ∨ ∃ x ∃ y ∃ z (ra_band x y z ∈ lrel ∧ ((fv nvf t1 = ndbl (fv nvf x) ∧ fv nvf t2 = ndbl (fv nvf y) ∧ fv nvf t3 = ndbl (fv nvf z)) ∨ (fv nvf t1 = ndbl (fv nvf x) ∧ fv nvf t2 = suc (ndbl (fv nvf y)) ∧ fv nvf t3 = ndbl (fv nvf z)) ∨ (fv nvf t1 = suc (ndbl (fv nvf x)) ∧ fv nvf t2 = ndbl (fv nvf y) ∧ fv nvf t3 = ndbl (fv nvf z)) ∨ (fv nvf t1 = suc (ndbl (fv nvf x)) ∧ fv nvf t2 = suc (ndbl (fv nvf y)) ∧ fv nvf t3 = suc (ndbl (fv nvf z))))) $;
+  $ G ⇒ nvf' t1 = ∅ ∨ nvf' t2 = ∅ ∨ ∃ x ∃ y ∃ z (ra_band x y z ∈ lrel ∧ ((nvf' t1 = ndbl (nvf' x) ∧ nvf' t2 = ndbl (nvf' y) ∧ nvf' t3 = ndbl (nvf' z)) ∨ (nvf' t1 = ndbl (nvf' x) ∧ nvf' t2 = suc (ndbl (nvf' y)) ∧ nvf' t3 = ndbl (nvf' z)) ∨ (nvf' t1 = suc (ndbl (nvf' x)) ∧ nvf' t2 = ndbl (nvf' y) ∧ nvf' t3 = ndbl (nvf' z)) ∨ (nvf' t1 = suc (ndbl (nvf' x)) ∧ nvf' t2 = suc (ndbl (nvf' y)) ∧ nvf' t3 = suc (ndbl (nvf' z))))) $;
 
 --| `bor` at a zero: the result is the other argument (by induction on the first tree and inversion).
 theorem lrel_bor_zero (G: hyps) (t1 t2 t3: set):
-  $ G ⇒ ra_bor t1 t2 t3 ∈ lrel $ > $ G ⇒ (fv nvf t1 = ∅ → fv nvf t3 = fv nvf t2) ∧ (fv nvf t2 = ∅ → fv nvf t3 = fv nvf t1) $;
+  $ G ⇒ ra_bor t1 t2 t3 ∈ lrel $ > $ G ⇒ (nvf' t1 = ∅ → nvf' t3 = nvf' t2) ∧ (nvf' t2 = ∅ → nvf' t3 = nvf' t1) $;
 
 --| An instance of `bor` has a zero argument, or it is a smaller instance with a digit on each argument (by inversion).
 --| @freshen G x
@@ -287,11 +287,11 @@ theorem lrel_bor_zero (G: hyps) (t1 t2 t3: set):
 --| @freshen G z
 theorem lrel_bor_digits {x y z: set} (G: hyps) (t1 t2 t3: set):
   $ G ⇒ ra_bor t1 t2 t3 ∈ lrel $ >
-  $ G ⇒ fv nvf t1 = ∅ ∨ fv nvf t2 = ∅ ∨ ∃ x ∃ y ∃ z (ra_bor x y z ∈ lrel ∧ ((fv nvf t1 = ndbl (fv nvf x) ∧ fv nvf t2 = ndbl (fv nvf y) ∧ fv nvf t3 = ndbl (fv nvf z)) ∨ (fv nvf t1 = ndbl (fv nvf x) ∧ fv nvf t2 = suc (ndbl (fv nvf y)) ∧ fv nvf t3 = suc (ndbl (fv nvf z))) ∨ (fv nvf t1 = suc (ndbl (fv nvf x)) ∧ fv nvf t2 = ndbl (fv nvf y) ∧ fv nvf t3 = suc (ndbl (fv nvf z))) ∨ (fv nvf t1 = suc (ndbl (fv nvf x)) ∧ fv nvf t2 = suc (ndbl (fv nvf y)) ∧ fv nvf t3 = suc (ndbl (fv nvf z))))) $;
+  $ G ⇒ nvf' t1 = ∅ ∨ nvf' t2 = ∅ ∨ ∃ x ∃ y ∃ z (ra_bor x y z ∈ lrel ∧ ((nvf' t1 = ndbl (nvf' x) ∧ nvf' t2 = ndbl (nvf' y) ∧ nvf' t3 = ndbl (nvf' z)) ∨ (nvf' t1 = ndbl (nvf' x) ∧ nvf' t2 = suc (ndbl (nvf' y)) ∧ nvf' t3 = suc (ndbl (nvf' z))) ∨ (nvf' t1 = suc (ndbl (nvf' x)) ∧ nvf' t2 = ndbl (nvf' y) ∧ nvf' t3 = suc (ndbl (nvf' z))) ∨ (nvf' t1 = suc (ndbl (nvf' x)) ∧ nvf' t2 = suc (ndbl (nvf' y)) ∧ nvf' t3 = suc (ndbl (nvf' z))))) $;
 
 --| `bxor` at a zero: the result is the other argument (by induction on the first tree and inversion).
 theorem lrel_bxor_zero (G: hyps) (t1 t2 t3: set):
-  $ G ⇒ ra_bxor t1 t2 t3 ∈ lrel $ > $ G ⇒ (fv nvf t1 = ∅ → fv nvf t3 = fv nvf t2) ∧ (fv nvf t2 = ∅ → fv nvf t3 = fv nvf t1) $;
+  $ G ⇒ ra_bxor t1 t2 t3 ∈ lrel $ > $ G ⇒ (nvf' t1 = ∅ → nvf' t3 = nvf' t2) ∧ (nvf' t2 = ∅ → nvf' t3 = nvf' t1) $;
 
 --| An instance of `bxor` has a zero argument, or it is a smaller instance with a digit on each argument (by inversion).
 --| @freshen G x
@@ -299,7 +299,7 @@ theorem lrel_bxor_zero (G: hyps) (t1 t2 t3: set):
 --| @freshen G z
 theorem lrel_bxor_digits {x y z: set} (G: hyps) (t1 t2 t3: set):
   $ G ⇒ ra_bxor t1 t2 t3 ∈ lrel $ >
-  $ G ⇒ fv nvf t1 = ∅ ∨ fv nvf t2 = ∅ ∨ ∃ x ∃ y ∃ z (ra_bxor x y z ∈ lrel ∧ ((fv nvf t1 = ndbl (fv nvf x) ∧ fv nvf t2 = ndbl (fv nvf y) ∧ fv nvf t3 = ndbl (fv nvf z)) ∨ (fv nvf t1 = ndbl (fv nvf x) ∧ fv nvf t2 = suc (ndbl (fv nvf y)) ∧ fv nvf t3 = suc (ndbl (fv nvf z))) ∨ (fv nvf t1 = suc (ndbl (fv nvf x)) ∧ fv nvf t2 = ndbl (fv nvf y) ∧ fv nvf t3 = suc (ndbl (fv nvf z))) ∨ (fv nvf t1 = suc (ndbl (fv nvf x)) ∧ fv nvf t2 = suc (ndbl (fv nvf y)) ∧ fv nvf t3 = ndbl (fv nvf z)))) $;
+  $ G ⇒ nvf' t1 = ∅ ∨ nvf' t2 = ∅ ∨ ∃ x ∃ y ∃ z (ra_bxor x y z ∈ lrel ∧ ((nvf' t1 = ndbl (nvf' x) ∧ nvf' t2 = ndbl (nvf' y) ∧ nvf' t3 = ndbl (nvf' z)) ∨ (nvf' t1 = ndbl (nvf' x) ∧ nvf' t2 = suc (ndbl (nvf' y)) ∧ nvf' t3 = suc (ndbl (nvf' z))) ∨ (nvf' t1 = suc (ndbl (nvf' x)) ∧ nvf' t2 = ndbl (nvf' y) ∧ nvf' t3 = suc (ndbl (nvf' z))) ∨ (nvf' t1 = suc (ndbl (nvf' x)) ∧ nvf' t2 = suc (ndbl (nvf' y)) ∧ nvf' t3 = ndbl (nvf' z)))) $;
 
 
 -- --------------------------------------------------------------------------
@@ -316,12 +316,12 @@ theorem le_D_wf (H: class): $ _ ⇒ hind H $ > $ ind_wf_j (jmod (mcv H)) nil le_
 -- --------------------------------------------------------------------------
 
 --| The numerals are distinct: `nnf` is injective on `ω`.
-theorem nnf_inj (G: hyps) (a b: set): $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ fv nnf a = fv nnf b $ > $ G ⇒ a = b $;
+theorem nnf_inj (G: hyps) (a b: set): $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nnf' a = nnf' b $ > $ G ⇒ a = b $;
 
 --| The truth value of `A ≤ B` for numerals `A` and `B` of the model: `csn ∅` when they are the numerals of numbers
 --| `c ⊆ d`, else `∅`.
 def nlev (A B: class) (.e .c .d: set): class =
-  $ {e | (e = ∅) ∧ (∃ c (∃ d ((c ∊ ω) ∧ ((d ∊ ω) ∧ ((A = (fv nnf c)) ∧ ((B = (fv nnf d)) ∧ (c ⊆ d)))))))} $;
+  $ {e | (e = ∅) ∧ (∃ c (∃ d ((c ∊ ω) ∧ ((d ∊ ω) ∧ ((A = (nnf' c)) ∧ ((B = (nnf' d)) ∧ (c ⊆ d)))))))} $;
 --| @congr
 theorem nlev_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ nlev A C ≐ nlev B D $;
 --| @rewrite
@@ -334,10 +334,10 @@ theorem nlev_eq (G: hyps) (A B C D: class): $ G ⇒ A = B $ > $ G ⇒ C = D $ > 
 theorem nlev_two (G: hyps) (A B: class): $ G ⇒ nlev A B ∈ two $;
 
 --| It holds at the numerals of `a ⊆ b`.
-theorem nlev_intro (G: hyps) (a b: set): $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ a ⊆ b $ > $ G ⇒ ∅ ∈ nlev (fv nnf a) (fv nnf b) $;
+theorem nlev_intro (G: hyps) (a b: set): $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ a ⊆ b $ > $ G ⇒ ∅ ∈ nlev (nnf' a) (nnf' b) $;
 
 --| An element of it at two numerals gives `⊆` of their numbers.
-theorem nlev_elim (G: hyps) (X: class) (a b: set): $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ X ∈ nlev (fv nnf a) (fv nnf b) $ > $ G ⇒ a ⊆ b $;
+theorem nlev_elim (G: hyps) (X: class) (a b: set): $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ X ∈ nlev (nnf' a) (nnf' b) $ > $ G ⇒ a ⊆ b $;
 
 
 -- --------------------------------------------------------------------------
@@ -347,7 +347,7 @@ theorem nlev_elim (G: hyps) (X: class) (a b: set): $ G ⇒ a ∊ ω $ > $ G ⇒ 
 --| The model's `Nat.le` is the order of the numerals: at the numerals of two numbers the value of `ind_ty le_D 0` is the
 --| truth value of `⊆`.
 def mles (M: class) (.u .w .a .b: set): fml =
-  $ ∀ u (∀ w ((uadm u) → ((w ∊ lvals) → (∀ a (∀ b ((a ∊ ω) → ((b ∊ ω) → ((ap (ap (dt u M (enc_expr (ind_ty le_D nz)) w ∅) (fv nnf a)) (fv nnf b)) = (nlev (fv nnf a) (fv nnf b)))))))))) $;
+  $ ∀ u (∀ w ((uadm u) → ((w ∊ lvals) → (∀ a (∀ b ((a ∊ ω) → ((b ∊ ω) → ((ap (ap (dt u M (enc_expr (ind_ty le_D nz)) w ∅) (nnf' a)) (nnf' b)) = (nlev (nnf' a) (nnf' b)))))))))) $;
 --| @congr
 theorem mles_congr (A B: class): $ A ≐ B $ > $ mles A ⟺ mles B $;
 --| @rewrite

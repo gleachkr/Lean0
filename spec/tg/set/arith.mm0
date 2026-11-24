@@ -22,14 +22,14 @@ import "hartogs.mm0";
 -- --------------------------------------------------------------------------
 
 --| `a + b`, by recursion on `b`: `a + 0 = a`, `a + suc b = suc (a + b)`.
-def nadd (A B: class) (.x: set): class = $ fv (omrec A (cgr x (suc x))) B $;
+def nadd (A B: class) (.x: set): class = $ (omrec A (cgr x (suc x)))' B $;
 --| `a · b`: `a · 0 = 0`, `a · suc b = a · b + a`.
-def nmul (A B: class) (.x: set): class = $ fv (omrec ∅ (cgr x (nadd x A))) B $;
+def nmul (A B: class) (.x: set): class = $ (omrec ∅ (cgr x (nadd x A)))' B $;
 --| `a ^ b`: `a ^ 0 = 1`, `a ^ suc b = a ^ b · a`.
-def npow (A B: class) (.x: set): class = $ fv (omrec (suc ∅) (cgr x (nmul x A))) B $;
+def npow (A B: class) (.x: set): class = $ (omrec (suc ∅) (cgr x (nmul x A)))' B $;
 --| Truncated difference `a - b`: `a - 0 = a`, `a - suc b = pred (a - b)`, with
 --| the predecessor of a natural number its union.
-def nsub (A B: class) (.x: set): class = $ fv (omrec A (cgr x (⋃ x))) B $;
+def nsub (A B: class) (.x: set): class = $ (omrec A (cgr x (⋃ x)))' B $;
 --| Doubling, and the maximum (the union, as for any two ordinals).
 def ndbl (A: class): class = $ nadd A A $;
 def nmax (A B: class): class = $ A ∪ B $;

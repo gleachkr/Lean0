@@ -86,10 +86,10 @@ theorem sb_c_fm {x: set} (t: set x) (A: class x):
 --| the children `S` and the children's satisfying assignments `V`.
 def fsb (A K S V: class) (.y .i .j .z: set): class =
   $ {z | z ∊ fseq A ∧ (
-      (K = suc ∅ ∧ (z ∊ fv V ∅ → z ∊ fv V (suc ∅))) ∨
-      (K = suc (suc ∅) ∧ ∀ y (y ∊ A → scons y z ∈ fv V ∅)) ∨
-      (K = suc (suc (suc ∅)) ∧ ∃ i ∃ j (fv S ∅ = ⟨ i , ∅ ⟩ ∧ fv S (suc ∅) = ⟨ j , ∅ ⟩ ∧ fv z i = fv z j)) ∨
-      (K = suc (suc (suc (suc ∅))) ∧ ∃ i ∃ j (fv S ∅ = ⟨ i , ∅ ⟩ ∧ fv S (suc ∅) = ⟨ j , ∅ ⟩ ∧ fv z i ∈ fv z j)))} $;
+      (K = suc ∅ ∧ (z ∊ V' ∅ → z ∊ V' (suc ∅))) ∨
+      (K = suc (suc ∅) ∧ ∀ y (y ∊ A → scons y z ∈ V' ∅)) ∨
+      (K = suc (suc (suc ∅)) ∧ ∃ i ∃ j (S' ∅ = ⟨ i , ∅ ⟩ ∧ S' (suc ∅) = ⟨ j , ∅ ⟩ ∧ z' i = z' j)) ∨
+      (K = suc (suc (suc (suc ∅))) ∧ ∃ i ∃ j (S' ∅ = ⟨ i , ∅ ⟩ ∧ S' (suc ∅) = ⟨ j , ∅ ⟩ ∧ z' i ∈ z' j)))} $;
 --| @congr
 theorem fsb_congr (A B C D E F H I: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ fsb A C E H ≐ fsb B D F I $;
 --| @rewrite
@@ -106,7 +106,7 @@ theorem sb_c_fsf {x: set} (t: set x) (A: class x):
 
 --| The assignment `S` satisfies the formula `C` in `(A, ∈)`.
 def fsat (A S C: class): fml =
-  $ S ∈ fv (fsf A) C $;
+  $ S ∈ (fsf A)' C $;
 --| @congr
 theorem fsat_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ fsat A C E ⟺ fsat B D F $;
 --| @rewrite
@@ -162,12 +162,12 @@ theorem sb_c_lup {x: set} (t: set x) (A: class x):
 --| One step of the Lean form: a trace over the lists of indices.
 def ltb (P E M K S V: class) (.r .i .j .z: set): class =
   $ {z | (K = ∅ ∧ z ∊ clam r (fseq (trees ω)) (enc_expr lfalse)) ∨
-      (K = suc ∅ ∧ z ∊ clam r (fseq (trees ω)) (tpi (ap (fv V ∅) r) (ap (fv V (suc ∅)) (lup r)))) ∨
-      (K = suc (suc ∅) ∧ z ∊ clam r (fseq (trees ω)) (tpi P (ap (fv V ∅) (scons ⟨ kc_nz , ∅ ⟩ (lup r))))) ∨
-      (K = suc (suc (suc ∅)) ∧ ∃ i ∃ j (fv S ∅ = ⟨ i , ∅ ⟩ ∧ fv S (suc ∅) = ⟨ j , ∅ ⟩ ∧
-         z ∊ clam r (fseq (trees ω)) (tapp (tapp E (tbv (fv r i))) (tbv (fv r j))))) ∨
-      (K = suc (suc (suc (suc ∅))) ∧ ∃ i ∃ j (fv S ∅ = ⟨ i , ∅ ⟩ ∧ fv S (suc ∅) = ⟨ j , ∅ ⟩ ∧
-         z ∊ clam r (fseq (trees ω)) (tapp (tapp M (tbv (fv r i))) (tbv (fv r j)))))} $;
+      (K = suc ∅ ∧ z ∊ clam r (fseq (trees ω)) (tpi (ap (V' ∅) r) (ap (V' (suc ∅)) (lup r)))) ∨
+      (K = suc (suc ∅) ∧ z ∊ clam r (fseq (trees ω)) (tpi P (ap (V' ∅) (scons ⟨ kc_nz , ∅ ⟩ (lup r))))) ∨
+      (K = suc (suc (suc ∅)) ∧ ∃ i ∃ j (S' ∅ = ⟨ i , ∅ ⟩ ∧ S' (suc ∅) = ⟨ j , ∅ ⟩ ∧
+         z ∊ clam r (fseq (trees ω)) (tapp (tapp E (tbv (r' i))) (tbv (r' j))))) ∨
+      (K = suc (suc (suc (suc ∅))) ∧ ∃ i ∃ j (S' ∅ = ⟨ i , ∅ ⟩ ∧ S' (suc ∅) = ⟨ j , ∅ ⟩ ∧
+         z ∊ clam r (fseq (trees ω)) (tapp (tapp M (tbv (r' i))) (tbv (r' j)))))} $;
 --| @congr
 theorem ltb_congr (A B C D E F H I J K L N: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ L ≐ N $ > $ ltb A C E H J L ≐ ltb B D F I K N $;
 --| @rewrite
@@ -185,7 +185,7 @@ theorem sb_c_ltf {x: set} (t: set x) (A B C: class x):
 --| The tree of the Lean term of the formula `C`, where `R` lists the de Bruijn indices of the formula's variables,
 --| `P` is the tree of the type of sets and `E`, `M` are those of the relations.
 def ltr (P E M C R: class): class =
-  $ ap (fv (ltf P E M) C) R $;
+  $ ap ((ltf P E M)' C) R $;
 --| @congr
 theorem ltr_congr (A B C D E F H I J K: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ ltr A C E H J ≐ ltr B D F I K $;
 --| @rewrite
@@ -210,10 +210,10 @@ theorem fsat_all {x: set} (G: hyps) (A: class) (a p: set): $ G ⇒ isset A $ > $
   $ G ⇒ (⟪ A , a ⊨ ∀ₒ p ⟫ ↔ ∀ x (x ∊ A → ⟪ A , scons x a ⊨ p ⟫)) $;
 
 theorem fsat_eq (G: hyps) (A: class) (a i j: set): $ G ⇒ isset A $ > $ G ⇒ a ∊ fseq A $ > $ G ⇒ i ∊ ω $ > $ G ⇒ j ∊ ω $ > 
-  $ G ⇒ (⟪ A , a ⊨ i =ₒ j ⟫ ↔ fv a i = fv a j) $;
+  $ G ⇒ (⟪ A , a ⊨ i =ₒ j ⟫ ↔ a' i = a' j) $;
 
 theorem fsat_in (G: hyps) (A: class) (a i j: set): $ G ⇒ isset A $ > $ G ⇒ a ∊ fseq A $ > $ G ⇒ i ∊ ω $ > $ G ⇒ j ∊ ω $ > 
-  $ G ⇒ (⟪ A , a ⊨ i ∈ₒ j ⟫ ↔ fv a i ∈ fv a j) $;
+  $ G ⇒ (⟪ A , a ⊨ i ∈ₒ j ⟫ ↔ a' i ∈ a' j) $;
 
 theorem ltr_bot (G: hyps) (P E M: class) (r: set): $ G ⇒ r ∊ fseq (trees ω) $ > 
   $ G ⇒ ltr P E M ⊥ₒ r = enc_expr lfalse $;
@@ -225,10 +225,10 @@ theorem ltr_all (G: hyps) (P E M: class) (p r: set): $ G ⇒ r ∊ fseq (trees �
   $ G ⇒ ltr P E M (∀ₒ p) r = tpi P (ltr P E M p (scons ⟨ kc_nz , ∅ ⟩ (lup r))) $;
 
 theorem ltr_eq (G: hyps) (P E M: class) (i j r: set): $ G ⇒ r ∊ fseq (trees ω) $ > $ G ⇒ i ∊ ω $ > $ G ⇒ j ∊ ω $ > 
-  $ G ⇒ ltr P E M (i =ₒ j) r = tapp (tapp E (tbv (fv r i))) (tbv (fv r j)) $;
+  $ G ⇒ ltr P E M (i =ₒ j) r = tapp (tapp E (tbv (r' i))) (tbv (r' j)) $;
 
 theorem ltr_in (G: hyps) (P E M: class) (i j r: set): $ G ⇒ r ∊ fseq (trees ω) $ > $ G ⇒ i ∊ ω $ > $ G ⇒ j ∊ ω $ > 
-  $ G ⇒ ltr P E M (i ∈ₒ j) r = tapp (tapp M (tbv (fv r i))) (tbv (fv r j)) $;
+  $ G ⇒ ltr P E M (i ∈ₒ j) r = tapp (tapp M (tbv (r' i))) (tbv (r' j)) $;
 
 
 
@@ -260,15 +260,15 @@ theorem pset_rels_i (b: blk) (E M: expr):
   $ pset_rels b E M $;
 
 --| Standardness: at a sentence of set theory, the model's value of its Lean form is inhabited exactly when the
---| sentence is true in `(U_1, ∈)`.
+--| sentence is true in `(U₁, ∈)`.
 theorem pset_truth {z: set} (G: hyps) (b: blk) (E M: expr) (u w c: set):
   $ pset_rels b E M $ > $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ c ∊ fm ∅ $ >
-  $ G ⇒ (∃ z (z ∊ dt u (mcv hfin) (lsent b E M c) w ∅) ↔ fv uni (suc ∅) ⊨ c) $;
+  $ G ⇒ (∃ z (z ∊ dt u (mcv hfin) (lsent b E M c) w ∅) ↔ U₁ ⊨ c) $;
 
---| Readback: a sentence of set theory whose Lean form is provable is true in `(U_1, ∈)`.
+--| Readback: a sentence of set theory whose Lean form is provable is true in `(U₁, ∈)`.
 theorem pset_readback (b: blk) (E M T: expr) (c: set):
   $ pset_rels b E M $ > $ _ ⇒ c ∊ fm ∅ $ > $ enc_expr T ≐ lsent b E M c $ > $ inh nil T $ >
-  $ _ ⇒ fv uni (suc ∅) ⊨ c $;
+  $ _ ⇒ U₁ ⊨ c $;
 
 
 -- --------------------------------------------------------------------------
@@ -285,10 +285,10 @@ theorem fsat_all_c {x: set} (G: hyps) (A S P: class): $ G ⇒ isset A $ > $ G �
   $ G ⇒ (⟪ A , S ⊨ ∀ₒ P ⟫ ↔ ∀ x (x ∊ A → ⟪ A , scons x S ⊨ P ⟫)) $;
 
 theorem fsat_eq_c (G: hyps) (A S I J: class): $ G ⇒ isset A $ > $ G ⇒ S ∈ fseq A $ > $ G ⇒ I ∈ ω $ > $ G ⇒ J ∈ ω $ >
-  $ G ⇒ (⟪ A , S ⊨ I =ₒ J ⟫ ↔ fv S I = fv S J) $;
+  $ G ⇒ (⟪ A , S ⊨ I =ₒ J ⟫ ↔ S' I = S' J) $;
 
 theorem fsat_in_c (G: hyps) (A S I J: class): $ G ⇒ isset A $ > $ G ⇒ S ∈ fseq A $ > $ G ⇒ I ∈ ω $ > $ G ⇒ J ∈ ω $ >
-  $ G ⇒ (⟪ A , S ⊨ I ∈ₒ J ⟫ ↔ fv S I ∈ fv S J) $;
+  $ G ⇒ (⟪ A , S ⊨ I ∈ₒ J ⟫ ↔ S' I ∈ S' J) $;
 
 --| A formula is a tree, and its bound on the free variables a number.
 theorem fm_tree (G: hyps) (N C: class): $ G ⇒ C ∈ fm N $ > $ G ⇒ isset N $ > $ G ⇒ N ∈ ω ∧ C ∈ trees ω $;
@@ -307,7 +307,7 @@ theorem fm_in (G: hyps) (N I J: class): $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ >
 --| Class form of `pset_readback`.
 theorem pset_readback_c (b: blk) (E M T: expr) (C: class):
   $ pset_rels b E M $ > $ _ ⇒ C ∈ fm ∅ $ > $ enc_expr T ≐ lsent b E M C $ > $ inh nil T $ >
-  $ _ ⇒ fv uni (suc ∅) ⊨ C $;
+  $ _ ⇒ U₁ ⊨ C $;
 
 
 -- --------------------------------------------------------------------------
@@ -427,7 +427,7 @@ theorem sb_f_r_sub {x: set} (t: set x) (A B C: class x):
 
 theorem fm_sub (G: hyps) (N I J: class): $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ (c_sub I J) ∈ fm N $;
 
-theorem sat_sub (G: hyps) (U S N I J: class) (x1 x2: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ fv S I = x1 $ > $ G ⇒ fv S J = x2 $ >
+theorem sat_sub (G: hyps) (U S N I J: class) (x1 x2: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ S' I = x1 $ > $ G ⇒ S' J = x2 $ >
   $ G ⇒ (⟪ U , S ⊨ c_sub I J ⟫ ↔ r_sub U x1 x2) $;
 
 --| `x` has no elements.
@@ -449,7 +449,7 @@ theorem sb_f_r_empty {x: set} (t: set x) (A B: class x):
 
 theorem fm_empty (G: hyps) (N I: class): $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ (c_empty I) ∈ fm N $;
 
-theorem sat_empty (G: hyps) (U S N I: class) (x1: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ fv S I = x1 $ >
+theorem sat_empty (G: hyps) (U S N I: class) (x1: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ S' I = x1 $ >
   $ G ⇒ (⟪ U , S ⊨ c_empty I ⟫ ↔ r_empty U x1) $;
 
 --| `y = x ∪ {x}`.
@@ -471,7 +471,7 @@ theorem sb_f_r_succ {x: set} (t: set x) (A B C: class x):
 
 theorem fm_succ (G: hyps) (N J I: class): $ G ⇒ N ∈ ω $ > $ G ⇒ J ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ (c_succ J I) ∈ fm N $;
 
-theorem sat_succ (G: hyps) (U S N J I: class) (x1 x2: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ J ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ fv S J = x1 $ > $ G ⇒ fv S I = x2 $ >
+theorem sat_succ (G: hyps) (U S N J I: class) (x1 x2: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ J ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ S' J = x1 $ > $ G ⇒ S' I = x2 $ >
   $ G ⇒ (⟪ U , S ⊨ c_succ J I ⟫ ↔ r_succ U x1 x2) $;
 
 --| `w` is inductive.
@@ -493,7 +493,7 @@ theorem sb_f_r_ind {x: set} (t: set x) (A B: class x):
 
 theorem fm_ind (G: hyps) (N I: class): $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ (c_ind I) ∈ fm N $;
 
-theorem sat_ind (G: hyps) (U S N I: class) (x1: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ fv S I = x1 $ >
+theorem sat_ind (G: hyps) (U S N I: class) (x1: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ S' I = x1 $ >
   $ G ⇒ (⟪ U , S ⊨ c_ind I ⟫ ↔ r_ind U x1) $;
 
 --| `w` is the least inductive set.
@@ -515,7 +515,7 @@ theorem sb_f_r_omega {x: set} (t: set x) (A B: class x):
 
 theorem fm_omega (G: hyps) (N I: class): $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ (c_omega I) ∈ fm N $;
 
-theorem sat_omega (G: hyps) (U S N I: class) (x1: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ fv S I = x1 $ >
+theorem sat_omega (G: hyps) (U S N I: class) (x1: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ S' I = x1 $ >
   $ G ⇒ (⟪ U , S ⊨ c_omega I ⟫ ↔ r_omega U x1) $;
 
 --| `p` is the power set of `w`.
@@ -537,7 +537,7 @@ theorem sb_f_r_pow {x: set} (t: set x) (A B C: class x):
 
 theorem fm_pow (G: hyps) (N I J: class): $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ (c_pow I J) ∈ fm N $;
 
-theorem sat_pow (G: hyps) (U S N I J: class) (x1 x2: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ fv S I = x1 $ > $ G ⇒ fv S J = x2 $ >
+theorem sat_pow (G: hyps) (U S N I J: class) (x1 x2: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ S' I = x1 $ > $ G ⇒ S' J = x2 $ >
   $ G ⇒ (⟪ U , S ⊨ c_pow I J ⟫ ↔ r_pow U x1 x2) $;
 
 --| `c = {a, b}`.
@@ -559,7 +559,7 @@ theorem sb_f_r_pair {x: set} (t: set x) (A B C D: class x):
 
 theorem fm_pair (G: hyps) (N K I J: class): $ G ⇒ N ∈ ω $ > $ G ⇒ K ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ (c_pair K I J) ∈ fm N $;
 
-theorem sat_pair (G: hyps) (U S N K I J: class) (x1 x2 x3: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ K ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ fv S K = x1 $ > $ G ⇒ fv S I = x2 $ > $ G ⇒ fv S J = x3 $ >
+theorem sat_pair (G: hyps) (U S N K I J: class) (x1 x2 x3: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ K ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ S' K = x1 $ > $ G ⇒ S' I = x2 $ > $ G ⇒ S' J = x3 $ >
   $ G ⇒ (⟪ U , S ⊨ c_pair K I J ⟫ ↔ r_pair U x1 x2 x3) $;
 
 --| `o = ⟨a, b⟩` (Kuratowski).
@@ -581,7 +581,7 @@ theorem sb_f_r_opair {x: set} (t: set x) (A B C D: class x):
 
 theorem fm_opair (G: hyps) (N K I J: class): $ G ⇒ N ∈ ω $ > $ G ⇒ K ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ (c_opair K I J) ∈ fm N $;
 
-theorem sat_opair (G: hyps) (U S N K I J: class) (x1 x2 x3: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ K ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ fv S K = x1 $ > $ G ⇒ fv S I = x2 $ > $ G ⇒ fv S J = x3 $ >
+theorem sat_opair (G: hyps) (U S N K I J: class) (x1 x2 x3: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ K ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ S' K = x1 $ > $ G ⇒ S' I = x2 $ > $ G ⇒ S' J = x3 $ >
   $ G ⇒ (⟪ U , S ⊨ c_opair K I J ⟫ ↔ r_opair U x1 x2 x3) $;
 
 --| `f` has a one-to-one map from `A` into `B` among its elements: every element of `A` has a pair in `f` with an
@@ -604,7 +604,7 @@ theorem sb_f_r_inj {x: set} (t: set x) (A B C D: class x):
 
 theorem fm_inj (G: hyps) (N K I J: class): $ G ⇒ N ∈ ω $ > $ G ⇒ K ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ (c_inj K I J) ∈ fm N $;
 
-theorem sat_inj (G: hyps) (U S N K I J: class) (x1 x2 x3: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ K ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ fv S K = x1 $ > $ G ⇒ fv S I = x2 $ > $ G ⇒ fv S J = x3 $ >
+theorem sat_inj (G: hyps) (U S N K I J: class) (x1 x2 x3: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ K ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ S' K = x1 $ > $ G ⇒ S' I = x2 $ > $ G ⇒ S' J = x3 $ >
   $ G ⇒ (⟪ U , S ⊨ c_inj K I J ⟫ ↔ r_inj U x1 x2 x3) $;
 
 --| The continuum hypothesis: for `ω` and its power set `p`, every subset `a` of `p` maps one-to-one into `ω`, or `p`
@@ -627,12 +627,12 @@ theorem ch_fm: $ _ ⇒ ch_code ∈ fm ∅ $;
 --| It is true in `(U, ∈)` exactly when the continuum hypothesis relativized to `U` holds.
 theorem ch_sat (G: hyps) (U: class): $ G ⇒ isset U $ > $ G ⇒ (U ⊨ ch_code ↔ r_ch U) $;
 
---| If Lean proves the continuum hypothesis of its pre-sets, the continuum hypothesis holds in `U_1`.
+--| If Lean proves the continuum hypothesis of its pre-sets, the continuum hypothesis holds in `U₁`.
 theorem ch_readback (b: blk) (E M T: expr):
   $ pset_rels b E M $ > $ enc_expr T ≐ lsent b E M ch_code $ > $ inh nil T $ >
-  $ _ ⇒ r_ch (fv uni (suc ∅)) $;
+  $ _ ⇒ r_ch U₁ $;
 
---| If Lean refutes it, it fails in `U_1`.
+--| If Lean refutes it, it fails in `U₁`.
 theorem nch_readback (b: blk) (E M T: expr):
   $ pset_rels b E M $ > $ enc_expr T ≐ lsent b E M (¬ₒ ch_code) $ > $ inh nil T $ >
-  $ _ ⇒ ¬ r_ch (fv uni (suc ∅)) $;
+  $ _ ⇒ ¬ r_ch U₁ $;

@@ -49,12 +49,12 @@ theorem nsc_inj (G: hyps) (y y2: set): $ G ⇒ nsc y = nsc y2 $ > $ G ⇒ y = y2
 --| The recursion's equations.
 theorem nnf_functional (G: hyps): $ G ⇒ functional nnf $;
 theorem nnf_cdm (G: hyps): $ G ⇒ cdm nnf = ω $;
-theorem nnf_zero (G: hyps): $ G ⇒ fv nnf ∅ = nzr $;
-theorem nnf_suc (G: hyps) (n: set): $ G ⇒ n ∊ ω $ > $ G ⇒ fv nnf (suc n) = nsc (fv nnf n) $;
+theorem nnf_zero (G: hyps): $ G ⇒ nnf' ∅ = nzr $;
+theorem nnf_suc (G: hyps) (n: set): $ G ⇒ n ∊ ω $ > $ G ⇒ nnf' (suc n) = nsc (nnf' n) $;
 --| Nat's value: introduction, elimination, induction.
-theorem nnat_fv (G: hyps) (n: set): $ G ⇒ n ∊ ω $ > $ G ⇒ fv nnf n ∈ nnat $;
+theorem nnat_fv (G: hyps) (n: set): $ G ⇒ n ∊ ω $ > $ G ⇒ nnf' n ∈ nnat $;
 --| Class form of `nnat_fv`.
-theorem nnat_fv_c (G: hyps) (A: class): $ G ⇒ A ∈ ω $ > $ G ⇒ fv nnf A ∈ nnat $;
+theorem nnat_fv_c (G: hyps) (A: class): $ G ⇒ A ∈ ω $ > $ G ⇒ nnf' A ∈ nnat $;
 theorem nnat_zero (G: hyps): $ G ⇒ nzr ∈ nnat $;
 theorem nnat_suc (G: hyps) (y: set): $ G ⇒ y ∊ nnat $ > $ G ⇒ nsc y ∈ nnat $;
 theorem nnat_cases {x: set} (G: hyps x) (y: set):
@@ -67,7 +67,7 @@ theorem nnat_ind {x y: set} (G: hyps) (p: fml y):
   $ G ⇒ nnat ⊆ {y | p} $;
 --| Nat's value is in the universe `U_1` (E2 at Nat), hence in every
 --| admissible universe.
-theorem nnat_uni (G: hyps): $ G ⇒ nnat ∈ fv uni (suc ∅) $;
+theorem nnat_uni (G: hyps): $ G ⇒ nnat ∈ U₁ $;
 theorem nnat_u (G: hyps) (u: set): $ G ⇒ uadm u $ > $ G ⇒ nnat ∈ u $;
 theorem nnat_sub_u (G: hyps) (u: set): $ G ⇒ uadm u $ > $ G ⇒ nnat ⊆ u $;
 
@@ -120,7 +120,7 @@ def ept0: class = $ ⟨ ∅ , ⟨ ∅ , ⟨ ∅ , ∅ ⟩ ⟩ ⟩ $;
 --| The paths of `succ`'s type at `R`: one field, an element `x` of `#0`'s
 --| value `R(0)`, with its own telescope's one path.
 def nk1p (U R: class) (.x .z: set): class =
-  $ {z | ∃ x (x ∊ fv R ∅ ∧ x ∊ U ∧ z = ⟨ scons x ∅ , ⟨ scons x ∅ , ⟨ scons (csn ept0) ∅ , ∅ ⟩ ⟩ ⟩)} $;
+  $ {z | ∃ x (x ∊ R' ∅ ∧ x ∊ U ∧ z = ⟨ scons x ∅ , ⟨ scons x ∅ , ⟨ scons (csn ept0) ∅ , ∅ ⟩ ⟩ ⟩)} $;
 
 theorem nat_etel_F (G: hyps) (M W R: class) (u: set):
   $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ etel u (dnf u M) tn_F W R = csn ept0 $;
@@ -169,41 +169,41 @@ theorem ept0_intro (G: hyps) (e: set): $ G ⇒ e = ∅ $ > $ G ⇒ ⟨ e , ⟨ e
 --| The motive and the minors are in their spaces.
 --| @freshen G x
 theorem nat_imots {x: set} (G: hyps) (M V: class) (u w m: set):
-  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (uni' V) $ >
   $ G ⇒ scons m ∅ ∈ imots u (dnf u M) tr_nat_D w ∅ V $;
 --| @freshen G x
 --| @freshen G y
 --| @freshen G h
 theorem nat_imins {x y h: set} (G: hyps) (M V: class) (u w m z ms: set):
-  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (uni' V) $ >
   $ G ⇒ z ∊ ap m nzr $ > $ G ⇒ ms ∊ cpi y nnat (cpi h (ap m y) (ap m (nsc y))) $ >
   $ G ⇒ scons ms (scons z ∅) ∈ imins u (dnf u M) tr_nat_D w ∅ (scons m ∅) $;
 --| The fold: in the motive, `z` at `nzr`, `ms` at `nsc y`.
 --| @freshen G x
 --| @freshen G h
 theorem nat_fold_mem {x h: set} (G: hyps) (M V: class) (u w m z ms y: set):
-  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (uni' V) $ >
   $ G ⇒ z ∊ ap m nzr $ > $ G ⇒ ms ∊ cpi x nnat (cpi h (ap m x) (ap m (nsc x))) $ > $ G ⇒ y ∊ nnat $ >
-  $ G ⇒ fv (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅))) ⟨ ∅ , ⟨ ∅ , y ⟩ ⟩ ∈ ap m y $;
+  $ G ⇒ (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅)))' ⟨ ∅ , ⟨ ∅ , y ⟩ ⟩ ∈ ap m y $;
 theorem nat_fold_zero {x h: set} (G: hyps x h) (M V: class) (u w m z ms: set):
-  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (uni' V) $ >
   $ G ⇒ z ∊ ap m nzr $ > $ G ⇒ ms ∊ cpi x nnat (cpi h (ap m x) (ap m (nsc x))) $ >
-  $ G ⇒ fv (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅))) ⟨ ∅ , ⟨ ∅ , nzr ⟩ ⟩ = z $;
+  $ G ⇒ (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅)))' ⟨ ∅ , ⟨ ∅ , nzr ⟩ ⟩ = z $;
 --| @freshen G x
 --| @freshen G h
 theorem nat_fold_succ {x h: set} (G: hyps) (M V: class) (u w m z ms y: set):
-  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (uni' V) $ >
   $ G ⇒ z ∊ ap m nzr $ > $ G ⇒ ms ∊ cpi x nnat (cpi h (ap m x) (ap m (nsc x))) $ > $ G ⇒ y ∊ nnat $ >
-  $ G ⇒ fv (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅))) ⟨ ∅ , ⟨ ∅ , nsc y ⟩ ⟩ =
-      ap (ap ms y) (fv (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅))) ⟨ ∅ , ⟨ ∅ , y ⟩ ⟩) $;
+  $ G ⇒ (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅)))' ⟨ ∅ , ⟨ ∅ , nsc y ⟩ ⟩ =
+      ap (ap ms y) ((ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅)))' ⟨ ∅ , ⟨ ∅ , y ⟩ ⟩) $;
 --| The recursor's value applied to the motive, the minors and a major.
 --| @freshen G x
 --| @freshen G h
 theorem nat_irc_ap {x h: set} (G: hyps) (M V: class) (u w m z ms y: set):
-  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (fv uni V) $ >
+  $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ > $ G ⇒ m ∊ cpi x nnat (uni' V) $ >
   $ G ⇒ z ∊ ap m nzr $ > $ G ⇒ ms ∊ cpi x nnat (cpi h (ap m x) (ap m (nsc x))) $ > $ G ⇒ y ∊ nnat $ >
   $ G ⇒ ap (ap (ap (ap (irc u (dnf u M) tr_nat_D ∅ V w) m) z) ms) y =
-      fv (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅))) ⟨ ∅ , ⟨ ∅ , y ⟩ ⟩ $;
+      (ifold u (dnf u M) tr_nat_D w ∅ (scons ms (scons z ∅)))' ⟨ ∅ , ⟨ ∅ , y ⟩ ⟩ $;
 --| The recursor's value is in its type's (`Nat.rec`'s type, as sets).
 --| @freshen G m
 --| @freshen G x
@@ -214,7 +214,7 @@ theorem nat_irc_ap {x h: set} (G: hyps) (M V: class) (u w m z ms y: set):
 theorem nat_irc_mem {m x z k y h: set} (G: hyps) (M V: class) (u w: set):
   $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ V ∈ ω $ >
   $ G ⇒ irc u (dnf u M) tr_nat_D ∅ V w ∈
-      cpi m (cpi x nnat (fv uni V)) (cpi z (ap m nzr)
+      cpi m (cpi x nnat (uni' V)) (cpi z (ap m nzr)
         (cpi k (cpi y nnat (cpi h (ap m y) (ap m (nsc y)))) (cpi y nnat (ap m y)))) $;
 
 -- --------------------------------------------------------------------------
@@ -255,7 +255,7 @@ theorem dt_nat_rec_ty {m x z k y h: set} (G: hyps) (H W R: class) (v: lvl) (u: s
   $ G ⇒ dt u (mcv H) (enc_expr (pi (pi nat_ty (srt v)) (pi (app (bvar nz) nat_zero)
       (pi (pi nat_ty (pi (app (bvar n2) (bvar nz)) (app (bvar n3) (app nat_succ (bvar n1)))))
         (pi nat_ty (app (bvar n3) (bvar nz))))))) W R =
-      cpi m (cpi x nnat (fv uni (lv (enc_lvl v) W))) (cpi z (ap m nzr)
+      cpi m (cpi x nnat (uni' (lv (enc_lvl v) W))) (cpi z (ap m nzr)
         (cpi k (cpi y nnat (cpi h (ap m y) (ap m (nsc y)))) (cpi y nnat (ap m y)))) $;
 
 -- --------------------------------------------------------------------------

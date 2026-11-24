@@ -51,7 +51,7 @@ theorem cgr3_functional {k s v: set} (G: hyps k s v) (B: class k s v):
   $ G ⇒ functional (cgr3 k s v B) $;
 theorem fv_cgr3 {k s v: set} (G: hyps k s v) (B: class k s v) (a b c: set):
   $ G ⇒ isset (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ >
-  $ G ⇒ fv (cgr3 k s v B) ⟨ a , ⟨ b , c ⟩ ⟩ = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $;
+  $ G ⇒ (cgr3 k s v B)' ⟨ a , ⟨ b , c ⟩ ⟩ = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $;
 --| @congr
 theorem cgr3_congr {k s v: set} (B D: class k s v): $ B ≐ D $ > $ cgr3 k s v B ≐ cgr3 k s v D $;
 --| Equal bodies under hypotheses give equal graphs (the quantifiers in the order
@@ -170,7 +170,7 @@ theorem trees_universe (G: hyps) (U: class) (l: set):
 
 --| `H` extended to the nodes whose children are in its domain, by `F`.
 def tstep (L F H: class) (.k .s .z: set): class =
-  $ {z | ∃ k ∃ s (z = ⟨ ⟨ k , s ⟩ , fv F ⟨ k , ⟨ s , ccom H s ⟩ ⟩ ⟩ ∧ k ∊ L ∧ s ∊ fseq (cdm H))} $;
+  $ {z | ∃ k ∃ s (z = ⟨ ⟨ k , s ⟩ , F' ⟨ k , ⟨ s , ccom H s ⟩ ⟩ ⟩ ∧ k ∊ L ∧ s ∊ fseq (cdm H))} $;
 
 --| @congr
 theorem tstep_congr (A B C D E F: class):
@@ -180,17 +180,17 @@ theorem sb_c_tstep {x: set} (t: set x) (A B C: class x):
   $ (⟦ x / t ⟧ (tstep A B C)) ≐ tstep (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
 theorem tstep_mem (G: hyps) (L F H: class) (k s: set):
   $ G ⇒ k ∊ L $ > $ G ⇒ s ∊ fseq (cdm H) $ >
-  $ G ⇒ ⟨ ⟨ k , s ⟩ , fv F ⟨ k , ⟨ s , ccom H s ⟩ ⟩ ⟩ ∈ tstep L F H $;
+  $ G ⇒ ⟨ ⟨ k , s ⟩ , F' ⟨ k , ⟨ s , ccom H s ⟩ ⟩ ⟩ ∈ tstep L F H $;
 theorem tstep_elim {k s: set} (G: hyps k s) (L F H: class) (z: set):
   $ G ⇒ z ∊ tstep L F H $ >
-  $ G ⇒ ∃ k ∃ s (z = ⟨ ⟨ k , s ⟩ , fv F ⟨ k , ⟨ s , ccom H s ⟩ ⟩ ⟩ ∧ k ∊ L ∧ s ∊ fseq (cdm H)) $;
+  $ G ⇒ ∃ k ∃ s (z = ⟨ ⟨ k , s ⟩ , F' ⟨ k , ⟨ s , ccom H s ⟩ ⟩ ⟩ ∧ k ∊ L ∧ s ∊ fseq (cdm H)) $;
 theorem tstep_functional (G: hyps) (L F H: class): $ G ⇒ functional (tstep L F H) $;
 theorem tstep_rel (G: hyps) (L F H: class): $ G ⇒ rel (tstep L F H) $;
 theorem tstep_cdm (G: hyps) (L F H: class):
   $ G ⇒ functional F $ > $ G ⇒ cdm (tstep L F H) = L × fseq (cdm H) $;
 theorem tstep_fv (G: hyps) (L F H: class) (k s: set):
   $ G ⇒ functional F $ > $ G ⇒ k ∊ L $ > $ G ⇒ s ∊ fseq (cdm H) $ >
-  $ G ⇒ fv (tstep L F H) ⟨ k , s ⟩ = fv F ⟨ k , ⟨ s , ccom H s ⟩ ⟩ $;
+  $ G ⇒ (tstep L F H)' ⟨ k , s ⟩ = F' ⟨ k , ⟨ s , ccom H s ⟩ ⟩ $;
 theorem tstep_set (G: hyps) (L F H: class):
   $ G ⇒ functional F $ > $ G ⇒ isset L $ > $ G ⇒ isset H $ > $ G ⇒ isset (tstep L F H) $;
 --| A larger function gives a larger extension.
@@ -204,7 +204,7 @@ theorem tstep_mono (G: hyps) (L F H K: class):
 --| The stages: at `a`, `tstep` applied to the union of the earlier stages.
 def tstg (L F: class) (.g: set): class = $ trec (cgr g (tstep L F (⋃ (crn g)))) $;
 --| The union of the stages below `A`.
-def tstgb (L F A: class): class = $ ⋃ (crn (cres (tstg L F) A)) $;
+def tstgb (L F A: class): class = $ ⋃ (crn (tstg L F ↾ A)) $;
 
 --| @congr
 theorem tstg_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ tstg A C ≐ tstg B D $;
@@ -218,34 +218,34 @@ theorem tstgb_congr (A B C D E F: class):
 theorem sb_c_tstgb {x: set} (t: set x) (A B C: class x):
   $ (⟦ x / t ⟧ (tstgb A B C)) ≐ tstgb (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
 theorem tstg_functional (G: hyps) (L F: class): $ G ⇒ functional (tstg L F) $;
-theorem tstg_set (G: hyps) (L F: class) (a: set): $ G ⇒ isset (fv (tstg L F) a) $;
+theorem tstg_set (G: hyps) (L F: class) (a: set): $ G ⇒ isset ((tstg L F)' a) $;
 theorem tstgb_intro (G: hyps) (L F: class) (a b c: set):
-  $ G ⇒ ord a $ > $ G ⇒ b ∊ a $ > $ G ⇒ c ∊ fv (tstg L F) b $ > $ G ⇒ c ∊ tstgb L F a $;
+  $ G ⇒ ord a $ > $ G ⇒ b ∊ a $ > $ G ⇒ c ∊ (tstg L F)' b $ > $ G ⇒ c ∊ tstgb L F a $;
 theorem tstgb_elim {b: set} (G: hyps b) (L F: class) (a c: set):
-  $ G ⇒ c ∊ tstgb L F a $ > $ G ⇒ ∃ b (b ∊ a ∧ c ∊ fv (tstg L F) b) $;
+  $ G ⇒ c ∊ tstgb L F a $ > $ G ⇒ ∃ b (b ∊ a ∧ c ∊ (tstg L F)' b) $;
 theorem tstep_eq_arg (G: hyps) (L F H K: class): $ G ⇒ H = K $ > $ G ⇒ tstep L F H = tstep L F K $;
 --| The recursion equation of the stages.
 theorem tstg_eq (G: hyps) (F: class) (l a: set):
-  $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ fv (tstg l F) a = tstep l F (tstgb l F a) $;
+  $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ (tstg l F)' a = tstep l F (tstgb l F a) $;
 --| Each stage is a function (a `tstep`), and the stages increase (by
 --| transfinite induction: `tstep_mono` at the union of the earlier stages).
 theorem tstg_val_functional (G: hyps) (F: class) (l a: set):
-  $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ functional (fv (tstg l F) a) $;
+  $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ functional ((tstg l F)' a) $;
 theorem tstgb_mono (G: hyps) (L F C D: class): $ G ⇒ C ⊆ D $ > $ G ⇒ tstgb L F C ⊆ tstgb L F D $;
 theorem tstg_val_chain (G: hyps) (F: class) (l a b: set):
   $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ ord b $ > $ G ⇒ a ⊆ b $ >
-  $ G ⇒ fv (tstg l F) a ⊆ fv (tstg l F) b $;
+  $ G ⇒ (tstg l F)' a ⊆ (tstg l F)' b $;
 --| The domain of a stage is the stage of the trees.
 theorem tstg_val_cdm {x: set} (G: hyps x) (F: class) (l a: set):
   $ G ⇒ functional F $ > $ G ⇒ ord a $ >
-  $ G ⇒ cdm (fv (tstg l F) a) = fv (stg x (l × fseq x)) a $;
+  $ G ⇒ cdm ((tstg l F)' a) = (stg x (l × fseq x))' a $;
 
 -- --------------------------------------------------------------------------
 -- Structural recursion
 -- --------------------------------------------------------------------------
 
 --| The function defined by structural recursion on `trees L` with step `F`.
-def trc (L F: class) (.a .z: set): class = $ {z | ∃ a (ord a ∧ z ∊ fv (tstg L F) a)} $;
+def trc (L F: class) (.a .z: set): class = $ {z | ∃ a (ord a ∧ z ∊ (tstg L F)' a)} $;
 
 --| @congr
 theorem trc_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ trc A C ≐ trc B D $;
@@ -255,10 +255,10 @@ theorem trc_eq (G: hyps) (A B C D: class):
 theorem sb_c_trc {x: set} (t: set x) (A B: class x):
   $ (⟦ x / t ⟧ (trc A B)) ≐ trc (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
 theorem trc_intro (G: hyps) (L F: class) (a c: set):
-  $ G ⇒ ord a $ > $ G ⇒ c ∊ fv (tstg L F) a $ > $ G ⇒ c ∊ trc L F $;
+  $ G ⇒ ord a $ > $ G ⇒ c ∊ (tstg L F)' a $ > $ G ⇒ c ∊ trc L F $;
 theorem trc_elim {a: set} (G: hyps a) (L F: class) (c: set):
-  $ G ⇒ c ∊ trc L F $ > $ G ⇒ ∃ a (ord a ∧ c ∊ fv (tstg L F) a) $;
-theorem tstg_subset_trc (G: hyps) (L F: class) (a: set): $ G ⇒ ord a $ > $ G ⇒ fv (tstg L F) a ⊆ trc L F $;
+  $ G ⇒ c ∊ trc L F $ > $ G ⇒ ∃ a (ord a ∧ c ∊ (tstg L F)' a) $;
+theorem tstg_subset_trc (G: hyps) (L F: class) (a: set): $ G ⇒ ord a $ > $ G ⇒ (tstg L F)' a ⊆ trc L F $;
 theorem trc_functional (G: hyps) (F: class) (l: set):
   $ G ⇒ functional F $ > $ G ⇒ functional (trc l F) $;
 --| Class form of `trc_functional`.
@@ -274,22 +274,22 @@ theorem trc_cdm_c (G: hyps) (F L: class):
   $ G ⇒ isset L $ > $ G ⇒ functional F $ > $ G ⇒ cdm (trc L F) = trees L $;
 --| A stage's value at a tree is the recursion's value.
 theorem trc_fv (G: hyps) (F: class) (l a c: set):
-  $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ c ∊ cdm (fv (tstg l F) a) $ >
-  $ G ⇒ fv (trc l F) c = fv (fv (tstg l F) a) c $;
+  $ G ⇒ functional F $ > $ G ⇒ ord a $ > $ G ⇒ c ∊ cdm ((tstg l F)' a) $ >
+  $ G ⇒ (trc l F)' c = ((tstg l F)' a)' c $;
 --| The recursion equation.
 theorem trc_node (G: hyps) (F: class) (l k s: set):
   $ G ⇒ functional F $ > $ G ⇒ k ∊ l $ > $ G ⇒ s ∊ fseq (trees l) $ >
-  $ G ⇒ fv (trc l F) ⟨ k , s ⟩ = fv F ⟨ k , ⟨ s , ccom (trc l F) s ⟩ ⟩ $;
+  $ G ⇒ (trc l F)' ⟨ k , s ⟩ = F' ⟨ k , ⟨ s , ccom (trc l F) s ⟩ ⟩ $;
 --| Class form of `trc_node`.
 theorem trc_node_c (G: hyps) (F L: class) (k s: set):
   $ G ⇒ isset L $ > $ G ⇒ functional F $ > $ G ⇒ k ∊ L $ > $ G ⇒ s ∊ fseq (trees L) $ >
-  $ G ⇒ fv (trc L F) ⟨ k , s ⟩ = fv F ⟨ k , ⟨ s , ccom (trc L F) s ⟩ ⟩ $;
+  $ G ⇒ (trc L F)' ⟨ k , s ⟩ = F' ⟨ k , ⟨ s , ccom (trc L F) s ⟩ ⟩ $;
 --| @freshen G y
-theorem ccom_eq_vals (G: hyps) {y: set} (H K: class) (f: set): $ G ⇒ functional H $ > $ G ⇒ functional K $ > $ G ⇒ crn f ⊆ cdm H $ > $ G ⇒ crn f ⊆ cdm K $ > $ G ⇒ ∀ y (y ∊ crn f → fv H y = fv K y) $ > $ G ⇒ ccom H f = ccom K f $;
+theorem ccom_eq_vals (G: hyps) {y: set} (H K: class) (f: set): $ G ⇒ functional H $ > $ G ⇒ functional K $ > $ G ⇒ crn f ⊆ cdm H $ > $ G ⇒ crn f ⊆ cdm K $ > $ G ⇒ ∀ y (y ∊ crn f → H' y = K' y) $ > $ G ⇒ ccom H f = ccom K f $;
 --| Any function on the trees satisfying the recursion equation is `trc l F`.
 --| @freshen G k
 --| @freshen G s
 theorem trc_unique (G: hyps) {k s: set} (F: class) (l h: set):
   $ G ⇒ functional F $ > $ G ⇒ functional h $ > $ G ⇒ rel h $ > $ G ⇒ cdm h = trees l $ >
-  $ G ⇒ ∀ k ∀ s (k ∊ l → s ∊ fseq (trees l) → fv h ⟨ k , s ⟩ = fv F ⟨ k , ⟨ s , ccom h s ⟩ ⟩) $ >
+  $ G ⇒ ∀ k ∀ s (k ∊ l → s ∊ fseq (trees l) → h' ⟨ k , s ⟩ = F' ⟨ k , ⟨ s , ccom h s ⟩ ⟩) $ >
   $ G ⇒ h = trc l F $;
