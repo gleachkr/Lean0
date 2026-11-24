@@ -17,15 +17,21 @@ notation pi (A B: expr): expr = ($Π$:20) A ($.$:0) B;
 --| `mk : (α : Sort 1) → (α → PSet) → PSet`.
 def pset_D (b: blk): ind =
   $ ind_mk b nil (tcons (srt (ls (ls lz))) (ccons (pi (srt (ls lz)) (pi (pi (bvar nz) (bvar n2)) (bvar n2))) cnil) tnil) nil $;
+--| The type of pre-sets, Lean's `PSet.{0}`: the type of the block `pset_D b`.
 def pset (b: blk): expr = $ ind_ty (pset_D b) nz $;
+--| The constructor of pre-sets, Lean's `PSet.mk`.
 def pset_mk (b: blk): expr = $ ind_ctor (pset_D b) nz nz $;
 
---| `False` as `∀ p : Prop, p`, `¬ A`, and `∃ x : A, B` as `¬ ∀ x : A, ¬ B` (`B` under the binder).
+--| Lean's `False`, as `∀ p : Prop, p`.
 def lfalse: expr = $ Π Prop . # 0 $;
+--| Lean's `¬ A`, as `A → False`. With `lfalse` and `lex` it keeps the Lean sentences in the fragment of `Π` alone.
 def lnot (A: expr): expr = $ Π A . lfalse $;
+--| Lean's `∃ x : A, B`, as `¬ ∀ x : A, ¬ B`. `B` is under the binder, and under one more binder than it looks: the
+--| inner `lnot` is a `Π` too, so `A`'s variable is `#0` in `B`.
 def lex (A B: expr): expr = $ lnot (Π A . lnot B) $;
 
---| `E (mk α A) (mk β B) → ∀ a, ∃ b, E (A a) (B b)`
+--| The first characterization of `PSet.Equiv`, as a closed Lean proposition about a relation `E`: `E (mk α A) (mk β B)
+--| → ∀ a, ∃ b, E (A a) (B b)`, for all `α`, `A`, `β`, `B`.
 def pset_e1 (b: blk) (E: expr): expr =
   $ Π Sort (ls lz) .
       Π (Π # 0 . pset b) .
@@ -33,7 +39,7 @@ def pset_e1 (b: blk) (E: expr): expr =
       Π (Π # 0 . pset b) .
       Π E @ (pset_mk b @ # 3 @ # 2) @ (pset_mk b @ # 1 @ # 0) .
       Π # 4 . lex (# 3) (E @ (# 5 @ # 1) @ (# 3 @ # 0)) $;
---| `E (mk α A) (mk β B) → ∀ b, ∃ a, E (A a) (B b)`
+--| The second characterization of `PSet.Equiv`: `E (mk α A) (mk β B) → ∀ b, ∃ a, E (A a) (B b)`.
 def pset_e2 (b: blk) (E: expr): expr =
   $ Π Sort (ls lz) .
       Π (Π # 0 . pset b) .
@@ -41,7 +47,8 @@ def pset_e2 (b: blk) (E: expr): expr =
       Π (Π # 0 . pset b) .
       Π E @ (pset_mk b @ # 3 @ # 2) @ (pset_mk b @ # 1 @ # 0) .
       Π # 2 . lex (# 5) (E @ (# 5 @ # 0) @ (# 3 @ # 1)) $;
---| `(∀ a, ∃ b, E (A a) (B b)) → (∀ b, ∃ a, E (A a) (B b)) → E (mk α A) (mk β B)`
+--| The third characterization of `PSet.Equiv`, the converse of the first two: `(∀ a, ∃ b, E (A a) (B b)) → (∀ b, ∃ a, E
+--| (A a) (B b)) → E (mk α A) (mk β B)`.
 def pset_e3 (b: blk) (E: expr): expr =
   $ Π Sort (ls lz) .
       Π (Π # 0 . pset b) .
@@ -49,13 +56,14 @@ def pset_e3 (b: blk) (E: expr): expr =
       Π (Π # 0 . pset b) .
       Π (Π # 3 . lex (# 2) (E @ (# 4 @ # 1) @ (# 2 @ # 0))) .
       Π (Π # 2 . lex (# 5) (E @ (# 5 @ # 0) @ (# 3 @ # 1))) . E @ (pset_mk b @ # 5 @ # 4) @ (pset_mk b @ # 3 @ # 2) $;
---| `M x (mk β B) → ∃ b, E x (B b)`
+--| The first characterization of `PSet.Mem`, as a closed Lean proposition about relations `E` and `M`: `M x (mk β B) →
+--| ∃ b, E x (B b)`.
 def pset_m1 (b: blk) (E M: expr): expr =
   $ Π pset b .
       Π Sort (ls lz) .
       Π (Π # 0 . pset b) .
       Π M @ # 2 @ (pset_mk b @ # 1 @ # 0) . lex (# 2) (E @ # 4 @ (# 2 @ # 0)) $;
---| `∀ b, E x (B b) → M x (mk β B)`
+--| The second characterization of `PSet.Mem`, the converse: `∀ b, E x (B b) → M x (mk β B)`.
 def pset_m2 (b: blk) (E M: expr): expr =
   $ Π pset b .
       Π Sort (ls lz) .
@@ -68,11 +76,12 @@ def pset_m2 (b: blk) (E M: expr): expr =
 -- The values and the collapse: definitions
 -- --------------------------------------------------------------------------
 
---| The value of the type of pre-sets in the universe `U` at the level valuation `W`.
+--| The pre-sets of the model: the value of the type `pset b` in the universe `U` at the level valuation `W`.
 def psv (U W: class) (b: blk): class = $ dt U (mcv hfin) (enc_expr (pset b)) W ∅ $;
---| The value of the constructor of pre-sets.
+--| The value of the constructor `pset_mk b` in the universe `U` at the level valuation `W`: a function of an index type
+--| and a family of pre-sets.
 def pmk (U W: class) (b: blk): class = $ dt U (mcv hfin) (enc_expr (pset_mk b)) W ∅ $;
---| The value of a closed term.
+--| The value of a closed term `e` in the universe `U` at the level valuation `W`.
 def cval (U W: class) (e: expr): class = $ dt U (mcv hfin) (enc_expr e) W ∅ $;
 
 --| One step of the collapse of the points over `X` (`0 :: i :: f` with `i` in `U₁` and `f` from `i` into `X`), on a graph
@@ -91,7 +100,8 @@ def plf (X: class) (.c: set): class = $ lfp c (pcop X c) $;
 theorem plf_congr (A B: class): $ A ≐ B $ > $ plf A ≐ plf B $;
 --| @rewrite
 theorem sb_c_plf {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (plf A)) ≐ plf (⟦ x / t ⟧ A) $;
---| The collapse of the pre-sets.
+--| The collapse of the pre-sets of the model, a function from `psv U W b` onto `U₁`: a pre-set `mk i f` goes to the set
+--| of the collapses of the `f n`, for `n` in `i` (`pcol_mk`, `pcol_onto`).
 def pcol (U W: class) (b: blk): class = $ plf (psv U W b) $;
 
 

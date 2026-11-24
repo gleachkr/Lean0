@@ -56,6 +56,7 @@ theorem lrel_closed_sem (G: hyps) {i: set} (M: class) (u w t1 t2 r r2: set):
   $ G ⇒ ra_closed t1 t2 ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ r2 ∊ fseq u $ >
   $ G ⇒ ∀ i (i ∊ nvf' t1 → r' i = r2' i) $ >
   $ G ⇒ dt u M t2 w r = dt u M t2 w r2 $;
+--| The value of a term closed at `k` depends only on the first `k` entries of the valuation.
 --| @freshen G i
 theorem closed_den (G: hyps) {i: set} (M: class) (k: nat) (e: expr) (u w r r2: set):
   $ closed k e $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ r2 ∊ fseq u $ >
@@ -84,6 +85,8 @@ theorem lrel_lift_sem (G: hyps) (M: class) (u w t1 t2 t3 t4 p q s: set):
   $ G ⇒ p ∊ fseq u $ > $ G ⇒ cdm p = nvf' t2 $ > $ G ⇒ q ∊ fseq u $ > $ G ⇒ cdm q = nvf' t1 $ >
   $ G ⇒ s ∊ fseq u $ >
   $ G ⇒ dt u M t4 w (p ++ q ++ s) = dt u M t3 w (p ++ s) $;
+--| Lifting against the denotation: the value of `e` lifted by `n` at the cutoff `k` is the value of `e` with the `n`
+--| entries after the first `k` dropped from the valuation.
 theorem lift_den (G: hyps) (M: class) (n k: nat) (e e2: expr) (u w p q s: set):
   $ lift n k e e2 $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ p ∊ fseq u $ > $ G ⇒ cdm p = nvf' (enc_nat k) $ >
@@ -121,6 +124,8 @@ theorem lrel_inst_sem (G: hyps) (M: class) (u w t1 t2 t3 t4 p s: set):
   $ G ⇒ p ∊ fseq u $ > $ G ⇒ cdm p = nvf' t1 $ > $ G ⇒ s ∊ fseq u $ >
   $ G ⇒ dt u M t3 w s ∈ u $ >
   $ G ⇒ dt u M t4 w (p ++ s) = dt u M t2 w (p ++ scons (dt u M t3 w s) s) $;
+--| Instantiation against the denotation: the value of `e` with `a` for the variable `k` is the value of `e` at the
+--| valuation with the value of `a` put in at position `k`.
 theorem inst_den (G: hyps) (M: class) (k: nat) (e a e2: expr) (u w p s: set):
   $ inst k e a e2 $ > $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ >
   $ G ⇒ p ∊ fseq u $ > $ G ⇒ cdm p = nvf' (enc_nat k) $ > $ G ⇒ s ∊ fseq u $ >
@@ -155,6 +160,7 @@ theorem inst0_den_c (G: hyps) (M W S: class) (e a e2: expr) (u: set):
 theorem lrel_lookup_sem (G: hyps) (M: class) (u w t1 t2 t3 r: set):
   $ G ⇒ ra_lookup t1 t2 t3 ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ sat u M t1 w $ >
   $ G ⇒ r' nvf' t2 ∈ dt u M t3 w r $;
+--| A valuation satisfying a context has, at each variable, an element of the value of the type the context gives it.
 theorem lookup_den (H: hyps) (M: class) (G: ctx) (i: nat) (A: expr) (u w r: set):
   $ lookup G i A $ > $ H ⇒ w ∊ lvals $ > $ H ⇒ r ∊ sat u M (enc_ctx G) w $ >
   $ H ⇒ r' nvf' (enc_nat i) ∈ dt u M (enc_expr A) w r $;
@@ -163,6 +169,8 @@ theorem lookup_den (H: hyps) (M: class) (G: ctx) (i: nat) (A: expr) (u w r: set)
 theorem lrel_cext_sem {q t: set} (G: hyps q t) (M: class) (u w t1 t2 t3 r: set):
   $ G ⇒ ra_cext t1 t2 t3 ∈ lrel $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ sat u M t3 w $ >
   $ G ⇒ ∃ q ∃ t (q ∊ fseq u ∧ cdm q = nvf' t1 ∧ t ∊ sat u M t2 w ∧ r = q ++ t) $;
+--| A valuation satisfying a context extended by `n` entries is `n` values in front of a valuation satisfying the
+--| context.
 --| @freshen H q
 --| @freshen H t
 theorem cext_den (H: hyps) {q t: set} (M: class) (n: nat) (G G2: ctx) (u w r: set):
@@ -182,6 +190,8 @@ theorem lrel_cinst_sem (G: hyps) {p t v: set} (M: class) (u w t1 t2 t3 t4 t5 t6 
   $ G ⇒ r ∊ sat u M t6 w $ >
   $ G ⇒ ∃ p ∃ t (p ∊ fseq u ∧ cdm p = nvf' t1 ∧ t ∊ sat u M t2 w ∧ r = p ++ t ∧
       p ++ scons (dt u M t4 w t) t ∈ sat u M t5 w) $;
+--| A valuation satisfying an instantiated context gives one satisfying the original context when the value of the
+--| instantiating term is put in at position `k`.
 --| @freshen H p
 --| @freshen H t
 theorem cinst_den (H: hyps) {p t: set} (M: class) (k: nat) (G0 G1 G: ctx) (A0 a: expr) (u w r: set):

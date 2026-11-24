@@ -9,20 +9,29 @@
 
 import "model-meta.mm0";
 
+--| The rule `bvar` in the model, for every hook: a variable has the type its context gives it.
 theorem mbvar (M: class) (G: ctx) (i: nat) (A: expr):
   $ lookup G i A $ > $ mdeq M G (bvar i) (bvar i) A $;
+--| The rule `appDF` in the model, for every hook: application respects the judgment, at the codomain instantiated by
+--| the argument.
 theorem mappDF (M: class) (G: ctx) (f f2 A B a a2 R: expr):
   $ mdeq M G f f2 (pi A B) $ > $ mdeq M G a a2 A $ > $ inst nz B a R $ >
   $ mdeq M G (app f a) (app f2 a2) R $;
+--| The rule `beta` in the model, for every hook: a `λ` applied to an argument is its body instantiated.
 theorem mbeta (M: class) (G: ctx) (A e B a r R: expr):
   $ mdeq M (cons A G) e e B $ > $ mdeq M G a a A $ > $ inst nz e a r $ > $ inst nz B a R $ >
   $ mdeq M G (app (lam A e) a) r R $;
+--| The rule `eta` in the model, for every hook: `λ x. e x` is `e` at a function type.
 theorem meta (M: class) (G: ctx) (A B e e1: expr):
   $ mdeq M G e e (pi A B) $ > $ lift n1 nz e e1 $ >
   $ mdeq M G (lam A (app e1 (bvar nz))) e (pi A B) $;
+--| The rule `instDF` in the model, for every hook: a judgment is kept by instantiating the variable `k` of its context
+--| by a term of that variable's type.
 theorem minstDF (M: class) (k: nat) (G0 G1 G: ctx) (A0 a e e2 A r r2 R: expr):
   $ mdeq M G0 a a A0 $ > $ cinst k G0 A0 a G1 G $ > $ mdeq M G1 e e2 A $ >
   $ inst k e a r $ > $ inst k e2 a r2 $ > $ inst k A a R $ > $ mdeq M G r r2 R $;
+--| The rule `weakDF` in the model, for every hook: a judgment is kept by lifting it into a context with `n` more
+--| entries in front.
 theorem mweakDF (M: class) (n: nat) (G G2: ctx) (e e2 A r r2 R: expr):
   $ mdeq M G e e2 A $ > $ cext n G G2 $ >
   $ lift n nz e r $ > $ lift n nz e2 r2 $ > $ lift n nz A R $ > $ mdeq M G2 r r2 R $;
@@ -61,6 +70,7 @@ theorem lrel2_eeqv_node (G: hyps) (M: class) (u w r z k j t: set):
 --| Introduction and elimination for `einv`.
 theorem einv_intro {t r: set} (G: hyps) (M: class) (u w x: set):
   $ G , ra_eeqv x t ∈ lrel2 ⇒ dt u M x w r = dt u M t w r $ > $ G ⇒ x ∊ einv u M w $;
+--| An invariant tree has the same value as any tree equivalent to it under `eeqv`.
 theorem einv_elim (G: hyps) (M R: class) (u w x c: set):
   $ G ⇒ x ∊ einv u M w $ > $ G ⇒ ra_eeqv x c ∈ lrel2 $ > $ G ⇒ isset R $ >
   $ G ⇒ dt u M x w R = dt u M c w R $;
@@ -73,8 +83,11 @@ theorem lrel2_eeqv_dt (G: hyps) (M: class) (u t t2 w r: set):
   $ G ⇒ minv M $ > $ G ⇒ uadm u $ > $ G ⇒ t ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ ra_eeqv t t2 ∈ lrel2 $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ dt u M t w r = dt u M t2 w r $;
+--| For a hook invariant under `eeqv`, terms equal up to level equivalence have the same value.
 theorem eeqv_dt (G: hyps) (M: class) (e e2: expr) (u w r: set):
   $ G ⇒ minv M $ > $ eeqv e e2 $ > $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ dt u M (enc_expr e) w r = dt u M (enc_expr e2) w r $;
+--| The rule `eeqv_df` in the model, for a hook invariant under `eeqv`: a term is judged equal to any term that differs
+--| from it by equivalent levels.
 theorem meeqv_df (M: class) (G: ctx) (e e2 A: expr):
   $ _ ⇒ minv M $ > $ mdeq M G e e A $ > $ eeqv e e2 $ > $ mdeq M G e e2 A $;

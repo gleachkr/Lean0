@@ -132,166 +132,322 @@ def shr_eqs (G: ctx) (e1 e2: expr): wff = $ shr_eqs_j (jmod (mcv hfin)) G e1 e2 
 -- The spec's axioms about them, as theorems
 -- --------------------------------------------------------------------------
 
+--| The spec's axiom `sty_nil` (`spec/lean-core.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem sty_nil (G: ctx) (h A: expr): $ sty G h A h A $;
 
+--| The spec's axiom `sty_app` (`spec/lean-core.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem sty_app (G: ctx) (h A f a B C C2: expr): $ sty G h A f (pi B C) $ > $ ty G a B $ > $ inst nz C a C2 $ > $ sty G h A (app f a) C2 $;
 
+--| The spec's axiom `cwf_pi` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem cwf_pi (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (A B A2: expr) (u: lvl): $ add d np k $ > $ closed k A $ > $ sinst D nz n k A A2 $ > $ ty Ctx A2 (srt u) $ > $ ulevel l u $ > $ cwf D n np l i (snoc Ctx A2) (s d) B $ > $ cwf D n np l i Ctx d (pi A B) $;
 
+--| The spec's axiom `cwf_pi_rec` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem cwf_pi_rec (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (A B A2 B2: expr) (u: lvl): $ add d np k $ > $ sinst D nz n k A A2 $ > $ ty Ctx A2 (srt u) $ > $ ulevel l u $ > $ ipos D n np d A $ > $ inst nz B (srt lz) B2 $ > $ lift0 n1 B2 B $ > $ cwf D n np l i (snoc Ctx A2) (s d) B $ > $ cwf D n np l i Ctx d (pi A B) $;
 
+--| The spec's axiom `cwf_res` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem cwf_res (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (K K2: expr) (b: blk) (P: ctx) (T: tys) (F: expr) (C: ctors) (R R2 S: expr): $ indapp D n np d K i $ > $ add d np k $ > $ sinst D nz n k K K2 $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ pis P F R $ > $ lift0 k R R2 $ > $ sty Ctx (ind_ty D i) R2 K2 S $ > $ cwf D n np l i Ctx d K $;
 
+--| The spec's axiom `ctors_wf_nil` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem ctors_wf_nil (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx): $ ctors_wf D n np l i Ctx cnil $;
 
+--| The spec's axiom `ctors_wf_cons` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem ctors_wf_cons (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (K: expr) (C: ctors) (b: blk) (P: ctx) (T: tys) (R: expr): $ ind_data D b P T $ > $ pis P K R $ > $ closed n R $ > $ cwf D n np l i Ctx nz K $ > $ ctors_wf D n np l i Ctx C $ > $ ctors_wf D n np l i Ctx (ccons K C) $;
 
+--| The spec's axiom `tys_wf_nil` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem tys_wf_nil (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx): $ tys_wf D n np l i Ctx tnil $;
 
+--| The spec's axiom `tys_wf_cons` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem tys_wf_cons (D: ind) (n np: nat) (l l2: lvl) (i k: nat) (Ctx: ctx) (F: expr) (C: ctors) (T: tys): $ isort F k l2 $ > $ leqv l2 l $ > $ ctors_wf D n np l i Ctx C $ > $ tys_wf D n np l (s i) Ctx T $ > $ tys_wf D n np l i Ctx (tcons F C T) $;
 
+--| The spec's axiom `ctx_wf_nil` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem ctx_wf_nil (G: ctx): $ ctx_wf G nil $;
 
+--| The spec's axiom `ctx_wf_cons` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem ctx_wf_cons (G P G2: ctx) (A: expr) (u: lvl): $ ctx_wf G P $ > $ capp P G G2 $ > $ ty G2 A (srt u) $ > $ ctx_wf G (snoc P A) $;
 
+--| The spec's axiom `tys_ty_nil` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem tys_ty_nil (Ctx: ctx): $ tys_ty Ctx tnil $;
 
+--| The spec's axiom `tys_ty_cons` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem tys_ty_cons (Ctx: ctx) (F: expr) (C: ctors) (T: tys) (u l: lvl) (k: nat): $ isort F k l $ > $ ty Ctx F (srt u) $ > $ tys_ty Ctx T $ > $ tys_ty Ctx (tcons F C T) $;
 
+--| The spec's axiom `tys_ok_i` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem tys_ok_i (G G2: ctx) (D: ind) (b: blk) (P: ctx) (T: tys): $ ind_data D b P T $ > $ tys_closed P T $ > $ ctx_wf G P $ > $ capp P G G2 $ > $ tys_ty G2 T $ > $ tys_ok G D $;
 
+--| The spec's axiom `nst_ty_i` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem nst_ty_i (G G2: ctx) (D I: ind) (b bi_v: blk) (P Pi: ctx) (T Ti: tys) (np n m: nat) (X X1 Fi RI S: expr) (Ci: ctors): $ ind_data D b P T $ > $ capp P G G2 $ > $ ind_arity D np n m $ > $ sinst D nz n np X X1 $ > $ closed np X1 $ > $ ind_data I bi_v Pi Ti $ > $ nth_ty Ti nz Fi Ci $ > $ pis Pi Fi RI $ > $ sty G2 (ind_ty I nz) RI X1 S $ > $ nst_ty G D I X $;
 
+--| The spec's axiom `nst_ok_nil` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nst_ok_nil (G: ctx) (D: ind) (j: nat): $ nst_ok G D j nil $;
 
+--| The spec's axiom `nst_ok_cons` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nst_ok_cons (G: ctx) (D I: ind) (j j2 npi ni mi ni0: nat) (X: expr) (N2 N3 NI: ctx): $ spine (ind_ty I nz) X npi $ > $ ind_wf G I $ > $ ind_arity I npi ni mi $ > $ ind_nested I NI $ > $ ndecl NI ni ni0 $ > $ lt nz ni0 $ > $ nst_ty G D I X $ > $ nst_group G D I X j nz ni0 (cons X N2) N3 $ > $ add j ni0 j2 $ > $ nst_ok G D j2 N3 $ > $ nst_ok G D j (cons X N2) $;
 
+--| The spec's axiom `ind_wf_i` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem ind_wf_i (G G2: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (np n m k n0: nat) (l: lvl) (F: expr) (C: ctors): $ tys_ok G D $ > $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ capp P G G2 $ > $ nth_ty T nz F C $ > $ isort F k l $ > $ tys_wf D n np l nz G2 T $ > $ ind_nested D N $ > $ ndecl N n n0 $ > $ nst_ok G D n0 N $ > $ ind_wf G D $;
 
+--| The spec's axiom `elim_prop` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem elim_prop (G: ctx) (D: ind) (v: lvl): $ leqv v lz $ > $ elim_ok G D v $;
 
+--| The spec's axiom `elim_large` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem elim_large (G: ctx) (D: ind) (v: lvl): $ large G D $ > $ elim_ok G D v $;
 
+--| The spec's axiom `large_nz` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem large_nz (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (F: expr) (C: ctors) (k: nat) (l: lvl): $ ind_data D b P T $ > $ nth_ty T nz F C $ > $ isort F k l $ > $ leqv (lmax (ls lz) l) l $ > $ large G D $;
 
+--| The spec's axiom `large_empty` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem large_empty (G: ctx) (D: ind) (b: blk) (P: ctx) (F: expr): $ ind_data D b P (tcons F cnil tnil) $ > $ large G D $;
 
+--| The spec's axiom `large_single` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem large_single (G G2: ctx) (D: ind) (b: blk) (P: ctx) (F K: expr) (np: nat): $ ind_data D b P (tcons F (ccons K cnil) tnil) $ > $ clen P np $ > $ capp P G G2 $ > $ fir D np G2 nz K $ > $ large G D $;
 
+--| The spec's axiom `fir_res` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem fir_res (D: ind) (np: nat) (Ctx: ctx) (d: nat) (K: expr): $ indapp D n1 np d K nz $ > $ fir D np Ctx d K $;
 
+--| The spec's axiom `fir_arg` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem fir_arg (D: ind) (np: nat) (Ctx: ctx) (d k: nat) (A A2 B: expr): $ leaf_has nz B $ > $ add d np k $ > $ sinst D nz n1 k A A2 $ > $ fir D np (snoc Ctx A2) (s d) B $ > $ fir D np Ctx d (pi A B) $;
 
+--| The spec's axiom `fir_prop` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem fir_prop (D: ind) (np: nat) (Ctx: ctx) (d k: nat) (A A2 B: expr): $ add d np k $ > $ sinst D nz n1 k A A2 $ > $ ty Ctx A2 Prop $ > $ fir D np (snoc Ctx A2) (s d) B $ > $ fir D np Ctx d (pi A B) $;
 
+--| The spec's axiom `proj_ok_sort` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem proj_ok_sort (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (j i: nat) (F: expr) (C: ctors) (l: lvl): $ ind_data D b P T $ > $ nth_ty T j F C $ > $ isort F nz l $ > $ leqv (lmax (ls lz) l) l $ > $ proj_ok G D j i $;
 
+--| The spec's axiom `proj_ok_prop` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem proj_ok_prop (G G2: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (j i np n m: nat) (F K: expr) (C: ctors): $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ capp P G G2 $ > $ nth_ty T j F C $ > $ nth_ctor C nz K $ > $ fprops D n np G2 nz (s i) K $ > $ proj_ok G D j i $;
 
+--| The spec's axiom `fprops_z` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem fprops_z (D: ind) (n np: nat) (Ctx: ctx) (d: nat) (K: expr): $ fprops D n np Ctx d nz K $;
 
+--| The spec's axiom `fprops_s` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem fprops_s (D: ind) (n np: nat) (Ctx: ctx) (d cnt k: nat) (A A2 B: expr): $ add d np k $ > $ sinst D nz n k A A2 $ > $ ty Ctx A2 Prop $ > $ fprops D n np (snoc Ctx A2) (s d) cnt B $ > $ fprops D n np Ctx d (s cnt) (pi A B) $;
 
+--| The spec's axiom `add_eqs_i` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem add_eqs_i (G: ctx) (f: expr): $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (snoc G nat_ty) (app (app f (bvar nz)) nat_zero) (bvar nz) nat_ty $ > $ deq (snoc (snoc G nat_ty) nat_ty) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app nat_succ (app (app f (bvar n1)) (bvar nz))) nat_ty $ > $ add_eqs G f $;
 
+--| The spec's axiom `pred_eqs_i` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem pred_eqs_i (G: ctx) (p: expr): $ closed nz p $ > $ ty G p (pi nat_ty nat_ty) $ > $ deq G (app p nat_zero) nat_zero nat_ty $ > $ deq (snoc G nat_ty) (app p (app nat_succ (bvar nz))) (bvar nz) nat_ty $ > $ pred_eqs G p $;
 
+--| The spec's axiom `sub_eqs_i` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem sub_eqs_i (G: ctx) (f p: expr): $ pred_eqs G p $ > $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (snoc G nat_ty) (app (app f (bvar nz)) nat_zero) (bvar nz) nat_ty $ > $ deq (snoc (snoc G nat_ty) nat_ty) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app p (app (app f (bvar n1)) (bvar nz))) nat_ty $ > $ sub_eqs G f p $;
 
+--| The spec's axiom `mul_eqs_i` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem mul_eqs_i (G: ctx) (f fa: expr): $ add_eqs G fa $ > $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (snoc G nat_ty) (app (app f (bvar nz)) nat_zero) nat_zero nat_ty $ > $ deq (snoc (snoc G nat_ty) nat_ty) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app (app fa (app (app f (bvar n1)) (bvar nz))) (bvar n1)) nat_ty $ > $ mul_eqs G f fa $;
 
+--| The spec's axiom `pow_eqs_i` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem pow_eqs_i (G: ctx) (f fm fa: expr): $ mul_eqs G fm fa $ > $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (snoc G nat_ty) (app (app f (bvar nz)) nat_zero) (app nat_succ nat_zero) nat_ty $ > $ deq (snoc (snoc G nat_ty) nat_ty) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app (app fm (app (app f (bvar n1)) (bvar nz))) (bvar n1)) nat_ty $ > $ pow_eqs G f fm fa $;
 
+--| The spec's axiom `beq_eqs_i` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem beq_eqs_i (G: ctx) (f B t u: expr): $ closed nz f $ > $ closed nz B $ > $ closed nz t $ > $ closed nz u $ > $ ty G f (pi nat_ty (pi nat_ty B)) $ > $ deq G (app (app f nat_zero) nat_zero) t B $ > $ deq (snoc G nat_ty) (app (app f nat_zero) (app nat_succ (bvar nz))) u B $ > $ deq (snoc G nat_ty) (app (app f (app nat_succ (bvar nz))) nat_zero) u B $ > $ deq (snoc (snoc G nat_ty) nat_ty) (app (app f (app nat_succ (bvar n1))) (app nat_succ (bvar nz))) (app (app f (bvar n1)) (bvar nz)) B $ > $ beq_eqs G f B t u $;
 
+--| The spec's axiom `ble_eqs_i` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem ble_eqs_i (G: ctx) (f B t u: expr): $ closed nz f $ > $ closed nz B $ > $ closed nz t $ > $ closed nz u $ > $ ty G f (pi nat_ty (pi nat_ty B)) $ > $ deq (snoc G nat_ty) (app (app f nat_zero) (bvar nz)) t B $ > $ deq (snoc G nat_ty) (app (app f (app nat_succ (bvar nz))) nat_zero) u B $ > $ deq (snoc (snoc G nat_ty) nat_ty) (app (app f (app nat_succ (bvar n1))) (app nat_succ (bvar nz))) (app (app f (bvar n1)) (bvar nz)) B $ > $ ble_eqs G f B t u $;
 
+--| The spec's axiom `shl_eqs_i` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem shl_eqs_i (G: ctx) (f fm fa: expr): $ mul_eqs G fm fa $ > $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (snoc G nat_ty) (app (app f (bvar nz)) nat_zero) (bvar nz) nat_ty $ > $ deq (snoc (snoc G nat_ty) nat_ty) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app (app f (app (app fm (lit (bd0 (bd1 b0)))) (bvar n1))) (bvar nz)) nat_ty $ > $ shl_eqs G f fm fa $;
 
+--| The spec's axiom `shr_eqs_i` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem shr_eqs_i (G: ctx) (f fd: expr): $ closed nz f $ > $ closed nz fd $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ deq (snoc G nat_ty) (app (app f (bvar nz)) nat_zero) (bvar nz) nat_ty $ > $ deq (snoc (snoc G nat_ty) nat_ty) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app (app fd (app (app f (bvar n1)) (bvar nz))) (lit (bd0 (bd1 b0)))) nat_ty $ > $ shr_eqs G f fd $;
 
+--| The spec's axiom `bvar` (`spec/lean-core.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem bvar (G: ctx) (i: nat) (A: expr): $ lookup G i A $ > $ ty G (bvar i) A $;
 
+--| The spec's axiom `symm` (`spec/lean-core.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem symm (G: ctx) (e e2 A: expr): $ deq G e e2 A $ > $ deq G e2 e A $;
 
+--| The spec's axiom `trans` (`spec/lean-core.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem trans (G: ctx) (e1 e2 e3 A: expr): $ deq G e1 e2 A $ > $ deq G e2 e3 A $ > $ deq G e1 e3 A $;
 
+--| The spec's axiom `sortDF` (`spec/lean-core.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem sortDF (G: ctx) (l l2: lvl): $ leqv l l2 $ > $ deq G (srt l) (srt l2) (srt (ls l)) $;
 
+--| The spec's axiom `appDF` (`spec/lean-core.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem appDF (G: ctx) (f f2 A B a a2 R: expr): $ deq G f f2 (pi A B) $ > $ deq G a a2 A $ > $ inst nz B a R $ > $ deq G (app f a) (app f2 a2) R $;
 
+--| The spec's axiom `lamDF` (`spec/lean-core.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem lamDF (G: ctx) (u: lvl) (A A2 b b2 B: expr): $ deq G A A2 (srt u) $ > $ deq (snoc G A) b b2 B $ > $ deq G (lam A b) (lam A2 b2) (pi A B) $;
 
+--| The spec's axiom `forallEDF` (`spec/lean-core.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem forallEDF (G: ctx) (u v: lvl) (A A2 B B2: expr): $ deq G A A2 (srt u) $ > $ deq (snoc G A) B B2 (srt v) $ > $ deq G (pi A B) (pi A2 B2) (srt (limax u v)) $;
 
+--| The spec's axiom `defeqDF` (`spec/lean-core.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem defeqDF (G: ctx) (u: lvl) (A B e e2: expr): $ deq G A B (srt u) $ > $ deq G e e2 A $ > $ deq G e e2 B $;
 
+--| The spec's axiom `beta` (`spec/lean-core.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem beta (G: ctx) (A e B a r R: expr): $ ty (snoc G A) e B $ > $ ty G a A $ > $ inst nz e a r $ > $ inst nz B a R $ > $ deq G (app (lam A e) a) r R $;
 
+--| The spec's axiom `eta` (`spec/lean-core.mm0`) as a theorem of the model: the same statement, with the judgments read
+--| as the model's definitions.
 theorem eta (G: ctx) (A B e e1: expr): $ ty G e (pi A B) $ > $ lift0 n1 e e1 $ > $ deq G (lam A (app e1 (bvar nz))) e (pi A B) $;
 
+--| The spec's axiom `proofIrrel` (`spec/lean-core.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem proofIrrel (G: ctx) (p h h2: expr): $ ty G p Prop $ > $ ty G h p $ > $ ty G h2 p $ > $ deq G h h2 p $;
 
+--| The spec's axiom `instDF` (`spec/lean-core.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem instDF (k: nat) (G0 G1 G: ctx) (A0 a e e2 A r r2 R: expr): $ ty G0 a A0 $ > $ cinst k G0 A0 a G1 G $ > $ deq G1 e e2 A $ > $ inst k e a r $ > $ inst k e2 a r2 $ > $ inst k A a R $ > $ deq G r r2 R $;
 
+--| The spec's axiom `weakDF` (`spec/lean-core.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem weakDF (n: nat) (G G2: ctx) (e e2 A r r2 R: expr): $ deq G e e2 A $ > $ cext n G G2 $ > $ lift0 n e r $ > $ lift0 n e2 r2 $ > $ lift0 n A R $ > $ deq G2 r r2 R $;
 
+--| The spec's axiom `eeqv_df` (`spec/lean-core.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem eeqv_df (G: ctx) (e e2 A: expr): $ ty G e A $ > $ eeqv e e2 $ > $ deq G e e2 A $;
 
+--| The spec's axiom `quot_ty` (`spec/lean-quot.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem quot_ty (G: ctx) (u: lvl): $ ty G (quot u) (pi (srt u) (pi (pi (bvar nz) (pi (bvar n1) Prop)) (srt u))) $;
 
+--| The spec's axiom `quot_mk_ty` (`spec/lean-quot.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem quot_mk_ty (G: ctx) (u: lvl): $ ty G (quot_mk u) (pi (srt u) (pi (pi (bvar nz) (pi (bvar n1) Prop)) (pi (bvar n1) (app (app (quot u) (bvar n2)) (bvar n1))))) $;
 
+--| The spec's axiom `quot_lift_ty` (`spec/lean-quot.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem quot_lift_ty (G: ctx) (u v: lvl): $ ty G (quot_lift u v) (pi (srt u) (pi (pi (bvar nz) (pi (bvar n1) Prop)) (pi (srt v) (pi (pi (bvar n2) (bvar n1)) (pi (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (pi (app (app (quot u) (bvar n4)) (bvar n3)) (bvar n3))))))) $;
 
+--| The spec's axiom `quot_ind_ty` (`spec/lean-quot.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem quot_ind_ty (G: ctx) (u: lvl): $ ty G (quot_ind u) (pi (srt u) (pi (pi (bvar nz) (pi (bvar n1) Prop)) (pi (pi (app (app (quot u) (bvar n1)) (bvar nz)) Prop) (pi (pi (bvar n2) (app (bvar n1) (app (app (app (quot_mk u) (bvar n3)) (bvar n2)) (bvar nz)))) (pi (app (app (quot u) (bvar n3)) (bvar n2)) (app (bvar n2) (bvar nz))))))) $;
 
 theorem quot_lift_mk_sty (G: ctx) (u v: lvl) (x1 x2 x3 x4 x5: expr) (v1: lvl) (y1 y2 a T: expr): $ sty G (quot_lift u v) (pi (srt u) (pi (pi (bvar nz) (pi (bvar n1) Prop)) (pi (srt v) (pi (pi (bvar n2) (bvar n1)) (pi (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (pi (app (app (quot u) (bvar n4)) (bvar n3)) (bvar n3))))))) (app (app (app (app (app (app (quot_lift u v) x1) x2) x3) x4) x5) (app (app (app (quot_mk v1) y1) y2) a)) T $ > $ ty G a x1 $ > $ deq G (app (app (app (app (app (app (quot_lift u v) x1) x2) x3) x4) x5) (app (app (app (quot_mk v1) y1) y2) a)) (app x4 a) T $;
 
+--| The spec's axiom `quot_lift_mk` (`spec/lean-quot.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem quot_lift_mk (u v: lvl): $ deq (snoc (snoc (snoc (snoc (snoc (snoc nil (srt u)) (pi (bvar nz) (pi (bvar n1) Prop))) (srt v)) (pi (bvar n2) (bvar n1))) (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1))))))) (bvar n4)) (app (app (app (app (app (app (quot_lift u v) (bvar n5)) (bvar n4)) (bvar n3)) (bvar n2)) (bvar n1)) (app (app (app (quot_mk u) (bvar n5)) (bvar n4)) (bvar nz))) (app (bvar n2) (bvar nz)) (bvar n3) $;
 
+--| The spec's axiom `lit_zero` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem lit_zero (G: ctx): $ deq G (lit b0) (ind_ctor nat_D nz nz) (ind_ty nat_D nz) $;
 
+--| The spec's axiom `lit_succ` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem lit_succ (G: ctx) (a b: bin): $ bsucc a b $ > $ deq G (lit b) (app (ind_ctor nat_D nz n1) (lit a)) (ind_ty nat_D nz) $;
 
+--| The spec's axiom `nat_add_lit` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_add_lit (G: ctx) (f: expr) (a b c: bin): $ add_eqs G f $ > $ badd a b c $ > $ deq G (app (app f (lit a)) (lit b)) (lit c) nat_ty $;
 
+--| The spec's axiom `nat_sub_lit` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_sub_lit (G: ctx) (f p: expr) (a b c: bin): $ sub_eqs G f p $ > $ badd c b a $ > $ deq G (app (app f (lit a)) (lit b)) (lit c) nat_ty $;
 
+--| The spec's axiom `nat_sub_lit0` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_sub_lit0 (G: ctx) (f p: expr) (a b c: bin): $ sub_eqs G f p $ > $ badd a c b $ > $ deq G (app (app f (lit a)) (lit b)) (lit b0) nat_ty $;
 
+--| The spec's axiom `nat_mul_lit` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_mul_lit (G: ctx) (f fa: expr) (a b c: bin): $ mul_eqs G f fa $ > $ bmul a b c $ > $ deq G (app (app f (lit a)) (lit b)) (lit c) nat_ty $;
 
+--| The spec's axiom `nat_pow_lit` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_pow_lit (G: ctx) (f fm fa: expr) (a b c: bin): $ pow_eqs G f fm fa $ > $ bpow a b c $ > $ deq G (app (app f (lit a)) (lit b)) (lit c) nat_ty $;
 
+--| The spec's axiom `nat_beq_lit` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_beq_lit (G: ctx) (f B t u: expr) (a: bin): $ beq_eqs G f B t u $ > $ deq G (app (app f (lit a)) (lit a)) t B $;
 
+--| The spec's axiom `nat_beq_lit_lt` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_beq_lit_lt (G: ctx) (f B t u: expr) (a b c: bin): $ beq_eqs G f B t u $ > $ baddc a c b $ > $ deq G (app (app f (lit a)) (lit b)) u B $;
 
+--| The spec's axiom `nat_beq_lit_gt` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_beq_lit_gt (G: ctx) (f B t u: expr) (a b c: bin): $ beq_eqs G f B t u $ > $ baddc b c a $ > $ deq G (app (app f (lit a)) (lit b)) u B $;
 
+--| The spec's axiom `nat_ble_lit` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_ble_lit (G: ctx) (f B t u: expr) (a b c: bin): $ ble_eqs G f B t u $ > $ badd a c b $ > $ deq G (app (app f (lit a)) (lit b)) t B $;
 
+--| The spec's axiom `nat_ble_lit_gt` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_ble_lit_gt (G: ctx) (f B t u: expr) (a b c: bin): $ ble_eqs G f B t u $ > $ baddc b c a $ > $ deq G (app (app f (lit a)) (lit b)) u B $;
 
+--| The spec's axiom `nat_shl_lit` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_shl_lit (G: ctx) (f fm fa: expr) (a b p c: bin): $ shl_eqs G f fm fa $ > $ bpow (bd0 (bd1 b0)) b p $ > $ bmul a p c $ > $ deq G (app (app f (lit a)) (lit b)) (lit c) nat_ty $;
 
+--| The spec's axiom `nat_shr_lit_z` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_shr_lit_z (G: ctx) (f fd: expr) (a: bin): $ shr_eqs G f fd $ > $ deq G (app (app f (lit a)) (lit b0)) (lit a) nat_ty $;
 
+--| The spec's axiom `nat_shr_lit_s` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_shr_lit_s (G: ctx) (f fd: expr) (a b b2 c c2: bin): $ shr_eqs G f fd $ > $ bsucc b b2 $ > $ deq G (app (app f (lit a)) (lit b)) (lit c) nat_ty $ > $ deq G (app (app fd (lit c)) (lit (bd0 (bd1 b0)))) (lit c2) nat_ty $ > $ deq G (app (app f (lit a)) (lit b2)) (lit c2) nat_ty $;
 
+--| The spec's axiom `inh_i` (`spec/lean-core.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem inh_i (G: ctx) (e A: expr): $ ty G e A $ > $ inh G A $;
 
 -- --------------------------------------------------------------------------
 -- The rules of the inductive types
 -- --------------------------------------------------------------------------
 
+--| The spec's axiom `ind_ty_ty` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem ind_ty_ty (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (i: nat) (F R: expr) (C: ctors): $ tys_ok G D $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ pis P F R $ > $ ty G (ind_ty D i) R $;
 
+--| The spec's axiom `ind_ctor_ty` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem ind_ctor_ty (G: ctx) (D: ind) (i c: nat) (R: expr): $ ind_wf G D $ > $ ctor_ty D i c R $ > $ ty G (ind_ctor D i c) R $;
 
+--| The spec's axiom `ind_rec_ty` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem ind_rec_ty (G: ctx) (D: ind) (N: ctx) (i: nat) (v: lvl) (R0 R: expr): $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_ty D v i R0 $ > $ ind_nested D N $ > $ rst D N R0 R $ > $ ty G (ind_rec D i v) R $;
 
+--| The spec's axiom `proj_ty` (`spec/lean-ind.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem proj_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (j i np: nat) (e e2 S A A1 A2 R: expr): $ deq G e e2 S $ > $ spine (ind_ty D j) S np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ struct_like D j $ > $ proj_ok G D j i $ > $ clen P np $ > $ field_ty D j i A $ > $ ind_nested D N $ > $ rst D N A A2 $ > $ pinst i S A2 A1 $ > $ qinst b e i nz A1 R $ > $ deq G (proj b i e) (proj b i e2) R $;
 
 
@@ -309,14 +465,24 @@ def lor_eqs (G: ctx) (e1 e2 e3 e4 e5: expr): wff = $ lor_eqs_j (jmod (mcv hfin))
 --| The spec's `xor_eqs`, over the judgments that hold in the model.
 def xor_eqs (G: ctx) (e1 e2 e3 e4 e5: expr): wff = $ xor_eqs_j (jmod (mcv hfin)) G e1 e2 e3 e4 e5 $;
 
+--| The spec's axiom `divmod_eqs_i` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem divmod_eqs_i (G: ctx) (fd fm fmul fadd h1 h2 h3: expr): $ mul_eqs G fmul fadd $ > $ closed nz fd $ > $ closed nz fm $ > $ ty G fd (pi nat_ty (pi nat_ty nat_ty)) $ > $ ty G fm (pi nat_ty (pi nat_ty nat_ty)) $ > $ ty G h1 (pi nat_ty (pi nat_ty (nat_eq (app (app fadd (app (app fmul (bvar nz)) (app (app fd (bvar n1)) (bvar nz)))) (app (app fm (bvar n1)) (bvar nz))) (bvar n1)))) $ > $ ty G h2 (pi nat_ty (pi nat_ty (pi (nat_lt lit0 (bvar nz)) (nat_lt (app (app fm (bvar n2)) (bvar n1)) (bvar n1))))) $ > $ ty G h3 (pi nat_ty (nat_eq (app (app fd (bvar nz)) lit0) lit0)) $ > $ divmod_eqs G fd fm fmul fadd $;
 
+--| The spec's axiom `gcd_eqs_i` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem gcd_eqs_i (G: ctx) (f fd fm fmul fadd h1 h2: expr): $ divmod_eqs G fd fm fmul fadd $ > $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ ty G h1 (pi nat_ty (nat_eq (app (app f lit0) (bvar nz)) (bvar nz))) $ > $ ty G h2 (pi nat_ty (pi nat_ty (nat_eq (app (app f (app nat_succ (bvar n1))) (bvar nz)) (app (app f (app (app fm (bvar nz)) (app nat_succ (bvar n1)))) (app nat_succ (bvar n1)))))) $ > $ gcd_eqs G f fd fm fmul fadd $;
 
+--| The spec's axiom `land_eqs_i` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem land_eqs_i (G: ctx) (f fd fm fmul fadd h: expr): $ divmod_eqs G fd fm fmul fadd $ > $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ ty G h (pi nat_ty (pi nat_ty (nat_eq (app (app f (bvar n1)) (bvar nz)) (app (app fadd (app (app fadd (app (app f (app (app fd (bvar n1)) lit2)) (app (app fd (bvar nz)) lit2))) (app (app f (app (app fd (bvar n1)) lit2)) (app (app fd (bvar nz)) lit2)))) (app (app fd (app (app fadd (app (app fm (bvar n1)) lit2)) (app (app fm (bvar nz)) lit2))) lit2))))) $ > $ land_eqs G f fd fm fmul fadd $;
 
+--| The spec's axiom `lor_eqs_i` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem lor_eqs_i (G: ctx) (f fd fm fmul fadd h: expr): $ divmod_eqs G fd fm fmul fadd $ > $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ ty G h (pi nat_ty (pi nat_ty (nat_eq (app (app f (bvar n1)) (bvar nz)) (app (app fadd (app (app fadd (app (app f (app (app fd (bvar n1)) lit2)) (app (app fd (bvar nz)) lit2))) (app (app f (app (app fd (bvar n1)) lit2)) (app (app fd (bvar nz)) lit2)))) (app (app fd (app (app fadd (app (app fadd (app (app fm (bvar n1)) lit2)) (app (app fm (bvar nz)) lit2))) lit1)) lit2))))) $ > $ lor_eqs G f fd fm fmul fadd $;
 
+--| The spec's axiom `xor_eqs_i` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the judgments
+--| read as the model's definitions.
 theorem xor_eqs_i (G: ctx) (f fd fm fmul fadd h: expr): $ divmod_eqs G fd fm fmul fadd $ > $ closed nz f $ > $ ty G f (pi nat_ty (pi nat_ty nat_ty)) $ > $ ty G h (pi nat_ty (pi nat_ty (nat_eq (app (app f (bvar n1)) (bvar nz)) (app (app fadd (app (app fadd (app (app f (app (app fd (bvar n1)) lit2)) (app (app fd (bvar nz)) lit2))) (app (app f (app (app fd (bvar n1)) lit2)) (app (app fd (bvar nz)) lit2)))) (app (app fm (app (app fadd (app (app fm (bvar n1)) lit2)) (app (app fm (bvar nz)) lit2))) lit2))))) $ > $ xor_eqs G f fd fm fmul fadd $;
 
 
@@ -324,20 +490,38 @@ theorem xor_eqs_i (G: ctx) (f fd fm fmul fadd h: expr): $ divmod_eqs G fd fm fmu
 
 
 
+--| The spec's axiom `nat_div_lit` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_div_lit (G: ctx) (fd fm fmul fadd: expr) (a b q m r x: bin): $ divmod_eqs G fd fm fmul fadd $ > $ bmul b q m $ > $ badd m r a $ > $ baddc r x b $ > $ deq G (app (app fd (lit a)) (lit b)) (lit q) nat_ty $;
 
+--| The spec's axiom `nat_div_lit0` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_div_lit0 (G: ctx) (fd fm fmul fadd: expr) (a: bin): $ divmod_eqs G fd fm fmul fadd $ > $ deq G (app (app fd (lit a)) lit0) lit0 nat_ty $;
 
+--| The spec's axiom `nat_mod_lit` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_mod_lit (G: ctx) (fd fm fmul fadd: expr) (a b q m r x: bin): $ divmod_eqs G fd fm fmul fadd $ > $ bmul b q m $ > $ badd m r a $ > $ baddc r x b $ > $ deq G (app (app fm (lit a)) (lit b)) (lit r) nat_ty $;
 
+--| The spec's axiom `nat_mod_lit0` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_mod_lit0 (G: ctx) (fd fm fmul fadd: expr) (a: bin): $ divmod_eqs G fd fm fmul fadd $ > $ deq G (app (app fm (lit a)) lit0) (lit a) nat_ty $;
 
+--| The spec's axiom `nat_gcd_lit` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_gcd_lit (G: ctx) (f fd fm fmul fadd: expr) (a b g p2 q x y m n: bin): $ gcd_eqs G f fd fm fmul fadd $ > $ bmul g p2 a $ > $ bmul g q b $ > $ bmul x a m $ > $ bmul y b n $ > $ badd n g m $ > $ deq G (app (app f (lit a)) (lit b)) (lit g) nat_ty $;
 
+--| The spec's axiom `nat_gcd_lit2` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_gcd_lit2 (G: ctx) (f fd fm fmul fadd: expr) (a b g p2 q x y m n: bin): $ gcd_eqs G f fd fm fmul fadd $ > $ bmul g p2 a $ > $ bmul g q b $ > $ bmul x a m $ > $ bmul y b n $ > $ badd m g n $ > $ deq G (app (app f (lit a)) (lit b)) (lit g) nat_ty $;
 
+--| The spec's axiom `nat_land_lit` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_land_lit (G: ctx) (f fd fm fmul fadd: expr) (a b c: bin): $ land_eqs G f fd fm fmul fadd $ > $ band a b c $ > $ deq G (app (app f (lit a)) (lit b)) (lit c) nat_ty $;
 
+--| The spec's axiom `nat_lor_lit` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_lor_lit (G: ctx) (f fd fm fmul fadd: expr) (a b c: bin): $ lor_eqs G f fd fm fmul fadd $ > $ bor a b c $ > $ deq G (app (app f (lit a)) (lit b)) (lit c) nat_ty $;
 
+--| The spec's axiom `nat_xor_lit` (`spec/lean-lit.mm0`) as a theorem of the model: the same statement, with the
+--| judgments read as the model's definitions.
 theorem nat_xor_lit (G: ctx) (f fd fm fmul fadd: expr) (a b c: bin): $ xor_eqs G f fd fm fmul fadd $ > $ bxor a b c $ > $ deq G (app (app f (lit a)) (lit b)) (lit c) nat_ty $;
