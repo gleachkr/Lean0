@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Write spec/tg/lean-tg.mm0, the encoding of the spec's syntax in the TG library.
+"""Write spec/tg/encoding/lean-tg.mm0, the encoding of the spec's syntax in the TG library.
 
 Reads the sorts and constructors of spec/lean.mm0 (its four files; every `term` whose sort is not
 `wff`) and writes, after `import "all.mm0";`:
@@ -27,14 +27,14 @@ Reads the sorts and constructors of spec/lean.mm0 (its four files; every `term` 
   - congruence of each relation's atoms (`ra_R_congr`, `ra_R_eq`), proved there
     too.
 
-It also writes spec/tg/lean-tg2.mm0, the second stratum: the relations of Part II
+It also writes spec/tg/encoding/lean-tg2.mm0, the second stratum: the relations of Part II
 whose clauses need only Part I's relations and level equivalence (`eeqv` and its
 kind, found by `stratum2`), as a second program over Part I's least model in the
 same form, its labels continuing Part I's: the clauses' Part I premises and
 `≈` premises are side conditions of their ground instances (`.. ∈ lrel`, `lveq`);
 the clauses at classes are `lrel2_A`. It imports model-levels.mm0 (for `lveq`).
 
-It also writes spec/tg/lean-tg3.mm0, the third stratum: the other relations of
+It also writes spec/tg/encoding/lean-tg3.mm0, the third stratum: the other relations of
 Part II, which depend on the judgment `deq` (`stratum3`), as a third program in
 the same form over a parameter `J`, a class of judgment atoms standing for `deq`:
 each relation is a `def R_j J` and each clause axiom a theorem `A_j` for every
@@ -50,8 +50,8 @@ definitions and axioms, except those the model declares (a spec `term` as a `def
 an axiom as a theorem with the same statement, which `lean0 tg-link` checks).
 Certificates are verified against this file's chain (`lean0 joined --tg`).
 
-  scripts/tg-lean.py            write spec/tg/lean-tg.mm0, spec/tg/lean-tg2.mm0,
-                                spec/tg/lean-tg3.mm0 and spec/tg/lean-tg-rest.mm0
+  scripts/tg-lean.py            write lean-tg.mm0, lean-tg2.mm0 and lean-tg3.mm0 in spec/tg/encoding
+                                and spec/tg/lean-tg-rest.mm0
   scripts/tg-lean.py --check    fail if the files are not what the spec gives
   scripts/tg-lean.py --parse-check DIR
                                 write DIR/check.mm0 and DIR/check.auf: every axiom of
@@ -68,10 +68,11 @@ import mm0math  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 SPEC = ROOT / "spec/lean.mm0"
-OUT = ROOT / "spec/tg/lean-tg.mm0"
-REST = ROOT / "spec/tg/lean-tg-rest.mm0"
+TG = ROOT / "spec/tg"
+OUT = TG / "encoding/lean-tg.mm0"
+REST = TG / "lean-tg-rest.mm0"
 # The top of the model's chain, which lean-tg-rest.mm0 imports.
-MODEL = "model.mm0"
+MODEL = "model/model.mm0"
 # The sorts a certificate declares new constants of (`term X_blk: blk`,
 # `term X_atom: atom`): their trees are also any leaves `⟨ n , ∅ ⟩`.
 OPEN = ["blk", "atom"]
@@ -133,10 +134,10 @@ def read_spec():
     return join(parts[0]) + PART2 + "\n" + join(parts[1]) + PART3 + "\n" + join(parts[2])
 # The second stratum (Part II's relations over level equivalence), between the
 # model's levels, which it imports, and the rest of the model.
-OUT2 = ROOT / "spec/tg/lean-tg2.mm0"
-LEVELS = "model-levels.mm0"
+OUT2 = TG / "encoding/lean-tg2.mm0"
+LEVELS = "model/model-levels.mm0"
 # The third stratum (the rest of Part II, over a judgment `J`), after the second.
-OUT3 = ROOT / "spec/tg/lean-tg3.mm0"
+OUT3 = TG / "encoding/lean-tg3.mm0"
 # A clause with more variables than this binds them as one sequence (the base's
 # pool of proof variables, 35, must name a clause's variables and a few more).
 WIDE = 30
@@ -206,7 +207,7 @@ def render(sorts, ctors):
     w("-- cannot state the syntactic equality it would conclude, and the relations")
     w("-- need only equality of encodings.")
     w("")
-    w('import "all.mm0";')
+    w('import "../set/all.mm0";')
     w("")
     w("-- " + "-" * 74)
     w("-- The spec's sorts and constructors (verbatim, without notations)")
@@ -292,24 +293,25 @@ def library_names():
     """The names the TG library declares (its terms, definitions, theorems and
     lemmas: all share one namespace with lean-tg.mm0)."""
     names = set()
-    for f in sorted((ROOT / "spec/tg").glob("*")):
-        if f.suffix in (".mm0", ".auf") and not f.name.startswith(("lean-tg", "model")):
+    for f in sorted([TG / "tg.mm0", TG / "tg.auf", *(TG / "set").glob("*")]):
+        if f.suffix in (".mm0", ".auf"):
             names |= set(re.findall(r"^(?:theorem|axiom|lemma|def|term)\s+(\w+)",
                                     f.read_text(encoding="utf-8"), re.M))
     return names
 
 
 def model_files():
-    """The model's files: `model.mm0` and the `model*.mm0` files it imports, directly
-    or not (a `model*.mm0` file outside that chain is not part of the model)."""
-    seen, todo = [], [MODEL]
+    """The model's files: `model/model.mm0` and the files of `spec/tg/model` it imports,
+    directly or not."""
+    seen, todo = [], [TG / MODEL]
     while todo:
-        n = todo.pop()
-        if n in seen:
+        f = todo.pop()
+        if f in seen:
             continue
-        seen.append(n)
-        todo += re.findall(r'^import "([^"]+)";', (ROOT / "spec/tg" / n).read_text(encoding="utf-8"), re.M)
-    return sorted(ROOT / "spec/tg" / n for n in seen if n.startswith("model"))
+        seen.append(f)
+        todo += [Path(os.path.normpath(f.parent / n))
+                 for n in re.findall(r'^import "([^"]+)";', f.read_text(encoding="utf-8"), re.M)]
+    return sorted(f for f in seen if f.parent == TG / "model")
 
 
 def model_decls(strata):
@@ -631,7 +633,7 @@ def render_stratum2(text, ctors, enc):
     axioms = [d for r in names for d in clauses[r]]
     part1_rels = {d[1] for d in part1.decls if d[0] == "term" and d[3] == "wff"}
     lib = (library_names() | decl_names(enc) | {d[1] for d in part1.decls} |
-           decl_names((ROOT / f"spec/tg/{LEVELS}").read_text(encoding="utf-8")))
+           decl_names((TG / LEVELS).read_text(encoding="utf-8")))
     ours = ({f"kr_{r}" for r in names} | {f"ra_{r}" for r in names} | set(names) |
             {f"cl_{d[1]}" for d in axioms} | {f"pr_{r}" for r in names} |
             {d[1] for d in axioms} | {"lprog2", "lrel2"} | {f"lrel2_{d[1]}" for d in axioms})
@@ -680,7 +682,7 @@ def render_stratum2(text, ctors, enc):
          "-- `lrel2_R_cases`. No axioms.",
          "-- Imports model-levels.mm0 (`lveq`); proofs in lean-tg2.auf.",
          "",
-         f'import "{LEVELS}";',
+         f'import "../{LEVELS}";',
          ""]
     w = o.append
     w("-- " + "-" * 74)
@@ -824,7 +826,7 @@ def render_stratum3(text, ctors, enc, enc2):
     part1_rels = {d[1] for d in part1.decls if d[0] == "term" and d[3] == "wff"}
     lib = (library_names() | decl_names(enc) | decl_names(enc2) |
            {d[1] for d in mm0math.Spec(text).decls} |
-           decl_names((ROOT / f"spec/tg/{LEVELS}").read_text(encoding="utf-8")))
+           decl_names((TG / LEVELS).read_text(encoding="utf-8")))
     wide = [d for d in axioms if len(d[2]) > WIDE]
     nix = max([len(d[2]) for d in wide], default=0)
     ours = ({f"kr_{r}" for r, _ in rels} | {f"ra_{r}" for r, _ in rels} |
@@ -1185,7 +1187,7 @@ def render_det(rels):
 
 def proof_variables():
     """The base's pool of proof variables (its `@vars` line)."""
-    m = re.search(r"^--\| @vars (.*)$", (ROOT / "spec/tg/tg.mm0").read_text(encoding="utf-8"), re.M)
+    m = re.search(r"^--\| @vars (.*)$", (TG / "tg.mm0").read_text(encoding="utf-8"), re.M)
     return set(m.group(1).split())
 
 

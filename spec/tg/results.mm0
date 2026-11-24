@@ -1,0 +1,84 @@
+-- results.mm0: the headline theorems of the development, restated in one place.
+--
+-- Nothing here is new: each theorem below is proved in one line from the theorem
+-- named in its comment (results.auf). The file imports the whole development, so
+-- checking it checks everything:
+--
+--   scripts/tg-check.sh spec/tg/results.mm0
+--
+-- Where things are:
+--
+--   tg.mm0       the axioms: Tarski–Grothendieck set theory with a choice operator,
+--                as natural deduction. Everything else is definitions and theorems.
+--   set/         the set-theory library (ordinals, least fixed points, universes,
+--                arithmetic, trees, least models of Horn programs); `set/all.mm0`.
+--   encoding/    Lean's syntax and the spec's syntactic relations, as trees and
+--                Horn programs (generated from spec/lean.mm0 by scripts/tg-lean.py;
+--                the 53 `enc_*` axioms say that the spec's terms are free).
+--   model/       the model of the spec: the denotation of terms in an admissible
+--                universe, the judgments as definitions, and every rule of the
+--                spec as a theorem (`model/model-top.mm0`, `model/model-ci.mm0`).
+--   lean-tg-rest.mm0
+--                what a certificate is verified against in TG mode: the model and
+--                whatever the spec states beyond it, which is nothing.
+--   readback/    the model's pre-sets are the sets of the first universe, and
+--                Lean sentences about them read back as sentences of set theory.
+
+import "readback/model-fo.mm0";
+
+-- --------------------------------------------------------------------------
+-- 1. Soundness and consistency of the spec
+-- --------------------------------------------------------------------------
+
+-- Soundness is not one theorem: `deq`, `ty`, `inh` are definitions of the model
+-- ("true in every admissible universe at every valuation"), and each of the
+-- spec's rules is a theorem about them, under its own name (`beta`, `ind_iota_eq`,
+-- `choice_ty`, ...), in model/model-top.mm0 and model/model-ci.mm0.
+
+--| Consistency (`lean_consistent`, model/model-ci.mm0). No term has the type
+--| `Π (p : Prop). p` in the empty context.
+theorem consistency (e: expr): $ ⟮ nil ⊢ e : Π Prop . # 0 ⟯ $ > $ _ ⇒ ⊥ $;
+
+-- --------------------------------------------------------------------------
+-- 2. The model's pre-sets are the sets of the first universe
+-- --------------------------------------------------------------------------
+
+-- `b` is the atom of the block `pset b` (Lean's `PSet.{0}`), and `pset_rels b E M`
+-- says that `E` and `M` are closed relations on it that provably satisfy the
+-- characterizations of `PSet.Equiv` and `PSet.Mem`. `c ∊ fm ∅` is a sentence of the
+-- language of set theory (a tree), `lsent b E M c` its Lean form, and `A ⊨ c` its
+-- truth in `(A, ∈)`. `fv uni (suc ∅)` is the first universe, `U_1`.
+
+--| Standardness (`pset_truth`, readback/model-fo.mm0). In every admissible universe
+--| `u` and at every valuation `w` of the levels, the value of a sentence's Lean form
+--| is inhabited exactly when the sentence is true in `(U_1, ∈)`.
+theorem standardness {z: set} (G: hyps) (b: blk) (E M: expr) (u w c: set):
+  $ pset_rels b E M $ > $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ c ∊ fm ∅ $ >
+  $ G ⇒ (∃ z (z ∊ dt u (mcv hfin) (lsent b E M c) w ∅) ↔ fv uni (suc ∅) ⊨ c) $;
+
+--| Readback (`pset_readback`). A sentence of set theory whose Lean form is provable
+--| is true in `(U_1, ∈)`.
+theorem readback (b: blk) (E M T: expr) (c: set):
+  $ pset_rels b E M $ > $ _ ⇒ c ∊ fm ∅ $ > $ enc_expr T ≐ lsent b E M c $ > $ inh nil T $ >
+  $ _ ⇒ fv uni (suc ∅) ⊨ c $;
+
+-- --------------------------------------------------------------------------
+-- 3. The continuum hypothesis
+-- --------------------------------------------------------------------------
+
+-- `ch_code` is the continuum hypothesis as a sentence of set theory, and `r_ch U`
+-- is the statement itself with its quantifiers bounded by `U`.
+
+--| What the sentence means (`ch_sat`).
+theorem ch_meaning (G: hyps) (U: class): $ G ⇒ isset U $ > $ G ⇒ (U ⊨ ch_code ↔ r_ch U) $;
+
+--| If Lean proves the continuum hypothesis of its pre-sets, it holds in `U_1`
+--| (`ch_readback`).
+theorem ch_proved (b: blk) (E M T: expr):
+  $ pset_rels b E M $ > $ enc_expr T ≐ lsent b E M ch_code $ > $ inh nil T $ >
+  $ _ ⇒ r_ch (fv uni (suc ∅)) $;
+
+--| If Lean refutes it, it fails in `U_1` (`nch_readback`).
+theorem ch_refuted (b: blk) (E M T: expr):
+  $ pset_rels b E M $ > $ enc_expr T ≐ lsent b E M (¬ₒ ch_code) $ > $ inh nil T $ >
+  $ _ ⇒ ¬ r_ch (fv uni (suc ∅)) $;

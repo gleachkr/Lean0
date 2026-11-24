@@ -37,12 +37,15 @@ for mm0 in spec/examples/*.mm0; do
   scripts/check.sh "$mm0" "${mm0%.mm0}.auf" || fail=1
 done
 
-# The TG library with the encoding of the spec's syntax (spec/tg/lean-tg.mm0, generated from
+# The TG library with the encoding of the spec's syntax (spec/tg/encoding/lean-tg.mm0, generated from
 # the spec) and the rest of the spec over it (lean-tg-rest.mm0, axioms for now): in sync with
 # the spec, and every theorem proved. Its MMB file is the start of every certificate in TG mode
 # (`certify.sh --tg` below).
 echo "== spec/tg (the set-theory library and the syntax encoding)"
 if scripts/tg-lean.py --check && tg=$(scripts/tg-check.sh spec/tg/lean-tg-rest.mm0) && echo "$tg" && [[ "$tg" == *"; 0 admitted with sorry!; 0 warnings)" ]]; then :; else echo "FAIL: spec/tg"; fail=1; fi
+# The whole development, with the readback theorems, which are outside the certificates' chain
+# (spec/tg/results.mm0 restates the headline theorems and imports everything).
+if tg=$(scripts/tg-check.sh spec/tg/results.mm0) && echo "$tg" && [[ "$tg" == *"; 0 admitted with sorry!; 0 warnings)" ]]; then :; else echo "FAIL: spec/tg/results.mm0"; fail=1; fi
 # The generator's notation parser: every axiom of the spec in prefix form, proved by the axiom.
 pc=build/tg/parsecheck
 if scripts/tg-lean.py --parse-check $pc && "${ABC:-abc}" compile $pc/check.mm0 $pc/check.auf $pc/check.mmb \

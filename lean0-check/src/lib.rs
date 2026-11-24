@@ -50,7 +50,13 @@ pub fn flatten(files: &[(&str, &str)], top: &str) -> Result<String, String> {
                 let Some(file) = line.trim_end().strip_prefix("import \"").and_then(|l| l.strip_suffix("\";")) else {
                     return Err(format!("{name}: unexpected import line {line:?}"))
                 };
-                go(files, file, seen, out)?;
+                // an import is relative to the importing file's directory
+                let mut path: Vec<&str> = name.split('/').collect();
+                path.pop();
+                for part in file.split('/') {
+                    if part == ".." { path.pop(); } else { path.push(part) }
+                }
+                go(files, &path.join("/"), seen, out)?;
             } else {
                 out.push_str(line);
             }
