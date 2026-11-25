@@ -17,8 +17,12 @@ initially based on [Lean4Lean](https://github.com/digama0/lean4lean)'s
 `IsDefEq` judgment. They add a new schema for inductive types, derived from the 
 kernel, since Lean4Lean leaves inductive declarations unspecified. `propext`, 
 `Classical.choice`, and `Quot.sound` are also included, and hold in the model. 
-The model should also support soundness for arithmetic of every finite order - 
-this will need some more work.
+Besides consistency, we prove a basic reflection result that the denotation of 
+`PSet.{0}` in the model, modulo `PSet.Equiv`, is isomorphic to the first 
+universe of the ambient set theory. This implies that the Lean0 axioms are 
+sound for arithmetic of all finite orders, and that independence results (like 
+the independence of CH) for the ambient theory reflect to independence results 
+for the Lean0 axioms.
 
 Nested inductive types (a prickly topic) are handled more or less as in the 
 kernel: the Lean0 axioms allow nested occurrences to be replaced by auxiliary 
@@ -33,7 +37,8 @@ gives an MM1 axiomatization of Lean 3's type theory (levels, typing and
 conversion, a general schema for inductive types including positivity and 
 elimination-level conditions, quotients). The idea of using nanoda for tracing 
 was [described by Chris Bailey in 
-2020](https://leanprover-community.github.io/archive/stream/236449-Program-verification/topic/Projects.html).
+2020](https://leanprover-community.github.io/archive/stream/236449-Program-verification/topic/Projects.html); 
+that idea was also due to Mario Carneiro.
 
 ## Prior Art
 
@@ -104,6 +109,19 @@ in the verifier.
 [lean2dk]: https://github.com/Deducteam/lean2dk
 [Lean4Less]: https://rish987.github.io/files/lean4less.pdf
 [Blanqui and Vaishnav]: https://arxiv.org/abs/2609.24604
+
+### nanodatg
+
+[nanodatg] is a fork of nanoda that turns an export into derivations in a
+very small (about 700 LoC) LCF-style kernel for Tarski–Grothendieck set theory.
+Lean0 is similar architecturally, but
+
+- with MM0 verifiers playing the role of the trusted kernel, and
+- with the exported derivations checked against an axiomatized type theory for 
+  Lean (which is proved consistent in an ambient set theory), rather than being 
+  exported directly as deductions in set theory.
+
+[nanodatg]: https://github.com/nomeata/nanodatg
 
 ## Setup
 
