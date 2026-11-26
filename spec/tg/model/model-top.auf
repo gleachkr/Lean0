@@ -1879,35 +1879,35 @@ p4: $ deq_j (jmod (mcv hfin)) (cons nat_ty G) (app (app f (bvar nz)) nat_zero) (
 p5: $ deq_j (jmod (mcv hfin)) (cons nat_ty (cons nat_ty G)) (app (app f (bvar n1)) (app nat_succ (bvar nz))) (app (app fd (app (app f (bvar n1)) (bvar nz))) (lit (bd0 (bd1 b0)))) nat_ty $ by jmod_i [#5]
 z1: $ shr_eqs G f fd $ by shr_eqs_i_j [#1, #2, p3, p4, p5]
 
-bvar
+bvar_ty
 ----
-z1: $ ty G (bvar i) A $ by mbvar [#1]
+z1: $ ty G (bvar i) A $ by mbvar_ty [#1]
 
-symm
+deq_symm
 ----
-z1: $ deq G e2 e A $ by msymm [#1]
+z1: $ deq G e2 e A $ by mdeq_symm [#1]
 
-trans
+deq_trans
 -----
-z1: $ deq G e1 e3 A $ by mtrans [#1, #2]
+z1: $ deq G e1 e3 A $ by mdeq_trans [#1, #2]
 
-sortDF
+sort_df
 ------
 z1: $ deq G (srt l) (srt l2) (srt (ls l)) $ by msort [#1]
 
-appDF
+app_df
 -----
-z1: $ deq G (app f a) (app f2 a2) R $ by mappDF [#1, #2, #3]
+z1: $ deq G (app f a) (app f2 a2) R $ by mapp_df [#1, #2, #3]
 
-lamDF
+lam_df
 -----
 z1: $ deq G (lam A b) (lam A2 b2) (pi A B) $ by mlam [#1, #2]
 
-forallEDF
+pi_df
 ---------
 z1: $ deq G (pi A B) (pi A2 B2) (srt (limax u v)) $ by mpi [#1, #2]
 
-defeqDF
+conv
 -------
 z1: $ deq G e e2 B $ by mdefeq [#1, #2]
 
@@ -1919,17 +1919,17 @@ eta
 ---
 z1: $ deq G (lam A (app e1 (bvar nz))) e (pi A B) $ by meta [#1, #2]
 
-proofIrrel
+proof_irrel
 ----------
 z1: $ deq G h h2 p $ by mpirr [#1, #2, #3]
 
-instDF
+inst_df
 ------
-z1: $ deq G r r2 R $ by minstDF [#1, #2, #3, #4, #5, #6]
+z1: $ deq G r r2 R $ by minst_df [#1, #2, #3, #4, #5, #6]
 
-weakDF
+weak_df
 ------
-z1: $ deq G2 r r2 R $ by mweakDF [#1, #2, #3, #4, #5]
+z1: $ deq G2 r r2 R $ by mweak_df [#1, #2, #3, #4, #5]
 
 eeqv_df
 -------
@@ -1986,7 +1986,7 @@ h5: $ lookup (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u
 h6: $ lookup (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))) n3 (srt u) $ by lookup_s [h5, h2]
 h7: $ lookup (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil))))) n4 (srt u) $ by lookup_s [h6, h2]
 h8: $ lookup (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) n5 (srt u) $ by lookup_s [h7, h2]
-h9: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (bvar n5) (bvar n5) (srt u) $ by bvar [h8]
+h9: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (bvar n5) (bvar n5) (srt u) $ by bvar_ty [h8]
 h10: $ le nz n5 $ by le_z
 h11: $ add n5 nz n5 $ by add_z
 h12: $ lift nz nz (bvar n5) (bvar n5) $ by lift_bvar_ge [h10, h11]
@@ -2101,7 +2101,7 @@ h120: $ lift n1 n1 (bvar n5) (bvar n6) $ by lift_bvar_ge [h48, h14]
 h121: $ lift n1 n1 (pi (bvar n5) Prop) (pi (bvar n6) Prop) $ by lift_pi [h120, h94]
 h122: $ lift n1 nz (pi (bvar n4) (pi (bvar n5) Prop)) (pi (bvar n5) (pi (bvar n6) Prop)) $ by lift_pi [h119, h121]
 h123: $ lookup (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) n4 (pi (bvar n5) (pi (bvar n6) Prop)) $ by lookup_s [h118, h122]
-h124: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (bvar n4) (bvar n4) (pi (bvar n5) (pi (bvar n6) Prop)) $ by bvar [h123]
+h124: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (bvar n4) (bvar n4) (pi (bvar n5) (pi (bvar n6) Prop)) $ by bvar_ty [h123]
 h125: $ inst nz (srt v) (bvar n4) (srt v) $ by inst_srt
 h126: $ le n1 n6 $ by le_s [h10]
 h127: $ inst n1 (bvar n7) (bvar n4) (bvar n6) $ by inst_bvar_gt [h126]
@@ -2149,7 +2149,7 @@ h168: $ lookup (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt
 h169: $ lookup (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))) n1 (srt v) $ by lookup_s [h168, h167]
 h170: $ lookup (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil))))) n2 (srt v) $ by lookup_s [h169, h167]
 h171: $ lookup (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) n3 (srt v) $ by lookup_s [h170, h167]
-h172: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (bvar n3) (bvar n3) (srt v) $ by bvar [h171]
+h172: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (bvar n3) (bvar n3) (srt v) $ by bvar_ty [h171]
 h173: $ inst nz (bvar n6) (bvar n3) (bvar n5) $ by inst_bvar_gt [h10]
 h174: $ inst n1 (bvar n1) (bvar n3) (bvar n4) $ by inst_bvar_eq [h112]
 h175: $ inst nz (pi (bvar n6) (bvar n1)) (bvar n3) (pi (bvar n5) (bvar n4)) $ by inst_pi [h173, h174]
@@ -2194,7 +2194,7 @@ h213: $ lift n1 nz (pi (bvar n3) (bvar n2)) (pi (bvar n4) (bvar n3)) $ by lift_p
 h214: $ lookup (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil))))) n1 (pi (bvar n4) (bvar n3)) $ by lookup_s [h212, h213]
 h215: $ lift n1 nz (pi (bvar n4) (bvar n3)) (pi (bvar n5) (bvar n4)) $ by lift_pi [h119, h108]
 h216: $ lookup (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) n2 (pi (bvar n5) (bvar n4)) $ by lookup_s [h214, h215]
-h217: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (bvar n2) (bvar n2) (pi (bvar n5) (bvar n4)) $ by bvar [h216]
+h217: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (bvar n2) (bvar n2) (pi (bvar n5) (bvar n4)) $ by bvar_ty [h216]
 h218: $ inst nz (bvar n6) (bvar n2) (bvar n5) $ by inst_bvar_gt [h10]
 h219: $ inst n1 (bvar n7) (bvar n2) (bvar n6) $ by inst_bvar_gt [h126]
 h220: $ inst n2 (bvar n7) (bvar n2) (bvar n6) $ by inst_bvar_gt [h69]
@@ -2258,7 +2258,7 @@ h277: $ lift n1 n2 (pi (app (app (bvar n5) (bvar n1)) (bvar nz)) (app (app (app 
 h278: $ lift n1 n1 (pi (bvar n5) (pi (app (app (bvar n5) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n5)) (app (bvar n4) (bvar n2))) (app (bvar n4) (bvar n1))))) (pi (bvar n6) (pi (app (app (bvar n6) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n6)) (app (bvar n5) (bvar n2))) (app (bvar n5) (bvar n1))))) $ by lift_pi [h120, h277]
 h279: $ lift n1 nz (pi (bvar n4) (pi (bvar n5) (pi (app (app (bvar n5) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n5)) (app (bvar n4) (bvar n2))) (app (bvar n4) (bvar n1)))))) (pi (bvar n5) (pi (bvar n6) (pi (app (app (bvar n6) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n6)) (app (bvar n5) (bvar n2))) (app (bvar n5) (bvar n1)))))) $ by lift_pi [h119, h278]
 h280: $ lookup (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) n1 (pi (bvar n5) (pi (bvar n6) (pi (app (app (bvar n6) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n6)) (app (bvar n5) (bvar n2))) (app (bvar n5) (bvar n1)))))) $ by lookup_s [h267, h279]
-h281: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (bvar n1) (bvar n1) (pi (bvar n5) (pi (bvar n6) (pi (app (app (bvar n6) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n6)) (app (bvar n5) (bvar n2))) (app (bvar n5) (bvar n1)))))) $ by bvar [h280]
+h281: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (bvar n1) (bvar n1) (pi (bvar n5) (pi (bvar n6) (pi (app (app (bvar n6) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n6)) (app (bvar n5) (bvar n2))) (app (bvar n5) (bvar n1)))))) $ by bvar_ty [h280]
 h282: $ inst nz (quot u) (bvar n1) (quot u) $ by inst_closed [h76, h35]
 h283: $ inst nz (bvar n6) (bvar n1) (bvar n5) $ by inst_bvar_gt [h10]
 h284: $ inst nz (app (quot u) (bvar n6)) (bvar n1) (app (quot u) (bvar n5)) $ by inst_app [h282, h283]
@@ -2274,22 +2274,22 @@ h293: $ inst n2 (bvar n1) (bvar n5) (bvar n1) $ by inst_bvar_lt [h37]
 h294: $ inst n2 (app (app (quot u) (bvar n2)) (bvar n1)) (bvar n5) (app (app (quot u) (bvar n7)) (bvar n1)) $ by inst_app [h292, h293]
 h295: $ inst n1 (pi (bvar n1) (app (app (quot u) (bvar n2)) (bvar n1))) (bvar n5) (pi (bvar n6) (app (app (quot u) (bvar n7)) (bvar n1))) $ by inst_pi [h16, h294]
 h296: $ inst nz (pi (pi (bvar nz) (pi (bvar n1) Prop)) (pi (bvar n1) (app (app (quot u) (bvar n2)) (bvar n1)))) (bvar n5) (pi (pi (bvar n5) (pi (bvar n6) Prop)) (pi (bvar n6) (app (app (quot u) (bvar n7)) (bvar n1)))) $ by inst_pi [h19, h295]
-h297: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (app (quot_mk u) (bvar n5)) (app (quot_mk u) (bvar n5)) (pi (pi (bvar n5) (pi (bvar n6) Prop)) (pi (bvar n6) (app (app (quot u) (bvar n7)) (bvar n1)))) $ by appDF [h290, h9, h296]
+h297: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (app (quot_mk u) (bvar n5)) (app (quot_mk u) (bvar n5)) (pi (pi (bvar n5) (pi (bvar n6) Prop)) (pi (bvar n6) (app (app (quot u) (bvar n7)) (bvar n1)))) $ by app_df [h290, h9, h296]
 h298: $ inst nz (bvar n6) (bvar n4) (bvar n5) $ by inst_bvar_gt [h10]
 h299: $ inst n1 (quot u) (bvar n4) (quot u) $ by inst_closed [h76, h24]
 h300: $ inst n1 (app (quot u) (bvar n7)) (bvar n4) (app (quot u) (bvar n6)) $ by inst_app [h299, h127]
 h301: $ inst n1 (bvar n1) (bvar n4) (bvar n5) $ by inst_bvar_eq [h119]
 h302: $ inst n1 (app (app (quot u) (bvar n7)) (bvar n1)) (bvar n4) (app (app (quot u) (bvar n6)) (bvar n5)) $ by inst_app [h300, h301]
 h303: $ inst nz (pi (bvar n6) (app (app (quot u) (bvar n7)) (bvar n1))) (bvar n4) (pi (bvar n5) (app (app (quot u) (bvar n6)) (bvar n5))) $ by inst_pi [h298, h302]
-h304: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (app (app (quot_mk u) (bvar n5)) (bvar n4)) (app (app (quot_mk u) (bvar n5)) (bvar n4)) (pi (bvar n5) (app (app (quot u) (bvar n6)) (bvar n5))) $ by appDF [h297, h124, h303]
+h304: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (app (app (quot_mk u) (bvar n5)) (bvar n4)) (app (app (quot_mk u) (bvar n5)) (bvar n4)) (pi (bvar n5) (app (app (quot u) (bvar n6)) (bvar n5))) $ by app_df [h297, h124, h303]
 h305: $ lookup (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) nz (bvar n5) $ by lookup_z [h119]
-h306: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (bvar nz) (bvar nz) (bvar n5) $ by bvar [h305]
+h306: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (bvar nz) (bvar nz) (bvar n5) $ by bvar_ty [h305]
 h307: $ inst nz (quot u) (bvar nz) (quot u) $ by inst_closed [h76, h35]
 h308: $ inst nz (bvar n6) (bvar nz) (bvar n5) $ by inst_bvar_gt [h10]
 h309: $ inst nz (app (quot u) (bvar n6)) (bvar nz) (app (quot u) (bvar n5)) $ by inst_app [h307, h308]
 h310: $ inst nz (bvar n5) (bvar nz) (bvar n4) $ by inst_bvar_gt [h47]
 h311: $ inst nz (app (app (quot u) (bvar n6)) (bvar n5)) (bvar nz) (app (app (quot u) (bvar n5)) (bvar n4)) $ by inst_app [h309, h310]
-h312: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (app (app (app (quot_mk u) (bvar n5)) (bvar n4)) (bvar nz)) (app (app (app (quot_mk u) (bvar n5)) (bvar n4)) (bvar nz)) (app (app (quot u) (bvar n5)) (bvar n4)) $ by appDF [h304, h306, h311]
+h312: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (app (app (app (quot_mk u) (bvar n5)) (bvar n4)) (bvar nz)) (app (app (app (quot_mk u) (bvar n5)) (bvar n4)) (bvar nz)) (app (app (quot u) (bvar n5)) (bvar n4)) $ by app_df [h304, h306, h311]
 h313: $ inst nz (bvar n4) (app (app (app (quot_mk u) (bvar n5)) (bvar n4)) (bvar nz)) (bvar n3) $ by inst_bvar_gt [h42]
 h314: $ sty (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (quot_lift u v) (pi (srt u) (pi (pi (bvar nz) (pi (bvar n1) Prop)) (pi (srt v) (pi (pi (bvar n2) (bvar n1)) (pi (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (pi (app (app (quot u) (bvar n4)) (bvar n3)) (bvar n3))))))) (app (app (app (app (app (app (quot_lift u v) (bvar n5)) (bvar n4)) (bvar n3)) (bvar n2)) (bvar n1)) (app (app (app (quot_mk u) (bvar n5)) (bvar n4)) (bvar nz))) (bvar n3) $ by sty_app [h289, h312, h313]
 z1: $ deq (cons (bvar n4) (cons (pi (bvar n3) (pi (bvar n4) (pi (app (app (bvar n4) (bvar n1)) (bvar nz)) (app (app (app (ind_ty (eq_D v) nz) (bvar n4)) (app (bvar n3) (bvar n2))) (app (bvar n3) (bvar n1)))))) (cons (pi (bvar n2) (bvar n1)) (cons (srt v) (cons (pi (bvar nz) (pi (bvar n1) Prop)) (cons (srt u) nil)))))) (app (app (app (app (app (app (quot_lift u v) (bvar n5)) (bvar n4)) (bvar n3)) (bvar n2)) (bvar n1)) (app (app (app (quot_mk u) (bvar n5)) (bvar n4)) (bvar nz))) (app (bvar n2) (bvar nz)) (bvar n3) $ by quot_lift_mk_sty [h314, h306]

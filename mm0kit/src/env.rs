@@ -167,6 +167,8 @@ pub struct Env {
     plain_hyps: HashMap<u32, Box<[E]>>,
     /// For such a theorem, once used: the local lemma that states it unfolded (`plain_thm`).
     plain_thms: HashMap<u32, ThId>,
+    /// The level prover's lemmas for the derived `imax` rules, by rule name (`level.rs`).
+    pub level_lemmas: HashMap<&'static str, ThId>,
 }
 
 /// A lemma signature: argument sorts and hypotheses.
@@ -783,6 +785,7 @@ impl Env {
         self.order.truncate(from);
         self.split_lemmas.retain(|_, id| (id.0 as usize) < nthms);
         self.plain_thms.retain(|_, id| (id.0 as usize) < nthms);
+        self.level_lemmas.retain(|_, id| (id.0 as usize) < nthms);
         let keep = self.split_lemmas.clone();
         self.recent_lemmas.retain(|k| keep.contains_key(k));
     }

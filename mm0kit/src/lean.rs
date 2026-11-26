@@ -560,7 +560,7 @@ impl Lean {
     pub fn bvar_rule(&mut self, env: &mut Env, g: E, i: usize) -> Result<P> {
         let (a, pl) = self.lookup(env, g, i)?;
         let ie = self.nat(env, i);
-        let p = env.thm_n("bvar", &[g, ie, a], &[pl])?;
+        let p = env.thm_n("bvar_ty", &[g, ie, a], &[pl])?;
         // the rule concludes `ty`; derivations are `deq`
         let e = self.bvar(env, i);
         let target = env.app(self.ids.deq, &[g, e, e, a]);
@@ -569,7 +569,7 @@ impl Lean {
 
     pub fn symm(&mut self, env: &mut Env, p: P) -> Result<P> {
         let (g, a, b, t) = self.deq_parts(env, p);
-        env.thm_n("symm", &[g, a, b, t], &[p])
+        env.thm_n("deq_symm", &[g, a, b, t], &[p])
     }
 
     pub fn trans(&mut self, env: &mut Env, p: P, q: P) -> Result<P> {
@@ -578,7 +578,7 @@ impl Lean {
         if b != b2 {
             bail!("trans: middle terms differ:\n  {}\n  {}", env.show(b, &[]), env.show(b2, &[]))
         }
-        env.thm_n("trans", &[g, a, b, c, t], &[p, q])
+        env.thm_n("deq_trans", &[g, a, b, c, t], &[p, q])
     }
 
     /// `ty G e A` from `deq G e e2 A`.
@@ -593,18 +593,18 @@ impl Lean {
         self.trans(env, q, p)
     }
 
-    /// `sortDF` from a `leqv l l2` proof.
+    /// `sort_df` from a `leqv l l2` proof.
     pub fn sort_df(&mut self, env: &mut Env, g: E, l: E, l2: E, pl: P) -> Result<P> {
-        env.thm_n("sortDF", &[g, l, l2], &[pl])
+        env.thm_n("sort_df", &[g, l, l2], &[pl])
     }
 
-    /// `appDF`: `pf: deq G f f2 (pi A B)`, `pa: deq G a a2 A`.
+    /// `app_df`: `pf: deq G f f2 (pi A B)`, `pa: deq G a a2 A`.
     pub fn app_df(&mut self, env: &mut Env, pf: P, pa: P) -> Result<P> {
         let (g, f, f2, fty) = self.deq_parts(env, pf);
-        let View::Pi(a, b) = self.view(env, fty) else { bail!("appDF: function type is not a pi: {}", env.show(fty, &[])) };
+        let View::Pi(a, b) = self.view(env, fty) else { bail!("app_df: function type is not a pi: {}", env.show(fty, &[])) };
         let (_, x, x2, _) = self.deq_parts(env, pa);
         let (r, pi) = self.inst(env, 0, b, x)?;
-        env.thm_n("appDF", &[g, f, f2, a, b, x, x2, r], &[pf, pa, pi])
+        env.thm_n("app_df", &[g, f, f2, a, b, x, x2, r], &[pf, pa, pi])
     }
 
     /// `sty_nil`: `sty G h A h A`.
@@ -630,32 +630,32 @@ impl Lean {
         env.thm_n("sty_app", &[g, h, a0, f, x, b, cb, c2], &[ps, pa, pi])
     }
 
-    /// `lamDF`: `pa: deq G A A2 (srt u)`, `pb: deq (cons A G) b b2 B`.
+    /// `lam_df`: `pa: deq G A A2 (srt u)`, `pb: deq (cons A G) b b2 B`.
     pub fn lam_df(&mut self, env: &mut Env, pa: P, pb: P) -> Result<P> {
         let (g, a, a2, aty) = self.deq_parts(env, pa);
-        let View::Srt(u) = self.view(env, aty) else { bail!("lamDF: domain type is not a sort") };
+        let View::Srt(u) = self.view(env, aty) else { bail!("lam_df: domain type is not a sort") };
         let (_, b, b2, bty) = self.deq_parts(env, pb);
-        env.thm_n("lamDF", &[g, u, a, a2, b, b2, bty], &[pa, pb])
+        env.thm_n("lam_df", &[g, u, a, a2, b, b2, bty], &[pa, pb])
     }
 
-    /// `forallEDF`: `pa: deq G A A2 (srt u)`, `pb: deq (cons A G) B B2 (srt v)`.
+    /// `pi_df`: `pa: deq G A A2 (srt u)`, `pb: deq (cons A G) B B2 (srt v)`.
     pub fn forall_df(&mut self, env: &mut Env, pa: P, pb: P) -> Result<P> {
         let (g, a, a2, aty) = self.deq_parts(env, pa);
-        let View::Srt(u) = self.view(env, aty) else { bail!("forallEDF: domain type is not a sort") };
+        let View::Srt(u) = self.view(env, aty) else { bail!("pi_df: domain type is not a sort") };
         let (_, b, b2, bty) = self.deq_parts(env, pb);
-        let View::Srt(v) = self.view(env, bty) else { bail!("forallEDF: body type is not a sort") };
-        env.thm_n("forallEDF", &[g, u, v, a, a2, b, b2], &[pa, pb])
+        let View::Srt(v) = self.view(env, bty) else { bail!("pi_df: body type is not a sort") };
+        env.thm_n("pi_df", &[g, u, v, a, a2, b, b2], &[pa, pb])
     }
 
-    /// `defeqDF`: `pt: deq G A B (srt u)`, `pe: deq G e e2 A`.
+    /// `conv`: `pt: deq G A B (srt u)`, `pe: deq G e e2 A`.
     pub fn defeq_df(&mut self, env: &mut Env, pt: P, pe: P) -> Result<P> {
         let (g, a, b, tty) = self.deq_parts(env, pt);
-        let View::Srt(u) = self.view(env, tty) else { bail!("defeqDF: type equation is not at a sort") };
+        let View::Srt(u) = self.view(env, tty) else { bail!("conv: type equation is not at a sort") };
         let (_, e, e2, ety) = self.deq_parts(env, pe);
         if ety != a {
-            bail!("defeqDF: type mismatch:\n  {}\n  {}", env.show(ety, &[]), env.show(a, &[]))
+            bail!("conv: type mismatch:\n  {}\n  {}", env.show(ety, &[]), env.show(a, &[]))
         }
-        env.thm_n("defeqDF", &[g, u, a, b, e, e2], &[pt, pe])
+        env.thm_n("conv", &[g, u, a, b, e, e2], &[pt, pe])
     }
 
     /// `beta`: `pb: ty (cons A G) e B`, `pa: ty G a A`.
@@ -688,14 +688,14 @@ impl Lean {
         Ok((g0, a0, self.cons(env, b2, g), p))
     }
 
-    /// `instDF`: `pa: ty G0 a A0` and `p: deq G1 e e2 A`, where `G1` has `A0` over `G0` and then
+    /// `inst_df`: `pa: ty G0 a A0` and `p: deq G1 e e2 A`, where `G1` has `A0` over `G0` and then
     /// `k` more entries, give `deq G e[a] e2[a] A[a]` (substituting at `k`).
     pub fn inst_df(&mut self, env: &mut Env, k: usize, pa: P, p: P) -> Result<P> {
         let (g0a, a, _, a0a) = self.deq_parts(env, pa);
         let (g1, e, e2, ty) = self.deq_parts(env, p);
         let (g0, a0, g, pc) = self.cinst(env, k, g1, a)?;
         if g0 != g0a {
-            bail!("instDF: the argument's context does not match the substituted entry's")
+            bail!("inst_df: the argument's context does not match the substituted entry's")
         }
         // the entry may be the argument's type up to definitions (a type that went through
         // the schema's relations has its definitions unfolded)
@@ -707,11 +707,11 @@ impl Lean {
             let mut xs = xs.to_vec();
             *xs.last_mut().unwrap() = a0;
             let target = env.app(t, &xs);
-            env.convert(pa, target).map_err(|_| Mm0Error("instDF: the argument's type does not match the substituted entry".into()))?
+            env.convert(pa, target).map_err(|_| Mm0Error("inst_df: the argument's type does not match the substituted entry".into()))?
         };
         let ((r, pr), (r2, pr2), (rt, prt)) = (self.inst(env, k, e, a)?, self.inst(env, k, e2, a)?, self.inst(env, k, ty, a)?);
         let ke = self.nat(env, k);
-        env.thm_n("instDF", &[ke, g0, g1, g, a0, a, e, e2, ty, r, r2, rt], &[pa, pc, p, pr, pr2, prt])
+        env.thm_n("inst_df", &[ke, g0, g1, g, a0, a, e, e2, ty, r, r2, rt], &[pa, pc, p, pr, pr2, prt])
     }
 
     /// `cext n G G2` for the context `G2`: returns `G` and the proof.
@@ -728,17 +728,17 @@ impl Lean {
         Ok((g, env.thm_n("cext_s", &[ne, g, g2t, a], &[p])?))
     }
 
-    /// `weakDF`: `p: deq G e e2 A`, where `G` is `G2` without its last `n` entries, gives
+    /// `weak_df`: `p: deq G e e2 A`, where `G` is `G2` without its last `n` entries, gives
     /// `deq G2 e↑ e2↑ A↑` (lifting by `n`).
     pub fn weak_df(&mut self, env: &mut Env, n: usize, g2: E, p: P) -> Result<P> {
         let (g, e, e2, ty) = self.deq_parts(env, p);
         let (g0, pc) = self.cext(env, n, g2)?;
         if g0 != g {
-            bail!("weakDF: the context is not a prefix")
+            bail!("weak_df: the context is not a prefix")
         }
         let ((r, pr), (r2, pr2), (rt, prt)) = (self.lift(env, n, 0, e)?, self.lift(env, n, 0, e2)?, self.lift(env, n, 0, ty)?);
         let ne = self.nat(env, n);
-        env.thm_n("weakDF", &[ne, g, g2, e, e2, ty, r, r2, rt], &[p, pc, pr, pr2, prt])
+        env.thm_n("weak_df", &[ne, g, g2, e, e2, ty, r, r2, rt], &[p, pc, pr, pr2, prt])
     }
 
     /// `eta`: `pe: ty G e (pi A B)` gives `deq G (lam A (app e↑ #0)) e (pi A B)`.
@@ -749,12 +749,12 @@ impl Lean {
         env.thm_n("eta", &[g, a, b, e, e1], &[pe, pl])
     }
 
-    /// `proofIrrel`: `pp: ty G p (srt lz)`, `ph: ty G h p`, `ph2: ty G h2 p`.
+    /// `proof_irrel`: `pp: ty G p (srt lz)`, `ph: ty G h p`, `ph2: ty G h2 p`.
     pub fn proof_irrel(&mut self, env: &mut Env, pp: P, ph: P, ph2: P) -> Result<P> {
         let (g, p, _, _) = self.deq_parts(env, pp);
         let (_, h, _, _) = self.deq_parts(env, ph);
         let (_, h2, _, _) = self.deq_parts(env, ph2);
-        env.thm_n("proofIrrel", &[g, p, h, h2], &[pp, ph, ph2])
+        env.thm_n("proof_irrel", &[g, p, h, h2], &[pp, ph, ph2])
     }
 }
 

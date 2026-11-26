@@ -1257,8 +1257,7 @@ def render_rest(text, strata):
     sp = mm0math.Spec(text)
     decls = sp.decls[len(part1.decls):]
     lib = library_names() | {d[1] for d in part1.decls}
-    # terms and theorems have separate namespaces (the spec's rule `bvar` is about
-    # the constructor `bvar`)
+    # terms and theorems have separate namespaces (a rule may have a term's name)
     thm = lambda d: d[0] in ("axiom", "theorem")
     ours = {(thm(d), d[1]) for d in part1.decls}
     taken = sorted(d[1] for d in decls if d[1] in library_names() or (thm(d), d[1]) in ours)

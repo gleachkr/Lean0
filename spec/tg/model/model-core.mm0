@@ -1,6 +1,6 @@
 -- model-core.mm0: the core rules of the judgment that need the metatheory of
 -- the syntax (layer I of the reduction, audit §11), for every hook `M`: the
--- spec's `bvar`, `appDF`, `beta`, `eta`, `instDF` and `weakDF` with `mdeq M`
+-- spec's `bvar_ty`, `app_df`, `beta`, `eta`, `inst_df` and `weak_df` with `mdeq M`
 -- for `deq` (`ty G e A` is `deq G e e A`), and `eeqv_df` for every hook that
 -- is invariant under `eeqv` (`minv`: the constructors it interprets denote
 -- the same on both sides of an `eeqv` atom, which C5 and C6 must prove of the
@@ -9,12 +9,12 @@
 
 import "model-meta.mm0";
 
---| The rule `bvar` in the model, for every hook: a variable has the type its context gives it.
-theorem mbvar (M: class) (G: ctx) (i: nat) (A: expr):
+--| The rule `bvar_ty` in the model, for every hook: a variable has the type its context gives it.
+theorem mbvar_ty (M: class) (G: ctx) (i: nat) (A: expr):
   $ lookup G i A $ > $ mdeq M G (bvar i) (bvar i) A $;
---| The rule `appDF` in the model, for every hook: application respects the judgment, at the codomain instantiated by
+--| The rule `app_df` in the model, for every hook: application respects the judgment, at the codomain instantiated by
 --| the argument.
-theorem mappDF (M: class) (G: ctx) (f f2 A B a a2 R: expr):
+theorem mapp_df (M: class) (G: ctx) (f f2 A B a a2 R: expr):
   $ mdeq M G f f2 (pi A B) $ > $ mdeq M G a a2 A $ > $ inst nz B a R $ >
   $ mdeq M G (app f a) (app f2 a2) R $;
 --| The rule `beta` in the model, for every hook: a `λ` applied to an argument is its body instantiated.
@@ -25,14 +25,14 @@ theorem mbeta (M: class) (G: ctx) (A e B a r R: expr):
 theorem meta (M: class) (G: ctx) (A B e e1: expr):
   $ mdeq M G e e (pi A B) $ > $ lift n1 nz e e1 $ >
   $ mdeq M G (lam A (app e1 (bvar nz))) e (pi A B) $;
---| The rule `instDF` in the model, for every hook: a judgment is kept by instantiating the variable `k` of its context
+--| The rule `inst_df` in the model, for every hook: a judgment is kept by instantiating the variable `k` of its context
 --| by a term of that variable's type.
-theorem minstDF (M: class) (k: nat) (G0 G1 G: ctx) (A0 a e e2 A r r2 R: expr):
+theorem minst_df (M: class) (k: nat) (G0 G1 G: ctx) (A0 a e e2 A r r2 R: expr):
   $ mdeq M G0 a a A0 $ > $ cinst k G0 A0 a G1 G $ > $ mdeq M G1 e e2 A $ >
   $ inst k e a r $ > $ inst k e2 a r2 $ > $ inst k A a R $ > $ mdeq M G r r2 R $;
---| The rule `weakDF` in the model, for every hook: a judgment is kept by lifting it into a context with `n` more
+--| The rule `weak_df` in the model, for every hook: a judgment is kept by lifting it into a context with `n` more
 --| entries in front.
-theorem mweakDF (M: class) (n: nat) (G G2: ctx) (e e2 A r r2 R: expr):
+theorem mweak_df (M: class) (n: nat) (G G2: ctx) (e e2 A r r2 R: expr):
   $ mdeq M G e e2 A $ > $ cext n G G2 $ >
   $ lift n nz e r $ > $ lift n nz e2 r2 $ > $ lift n nz A R $ > $ mdeq M G2 r r2 R $;
 

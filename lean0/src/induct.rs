@@ -1055,7 +1055,7 @@ fn spine_args(g: &Gen, mut e: E) -> Vec<E> {
 /// (at an auxiliary type the constructor is the nested block's, at the occurrence's arguments),
 /// every argument a variable of the rule's context `Dl` (the fields over the minors, the
 /// motives and the parameters) or an index of the constructor's result, over any base
-/// context `G` (`weakBaseDF`), with the block's nested occurrences restored. The statement
+/// context `G` (`weak_base_df`), with the block's nested occurrences restored. The statement
 /// comes from Part I's `iota_eq`, `crst` and `rst` alone, so a replayed declaration states
 /// it without the proof.
 #[allow(clippy::too_many_arguments)]
@@ -1136,7 +1136,7 @@ fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &s
         let p0 = mm(g.env.convert(p0, goal0))?;
         pv.horn.facts.clear();
         pv.horn.facts.insert(goal0, p0);
-        let p = pv.apply(g, "weakBaseDF", concl)?;
+        let p = pv.apply(g, "weak_base_df", concl)?;
         pv.horn.facts.clear();
         Some(p)
     };
@@ -1146,7 +1146,7 @@ fn iota_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &s
 /// The projection rule as a closed equation (`proj_mk`, audit §4): field `i` of the
 /// constructor `c` (`ind_ctor D j 0`) applied to the variables of the rule's context `Dl`
 /// (the fields over the parameters) is the field's variable, over any base context `G`
-/// (`weakBaseDF`), with the block's nested occurrences restored, under the hypotheses `hyps`
+/// (`weak_base_df`), with the block's nested occurrences restored, under the hypotheses `hyps`
 /// of `proj_ok` (on the levels). The statement comes from Part I's `proj_eq`, `crst`, `rst`
 /// and `lookup` alone, so a replayed declaration states it without the proof.
 #[allow(clippy::too_many_arguments)]
@@ -1223,7 +1223,7 @@ fn proj_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, hyps: Ve
         let p0 = pv.apply(g, "proj_mk", goal0)?;
         pv.horn.facts.clear();
         pv.horn.facts.insert(goal0, p0);
-        let p = pv.apply(g, "weakBaseDF", concl)?;
+        let p = pv.apply(g, "weak_base_df", concl)?;
         pv.horn.facts.clear();
         Some(p)
     };
@@ -1232,7 +1232,7 @@ fn proj_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, hyps: Ve
 
 /// Structure eta as a closed equation (`ind_eta`, audit §4): in the rule's context `Dl` (the
 /// parameters, then one variable of the type `st`, `ind_ty D j`, applied to them), over any
-/// base context `G` (`weakBaseDF`), the variable is the constructor applied to the parameters
+/// base context `G` (`weak_base_df`), the variable is the constructor applied to the parameters
 /// and its projections. The statement comes from Part I's `eta_eq` alone, so a replayed
 /// declaration states it without the proof.
 #[allow(clippy::too_many_arguments)]
@@ -1279,7 +1279,7 @@ fn eta_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &st
         let p0 = pv.apply(g, "ind_eta", goal0)?;
         pv.horn.facts.clear();
         pv.horn.facts.insert(goal0, p0);
-        let p = pv.apply(g, "weakBaseDF", concl)?;
+        let p = pv.apply(g, "weak_base_df", concl)?;
         pv.horn.facts.clear();
         Some(p)
     };
@@ -1287,7 +1287,7 @@ fn eta_eq_lemma(g: &mut Gen, pv: &mut Prover, args: Vec<(String, u8)>, name: &st
 }
 
 /// The spec's closed equation `ax` at the levels `us` (a rule without premises whose context
-/// is closed: `quot_lift_mk`), over any base context `G` (`weakBaseDF`): the
+/// is closed: `quot_lift_mk`), over any base context `G` (`weak_base_df`): the
 /// theorem `name` over `args` (`G`, then the levels).
 pub(crate) fn closed_over_base(g: &mut Gen, ax: &str, us: &[E], name: &str, args: Vec<(String, u8)>, doc: &str) -> R<ThId> {
     let th = g.env.thm_id(ax);
@@ -1315,7 +1315,7 @@ pub(crate) fn closed_over_base(g: &mut Gen, ax: &str, us: &[E], name: &str, args
         let p0 = mm(g.env.convert(p0, c0))?;
         let mut pv = Prover::new(g);
         pv.horn.facts.insert(c0, p0);
-        Some(pv.apply(g, "weakBaseDF", concl)?)
+        Some(pv.apply(g, "weak_base_df", concl)?)
     };
     add_thm(&mut g.env, name, args, Vec::new(), concl, false, false, proof, doc)
 }

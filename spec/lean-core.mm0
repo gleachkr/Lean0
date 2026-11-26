@@ -58,12 +58,12 @@ delimiter $ ( ) , # $;
 --|   checker compares with the export), and the quotient primitives are
 --|   constants (`cst` of atoms of the spec, as are `propext`, `Quot.sound`
 --|   and `Classical.choice`) with the kernel's types and reduction rule.
---| * Two admissible rules are axioms: `instDF` (substitution, Lean4Lean's
---|   theorem `IsDefEq.instN`), so that a substituted term's typing need not
---|   be derived again, and `weakDF` (weakening, `IsDefEq.weakN`), so that a
---|   derivation made in a shorter context can be used in a longer one.
+--| * Substitution and weakening are rules: `inst_df` (a theorem of Lean4Lean
+--|   about its judgment, `IsDefEq.instN`), so that a substituted term's
+--|   typing need not be derived again, and `weak_df` (`IsDefEq.weakN`), so
+--|   that a derivation made in a shorter context can be used in a longer one.
 --| * `eeqv_df`: expressions of the same shape at equivalent levels are
---|   definitionally equal (generalizing `sortDF` and `constDF`).
+--|   definitionally equal (generalizing `sort_df` and `constDF`).
 --|
 --| Notations: `⟦ Γ ⊢ e ≡ e2 : A ⟧` for the judgment and `⟦ₜ Γ ⊢ e : A ⟧` for typing,
 --| `λ A, e`, `Π A, B`, `f @ a`, `#i` for a bound variable, `Γ ▷ A` and `[]`
@@ -106,22 +106,34 @@ strict provable sort wff;
 
 -- Unary naturals (de Bruijn indices) ---------------------------------------
 
+--| Unary natural numbers: de Bruijn indices, lengths and positions in lists.
 --| @hole _n
 strict free sort nat;
+--| Zero, written `0`.
 term nz: nat;
+--| `s n`: the successor of `n`.
 term s: nat > nat;
 
 -- The numerals `0` to `9`: `0` is `nz`, and `n1` to `n9` are the definitions
 -- `s 0` to `s 8`. Larger numbers are written with `s`.
 prefix nz: $0$ prec max;
+--| `1`: `s 0`.
 def n1: nat = $ s 0 $; prefix n1: $1$ prec max;
+--| `2`: `s 1`.
 def n2: nat = $ s 1 $; prefix n2: $2$ prec max;
+--| `3`: `s 2`.
 def n3: nat = $ s 2 $; prefix n3: $3$ prec max;
+--| `4`: `s 3`.
 def n4: nat = $ s 3 $; prefix n4: $4$ prec max;
+--| `5`: `s 4`.
 def n5: nat = $ s 4 $; prefix n5: $5$ prec max;
+--| `6`: `s 5`.
 def n6: nat = $ s 5 $; prefix n6: $6$ prec max;
+--| `7`: `s 6`.
 def n7: nat = $ s 6 $; prefix n7: $7$ prec max;
+--| `8`: `s 7`.
 def n8: nat = $ s 7 $; prefix n8: $8$ prec max;
+--| `9`: `s 8`.
 def n9: nat = $ s 8 $; prefix n9: $9$ prec max;
 
 --| `le i n`: i ≤ n.
@@ -144,13 +156,22 @@ axiom add_s (i n j: nat): $ ⦃ i + n = j ⦄ $ > $ ⦃ i + s n = s j ⦄ $;
 
 -- Universe levels (VLevel.lean:8-13) ---------------------------------------
 
+--| Universe levels (`VLevel`): zero, successor, `max` and `imax`. A level
+--| variable of a statement stands for any level, so a universe-polymorphic
+--| constant is stated once.
 --| @hole _l
 strict free sort lvl;
+--| The level zero: `Sort lz` is `Prop`.
 term lz: lvl;
+--| `ls l`: the successor level `l + 1`.
 term ls: lvl > lvl;
+--| `a ⊔ b` (`lmax a b`): the maximum of two levels.
 term lmax: lvl > lvl > lvl;
 infixl lmax: $|_|$ prec 65;
 infixl lmax: $⊔$ prec 65;
+--| `limax a b`: Lean's `imax a b`, zero when `b` is zero and `max a b`
+--| otherwise. It is the level of a `Π` type, which is a proposition whenever
+--| its body is.
 term limax: lvl > lvl > lvl;
 
 --| `lparam i`: an object-level level parameter, for the case split
@@ -160,7 +181,9 @@ term lparam: nat > lvl;
 --| Lists of levels.
 --| @hole _ls
 strict free sort lvls;
+--| The empty list of levels.
 term lnil: lvls;
+--| `lcons l S`: the list `S` with `l` in front.
 term lcons: lvl > lvls > lvls;
 
 --| `lnth S n a`: the `n`th element of `S` is `a`.
@@ -196,16 +219,25 @@ axiom lsubst_gt (n m: nat) (a: lvl): $ n < m $ > $ ⟮ᵤ [ n ↦ a ] lparam m =
 
 -- Expressions (VExpr.lean:7-13), without `const` ---------------------------
 
+--| Expressions (`VExpr`), with de Bruijn indices. There is no constructor for
+--| constants: a Lean definition is an MM0 definition, an opaque constant is a
+--| `cst`, and inductive types, quotients and literals have terms of their own.
 --| @hole _e
 strict free sort expr;
+--| `#i` (`bvar i`): the bound variable with de Bruijn index `i`, counted from
+--| the innermost binder.
 term bvar: nat > expr;
 prefix bvar: $#$ prec max;
+--| `Sort l` (`srt l`): the universe at level `l`.
 term srt: lvl > expr;
 prefix srt: $Sort$ prec max;
 --| The sort of propositions.
 def Prop: expr = $ Sort lz $;
+--| `f @ a` (`app f a`): application.
 term app: expr > expr > expr;
 infixl app: $@$ prec 1000;
+--| `λ A, e` (`lam A e`): the function `fun x : A => e`, where `#0` in `e` is
+--| `x`.
 term lam: expr > expr > expr;
 notation lam (A e: expr): expr = ($\$:55) A ($,$:5) e;
 notation lam (A e: expr): expr = ($λ$:55) A ($,$:5) e;
@@ -220,6 +252,7 @@ notation pi (A B: expr): expr = ($Π$:55) A ($,$:5) B;
 --| levels. Nothing in the spec tells two atoms apart; that each constant has
 --| its own is checked by `lean0 check` (audit §8).
 strict free sort atom;
+--| `cst a S`: the opaque constant with atom `a` at the universe levels `S`.
 term cst: atom > lvls > expr;
 
 --| `closed k e`: every loose bound variable of `e` is below `k`
@@ -283,11 +316,15 @@ axiom inst_closed (j k: nat) (e a: expr):
 
 -- Contexts (Typing/Basic.lean:6-8) -----------------------------------------
 
---| Innermost binder first; each entry is a type relative to the tail.
+--| Contexts: lists of types, innermost binder first; each entry is a type
+--| relative to the tail.
 --| @hole _G
 strict free sort ctx;
+--| `[]`: the empty context.
 term nil: ctx;
 prefix nil: $[]$ prec max;
+--| `A :: G` (`cons A G`): `G` extended by a variable of type `A`. Statements
+--| write this `G ▷ A`.
 term cons: expr > ctx > ctx;
 infixr cons: $::$ prec 59;
 --| `G ▷ A` (`snoc G A`) is `A :: G`: the context `G` extended by a variable of
@@ -324,17 +361,19 @@ axiom cext_z (G: ctx): $ cext 0 G G $;
 axiom cext_s (n: nat) (G G2: ctx) (A: expr):
   $ cext n G G2 $ > $ cext (s n) G (G2 ▷ A) $;
 
---| Contexts as lists: `⌊| G | = n ⌋` (`clen G n`) is the length, `cnth G n A`
---| entry `n` as written (`lookup` lifts it), and `⌊ G ++ P = G2 ⌋` (`capp P G G2`)
---| the concatenation: `G2` is `G` followed by the entries of `P`.
+--| `⌊| G | = n ⌋` (`clen G n`): `G` has `n` entries.
 term clen: ctx > nat > wff;
 notation clen (G: ctx) (n: nat): wff = ($<_|$:0) G ($|$:0) ($=$:50) n ($_>$:0);
 notation clen (G: ctx) (n: nat): wff = ($⌊|$:0) G ($|$:0) ($=$:50) n ($⌋$:0);
 axiom clen_nil: $ ⌊| [] | = 0 ⌋ $;
 axiom clen_cons (A: expr) (G: ctx) (n: nat): $ ⌊| G | = n ⌋ $ > $ ⌊| G ▷ A | = s n ⌋ $;
+--| `cnth G n A`: entry `n` of `G`, counted from the innermost, is `A` as
+--| written (`lookup` lifts it).
 term cnth: ctx > nat > expr > wff;
 axiom cnth_z (A: expr) (G: ctx): $ cnth (G ▷ A) 0 A $;
 axiom cnth_s (A B: expr) (G: ctx) (n: nat): $ cnth G n B $ > $ cnth (G ▷ A) (s n) B $;
+--| `⌊ G ++ P = G2 ⌋` (`capp P G G2`): `G2` is `G` followed by the entries of
+--| `P`.
 term capp: ctx > ctx > ctx > wff;
 notation capp (P G G2: ctx): wff = ($<_$:0) G ($++$:62) P ($=$:50) G2 ($_>$:0);
 notation capp (P G G2: ctx): wff = ($⌊$:0) G ($++$:62) P ($=$:50) G2 ($⌋$:0);
@@ -398,6 +437,7 @@ axiom sty_app (G: ctx) (h A f a B C C2: expr):
 --| same levels among them).
 term eeqv: expr > expr > wff;
 axiom eeqv_refl (e: expr): $ eeqv e e $;
+--| `ceqv G G2`: the contexts agree entry by entry up to `eeqv`.
 term ceqv: ctx > ctx > wff;
 axiom eeqv_bvar (i: nat): $ eeqv #i #i $;
 axiom eeqv_srt (l l2: lvl): $ l ≈ l2 $ > $ eeqv (Sort l) (Sort l2) $;
@@ -415,14 +455,18 @@ axiom ceqv_cons (A A2: expr) (G G2: ctx): $ eeqv A A2 $ > $ ceqv G G2 $ > $ ceqv
 ---------------------------------------------------------------------------
 -- PART III: THE RULES
 -- The axioms concluding `≈` and `⊢`: the theory. Each is argued in
--- notes/audit-lean-mm0.md (§2 for the core, §6 for the admissible rules; §4
+-- notes/audit-lean-mm0.md (§2 for the core, §6 for the structural rules; §4
 -- for inductive types and quotients and §5 for literals, in their files).
 ---------------------------------------------------------------------------
 
 -- Level equivalence (VLevel.lean:58) ---------------------------------------
 -- Each axiom is valid under `VLevel.eval`, where `imax a b = if b = 0 then 0
--- else max a b`. These axioms alone are incomplete (notes/audit-lean-mm0.md
--- §3); `leqv_cases` completes them. A case split must substitute the
+-- else max a b`. `imax` has two rules, one for each case of its second
+-- argument; the identities `imax 0 a = a`, `imax 1 a = a`, `imax a a = a`
+-- and the distribution of `imax a` over `max` and `imax` follow by
+-- `leqv_cases` (the generator proves them in each certificate that uses
+-- them). The axioms before `leqv_cases` alone are incomplete
+-- (notes/audit-lean-mm0.md §3); `leqv_cases` completes them. A case split must substitute the
 -- parameter inside an arbitrary level, which cannot be stated over MM0
 -- variables, so a goal's variables are first abstracted to object-level
 -- parameters `lparam i` (`leqv_inst` puts the original levels back), and
@@ -446,21 +490,8 @@ axiom lmax_zero (a: lvl): $ lz ⊔ a ≈ a $;
 axiom lmax_succ (a b: lvl): $ ls a ⊔ ls b ≈ ls (a ⊔ b) $;
 axiom lmax_succ_self (a: lvl): $ a ⊔ ls a ≈ ls a $;
 axiom limax_zero (a: lvl): $ limax a lz ≈ lz $;
-axiom limax_zero_l (a: lvl): $ limax lz a ≈ a $;
---| `imax 1 a = a`: if `a = 0` both are 0, otherwise `max 1 a = a`. nanoda's level `simplify`
---| applies it (and `limax_zero_l`) whenever it puts a `Sort` in weak head normal form.
-axiom limax_one (a: lvl): $ limax (ls lz) a ≈ a $;
 --| `imax a (b+1) = max a (b+1)`: the second argument is not zero.
 axiom limax_succ (a b: lvl): $ limax a (ls b) ≈ a ⊔ ls b $;
-axiom limax_self (a: lvl): $ limax a a ≈ a $;
---| `imax a (max b c) = max (imax a b) (imax a c)`: `max b c` is zero only
---| when `b` and `c` are.
-axiom limax_max (a b c: lvl):
-  $ limax a (b ⊔ c) ≈ limax a b ⊔ limax a c $;
---| `imax a (imax b c) = max (imax a c) (imax b c)`: both sides are zero when
---| `c` is, and `max a (max b c)` otherwise.
-axiom limax_imax (a b c: lvl):
-  $ limax a (limax b c) ≈ limax a c ⊔ limax b c $;
 
 --| Case split on `lparam n`: zero, or the successor of some level (which is
 --| again called `lparam n`).
@@ -475,31 +506,31 @@ axiom leqv_inst (S: lvls) (l r l2 r2: lvl):
 -- The judgment (IsDefEq, Typing/Basic.lean:18-56) --------------------------
 
 --| A variable has the type its context gives it.
-axiom bvar (G: ctx) (i: nat) (A: expr):
+axiom bvar_ty (G: ctx) (i: nat) (A: expr):
   $ ⟮ₖ G ∋ #i : A ⟯ $ > $ ⟦ₜ G ⊢ #i : A ⟧ $;
-axiom symm (G: ctx) (e e2 A: expr):
+axiom deq_symm (G: ctx) (e e2 A: expr):
   $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ ⟦ G ⊢ e2 ≡ e : A ⟧ $;
-axiom trans (G: ctx) (e1 e2 e3 A: expr):
+axiom deq_trans (G: ctx) (e1 e2 e3 A: expr):
   $ ⟦ G ⊢ e1 ≡ e2 : A ⟧ $ > $ ⟦ G ⊢ e2 ≡ e3 : A ⟧ $ > $ ⟦ G ⊢ e1 ≡ e3 : A ⟧ $;
 --| `Sort l ≡ Sort l2 : Sort (l+1)` for equivalent levels `l`, `l2`.
-axiom sortDF (G: ctx) (l l2: lvl):
+axiom sort_df (G: ctx) (l l2: lvl):
   $ l ≈ l2 $ > $ ⟦ G ⊢ Sort l ≡ Sort l2 : Sort (ls l) ⟧ $;
 --| `f a ≡ f2 a2 : B[a]` from `f ≡ f2 : (x : A) → B` and `a ≡ a2 : A`.
-axiom appDF (G: ctx) (f f2 A B a a2 R: expr):
+axiom app_df (G: ctx) (f f2 A B a a2 R: expr):
   $ ⟦ G ⊢ f ≡ f2 : Π A, B ⟧ $ > $ ⟦ G ⊢ a ≡ a2 : A ⟧ $ > $ ⟮ [ #0 ↦ a ] B = R ⟯ $ >
   $ ⟦ G ⊢ f @ a ≡ f2 @ a2 : R ⟧ $;
 --| `(fun x : A => b) ≡ (fun x : A2 => b2) : (x : A) → B` from
 --| `A ≡ A2 : Sort u` and, with `x : A`, `b ≡ b2 : B`.
-axiom lamDF (G: ctx) (u: lvl) (A A2 b b2 B: expr):
+axiom lam_df (G: ctx) (u: lvl) (A A2 b b2 B: expr):
   $ ⟦ G ⊢ A ≡ A2 : Sort u ⟧ $ > $ ⟦ G ▷ A ⊢ b ≡ b2 : B ⟧ $ >
   $ ⟦ G ⊢ λ A, b ≡ λ A2, b2 : Π A, B ⟧ $;
 --| `((x : A) → B) ≡ ((x : A2) → B2) : Sort (imax u v)` from
 --| `A ≡ A2 : Sort u` and, with `x : A`, `B ≡ B2 : Sort v`.
-axiom forallEDF (G: ctx) (u v: lvl) (A A2 B B2: expr):
+axiom pi_df (G: ctx) (u v: lvl) (A A2 B B2: expr):
   $ ⟦ G ⊢ A ≡ A2 : Sort u ⟧ $ > $ ⟦ G ▷ A ⊢ B ≡ B2 : Sort v ⟧ $ >
   $ ⟦ G ⊢ Π A, B ≡ Π A2, B2 : Sort (limax u v) ⟧ $;
 --| Conversion: `e ≡ e2 : B` from `e ≡ e2 : A` and `A ≡ B : Sort u`.
-axiom defeqDF (G: ctx) (u: lvl) (A B e e2: expr):
+axiom conv (G: ctx) (u: lvl) (A B e e2: expr):
   $ ⟦ G ⊢ A ≡ B : Sort u ⟧ $ > $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ ⟦ G ⊢ e ≡ e2 : B ⟧ $;
 --| Beta: `(fun x : A => e) a ≡ e[a] : B[a]`, for `e : B` with `x : A`, and
 --| `a : A`.
@@ -511,22 +542,25 @@ axiom eta (G: ctx) (A B e e1: expr):
   $ ⟦ₜ G ⊢ e : Π A, B ⟧ $ > $ ⟮₀ e ↑ 1 = e1 ⟯ $ >
   $ ⟦ G ⊢ λ A, e1 @ #0 ≡ e : Π A, B ⟧ $;
 --| Proof irrelevance: `h ≡ h2 : p` for two proofs of a proposition `p`.
-axiom proofIrrel (G: ctx) (p h h2: expr):
+axiom proof_irrel (G: ctx) (p h h2: expr):
   $ ⟦ₜ G ⊢ p : Prop ⟧ $ > $ ⟦ₜ G ⊢ h : p ⟧ $ > $ ⟦ₜ G ⊢ h2 : p ⟧ $ >
   $ ⟦ G ⊢ h ≡ h2 : p ⟧ $;
 
--- Admissible rules (theorems of Lean4Lean, here axioms) --------------------
+-- Structural rules: substitution and weakening ----------------------------
+-- Lean4Lean proves these as theorems about its judgment; here they are rules
+-- like the others, and like the others they hold in the model (spec/tg).
+-- That they add nothing derivable is not claimed for this system.
 
 --| Substitution: `IsDefEq.instN`, Typing/Lemmas.lean:634 (see
 --| notes/audit-lean-mm0.md §6).
-axiom instDF (k: nat) (G0 G1 G: ctx) (A0 a e e2 A r r2 R: expr):
+axiom inst_df (k: nat) (G0 G1 G: ctx) (A0 a e e2 A r r2 R: expr):
   $ ⟦ₜ G0 ⊢ a : A0 ⟧ $ > $ cinst k G0 A0 a G1 G $ > $ ⟦ G1 ⊢ e ≡ e2 : A ⟧ $ >
   $ ⟮ [ #k ↦ a ] e = r ⟯ $ > $ ⟮ [ #k ↦ a ] e2 = r2 ⟯ $ > $ ⟮ [ #k ↦ a ] A = R ⟯ $ >
   $ ⟦ G ⊢ r ≡ r2 : R ⟧ $;
 
 --| Weakening: `IsDefEq.weakN`, Typing/Lemmas.lean:501, for `Ctx.LiftN n 0`
 --| (see notes/audit-lean-mm0.md §6).
-axiom weakDF (n: nat) (G G2: ctx) (e e2 A r r2 R: expr):
+axiom weak_df (n: nat) (G G2: ctx) (e e2 A r r2 R: expr):
   $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ cext n G G2 $ >
   $ ⟮₀ e ↑ n = r ⟯ $ > $ ⟮₀ e2 ↑ n = r2 ⟯ $ > $ ⟮₀ A ↑ n = R ⟯ $ >
   $ ⟦ G2 ⊢ r ≡ r2 : R ⟧ $;
@@ -534,7 +568,7 @@ axiom weakDF (n: nat) (G G2: ctx) (e e2 A r r2 R: expr):
 -- Level equivalence of expressions -----------------------------------------
 
 --| Expressions of the same shape at equivalent levels denote the same value,
---| so they are definitionally equal (this generalizes `sortDF` and `constDF`).
+--| so they are definitionally equal (this generalizes `sort_df` and `constDF`).
 axiom eeqv_df (G: ctx) (e e2 A: expr): $ ⟦ₜ G ⊢ e : A ⟧ $ > $ eeqv e e2 $ > $ ⟦ G ⊢ e ≡ e2 : A ⟧ $;
 
 -- Statements ---------------------------------------------------------------

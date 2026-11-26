@@ -12,15 +12,43 @@ are definitions (§4, *Functionality*). Lean4Lean paths are relative to
 `refs/lean4lean/Lean4Lean/` (`scripts/fetch-refs.sh`). The model-search scripts mentioned
 below (`build/audit/`) are not part of the repository.
 
-**Bottom line: no soundness problem found.** Every axiom holds in the intended model, and
-every `deq` axiom of the core is a verbatim instance of an `IsDefEq` constructor; the
-inductive schema (§4, stage B) is new trusted design argued in the thesis's model, with the
-kernel's recursor types and rules compared on every block. The real gaps are about
-**completeness**: the `leqv` axioms cannot derive some valid level equivalences that nanoda
-accepts (§3, issue 1), and `constDF` for `def`-encoded constants is not directly available
-(issue 2).
+**What is proved and what is argued (2026-11-26).** This document was written before the
+model existed, and its sections argue two things at once. The two now have different standing.
+
+*Soundness* is no longer argued here: it is proved. Every rule of the spec is a theorem of
+Tarski–Grothendieck set theory about a model defined there (`spec/tg`, described in §11; the
+headline statements are in `spec/tg/results.mm0`), checked by both verifiers: the level rules
+in `model-levels`, the core rules in `model-den` and `model-core`, the inductive schema in
+`model-fold`, `model-nst` and `model-ci`, the quotients and the three standard axioms in
+`model-quot`, the literals in `model-lit`, and the assembly with the spec's own statements
+in `model-top`. Where a section below says a rule "holds in the model" or "is sound
+because", read it as an explanation of that theorem, not as the evidence for it. The
+informal standard model of §1 and the model sketch of §4 are kept as the reading that
+guided the design.
+
+*Correspondence with Lean* is still argued here, and only here: that each relation of the
+spec says what the kernel computes or checks (the per-axiom tables of §2, §4, §5, with
+Lean4Lean and the C++ kernel cited by function), and that a certificate's statements say
+what the export's declarations say (§8). The model does not prove this. A spec that was
+sound but stricter or differently shaped than Lean would still have a model. The evidence
+is the tables, the comparison of every recursor type and rule with the kernel's on every
+block (§4), `lean0 modes` (§4, *Functionality*), the negative tests, and the size of the
+certified corpus.
+
+What is trusted without proof, then: the set theory `tg.mm0` (77 axioms; choice as an
+operator, §4); the encoding of the spec's syntax as sets (53 axioms, §11); the reading of the
+spec as Lean's type theory (the tables); the statement checker (§8) and the restating of
+earlier parts (§7); and, for a development with axioms of its own, those axioms.
+
+Known departures from Lean4Lean's judgment: substitution and weakening are rules (§6), the
+literal operations are rules over provable characterizations (§5, slightly stronger than
+Lean's definitional equality in principle), and the level rules are complete where the
+kernel's procedure is not (§3, §4).
 
 ## 1. Soundness argument (why a per-axiom check is enough)
+
+(Superseded as evidence of soundness by the model of §11; kept as the reading of each sort and
+relation against Lean4Lean that the tables of §2 use.)
 
 Every axiom in the file is a Horn clause over closed first-order terms. `wff` has no
 connectives, there is no negation, and no sort admits bound or dummy variables (`strict`,
@@ -48,7 +76,7 @@ Consequences:
   derivable `lift n k e e2` has `e2 = liftN n e k`, and the same goes for `inst` and `lookup`.
   Overlapping rules always agree: `lift_closed` and the structural rules, for example, give the
   same answer. There is no way to get two different results.
-* **WF conditions.** Lean4Lean needs `l.WF U` only in `sortDF`, `constDF` and `extra`. Because
+* **WF conditions.** Lean4Lean needs `l.WF U` only in `sort_df`, `constDF` and `extra`. Because
   `lvl` is `strict` (no dummies), every level term in a proof of a theorem with level variables
   `u₀ … uₙ₋₁` is built from those variables and `lz/ls/lmax/limax`. Map `uᵢ ↦ .param i` and take
   `U = n`. Then every level in the derivation satisfies `WF n`, and the dropped premises hold.
@@ -56,11 +84,11 @@ Consequences:
   `IsDefEq.instL` (Typing/Lemmas.lean:595). If the proof uses a level variable that the
   statement does not need, instantiate it with `lz`. All the `leqv` laws are identities of
   `eval`, so they survive substitution of arbitrary `VLevel`s for their metavariables.
-* **Variables that occur only in hypotheses** (`u` in `lamDF`/`defeqDF`, `A B` in `appDF`, `e2`
-  in `trans`, `j` in `*_closed`, `B` in `lookup_s`, `B` in `beta`). In MM0 the proof supplies
+* **Variables that occur only in hypotheses** (`u` in `lam_df`/`conv`, `A B` in `app_df`, `e2`
+  in `deq_trans`, `j` in `*_closed`, `B` in `lookup_s`, `B` in `beta`). In MM0 the proof supplies
   every axiom argument explicitly, and every sort is inhabited (`nz`, `lz`, `srt lz`, `nil`). So
   this is just ordinary Horn-clause instantiation: no pitfall.
-* `bvar` is both a `term` and an `axiom` name. Terms and theorems live in separate namespaces,
+* (Until 2026-11-26 the rule `bvar_ty` was named `bvar`, like the term.) Terms and theorems live in separate namespaces,
   and both mm0-zig and mm0-c accept the file (checked with `spec/examples/*`).
 
 ## 2. Per-axiom table
@@ -95,12 +123,18 @@ means a sound admissible fact (lemma cited, hypotheses checked). **L** means a v
 | `lmax_succ` (74) | L | `max (a+1) (b+1) = max a b + 1` |
 | `lmax_succ_self` (75) | L | `max a (a+1) = a+1` |
 | `limax_zero` (76) | L | `imax_zero` VLevel.lean:99 |
-| `limax_zero_l` (77) | L | `zero_imax` VLevel.lean:96 (`b=0`: 0; else `max 0 b = b`) |
-| `limax_one` (added later) | L | not in the audited file; checked by hand: `a=0` gives `imax 1 0 = 0`; otherwise `max 1 a = a` since `a ≥ 1`. nanoda's `simplify` applies this rule (`imax 1 a ↦ a`). I found no derivation from the other axioms (it seems to need a case split on `a`), but did not prove it underivable |
 | `limax_succ` (78) | L | `IsNeverZero.imax_eq_max` VLevel.lean:111 (`b+1 ≠ 0`) |
-| `limax_self` (79) | L | `imax_self` VLevel.lean:101 |
-| `limax_max` (80) | L | cases: `b=c=0` gives 0 = max 0 0. `b=0,c≠0` gives `max a c = max 0 (max a c)`. Symmetric case is the same. Both ≠0 gives `max a (max b c)` = `max (max a b) (max a c)` |
-| `limax_imax` (82) | L | cases: `c=0` gives `imax a 0 = 0 = max 0 0`. `c≠0` gives `imax b c = max b c ≠ 0`, so LHS = `max a (max b c)` = RHS `max (max a c) (max b c)` |
+
+Until 2026-11-26 five more identities of `imax` were axioms: `limax_zero_l` (`imax 0 a = a`),
+`limax_one` (`imax 1 a = a`), `limax_self` (`imax a a = a`), `limax_max` (`imax a (max b c) =
+max (imax a b) (imax a c)`) and `limax_imax` (`imax a (imax b c) = max (imax a c) (imax b c)`).
+Each follows from the two rules above by `leqv_cases` and `leqv_inst` (§4): state it at
+parameters, split each parameter in a second argument of `imax` into zero and a successor, and
+the cases are identities of `max`; then put arbitrary levels back. The generator proves the
+ones a certificate uses as local lemmas at their first use (`mm0kit/src/level.rs`, `derive`;
+`tests/lean/DefLevels.lean` exercises all five), so both verifiers check the derivations, and
+`spec/lib.auf` has `limax_self` by hand. They are still theorems of the model
+(`model-levels.mm0`), where other proofs use them.
 
 ### Expressions: `closed` (`ClosedN`, VExpr.lean:99-104)
 
@@ -151,17 +185,17 @@ means a sound admissible fact (lemma cited, hypotheses checked). **L** means a v
 |---|---|---|
 | `ty` (166, def) | D | `HasType` = diagonal (Basic.lean:60) |
 | `sty_nil`, `sty_app` | D | `sty G h A e T`: `e` is `h` applied to `a1 … an`, `A` is a `Π` telescope over them as written (no conversion between the steps), `ai` has the type of the `i`-th binder at `a1 … a(i-1)`, and `T` is the rest. A computing relation (mode `+*++-`: `T` from the rest, the head given up to its constructor, `lean0 modes`). It types a constructor's result (`cwf`) and a nested occurrence (`nst_ty`), which need every argument in the head's domain: a typing of the whole term gives that only by inversion of its derivation (§4, 2026-11-04; the iota, quotient and projection rules, which took it too, are closed equations now) |
-| `bvar` (168) | T | :19 |
-| `symm` (170) | T | :20 |
-| `trans` (172) | T | :21, same type `A` on both premises |
-| `sortDF` (174) | T, WF dropped | :22-24. The result type is `sort (succ l)` with the **left** `l`, as in Lean4Lean. Dropping WF is sound (§1) |
-| `appDF` (176) | T | :32-35. The result is `B.inst a` with the **left** argument `a`. `inst nz B a R` is `R = inst B a 0` ✓ |
-| `lamDF` (179) | T | :36-39. The body context is `A::Γ` with the **left** `A`, and the result is `forallE A B` (left `A`) ✓ |
-| `forallEDF` (182) | T | :40-43. Body context `A::Γ` (left), result `sort (imax u v)` ✓ |
-| `defeqDF` (185) | T | :44 |
+| `bvar_ty` (168) | T | :19 |
+| `deq_symm` (170) | T | :20 |
+| `deq_trans` (172) | T | :21, same type `A` on both premises |
+| `sort_df` (174) | T, WF dropped | :22-24. The result type is `sort (succ l)` with the **left** `l`, as in Lean4Lean. Dropping WF is sound (§1) |
+| `app_df` (176) | T | :32-35. The result is `B.inst a` with the **left** argument `a`. `inst nz B a R` is `R = inst B a 0` ✓ |
+| `lam_df` (179) | T | :36-39. The body context is `A::Γ` with the **left** `A`, and the result is `forallE A B` (left `A`) ✓ |
+| `pi_df` (182) | T | :40-43. Body context `A::Γ` (left), result `sort (imax u v)` ✓ |
+| `conv` (185) | T | :44 |
 | `beta` (187) | T | :45-47. Premises `A::Γ ⊢ e : B` and `Γ ⊢ a : A`. The result is `e.inst a : B.inst a`, both at `k=0` ✓ |
 | `eta` (190) | T | :48-50. `e.lift = liftN 1 e 0` is `lift 1 0 e e1` ✓. The binder type `A` of the λ is the one in `forallE A B` ✓ |
-| `proofIrrel` (193) | T | :51-53 (`sort .zero` = `srt lz`) |
+| `proof_irrel` (193) | T | :51-53 (`sort .zero` = `srt lz`) |
 | (`constDF`, `extra`) | omitted | replaced by MM0 `def` unfolding, the schema for inductive types (§4) and, for an axiom the development itself declares, an axiom of the certificate (§10); not audited here |
 | `inh_i` (204) | sound, by definition | `inh` has this single introduction rule, so `inh G A` holds iff `∃ e. G ⊢ e : A`. The witness is built from the theorem's own variables (no dummies), which is fine for a closed Lean proof term |
 
@@ -181,7 +215,7 @@ satisfy every `leqv` axiom as an identity. It found 4-element countermodels for 
 * `imax (max u w) v ≈ max (imax u v) (imax w v)`, i.e. right distributivity, which is missing
 * `max (imax u v) (imax v u) ≈ max u v`
 
-(`max (imax u v) v ≈ imax u v` *is* derivable, via `limax_imax` and `limax_self`; see
+(`max (imax u v) v ≈ imax u v` *is* derivable, via `limax_imax` and `limax_self`, axioms then; see
 `build/audit/probe.auf`, verified.) So any Lean term whose checking needs one of these, for
 example `Sort (max u (imax u v))` against `Sort (max u v)`, cannot be certified. Resolved later
 by the case-split rules (§4).
@@ -207,7 +241,7 @@ For `term` constants, the generator emits `c_df` with a `leqv` premise (`spec/ex
 For `def` constants, `c u ≡ c u'` with `u ≈ u'` (and `u ≠ u'` syntactically) unfolds to
 `body[u] ≡ body[u'] : T[u]`. That is admissible (`IsDefEq.instL_r`, Theory/Typing/Strong.lean:703)
 but is not derivable in one step. The elaborator must replay the body's typing derivation,
-using `sortDF`/`c_df` at the leaves, or the generator must emit a per-def proved lemma.
+using `sort_df`/`c_df` at the leaves, or the generator must emit a per-def proved lemma.
 Nothing new needs to be trusted, but the work is real. Kernels hit this case when comparing
 `f.{max u v}` with `f.{max v u}`.
 
@@ -247,7 +281,7 @@ must keep the model valid:
 * **Annotation side.** Every rule uses the left-hand annotation, exactly as in Lean4Lean.
 * **WF drop, `inh_i`, non-functionality, hypothesis-only variables.** All sound (§1).
 
-## 4. Level case splits, the inductive schema and the generated per-declaration axioms (argued here, to be re-audited)
+## 4. Level case splits, the inductive schema and the generated per-declaration axioms
 
 ### Level case splits (`spec/lean.mm0`, Part III "Level equivalence")
 
@@ -265,7 +299,7 @@ Completeness (not needed for soundness): after abstracting the variables, splitt
 parameter that occurs as the second argument of an `imax` leaves `imax`-free goals, which the
 normal form decides.
 
-### The inductive schema (stage B, `spec/lean.mm0`, the inductive sections of Parts I–III; argued here, to be re-audited)
+### The inductive schema (`spec/lean-ind.mm0`)
 
 Lean4Lean leaves inductive well-formedness as `sorry` (`VInductDecl.WF`), so this part of the
 spec is new trusted design, transcribed from the kernel (`inductive.cpp`; read through its
@@ -292,21 +326,16 @@ definitional cast, which the certificate proves (§8 says what the checker compa
 the projections. `N` lists the block's nested occurrences (below); it is `[]` for a block
 without any.
 
-**Model.** Fix an assignment of the level variables and a valuation of `G`. A block whose
-types are well formed (`tys_ok`) is interpreted by families of sets over the parameters and
-indices: if the block is legal (`ind_wf`), the least fixed point of its constructors'
-operator (the thesis's construction: positivity makes the operator monotone and the
-universe conditions keep the fixed point in `srt l`), each element tagged by the data term
-`D` and the constructor and field values, so that two blocks, or two instances of one block
-at inequivalent levels, have disjoint values; `ind_ctor` is the tagging injection and
-`ind_rec D i v` the unique fold (structural recursion), which exists for every motive
-family in `srt v` whenever `elim_ok` holds (large elimination; or small elimination into
-propositions, which is trivial under proof irrelevance). If the block is not legal, every
-`ind_ty D i` is the empty family and `ind_ctor`, `ind_rec` arbitrary: they are then typed by
-no axiom, since every typing axiom but `ind_ty_ty` has `ind_wf` as a premise. `proj b i e`
-is the `i`th component of the tuple `e` when `e` is an element of a structure-like type of a
-block with atom `b`, else arbitrary. `eeqv e e2` holds exactly when `e` and `e2` have the
-same shape with equivalent levels, so they denote the same value.
+**Model.** In outline (the definitions are `model-ind.mm0` and `model-rec.mm0`, the rules
+`model-fold.mm0`, `model-nst.mm0` and `model-ci.mm0`; §11): a legal block (`ind_wf`) is
+interpreted by families of sets over the parameters and indices, the least fixed point of
+its constructors' operator (positivity makes the operator monotone, the universe conditions
+keep the fixed point in `srt l`), each element tagged by the constructor and the field
+values; `ind_ctor` is the tagging injection and `ind_rec D i v` the fold, which exists for
+every motive family in `srt v` whenever `elim_ok` holds. A block that is not legal has a
+failure value: it is typed by no rule but `ind_ty_ty`, which needs only `tys_ok`. `proj b i
+e` is the `i`th component of an element of a structure-like type. `eeqv e e2` holds only for
+terms of the same shape at equivalent levels, which have the same value (`hfin_minv`).
 
 **Functionality.** A relation that computes a term (`rec_ty`, `rec_rhs`, the telescope
 relations) is sound only if every derivation yields the right term, so each one's clauses
@@ -323,7 +352,7 @@ are in scope at each point.
 | `closed_ind_ty`, `closed_ind_ctor`, `closed_ind_rec`, `closed_proj`, `lift_proj`, `inst_proj` | The constants are closed, and `proj` is structural for the three relations, as `.proj` in `VExpr`. |
 | `sinst` | Puts the block's types in for the variables above the parameters: `inst k e (ind_ty D j)` instantiates `#k` (type `j` after types `0..j-1` are gone, which moved it down) by a closed term; `inst` lifts by `k`, which leaves a closed term unchanged. |
 | `iargs`, `indapp` (`isValidIndApp`) | At depth `d`, `#(d+np+j)` applied to exactly the parameters (`pargs #t d np`: `#(d+np-1) .. #d`) and `nidx D j` indices, each without an occurrence of the block (`closed (d+np)`: every variable at or above `d+np` is a block type). |
-| `ipos` (`checkPositivity`), `recfield` (`isRecArg`) | `ipos`: no occurrence, or `Π` over a domain without one (the kernel: an occurrence in a domain is non-positive), or a valid occurrence. `recfield`: a valid occurrence under `Π`s (a reflexive field). Both syntactic where the kernel uses `whnf` first; a block where that matters is left to stage A. |
+| `ipos` (`checkPositivity`), `recfield` (`isRecArg`) | `ipos`: no occurrence, or `Π` over a domain without one (the kernel: an occurrence in a domain is non-positive), or a valid occurrence. `recfield`: a valid occurrence under `Π`s (a reflexive field). Both syntactic where the kernel uses `whnf` first; a block where that matters is an error of `lean0 gen`. |
 | `ulevel` (`checkConstructors`' universe test) | `l ≈ 0` or `l ⊔ u ≈ l` are the semantic readings of `isAlwaysZero` and `geq'`, which are sound approximations of them: whatever the kernel accepts, these accept, and both conditions are what the fixed point in `srt l` needs (a type in `Prop` may have fields of any size; otherwise each field's universe is at most the type's). |
 | `cwf`, `ctors_wf` | Each field's type (with the block's types put in) is a type in the context of the parameters and the earlier fields (`⟦ₜ Ctx ⊢ A2 : srt u ⟧`), of an allowed level, positive; a recursive field is not mentioned in the rest of the constructor type (`cwf_pi_rec`: the rest is a lift, `lift 1 0 B2 B`; a non-recursive field, `cwf_pi`, has no occurrence of the block, `closed k A`); the result is the constructor's own type applied to the parameters and to indices without occurrences, each argument of the result (with the block's types put in, `K2`) typed at its binder's type in the type former's type `Π P, F_i` (`sty Ctx (ind_ty D i) R2 K2 S`, `R2` that type lifted over the fields and parameters, as in the iota rules). The kernel types the indices by `checkType` of the whole constructor type; the spec states each argument's typing, since in the model a typing of the result as a whole says nothing about its arguments (an application outside a function's domain denotes `∅`), and the indices' typing is what puts a constructor's value in the family at an index of the family's domain (until 2026-11-11 the clause had only `indapp`, which accepted an index of the wrong type: `IX.mk : IX E` for `IX : Prop → Type`). This is `checkConstructors`, with the parameters matched syntactically (the data has one telescope `P`) where the kernel uses `isDefEq`; the generator checks that before it states the data, else the block is an error. The non-occurrence of recursive fields (added 2026-11-12) is implied by the kernel's typing (a term that mentions a field of type `T` mentions `T`, which neither a positive field's domain nor an index may do; the kernel also rejects a nested occurrence whose arguments mention a field), so it rejects no block the kernel accepts; it is stated because the model sees only that the typings hold, not that they are derivable, and without it a field's domain could grow with a recursive field's value and the family leave the universe. Each constructor type is closed over the parameters and the types (`ctors_wf_cons`: `Π P, K` is `closed n`, added 2026-11-12), for the reason `tys_closed` gives: `ind_ctor D i c` is a closed constant. |
 | `tys_ty`, `tys_ok`, `ctx_wf`, `tys_wf`, `ind_wf`, `tys_closed` | `checkInductiveTypes`: the parameters and the types' types are closed (`tys_closed`: `Π P, F_i` is closed for each type; the kernel's blocks are closed constants, and the model's values of a block's constants are the same at every valuation of the context, so a block whose parameters mention the context could not have the types `ind_ctor_ty` gives it in every context; added 2026-11-12), the parameters are types over the earlier ones, each type's type is a type of the form `Π indices, srt l2` with `l2 ≈ l`, the block's universe being the first type's (the kernel: `isEquiv`). `tys_ty` also requires each type's type to be binders over a sort (`isort`; added 2026-11-15): `ind_ty_ty` has only `tys_ok` as its premise, and without this a block whose type's type is a typed non-sort such as `False` would make `ind_ty D 0` a proof of it (lean0's generator refuses such a block before the schema sees it, so no negative test shows the premise at work). `tys_ok` alone types the type formers (the kernel adds them before it checks the constructors; in the model an illegal block's types are empty families, so typing the formers needs no legality). |
@@ -334,13 +363,13 @@ are in scope at each point.
 | `ihval`, `rwalk`, `rec_rhs` (`mkRecRules`) | `λ P, λ M, λ N, λ fields, minor_k fields ihs`, the minor at `#(nf + m - 1 - k)` under the fields; each recursive field's hypothesis is `λ ys, ind_rec D j v params motives minors indices (field ys)`, with the recursor's arguments the variables above the fields: parameters at `#(y+nf+m+n+np-1) ..`, motives and minors `#(y+nf+m+n-1) .. #(y+nf)`, the field at `#(y + nf - 1 - d)`. As in `ihty`, the type index `j` is an argument of `ihval` (`ihval D np n m v nf fld y j A IH`), passed by `rwalk_pi_rec` from `recfield`. |
 | `ind_ty_ty`, `ind_ctor_ty` | The type former has type `Π P, F_i` under `tys_ok`; constructor `c` of type `i` has type `Π P, K` with the block's types put in (`ctor_ty`, a relation of Part I since 2026-11-17, so that the iota and projection rules can name the type), under `ind_wf`: in the model, the families and the tagging injections have these types. |
 | `ind_rec_ty` | Under `ind_wf` and `elim_ok`, the fold has the type `rec_ty` computes (the thesis's recursor; the argument that `rec_ty` computes the kernel's type is the two rows above, tested on every block). |
-| `clift`, `psplit`, `iota_tel`, `iota_lhs`, `iota_eq`, `crst`, `ind_iota_eq` | Iota as a closed equation: `ind_wf Dl D`, `elim_ok Dl D v`, `iota_eq D i c v Dl0 lhs0 rhs0 T0`, `ind_nested D N`, `crst D N Dl0 Dl` and `rst D N` of `lhs0`, `rhs0`, `T0` to `lhs`, `rhs`, `T` give `Dl ⊢ lhs ≡ rhs : T`: `iota_eq` states the equation over the block's own types and constructors, and the rule restores the auxiliary ones to the nested occurrences in the context (`crst`: `rst` entry by entry), the two sides and the type (nothing changes when `N` is empty: `rst_nil`). The unrestored context, sides and type are variables of the rule, not of a relation, so that they have sorts in the reduction. `iota_eq` (Part I, one clause) puts together the context `Dl` of the recursor's own variables (`iota_tel`: the parameters `P`, the motives, the minors, then the constructor's fields `X`, which `clift` moves under the motives and the minors; `psplit` splits the constructor's type with the block's types put in, `sinst`, at its `npis` binders into `X` and the result `res`), `ind_rec D i v ps ms ns is (ind_ctor D i c ps fs) ≡ Rh ps ms ns fs` at the type `motive_i is (ind_ctor D i c ps fs)` (`iota_lhs`: `ps`, `ms`, `ns`, `fs` are the context's variables, by windows `pargs`; the indices `is` are those of the constructor's result `res`, lifted under the motives and the minors and read off by `rehead`; `Rh` is `rec_rhs`'s term). The rule has no typing premise, since every argument is a variable of the context at its declared type or an index of the constructor's own result (typed by `cwf_res` in `ind_wf`): so the constructor's parameters are the recursor's and its indices the recursor's by construction, where a rule over arbitrary arguments would need typing premises to say so (the previous row's example); it is Lean4Lean's form of a recursor rule (a closed equation over shared variables). An instance at terms in a context `Γ` follows by `weakBaseDF` (§6: the equation over `Γ` as base context) and `instDF` once per variable, from the parameters on, whose premises are the typings of the terms substituted; the generator proves the equation once per recursor rule (`X_rec_c_iota`, with the closedness of the rule's definition, `X_rec_c_closed`) and uses it at every iota step (`Elab::iota_closed`: the instance has the constructor's own indices and, in the major premise, the parameters and levels of the major premise's type in the recursor's type, which are the recursor's own or, for the recursor of an auxiliary type, the nested occurrence's arguments at the recursor's parameters; the term at hand is equal to the instance by congruence). At an auxiliary type `i` the restored equation is the recursor `X.rec_k` (`mkAuxRecNameMap`) on the constructor of the occurrence's block, `ind_rec D i v ps ms ns is (ind_ctor I ii c Ds[ps] fs) ≡ R ps ms ns fs`, the fields being the last arguments of the major premise as in `inductive_reduce_rec`. All of Init (census of 2026-11-21): 3.3 million iota steps, each by this rule. The relations have computing premises only. In the reduction the rule is a theorem at every block (`spec/tg/model/model-ci.mm0`, audit §11): at a valuation of the unrestored context the arguments lie in their spaces because the valuation does; the restored context has the same valuations, and the restored sides and type the same values, because every auxiliary type and constructor in them sits on the parameters' variables (the specialization lemma of nested blocks, `spec/tg/model/model-nst.mm0`: `iota_tel_rst_sat`, `iota_lhs_rst_val`, `rec_rhs_rst_val`). `rst` is not a function (`rst_refl`): the rule holds for every result. |
+| `clift`, `psplit`, `iota_tel`, `iota_lhs`, `iota_eq`, `crst`, `ind_iota_eq` | Iota as a closed equation: `ind_wf Dl D`, `elim_ok Dl D v`, `iota_eq D i c v Dl0 lhs0 rhs0 T0`, `ind_nested D N`, `crst D N Dl0 Dl` and `rst D N` of `lhs0`, `rhs0`, `T0` to `lhs`, `rhs`, `T` give `Dl ⊢ lhs ≡ rhs : T`: `iota_eq` states the equation over the block's own types and constructors, and the rule restores the auxiliary ones to the nested occurrences in the context (`crst`: `rst` entry by entry), the two sides and the type (nothing changes when `N` is empty: `rst_nil`). The unrestored context, sides and type are variables of the rule, not of a relation, so that they have sorts in the reduction. `iota_eq` (Part I, one clause) puts together the context `Dl` of the recursor's own variables (`iota_tel`: the parameters `P`, the motives, the minors, then the constructor's fields `X`, which `clift` moves under the motives and the minors; `psplit` splits the constructor's type with the block's types put in, `sinst`, at its `npis` binders into `X` and the result `res`), `ind_rec D i v ps ms ns is (ind_ctor D i c ps fs) ≡ Rh ps ms ns fs` at the type `motive_i is (ind_ctor D i c ps fs)` (`iota_lhs`: `ps`, `ms`, `ns`, `fs` are the context's variables, by windows `pargs`; the indices `is` are those of the constructor's result `res`, lifted under the motives and the minors and read off by `rehead`; `Rh` is `rec_rhs`'s term). The rule has no typing premise, since every argument is a variable of the context at its declared type or an index of the constructor's own result (typed by `cwf_res` in `ind_wf`): so the constructor's parameters are the recursor's and its indices the recursor's by construction, where a rule over arbitrary arguments would need typing premises to say so (the previous row's example); it is Lean4Lean's form of a recursor rule (a closed equation over shared variables). An instance at terms in a context `Γ` follows by `weak_base_df` (§6: the equation over `Γ` as base context) and `inst_df` once per variable, from the parameters on, whose premises are the typings of the terms substituted; the generator proves the equation once per recursor rule (`X_rec_c_iota`, with the closedness of the rule's definition, `X_rec_c_closed`) and uses it at every iota step (`Elab::iota_closed`: the instance has the constructor's own indices and, in the major premise, the parameters and levels of the major premise's type in the recursor's type, which are the recursor's own or, for the recursor of an auxiliary type, the nested occurrence's arguments at the recursor's parameters; the term at hand is equal to the instance by congruence). At an auxiliary type `i` the restored equation is the recursor `X.rec_k` (`mkAuxRecNameMap`) on the constructor of the occurrence's block, `ind_rec D i v ps ms ns is (ind_ctor I ii c Ds[ps] fs) ≡ R ps ms ns fs`, the fields being the last arguments of the major premise as in `inductive_reduce_rec`. All of Init (census of 2026-11-21): 3.3 million iota steps, each by this rule. The relations have computing premises only. In the reduction the rule is a theorem at every block (`spec/tg/model/model-ci.mm0`, audit §11): at a valuation of the unrestored context the arguments lie in their spaces because the valuation does; the restored context has the same valuations, and the restored sides and type the same values, because every auxiliary type and constructor in them sits on the parameters' variables (the specialization lemma of nested blocks, `spec/tg/model/model-nst.mm0`: `iota_tel_rst_sat`, `iota_lhs_rst_val`, `rec_rhs_rst_val`). `rst` is not a function (`rst_refl`): the rule holds for every result. |
 | `struct_like`, `field_ty`, `proj_ok`, `fprops`, `pinst`, `qinst`, `proj_ty` | Typing of `proj b i e` for `e : ind_ty D j ps`, type `j` structure-like (one constructor, no indices; the kernel's `is_structure_like`, which a type of a mutual block may satisfy): the field's type with the parameters and then the earlier projections put in, outermost first (`pinst` recurses to the innermost argument of `S` and substitutes on the way out; `qinst` fields `0 ..` at `#(k-1) ..`), a simultaneous substitution since each term substituted is lifted over the binders below it. `proj_ok`: the type's sort is at least 1, or the fields up to `i` are propositions (`fprops`: each `⟦ₜ Ctx ⊢ A2 : srt lz ⟧`) — the argument of stage A's `_dfp`: such projections are definable by elimination into `Prop`, and nanoda requires less (only the dependent fields), so this is no more permissive. |
-| `proj_eq`, `proj_mk` | The projection of a constructor application as a closed equation, in `ind_iota_eq`'s shape: `ind_wf Dl D`, `proj_ok Dl D j i`, `proj_eq D j i Dl0 lhs0 k`, `ind_nested D N`, `crst D N Dl0 Dl`, `rst D N lhs0 lhs` and `lookup Dl k T` give `Dl ⊢ lhs ≡ #k : T`. `proj_eq` (Part I, one clause) puts together the context `Dl0` of the parameters `P` and then the first constructor's fields `X` (`psplit` of its type with the block's types put in, `sinst`, at its `npis` binders; `capp X P`), the left-hand side `proj b i (ind_ctor D j 0 @ ps @ fs)` with the block's own atom `b` and `ps`, `fs` the context's variables (windows `pargs`), and the index `k = nf - 1 - i` of field `i`'s variable; the rule restores the auxiliary types to the nested occurrences in the context and the left-hand side (nothing changes when `N` is empty) and reads the field's type off the restored context (`lookup`). The field may be projected (`proj_ok`, as in `proj_ty`: for a structure that is a proposition the value has no fields, so the fields up to `i` must be proofs). No typing premise: every argument is a variable of the context, so it lies in the constructor's domain by the context itself (until 2026-11-22 the rule was schematic in the arguments, with a typing of the constructor's spine along its type, `ctor_ty` and `sty`, and of the projection; a typing of the projection alone says nothing about the arguments, whose application has the value `∅` in the model outside the constructor's domain). Instances follow by `weakBaseDF` and `instDF`: the generator proves the equation once per field (`S_proj_i_mk`, over any base context, with `proj_ok`'s level premises) and each use types the parameters and the fields at their binders. In the model: a valuation of the restored context is one of the unrestored (`proj_tel_rst_sat`), the restored left-hand side keeps its value (`proj_lhs_rst_val`), and there the constructor's value at the valuation is its point at a path of its type, whose field `i` is the valuation's entry (`proj_ci_wf`, `proj_mk_eq_rule`). |
-| `nonrec`, `eta_ok`, `projs`, `eta_eq`, `ind_eta` | Eta for a structure-like type none of whose fields mentions the block (`closed (d + np)` for each domain): `e ≡ ind_ctor D j nz ps (proj b 0 e) ... (proj b (nf-1) e)` at `e`'s type, since such a type is a product in the model. The rule is a closed equation in the shape of `ind_iota_eq` and `proj_mk`: `ind_wf Dl D`, `eta_ok D j` and `eta_eq D j Dl M S` give `⟦ Dl ⊢ #0 ≡ M : S ⟧`, where Part I's `eta_eq` (one clause) builds the context `Dl` of the parameters and one variable of the type applied to them (`pargs`), that type as the variable has it (`lift`), and `M`, the constructor applied to the parameters (`rehead`) and to the projections of `#0` (`projs`). No typing premise and no restoration (the type is a declared one, and its parameters mention no type of the block). Instances follow by `weakBaseDF` and `instDF`: the generator's `S_eta` is the equation over any base context, and each use types the parameters at their binders and the term at the structure type. Until 2026-11-22 the rule was schematic in `e`, with its typing as a premise; the model proves the closed equation from that one at the variable (`ind_eta_eq_rule`). (The kernel requires the block not to be recursive at all; this accepts a non-recursive type of a recursive mutual block too, which is still a product.) |
-| `ind_nested`, `ndecl`, `cnth`, `aux_of`, `rst`, `spz`, `nst_hit`, `afree`, `spz_ctors`, `aux_data`, `nst_ok`, `nst_ty`, `nst_group`, `pinst_head_c` (nested blocks, B2; `ElimNestedInductive`) | A nested block `ind_mk b P T N` (`N` not empty) is the mutual block the kernel checks in its place: `T` lists the declared types and then one auxiliary type per nested occurrence `I Ds` of an earlier block `I` (in the kernel's order), and `N` the occurrences, each `ind_ty I i @ Ds` written like a constructor type at depth 0 (`Ds` mention the block's types; the kernel requires them to mention no bound variable, and a parameter `Ds` that mentions none makes no occurrence, so the certificate's `N` must be the kernel's list, which the checker's comparison of the recursor types enforces, §8). Every relation of the schema (`ind_wf`, `elim_ok`, `rec_ty`, `rec_rhs`, `struct_like`, `eta_ok`, ...) reads the mutual data, as the kernel runs `AddInductive` on the specialized block; two additions make it the kernel's nested block. (1) `nst_ok` (a premise of `ind_wf`): the occurrences come in groups, one per declared type of a well-formed block `I` in order with the same arguments (`I.all`, which excludes `I`'s own auxiliary types; `I` declares at least one type, `0 < ni0`), a group's arguments are typed at `I`'s parameters in the block's parameter context with the block's types put in (`nst_ty`: `sty` at the type of `I`'s first type, as `cwf_res` types a constructor's result: the specialized constructors mention only the auxiliary type, so without this premise nothing would say that `I Ds` is a type, and `ind_ctor_ty`, which restores it, would state a type with no meaning; the arguments are also closed over the block's parameters, `closed np X1`, as the kernel's are: without it they could mention the context `G`, and the closed constant `ind_ctor D i c` would have a restored type that changes under `instDF`), and each auxiliary type's data is `I`'s type's type at `Ds` (`pinst`) and `I`'s constructors specialized (`spz_ctors`: `I`'s types put in by `sinst`, `I`'s own occurrences restored by `rst` since `I` may be nested, the parameters replaced by `Ds` by `pinst`, then `spz`, which replaces each occurrence `I' Ds' is` of `N` at depth `d` by `#(d + np + j)` applied to the block's parameters and to `is`, from the outside in as `replaceAllNested` does; the lookup `nst_hit` tries the entries by clause alternatives, since the prover does not re-enter a finished premise). So the auxiliary types are exactly the kernel's `_nested.X_k`, and `tys_wf` on the mutual data is the kernel's positivity and universe check on them. (2) `rst D N e e2` (`restoreNested`): `ind_ty D j ps is` for an auxiliary type `j` is read as `I Ds[ps] is` (`sinst` then `pinst`, the parameters applied being the ones substituted) and `ind_ctor D j c ps fs` as `ind_ctor I i c Ds[ps] fs`; nothing else changes, and the identity when `N = []` (`rst_nil`; `rst_refl` is the last clause so that an unknown result is computed by the traversal). `ind_ctor_ty`, `ind_rec_ty`, `proj_ty` (the field's type, before the parameters and projections are put in, so that the substitution hypotheses of the structure lemmas match) and iota (`ind_iota_eq` restores its context, both sides and the type; the unrestored ones are variables of the rule) restore what they state. *Model.* The auxiliary type `j` of a legal nested block is interpreted as the family `I Ds` itself: by (1) its constructors are `I`'s at `Ds` with the occurrences written as the block's own types, so the mutual fixed point's component `j` and the family `I Ds` (the fixed point of `I`'s operator at the parameters `Ds`, which the mutual fixed point already contains) satisfy the same equations, and the least fixed point is unique; this is the kernel's justification for restoring. Under that reading `rst` is the identity on values, so the restored typings are the mutual block's, and the restored iota equation is the mutual block's for the constructor `ind_ctor D i c`, whose value is `ind_ctor I ii c Ds[ps]`'s. `rst` is a search relation (`rst_refl` may leave any subterm as it is), so `spz_ctors_cons` also requires `afree K2` of the restored constructor: no `ind_ty D j` or `ind_ctor D j c` in it has `j` among `D`'s auxiliary types. That holds of every term Lean exports, which mentions no auxiliary type (the generator restores from the outside in and proves the premise as the other checking relations; no generator change, and no negative test: the restored constructor is computed by the generator, not read from the export). A premise can only make the relation less permissive; with it the restored constructor is unique, which the model's proof for a nested block that is nested itself uses (two blocks specializing the same inner constructor get the same one). `ind_eqv` compares `N` as well as `P` and `T`, since two blocks with the same atom and mutual data but different occurrences denote different families. The elimination level and `is_rec` (no eta for a structure with a nested field) are the mutual block's, as in the kernel. |
-| `eeqv_*`, `ind_eqv`, `ceqv`, `teqv`, `cseqv`, `lseqv`, `eeqv_df` | `eeqv` is the structural congruence with `leqv` at sorts and recursor levels, `ind_eqv` (same atom, componentwise `eeqv`) at the block constants, and `lseqv` (entrywise `leqv`) at an opaque constant's levels (`eeqv_cst`: the same atom; the atom's interpretation is a function of the levels' values). `eeqv_df`: expressions of the same shape at equivalent levels denote the same value, so they are defeq at any type of one of them (this generalizes `sortDF` and `constDF`). A generated term that is not a public definition (an opaque, an axiom, a theorem, a stage-A constant) has no `eeqv` clause, so a block whose data mentions one at its levels gets `axiom c_eeqv (us us2): leqv u u2 > ... > eeqv (c us) (c us2)`, once per constant (`induct::eeqv_axioms`; the generator's report counts them): the same constant at equivalent levels, which is what `eeqv` means. `lean0 check` checks its shape (§8). A `_df` lemma whose `eeqv` still fails is stated as an axiom and counted. |
-| `nat_D`, `eq_D`; `quot_atom`, `quot_mk_atom`, `quot_lift_atom`, `quot_ind_atom` and the defs `quot`, `quot_mk`, `quot_lift`, `quot_ind`; `quot_ty`, `quot_mk_ty`, `quot_lift_ty`, `quot_ind_ty`, `quot_lift_mk` | Lean's prelude blocks `Nat` and `Eq` are stated as spec data (between the spec's `lean0-check` marks, in prefix form), so that the quotient primitives' types (which mention `Eq`) and the literal ties (§5) can be spec axioms. The generator uses them only when the export's block is exactly this data (else the block is generated as usual, and the quotient primitives are an error: no axioms are generated for them); `lean0 check` compares the export's `Nat` and `Eq` with them like any block (§8). The quotient primitives are constants with the types the kernel requires when it adds them (`quot.cpp`, `check_quot_decls`: `Quot`, `Quot.mk`, `Quot.lift`, `Quot.ind` have exactly these types, with `Eq` checked to be the expected inductive), and they are constants like any other: `cst` of an atom of the spec at the list of their levels (since 2026-11-23; four expression constructors with their own clauses of `closed`, `afree` and `eeqv` before), so closedness and level invariance are `closed_cst` and `eeqv_cst`. The reduction rule is `Quot.lift f h (Quot.mk r a) ≡ f a` (Lean4Lean's quotient `extra` rule), stated once as a closed equation in the context of the primitive's own variables (`α`, `r`, `β`, `f`, `h`, `a`, at the type `β`), with no premise: every argument is a variable of the context, so `Quot.mk`'s `α` and `r` are the primitive's and `a` is in `f`'s domain by the context itself. Instances follow by `weakBaseDF` and `instDF` (the generator's `Quot_lift_mk` is the equation over any base context, and each use types the arguments at their binders, where nanoda's `reduce_quot` checks only the spine). Until 2026-11-22 the rule was schematic in the arguments, with a typing of the spine (`sty`) and of `a` at `α` (when `α` is a proposition the typing of `Quot.mk r a` as a whole says nothing about `a`); the model proves the closed equation from that. The kernel's other reduction, `Quot.ind h (Quot.mk r a) ≡ h a`, has no rule: both sides are proofs of `β (Quot.mk r a)`, so the generator certifies the step by `proofIrrel` (test `quot_ind_ex`). Sound in the model: the quotient of a type by a relation, with `Quot.lift` well defined by its hypothesis and `Quot.ind` by induction on representatives. |
+| `proj_eq`, `proj_mk` | The projection of a constructor application as a closed equation, in `ind_iota_eq`'s shape: `ind_wf Dl D`, `proj_ok Dl D j i`, `proj_eq D j i Dl0 lhs0 k`, `ind_nested D N`, `crst D N Dl0 Dl`, `rst D N lhs0 lhs` and `lookup Dl k T` give `Dl ⊢ lhs ≡ #k : T`. `proj_eq` (Part I, one clause) puts together the context `Dl0` of the parameters `P` and then the first constructor's fields `X` (`psplit` of its type with the block's types put in, `sinst`, at its `npis` binders; `capp X P`), the left-hand side `proj b i (ind_ctor D j 0 @ ps @ fs)` with the block's own atom `b` and `ps`, `fs` the context's variables (windows `pargs`), and the index `k = nf - 1 - i` of field `i`'s variable; the rule restores the auxiliary types to the nested occurrences in the context and the left-hand side (nothing changes when `N` is empty) and reads the field's type off the restored context (`lookup`). The field may be projected (`proj_ok`, as in `proj_ty`: for a structure that is a proposition the value has no fields, so the fields up to `i` must be proofs). No typing premise: every argument is a variable of the context, so it lies in the constructor's domain by the context itself (until 2026-11-22 the rule was schematic in the arguments, with a typing of the constructor's spine along its type, `ctor_ty` and `sty`, and of the projection; a typing of the projection alone says nothing about the arguments, whose application has the value `∅` in the model outside the constructor's domain). Instances follow by `weak_base_df` and `inst_df`: the generator proves the equation once per field (`S_proj_i_mk`, over any base context, with `proj_ok`'s level premises) and each use types the parameters and the fields at their binders. In the model: a valuation of the restored context is one of the unrestored (`proj_tel_rst_sat`), the restored left-hand side keeps its value (`proj_lhs_rst_val`), and there the constructor's value at the valuation is its point at a path of its type, whose field `i` is the valuation's entry (`proj_ci_wf`, `proj_mk_eq_rule`). |
+| `nonrec`, `eta_ok`, `projs`, `eta_eq`, `ind_eta` | Eta for a structure-like type none of whose fields mentions the block (`closed (d + np)` for each domain): `e ≡ ind_ctor D j nz ps (proj b 0 e) ... (proj b (nf-1) e)` at `e`'s type, since such a type is a product in the model. The rule is a closed equation in the shape of `ind_iota_eq` and `proj_mk`: `ind_wf Dl D`, `eta_ok D j` and `eta_eq D j Dl M S` give `⟦ Dl ⊢ #0 ≡ M : S ⟧`, where Part I's `eta_eq` (one clause) builds the context `Dl` of the parameters and one variable of the type applied to them (`pargs`), that type as the variable has it (`lift`), and `M`, the constructor applied to the parameters (`rehead`) and to the projections of `#0` (`projs`). No typing premise and no restoration (the type is a declared one, and its parameters mention no type of the block). Instances follow by `weak_base_df` and `inst_df`: the generator's `S_eta` is the equation over any base context, and each use types the parameters at their binders and the term at the structure type. Until 2026-11-22 the rule was schematic in `e`, with its typing as a premise; the model proves the closed equation from that one at the variable (`ind_eta_eq_rule`). (The kernel requires the block not to be recursive at all; this accepts a non-recursive type of a recursive mutual block too, which is still a product.) |
+| `ind_nested`, `ndecl`, `cnth`, `aux_of`, `rst`, `spz`, `nst_hit`, `afree`, `spz_ctors`, `aux_data`, `nst_ok`, `nst_ty`, `nst_group`, `pinst_head_c` (nested blocks, B2; `ElimNestedInductive`) | A nested block `ind_mk b P T N` (`N` not empty) is the mutual block the kernel checks in its place: `T` lists the declared types and then one auxiliary type per nested occurrence `I Ds` of an earlier block `I` (in the kernel's order), and `N` the occurrences, each `ind_ty I i @ Ds` written like a constructor type at depth 0 (`Ds` mention the block's types; the kernel requires them to mention no bound variable, and a parameter `Ds` that mentions none makes no occurrence, so the certificate's `N` must be the kernel's list, which the checker's comparison of the recursor types enforces, §8). Every relation of the schema (`ind_wf`, `elim_ok`, `rec_ty`, `rec_rhs`, `struct_like`, `eta_ok`, ...) reads the mutual data, as the kernel runs `AddInductive` on the specialized block; two additions make it the kernel's nested block. (1) `nst_ok` (a premise of `ind_wf`): the occurrences come in groups, one per declared type of a well-formed block `I` in order with the same arguments (`I.all`, which excludes `I`'s own auxiliary types; `I` declares at least one type, `0 < ni0`), a group's arguments are typed at `I`'s parameters in the block's parameter context with the block's types put in (`nst_ty`: `sty` at the type of `I`'s first type, as `cwf_res` types a constructor's result: the specialized constructors mention only the auxiliary type, so without this premise nothing would say that `I Ds` is a type, and `ind_ctor_ty`, which restores it, would state a type with no meaning; the arguments are also closed over the block's parameters, `closed np X1`, as the kernel's are: without it they could mention the context `G`, and the closed constant `ind_ctor D i c` would have a restored type that changes under `inst_df`), and each auxiliary type's data is `I`'s type's type at `Ds` (`pinst`) and `I`'s constructors specialized (`spz_ctors`: `I`'s types put in by `sinst`, `I`'s own occurrences restored by `rst` since `I` may be nested, the parameters replaced by `Ds` by `pinst`, then `spz`, which replaces each occurrence `I' Ds' is` of `N` at depth `d` by `#(d + np + j)` applied to the block's parameters and to `is`, from the outside in as `replaceAllNested` does; the lookup `nst_hit` tries the entries by clause alternatives, since the prover does not re-enter a finished premise). So the auxiliary types are exactly the kernel's `_nested.X_k`, and `tys_wf` on the mutual data is the kernel's positivity and universe check on them. (2) `rst D N e e2` (`restoreNested`): `ind_ty D j ps is` for an auxiliary type `j` is read as `I Ds[ps] is` (`sinst` then `pinst`, the parameters applied being the ones substituted) and `ind_ctor D j c ps fs` as `ind_ctor I i c Ds[ps] fs`; nothing else changes, and the identity when `N = []` (`rst_nil`; `rst_refl` is the last clause so that an unknown result is computed by the traversal). `ind_ctor_ty`, `ind_rec_ty`, `proj_ty` (the field's type, before the parameters and projections are put in, so that the substitution hypotheses of the structure lemmas match) and iota (`ind_iota_eq` restores its context, both sides and the type; the unrestored ones are variables of the rule) restore what they state. *Model.* The auxiliary type `j` of a legal nested block is interpreted as the family `I Ds` itself: by (1) its constructors are `I`'s at `Ds` with the occurrences written as the block's own types, so the mutual fixed point's component `j` and the family `I Ds` (the fixed point of `I`'s operator at the parameters `Ds`, which the mutual fixed point already contains) satisfy the same equations, and the least fixed point is unique; this is the kernel's justification for restoring. Under that reading `rst` is the identity on values, so the restored typings are the mutual block's, and the restored iota equation is the mutual block's for the constructor `ind_ctor D i c`, whose value is `ind_ctor I ii c Ds[ps]`'s. `rst` is a search relation (`rst_refl` may leave any subterm as it is), so `spz_ctors_cons` also requires `afree K2` of the restored constructor: no `ind_ty D j` or `ind_ctor D j c` in it has `j` among `D`'s auxiliary types. That holds of every term Lean exports, which mentions no auxiliary type (the generator restores from the outside in and proves the premise as the other checking relations; no generator change, and no negative test: the restored constructor is computed by the generator, not read from the export). A premise can only make the relation less permissive; with it the restored constructor is unique, which the model's proof for a nested block that is nested itself uses (two blocks specializing the same inner constructor get the same one). `ind_eqv` compares `N` as well as `P` and `T`, since two blocks with the same atom and mutual data but different occurrences denote different families. The elimination level and `is_rec` (no eta for a structure with a nested field) are the mutual block's, as in the kernel. |
+| `eeqv_*`, `ind_eqv`, `ceqv`, `teqv`, `cseqv`, `lseqv`, `eeqv_df` | `eeqv` is the structural congruence with `leqv` at sorts and recursor levels, `ind_eqv` (same atom, componentwise `eeqv`) at the block constants, and `lseqv` (entrywise `leqv`) at an opaque constant's levels (`eeqv_cst`: the same atom; the atom's interpretation is a function of the levels' values). `eeqv_df`: expressions of the same shape at equivalent levels denote the same value, so they are defeq at any type of one of them (this generalizes `sort_df` and `constDF`). A generated term that is not a public definition (an opaque, an axiom, a theorem, a stage-A constant) has no `eeqv` clause, so a block whose data mentions one at its levels gets `axiom c_eeqv (us us2): leqv u u2 > ... > eeqv (c us) (c us2)`, once per constant (`induct::eeqv_axioms`; the generator's report counts them): the same constant at equivalent levels, which is what `eeqv` means. `lean0 check` checks its shape (§8). A `_df` lemma whose `eeqv` still fails is stated as an axiom and counted. |
+| `nat_D`, `eq_D`; `quot_atom`, `quot_mk_atom`, `quot_lift_atom`, `quot_ind_atom` and the defs `quot`, `quot_mk`, `quot_lift`, `quot_ind`; `quot_ty`, `quot_mk_ty`, `quot_lift_ty`, `quot_ind_ty`, `quot_lift_mk` | Lean's prelude blocks `Nat` and `Eq` are stated as spec data (between the spec's `lean0-check` marks, in prefix form), so that the quotient primitives' types (which mention `Eq`) and the literal ties (§5) can be spec axioms. The generator uses them only when the export's block is exactly this data (else the block is generated as usual, and the quotient primitives are an error: no axioms are generated for them); `lean0 check` compares the export's `Nat` and `Eq` with them like any block (§8). The quotient primitives are constants with the types the kernel requires when it adds them (`quot.cpp`, `check_quot_decls`: `Quot`, `Quot.mk`, `Quot.lift`, `Quot.ind` have exactly these types, with `Eq` checked to be the expected inductive), and they are constants like any other: `cst` of an atom of the spec at the list of their levels (since 2026-11-23; four expression constructors with their own clauses of `closed`, `afree` and `eeqv` before), so closedness and level invariance are `closed_cst` and `eeqv_cst`. The reduction rule is `Quot.lift f h (Quot.mk r a) ≡ f a` (Lean4Lean's quotient `extra` rule), stated once as a closed equation in the context of the primitive's own variables (`α`, `r`, `β`, `f`, `h`, `a`, at the type `β`), with no premise: every argument is a variable of the context, so `Quot.mk`'s `α` and `r` are the primitive's and `a` is in `f`'s domain by the context itself. Instances follow by `weak_base_df` and `inst_df` (the generator's `Quot_lift_mk` is the equation over any base context, and each use types the arguments at their binders, where nanoda's `reduce_quot` checks only the spine). Until 2026-11-22 the rule was schematic in the arguments, with a typing of the spine (`sty`) and of `a` at `α` (when `α` is a proposition the typing of `Quot.mk r a` as a whole says nothing about `a`); the model proves the closed equation from that. The kernel's other reduction, `Quot.ind h (Quot.mk r a) ≡ h a`, has no rule: both sides are proofs of `β (Quot.mk r a)`, so the generator certifies the step by `proof_irrel` (test `quot_ind_ex`). Sound in the model: the quotient of a type by a relation, with `Quot.lift` well defined by its hypothesis and `Quot.ind` by induction on representatives. |
 
 **What `ind_wf` does not say.** Duplicate constructor names, `checkNoMVarNoFVar`, the
 `_nested` prefix: naming matters, not typing. The syntactic places where the kernel uses
@@ -383,8 +412,8 @@ declared with their reason, and the check requires the declared list to be exact
 above the parameters). The relations that are not functions are declared as such: the
 checking relations (`ipos`, `cwf`, `elim_ok`, ..., where the kernel's disjunctions are), and
 `rst`, whose clauses are tried in order (`rst_refl` last) and which admits every partial
-restoration, sound since an auxiliary type denotes its occurrence (below). Totals: 126
-relations with 175 computing clauses, 133 checking clauses and the 8 clauses of `rst`, and 76
+restoration, sound since an auxiliary type denotes its occurrence (below). Totals (2026-11-26): 120
+relations with 173 computing clauses, 115 checking clauses and the 8 clauses of `rst`, and 71
 rules. `scripts/test.sh` runs the check and requires a spec with an overlapping clause to be
 rejected.
 
@@ -466,9 +495,9 @@ its value's typing proved beside it).
 | (`c_eeqv`: `leqv u u2 > ... > eeqv (c us) (c us2)`, for a theorem or opaque constant that an inductive declaration mentions at its levels; above) | not an axiom since 2026-11-22: a theorem, proved where the constant is declared by unfolding it (the proof term at equivalent levels is the same expression up to levels; `induct::theorem_eeqv`, for the constants `gen::eeqv_needed` finds in the export, a set closed under mention in proof terms) |
 
 K-like reduction (`Eq.rec` on a non-constructor) has no axiom: the major premise is replaced by
-the constructor using `proofIrrel`.
+the constructor using `proof_irrel`.
 
-## 5. Nat literals (argued here, to be re-audited)
+## 5. Nat literals
 
 ### Binary numerals and arithmetic (`spec/lean.mm0`, "Nat literals: binary numerals")
 
@@ -544,10 +573,10 @@ subsection.
 Conventions of the arguments: `n̄` is `lit n`, `N`, `Z` and `S` are `nat_ty`, `nat_zero` and
 `nat_succ`; `Γ ⊢ n̄ : N` for every `n` by `lit_zero`/`lit_succ` (the typing of a `deq`); an
 equation over fresh variables is instantiated at literals by substitution (`IsDefEq.instN`,
-the spec's `instDF`; the equations are stated in extended contexts, so `f` must be closed
+the spec's `inst_df`; the equations are stated in extended contexts, so `f` must be closed
 for the premises' `f` to be the lifting of the conclusion's `f`, which is why every
 function the equations mention is required closed, directly or by its own relation);
-`f ā ≡ f ā : Π N, N` from the typing premise and `ā : N`, so the congruence `appDF` turns
+`f ā ≡ f ā : Π N, N` from the typing premise and `ā : N`, so the congruence `app_df` turns
 `b̄ ≡ e` into `f ā b̄ ≡ f ā e`. The `*_eqs_i` rules are definitional (a relation introduced
 by its only rule) and need no argument; the `_i` premises' order is also the generator's.
 
@@ -625,7 +654,16 @@ String literals have no axioms: a string literal is translated as its expansion
 `String.ofList [Char.ofNat n, …]` (Lean4Lean's translation; nanoda expands it in `def_eq`), so
 every step about one is an ordinary derivation.
 
-## 6. Substitution and weakening (argued here, to be re-audited)
+## 6. Substitution and weakening
+
+What is claimed for these rules (2026-11-26). `inst_df`, `weak_df` and `weak_base_df` are structural
+rules of Lean0's judgment, on the same footing as the others: each is a theorem of the model
+(§11), and that is the soundness claim. The arguments below show something else, which predates
+the model: that each is the transcription of a theorem Lean4Lean proves about *its* judgment
+(`IsDefEq.instN`, `IsDefEq.weakN`), where the rule is admissible, that is, adds nothing
+derivable. Admissibility is not proved for Lean0's axioms, whose inductive types, quotients and
+literals are stated differently, and nothing here depends on it; it bears only on how closely
+Lean0's derivable judgments match Lean4Lean's, which the literal rules of §5 already exceed.
 
 ### `cinst` (`spec/lean.mm0`, "Contexts")
 
@@ -640,7 +678,7 @@ Lean4Lean's list contexts (`Lookup` lifts on the way out), so the substitution d
 entry `k` places above `A₀` is `k`, as in the constructor. `Γ₀`, `e₀` and `A₀` are arguments
 of the MM0 relation where Lean4Lean has them as parameters of the inductive.
 
-### `instDF` (`spec/lean.mm0`, "Admissible rules")
+### `inst_df` (`spec/lean.mm0`, "Structural rules")
 
 `deq G0 a a A0 > cinst k G0 A0 a G1 G > deq G1 e e2 A > inst k e a r > inst k e2 a r2 >
 inst k A a R > deq G r r2 R` is `IsDefEq.instN` (Typing/Lemmas.lean:634): from
@@ -669,19 +707,19 @@ Only the `zero` constructor, `Ctx.LiftN n 0 Γ (As ++ Γ)` with `As.length = n`:
 `G2` equal to `G` with `n` entries (any expressions) consed on, which is the constructor's
 instance with `As` those entries; `Ctx.LiftN.zero` puts no condition on `As`.
 
-### `weakDF` (`spec/lean.mm0`, "Admissible rules")
+### `weak_df` (`spec/lean.mm0`, "Structural rules")
 
 `deq G e e2 A > cext n G G2 > lift n nz e r > lift n nz e2 r2 > lift n nz A R > deq G2 r r2 R` is
 `IsDefEq.weakN` (Typing/Lemmas.lean:501) for `W : Ctx.LiftN n 0 Γ Γ'`: from `henv :
 env.Ordered` and `H : env.IsDefEq U Γ e1 e2 A` it concludes `env.IsDefEq U Γ' (e1.liftN n)
 (e2.liftN n) (A.liftN n)`. The `lift` premises pin `r`, `r2`, `R` (functionality, §1). The
-argument is the one for `instDF`: the rule is valid in the standard model, so it needs no check
-against the generated axioms, and its one assumption, `env.Ordered`, is the one `instDF` and
+argument is the one for `inst_df`: the rule is valid in the standard model, so it needs no check
+against the generated axioms, and its one assumption, `env.Ordered`, is the one `inst_df` and
 the stage-A axioms already rest on. The generated rules are all schematic in `G` (a context
 appears only as the variable `G` of their premises and conclusion), as the model's constant
 rules are, so nothing in them depends on the context's length.
 
-### `weakBaseDF` (`spec/lean-ind.mm0`, Part III, before `ind_iota_eq`)
+### `weak_base_df` (`spec/lean-ind.mm0`, Part III, before `ind_iota_eq`)
 
 `deq G e e2 A > pis G (srt lz) K > closed nz K > clen G k > closed k e > closed k e2 > closed k A >
 capp G G0 G2 > deq G2 e e2 A`, where `G2` is `G` appended to a base context `G0`: a judgment in a
@@ -690,9 +728,9 @@ at `k` the length of `G` and `n` the length of `G0` (the new entries go below al
 entries of `G` are lifted at their own depths and `e`, `e2`, `A` at `k`, and lifting a term closed
 below the cutoff is the identity. The premises say exactly that: `closed nz (Π G, Prop)` is each
 entry of `G` closed over the entries before it (`pis` builds the telescope's type), and `closed k`
-of the three terms. `weakDF` cannot express it (it adds entries above, `Ctx.LiftN n 0`), and a
+of the three terms. `weak_df` cannot express it (it adds entries above, `Ctx.LiftN n 0`), and a
 closed judgment proved by a rule that fixes its whole context (`ind_iota_eq`, §4) is otherwise
-unusable inside another context. In the reduction the rule is a theorem (`mweakBaseDF` for every
+unusable inside another context. In the reduction the rule is a theorem (`mweak_base_df` for every
 hook, `spec/tg/model/model-ci.mm0`, §11): a valuation of `G2` begins with a valuation of `G`
 (`weak_base_sem`), at which the three terms have the same values.
 
@@ -865,7 +903,7 @@ forms and converts, which costs about 0.01% in certificate size. The block betwe
 
 `ℕ` (2026-11-05) is a notation for the definition `nat_ty`, so its terms are unchanged.
 
-Typing premises (2026-11-05): the core rules `bvar`, `beta`, `eta`, `proofIrrel`, `instDF` and
+Typing premises (2026-11-05): the core rules `bvar_ty`, `beta`, `eta`, `proof_irrel`, `inst_df` and
 `inh_i` now state typing with `ty`, the definition of `⟦ G ⊢ e ≡ e : A ⟧`, where they spelled
 out the diagonal as Lean4Lean does. The statements are equivalent by unfolding. The generator
 converts at each use, which costs 0.38% on `Init.Prelude`.
@@ -1151,7 +1189,7 @@ which is now a definition: a level valuation is a function from `ω` to `ω` (`l
 level's value is computed by structural recursion on its tree (`lv`: `lz` is 0, `ls` adds
 one, `lmax` is `max`, `limax a b` is 0 when `b` is 0 and `max` otherwise, a parameter is
 the valuation's value), and `leqv l l2` says the values agree at every valuation. The spec's
-21 level rules are theorems about this definition (`leqv_cases` and `leqv_inst` through the
+16 level rules (21 until 2026-11-26) are theorems about this definition (`leqv_cases` and `leqv_inst` through the
 semantics of `lsubst` and `linst`, by induction on the trees). Replacing an axiomatized
 relation by a definition that satisfies its axioms is conservative for statements that only
 use the axioms, and the certificate's proofs only use them.
@@ -1170,8 +1208,8 @@ The rest of the model is not yet the spec's `deq`, so it changes nothing that is
   same at every valuation of the de Bruijn variables, so these constants are closed by
   construction, and it is cut to `u`.
 - **The judgments** `mdeq M`, `minh M` quantify over every admissible universe, level
-  valuation and satisfying valuation. Symmetry, transitivity, conversion, `sortDF`, `lamDF`,
-  `forallEDF`, `proofIrrel` and `inh_i` are theorems for every hook (`msymm` .. `minh_ty`).
+  valuation and satisfying valuation. Symmetry, transitivity, conversion, `sort_df`, `lam_df`,
+  `pi_df`, `proof_irrel` and `inh_i` are theorems for every hook (`mdeq_symm` .. `minh_ty`).
   The spec's `deq` becomes `mdeq` at the hook the later layers define.
 - **The metatheory of the syntax** (`model-meta.mm0`) relates the spec's `closed`, `lift`
   and `inst` to the denotation, for every derivable atom (the admissible clauses
@@ -1183,8 +1221,8 @@ The rest of the model is not yet the spec's `deq`, so it changes nothing that is
   valuation of `G2` with `cext n G G2` is `q ++ t` with `q` of length `n` and `t` satisfying
   `G`; and with `cinst k G0 A0 a G1 G` and `a` of type `A0` in `G0`, a valuation of `G` is
   `p ++ t` with `t` satisfying `G0` and `p ++ (x :: t)` satisfying `G1`, `x` the value of `a`.
-- **The remaining core rules** (`model-core.mm0`): `bvar`, `appDF`, `beta`, `eta`, `instDF`
-  and `weakDF` are theorems for every hook too (`mbvar` .. `mweakDF`), from the above and the
+- **The remaining core rules** (`model-core.mm0`): `bvar_ty`, `app_df`, `beta`, `eta`, `inst_df`
+  and `weak_df` are theorems for every hook too (`mbvar_ty` .. `mweak_df`), from the above and the
   function-space laws (`cpi_elim_ap`, `clam_ap`, `cpi_eta`). With the eight before, 14 of the
   15 core rules hold in the model for every hook. The fifteenth, `eeqv_df`, holds for every
   hook that is invariant under `eeqv` (`meeqv_df`; `minv M`: a constructor the hook interprets

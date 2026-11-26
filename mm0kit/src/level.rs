@@ -24,14 +24,23 @@ enum L {
 
 pub struct Levels {
     memo: HashMap<E, (E, P)>,
+    /// Set while a derived `imax` rule is being proved: normalization then uses the spec's own
+    /// rules only (`limax_zero`, `limax_succ`), and what they leave is split by cases.
+    basic: bool,
 }
+
+/// The `imax` rules that follow from the spec's level rules (audit §3). Each is proved once per
+/// certificate, at its first use, as a local lemma over level variables: at parameters by
+/// `leqv_cases`, then at arbitrary levels by `leqv_inst`.
+const DERIVED: [(&str, usize); 5] =
+    [("limax_zero_l", 1), ("limax_one", 1), ("limax_self", 1), ("limax_max", 3), ("limax_imax", 3)];
 
 impl Default for Levels {
     fn default() -> Self { Self::new() }
 }
 
 impl Levels {
-    pub fn new() -> Self { Levels { memo: HashMap::default() } }
+    pub fn new() -> Self { Levels { memo: HashMap::default(), basic: false } }
 
     pub fn reset(&mut self) { self.memo.clear(); }
 
@@ -293,17 +302,99 @@ impl Levels {
         }
     }
 
+    /// The derived rule `name` at `args`: its lemma, proved here at its first use.
+    fn derived(&mut self, lean: &Lean, env: &mut Env, name: &'static str, args: &[E]) -> P {
+        let id = match env.level_lemmas.get(name) {
+            Some(&id) => id,
+            None => {
+                let id = self.derive(lean, env, name).unwrap_or_else(|e| panic!("{name}: {}", e.0));
+                env.level_lemmas.insert(name, id);
+                id
+            }
+        };
+        env.thm(id, args, &[]).unwrap()
+    }
+
+    fn derive(&mut self, lean: &Lean, env: &mut Env, name: &'static str) -> Result<ThId> {
+        if std::env::var_os("LEAN0_TRACE").is_some() { eprintln!("level lemma: {name}"); }
+        let i = &lean.ids;
+        let n = DERIVED.iter().find(|d| d.0 == name).expect("a derived rule").1;
+        let (a, b, c) = (env.var(0), env.var(1), env.var(2));
+        let z = env.app(i.lz, &[]);
+        let (l, r) = match name {
+            "limax_zero_l" => (env.app(i.limax, &[z, a]), a),
+            "limax_one" => {
+                let one = env.app(i.ls, &[z]);
+                (env.app(i.limax, &[one, a]), a)
+            }
+            "limax_self" => (env.app(i.limax, &[a, a]), a),
+            "limax_max" => {
+                let bc = env.app(i.lmax, &[b, c]);
+                let (ab, ac) = (env.app(i.limax, &[a, b]), env.app(i.limax, &[a, c]));
+                (env.app(i.limax, &[a, bc]), env.app(i.lmax, &[ab, ac]))
+            }
+            _ => {
+                let bc = env.app(i.limax, &[b, c]);
+                let (ac, bc2) = (env.app(i.limax, &[a, c]), bc);
+                (env.app(i.limax, &[a, bc]), env.app(i.lmax, &[ac, bc2]))
+            }
+        };
+        // The proof is over the lemma's own variables, with a normalization of its own.
+        let memo = std::mem::take(&mut self.memo);
+        let basic = std::mem::replace(&mut self.basic, true);
+        let proof = self.by_cases(lean, env, l, r);
+        self.memo = memo;
+        self.basic = basic;
+        let proof = proof?;
+        let lvl = env.sort_names["lvl"];
+        let args: Vec<(String, u8)> = ["a", "b", "c"][..n].iter().map(|v| (v.to_string(), lvl)).collect();
+        let concl = env.app_n("leqv", &[l, r]);
+        let name = format!("{}{}", crate::lean::FACT_PREFIX, name);
+        env.add_thm(ThmDecl { name: name.into(), args: args.into(), hyps: Box::new([]), concl, axiom: false, local: true, proof: Some(proof), doc: None })
+    }
+
+    /// `B` with one successor taken off each item, if every item of the normal form `B` has one.
+    fn pred(lean: &Lean, env: &mut Env, b: E) -> Option<E> {
+        match Self::view(lean, env, b) {
+            L::Succ(x) => Some(x),
+            L::Max(x, r) => {
+                let L::Succ(x1) = Self::view(lean, env, x) else { return None };
+                let r1 = Self::pred(lean, env, r)?;
+                Some(env.app(lean.ids.lmax, &[x1, r1]))
+            }
+            _ => None,
+        }
+    }
+
     /// `limax A B ≈ C` for normal `A`, `B`.
     fn imax_nf(&mut self, lean: &Lean, env: &mut Env, a: E, b: E) -> (E, P) {
         let z = env.app(lean.ids.lz, &[]);
         let ia = env.app(lean.ids.limax, &[a, b]);
-        if a == b {
-            return (b, Self::ax(env, "limax_self", &[b]))
+        if a == b && !self.basic {
+            return (b, self.derived(lean, env, "limax_self", &[b]))
         }
         match Self::view(lean, env, b) {
             L::Zero => (z, Self::ax(env, "limax_zero", &[a])),
+            L::Max(..) if self.basic => {
+                // A maximum of successors is a successor (`lmax_succ`), so `limax_succ` applies.
+                let Some(m) = Self::pred(lean, env, b) else { return (ia, Self::refl(env, ia)) };
+                let (b2, q) = Self::succ_chain(lean, env, m);
+                if b2 != b {
+                    return (ia, Self::refl(env, ia))
+                }
+                let ra = Self::refl(env, a);
+                let qs = Self::symm(env, q);
+                let p0 = Self::cong_imax(env, ra, qs);
+                let p1 = Self::ax(env, "limax_succ", &[a, m]);
+                let p2 = Self::cong_max(env, ra, q);
+                let (c, p3) = Self::merge(lean, env, a, b);
+                let p = Self::trans(env, p0, p1);
+                let p = Self::trans(env, p, p2);
+                (c, Self::trans(env, p, p3))
+            }
+            L::IMax(..) | L::Var if self.basic => (ia, Self::refl(env, ia)),
             L::Max(x, r) => {
-                let p1 = Self::ax(env, "limax_max", &[a, x, r]);
+                let p1 = self.derived(lean, env, "limax_max", &[a, x, r]);
                 let (c1, q1) = self.imax_nf(lean, env, a, x);
                 let (c2, q2) = self.imax_nf(lean, env, a, r);
                 let q = Self::cong_max(env, q1, q2);
@@ -317,7 +408,7 @@ impl Levels {
                 (c, Self::trans(env, p1, p2))
             }
             L::IMax(c, p) => {
-                let p1 = Self::ax(env, "limax_imax", &[a, c, p]);
+                let p1 = self.derived(lean, env, "limax_imax", &[a, c, p]);
                 let (c1, q1) = self.imax_nf(lean, env, a, p);
                 let ic = env.app(lean.ids.limax, &[c, p]);
                 let q2 = Self::refl(env, ic);
@@ -329,9 +420,9 @@ impl Levels {
             L::Var => {
                 let one = env.app(lean.ids.ls, &[z]);
                 if Self::view(lean, env, a) == L::Zero {
-                    (b, Self::ax(env, "limax_zero_l", &[b]))
+                    (b, self.derived(lean, env, "limax_zero_l", &[b]))
                 } else if a == one {
-                    (b, Self::ax(env, "limax_one", &[b]))
+                    (b, self.derived(lean, env, "limax_one", &[b]))
                 } else {
                     (ia, Self::refl(env, ia))
                 }
@@ -525,10 +616,21 @@ impl Levels {
         }
     }
 
+    /// A parameter that keeps `limax a b` from being rewritten: `b` itself, an item of `b` without
+    /// a successor, or such a parameter of an `imax` there.
+    fn blocking(lean: &Lean, env: &Env, b: E) -> Option<usize> {
+        match Self::view(lean, env, b) {
+            L::Var => Self::lparam_idx(lean, env, b),
+            L::Max(x, r) => Self::blocking(lean, env, x).or_else(|| Self::blocking(lean, env, r)),
+            L::IMax(_, p) => Self::blocking(lean, env, p),
+            _ => None,
+        }
+    }
+
     /// A parameter under an `imax` in a normal form, to split on.
     fn split_param(lean: &Lean, env: &Env, nf: E) -> Option<usize> {
         match Self::view(lean, env, nf) {
-            L::IMax(a, b) => Self::lparam_idx(lean, env, b).or_else(|| Self::split_param(lean, env, a)),
+            L::IMax(a, b) => Self::blocking(lean, env, b).or_else(|| Self::split_param(lean, env, a)),
             L::Max(a, b) => Self::split_param(lean, env, a).or_else(|| Self::split_param(lean, env, b)),
             L::Succ(a) => Self::split_param(lean, env, a),
             _ => None,

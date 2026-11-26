@@ -17,8 +17,11 @@ import "lean-quot.mm0";
 --| `bd0 b0` is harmless; generated proofs only use canonical ones).
 --| @hole _b
 strict free sort bin;
+--| The numeral 0.
 term b0: bin;
+--| `bd0 n`: the numeral 2n.
 term bd0: bin > bin;
+--| `bd1 n`: the numeral 2n + 1.
 term bd1: bin > bin;
 
 --| `bsucc a b`: a + 1 = b.
@@ -37,8 +40,9 @@ axiom bdbl_0: $ ⟪₂ 2 * b0 = b0 ⟫ $;
 axiom bdbl_d0 (a: bin): $ ⟪₂ 2 * bd0 a = bd0 (bd0 a) ⟫ $;
 axiom bdbl_d1 (a: bin): $ ⟪₂ 2 * bd1 a = bd0 (bd1 a) ⟫ $;
 
---| `badd a b c`: a + b = c. `baddc a b c`: a + b + 1 = c (with carry).
+--| `⟪ a + b = c ⟫` (`badd a b c`): a + b = c.
 term badd: bin > bin > bin > wff;
+--| `⟪₁ a + b + 1 = c ⟫` (`baddc a b c`): a + b + 1 = c, addition with a carry.
 term baddc: bin > bin > bin > wff;
 notation badd (a b c: bin): wff = ($<<$:0) a ($+$:64) b ($=$:50) c ($>>$:0);
 notation badd (a b c: bin): wff = ($⟪$:0) a ($+$:64) b ($=$:50) c ($⟫$:0);
@@ -75,7 +79,7 @@ axiom bpow_d0 (a b c d: bin): $ ⟪ₚ a ^ b = c ⟫ $ > $ ⟪ₘ c * c = d ⟫ 
 axiom bpow_d1 (a b c d e: bin):
   $ ⟪ₚ a ^ b = c ⟫ $ > $ ⟪ₘ c * c = d ⟫ $ > $ ⟪ₘ d * a = e ⟫ $ > $ ⟪ₚ a ^ bd1 b = e ⟫ $;
 
---| `band a b c`, `bor a b c`, `bxor a b c`: bitwise and, or and exclusive or.
+--| `⟪ₐ a &&& b = c ⟫` (`band a b c`): bitwise and.
 term band: bin > bin > bin > wff;
 notation band (a b c: bin): wff = ($<<a$:0) a ($&&&$:0) b ($=$:50) c ($>>$:0);
 notation band (a b c: bin): wff = ($⟪ₐ$:0) a ($&&&$:0) b ($=$:50) c ($⟫$:0);
@@ -85,6 +89,7 @@ axiom band_00 (a b c d: bin): $ ⟪ₐ a &&& b = c ⟫ $ > $ ⟪₂ 2 * c = d �
 axiom band_01 (a b c d: bin): $ ⟪ₐ a &&& b = c ⟫ $ > $ ⟪₂ 2 * c = d ⟫ $ > $ ⟪ₐ bd0 a &&& bd1 b = d ⟫ $;
 axiom band_10 (a b c d: bin): $ ⟪ₐ a &&& b = c ⟫ $ > $ ⟪₂ 2 * c = d ⟫ $ > $ ⟪ₐ bd1 a &&& bd0 b = d ⟫ $;
 axiom band_11 (a b c: bin): $ ⟪ₐ a &&& b = c ⟫ $ > $ ⟪ₐ bd1 a &&& bd1 b = bd1 c ⟫ $;
+--| `⟪ₒ a ||| b = c ⟫` (`bor a b c`): bitwise or.
 term bor: bin > bin > bin > wff;
 notation bor (a b c: bin): wff = ($<<o$:0) a ($|||$:0) b ($=$:50) c ($>>$:0);
 notation bor (a b c: bin): wff = ($⟪ₒ$:0) a ($|||$:0) b ($=$:50) c ($⟫$:0);
@@ -94,6 +99,7 @@ axiom bor_00 (a b c: bin): $ ⟪ₒ a ||| b = c ⟫ $ > $ ⟪ₒ bd0 a ||| bd0 b
 axiom bor_01 (a b c: bin): $ ⟪ₒ a ||| b = c ⟫ $ > $ ⟪ₒ bd0 a ||| bd1 b = bd1 c ⟫ $;
 axiom bor_10 (a b c: bin): $ ⟪ₒ a ||| b = c ⟫ $ > $ ⟪ₒ bd1 a ||| bd0 b = bd1 c ⟫ $;
 axiom bor_11 (a b c: bin): $ ⟪ₒ a ||| b = c ⟫ $ > $ ⟪ₒ bd1 a ||| bd1 b = bd1 c ⟫ $;
+--| `⟪ₓ a ^^^ b = c ⟫` (`bxor a b c`): bitwise exclusive or.
 term bxor: bin > bin > bin > wff;
 notation bxor (a b c: bin): wff = ($<<x$:0) a ($^^^$:0) b ($=$:50) c ($>>$:0);
 notation bxor (a b c: bin): wff = ($⟪ₓ$:0) a ($^^^$:0) b ($=$:50) c ($⟫$:0);
@@ -110,9 +116,11 @@ axiom bxor_11 (a b c d: bin): $ ⟪ₓ a ^^^ b = c ⟫ $ > $ ⟪₂ 2 * c = d �
 --| follow them (`nat_add_lit`, ...; notes/audit-lean-mm0.md §5).
 term lit: bin > expr;
 axiom closed_lit (k: nat) (n: bin): $ closed k (lit n) $;
---| The literals `0`, `1` and `2`.
+--| The literal `0`.
 def lit0: expr = $ lit b0 $;
+--| The literal `1`.
 def lit1: expr = $ lit (bd1 b0) $;
+--| The literal `2`.
 def lit2: expr = $ lit (bd0 (bd1 b0)) $;
 
 
@@ -130,11 +138,13 @@ term nat_blk: blk;
 def nat_D: ind = $ ind_mk nat_blk nil (tcons (srt (ls lz)) (ccons (bvar nz) (ccons (pi (bvar nz) (bvar (s nz))) cnil)) tnil) nil $;
 -- lean0-check: end
 
---| Lean's `Nat`, `Nat.zero` and `Nat.succ`.
+--| `ℕ`: Lean's `Nat`, type 0 of the block `nat_D`.
 def nat_ty: expr = $ ind_ty nat_D 0 $;
 prefix nat_ty: $\N$ prec max;
 prefix nat_ty: $ℕ$ prec max;
+--| Lean's `Nat.zero`.
 def nat_zero: expr = $ ind_ctor nat_D 0 0 $;
+--| Lean's `Nat.succ`.
 def nat_succ: expr = $ ind_ctor nat_D 0 1 $;
 
 -- Lean's `Nat.le` ---------------------------------------------------------
@@ -149,8 +159,9 @@ term le_blk: blk;
 def le_D: ind = $ ind_mk le_blk (cons (ind_ty nat_D nz) nil) (tcons (pi (ind_ty nat_D nz) (srt lz)) (ccons (app (app (bvar (s nz)) (bvar nz)) (bvar nz)) (ccons (pi (ind_ty nat_D nz) (pi (app (app (bvar (s (s nz))) (bvar (s nz))) (bvar nz)) (app (app (bvar (s (s (s nz)))) (bvar (s (s nz)))) (app (ind_ctor nat_D nz (s nz)) (bvar (s nz)))))) cnil)) tnil) nil $;
 -- lean0-check: end
 
---| `x = y` and `x < y` at `Nat`: Lean's `@Eq Nat x y` and `Nat.le (Nat.succ x) y`.
+--| `nat_eq x y`: `x = y` at `Nat`, Lean's `@Eq Nat x y`.
 def nat_eq (x y: expr): expr = $ ind_ty (eq_D (ls lz)) 0 @ ℕ @ x @ y $;
+--| `nat_lt x y`: `x < y` at `Nat`, Lean's `Nat.le (Nat.succ x) y`.
 def nat_lt (x y: expr): expr = $ ind_ty le_D 0 @ (nat_succ @ x) @ y $;
 
 --| A literal mentions no auxiliary type (`afree`, lean-ind.mm0).

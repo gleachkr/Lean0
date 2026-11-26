@@ -212,7 +212,7 @@ tamper deflevels rejected --tamper-theorem tag_lvl_ty
 tamper induct rejected --tamper-theorem two_add_two_ty
 tamper induct rejected --tamper-theorem quot_ex_ty
 # Rules the proofs depend on: a false premise makes every use fail ...
-for ax in beta eta proofIrrel sortDF lmax_comm Pt_df; do tamper core rejected --tamper-axiom "$ax"; done
+for ax in beta eta proof_irrel sort_df lmax_comm Pt_df; do tamper core rejected --tamper-axiom "$ax"; done
 # (the inductive rules are theorems now, derived from the schema: a tampered statement with
 # the original proof is rejected like any other)
 for th in Eq_rec_refl_iota MyNat_rec_succ_iota MyList_rec_cons_iota Prod_eta PUnit_eta Sigma_eta \
@@ -248,7 +248,7 @@ done
 tamper lit accepted --tamper-axiom quot_lift_mk
 tamper lit accepted --tamper-axiom nst_hit_z
 # Substitution (typing handles).
-for ax in instDF cinst_z cinst_s; do tamper lit rejected --tamper-axiom "$ax"; done
+for ax in inst_df cinst_z cinst_s; do tamper lit rejected --tamper-axiom "$ax"; done
 
 # In TG mode: a tampered theorem of the certificate is rejected by the verifiers against the
 # library's text, and a tampered axiom of the spec cannot be linked, since the library states

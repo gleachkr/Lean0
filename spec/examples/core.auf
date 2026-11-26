@@ -3,10 +3,10 @@ include "../lib.auf";
 id_ty
 -----
 l1: $ ty G (srt u) (srt (ls u)) $ by ty_srt []
-l2: $ ty (cons (srt u) G) (bvar nz) (srt u) $ by bvar [lookup_srt0 []]
-l3: $ ty (cons (bvar nz) (cons (srt u) G)) (bvar nz) (bvar (s nz)) $ by bvar [lookup_z [lift1_z []]]
-l4: $ ty (cons (srt u) G) (lam (bvar nz) (bvar nz)) (pi (bvar nz) (bvar (s nz))) $ by lamDF [l2, l3]
-l5: $ ty G (id u) (pi (srt u) (pi (bvar nz) (bvar (s nz)))) $ by lamDF [l1, l4]
+l2: $ ty (cons (srt u) G) (bvar nz) (srt u) $ by bvar_ty [lookup_srt0 []]
+l3: $ ty (cons (bvar nz) (cons (srt u) G)) (bvar nz) (bvar (s nz)) $ by bvar_ty [lookup_z [lift1_z []]]
+l4: $ ty (cons (srt u) G) (lam (bvar nz) (bvar nz)) (pi (bvar nz) (bvar (s nz))) $ by lam_df [l2, l3]
+l5: $ ty G (id u) (pi (srt u) (pi (bvar nz) (bvar (s nz)))) $ by lam_df [l1, l4]
 
 -- Contexts under the binders of `comp`: α, β, δ, f : β → δ, g : α → β, x : α.
 def c1 (G: ctx) (u: lvl): ctx = $ cons (srt u) G $
@@ -27,19 +27,19 @@ a3: $ ty (c2 G u v) (srt w) (srt (ls w)) $ by ty_srt []
 b1: $ lookup (c3 G u v w) (s nz) (srt v) $ by lookup_srt_s [lookup_srt0 []]
 b2: $ lookup (cons (bvar (s nz)) (c3 G u v w)) (s nz) (srt w) $ by lookup_srt_s [lookup_srt0 []]
 b3: $ ty (c3 G u v w) (pi (bvar (s nz)) (bvar (s nz))) (srt (limax v w)) $
-  by forallEDF [bvar [b1], bvar [b2]]
+  by pi_df [bvar_ty [b1], bvar_ty [b2]]
 -- g's type α → β in c4
 d1: $ lookup (c4 G u v w) (s (s (s nz))) (srt u) $
   by lookup_srt_s [lookup_srt_s [lookup_srt_s [lookup_srt0 []]]]
 d2: $ lookup (cons (bvar (s (s (s nz)))) (c4 G u v w)) (s (s (s nz))) (srt v) $
   by lookup_srt_s [lookup_srt_s [lookup_srt_s [lookup_srt0 []]]]
 d3: $ ty (c4 G u v w) (pi (bvar (s (s (s nz)))) (bvar (s (s (s nz))))) (srt (limax u v)) $
-  by forallEDF [bvar [d1], bvar [d2]]
+  by pi_df [bvar_ty [d1], bvar_ty [d2]]
 -- x's type α in c5
 e1: $ ty (c5 G u v w) (bvar (s (s (s (s nz))))) (srt u) $
-  by bvar [lookup_srt_s [lookup_srt_s [lookup_srt_s [lookup_srt_s [lookup_srt0 []]]]]]
+  by bvar_ty [lookup_srt_s [lookup_srt_s [lookup_srt_s [lookup_srt_s [lookup_srt0 []]]]]]
 -- variable typings in c6
-x1: $ ty (c6 G u v w) (bvar nz) (bvar (s (s (s (s (s nz)))))) $ by bvar [lookup_z [lift1_z []]]
+x1: $ ty (c6 G u v w) (bvar nz) (bvar (s (s (s (s (s nz)))))) $ by bvar_ty [lookup_z [lift1_z []]]
 g1: $ lift (s nz) nz (pi (bvar (s (s (s nz)))) (bvar (s (s (s nz)))))
                    (pi (bvar (s (s (s (s nz))))) (bvar (s (s (s (s nz)))))) $
   by lift_pi [lift1_z [], lift1_ge [le_s [le_z []]]]
@@ -48,7 +48,7 @@ g2: $ lift (s nz) nz (pi (bvar (s (s (s (s nz))))) (bvar (s (s (s (s nz))))))
   by lift_pi [lift1_z [], lift1_ge [le_s [le_z []]]]
 g3: $ ty (c6 G u v w) (bvar (s nz))
         (pi (bvar (s (s (s (s (s nz)))))) (bvar (s (s (s (s (s nz))))))) $
-  by bvar [lookup_s [lookup_z [g1], g2]]
+  by bvar_ty [lookup_s [lookup_z [g1], g2]]
 f1: $ lift (s nz) nz (pi (bvar (s nz)) (bvar (s nz))) (pi (bvar (s (s nz))) (bvar (s (s nz)))) $
   by lift_pi [lift1_z [], lift1_ge [le_s [le_z []]]]
 f2: $ lift (s nz) nz (pi (bvar (s (s nz))) (bvar (s (s nz))))
@@ -59,48 +59,48 @@ f3: $ lift (s nz) nz (pi (bvar (s (s (s nz)))) (bvar (s (s (s nz)))))
   by lift_pi [lift1_z [], lift1_ge [le_s [le_z []]]]
 f4: $ ty (c6 G u v w) (bvar (s (s nz)))
         (pi (bvar (s (s (s (s nz))))) (bvar (s (s (s (s nz)))))) $
-  by bvar [lookup_s [lookup_s [lookup_z [f1], f2], f3]]
+  by bvar_ty [lookup_s [lookup_s [lookup_z [f1], f2], f3]]
 -- the body f (g x) : δ
 h1: $ ty (c6 G u v w) (app (bvar (s nz)) (bvar nz)) (bvar (s (s (s (s nz))))) $
-  by appDF [g3, x1, inst_bvar_gt [le_z []]]
+  by app_df [g3, x1, inst_bvar_gt [le_z []]]
 h2: $ ty (c6 G u v w) (app (bvar (s (s nz))) (app (bvar (s nz)) (bvar nz))) (bvar (s (s (s nz)))) $
-  by appDF [f4, h1, inst_bvar_gt [le_z []]]
+  by app_df [f4, h1, inst_bvar_gt [le_z []]]
 -- the six lambdas
 k6: $ ty (c5 G u v w) (lam (bvar (s (s (s (s nz)))))
         (app (bvar (s (s nz))) (app (bvar (s nz)) (bvar nz))))
-      (pi (bvar (s (s (s (s nz))))) (bvar (s (s (s nz))))) $ by lamDF [e1, h2]
+      (pi (bvar (s (s (s (s nz))))) (bvar (s (s (s nz))))) $ by lam_df [e1, h2]
 k5: $ ty (c4 G u v w) (lam (pi (bvar (s (s (s nz)))) (bvar (s (s (s nz)))))
         (lam (bvar (s (s (s (s nz))))) (app (bvar (s (s nz))) (app (bvar (s nz)) (bvar nz)))))
       (pi (pi (bvar (s (s (s nz)))) (bvar (s (s (s nz)))))
-        (pi (bvar (s (s (s (s nz))))) (bvar (s (s (s nz)))))) $ by lamDF [d3, k6]
+        (pi (bvar (s (s (s (s nz))))) (bvar (s (s (s nz)))))) $ by lam_df [d3, k6]
 k4: $ ty (c3 G u v w) (lam (pi (bvar (s nz)) (bvar (s nz)))
         (lam (pi (bvar (s (s (s nz)))) (bvar (s (s (s nz)))))
         (lam (bvar (s (s (s (s nz))))) (app (bvar (s (s nz))) (app (bvar (s nz)) (bvar nz))))))
       (pi (pi (bvar (s nz)) (bvar (s nz)))
         (pi (pi (bvar (s (s (s nz)))) (bvar (s (s (s nz)))))
-        (pi (bvar (s (s (s (s nz))))) (bvar (s (s (s nz))))))) $ by lamDF [b3, k5]
+        (pi (bvar (s (s (s (s nz))))) (bvar (s (s (s nz))))))) $ by lam_df [b3, k5]
 k3: $ ty (c2 G u v) (lam (srt w) (lam (pi (bvar (s nz)) (bvar (s nz)))
         (lam (pi (bvar (s (s (s nz)))) (bvar (s (s (s nz)))))
         (lam (bvar (s (s (s (s nz))))) (app (bvar (s (s nz))) (app (bvar (s nz)) (bvar nz)))))))
       (pi (srt w) (pi (pi (bvar (s nz)) (bvar (s nz)))
         (pi (pi (bvar (s (s (s nz)))) (bvar (s (s (s nz)))))
-        (pi (bvar (s (s (s (s nz))))) (bvar (s (s (s nz)))))))) $ by lamDF [a3, k4]
+        (pi (bvar (s (s (s (s nz))))) (bvar (s (s (s nz)))))))) $ by lam_df [a3, k4]
 k2: $ ty (c1 G u) (lam (srt v) (lam (srt w) (lam (pi (bvar (s nz)) (bvar (s nz)))
         (lam (pi (bvar (s (s (s nz)))) (bvar (s (s (s nz)))))
         (lam (bvar (s (s (s (s nz))))) (app (bvar (s (s nz))) (app (bvar (s nz)) (bvar nz))))))))
       (pi (srt v) (pi (srt w) (pi (pi (bvar (s nz)) (bvar (s nz)))
         (pi (pi (bvar (s (s (s nz)))) (bvar (s (s (s nz)))))
-        (pi (bvar (s (s (s (s nz))))) (bvar (s (s (s nz))))))))) $ by lamDF [a2, k3]
+        (pi (bvar (s (s (s (s nz))))) (bvar (s (s (s nz))))))))) $ by lam_df [a2, k3]
 k1: $ ty G (comp u v w)
   (pi (srt u) (pi (srt v) (pi (srt w)
   (pi (pi (bvar (s nz)) (bvar (s nz)))
   (pi (pi (bvar (s (s (s nz)))) (bvar (s (s (s nz)))))
-  (pi (bvar (s (s (s (s nz))))) (bvar (s (s (s nz)))))))))) $ by lamDF [a1, k2]
+  (pi (bvar (s (s (s (s nz))))) (bvar (s (s (s nz)))))))))) $ by lam_df [a1, k2]
 
 eta_ex
 ------
 l1: $ ty (cons (pi (srt l) (srt l)) G) (bvar nz) (pi (srt l) (srt l)) $
-  by bvar [lookup_z [lift_pi [lift_srt [], lift_srt []]]]
+  by bvar_ty [lookup_z [lift_pi [lift_srt [], lift_srt []]]]
 l2: $ deq (cons (pi (srt l) (srt l)) G)
       (lam (srt l) (app (bvar (s nz)) (bvar nz))) (bvar nz) (pi (srt l) (srt l)) $
   by eta [l1, lift1_z []]
@@ -111,14 +111,14 @@ pirr_ex
 l1: $ lookup (cons (bvar (s nz)) (cons (bvar nz) (cons (srt lz) G))) (s (s nz)) (srt lz) $
   by lookup_srt_s [lookup_srt_s [lookup_srt0 []]]
 l2: $ ty (cons (bvar (s nz)) (cons (bvar nz) (cons (srt lz) G))) (bvar (s (s nz))) (srt lz) $
-  by bvar [l1]
+  by bvar_ty [l1]
 l3a: $ lookup (cons (bvar nz) (cons (srt lz) G)) nz (bvar (s nz)) $ by lookup_z [lift1_z []]
 l3: $ ty (cons (bvar (s nz)) (cons (bvar nz) (cons (srt lz) G))) (bvar (s nz)) (bvar (s (s nz))) $
-  by bvar [lookup_s [l3a, lift1_z []]]
+  by bvar_ty [lookup_s [l3a, lift1_z []]]
 l4: $ ty (cons (bvar (s nz)) (cons (bvar nz) (cons (srt lz) G))) (bvar nz) (bvar (s (s nz))) $
-  by bvar [lookup_z [lift1_z []]]
+  by bvar_ty [lookup_z [lift1_z []]]
 l5: $ deq (cons (bvar (s nz)) (cons (bvar nz) (cons (srt lz) G)))
-      (bvar (s nz)) (bvar nz) (bvar (s (s nz))) $ by proofIrrel [l2, l3, l4]
+      (bvar (s nz)) (bvar nz) (bvar (s (s nz))) $ by proof_irrel [l2, l3, l4]
 
 id_inh
 ------

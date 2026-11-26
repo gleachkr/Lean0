@@ -28,25 +28,25 @@ l1: $ closed nz (czero u) $
 lemma arr_ty (G: ctx) (u: lvl): $ ty (q1 G u) (pi v0 v1) (srt (limax u u)) $
 ----
 l1: $ ty (q1 G u) (pi v0 v1) (srt (limax u u)) $
-  by forallEDF [bvar [lookup_srt0 []], bvar [lookup_srt_s [lookup_srt0 []]]]
+  by pi_df [bvar_ty [lookup_srt0 []], bvar_ty [lookup_srt_s [lookup_srt0 []]]]
 
 lemma a_ty (G: ctx) (u: lvl): $ ty (q2 G u) v1 (srt u) $
 ----
-l1: $ ty (q2 G u) v1 (srt u) $ by bvar [lookup_srt_s [lookup_srt0 []]]
+l1: $ ty (q2 G u) v1 (srt u) $ by bvar_ty [lookup_srt_s [lookup_srt0 []]]
 
 lemma a_ty3 (G: ctx) (u: lvl): $ ty (q3 G u) v2 (srt u) $
 ----
-l1: $ ty (q3 G u) v2 (srt u) $ by bvar [lookup_srt_s [lookup_srt_s [lookup_srt0 []]]]
+l1: $ ty (q3 G u) v2 (srt u) $ by bvar_ty [lookup_srt_s [lookup_srt_s [lookup_srt0 []]]]
 
 lemma s_ty (G: ctx) (u: lvl): $ ty (q3 G u) v1 (pi v2 v3) $
 ----
 l1: $ lift (s nz) nz (pi v0 v1) (pi v1 v2) $ by lift_pi [lift1_z [], lift1_ge [le_s [le_z []]]]
 l2: $ lift (s nz) nz (pi v1 v2) (pi v2 v3) $ by lift_pi [lift1_z [], lift1_ge [le_s [le_z []]]]
-l3: $ ty (q3 G u) v1 (pi v2 v3) $ by bvar [lookup_s [lookup_z [l1], l2]]
+l3: $ ty (q3 G u) v1 (pi v2 v3) $ by bvar_ty [lookup_s [lookup_z [l1], l2]]
 
 lemma z_ty (G: ctx) (u: lvl): $ ty (q3 G u) v0 v2 $
 ----
-l1: $ ty (q3 G u) v0 v2 $ by bvar [lookup_z [lift1_z []]]
+l1: $ ty (q3 G u) v0 v2 $ by bvar_ty [lookup_z [lift1_z []]]
 
 -- Types
 
@@ -55,12 +55,12 @@ cnat_ty
 l1: $ ty G (srt u) (srt (ls u)) $ by ty_srt []
 l2: $ ty (q1 G u) (pi v0 v1) (srt (limax u u)) $ by arr_ty []
 l3: $ ty (q2 G u) (pi v1 v2) (srt (limax u u)) $
-  by forallEDF [bvar [lookup_srt_s [lookup_srt0 []]],
-                bvar [lookup_srt_s [lookup_srt_s [lookup_srt0 []]]]]
+  by pi_df [bvar_ty [lookup_srt_s [lookup_srt0 []]],
+                bvar_ty [lookup_srt_s [lookup_srt_s [lookup_srt0 []]]]]
 l4: $ ty (q1 G u) (pi (pi v0 v1) (pi v1 v2)) (srt (limax (limax u u) (limax u u))) $
-  by forallEDF [l2, l3]
+  by pi_df [l2, l3]
 l5: $ ty G (cnat u) (srt (limax (ls u) (limax (limax u u) (limax u u)))) $
-  by forallEDF [l1, l4]
+  by pi_df [l1, l4]
 
 cnat_ty2
 --------
@@ -72,8 +72,8 @@ m3: $ leqv (limax (limax u u) (limax u u)) u $ by leqv_trans [m1, m2]
 l2: $ leqv (limax (ls u) (limax (limax u u) (limax u u))) (limax (ls u) u) $
   by leqv_imax [leqv_refl [], m3]
 l3: $ deq G (srt (limax (ls u) (limax (limax u u) (limax u u)))) (srt (limax (ls u) u))
-      (srt (ls (limax (ls u) (limax (limax u u) (limax u u))))) $ by sortDF [l2]
-l4: $ ty G (cnat u) (srt (limax (ls u) u)) $ by defeqDF [l3, l1]
+      (srt (ls (limax (ls u) (limax (limax u u) (limax u u))))) $ by sort_df [l2]
+l4: $ ty G (cnat u) (srt (limax (ls u) u)) $ by conv [l3, l1]
 
 lemma czero_body (G: ctx) (u: lvl):
   $ ty (q1 G u) (lam (pi v0 v1) (lam v1 v0)) (pi (pi v0 v1) (pi v1 v2)) $
@@ -81,27 +81,27 @@ lemma czero_body (G: ctx) (u: lvl):
 l1: $ ty (q1 G u) (pi v0 v1) (srt (limax u u)) $ by arr_ty []
 l2: $ ty (q2 G u) v1 (srt u) $ by a_ty []
 l3: $ ty (q3 G u) v0 v2 $ by z_ty []
-l4: $ ty (q2 G u) (lam v1 v0) (pi v1 v2) $ by lamDF [l2, l3]
-l5: $ ty (q1 G u) (lam (pi v0 v1) (lam v1 v0)) (pi (pi v0 v1) (pi v1 v2)) $ by lamDF [l1, l4]
+l4: $ ty (q2 G u) (lam v1 v0) (pi v1 v2) $ by lam_df [l2, l3]
+l5: $ ty (q1 G u) (lam (pi v0 v1) (lam v1 v0)) (pi (pi v0 v1) (pi v1 v2)) $ by lam_df [l1, l4]
 
 czero_ty
 --------
 l1: $ ty G (srt u) (srt (ls u)) $ by ty_srt []
 l2: $ ty (q1 G u) (lam (pi v0 v1) (lam v1 v0)) (pi (pi v0 v1) (pi v1 v2)) $ by czero_body []
-l3: $ ty G (czero u) (cnat u) $ by lamDF [l1, l2]
+l3: $ ty G (czero u) (cnat u) $ by lam_df [l1, l2]
 
 cone_ty
 -------
 l0a: $ ty (q3 G u) v1 (pi v2 v3) $ by s_ty []
 l0b: $ ty (q3 G u) v0 v2 $ by z_ty []
-l1: $ ty (q3 G u) (app v1 v0) v2 $ by appDF [l0a, l0b, inst_bvar_gt [le_z []]]
+l1: $ ty (q3 G u) (app v1 v0) v2 $ by app_df [l0a, l0b, inst_bvar_gt [le_z []]]
 l2: $ ty (q2 G u) v1 (srt u) $ by a_ty []
-l3: $ ty (q2 G u) (lam v1 (app v1 v0)) (pi v1 v2) $ by lamDF [l2, l1]
+l3: $ ty (q2 G u) (lam v1 (app v1 v0)) (pi v1 v2) $ by lam_df [l2, l1]
 l4: $ ty (q1 G u) (pi v0 v1) (srt (limax u u)) $ by arr_ty []
 l5: $ ty (q1 G u) (lam (pi v0 v1) (lam v1 (app v1 v0))) (pi (pi v0 v1) (pi v1 v2)) $
-  by lamDF [l4, l3]
+  by lam_df [l4, l3]
 l6: $ ty G (srt u) (srt (ls u)) $ by ty_srt []
-l7: $ ty G (cone u) (cnat u) $ by lamDF [l6, l5]
+l7: $ ty G (cone u) (cnat u) $ by lam_df [l6, l5]
 
 -- `inst` of the body of `cnat` at `α := v2`, shared by `succ` and the β-steps.
 lemma i_cb : $ inst nz (pi (pi v0 v1) (pi v1 v2)) v2 (pi (pi v2 v3) (pi v3 v4)) $
@@ -120,34 +120,34 @@ lemma csucc_body (G: ctx) (u: lvl):
   $ ty (cons (cnat u) G) (lam (srt u) (lam (pi v0 v1) (lam v1 sbody))) (cnat u) $
 ----
 n1: $ ty (q3 (cons (cnat u) G) u) v3 (cnat u) $
-  by bvar [lookup_closed_s [lookup_closed_s [lookup_closed_s [lookup_closed0 [cl_cnat []],
+  by bvar_ty [lookup_closed_s [lookup_closed_s [lookup_closed_s [lookup_closed0 [cl_cnat []],
             cl_cnat []], cl_cnat []], cl_cnat []]]
 n2: $ ty (q3 (cons (cnat u) G) u) v2 (srt u) $ by a_ty3 []
 n3: $ ty (q3 (cons (cnat u) G) u) v1 (pi v2 v3) $ by s_ty []
 n4: $ ty (q3 (cons (cnat u) G) u) v0 v2 $ by z_ty []
 t1: $ ty (q3 (cons (cnat u) G) u) (app v3 v2) (pi (pi v2 v3) (pi v3 v4)) $
-  by appDF [n1, n2, i_cb []]
+  by app_df [n1, n2, i_cb []]
 t2: $ ty (q3 (cons (cnat u) G) u) (app (app v3 v2) v1) (pi v2 v3) $
-  by appDF [t1, n3, i_s []]
+  by app_df [t1, n3, i_s []]
 t3: $ ty (q3 (cons (cnat u) G) u) (app (app (app v3 v2) v1) v0) v2 $
-  by appDF [t2, n4, inst_bvar_gt [le_z []]]
+  by app_df [t2, n4, inst_bvar_gt [le_z []]]
 t4: $ ty (q3 (cons (cnat u) G) u) sbody v2 $
-  by appDF [n3, t3, inst_bvar_gt [le_z []]]
+  by app_df [n3, t3, inst_bvar_gt [le_z []]]
 a1: $ ty (q2 (cons (cnat u) G) u) v1 (srt u) $ by a_ty []
-t5: $ ty (q2 (cons (cnat u) G) u) (lam v1 sbody) (pi v1 v2) $ by lamDF [a1, t4]
+t5: $ ty (q2 (cons (cnat u) G) u) (lam v1 sbody) (pi v1 v2) $ by lam_df [a1, t4]
 a2: $ ty (q1 (cons (cnat u) G) u) (pi v0 v1) (srt (limax u u)) $ by arr_ty []
 t6: $ ty (q1 (cons (cnat u) G) u) (lam (pi v0 v1) (lam v1 sbody))
-        (pi (pi v0 v1) (pi v1 v2)) $ by lamDF [a2, t5]
+        (pi (pi v0 v1) (pi v1 v2)) $ by lam_df [a2, t5]
 a3: $ ty (cons (cnat u) G) (srt u) (srt (ls u)) $ by ty_srt []
 t7: $ ty (cons (cnat u) G) (lam (srt u) (lam (pi v0 v1) (lam v1 sbody))) (cnat u) $
-  by lamDF [a3, t6]
+  by lam_df [a3, t6]
 
 csucc_ty
 --------
 l1: $ ty G (cnat u) (srt (limax (ls u) (limax (limax u u) (limax u u)))) $ by cnat_ty []
 l2: $ ty (cons (cnat u) G) (lam (srt u) (lam (pi v0 v1) (lam v1 sbody))) (cnat u) $
   by csucc_body []
-l3: $ ty G (csucc u) (pi (cnat u) (cnat u)) $ by lamDF [l1, l2]
+l3: $ ty G (csucc u) (pi (cnat u) (cnat u)) $ by lam_df [l1, l2]
 
 csucc_zero
 ----------
@@ -182,34 +182,34 @@ b1b: $ inst nz (lam (pi v0 v1) (lam v1 v0)) v2 (lam (pi v2 v3) (lam v3 v0)) $
                inst_lam [inst_bvar_eq [lift1_z []], inst_bvar_lt [le_s [le_z []]]]]
 b1: $ deq (q3 G u) (app (czero u) v2) (lam (pi v2 v3) (lam v3 v0))
       (pi (pi v2 v3) (pi v3 v4)) $ by beta [b1a, z2, b1b, i_cb []]
-b2a: $ ty (cons v3 (cons (pi v2 v3) (q3 G u))) v0 v4 $ by bvar [lookup_z [lift1_z []]]
+b2a: $ ty (cons v3 (cons (pi v2 v3) (q3 G u))) v0 v4 $ by bvar_ty [lookup_z [lift1_z []]]
 b2b: $ ty (cons (pi v2 v3) (q3 G u)) v3 (srt u) $
-  by bvar [lookup_srt_s [lookup_srt_s [lookup_srt_s [lookup_srt0 []]]]]
-b2c: $ ty (cons (pi v2 v3) (q3 G u)) (lam v3 v0) (pi v3 v4) $ by lamDF [b2b, b2a]
+  by bvar_ty [lookup_srt_s [lookup_srt_s [lookup_srt_s [lookup_srt0 []]]]]
+b2c: $ ty (cons (pi v2 v3) (q3 G u)) (lam v3 v0) (pi v3 v4) $ by lam_df [b2b, b2a]
 b2d: $ inst nz (lam v3 v0) v1 (lam v2 v0) $
   by inst_lam [inst_bvar_gt [le_z []], inst_bvar_lt [le_s [le_z []]]]
 b2: $ deq (q3 G u) (app (lam (pi v2 v3) (lam v3 v0)) v1) (lam v2 v0) (pi v2 v3) $
   by beta [b2c, z3, b2d, i_s []]
-b3a: $ ty (cons v2 (q3 G u)) v0 v3 $ by bvar [lookup_z [lift1_z []]]
+b3a: $ ty (cons v2 (q3 G u)) v0 v3 $ by bvar_ty [lookup_z [lift1_z []]]
 b3: $ deq (q3 G u) (app (lam v2 v0) v0) v0 v2 $
   by beta [b3a, z4, inst_bvar_eq [lift0 []], inst_bvar_gt [le_z []]]
 c1: $ deq (q3 G u) (app (app (czero u) v2) v1) (app (lam (pi v2 v3) (lam v3 v0)) v1)
-      (pi v2 v3) $ by appDF [b1, z3, i_s []]
-c2: $ deq (q3 G u) (app (app (czero u) v2) v1) (lam v2 v0) (pi v2 v3) $ by trans [c1, b2]
+      (pi v2 v3) $ by app_df [b1, z3, i_s []]
+c2: $ deq (q3 G u) (app (app (czero u) v2) v1) (lam v2 v0) (pi v2 v3) $ by deq_trans [c1, b2]
 c3: $ deq (q3 G u) (app (app (app (czero u) v2) v1) v0) (app (lam v2 v0) v0) v2 $
-  by appDF [c2, z4, inst_bvar_gt [le_z []]]
-c4: $ deq (q3 G u) (app (app (app (czero u) v2) v1) v0) v0 v2 $ by trans [c3, b3]
+  by app_df [c2, z4, inst_bvar_gt [le_z []]]
+c4: $ deq (q3 G u) (app (app (app (czero u) v2) v1) v0) v0 v2 $ by deq_trans [c3, b3]
 -- Step 3: congruence back out through `s _` and the three binders.
 z5: $ ty (q2 G u) v1 (srt u) $ by a_ty []
 c5: $ deq (q3 G u) (app v1 (app (app (app (czero u) v2) v1) v0)) (app v1 v0) v2 $
-  by appDF [z3, c4, inst_bvar_gt [le_z []]]
+  by app_df [z3, c4, inst_bvar_gt [le_z []]]
 c6: $ deq (q2 G u) (lam v1 (app v1 (app (app (app (czero u) v2) v1) v0))) (lam v1 (app v1 v0))
-      (pi v1 v2) $ by lamDF [z5, c5]
+      (pi v1 v2) $ by lam_df [z5, c5]
 d1: $ ty (q1 G u) (pi v0 v1) (srt (limax u u)) $ by arr_ty []
 c7: $ deq (q1 G u) (lam (pi v0 v1) (lam v1 (app v1 (app (app (app (czero u) v2) v1) v0))))
-      (lam (pi v0 v1) (lam v1 (app v1 v0))) (pi (pi v0 v1) (pi v1 v2)) $ by lamDF [d1, c6]
+      (lam (pi v0 v1) (lam v1 (app v1 v0))) (pi (pi v0 v1) (pi v1 v2)) $ by lam_df [d1, c6]
 d2: $ ty G (srt u) (srt (ls u)) $ by ty_srt []
 c8: $ deq G (lam (srt u) (lam (pi v0 v1) (lam v1
         (app v1 (app (app (app (czero u) v2) v1) v0))))) (cone u) (cnat u) $
-  by lamDF [d2, c7]
-c9: $ deq G (app (csucc u) (czero u)) (cone u) (cnat u) $ by trans [s5, c8]
+  by lam_df [d2, c7]
+c9: $ deq G (app (csucc u) (czero u)) (cone u) (cnat u) $ by deq_trans [s5, c8]

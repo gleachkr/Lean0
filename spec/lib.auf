@@ -14,6 +14,24 @@ lemma le_refl1 : $ le 1 1 $
 ----
 l1: $ le (s nz) (s nz) $ by le_s [le_z []]
 
+-- Levels: `imax a a = a`, from the two rules for `imax` by a case split on a parameter
+-- (`leqv_cases`), then at any level (`leqv_inst`).
+
+lemma limax_self_p : $ leqv (limax (lparam nz) (lparam nz)) (lparam nz) $
+----
+z1: $ lsubst nz (limax (lparam nz) (lparam nz)) lz (limax lz lz) $ by lsubst_imax [lsubst_eq [], lsubst_eq []]
+z2: $ lsubst nz (lparam nz) lz lz $ by lsubst_eq []
+z3: $ leqv (limax lz lz) lz $ by limax_zero []
+s1: $ lsubst nz (limax (lparam nz) (lparam nz)) (ls (lparam nz)) (limax (ls (lparam nz)) (ls (lparam nz))) $ by lsubst_imax [lsubst_eq [], lsubst_eq []]
+s2: $ lsubst nz (lparam nz) (ls (lparam nz)) (ls (lparam nz)) $ by lsubst_eq []
+s3: $ leqv (limax (ls (lparam nz)) (ls (lparam nz))) (ls (lparam nz)) $ by leqv_trans [limax_succ [], lmax_idem []]
+l1: $ leqv (limax (lparam nz) (lparam nz)) (lparam nz) $ by leqv_cases [z1, z2, z3, s1, s2, s3]
+
+lemma limax_self (a: lvl): $ leqv (limax a a) a $
+----
+p1: $ linst (lcons a lnil) (lparam nz) a $ by linst_param [lnth_z []]
+l1: $ leqv (limax a a) a $ by leqv_inst [limax_self_p [], linst_imax [p1, p1], p1]
+
 -- Lifting by one
 
 lemma lift1_ge (k i: nat): $ le k i $ > $ lift 1 k (bvar i) (bvar (s i)) $
@@ -47,15 +65,15 @@ l1: $ lookup (cons A G) (s n) (srt l) $ by lookup_s [#1, lift_srt []]
 
 lemma refl_l (G: ctx) (e e2 A: expr): $ deq G e e2 A $ > $ ty G e A $
 ----
-l1: $ deq G e e A $ by trans [#1, symm [#1]]
+l1: $ deq G e e A $ by deq_trans [#1, deq_symm [#1]]
 
 lemma refl_r (G: ctx) (e e2 A: expr): $ deq G e e2 A $ > $ ty G e2 A $
 ----
-l1: $ deq G e2 e2 A $ by trans [symm [#1], #1]
+l1: $ deq G e2 e2 A $ by deq_trans [deq_symm [#1], #1]
 
 lemma ty_srt (G: ctx) (l: lvl): $ ty G (srt l) (srt (ls l)) $
 ----
-l1: $ ty G (srt l) (srt (ls l)) $ by sortDF [leqv_refl []]
+l1: $ ty G (srt l) (srt (ls l)) $ by sort_df [leqv_refl []]
 
 lemma lookup_closed0 (G: ctx) (A: expr): $ closed 0 A $ > $ lookup (cons A G) 0 A $
 ----

@@ -8,7 +8,7 @@
 //! together with a derivation of `Γ ⊢ x : τ(x)`. Every defeq derivation `Γ ⊢ x ≡ y : τ(x)`
 //! follows the rule the tracer recorded for `(x, y)`. When two types meet that are only
 //! defeq (an argument type and a binder type, or the canonical types of a term and its
-//! reduct), the elaborator asks nanoda again and inserts `defeqDF`. Reducts are re-typed
+//! reduct), the elaborator asks nanoda again and inserts `conv`. Reducts are re-typed
 //! from scratch (the simple fallback), not through typing handles.
 //!
 //! A derivation about closed terms does not depend on the context. Under binders, the
@@ -17,7 +17,7 @@
 //!
 //! A β-step's reduct is a substitution instance, and so is the lambda body the next β-step
 //! must type. Such terms get a typing handle: their typing comes from the typing of the term
-//! before substitution, by the spec's `instDF`, instead of being derived again.
+//! before substitution, by the spec's `inst_df`, instead of being derived again.
 
 use crate::gen::{ConstKind, Gen};
 use crate::natlit;
@@ -412,7 +412,7 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         r
     }
 
-    /// `weakDF`: move `p`, made under the first `t` open fvars, into the current context.
+    /// `weak_df`: move `p`, made under the first `t` open fvars, into the current context.
     fn weaken(&mut self, p: P, t: usize) -> R<P> {
         let (n, g) = (self.d() - t, self.ctx());
         mm(self.g.lean.weak_df(&mut self.g.env, n, g, p))
@@ -492,7 +492,7 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
         Ok(())
     }
 
-    /// `τ(e)` and `Γ ⊢ e : τ(e)` by `instDF`, from the handle's source and argument, or `None`
+    /// `τ(e)` and `Γ ⊢ e : τ(e)` by `inst_df`, from the handle's source and argument, or `None`
     /// if the handle does not fit.
     fn infer_handle(&mut self, e: ExprPtr<'t>, h: &Handle<'t>) -> R<Option<(ExprPtr<'t>, P)>> {
         let (base, d) = (h.base, self.d());
@@ -1013,7 +1013,7 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
             args.push(self.trl(l)?);
         }
         // the closed equation (`ind_eta`, audit §4), its variables instantiated from the bottom
-        // of its context (`instDF`): the parameters, each typed at its binder in the type's
+        // of its context (`inst_df`): the parameters, each typed at its binder in the type's
         // type, then `x` at the structure type
         let (tf, _) = self.tc.ctx.unfold_apps(w);
         // (the block states its binders without type annotations)
@@ -1598,7 +1598,7 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
             }
         }
         // the closed equation (`proj_mk`, audit §4), its variables instantiated from the
-        // bottom of its context (`instDF`): the parameters, then the fields, each typed at
+        // bottom of its context (`inst_df`): the parameters, then the fields, each typed at
         // its binder in the constructor's type as the schema has it
         let (cf, _) = self.tc.ctx.unfold_apps(s2);
         let cty = self.infer(cf)?.0;
@@ -1743,7 +1743,7 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
 
     /// The reduction of `Quot.lift` (`f`, applied to `rargs` and to `Quot.mk`,
     /// `cname`, applied to `margs`) from the closed equation `th`: its variables are
-    /// instantiated from the bottom of its context (`instDF`), the primitive's arguments each
+    /// instantiated from the bottom of its context (`inst_df`), the primitive's arguments each
     /// typed at its binder, then `a` at `α`. The instance has the primitive's `α`, `r` and
     /// level in `Quot.mk`: `lhs2` is equal to it by congruence. `a` is `Γ` and the levels.
     #[allow(clippy::too_many_arguments)]
@@ -1792,7 +1792,7 @@ impl<'a, 'x, 't: 'x, 'p: 't> Elab<'a, 'x, 't, 'p> {
     /// `Γ ⊢ lhs2 ≡ R_c ps ms ns fs : tl`, where `lhs2` is the recursor `f` applied to `rargs`
     /// (its arguments before the major premise) and the constructor `cname` applied to
     /// `margs`. The lemma's variables are instantiated one by one from the bottom of its
-    /// context (`instDF`): parameters, motives, minors, each typed at the recursor's binder,
+    /// context (`inst_df`): parameters, motives, minors, each typed at the recursor's binder,
     /// then the fields, typed along the constructor's type at the parameters of the major
     /// premise's type in the recursor's type (the recursor's own, or at an auxiliary type
     /// the nested occurrence's arguments). The instance has the constructor's own indices
