@@ -767,7 +767,7 @@ fn restore(m: &M, d: usize, np: usize, n0: usize, nested: &[&M]) -> Option<M> {
     }
 }
 
-/// `Π params. body`.
+/// `Π params, body`.
 fn pis(params: &[&M], body: &M) -> M {
     let mut m = body.clone();
     for &p in params.iter().rev() {

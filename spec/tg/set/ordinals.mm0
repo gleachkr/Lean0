@@ -45,7 +45,7 @@ def ord (A: class) (.x: set): fml = $ transitive A ∧ ∀ x (x ∊ A → transi
 theorem ord_congr (A B: class): $ A ≐ B $ > $ ord A ⟺ ord B $;
 --| @rewrite
 theorem sb_f_ord {x: set} (t: set x) (A: class x):
-  $ [x/t] (ord A) ⟺ ord (⟦ x / t ⟧ A) $;
+  $ [ x / t ] (ord A) ⟺ ord ([[ x / t ]] A) $;
 theorem ord_intro {x: set} (G: hyps x) (A: class):
   $ G ⇒ transitive A $ > $ G ⇒ ∀ x (x ∊ A → transitive x) $ > $ G ⇒ ord A $;
 theorem ord_trans (G: hyps) (A: class): $ G ⇒ ord A $ > $ G ⇒ transitive A $;
@@ -78,7 +78,7 @@ theorem ord_subset (G: hyps) (A B: class):
 --| @freshen G y
 --| @freshen p y
 theorem ord_ind_f (G: hyps) {x y: set} (p: fml x):
-  $ G , ord x , ∀ y (y ∊ x → [x/y] p) ⇒ p $ > $ G ⇒ ∀ x (ord x → p) $;
+  $ G , ord x , ∀ y (y ∊ x → [ x / y ] p) ⇒ p $ > $ G ⇒ ∀ x (ord x → p) $;
 --| @freshen G x
 theorem ord_ind (G: hyps) {x: set} (P: class):
   $ G ⇒ ∀ x (ord x → x ⊆ P → x ∊ P) $ > $ G ⇒ ∀ x (ord x → x ∊ P) $;
@@ -143,9 +143,9 @@ def cgr {x: set} (B: class x) (.y .z: set): class =
   $ {z | ∃ x ∃ y (z = ⟨ x , y ⟩ ∧ y = B)} $;
 
 --| @rewrite
-theorem cap_var {x: set} (B: class x) (a: set): $ cap x B a ≐ (⟦ x / a ⟧ B) $;
+theorem cap_var {x: set} (B: class x) (a: set): $ cap x B a ≐ ([[ x / a ]] B) $;
 theorem cap_intro {x: set} (G: hyps x) (B: class x) (C: class) (a b: set):
-  $ G ⇒ a = C $ > $ G ⇒ b ∊ (⟦ x / a ⟧ B) $ > $ G ⇒ b ∊ cap x B C $;
+  $ G ⇒ a = C $ > $ G ⇒ b ∊ ([[ x / a ]] B) $ > $ G ⇒ b ∊ cap x B C $;
 theorem cap_elim {x: set} (G: hyps x) (B: class x) (C: class) (b: set):
   $ G ⇒ b ∊ cap x B C $ > $ G ⇒ ∃ x (x = C ∧ b ∊ B) $;
 theorem cap_elim_isset {x: set} (G: hyps x) (B: class x) (C: class) (b: set):
@@ -156,7 +156,7 @@ theorem welc_cap_eq {x: set} (G: hyps x) (B: class x) (C E: class) (b: set):
 theorem cap_eq_arg {x: set} (G: hyps x) (B: class x) (C E: class):
   $ G ⇒ C = E $ > $ G ⇒ cap x B C = cap x B E $;
 theorem cap_eq {x: set} (G: hyps x) (B: class x) (C: class) (a: set):
-  $ G ⇒ a = C $ > $ G ⇒ cap x B C = (⟦ x / a ⟧ B) $;
+  $ G ⇒ a = C $ > $ G ⇒ cap x B C = ([[ x / a ]] B) $;
 theorem cap_empty {x: set} (G: hyps x) (B: class x) (C: class):
   $ G ⇒ ¬ isset C $ > $ G ⇒ cap x B C = ∅ $;
 --| @congr
@@ -165,43 +165,43 @@ theorem cap_congr {x: set} (B D: class x) (C E: class):
 --| Renaming the bound variable (`@alpha`: the `@freshen` repair renames a `cap` binder
 --| through it).
 --| @alpha x y
-theorem cap_alpha {x y: set} (B: class x) (C: class): $ cap x B C ≐ cap y (⟦ x / y ⟧ B) C $;
+theorem cap_alpha {x y: set} (B: class x) (C: class): $ cap x B C ≐ cap y ([[ x / y ]] B) C $;
 --| @rewrite
 theorem sb_c_cap {x y: set} (t: set y) (B: class x y) (C: class y):
-  $ (⟦ y / t ⟧ (cap x B C)) ≐ cap x (⟦ y / t ⟧ B) (⟦ y / t ⟧ C) $;
+  $ ([[ y / t ]] (cap x B C)) ≐ cap x ([[ y / t ]] B) ([[ y / t ]] C) $;
 
 theorem cgr_intro {x: set} (G: hyps x) (B: class x) (a b: set):
-  $ G ⇒ b = (⟦ x / a ⟧ B) $ > $ G ⇒ ⟨ a , b ⟩ ∈ cgr x B $;
+  $ G ⇒ b = ([[ x / a ]] B) $ > $ G ⇒ ⟨ a , b ⟩ ∈ cgr x B $;
 theorem cgr_elim {x: set} (G: hyps x) (B: class x) (a b: set):
-  $ G ⇒ ⟨ a , b ⟩ ∈ cgr x B $ > $ G ⇒ b = (⟦ x / a ⟧ B) $;
+  $ G ⇒ ⟨ a , b ⟩ ∈ cgr x B $ > $ G ⇒ b = ([[ x / a ]] B) $;
 theorem cgr_functional {x: set} (G: hyps x) (B: class x): $ G ⇒ functional (cgr x B) $;
 theorem cgr_rel {x: set} (G: hyps x) (B: class x): $ G ⇒ rel (cgr x B) $;
 theorem cgr_cdm {x: set} (G: hyps x) (B: class x) (a: set):
-  $ G ⇒ isset (⟦ x / a ⟧ B) $ > $ G ⇒ a ∊ cdm (cgr x B) $;
+  $ G ⇒ isset ([[ x / a ]] B) $ > $ G ⇒ a ∊ cdm (cgr x B) $;
 theorem cgr_cdm_elim {x: set} (G: hyps x) (B: class x) (a: set):
-  $ G ⇒ a ∊ cdm (cgr x B) $ > $ G ⇒ isset (⟦ x / a ⟧ B) $;
+  $ G ⇒ a ∊ cdm (cgr x B) $ > $ G ⇒ isset ([[ x / a ]] B) $;
 --| The value of the graph is the operation.
 theorem fv_cgr {x: set} (G: hyps x) (B: class x) (a: set):
-  $ G ⇒ isset (⟦ x / a ⟧ B) $ > $ G ⇒ (cgr x B)' a = (⟦ x / a ⟧ B) $;
+  $ G ⇒ isset ([[ x / a ]] B) $ > $ G ⇒ (cgr x B)' a = ([[ x / a ]] B) $;
 --| The graph of an operation with values in `C` on `A` is a function on `A` into `C`.
 theorem cgr_fn_into {x: set} (G: hyps x) (A C: class) (B: class x):
-  $ G ⇒ ∀ x (x ∊ A → B ∈ C) $ > $ G ⇒ fn_into (cgr x B) A C $;
+  $ G ⇒ ∀ x (x ∊ A → B ∈ C) $ > $ G ⇒ ⌈ cgr x B : A → C ⌉ $;
 --| The identity function on `A` is the graph of `x ↦ x` restricted to `A`.
 theorem cgr_id_fn_into {x: set} (G: hyps x) (A B: class):
-  $ G ⇒ A ⊆ B $ > $ G ⇒ fn_into (cgr x x ↾ A) A B $;
+  $ G ⇒ A ⊆ B $ > $ G ⇒ ⌈ cgr x x ↾ A : A → B ⌉ $;
 theorem img_cgr_id {x: set} (G: hyps x) (A: class): $ G ⇒ img (cgr x x) A = A $;
 --| @congr
 theorem cgr_congr {x: set} (B D: class x): $ B ≐ D $ > $ cgr x B ≐ cgr x D $;
 --| Renaming the bound variable (`@alpha`: the `@freshen` repair renames a `cgr` binder
 --| through it).
 --| @alpha x y
-theorem cgr_alpha {x y: set} (B: class x): $ cgr x B ≐ cgr y (⟦ x / y ⟧ B) $;
+theorem cgr_alpha {x y: set} (B: class x): $ cgr x B ≐ cgr y ([[ x / y ]] B) $;
 --| Graphs of operations equal at every argument, under hypotheses.
 --| @freshen G x
 theorem cgr_eq {x: set} (G: hyps) (B D: class x): $ G ⇒ ∀ x (B = D) $ > $ G ⇒ cgr x B = cgr x D $;
 --| @rewrite
 theorem sb_c_cgr {x y: set} (t: set y) (B: class x y):
-  $ (⟦ y / t ⟧ (cgr x B)) ≐ cgr x (⟦ y / t ⟧ B) $;
+  $ ([[ y / t ]] (cgr x B)) ≐ cgr x ([[ y / t ]] B) $;
 
 -- --------------------------------------------------------------------------
 -- Transfinite recursion
@@ -253,7 +253,7 @@ theorem fv_cres (G: hyps) (F A: class) (a: set):
   $ G ⇒ functional F $ > $ G ⇒ a ∊ A $ > $ G ⇒ (F ↾ A)' a = F' a $;
 --| The value of a restricted graph.
 theorem fv_cres_cgr {x: set} (G: hyps x) (B: class x) (A: class) (b: set):
-  $ G ⇒ b ∊ A $ > $ G ⇒ isset (⟦ x / b ⟧ B) $ > $ G ⇒ (cgr x B ↾ A)' b = (⟦ x / b ⟧ B) $;
+  $ G ⇒ b ∊ A $ > $ G ⇒ isset ([[ x / b ]] B) $ > $ G ⇒ (cgr x B ↾ A)' b = ([[ x / b ]] B) $;
 --| A function and a subfunction agree on part of the subfunction's domain.
 theorem cres_subfun (G: hyps) (R S A: class):
   $ G ⇒ functional S $ > $ G ⇒ R ⊆ S $ > $ G ⇒ A ⊆ cdm R $ > $ G ⇒ S ↾ A = R ↾ A $;
@@ -312,12 +312,12 @@ theorem trapx_exists_at {g: set} (G: hyps g) (F: class) (a: set):
 theorem trapx_congr (F H: class): $ F ≐ H $ > $ trapx F ≐ trapx H $;
 --| @rewrite
 theorem sb_c_trapx {x: set} (t: set x) (F: class x):
-  $ (⟦ x / t ⟧ (trapx F)) ≐ trapx (⟦ x / t ⟧ F) $;
+  $ ([[ x / t ]] (trapx F)) ≐ trapx ([[ x / t ]] F) $;
 --| @congr
 theorem trapxd_congr (F H: class): $ F ≐ H $ > $ trapxd F ≐ trapxd H $;
 --| @rewrite
 theorem sb_c_trapxd {x: set} (t: set x) (F: class x):
-  $ (⟦ x / t ⟧ (trapxd F)) ≐ trapxd (⟦ x / t ⟧ F) $;
+  $ ([[ x / t ]] (trapxd F)) ≐ trapxd ([[ x / t ]] F) $;
 
 theorem trec_intro (G: hyps) (F: class) (g a b: set):
   $ G ⇒ g ∊ trapx F $ > $ G ⇒ ⟨ a , b ⟩ ∈ g $ > $ G ⇒ ⟨ a , b ⟩ ∈ trec F $;
@@ -349,4 +349,4 @@ theorem trec_congr (F H: class): $ F ≐ H $ > $ trec F ≐ trec H $;
 theorem trec_eq_cong (G: hyps) (F H: class): $ G ⇒ F = H $ > $ G ⇒ trec F = trec H $;
 --| @rewrite
 theorem sb_c_trec {x: set} (t: set x) (F: class x):
-  $ (⟦ x / t ⟧ (trec F)) ≐ trec (⟦ x / t ⟧ F) $;
+  $ ([[ x / t ]] (trec F)) ≐ trec ([[ x / t ]] F) $;

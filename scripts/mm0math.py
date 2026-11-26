@@ -59,6 +59,8 @@ class Spec:
         self.prefix = {}  # first token -> (name, prec, lits); lits None for `prefix`
         self.infix = {}  # token -> (name, prec, 'l' or 'r')
         self.defs = {}  # def name -> (binders, body term)
+        self.form = {}  # term or def name -> its last notation: ('p', tok, prec), ('i', tok, prec, assoc), ('n', prec, lits)
+        self.source = {}  # term or def name -> its notation declarations, as written
         self.decls = []
         for st in statements(text):
             self.declare(st)
@@ -72,10 +74,13 @@ class Spec:
         if kw in ("prefix", "infixl", "infixr"):
             m = re.fullmatch(r"(\w+) (\w+): \$\s*(\S+)\s*\$ prec (\w+)", st)
             _, name, tok, p = m.groups()
+            self.source.setdefault(name, []).append(st + ";")
             if kw == "prefix":
                 self.prefix[tok] = (name, prec(p), None)
+                self.form[name] = ("p", tok, prec(p))
             else:
                 self.infix[tok] = (name, prec(p), kw[-1])
+                self.form[name] = ("i", tok, prec(p), kw[-1])
             return
         if kw == "notation":
             m = re.fullmatch(r"notation (\w+)(.*?): (\w+) = (.*)", st)
@@ -85,6 +90,8 @@ class Spec:
             for c, p, v in re.findall(r"\(\$\s*(\S+)\s*\$:(\w+)\)|(\w+)", lits):
                 parsed.append(("c", c, prec(p)) if c else ("v", v))
             self.prefix[parsed[0][1]] = (name, parsed[0][2], (order, parsed))
+            self.form[name] = ("n", parsed[0][2], (order, parsed))
+            self.source.setdefault(name, []).append(st + ";")
             return
         m = re.fullmatch(r"((?:\w+ )*)(sort|term|def|axiom|theorem) (\w+)(.*)", st)
         if not m:
@@ -215,6 +222,41 @@ def show(e, paren=False):
         return name
     s = " ".join([name] + [show(a, True) for a in args])
     return f"({s})" if paren else s
+
+
+def pretty(spec, e):
+    """A term in the notations of `spec` (for each term the one declared last), with
+    the parentheses the precedences ask for. `spec.parse` reads it back as `e`."""
+    def go(e, p):
+        if e[0] == "v":
+            return e[1]
+        _, name, args = e
+        f = spec.form.get(name)
+        if f is None:
+            q, toks = (APP if args else MAX), [name] + [go(a, MAX) for a in args]
+        elif f[0] == "p":
+            q, toks = f[2], [f[1]] + [go(a, MAX) for a in args[:-1]] + [go(a, f[2]) for a in args[-1:]]
+        elif f[0] == "i":
+            q, left = f[2], f[3] == "l"
+            toks = [go(args[0], q if left else q + 1), f[1], go(args[1], q + 1 if left else q)]
+        else:
+            q, (order, lits) = f[1], f[2]
+            got, toks = dict(zip(order, args)), []
+            for j, lit in enumerate(lits):
+                if lit[0] == "c":
+                    toks.append(lit[1])
+                    continue
+                rest = lits[j + 1:]
+                pv = q if not rest else rest[0][2] + 1 if rest[0][0] == "c" else MAX
+                if lits[j - 1] == ("c", "#", MAX) or rest[:1] in ([("c", ",", 5)], [("c", ".", 0)]):
+                    pv = MAX  # for the reader: `#(s k)`, `Π (Π A, B), C`
+                toks.append(go(got[lit[1]], pv))
+        s = " ".join(toks)
+        return f"({s})" if q < p else s
+    s = go(e, 0)
+    for d in spec.delims - {"(", ")"}:  # `#0`, `λ A, e`
+        s = s.replace(f"{d} ", d) if d != "," else s.replace(" ,", ",")
+    return s
 
 
 def subst(e, env):

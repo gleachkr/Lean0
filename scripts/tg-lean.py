@@ -57,6 +57,9 @@ Certificates are verified against this file's chain (`lean0 joined --tg`).
                                 write DIR/check.mm0 and DIR/check.auf: every axiom of
                                 the spec restated in prefix form, proved by the axiom
                                 itself (compiling them checks the notation parser)
+  scripts/tg-lean.py --prefix DIR
+                                write the three encoding files into DIR without notations in their
+                                statements (the same terms), for the proof generators, which read them
 """
 import os
 import re
@@ -176,10 +179,22 @@ def parse(text):
     return sorts, ctors
 
 
+def operand(x):
+    """`x` as an operand of `+:`: an application needs no parentheses."""
+    x = x[1:-1] if re.fullmatch(r"\(\w+( \w+)*\)", x) else x
+    return x if re.fullmatch(r"\w+( \w+)*|∅|⟨.*⟩|\(.*\)", x) else f"({x})"
+
+
+PREFIX_FORM = False  # `--prefix`: no notation in the statements written
+
+
 def seq(xs):
     out = "∅"
     for x in reversed(xs):
-        out = f"scons {x} ({out})" if out != "∅" else f"scons {x} ∅"
+        if PREFIX_FORM:
+            out = f"scons {x} ({out})" if out != "∅" else f"scons {x} ∅"
+        else:
+            out = f"{operand(x)} +: {out}"
     return out
 
 
@@ -303,7 +318,7 @@ def library_names():
 def model_files():
     """The model's files: `model/model.mm0` and the files of `spec/tg/model` it imports,
     directly or not."""
-    seen, todo = [], [TG / MODEL]
+    seen, todo = [], [ TG / MODEL ]
     while todo:
         f = todo.pop()
         if f in seen:
@@ -331,10 +346,10 @@ def paren(x):
 
 
 def sseq(xs):
-    """A finite sequence of classes, as `scons`es."""
+    """A finite sequence of classes, `a +: b +: ∅` (`scons`)."""
     out = "∅"
     for x in reversed(xs):
-        out = f"scons {paren(x)} {paren(out)}"
+        out = f"scons {paren(x)} {paren(out)}" if PREFIX_FORM else f"{operand(x)} +: {out}"
     return out
 
 
@@ -537,6 +552,12 @@ def render_relations(text, ctors):
     for _, name, bs, result, body in defs:
         b = f" {group(bs)}" if bs else ""
         w(f"def {name}{b}: {result} = $ {mm0math.show(body)} $;")
+    w("")
+    w("--| The spec's notations, as it declares them (spec/lean-core.mm0 describes them).")
+    w("delimiter $ # $;")
+    for lines in sp.source.values():
+        o.extend(lines)
+    w("")
     for _, name, bs, result, body in early_defs(sp):
         vs = [(var(n), srt) for n, srt in bs]
         rhs = tree(body, {n: f"(enc_{srt} {var(n)})" for n, srt in bs})
@@ -553,10 +574,11 @@ def render_relations(text, ctors):
         o += at_classes(f"lrel_{name}", bs, [f"{atom(h, env)} ∈ lrel" for h in hyps],
                         atom(concl, env), "lrel")
     w("")
-    w("--| The clause axioms of Part I, in prefix form.")
+    w("--| The clause axioms of Part I, as the spec states them.")
+    nstmt = lambda e: syn.stmt(e) if PREFIX_FORM else mm0math.pretty(sp, syn.rename(e))
     for _, name, bs, hyps, concl in axioms:
         b = group([(var(n), srt) for n, srt in bs])
-        st = " > ".join([f"$ {stmt(h)} $" for h in hyps] + [f"$ {stmt(concl)} $"])
+        st = " > ".join([f"$ {nstmt(h)} $" for h in hyps] + [f"$ {nstmt(concl)} $"])
         w(f"theorem {name}{' ' + b if b else ''}: {st};")
     w("")
     w("--| The program's clauses that conclude an atom of a relation are that relation's")
@@ -745,10 +767,11 @@ def render_stratum2(text, ctors, enc):
     for d in axioms:
         o += at_classes2(d, "lrel2")
     w("")
-    w("--| The clause axioms, in prefix form.")
+    w("--| The clause axioms, as the spec states them.")
+    nstmt = lambda e: syn.stmt(e) if PREFIX_FORM else mm0math.pretty(sp, syn.rename(e))
     for _, name, bs, hyps, concl in axioms:
         b = group([(syn.var(n), srt) for n, srt in bs])
-        st = " > ".join([f"$ {stmt(h)} $" for h in hyps] + [f"$ {stmt(concl)} $"])
+        st = " > ".join([f"$ {nstmt(h)} $" for h in hyps] + [f"$ {nstmt(concl)} $"])
         w(f"theorem {name}{' ' + b if b else ''}: {st};")
     w("")
     w("--| The program's clauses that conclude an atom of a relation are that relation's.")
@@ -1141,7 +1164,7 @@ def render_stratum3(text, ctors, enc, enc2):
           + f" > $ {D} {' '.join(a)} ≐ {D} {' '.join(b)} $;")
         w("--| @rewrite")
         w(f"theorem sb_c_{D} {{x: set}} (t: set x) ({' '.join(a)}: class x): "
-          f"$ (⟦ x / t ⟧ ({D} {' '.join(a)})) ≐ {D} {' '.join(f'(⟦ x / t ⟧ {v})' for v in a)} $;")
+          f"$ ([[ x / t ]] ({D} {' '.join(a)})) ≐ {D} {' '.join(f'([[ x / t ]] {v})' for v in a)} $;")
     w("theorem lrel3_eq (G: hyps) (J J2: class): $ G ⇒ J = J2 $ > $ G ⇒ lrel3 J = lrel3 J2 $;")
     return "\n".join(o) + "\n"
 
@@ -1176,7 +1199,7 @@ def render_det(rels):
         for i, m in enumerate(mode):
             if m == "*":
                 for v in (a1[i], a2[i]):
-                    hyps.append(f"$ G ⇒ ¬ ∃ x ∃ y ({v} = ⟨ kc_app , scons x (scons y ∅) ⟩) $")
+                    hyps.append(f"$ G ⇒ ¬ ∃ x ∃ y ({v} = ⟨ kc_app , {seq(['x', 'y'])} ⟩) $")
         concl = " ∧ ".join(f"u{i + 1} = v{i + 1}" for i, m in enumerate(mode) if m != "+")
         bound = " {x y: set}" if "*" in mode else ""
         o.append(f"theorem {name} (G: hyps){bound} ({' '.join(vs)}: set):")
@@ -1224,7 +1247,7 @@ def render_congr(text):
                  + f" > $ G ⇒ {lhs} = {rhs} $;")
         o.append("--| @rewrite")
         o.append(f"theorem sb_c_{r} {{x: set}} (t: set x) ({' '.join(a)}: class x): "
-                 f"$ (⟦ x / t ⟧ ({lhs})) ≐ {r} {' '.join(f'(⟦ x / t ⟧ {v})' for v in a)} $;")
+                 f"$ ([[ x / t ]] ({lhs})) ≐ {r} {' '.join(f'([[ x / t ]] {v})' for v in a)} $;")
     return "\n".join(o) + "\n"
 
 
@@ -1271,7 +1294,7 @@ def render_rest(text, strata):
     for d in decls:
         if not thm(d) or d[1] not in proved:
             continue
-        st = " > ".join(f"$ {mm0math.show(rename(h))} $" for h in d[3] + [d[4]])
+        st = " > ".join(f"$ {mm0math.pretty(sp, rename(h))} $" for h in d[3] + [d[4]])
         found = d[1] in strata_thms
         for f in files:
             m = re.search(rf"^theorem {d[1]}\b[^$;]*?(\$[^;]*);$", files[f], re.M)
@@ -1283,13 +1306,17 @@ def render_rest(text, strata):
                     f.write_text(files[f], encoding="utf-8")
         if not found:
             sys.exit(f"tg-lean: cannot read the model's statement of {d[1]}")
+    # a notation of Parts II and III is declared by the model file that defines its term
+    for name in sp.source:
+        if name not in part1.source and not any(all(l in t for l in sp.source[name]) for t in files.values()):
+            sys.exit(f"tg-lean: no model file declares the spec's notations of {name}: {sp.source[name]}")
     if wrong and not os.environ.get("TG_FIX_MODEL"):
         sys.exit(f"tg-lean: the model states these differently from the spec: {wrong}")
 
     o = ["-- lean-tg-rest.mm0: Parts II and III of spec/lean.mm0, over the model.",
          "-- GENERATED by scripts/tg-lean.py from spec/lean.mm0; do not edit.",
          "--",
-         "-- Trusted: everything here is the spec's own statement (in prefix form, with",
+         "-- Trusted: everything here is the spec's own statement (in its notations, with",
          "-- its variables renamed apart from the library's names), stated as an axiom",
          "-- until later layers of the reduction prove it (audit §11); what the model",
          "-- (model.mm0) already declares is left out. Certificates are verified",
@@ -1313,7 +1340,7 @@ def render_rest(text, strata):
         else:
             _, _, bs, hyps, concl = d
             b = group([(var(n), srt) for n, srt in bs])
-            st = " > ".join([f"$ {mm0math.show(rename(h))} $" for h in hyps] + [f"$ {mm0math.show(rename(concl))} $"])
+            st = " > ".join([f"$ {mm0math.pretty(sp, rename(h))} $" for h in hyps] + [f"$ {mm0math.pretty(sp, rename(concl))} $"])
             w(f"axiom {name}{' ' + b if b else ''}: {st};")
     return "\n".join(o) + "\n"
 
@@ -1330,6 +1357,10 @@ def parse_check(spec, out):
         mm.append(f"theorem chk_{name}{' ' + group(bs) if bs else ''}: {st};")
         refs = ", ".join(f"#{i + 1}" for i in range(len(hyps)))
         auf += [f"chk_{name}", "----", f"l1: $ {mm0math.show(concl)} $ by {name} [{refs}]", ""]
+        # and as mm0math.pretty writes it (the model's statements and lean-tg's are written that way)
+        st = " > ".join([f"$ {mm0math.pretty(sp, h)} $" for h in hyps] + [f"$ {mm0math.pretty(sp, concl)} $"])
+        mm.append(f"theorem chkn_{name}{' ' + group(bs) if bs else ''}: {st};")
+        auf += [f"chkn_{name}", "----", f"l1: $ {mm0math.pretty(sp, concl)} $ by {name} [{refs}]", ""]
     out.mkdir(parents=True, exist_ok=True)
     (out / "check.mm0").write_text("\n".join(mm) + "\n", encoding="utf-8")
     (out / "check.auf").write_text("\n".join(auf), encoding="utf-8")
@@ -1340,12 +1371,19 @@ def main():
     if sys.argv[1:2] == ["--parse-check"]:
         parse_check(spec, Path(sys.argv[2]))
         return
+    if sys.argv[1:2] == ["--prefix"]:
+        global PREFIX_FORM
+        PREFIX_FORM = True
     sorts, ctors = parse(spec)
     text = render(sorts, ctors) + "\n".join(render_relations(spec, ctors)) + "\n"
     text += render_labels(text)
     text += render_congr(text)
     text2 = render_stratum2(spec, ctors, text)
     text3 = render_stratum3(spec, ctors, text, text2)
+    if PREFIX_FORM:
+        for path, t in ((OUT, text), (OUT2, text2), (OUT3, text3)):
+            (Path(sys.argv[2]) / path.name).write_text(t, encoding="utf-8")
+        return
     files = [(OUT, text), (OUT2, text2), (OUT3, text3), (REST, render_rest(spec, [text2, text3]))]
     if sys.argv[1:] == ["--check"]:
         for path, t in files:

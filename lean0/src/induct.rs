@@ -304,7 +304,7 @@ fn params<'t>(el: &mut Elab<'_, '_, 't, '_>, ty: ExprPtr<'t>, np: usize) -> R<(V
     Ok((ps, ctx))
 }
 
-/// `e` is `Π ... . Sort _` with `k` binders.
+/// `e` is `Π ..., Sort _` with `k` binders.
 fn is_sorted<'t>(el: &Elab<'_, '_, 't, '_>, mut e: ExprPtr<'t>) -> Option<usize> {
     let mut k = 0;
     loop {
@@ -515,7 +515,7 @@ pub(crate) fn block_head<'t>(el: &mut Elab<'_, '_, 't, '_>, sig: &Sig, id: &Indu
             Ok(b) => b,
             Err(e) => return reason(el, e),
         };
-        let Some(k) = is_sorted(el, body) else { return reason(el, "a type's type is not `Π indices. Sort`".into()) };
+        let Some(k) = is_sorted(el, body) else { return reason(el, "a type's type is not `Π indices, Sort`".into()) };
         if k != h.nidx {
             return reason(el, "index count".into())
         }

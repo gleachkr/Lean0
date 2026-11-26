@@ -21,18 +21,18 @@ import "arith.mm0";
 -- --------------------------------------------------------------------------
 
 --| `A` divides `B`: `B = A · c` for some `c ∊ ω`.
-def ndvd (A B: class) (.c: set): fml = $ ∃ c (c ∊ ω ∧ B = nmul A c) $;
+def ndvd (A B: class) (.c: set): fml = $ ∃ c (c ∊ ω ∧ B = A · c) $;
 --| The quotient: the `q ∊ ω` with `q·B + r = A` for some `r < B`; `0` when `B = 0`.
 def ndiv (A B: class) (.q .r: set): class =
-  $ ⋃ {q | q ∊ ω ∧ ((B = ∅ ∧ q = ∅) ∨ (∅ ∈ B ∧ ∃ r (r ∊ B ∧ nadd (nmul q B) r = A)))} $;
+  $ ⋃ {q | q ∊ ω ∧ ((B = ∅ ∧ q = ∅) ∨ (∅ ∈ B ∧ ∃ r (r ∊ B ∧ q · B + r = A)))} $;
 --| The remainder: `A - (A / B)·B` (so `A` itself when `B = 0`, as in Lean).
-def nmod (A B: class): class = $ nsub A (nmul (ndiv A B) B) $;
+def nmod (A B: class): class = $ nsub A (ndiv A B · B) $;
 --| The greatest common divisor, as the common divisor that every common
 --| divisor divides (`ngcd 0 0 = 0`).
 def ngcd (A B: class) (.g .d: set): class =
   $ ⋃ {g | g ∊ ω ∧ ndvd g A ∧ ndvd g B ∧ ∀ d (d ∊ ω → ndvd d A → ndvd d B → ndvd d g)} $;
 --| `A · 2 ^ B`.
-def nshl (A B: class): class = $ nmul A (npow two B) $;
+def nshl (A B: class): class = $ A · two ^ B $;
 
 --| @congr
 theorem ndvd_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ ndvd A C ⟺ ndvd B D $;
@@ -40,35 +40,35 @@ theorem ndvd_eq (G: hyps) (A B C D: class):
   $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ ndvd A C $ > $ G ⇒ ndvd B D $;
 --| @rewrite
 theorem sb_f_ndvd {x: set} (t: set x) (A B: class x):
-  $ [x/t] (ndvd A B) ⟺ ndvd (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ [ x / t ] (ndvd A B) ⟺ ndvd ([[ x / t ]] A) ([[ x / t ]] B) $;
 --| @congr
 theorem ndiv_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ ndiv A C ≐ ndiv B D $;
 theorem ndiv_eq (G: hyps) (A B C D: class):
   $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ ndiv A C = ndiv B D $;
 --| @rewrite
 theorem sb_c_ndiv {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (ndiv A B)) ≐ ndiv (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (ndiv A B)) ≐ ndiv ([[ x / t ]] A) ([[ x / t ]] B) $;
 --| @congr
 theorem nmod_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ nmod A C ≐ nmod B D $;
 theorem nmod_eq (G: hyps) (A B C D: class):
   $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ nmod A C = nmod B D $;
 --| @rewrite
 theorem sb_c_nmod {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (nmod A B)) ≐ nmod (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (nmod A B)) ≐ nmod ([[ x / t ]] A) ([[ x / t ]] B) $;
 --| @congr
 theorem ngcd_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ ngcd A C ≐ ngcd B D $;
 theorem ngcd_eq (G: hyps) (A B C D: class):
   $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ ngcd A C = ngcd B D $;
 --| @rewrite
 theorem sb_c_ngcd {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (ngcd A B)) ≐ ngcd (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (ngcd A B)) ≐ ngcd ([[ x / t ]] A) ([[ x / t ]] B) $;
 --| @congr
 theorem nshl_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ nshl A C ≐ nshl B D $;
 theorem nshl_eq (G: hyps) (A B C D: class):
   $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ nshl A C = nshl B D $;
 --| @rewrite
 theorem sb_c_nshl {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (nshl A B)) ≐ nshl (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (nshl A B)) ≐ nshl ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 -- --------------------------------------------------------------------------
 -- Strong induction, and divisibility
@@ -79,7 +79,7 @@ theorem sb_c_nshl {x: set} (t: set x) (A B: class x):
 --| @freshen G y
 --| @freshen p y
 theorem omega_sind_f (G: hyps) {x y: set} (p: fml x):
-  $ G , x ∊ ω , ∀ y (y ∊ x → [x/y] p) ⇒ p $ > $ G ⇒ ∀ x (x ∊ ω → p) $;
+  $ G , x ∊ ω , ∀ y (y ∊ x → [ x / y ] p) ⇒ p $ > $ G ⇒ ∀ x (x ∊ ω → p) $;
 theorem two_omega (G: hyps): $ G ⇒ two ∈ ω $;
 --| Name `two`, `0` and `1` by set variables, with the facts about them.
 --| @freshen G t
@@ -92,23 +92,23 @@ theorem two_names {t e o: set} (G: hyps) (c: fml):
   $ G , t = two , e = ∅ , o = suc e , t ∊ ω , e ∊ t , o ∊ t ⇒ c $ > $ G ⇒ c $;
 
 theorem ndvd_intro (G: hyps) (a b c: set):
-  $ G ⇒ c ∊ ω $ > $ G ⇒ b = nmul a c $ > $ G ⇒ ndvd a b $;
+  $ G ⇒ c ∊ ω $ > $ G ⇒ b = a · c $ > $ G ⇒ ndvd a b $;
 --| Class form of `ndvd_intro`.
-theorem ndvd_intro_c (G: hyps) (A B C: class): $ G ⇒ C ∈ ω $ > $ G ⇒ B = nmul A C $ > $ G ⇒ ndvd A B $;
+theorem ndvd_intro_c (G: hyps) (A B C: class): $ G ⇒ C ∈ ω $ > $ G ⇒ B = A · C $ > $ G ⇒ ndvd A B $;
 --| Elimination of `ndvd`: name the cofactor.
-theorem ndvd_elim {u: set} (G: hyps u) (A B: class): $ G ⇒ ndvd A B $ > $ G ⇒ ∃ u (u ∊ ω ∧ B = nmul A u) $;
+theorem ndvd_elim {u: set} (G: hyps u) (A B: class): $ G ⇒ ndvd A B $ > $ G ⇒ ∃ u (u ∊ ω ∧ B = A · u) $;
 theorem ndvd_refl (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ ndvd a a $;
 theorem ndvd_zero (G: hyps) (a: set): $ G ⇒ ndvd a ∅ $;
 theorem one_ndvd (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ ndvd (suc ∅) a $;
 theorem ndvd_trans (G: hyps) (a b c: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ ndvd a b $ > $ G ⇒ ndvd b c $ > $ G ⇒ ndvd a c $;
 theorem ndvd_nadd (G: hyps) (a b c: set):
-  $ G ⇒ a ∊ ω $ > $ G ⇒ ndvd a b $ > $ G ⇒ ndvd a c $ > $ G ⇒ ndvd a (nadd b c) $;
+  $ G ⇒ a ∊ ω $ > $ G ⇒ ndvd a b $ > $ G ⇒ ndvd a c $ > $ G ⇒ ndvd a (b + c) $;
 theorem ndvd_nmul_l (G: hyps) (a b c: set):
-  $ G ⇒ a ∊ ω $ > $ G ⇒ c ∊ ω $ > $ G ⇒ ndvd a b $ > $ G ⇒ ndvd a (nmul c b) $;
+  $ G ⇒ a ∊ ω $ > $ G ⇒ c ∊ ω $ > $ G ⇒ ndvd a b $ > $ G ⇒ ndvd a (c · b) $;
 --| A divisor of `b` and of `b + c` divides `c`.
 theorem ndvd_nadd_cancel (G: hyps) (a b c: set):
-  $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ c ∊ ω $ > $ G ⇒ ndvd a b $ > $ G ⇒ ndvd a (nadd b c) $ >
+  $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ c ∊ ω $ > $ G ⇒ ndvd a b $ > $ G ⇒ ndvd a (b + c) $ >
   $ G ⇒ ndvd a c $;
 theorem ndvd_le (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ ∅ ∈ b $ > $ G ⇒ ndvd a b $ > $ G ⇒ a ⊆ b $;
@@ -123,16 +123,16 @@ theorem ndiv_set (G: hyps) (a b: set): $ G ⇒ isset (ndiv a b) $;
 --| Euclid: a quotient and a remainder exist, and they are unique.
 theorem ndivmod_ex {q r: set} (G: hyps q r) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ ∅ ∈ b $ >
-  $ G ⇒ ∃ q ∃ r (q ∊ ω ∧ r ∊ b ∧ nadd (nmul q b) r = a) $;
+  $ G ⇒ ∃ q ∃ r (q ∊ ω ∧ r ∊ b ∧ q · b + r = a) $;
 theorem ndivmod_unique (G: hyps) (b q r c d: set):
   $ G ⇒ b ∊ ω $ > $ G ⇒ q ∊ ω $ > $ G ⇒ r ∊ b $ > $ G ⇒ c ∊ ω $ > $ G ⇒ d ∊ b $ >
-  $ G ⇒ nadd (nmul q b) r = nadd (nmul c b) d $ > $ G ⇒ q = c ∧ r = d $;
+  $ G ⇒ q · b + r = c · b + d $ > $ G ⇒ q = c ∧ r = d $;
 --| The facts behind `nat_div_lit` and `nat_mod_lit`.
 theorem ndiv_char (G: hyps) (a b q r: set):
-  $ G ⇒ b ∊ ω $ > $ G ⇒ q ∊ ω $ > $ G ⇒ r ∊ b $ > $ G ⇒ nadd (nmul q b) r = a $ >
+  $ G ⇒ b ∊ ω $ > $ G ⇒ q ∊ ω $ > $ G ⇒ r ∊ b $ > $ G ⇒ q · b + r = a $ >
   $ G ⇒ ndiv a b = q $;
 theorem nmod_char (G: hyps) (a b q r: set):
-  $ G ⇒ b ∊ ω $ > $ G ⇒ q ∊ ω $ > $ G ⇒ r ∊ b $ > $ G ⇒ nadd (nmul q b) r = a $ >
+  $ G ⇒ b ∊ ω $ > $ G ⇒ q ∊ ω $ > $ G ⇒ r ∊ b $ > $ G ⇒ q · b + r = a $ >
   $ G ⇒ nmod a b = r $;
 --| Name the quotient `u` and the remainder `v` of `a` by `b > 0`, with their
 --| characterization (Euclid, `ndiv_char`, `nmod_char`).
@@ -140,7 +140,7 @@ theorem nmod_char (G: hyps) (a b q r: set):
 --| @freshen G v
 --| @freshen c u
 --| @freshen c v
-theorem ndivmod_elim {u v: set} (G: hyps) (a b: set) (c: fml): $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ ∅ ∈ b $ > $ G , u ∊ ω , v ∊ b , nadd (nmul u b) v = a , ndiv a b = u , nmod a b = v ⇒ c $ > $ G ⇒ c $;
+theorem ndivmod_elim {u v: set} (G: hyps) (a b: set) (c: fml): $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ ∅ ∈ b $ > $ G , u ∊ ω , v ∊ b , u · b + v = a , ndiv a b = u , nmod a b = v ⇒ c $ > $ G ⇒ c $;
 --| The facts behind `nat_div_lit0` and `nat_mod_lit0`.
 theorem ndiv_zero_r (G: hyps) (a: set): $ G ⇒ ndiv a ∅ = ∅ $;
 theorem nmod_zero_r (G: hyps) (a: set): $ G ⇒ nmod a ∅ = a $;
@@ -151,7 +151,7 @@ theorem nmod_omega (G: hyps) (a b: set):
 theorem nmod_lt (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ ∅ ∈ b $ > $ G ⇒ nmod a b ∈ b $;
 theorem ndiv_nmod (G: hyps) (a b: set):
-  $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nadd (nmul (ndiv a b) b) (nmod a b) = a $;
+  $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ ndiv a b · b + nmod a b = a $;
 theorem nmod_le (G: hyps) (a b: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nmod a b ⊆ a $;
 --| Lean's recursion equations: below the divisor the quotient is `0` and the
@@ -223,11 +223,11 @@ theorem ngcd_suc (G: hyps) (a b: set):
 --| is a difference of multiples of `a` and `b` is the greatest one.
 theorem ngcd_lit (G: hyps) (a b g x y: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ g ∊ ω $ > $ G ⇒ x ∊ ω $ > $ G ⇒ y ∊ ω $ >
-  $ G ⇒ ndvd g a $ > $ G ⇒ ndvd g b $ > $ G ⇒ nadd (nmul y b) g = nmul x a $ >
+  $ G ⇒ ndvd g a $ > $ G ⇒ ndvd g b $ > $ G ⇒ y · b + g = x · a $ >
   $ G ⇒ ngcd a b = g $;
 theorem ngcd_lit2 (G: hyps) (a b g x y: set):
   $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ g ∊ ω $ > $ G ⇒ x ∊ ω $ > $ G ⇒ y ∊ ω $ >
-  $ G ⇒ ndvd g a $ > $ G ⇒ ndvd g b $ > $ G ⇒ nadd (nmul x a) g = nmul y b $ >
+  $ G ⇒ ndvd g a $ > $ G ⇒ ndvd g b $ > $ G ⇒ x · a + g = y · b $ >
   $ G ⇒ ngcd a b = g $;
 
 -- --------------------------------------------------------------------------
@@ -239,4 +239,4 @@ theorem nshl_omega (G: hyps) (a b: set):
 --| Lean's recursion equations for `Nat.shiftLeft`.
 theorem nshl_zero (G: hyps) (a: set): $ G ⇒ a ∊ ω $ > $ G ⇒ nshl a ∅ = a $;
 theorem nshl_suc (G: hyps) (a b: set):
-  $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nshl a (suc b) = nshl (nmul two a) b $;
+  $ G ⇒ a ∊ ω $ > $ G ⇒ b ∊ ω $ > $ G ⇒ nshl a (suc b) = nshl (two · a) b $;

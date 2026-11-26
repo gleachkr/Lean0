@@ -12,13 +12,13 @@ import "model-quot.mm0";
 
 --| At `lit b`: the numeral of `b`'s number.
 def hlit (.u .l .e .z .w: set): class =
-  $ {z | ∃ u ∃ l ∃ e (z = ⟨ ⟨ u , ⟨ kc_lit , ⟨ scons l ∅ , e ⟩ ⟩ ⟩ , clam w lvals (sclip (nnf' nvf' l)) ⟩)} $;
+  $ {z | ∃ u ∃ l ∃ e (z = ⟨ ⟨ u , ⟨ kc_lit , ⟨ l +: ∅ , e ⟩ ⟩ ⟩ , (λₛ w ∈ lvals, sclip (nnf' nvf' l)) ⟩)} $;
 
 --| The denotation of `lit b`, for a hook `mcv H` with `H` extending `hlit`, in an admissible universe: the numeral of
 --| `b`'s number.
 theorem dt_lit (G: hyps) (H B W R: class) (u: set):
   $ G ⇒ hlit ⊆ H $ > $ G ⇒ functional H $ > $ G ⇒ B ∈ trees ω $ > $ G ⇒ W ∈ lvals $ > $ G ⇒ R ∈ fseq u $ > $ G ⇒ uadm u $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_lit , scons B ∅ ⟩ W R = nnf' nvf' B $;
+  $ G ⇒ dt u (mcv H) ⟨ kc_lit , B +: ∅ ⟩ W R = nnf' nvf' B $;
 
 --| The rule `lit_zero` in the model, for a hook with the inductive types' and the literals' parts.
 theorem mlit_zero (H: class) (G: ctx): $ _ ⇒ hind H $ > $ _ ⇒ hlit ⊆ H $ > $ mdeq (mcv H) G (lit b0) (ind_ctor nat_D nz nz) (ind_ty nat_D nz) $;
@@ -51,31 +51,31 @@ theorem bdbl_sem (G: hyps) (a b: bin): $ bdbl a b $ > $ G ⇒ nvf' (enc_bin b) =
 
 --| The semantics of `badd`, by induction on the first tree and inversion.
 theorem lrel_badd_sem (G: hyps) (t1 t2 t3: set):
-  $ G ⇒ ra_badd t1 t2 t3 ∈ lrel $ > $ G ⇒ nvf' t3 = nadd (nvf' t1) (nvf' t2) $;
+  $ G ⇒ ra_badd t1 t2 t3 ∈ lrel $ > $ G ⇒ nvf' t3 = nvf' t1 + nvf' t2 $;
 
 --| `badd a b c`: the number of `c` is the sum of `a`'s and `b`'s.
-theorem badd_sem (G: hyps) (a b c: bin): $ badd a b c $ > $ G ⇒ nvf' (enc_bin c) = nadd (nvf' (enc_bin a)) (nvf' (enc_bin b)) $;
+theorem badd_sem (G: hyps) (a b c: bin): $ badd a b c $ > $ G ⇒ nvf' (enc_bin c) = nvf' (enc_bin a) + nvf' (enc_bin b) $;
 
 --| The semantics of `baddc` (addition with a carry), by induction on the first tree and inversion.
 theorem lrel_baddc_sem (G: hyps) (t1 t2 t3: set):
-  $ G ⇒ ra_baddc t1 t2 t3 ∈ lrel $ > $ G ⇒ nvf' t3 = suc (nadd (nvf' t1) (nvf' t2)) $;
+  $ G ⇒ ra_baddc t1 t2 t3 ∈ lrel $ > $ G ⇒ nvf' t3 = suc (nvf' t1 + nvf' t2) $;
 
 --| `baddc a b c`: the number of `c` is the sum of `a`'s and `b`'s, plus one.
-theorem baddc_sem (G: hyps) (a b c: bin): $ baddc a b c $ > $ G ⇒ nvf' (enc_bin c) = suc (nadd (nvf' (enc_bin a)) (nvf' (enc_bin b))) $;
+theorem baddc_sem (G: hyps) (a b c: bin): $ baddc a b c $ > $ G ⇒ nvf' (enc_bin c) = suc (nvf' (enc_bin a) + nvf' (enc_bin b)) $;
 
 --| The semantics of `bmul`, by induction on the second tree and inversion.
 theorem lrel_bmul_sem (G: hyps) (t1 t2 t3: set):
-  $ G ⇒ ra_bmul t1 t2 t3 ∈ lrel $ > $ G ⇒ nvf' t3 = nmul (nvf' t1) (nvf' t2) $;
+  $ G ⇒ ra_bmul t1 t2 t3 ∈ lrel $ > $ G ⇒ nvf' t3 = nvf' t1 · nvf' t2 $;
 
 --| `bmul a b c`: the number of `c` is the product of `a`'s and `b`'s.
-theorem bmul_sem (G: hyps) (a b c: bin): $ bmul a b c $ > $ G ⇒ nvf' (enc_bin c) = nmul (nvf' (enc_bin a)) (nvf' (enc_bin b)) $;
+theorem bmul_sem (G: hyps) (a b c: bin): $ bmul a b c $ > $ G ⇒ nvf' (enc_bin c) = nvf' (enc_bin a) · nvf' (enc_bin b) $;
 
 --| The semantics of `bpow`, by induction on the second tree and inversion.
 theorem lrel_bpow_sem (G: hyps) (t1 t2 t3: set):
-  $ G ⇒ ra_bpow t1 t2 t3 ∈ lrel $ > $ G ⇒ nvf' t3 = npow (nvf' t1) (nvf' t2) $;
+  $ G ⇒ ra_bpow t1 t2 t3 ∈ lrel $ > $ G ⇒ nvf' t3 = nvf' t1 ^ nvf' t2 $;
 
 --| `bpow a b c`: the number of `c` is `a`'s to the power of `b`'s.
-theorem bpow_sem (G: hyps) (a b c: bin): $ bpow a b c $ > $ G ⇒ nvf' (enc_bin c) = npow (nvf' (enc_bin a)) (nvf' (enc_bin b)) $;
+theorem bpow_sem (G: hyps) (a b c: bin): $ bpow a b c $ > $ G ⇒ nvf' (enc_bin c) = nvf' (enc_bin a) ^ nvf' (enc_bin b) $;
 
 -- --------------------------------------------------------------------------
 -- The literal rules
@@ -376,7 +376,7 @@ def nlev (A B: class) (.e .c .d: set): class =
 theorem nlev_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ nlev A C ≐ nlev B D $;
 --| @rewrite
 theorem sb_c_nlev {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (nlev A B)) ≐ nlev (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (nlev A B)) ≐ nlev ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 theorem nlev_eq (G: hyps) (A B C D: class): $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ nlev A C = nlev B D $;
 
@@ -402,7 +402,7 @@ def mles (M: class) (.u .w .a .b: set): fml =
 theorem mles_congr (A B: class): $ A ≐ B $ > $ mles A ⟺ mles B $;
 --| @rewrite
 theorem sb_f_mles {x: set} (t: set x) (A: class x):
-  $ [x/t] (mles A) ⟺ mles (⟦ x / t ⟧ A) $;
+  $ [ x / t ] (mles A) ⟺ mles ([[ x / t ]] A) $;
 
 --| The model's `Nat.le` is the order of the numerals, for a hook with the inductive types' parts: by induction, the
 --| constructors give an element at the numerals of `x ⊆ y`; the recursor at the motive `nlev` turns an element into `x ⊆ y`.

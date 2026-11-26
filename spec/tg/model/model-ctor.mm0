@@ -27,7 +27,7 @@ theorem ind_ty_ty_sem (G: hyps) (H: class) (u w r td tb tp tt ti tf te tk tl tr:
   $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_tys_closed tp tt ∈ lrel $ >
   $ G ⇒ ra_nth_ty tt ti tf te ∈ lrel $ > $ G ⇒ ra_isort tf tk tl ∈ lrel $ > $ G ⇒ ra_pis tp tf tr ∈ lrel $ >
   $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ w r ∈ dt u (mcv H) tr w r $;
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ty , td +: ti +: ∅ ⟩ w r ∈ dt u (mcv H) tr w r $;
 
 -- --------------------------------------------------------------------------
 -- `ind_ctor_ty` (E4)
@@ -38,12 +38,12 @@ theorem ind_ty_ty_sem (G: hyps) (H: class) (u w r td tb tp tt ti tf te tk tl tr:
 --| `i` applied to the parameters and indices.
 theorem lrel3_cwf_shape {a b c d: set} (G: hyps) (J: class) (t1 t2 t3 t4 t5 t6 t7 t8: set):
   $ G ⇒ ra_cwf t1 t2 t3 t4 t5 t6 t7 t8 ∈ lrel3 J $ >
-  $ G ⇒ ∃ a ∃ b ∃ c ∃ d (t8 = ⟨ kc_pi , scons a (scons b ∅) ⟩ ∧ d = ⟨ kc_s , scons t7 ∅ ⟩ ∧
+  $ G ⇒ ∃ a ∃ b ∃ c ∃ d (t8 = ⟨ kc_pi , a +: b +: ∅ ⟩ ∧ d = ⟨ kc_s , t7 +: ∅ ⟩ ∧
         ra_cwf t1 t2 t3 t4 t5 c d b ∈ lrel3 J) ∨
       ra_indapp t1 t2 t3 t7 t8 t5 ∈ lrel $;
 --| The children of a `Π` are expressions.
 theorem ofsort_pi_kids (G: hyps) (ta tb: set):
-  $ G ⇒ ⟨ kc_pi , scons ta (scons tb ∅) ⟩ ∈ ofsort lsig lopen ks_expr $ >
+  $ G ⇒ ⟨ kc_pi , ta +: tb +: ∅ ⟩ ∈ ofsort lsig lopen ks_expr $ >
   $ G ⇒ ta ∊ ofsort lsig lopen ks_expr ∧ tb ∊ ofsort lsig lopen ks_expr $;
 --| The arguments of the result of a constructor type (`indapp`) are a
 --| valuation over `u`.
@@ -51,9 +51,9 @@ theorem lrel_indapp_fseq (G: hyps) (M: class) (u w r t1 t2 t3 t4 t5 t6: set):
   $ G ⇒ ra_indapp t1 t2 t3 t4 t5 t6 ∈ lrel $ > $ G ⇒ uadm u $ > $ G ⇒ t5 ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ sarg u (dnf u M) t5 w r ∈ fseq u $;
 --| An element of the telescope of `Π A. B`: a head in `A`'s value and an element of `B`'s telescope over it.
-theorem etel_pi_elim {x f g t: set} (G: hyps) (M: class) (u w r ta tb q1 q2 q3 q4: set): $ G ⇒ ta ∊ trees ω $ > $ G ⇒ tb ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ ⟨ q1 , ⟨ q2 , ⟨ q3 , q4 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) ⟨ kc_pi , scons ta (scons tb ∅) ⟩ w r $ > $ G ⇒ ∃ x ∃ f ∃ g ∃ t (x ∊ dt u M ta w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , q4 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tb w (scons x r) ∧ q1 = ssnoc f x ∧ q2 = scons x g) $;
+theorem etel_pi_elim {x f g t: set} (G: hyps) (M: class) (u w r ta tb q1 q2 q3 q4: set): $ G ⇒ ta ∊ trees ω $ > $ G ⇒ tb ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ ⟨ q1 , ⟨ q2 , ⟨ q3 , q4 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) ⟨ kc_pi , ta +: tb +: ∅ ⟩ w r $ > $ G ⇒ ∃ x ∃ f ∃ g ∃ t (x ∊ dt u M ta w r ∧ x ∊ u ∧ ⟨ f , ⟨ g , ⟨ t , q4 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tb w (x +: r) ∧ q1 = f :+ x ∧ q2 = x +: g) $;
 --| An element of the telescope of `Π A. B` from a head in `A`'s value and an element of `B`'s telescope over it.
-theorem etel_pi_intro (G: hyps) (M: class) (u w r ta tb x1 f1 g1 s1 a1: set): $ G ⇒ ta ∊ trees ω $ > $ G ⇒ tb ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ x1 ∊ dt u M ta w r $ > $ G ⇒ x1 ∊ u $ > $ G ⇒ ⟨ f1 , ⟨ g1 , ⟨ s1 , a1 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tb w (scons x1 r) $ > $ G ⇒ ⟨ ssnoc f1 x1 , ⟨ scons x1 g1 , ⟨ scons (etel u (dnf u M) ta w r) s1 , a1 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) ⟨ kc_pi , scons ta (scons tb ∅) ⟩ w r $;
+theorem etel_pi_intro (G: hyps) (M: class) (u w r ta tb x1 f1 g1 s1 a1: set): $ G ⇒ ta ∊ trees ω $ > $ G ⇒ tb ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ x1 ∊ dt u M ta w r $ > $ G ⇒ x1 ∊ u $ > $ G ⇒ ⟨ f1 , ⟨ g1 , ⟨ s1 , a1 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tb w (x1 +: r) $ > $ G ⇒ ⟨ f1 :+ x1 , ⟨ x1 +: g1 , ⟨ etel u (dnf u M) ta w r +: s1 , a1 ⟩ ⟩ ⟩ ∈ etel u (dnf u M) ⟨ kc_pi , ta +: tb +: ∅ ⟩ w r $;
 --| A set of points over the paths of a well-formed constructor type, whose
 --| value at each path is an element of the result's value there (type `i` of
 --| the valuation at the path's arguments), is an element of the type's
@@ -64,16 +64,16 @@ theorem lrel3_cwf_trace {z f g t a v: set} (G: hyps) (J M: class) (u w r x t1 t2
   $ G ⇒ t8 ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ t7 ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ ∀ z (z ∊ x → ∃ f ∃ g ∃ t ∃ a ∃ v (⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u (dnf u M) t8 w r ∧ z = nest f v)) $ >
   $ G ⇒ ∀ f ∀ g ∀ t ∀ a (⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u (dnf u M) t8 w r → a ∊ fseq u →
-      apn x f ∈ apn (r' (nadd (nadd (nvf' t7) (nvf' t3)) (nvf' t5))) a) $ >
+      apn x f ∈ apn (r' (nvf' t7 + nvf' t3 + nvf' t5)) a) $ >
   $ G ⇒ x ∈ dt u M t8 w r $;
 --| The empty function applied along any sequence is empty.
 theorem apn_empty_fn (G: hyps) (S: class): $ G ⇒ apn ∅ S = ∅ $;
 --| An element of a constructor's value: parameters, then an element of the constructor type's telescope over them and the family.
 theorem ictor_elim_tel {p f g t a y: set} (G: hyps) (E: class) (u w td tp tt j c tk z: set): $ G ⇒ z ∊ (ictor u E td j c w) $ > $ G ⇒ iprt td tp tt $ > $ G ⇒ ictk td j c tk $ > $ G ⇒ tk ∊ trees ω $ > $ G ⇒ (ixs td w (ifam u E td w)) ∈ fseq u $ > $ G ⇒ ∃ p ∃ f ∃ g ∃ t ∃ a ∃ y (p ∊ esat u E tp w ∧ ⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u E tk w (p ++ ixs td w (ifam u E td w)) ∧ z = nest p (nest f y)) $;
 --| The telescope of a term closed at a depth does not read the valuation past that depth.
-theorem closed_etel_scat (G: hyps) (M: class) (u w k e q v r: set): $ G ⇒ ra_closed k e ∈ lrel $ > $ G ⇒ e ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ q ∊ fseq u $ > $ G ⇒ v ∊ fseq u $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ nvf' k = nadd (cdm q) (cdm v) $ > $ G ⇒ etel u (dnf u M) e w (q ++ v ++ r) = etel u (dnf u M) e w (q ++ v) $;
+theorem closed_etel_scat (G: hyps) (M: class) (u w k e q v r: set): $ G ⇒ ra_closed k e ∈ lrel $ > $ G ⇒ e ∊ trees ω $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ q ∊ fseq u $ > $ G ⇒ v ∊ fseq u $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ nvf' k = cdm q + cdm v $ > $ G ⇒ etel u (dnf u M) e w (q ++ v ++ r) = etel u (dnf u M) e w (q ++ v) $;
 --| An entry of the middle of three concatenated sequences.
-theorem scat_scat_fv_mid (G: hyps) (I: class) (u q v r: set): $ G ⇒ q ∊ fseq u $ > $ G ⇒ v ∊ fseq u $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ I ∈ cdm v $ > $ G ⇒ I ∈ ω $ > $ G ⇒ (q ++ v ++ r)' (nadd (cdm q) I) = v' I $;
+theorem scat_scat_fv_mid (G: hyps) (I: class) (u q v r: set): $ G ⇒ q ∊ fseq u $ > $ G ⇒ v ∊ fseq u $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ I ∈ cdm v $ > $ G ⇒ I ∈ ω $ > $ G ⇒ (q ++ v ++ r)' (cdm q + I) = v' I $;
 --| `lrel3_cwf_trace` at a constructor type over parameters, a valuation of the types and an outer valuation.
 theorem lrel3_cwf_fiber {z f g t a y: set} (G: hyps) (J M: class) (u w td tn tm tl ti tx t7 tk q v r o x: set): $ G ⇒ uadm u $ > $ G ⇒ w ∊ lvals $ > $ G ⇒ ra_cwf td tn tm tl ti tx t7 tk ∈ lrel3 J $ > $ G ⇒ tk ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ t7 ∊ trees ω $ > $ G ⇒ nvf' t7 = ∅ $ > $ G ⇒ q ∊ fseq u $ > $ G ⇒ cdm q = nvf' tm $ > $ G ⇒ v ∊ fseq u $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ nvf' ti ∈ cdm v $ > $ G ⇒ o = q ++ v ++ r $ > $ G ⇒ ∀ z (z ∊ x → ∃ f ∃ g ∃ t ∃ a ∃ y (⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tk w o ∧ z = nest f y)) $ > $ G ⇒ ∀ f ∀ g ∀ t ∀ a (⟨ f , ⟨ g , ⟨ t , a ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tk w o → a ∊ fseq u → apn x f ∈ apn (v' nvf' ti) a) $ > $ G ⇒ x ∈ dt u M tk w o $;
 --| The values of a block's types over its family form a sequence in the universe, of length `intys`.
@@ -87,7 +87,7 @@ theorem ictor_apn_fiber (G: hyps) (H J: class) (u w r r0 tg td tb tp tt ti tf te
   $ G ⇒ iwf u H J tg td w r0 $ > $ G ⇒ r ∊ fseq u $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
   $ G ⇒ ra_nth_ty tt ti tf te ∈ lrel $ > $ G ⇒ ra_nth_ctor te tc tk ∈ lrel $ > $ G ⇒ ra_clen tp tnp ∈ lrel $ >
   $ G ⇒ ra_ntys tt tn tm ∈ lrel $ > $ G ⇒ ra_closed tx tk ∈ lrel $ >
-  $ G ⇒ nvf' tx = nadd (nvf' tnp) (nvf' tn) $ > $ G ⇒ j = nvf' ti $ > $ G ⇒ c = nvf' tc $ >
+  $ G ⇒ nvf' tx = nvf' tnp + nvf' tn $ > $ G ⇒ j = nvf' ti $ > $ G ⇒ c = nvf' tc $ >
   $ G ⇒ q ∊ esat u (dnf u (mcv H)) tp w $ >
   $ G ⇒ apn (ictor u (dnf u (mcv H)) td j c w) q ∈ dt u (mcv H) tk w (q ++ ixs td w (ifam u (dnf u (mcv H)) td w) ++ r) $;
 
@@ -103,14 +103,14 @@ theorem ind_ctor_ty_sem (G: hyps) (H J: class) (u w r tg td tb tp tt ti tf te tc
   $ G ⇒ ra_nth_ctor te tc tk ∈ lrel $ > $ G ⇒ ra_clen tp tnp ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
   $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tk tk2 ∈ lrel $ > $ G ⇒ ra_pis tp tk2 tr ∈ lrel $ >
   $ G ⇒ ra_tys_closed tp tt ∈ lrel $ > $ G ⇒ ra_closed tx tk ∈ lrel $ >
-  $ G ⇒ nvf' tx = nadd (nvf' tnp) (nvf' tn) $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ w r ∈ dt u (mcv H) tr w r $;
+  $ G ⇒ nvf' tx = nvf' tnp + nvf' tn $ >
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ctor , td +: ti +: tc +: ∅ ⟩ w r ∈ dt u (mcv H) tr w r $;
 
 --| When `Π P. K` (`t3`) is closed at `k`, `K` (`t2`) is closed past the
 --| telescope's variables too.
 theorem lrel_pis_closed {x: set} (G: hyps) (t1 t2 t3 k q: set):
   $ G ⇒ ra_pis t1 t2 t3 ∈ lrel $ > $ G ⇒ ra_closed k t3 ∈ lrel $ > $ G ⇒ ra_clen t1 q ∈ lrel $ >
-  $ G ⇒ ∃ x (ra_closed x t2 ∈ lrel ∧ nvf' x = nadd (nvf' q) (nvf' k)) $;
+  $ G ⇒ ∃ x (ra_closed x t2 ∈ lrel ∧ nvf' x = nvf' q + nvf' k) $;
 
 --| Each constructor type of a well-formed list is closed under the block's
 --| parameters, at the number of the block's types (`ctors_wf_cons`'s premises).
@@ -125,7 +125,7 @@ theorem ind_ctor_ty_wf (G: hyps) (H J: class) (u w r tg td tb tp tt ti tf te tc 
   $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ > $ G ⇒ ra_nth_ty tt ti tf te ∈ lrel $ >
   $ G ⇒ ra_nth_ctor te tc tk ∈ lrel $ > $ G ⇒ ra_clen tp tnp ∈ lrel $ > $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
   $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tk tk2 ∈ lrel $ > $ G ⇒ ra_pis tp tk2 tr ∈ lrel $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ w r ∈ dt u (mcv H) tr w r $;
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ctor , td +: ti +: tc +: ∅ ⟩ w r ∈ dt u (mcv H) tr w r $;
 
 --| Each type of a list accepted by `tys_ty` is binders over a sort
 --| (`tys_ty_cons`'s premise).
@@ -140,4 +140,4 @@ theorem ind_ty_ty_wf (G: hyps) (H J: class) (u w r tg td tb tp tt ti tf te tr: s
   $ G ⇒ ra_tys_ok tg td ∈ lrel3 J $ > $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
   $ G ⇒ ra_nth_ty tt ti tf te ∈ lrel $ > $ G ⇒ ra_pis tp tf tr ∈ lrel $ >
   $ G ⇒ w ∊ lvals $ > $ G ⇒ r ∊ fseq u $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ w r ∈ dt u (mcv H) tr w r $;
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ty , td +: ti +: ∅ ⟩ w r ∈ dt u (mcv H) tr w r $;

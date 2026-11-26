@@ -5,7 +5,7 @@
 -- proofs in relations.auf.
 --
 -- A class-valued operation on `x` is a class term `B` depending on the bound
--- variable `x` (`B: class x`); `⟦ x / a ⟧ B` is its value at `a`. Contexts
+-- variable `x` (`B: class x`); `[[ x / a ]] B` is its value at `a`. Contexts
 -- of the trace rules may mention `x` (`G: hyps x`): every such statement binds
 -- `x` in its conclusion.
 
@@ -54,7 +54,7 @@ theorem cxp_eq (G: hyps) (A B C D: class):
   $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ A × C = B × D $;
 --| @rewrite
 theorem sb_c_cxp {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (A × B)) ≐ (⟦ x / t ⟧ A) × (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (A × B)) ≐ ([[ x / t ]] A) × ([[ x / t ]] B) $;
 
 --| @freshen G z
 theorem rel_intro {x y: set} (G: hyps x y) {z: set} (R: class):
@@ -82,7 +82,7 @@ theorem rel_eq (G: hyps) (R S: class): $ G ⇒ R = S $ > $ G ⇒ rel R $ > $ G �
 theorem rel_pair_isset (G: hyps) (R A B: class): $ G ⇒ rel R $ > $ G ⇒ ⟨ A , B ⟩ ∈ R $ > $ G ⇒ isset A $;
 --| @rewrite
 theorem sb_f_rel {x: set} (t: set x) (R: class x):
-  $ [x/t] (rel R) ⟺ rel (⟦ x / t ⟧ R) $;
+  $ [ x / t ] (rel R) ⟺ rel ([[ x / t ]] R) $;
 
 -- --------------------------------------------------------------------------
 -- Domain and range
@@ -131,10 +131,10 @@ theorem cuni_crn_csn_c (G: hyps) (A B: class):
   $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ ⋃ (crn (csn ⟨ A , B ⟩)) = B $;
 --| @rewrite
 theorem sb_c_cdm {x: set} (t: set x) (R: class x):
-  $ (⟦ x / t ⟧ (cdm R)) ≐ cdm (⟦ x / t ⟧ R) $;
+  $ ([[ x / t ]] (cdm R)) ≐ cdm ([[ x / t ]] R) $;
 --| @rewrite
 theorem sb_c_crn {x: set} (t: set x) (R: class x):
-  $ (⟦ x / t ⟧ (crn R)) ≐ crn (⟦ x / t ⟧ R) $;
+  $ ([[ x / t ]] (crn R)) ≐ crn ([[ x / t ]] R) $;
 
 -- --------------------------------------------------------------------------
 -- Converse, composition, restriction
@@ -163,7 +163,7 @@ theorem welc_ccnv_eq (G: hyps) (R S: class) (a: set): $ G ⇒ R = S $ > $ G ⇒ 
 theorem ccnv_eq (G: hyps) (R S: class): $ G ⇒ R = S $ > $ G ⇒ ccnv R = ccnv S $;
 --| @rewrite
 theorem sb_c_ccnv {x: set} (t: set x) (R: class x):
-  $ (⟦ x / t ⟧ (ccnv R)) ≐ ccnv (⟦ x / t ⟧ R) $;
+  $ ([[ x / t ]] (ccnv R)) ≐ ccnv ([[ x / t ]] R) $;
 
 theorem ccom_intro (G: hyps) (S R: class) (a b c: set):
   $ G ⇒ ⟨ a , b ⟩ ∈ R $ > $ G ⇒ ⟨ b , c ⟩ ∈ S $ > $ G ⇒ ⟨ a , c ⟩ ∈ ccom S R $;
@@ -186,7 +186,7 @@ theorem ccom_eq (G: hyps) (R S T U: class):
   $ G ⇒ R = S $ > $ G ⇒ T = U $ > $ G ⇒ ccom R T = ccom S U $;
 --| @rewrite
 theorem sb_c_ccom {x: set} (t: set x) (R S: class x):
-  $ (⟦ x / t ⟧ (ccom R S)) ≐ ccom (⟦ x / t ⟧ R) (⟦ x / t ⟧ S) $;
+  $ ([[ x / t ]] (ccom R S)) ≐ ccom ([[ x / t ]] R) ([[ x / t ]] S) $;
 
 theorem cres_intro (G: hyps) (R A: class) (a b: set):
   $ G ⇒ a ∊ A $ > $ G ⇒ ⟨ a , b ⟩ ∈ R $ > $ G ⇒ ⟨ a , b ⟩ ∈ R ↾ A $;
@@ -212,7 +212,7 @@ theorem cres_eq (G: hyps) (R S A B: class):
 theorem cres_empty (G: hyps) (R: class): $ G ⇒ R ↾ ∅ = ∅ $;
 --| @rewrite
 theorem sb_c_cres {x: set} (t: set x) (R A: class x):
-  $ (⟦ x / t ⟧ (R ↾ A)) ≐ (⟦ x / t ⟧ R) ↾ (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (R ↾ A)) ≐ ([[ x / t ]] R) ↾ ([[ x / t ]] A) $;
 --| The image of `A` under a restriction to `A`.
 theorem img_cres (G: hyps) (F A: class): $ G ⇒ img (F ↾ A) A = img F A $;
 
@@ -227,21 +227,21 @@ theorem functional_cres (G: hyps) (F A: class):
 --| @freshen G x
 theorem fn_into_intro {x y: set} (G: hyps y) (F A B: class):
   $ G ⇒ functional F $ > $ G , x ∊ A ⇒ ∃ y (y ∊ B ∧ ⟨ x , y ⟩ ∈ F) $ >
-  $ G ⇒ fn_into F A B $;
+  $ G ⇒ ⌈ F : A → B ⌉ $;
 theorem fn_into_functional (G: hyps) (F A B: class):
-  $ G ⇒ fn_into F A B $ > $ G ⇒ functional F $;
+  $ G ⇒ ⌈ F : A → B ⌉ $ > $ G ⇒ functional F $;
 --| @freshen H y
 --| @freshen c y
 theorem fn_into_elim {y: set} (G: hyps y) (H: hyps) (F A B: class) (a: set) (c: fml):
-  $ G ⇒ fn_into F A B $ > $ G ⇒ a ∊ A $ > $ H , y ∊ B , ⟨ a , y ⟩ ∈ F ⇒ c $ >
+  $ G ⇒ ⌈ F : A → B ⌉ $ > $ G ⇒ a ∊ A $ > $ H , y ∊ B , ⟨ a , y ⟩ ∈ F ⇒ c $ >
   $ G , H ⇒ c $;
 theorem fn_into_cdm (G: hyps) (F A B: class):
-  $ G ⇒ fn_into F A B $ > $ G ⇒ A ⊆ cdm F $;
+  $ G ⇒ ⌈ F : A → B ⌉ $ > $ G ⇒ A ⊆ cdm F $;
 --| A function on `A` restricted to `A` is still a function on `A`.
-theorem fn_into_cres (G: hyps) (F A B: class): $ G ⇒ fn_into F A B $ > $ G ⇒ fn_into (F ↾ A) A B $;
+theorem fn_into_cres (G: hyps) (F A B: class): $ G ⇒ ⌈ F : A → B ⌉ $ > $ G ⇒ ⌈ F ↾ A : A → B ⌉ $;
 --| A function into `B` is a function into any superclass of `B`.
 theorem fn_into_subset_cod (G: hyps) (F A B C: class):
-  $ G ⇒ fn_into F A B $ > $ G ⇒ B ⊆ C $ > $ G ⇒ fn_into F A C $;
+  $ G ⇒ ⌈ F : A → B ⌉ $ > $ G ⇒ B ⊆ C $ > $ G ⇒ ⌈ F : A → C ⌉ $;
 
 -- --------------------------------------------------------------------------
 -- Functions as traces: `ap`, `clam`, `cpi`
@@ -252,12 +252,16 @@ def ap (F A: class) (.y: set): class = $ {y | ⟨ A , y ⟩ ∈ F} $;
 --| The trace of the operation `x ↦ B` on `A`.
 def clam {x: set} (A: class) (B: class x) (.y .z: set): class =
   $ {z | ∃ x ∃ y (z = ⟨ x , y ⟩ ∧ x ∊ A ∧ y ∊ B)} $;
+notation clam {x: set} (A: class) (B: class x): class = ($\s$:20) x ($e.$:50) A ($,$:5) B;
+notation clam {x: set} (A: class) (B: class x): class = ($λₛ$:20) x ($∈$:50) A ($,$:5) B;
 --| The dependent function space: the traces of functions on `A` with values
 --| in `B` at each `x`. A trace's pairs have their second components in the
 --| value `ap f x ∈ B`, hence in `⋃ B`; the first conjunct says `f` has no
 --| other pairs.
 def cpi {x: set} (A: class) (B: class x) (.f: set): class =
-  $ {f | f ⊆ clam x A (⋃ B) ∧ ∀ x (x ∊ A → ap f x ∈ B)} $;
+  $ {f | f ⊆ (λₛ x ∈ A, ⋃ B) ∧ ∀ x (x ∊ A → ap f x ∈ B)} $;
+notation cpi {x: set} (A: class) (B: class x): class = ($\Pis$:20) x ($e.$:50) A ($,$:5) B;
+notation cpi {x: set} (A: class) (B: class x): class = ($Πₛ$:20) x ($∈$:50) A ($,$:5) B;
 --| The truth values: `∅` is false and `csn ∅` is true.
 def two: class = $ cpr ∅ (csn ∅) $;
 
@@ -287,89 +291,89 @@ theorem ap_eq (G: hyps) (F H A B: class):
   $ G ⇒ F = H $ > $ G ⇒ A = B $ > $ G ⇒ ap F A = ap H B $;
 --| @rewrite
 theorem sb_c_ap {x: set} (t: set x) (F A: class x):
-  $ (⟦ x / t ⟧ (ap F A)) ≐ ap (⟦ x / t ⟧ F) (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (ap F A)) ≐ ap ([[ x / t ]] F) ([[ x / t ]] A) $;
 
 theorem clam_intro {x: set} (G: hyps x) (A: class) (B: class x) (a b: set):
-  $ G ⇒ a ∊ A $ > $ G ⇒ b ∊ (⟦ x / a ⟧ B) $ > $ G ⇒ ⟨ a , b ⟩ ∈ clam x A B $;
+  $ G ⇒ a ∊ A $ > $ G ⇒ b ∊ ([[ x / a ]] B) $ > $ G ⇒ ⟨ a , b ⟩ ∈ (λₛ x ∈ A, B) $;
 theorem clam_elim {x: set} (G: hyps x) (A: class) (B: class x) (a b: set):
-  $ G ⇒ ⟨ a , b ⟩ ∈ clam x A B $ > $ G ⇒ a ∊ A ∧ b ∊ (⟦ x / a ⟧ B) $;
+  $ G ⇒ ⟨ a , b ⟩ ∈ (λₛ x ∈ A, B) $ > $ G ⇒ a ∊ A ∧ b ∊ ([[ x / a ]] B) $;
 --| Elimination of membership in a trace: a member is a pair `⟨ u , v ⟩` with
---| `u ∊ A` and `v ∊ ⟦ x / u ⟧ B`.
+--| `u ∊ A` and `v ∊ [[ x / u ]] B`.
 --| @freshen G u
 --| @freshen G v
 --| @freshen H u
 --| @freshen H v
 --| @freshen d u
 --| @freshen d v
-theorem clam_elim_mem {x u v: set} (G: hyps x) (H: hyps x) (A: class) (B: class x) (c: set) (d: fml x): $ G ⇒ c ∊ clam x A B $ > $ H , c = ⟨ u , v ⟩ , u ∊ A , v ∊ (⟦ x / u ⟧ B) ⇒ d $ > $ G , H ⇒ d $;
-theorem clam_rel {x: set} (G: hyps x) (A: class) (B: class x): $ G ⇒ rel (clam x A B) $;
+theorem clam_elim_mem {x u v: set} (G: hyps x) (H: hyps x) (A: class) (B: class x) (c: set) (d: fml x): $ G ⇒ c ∊ (λₛ x ∈ A, B) $ > $ H , c = ⟨ u , v ⟩ , u ∊ A , v ∊ ([[ x / u ]] B) ⇒ d $ > $ G , H ⇒ d $;
+theorem clam_rel {x: set} (G: hyps x) (A: class) (B: class x): $ G ⇒ rel (λₛ x ∈ A, B) $;
 theorem clam_cdm {x: set} (G: hyps x) (A: class) (B: class x):
-  $ G ⇒ cdm (clam x A B) ⊆ A $;
+  $ G ⇒ cdm (λₛ x ∈ A, B) ⊆ A $;
 --| β: the values of the trace at `a ∊ A` are `B` at `a`.
 theorem clam_ap {x: set} (G: hyps x) (A: class) (B: class x) (a: set):
-  $ G ⇒ a ∊ A $ > $ G ⇒ ap (clam x A B) a = (⟦ x / a ⟧ B) $;
+  $ G ⇒ a ∊ A $ > $ G ⇒ ap (λₛ x ∈ A, B) a = ([[ x / a ]] B) $;
 --| `clam x A B ⊆ A × ⋃ (img of A under x ↦ B)`: a set when `A` and each `B` are.
 theorem clam_set {x: set} (G: hyps x) (A: class) (B: class x):
-  $ G ⇒ isset A $ > $ G ⇒ ∀ x (x ∊ A → isset B) $ > $ G ⇒ isset (clam x A B) $;
+  $ G ⇒ isset A $ > $ G ⇒ ∀ x (x ∊ A → isset B) $ > $ G ⇒ isset (λₛ x ∈ A, B) $;
 --| @congr
 theorem clam_congr {x: set} (A C: class) (B D: class x):
-  $ A ≐ C $ > $ B ≐ D $ > $ clam x A B ≐ clam x C D $;
+  $ A ≐ C $ > $ B ≐ D $ > $ (λₛ x ∈ A, B) ≐ (λₛ x ∈ C, D) $;
 theorem clam_eq_dom {x: set} (G: hyps x) (A C: class) (B: class x):
-  $ G ⇒ A = C $ > $ G ⇒ clam x A B = clam x C B $;
+  $ G ⇒ A = C $ > $ G ⇒ (λₛ x ∈ A, B) = (λₛ x ∈ C, B) $;
 --| Traces with equal values at every argument are equal.
 theorem clam_eq_body {x: set} (G: hyps x) (A: class) (B C: class x):
-  $ G ⇒ ∀ x (x ∊ A → B = C) $ > $ G ⇒ clam x A B = clam x A C $;
+  $ G ⇒ ∀ x (x ∊ A → B = C) $ > $ G ⇒ (λₛ x ∈ A, B) = (λₛ x ∈ A, C) $;
 --| @rewrite
 theorem sb_c_clam {x y: set} (t: set y) (A: class y) (B: class x y):
-  $ (⟦ y / t ⟧ (clam x A B)) ≐ clam x (⟦ y / t ⟧ A) (⟦ y / t ⟧ B) $;
+  $ ([[ y / t ]] (λₛ x ∈ A, B)) ≐ (λₛ x ∈ ([[ y / t ]] A), [[ y / t ]] B) $;
 
 theorem cpi_intro {x: set} (G: hyps x) (A: class) (B: class x) (f: set):
-  $ G ⇒ f ⊆ clam x A (⋃ B) $ > $ G ⇒ ∀ x (x ∊ A → ap f x ∈ B) $ > $ G ⇒ f ∊ cpi x A B $;
+  $ G ⇒ f ⊆ (λₛ x ∈ A, ⋃ B) $ > $ G ⇒ ∀ x (x ∊ A → ap f x ∈ B) $ > $ G ⇒ f ∊ (Πₛ x ∈ A, B) $;
 theorem cpi_elim_sub {x: set} (G: hyps x) (A: class) (B: class x) (f: set):
-  $ G ⇒ f ∊ cpi x A B $ > $ G ⇒ f ⊆ clam x A (⋃ B) $;
+  $ G ⇒ f ∊ (Πₛ x ∈ A, B) $ > $ G ⇒ f ⊆ (λₛ x ∈ A, ⋃ B) $;
 --| Typing of application.
 theorem cpi_elim_ap {x: set} (G: hyps x) (A: class) (B: class x) (f a: set):
-  $ G ⇒ f ∊ cpi x A B $ > $ G ⇒ a ∊ A $ > $ G ⇒ ap f a ∈ (⟦ x / a ⟧ B) $;
+  $ G ⇒ f ∊ (Πₛ x ∈ A, B) $ > $ G ⇒ a ∊ A $ > $ G ⇒ ap f a ∈ ([[ x / a ]] B) $;
 --| Typing of abstraction, both directions.
 theorem clam_cpi_intro {x: set} (G: hyps x) (A: class) (B C: class x):
-  $ G ⇒ isset (clam x A C) $ > $ G ⇒ ∀ x (x ∊ A → C ∈ B) $ >
-  $ G ⇒ clam x A C ∈ cpi x A B $;
+  $ G ⇒ isset (λₛ x ∈ A, C) $ > $ G ⇒ ∀ x (x ∊ A → C ∈ B) $ >
+  $ G ⇒ (λₛ x ∈ A, C) ∈ (Πₛ x ∈ A, B) $;
 theorem clam_cpi_elim {x: set} (G: hyps x) (A: class) (B C: class x):
-  $ G ⇒ clam x A C ∈ cpi x A B $ > $ G ⇒ ∀ x (x ∊ A → C ∈ B) $;
+  $ G ⇒ (λₛ x ∈ A, C) ∈ (Πₛ x ∈ A, B) $ > $ G ⇒ ∀ x (x ∊ A → C ∈ B) $;
 --| η.
 theorem cpi_eta {x: set} (G: hyps x) (A: class) (B: class x) (f: set):
-  $ G ⇒ f ∊ cpi x A B $ > $ G ⇒ clam x A (ap f x) = f $;
+  $ G ⇒ f ∊ (Πₛ x ∈ A, B) $ > $ G ⇒ (λₛ x ∈ A, ap f x) = f $;
 --| Extensionality.
 theorem cpi_ext {x: set} (G: hyps x) (A: class) (B: class x) (f g: set):
-  $ G ⇒ f ∊ cpi x A B $ > $ G ⇒ g ∊ cpi x A B $ >
+  $ G ⇒ f ∊ (Πₛ x ∈ A, B) $ > $ G ⇒ g ∊ (Πₛ x ∈ A, B) $ >
   $ G ⇒ ∀ x (x ∊ A → ap f x = ap g x) $ > $ G ⇒ f = g $;
 --| `cpi x A B ⊆ 𝒫 (clam x A (⋃ B))`.
 theorem cpi_set {x: set} (G: hyps x) (A: class) (B: class x):
-  $ G ⇒ isset (clam x A (⋃ B)) $ > $ G ⇒ isset (cpi x A B) $;
+  $ G ⇒ isset (λₛ x ∈ A, ⋃ B) $ > $ G ⇒ isset (Πₛ x ∈ A, B) $;
 --| @congr
 theorem cpi_congr {x: set} (A C: class) (B D: class x):
-  $ A ≐ C $ > $ B ≐ D $ > $ cpi x A B ≐ cpi x C D $;
+  $ A ≐ C $ > $ B ≐ D $ > $ (Πₛ x ∈ A, B) ≐ (Πₛ x ∈ C, D) $;
 --| Renaming the bound variable of `clam` and `cpi` (the normalizer does not
 --| identify alpha-variants of these binders). `@alpha`: the `@freshen` repair renames
 --| through them.
 --| @alpha x y
-theorem clam_alpha {x y: set} (A: class) (B: class x): $ clam x A B ≐ clam y A (⟦ x / y ⟧ B) $;
+theorem clam_alpha {x y: set} (A: class) (B: class x): $ (λₛ x ∈ A, B) ≐ (λₛ y ∈ A, [[ x / y ]] B) $;
 --| @alpha x y
-theorem cpi_alpha {x y: set} (A: class) (B: class x): $ cpi x A B ≐ cpi y A (⟦ x / y ⟧ B) $;
+theorem cpi_alpha {x y: set} (A: class) (B: class x): $ (Πₛ x ∈ A, B) ≐ (Πₛ y ∈ A, [[ x / y ]] B) $;
 --| A set of pairs over `A` whose values are in `B` is in the space.
 --| @freshen G c
 --| @freshen G a
 --| @freshen G b
-theorem cpi_intro_pts {x c a b: set} (G: hyps x) (A: class) (B: class x) (f: set): $ G ⇒ ∀ c (c ∊ f → ∃ a ∃ b (a ∊ A ∧ c = ⟨ a , b ⟩)) $ > $ G ⇒ ∀ x (x ∊ A → ap f x ∈ B) $ > $ G ⇒ f ∊ cpi x A B $;
+theorem cpi_intro_pts {x c a b: set} (G: hyps x) (A: class) (B: class x) (f: set): $ G ⇒ ∀ c (c ∊ f → ∃ a ∃ b (a ∊ A ∧ c = ⟨ a , b ⟩)) $ > $ G ⇒ ∀ x (x ∊ A → ap f x ∈ B) $ > $ G ⇒ f ∊ (Πₛ x ∈ A, B) $;
 theorem cpi_eq_dom {x: set} (G: hyps x) (A C: class) (B: class x):
-  $ G ⇒ A = C $ > $ G ⇒ cpi x A B = cpi x C B $;
+  $ G ⇒ A = C $ > $ G ⇒ (Πₛ x ∈ A, B) = (Πₛ x ∈ C, B) $;
 --| The function space grows with its codomain.
 --| @freshen G x
 theorem cpi_mono {x: set} (G: hyps) (A: class) (B C: class x):
-  $ G ⇒ ∀ x (x ∊ A → B ⊆ C) $ > $ G ⇒ cpi x A B ⊆ cpi x A C $;
+  $ G ⇒ ∀ x (x ∊ A → B ⊆ C) $ > $ G ⇒ (Πₛ x ∈ A, B) ⊆ (Πₛ x ∈ A, C) $;
 --| @rewrite
 theorem sb_c_cpi {x y: set} (t: set y) (A: class y) (B: class x y):
-  $ (⟦ y / t ⟧ (cpi x A B)) ≐ cpi x (⟦ y / t ⟧ A) (⟦ y / t ⟧ B) $;
+  $ ([[ y / t ]] (Πₛ x ∈ A, B)) ≐ (Πₛ x ∈ ([[ y / t ]] A), [[ y / t ]] B) $;
 
 theorem two_intro_l (G: hyps): $ G ⇒ ∅ ∈ two $;
 theorem two_intro_r (G: hyps): $ G ⇒ csn ∅ ∈ two $;
@@ -378,8 +382,8 @@ theorem two_set (G: hyps): $ G ⇒ isset two $;
 --| Impredicativity: a function space of truth values is a truth value, and
 --| it is true exactly when every value is.
 theorem cpi_two {x: set} (G: hyps x) (A: class) (B: class x):
-  $ G ⇒ ∀ x (x ∊ A → B ∈ two) $ > $ G ⇒ cpi x A B ∈ two $;
+  $ G ⇒ ∀ x (x ∊ A → B ∈ two) $ > $ G ⇒ (Πₛ x ∈ A, B) ∈ two $;
 theorem cpi_two_true {x: set} (G: hyps x) (A: class) (B: class x):
-  $ G ⇒ ∀ x (x ∊ A → B = csn ∅) $ > $ G ⇒ cpi x A B = csn ∅ $;
+  $ G ⇒ ∀ x (x ∊ A → B = csn ∅) $ > $ G ⇒ (Πₛ x ∈ A, B) = csn ∅ $;
 theorem cpi_two_false {x: set} (G: hyps x) (A: class) (B: class x) (a: set):
-  $ G ⇒ a ∊ A $ > $ G ⇒ (⟦ x / a ⟧ B) = ∅ $ > $ G ⇒ cpi x A B = ∅ $;
+  $ G ⇒ a ∊ A $ > $ G ⇒ ([[ x / a ]] B) = ∅ $ > $ G ⇒ (Πₛ x ∈ A, B) = ∅ $;

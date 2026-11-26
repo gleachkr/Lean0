@@ -10,7 +10,7 @@ import "model-fold.mm0";
 -- --------------------------------------------------------------------------
 
 --| No number is itself plus a successor (`add`, by its values).
-theorem add_s_self (G: hyps) (a b: set): $ G ⇒ ra_add a ⟨ kc_s , scons b ∅ ⟩ a ∈ lrel $ > $ G ⇒ ⊥ $;
+theorem add_s_self (G: hyps) (a b: set): $ G ⇒ ra_add a ⟨ kc_s , b +: ∅ ⟩ a ∈ lrel $ > $ G ⇒ ⊥ $;
 
 --| An auxiliary type's group: entry `tk` of the occurrences of a block with `nst_ok` (from auxiliary type `tj` on), the
 --| occurrence `tX` of auxiliary type `te = tj + tk`, is the type `i` of a well-formed block `a` at the arguments of the
@@ -26,7 +26,7 @@ theorem add_s_self (G: hyps) (a b: set): $ G ⇒ ra_add a ⟨ kc_s , scons b ∅
 --| @freshen G x3
 --| @freshen G x4
 theorem nst_read {z u v w x0 x1 x2 x3 x4: set} (G: hyps) (J: class) (tg td tj tN tk tX te: set): $ G ⇒ ra_nst_ok tg td tj tN ∈ lrel3 J $ > $ G ⇒ ra_cnth tN tk tX ∈ lrel $ > $ G ⇒ ra_add tj tk te ∈ lrel $ >
-  $ G ⇒ ∃ z ∃ u ∃ v ∃ w ∃ x0 ∃ x1 ∃ x2 ∃ x3 ∃ x4 (ra_ind_wf tg z ∈ lrel3 J ∧ ra_nst_ty tg td z v ∈ lrel3 J ∧ ra_spine ⟨ kc_ind_ty , scons z (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ v w ∈ lrel ∧ ra_spine ⟨ kc_ind_ty , scons z (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ v x0 ∈ lrel ∧ ra_rehead ⟨ kc_ind_ty , scons z (scons ⟨ kc_nz , ∅ ⟩ ∅) ⟩ ⟨ kc_ind_ty , scons z (scons u ∅) ⟩ x0 v tX ∈ lrel ∧ ra_aux_data td z tX te u ∈ lrel ∧ ra_ind_arity z w x1 x2 ∈ lrel ∧ ra_ind_nested z x4 ∈ lrel ∧ ra_ndecl x4 x1 x3 ∈ lrel ∧ ra_le ⟨ kc_s , scons u ∅ ⟩ x3 ∈ lrel) $;
+  $ G ⇒ ∃ z ∃ u ∃ v ∃ w ∃ x0 ∃ x1 ∃ x2 ∃ x3 ∃ x4 (ra_ind_wf tg z ∈ lrel3 J ∧ ra_nst_ty tg td z v ∈ lrel3 J ∧ ra_spine ⟨ kc_ind_ty , z +: ⟨ kc_nz , ∅ ⟩ +: ∅ ⟩ v w ∈ lrel ∧ ra_spine ⟨ kc_ind_ty , z +: ⟨ kc_nz , ∅ ⟩ +: ∅ ⟩ v x0 ∈ lrel ∧ ra_rehead ⟨ kc_ind_ty , z +: ⟨ kc_nz , ∅ ⟩ +: ∅ ⟩ ⟨ kc_ind_ty , z +: u +: ∅ ⟩ x0 v tX ∈ lrel ∧ ra_aux_data td z tX te u ∈ lrel ∧ ra_ind_arity z w x1 x2 ∈ lrel ∧ ra_ind_nested z x4 ∈ lrel ∧ ra_ndecl x4 x1 x3 ∈ lrel ∧ ra_le ⟨ kc_s , u +: ∅ ⟩ x3 ∈ lrel) $;
 
 -- --------------------------------------------------------------------------
 -- Nested blocks (E7): two telescopes related field by field
@@ -56,8 +56,8 @@ theorem etel_cmp {i j k l m n o p h e x0 x1 b c: set} (G: hyps) (R L M: class) (
   $ G ⇒ q ∊ fseq u $ >
   $ G ⇒ cdm q = nvf' td $ >
   $ G ⇒ ⟨ sf , ⟨ sg , ⟨ st , sa ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tK w (q ++ r) $ >
-  $ G ⇒ ∀ i ∀ j ∀ k ∀ l ∀ m (⟨ i , ⟨ ⟨ kc_pi , scons j (scons k ∅) ⟩ , l ⟩ ⟩ ∈ R → m ∊ fseq u → cdm m = nvf' i → ∃ x0 ∃ x1 (l = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ x0 ∊ trees ω ∧ x1 ∊ trees ω ∧ dt u M j w (m ++ r) ⊆ dt u M x0 w (m ++ r2) ∧ ⟨ ⟨ kc_s , scons i ∅ ⟩ , ⟨ k , x1 ⟩ ⟩ ∈ R)) $ >
-  $ G ⇒ ∀ i ∀ e ∀ l ∀ m ∀ n ∀ o ∀ p ∀ h (⟨ i , ⟨ e , l ⟩ ⟩ ∈ R → ¬ ∃ j ∃ k (e = ⟨ kc_pi , scons j (scons k ∅) ⟩) → m ∊ fseq u → cdm m = nvf' i → ⟨ n , ⟨ o , ⟨ p , h ⟩ ⟩ ⟩ ∈ etel u (dnf u M) e w (m ++ r) → ∃ b ∃ c (⟨ n , ⟨ o , ⟨ b , c ⟩ ⟩ ⟩ ∈ etel u (dnf u M) l w (m ++ r2) ∧ ⟨ h , c ⟩ ∈ L)) $ >
+  $ G ⇒ ∀ i ∀ j ∀ k ∀ l ∀ m (⟨ i , ⟨ ⟨ kc_pi , j +: k +: ∅ ⟩ , l ⟩ ⟩ ∈ R → m ∊ fseq u → cdm m = nvf' i → ∃ x0 ∃ x1 (l = ⟨ kc_pi , x0 +: x1 +: ∅ ⟩ ∧ x0 ∊ trees ω ∧ x1 ∊ trees ω ∧ dt u M j w (m ++ r) ⊆ dt u M x0 w (m ++ r2) ∧ ⟨ ⟨ kc_s , i +: ∅ ⟩ , ⟨ k , x1 ⟩ ⟩ ∈ R)) $ >
+  $ G ⇒ ∀ i ∀ e ∀ l ∀ m ∀ n ∀ o ∀ p ∀ h (⟨ i , ⟨ e , l ⟩ ⟩ ∈ R → ¬ ∃ j ∃ k (e = ⟨ kc_pi , j +: k +: ∅ ⟩) → m ∊ fseq u → cdm m = nvf' i → ⟨ n , ⟨ o , ⟨ p , h ⟩ ⟩ ⟩ ∈ etel u (dnf u M) e w (m ++ r) → ∃ b ∃ c (⟨ n , ⟨ o , ⟨ b , c ⟩ ⟩ ⟩ ∈ etel u (dnf u M) l w (m ++ r2) ∧ ⟨ h , c ⟩ ∈ L)) $ >
   $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ r2 ∊ fseq u $ >
   $ G ⇒ w ∊ lvals $ >
@@ -70,14 +70,14 @@ theorem etel_cmp {i j k l m n o p h e x0 x1 b c: set} (G: hyps) (R L M: class) (
 --| `rst` at a `Π`: the result is a `Π` of restored parts (a spine of a block's type or constructor is no `Π`).
 --| @freshen G a
 --| @freshen G b
-theorem rst_pi_inv {a b: set} (G: hyps) (td tN ta tb te2: set): $ G ⇒ ra_rst td tN ⟨ kc_pi , scons ta (scons tb ∅) ⟩ te2 ∈ lrel $ >
-  $ G ⇒ ∃ a ∃ b (te2 = ⟨ kc_pi , scons a (scons b ∅) ⟩ ∧ ra_rst td tN ta a ∈ lrel ∧ ra_rst td tN tb b ∈ lrel) $;
+theorem rst_pi_inv {a b: set} (G: hyps) (td tN ta tb te2: set): $ G ⇒ ra_rst td tN ⟨ kc_pi , ta +: tb +: ∅ ⟩ te2 ∈ lrel $ >
+  $ G ⇒ ∃ a ∃ b (te2 = ⟨ kc_pi , a +: b +: ∅ ⟩ ∧ ra_rst td tN ta a ∈ lrel ∧ ra_rst td tN tb b ∈ lrel) $;
 
 --| `spz` at a `Π`: the result is a `Π` of specialized parts, the body one binder deeper (an occurrence is no `Π`).
 --| @freshen G a
 --| @freshen G b
-theorem spz_pi_inv {a b: set} (G: hyps) (td tN tdd ta tb te2: set): $ G ⇒ ra_spz td tN tdd ⟨ kc_pi , scons ta (scons tb ∅) ⟩ te2 ∈ lrel $ >
-  $ G ⇒ ∃ a ∃ b (te2 = ⟨ kc_pi , scons a (scons b ∅) ⟩ ∧ ra_spz td tN tdd ta a ∈ lrel ∧ ra_spz td tN ⟨ kc_s , scons tdd ∅ ⟩ tb b ∈ lrel) $;
+theorem spz_pi_inv {a b: set} (G: hyps) (td tN tdd ta tb te2: set): $ G ⇒ ra_spz td tN tdd ⟨ kc_pi , ta +: tb +: ∅ ⟩ te2 ∈ lrel $ >
+  $ G ⇒ ∃ a ∃ b (te2 = ⟨ kc_pi , a +: b +: ∅ ⟩ ∧ ra_spz td tN tdd ta a ∈ lrel ∧ ra_spz td tN ⟨ kc_s , tdd +: ∅ ⟩ tb b ∈ lrel) $;
 
 -- --------------------------------------------------------------------------
 -- Nested blocks (E7): two telescopes related field by field, from right to left
@@ -107,8 +107,8 @@ theorem etel_cmp_rev {i j k l m n o p h e x0 x1 b c: set} (G: hyps) (R L M: clas
   $ G ⇒ q ∊ fseq u $ >
   $ G ⇒ cdm q = nvf' td $ >
   $ G ⇒ ⟨ sf , ⟨ sg , ⟨ st , sa ⟩ ⟩ ⟩ ∈ etel u (dnf u M) tK2 w (q ++ r2) $ >
-  $ G ⇒ ∀ i ∀ j ∀ k ∀ l ∀ m (⟨ i , ⟨ ⟨ kc_pi , scons j (scons k ∅) ⟩ , l ⟩ ⟩ ∈ R → m ∊ fseq u → cdm m = nvf' i → ∃ x0 ∃ x1 (l = ⟨ kc_pi , scons x0 (scons x1 ∅) ⟩ ∧ x0 ∊ trees ω ∧ x1 ∊ trees ω ∧ dt u M x0 w (m ++ r2) ⊆ dt u M j w (m ++ r) ∧ ⟨ ⟨ kc_s , scons i ∅ ⟩ , ⟨ k , x1 ⟩ ⟩ ∈ R)) $ >
-  $ G ⇒ ∀ i ∀ e ∀ l ∀ m ∀ n ∀ o ∀ p ∀ h (⟨ i , ⟨ e , l ⟩ ⟩ ∈ R → ¬ ∃ j ∃ k (e = ⟨ kc_pi , scons j (scons k ∅) ⟩) → m ∊ fseq u → cdm m = nvf' i → ⟨ n , ⟨ o , ⟨ p , h ⟩ ⟩ ⟩ ∈ etel u (dnf u M) l w (m ++ r2) → ∃ b ∃ c (⟨ n , ⟨ o , ⟨ b , c ⟩ ⟩ ⟩ ∈ etel u (dnf u M) e w (m ++ r) ∧ ⟨ h , c ⟩ ∈ L)) $ >
+  $ G ⇒ ∀ i ∀ j ∀ k ∀ l ∀ m (⟨ i , ⟨ ⟨ kc_pi , j +: k +: ∅ ⟩ , l ⟩ ⟩ ∈ R → m ∊ fseq u → cdm m = nvf' i → ∃ x0 ∃ x1 (l = ⟨ kc_pi , x0 +: x1 +: ∅ ⟩ ∧ x0 ∊ trees ω ∧ x1 ∊ trees ω ∧ dt u M x0 w (m ++ r2) ⊆ dt u M j w (m ++ r) ∧ ⟨ ⟨ kc_s , i +: ∅ ⟩ , ⟨ k , x1 ⟩ ⟩ ∈ R)) $ >
+  $ G ⇒ ∀ i ∀ e ∀ l ∀ m ∀ n ∀ o ∀ p ∀ h (⟨ i , ⟨ e , l ⟩ ⟩ ∈ R → ¬ ∃ j ∃ k (e = ⟨ kc_pi , j +: k +: ∅ ⟩) → m ∊ fseq u → cdm m = nvf' i → ⟨ n , ⟨ o , ⟨ p , h ⟩ ⟩ ⟩ ∈ etel u (dnf u M) l w (m ++ r2) → ∃ b ∃ c (⟨ n , ⟨ o , ⟨ b , c ⟩ ⟩ ⟩ ∈ etel u (dnf u M) e w (m ++ r) ∧ ⟨ h , c ⟩ ∈ L)) $ >
   $ G ⇒ r ∊ fseq u $ >
   $ G ⇒ r2 ∊ fseq u $ >
   $ G ⇒ w ∊ lvals $ >
@@ -121,18 +121,18 @@ theorem etel_cmp_rev {i j k l m n o p h e x0 x1 b c: set} (G: hyps) (R L M: clas
 --| A well-formed constructor type that is a `Π`: its domain is a positive field (`ipos_closed` for a field that does not
 --| mention the block), its body well formed a binder deeper.
 --| @freshen G c
-theorem cwf_pi_ipos {c: set} (G: hyps) (J: class) (t1 t2 t3 t4 t5 t6 t7 ta tb: set): $ G ⇒ ra_cwf t1 t2 t3 t4 t5 t6 t7 ⟨ kc_pi , scons ta (scons tb ∅) ⟩ ∈ lrel3 J $ >
-  $ G ⇒ ∃ c (ra_ipos t1 t2 t3 t7 ta ∈ lrel ∧ ra_cwf t1 t2 t3 t4 t5 c ⟨ kc_s , scons t7 ∅ ⟩ tb ∈ lrel3 J) $;
+theorem cwf_pi_ipos {c: set} (G: hyps) (J: class) (t1 t2 t3 t4 t5 t6 t7 ta tb: set): $ G ⇒ ra_cwf t1 t2 t3 t4 t5 t6 t7 ⟨ kc_pi , ta +: tb +: ∅ ⟩ ∈ lrel3 J $ >
+  $ G ⇒ ∃ c (ra_ipos t1 t2 t3 t7 ta ∈ lrel ∧ ra_cwf t1 t2 t3 t4 t5 c ⟨ kc_s , t7 +: ∅ ⟩ tb ∈ lrel3 J) $;
 
 -- --------------------------------------------------------------------------
 -- Nested blocks (E7): closed terms under `inst` and `sinst`
 -- --------------------------------------------------------------------------
 
 --| A closed `λ`: its domain is closed, its body closed one binder deeper.
-theorem closed_lam_inv (G: hyps) (tx ta tb: set): $ G ⇒ ra_closed tx ⟨ kc_lam , scons ta (scons tb ∅) ⟩ ∈ lrel $ > $ G ⇒ ra_closed tx ta ∈ lrel ∧ ra_closed ⟨ kc_s , scons tx ∅ ⟩ tb ∈ lrel $;
+theorem closed_lam_inv (G: hyps) (tx ta tb: set): $ G ⇒ ra_closed tx ⟨ kc_lam , ta +: tb +: ∅ ⟩ ∈ lrel $ > $ G ⇒ ra_closed tx ta ∈ lrel ∧ ra_closed ⟨ kc_s , tx +: ∅ ⟩ tb ∈ lrel $;
 
 --| A closed projection: its structure is closed.
-theorem closed_proj_inv (G: hyps) (tx tb ti te: set): $ G ⇒ ra_closed tx ⟨ kc_proj , scons tb (scons ti (scons te ∅)) ⟩ ∈ lrel $ > $ G ⇒ ra_closed tx te ∈ lrel $;
+theorem closed_proj_inv (G: hyps) (tx tb ti te: set): $ G ⇒ ra_closed tx ⟨ kc_proj , tb +: ti +: te +: ∅ ⟩ ∈ lrel $ > $ G ⇒ ra_closed tx te ∈ lrel $;
 
 --| `inst` at a variable leaves a term closed at that variable as it is (by induction on the term; no determinacy of
 --| `inst` is needed).
@@ -162,7 +162,7 @@ def tcl (X: class) (.t .q: set): class = $ {q | ∀ t (transitive t → X ⊆ t 
 --| @congr
 theorem tcl_congr (A B: class): $ A ≐ B $ > $ tcl A ≐ tcl B $;
 --| @rewrite
-theorem sb_c_tcl {x: set} (t: set x) (A: class x): $ (⟦ x / t ⟧ (tcl A)) ≐ tcl (⟦ x / t ⟧ A) $;
+theorem sb_c_tcl {x: set} (t: set x) (A: class x): $ ([[ x / t ]] (tcl A)) ≐ tcl ([[ x / t ]] A) $;
 
 --| `rst` leaves a term inside the block (in its transitive closure: a part of its data) as it is: a restored spine has
 --| the block in its head, and no set is inside itself (`ax_induction`).
@@ -186,7 +186,7 @@ theorem nth_ctor_tc (G: hyps) (tC tc tK tx: set): $ G ⇒ ra_nth_ctor tC tc tK �
 -- --------------------------------------------------------------------------
 
 --| `le` to a successor.
-theorem le_suc_r (G: hyps) (ta tb: set): $ G ⇒ ra_le ta tb ∈ lrel $ > $ G ⇒ ra_le ta ⟨ kc_s , scons tb ∅ ⟩ ∈ lrel $;
+theorem le_suc_r (G: hyps) (ta tb: set): $ G ⇒ ra_le ta tb ∈ lrel $ > $ G ⇒ ra_le ta ⟨ kc_s , tb +: ∅ ⟩ ∈ lrel $;
 
 --| A summand is below the sum (`le ta ta` says that `ta` is a numeral).
 theorem add_le (G: hyps) (ta tb tc: set): $ G ⇒ ra_add ta tb tc ∈ lrel $ > $ G ⇒ ra_le ta ta ∈ lrel $ > $ G ⇒ ra_le ta tc ∈ lrel $;
@@ -196,13 +196,13 @@ theorem add_le (G: hyps) (ta tb tc: set): $ G ⇒ ra_add ta tb tc ∈ lrel $ > $
 --| @freshen G t
 --| @freshen G q
 theorem indapp_iargs {t q: set} (G: hyps) (tD tn tnp td tA tj tk: set): $ G ⇒ ra_indapp tD tn tnp td tA tj ∈ lrel $ > $ G ⇒ ra_add td tnp tk ∈ lrel $ > $ G ⇒ ra_le td td ∈ lrel $ >
-  $ G ⇒ ∃ t ∃ q (ra_iargs tk q ⟨ kc_bvar , scons t ∅ ⟩ tA ∈ lrel) $;
+  $ G ⇒ ∃ t ∃ q (ra_iargs tk q ⟨ kc_bvar , t +: ∅ ⟩ tA ∈ lrel) $;
 
 --| `spz` with a `Π` as its result: the term is a `Π` of parts specialized to the result's (no replaced occurrence is a `Π`).
 --| @freshen G a
 --| @freshen G b
-theorem spz_pi_inv_r {a b: set} (G: hyps) (td tN tdd te ta tb: set): $ G ⇒ ra_spz td tN tdd te ⟨ kc_pi , scons ta (scons tb ∅) ⟩ ∈ lrel $ >
-  $ G ⇒ ∃ a ∃ b (te = ⟨ kc_pi , scons a (scons b ∅) ⟩ ∧ ra_spz td tN tdd a ta ∈ lrel ∧ ra_spz td tN ⟨ kc_s , scons tdd ∅ ⟩ b tb ∈ lrel) $;
+theorem spz_pi_inv_r {a b: set} (G: hyps) (td tN tdd te ta tb: set): $ G ⇒ ra_spz td tN tdd te ⟨ kc_pi , ta +: tb +: ∅ ⟩ ∈ lrel $ >
+  $ G ⇒ ∃ a ∃ b (te = ⟨ kc_pi , a +: b +: ∅ ⟩ ∧ ra_spz td tN tdd a ta ∈ lrel ∧ ra_spz td tN ⟨ kc_s , tdd +: ∅ ⟩ b tb ∈ lrel) $;
 
 -- --------------------------------------------------------------------------
 -- Nested blocks (E7): the value of an occurrence's spine under `spz`
@@ -222,8 +222,8 @@ theorem spine_trans2 {c: set} (G: hyps) (th tx ta te tb: set): $ G ⇒ ra_spine 
 --| A positive field type that is a `Π`: its domain is closed at the fields and the parameters, its body positive a
 --| binder deeper.
 --| @freshen G k
-theorem ipos_pi_inv {k: set} (G: hyps) (tD tn tnp td ta tb: set): $ G ⇒ ra_ipos tD tn tnp td ⟨ kc_pi , scons ta (scons tb ∅) ⟩ ∈ lrel $ >
-  $ G ⇒ ∃ k (ra_add td tnp k ∈ lrel ∧ ra_closed k ta ∈ lrel ∧ ra_ipos tD tn tnp ⟨ kc_s , scons td ∅ ⟩ tb ∈ lrel) $;
+theorem ipos_pi_inv {k: set} (G: hyps) (tD tn tnp td ta tb: set): $ G ⇒ ra_ipos tD tn tnp td ⟨ kc_pi , ta +: tb +: ∅ ⟩ ∈ lrel $ >
+  $ G ⇒ ∃ k (ra_add td tnp k ∈ lrel ∧ ra_closed k ta ∈ lrel ∧ ra_ipos tD tn tnp ⟨ kc_s , td +: ∅ ⟩ tb ∈ lrel) $;
 
 -- --------------------------------------------------------------------------
 -- Nested blocks (E7): a recursive field under `sinst` and `rst`
@@ -308,7 +308,7 @@ theorem inst_closed_below_id (G: hyps) (tk te ta tn tc tj te2: set): $ G ⇒ ra_
 
 --| A lift by `tn + 1` at a cutoff, then `inst` at the cutoff plus `tn`, is the lift by `tn` (the instantiated variable is
 --| one of those the lift skipped; by induction on the term).
-theorem inst_lift (G: hyps) (tn tm ta tc tk te tl tz: set): $ G ⇒ ra_lift tm tc te tl ∈ lrel $ > $ G ⇒ ra_inst tk tl ta tz ∈ lrel $ > $ G ⇒ ra_add tc tn tk ∈ lrel $ > $ G ⇒ tm = ⟨ kc_s , scons tn ∅ ⟩ $ > $ G ⇒ ra_lift tn tc te tz ∈ lrel $;
+theorem inst_lift (G: hyps) (tn tm ta tc tk te tl tz: set): $ G ⇒ ra_lift tm tc te tl ∈ lrel $ > $ G ⇒ ra_inst tk tl ta tz ∈ lrel $ > $ G ⇒ ra_add tc tn tk ∈ lrel $ > $ G ⇒ tm = ⟨ kc_s , tn +: ∅ ⟩ $ > $ G ⇒ ra_lift tn tc te tz ∈ lrel $;
 
 -- --------------------------------------------------------------------------
 -- Nested blocks (E7): factoring a lift through a lift
@@ -337,22 +337,22 @@ theorem lift_lift (G: hyps) (ta tk tm tp tq te tu tz: set): $ G ⇒ ra_lift ta t
 --| A lift of an application is the application of the parts' lifts.
 --| @freshen G x
 --| @freshen G y
-theorem lift_app_inv {x y: set} (G: hyps) (tn tk ta tb t4: set): $ G ⇒ ra_lift tn tk ⟨ kc_app , scons ta (scons tb ∅) ⟩ t4 ∈ lrel $ > $ G ⇒ ∃ x ∃ y (t4 = ⟨ kc_app , scons x (scons y ∅) ⟩ ∧ ra_lift tn tk ta x ∈ lrel ∧ ra_lift tn tk tb y ∈ lrel) $;
+theorem lift_app_inv {x y: set} (G: hyps) (tn tk ta tb t4: set): $ G ⇒ ra_lift tn tk ⟨ kc_app , ta +: tb +: ∅ ⟩ t4 ∈ lrel $ > $ G ⇒ ∃ x ∃ y (t4 = ⟨ kc_app , x +: y +: ∅ ⟩ ∧ ra_lift tn tk ta x ∈ lrel ∧ ra_lift tn tk tb y ∈ lrel) $;
 
 --| A lift of a `Π` is the `Π` of the parts' lifts (the body's at the next cutoff).
 --| @freshen G x
 --| @freshen G y
-theorem lift_pi_inv {x y: set} (G: hyps) (tn tk ta tb t4: set): $ G ⇒ ra_lift tn tk ⟨ kc_pi , scons ta (scons tb ∅) ⟩ t4 ∈ lrel $ > $ G ⇒ ∃ x ∃ y (t4 = ⟨ kc_pi , scons x (scons y ∅) ⟩ ∧ ra_lift tn tk ta x ∈ lrel ∧ ra_lift tn ⟨ kc_s , scons tk ∅ ⟩ tb y ∈ lrel) $;
+theorem lift_pi_inv {x y: set} (G: hyps) (tn tk ta tb t4: set): $ G ⇒ ra_lift tn tk ⟨ kc_pi , ta +: tb +: ∅ ⟩ t4 ∈ lrel $ > $ G ⇒ ∃ x ∃ y (t4 = ⟨ kc_pi , x +: y +: ∅ ⟩ ∧ ra_lift tn tk ta x ∈ lrel ∧ ra_lift tn ⟨ kc_s , tk +: ∅ ⟩ tb y ∈ lrel) $;
 
 --| A term whose lift is an application is an application, and the parts are lifted.
 --| @freshen G x
 --| @freshen G y
-theorem lift_app_res {x y: set} (G: hyps) (tn tk te ta tb: set): $ G ⇒ ra_lift tn tk te ⟨ kc_app , scons ta (scons tb ∅) ⟩ ∈ lrel $ > $ G ⇒ ∃ x ∃ y (te = ⟨ kc_app , scons x (scons y ∅) ⟩ ∧ ra_lift tn tk x ta ∈ lrel ∧ ra_lift tn tk y tb ∈ lrel) $;
+theorem lift_app_res {x y: set} (G: hyps) (tn tk te ta tb: set): $ G ⇒ ra_lift tn tk te ⟨ kc_app , ta +: tb +: ∅ ⟩ ∈ lrel $ > $ G ⇒ ∃ x ∃ y (te = ⟨ kc_app , x +: y +: ∅ ⟩ ∧ ra_lift tn tk x ta ∈ lrel ∧ ra_lift tn tk y tb ∈ lrel) $;
 
 --| A term whose lift is a `Π` is a `Π`, and the parts are lifted (the body at the next cutoff).
 --| @freshen G x
 --| @freshen G y
-theorem lift_pi_res {x y: set} (G: hyps) (tn tk te ta tb: set): $ G ⇒ ra_lift tn tk te ⟨ kc_pi , scons ta (scons tb ∅) ⟩ ∈ lrel $ > $ G ⇒ ∃ x ∃ y (te = ⟨ kc_pi , scons x (scons y ∅) ⟩ ∧ ra_lift tn tk x ta ∈ lrel ∧ ra_lift tn ⟨ kc_s , scons tk ∅ ⟩ y tb ∈ lrel) $;
+theorem lift_pi_res {x y: set} (G: hyps) (tn tk te ta tb: set): $ G ⇒ ra_lift tn tk te ⟨ kc_pi , ta +: tb +: ∅ ⟩ ∈ lrel $ > $ G ⇒ ∃ x ∃ y (te = ⟨ kc_pi , x +: y +: ∅ ⟩ ∧ ra_lift tn tk x ta ∈ lrel ∧ ra_lift tn ⟨ kc_s , tk +: ∅ ⟩ y tb ∈ lrel) $;
 
 
 
@@ -468,20 +468,20 @@ theorem sinst_det (G: hyps) (td tj tn tk te tz tw tdd: set): $ G ⇒ ra_add tj t
 --| An instance of a `λ` is a `λ` of the parts' instances (the body's a binder deeper).
 --| @freshen G x
 --| @freshen G y
-theorem inst_lam_inv {x y: set} (G: hyps) (tk ta tb tc t4: set): $ G ⇒ ra_inst tk ⟨ kc_lam , scons ta (scons tb ∅) ⟩ tc t4 ∈ lrel $ > $ G ⇒ ∃ x ∃ y (t4 = ⟨ kc_lam , scons x (scons y ∅) ⟩ ∧ ra_inst tk ta tc x ∈ lrel ∧ ra_inst ⟨ kc_s , scons tk ∅ ⟩ tb tc y ∈ lrel) $;
+theorem inst_lam_inv {x y: set} (G: hyps) (tk ta tb tc t4: set): $ G ⇒ ra_inst tk ⟨ kc_lam , ta +: tb +: ∅ ⟩ tc t4 ∈ lrel $ > $ G ⇒ ∃ x ∃ y (t4 = ⟨ kc_lam , x +: y +: ∅ ⟩ ∧ ra_inst tk ta tc x ∈ lrel ∧ ra_inst ⟨ kc_s , tk +: ∅ ⟩ tb tc y ∈ lrel) $;
 
 --| `pinst` at a `λ`: a `λ` of the parts' instances along the same spine (the body's a binder deeper).
 --| @freshen G x
 --| @freshen G z
-theorem pinst_lam_inv {x z: set} (G: hyps) (ti ts ta tb tr: set): $ G ⇒ ra_pinst ti ts ⟨ kc_lam , scons ta (scons tb ∅) ⟩ tr ∈ lrel $ > $ G ⇒ ∃ x ∃ z (tr = ⟨ kc_lam , scons x (scons z ∅) ⟩ ∧ ra_pinst ti ts ta x ∈ lrel ∧ ra_pinst ⟨ kc_s , scons ti ∅ ⟩ ts tb z ∈ lrel) $;
+theorem pinst_lam_inv {x z: set} (G: hyps) (ti ts ta tb tr: set): $ G ⇒ ra_pinst ti ts ⟨ kc_lam , ta +: tb +: ∅ ⟩ tr ∈ lrel $ > $ G ⇒ ∃ x ∃ z (tr = ⟨ kc_lam , x +: z +: ∅ ⟩ ∧ ra_pinst ti ts ta x ∈ lrel ∧ ra_pinst ⟨ kc_s , ti +: ∅ ⟩ ts tb z ∈ lrel) $;
 
 --| An instance of a projection is the projection of the structure's instance.
 --| @freshen G x
-theorem inst_proj_inv {x: set} (G: hyps) (tk tb ti te tc t4: set): $ G ⇒ ra_inst tk ⟨ kc_proj , scons tb (scons ti (scons te ∅)) ⟩ tc t4 ∈ lrel $ > $ G ⇒ ∃ x (t4 = ⟨ kc_proj , scons tb (scons ti (scons x ∅)) ⟩ ∧ ra_inst tk te tc x ∈ lrel) $;
+theorem inst_proj_inv {x: set} (G: hyps) (tk tb ti te tc t4: set): $ G ⇒ ra_inst tk ⟨ kc_proj , tb +: ti +: te +: ∅ ⟩ tc t4 ∈ lrel $ > $ G ⇒ ∃ x (t4 = ⟨ kc_proj , tb +: ti +: x +: ∅ ⟩ ∧ ra_inst tk te tc x ∈ lrel) $;
 
 --| `pinst` at a projection: the projection of the structure's instance along the same spine.
 --| @freshen G x
-theorem pinst_proj_inv {x: set} (G: hyps) (tj ts tb ti te tr: set): $ G ⇒ ra_pinst tj ts ⟨ kc_proj , scons tb (scons ti (scons te ∅)) ⟩ tr ∈ lrel $ > $ G ⇒ ∃ x (tr = ⟨ kc_proj , scons tb (scons ti (scons x ∅)) ⟩ ∧ ra_pinst tj ts te x ∈ lrel) $;
+theorem pinst_proj_inv {x: set} (G: hyps) (tj ts tb ti te tr: set): $ G ⇒ ra_pinst tj ts ⟨ kc_proj , tb +: ti +: te +: ∅ ⟩ tr ∈ lrel $ > $ G ⇒ ∃ x (tr = ⟨ kc_proj , tb +: ti +: x +: ∅ ⟩ ∧ ra_pinst tj ts te x ∈ lrel) $;
 
 -- --------------------------------------------------------------------------
 -- Nested blocks (E7): the composition of `pinst` through `sinst`
@@ -506,11 +506,11 @@ theorem pinst_proj_inv {x: set} (G: hyps) (tj ts tb ti te tr: set): $ G ⇒ ra_p
 --| `sinst` at a `λ`: a `λ` of the parts' `sinst`, the body's a binder deeper.
 --| @freshen G x
 --| @freshen G c
-theorem sinst_lam_inv {x c: set} (G: hyps) (td tn tj tk ta tb tz tdd: set): $ G ⇒ ra_add tj tdd tn ∈ lrel $ > $ G ⇒ ra_sinst td tj tn tk ⟨ kc_lam , scons ta (scons tb ∅) ⟩ tz ∈ lrel $ > $ G ⇒ ∃ x ∃ c (tz = ⟨ kc_lam , scons x (scons c ∅) ⟩ ∧ ra_sinst td tj tn tk ta x ∈ lrel ∧ ra_sinst td tj tn ⟨ kc_s , scons tk ∅ ⟩ tb c ∈ lrel) $;
+theorem sinst_lam_inv {x c: set} (G: hyps) (td tn tj tk ta tb tz tdd: set): $ G ⇒ ra_add tj tdd tn ∈ lrel $ > $ G ⇒ ra_sinst td tj tn tk ⟨ kc_lam , ta +: tb +: ∅ ⟩ tz ∈ lrel $ > $ G ⇒ ∃ x ∃ c (tz = ⟨ kc_lam , x +: c +: ∅ ⟩ ∧ ra_sinst td tj tn tk ta x ∈ lrel ∧ ra_sinst td tj tn ⟨ kc_s , tk +: ∅ ⟩ tb c ∈ lrel) $;
 
 --| `sinst` at a projection: the projection of the structure's `sinst`.
 --| @freshen G x
-theorem sinst_proj_inv {x: set} (G: hyps) (td tn tj tk tb ti ta tz tdd: set): $ G ⇒ ra_add tj tdd tn ∈ lrel $ > $ G ⇒ ra_sinst td tj tn tk ⟨ kc_proj , scons tb (scons ti (scons ta ∅)) ⟩ tz ∈ lrel $ > $ G ⇒ ∃ x (tz = ⟨ kc_proj , scons tb (scons ti (scons x ∅)) ⟩ ∧ ra_sinst td tj tn tk ta x ∈ lrel) $;
+theorem sinst_proj_inv {x: set} (G: hyps) (td tn tj tk tb ti ta tz tdd: set): $ G ⇒ ra_add tj tdd tn ∈ lrel $ > $ G ⇒ ra_sinst td tj tn tk ⟨ kc_proj , tb +: ti +: ta +: ∅ ⟩ tz ∈ lrel $ > $ G ⇒ ∃ x (tz = ⟨ kc_proj , tb +: ti +: x +: ∅ ⟩ ∧ ra_sinst td tj tn tk ta x ∈ lrel) $;
 
 -- --------------------------------------------------------------------------
 -- Nested blocks (E7): restoring undoes the specialization
@@ -616,7 +616,7 @@ theorem sinst_proj_inv {x: set} (G: hyps) (td tn tj tk tb ti ta tz tdd: set): $ 
 --| type has the value of the type with the block's types put in (the specialization lemma and the constructors' lemma).
 theorem ind_ctor_ty_all (G: hyps) (H J: class) (u w r tg td ti tc tCT: set):
   $ G ⇒ iwf u H J tg td w r $ > $ G ⇒ hctor ⊆ H $ > $ G ⇒ ra_ctor_ty td ti tc tCT ∈ lrel $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ w r ∈ dt u (mcv H) tCT w r $;
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_ctor , td +: ti +: tc +: ∅ ⟩ w r ∈ dt u (mcv H) tCT w r $;
 
 -- --------------------------------------------------------------------------
 -- Nested blocks (E7): a lift of a guarded term is guarded
@@ -646,7 +646,7 @@ theorem ind_ctor_ty_all (G: hyps) (H J: class) (u w r tg td ti tc tCT: set):
 --| of the type `rec_ty` builds, because that type is guarded under the parameters.
 theorem ind_rec_ty_all (G: hyps) (H J: class) (u w r tg td tv ti tN tR0 tRT: set):
   $ G ⇒ iwf u H J tg td w r $ > $ G ⇒ hctor ⊆ H $ > $ G ⇒ hrec ⊆ H $ > $ G ⇒ ra_elim_ok tg td tv ∈ lrel3 J $ > $ G ⇒ ra_rec_ty td tv ti tR0 ∈ lrel $ > $ G ⇒ ra_ind_nested td tN ∈ lrel $ > $ G ⇒ ra_rst td tN tR0 tRT ∈ lrel $ > $ G ⇒ tR0 ∊ ofsort lsig lopen ks_expr $ > $ G ⇒ ti ∊ ofsort lsig lopen ks_nat $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ w r ∈ dt u (mcv H) tRT w r $;
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_rec , td +: ti +: tv +: ∅ ⟩ w r ∈ dt u (mcv H) tRT w r $;
 
 -- --------------------------------------------------------------------------
 -- Nested blocks (E7): the type of a projection at every block
@@ -660,7 +660,7 @@ theorem proj_ty_all (G: hyps) (H J: class) (u w r r0 tg td tb tp tt tnp ti tS tf
   $ G ⇒ r ∊ sat u (mcv H) tg w $ >
   $ G ⇒ dt u (mcv H) te w r = dt u (mcv H) te2 w r $ >
   $ G ⇒ dt u (mcv H) te w r ∈ dt u (mcv H) tS w r $ >
-  $ G ⇒ ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tS tnp ∈ lrel $ >
+  $ G ⇒ ra_spine ⟨ kc_ind_ty , td +: ti +: ∅ ⟩ tS tnp ∈ lrel $ >
   $ G ⇒ ra_ind_data td tb tp tt ∈ lrel $ >
   $ G ⇒ ra_struct_like td ti ∈ lrel $ >
   $ G ⇒ ra_proj_ok tg td ti tfi ∈ lrel3 J $ >
@@ -672,7 +672,7 @@ theorem proj_ty_all (G: hyps) (H J: class) (u w r r0 tg td tb tp tt tnp ti tS tf
   $ G ⇒ ra_qinst tb te tfi ⟨ kc_nz , ∅ ⟩ tA1 tR ∈ lrel $ >
   $ G ⇒ te2 ∊ trees ω $ >
   $ G ⇒ tS ∊ ofsort lsig lopen ks_expr $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_proj , scons tb (scons tfi (scons te ∅)) ⟩ w r = dt u (mcv H) ⟨ kc_proj , scons tb (scons tfi (scons te2 ∅)) ⟩ w r ∧ dt u (mcv H) ⟨ kc_proj , scons tb (scons tfi (scons te ∅)) ⟩ w r ∈ dt u (mcv H) tR w r $;
+  $ G ⇒ dt u (mcv H) ⟨ kc_proj , tb +: tfi +: te +: ∅ ⟩ w r = dt u (mcv H) ⟨ kc_proj , tb +: tfi +: te2 +: ∅ ⟩ w r ∧ dt u (mcv H) ⟨ kc_proj , tb +: tfi +: te +: ∅ ⟩ w r ∈ dt u (mcv H) tR w r $;
 
 -- --------------------------------------------------------------------------
 -- Nested blocks (E7): restoring a telescope
@@ -695,7 +695,7 @@ theorem mcv_inv_ind_rec (G: hyps) (H: class) (u w r d e i v v2: set):
   $ G ⇒ v ∊ trees ω $ >
   $ G ⇒ v2 ∊ trees ω $ >
   $ G ⇒ lveq v v2 $ >
-  $ G ⇒ dt u (mcv H) ⟨ kc_ind_rec , scons d (scons i (scons v ∅)) ⟩ w r = dt u (mcv H) ⟨ kc_ind_rec , scons e (scons i (scons v2 ∅)) ⟩ w r $;
+  $ G ⇒ dt u (mcv H) ⟨ kc_ind_rec , d +: i +: v +: ∅ ⟩ w r = dt u (mcv H) ⟨ kc_ind_rec , e +: i +: v2 +: ∅ ⟩ w r $;
 
 --| `minv_intro`'s step for the hook of the inductive types at the nodes `ind_rec`: a node whose proper subtrees are
 --| invariant is invariant.
@@ -758,15 +758,15 @@ theorem iota_lhs_rst_val (G: hyps) (H J: class) (u w r0 tg td tb tp tt tnp tn tm
   $ G ⇒ ra_add tm tn tmn ∈ lrel $ >
   $ G ⇒ ra_add tnf tm tam ∈ lrel $ >
   $ G ⇒ ra_add tam tn td1 ∈ lrel $ >
-  $ G ⇒ ra_pargs ⟨ kc_ind_rec , scons td (scons ti (scons tv ∅)) ⟩ td1 tnp te1 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_rec , td +: ti +: tv +: ∅ ⟩ td1 tnp te1 ∈ lrel $ >
   $ G ⇒ ra_pargs te1 tam tn te2 ∈ lrel $ >
   $ G ⇒ ra_pargs te2 tnf tm te3 ∈ lrel $ >
-  $ G ⇒ ra_pargs ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ td1 tnp tY ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ty , td +: ti +: ∅ ⟩ td1 tnp tY ∈ lrel $ >
   $ G ⇒ ra_lift tmn tnf tB tT2 ∈ lrel $ >
   $ G ⇒ ra_rehead tY te3 tni tT2 te4 ∈ lrel $ >
-  $ G ⇒ ra_pargs ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ td1 tnp tc1 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ctor , td +: ti +: tc +: ∅ ⟩ td1 tnp tc1 ∈ lrel $ >
   $ G ⇒ ra_pargs tc1 ⟨ kc_nz , ∅ ⟩ tnf tmj ∈ lrel $ >
-  $ G ⇒ ra_rehead tY ⟨ kc_bvar , scons tmo ∅ ⟩ tni tT2 tT0 ∈ lrel $ >
+  $ G ⇒ ra_rehead tY ⟨ kc_bvar , tmo +: ∅ ⟩ tni tT2 tT0 ∈ lrel $ >
   $ G ⇒ tl ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ tT ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ ra_rst td tN tl z1 ∈ lrel $ >
@@ -775,8 +775,8 @@ theorem iota_lhs_rst_val (G: hyps) (H J: class) (u w r0 tg td tb tp tt tnp tn tm
   $ G ⇒ s ∊ fseq u $ >
   $ G ⇒ m ∊ fseq u $ >
   $ G ⇒ cdm m = nvf' td1 $ >
-  $ G ⇒ tl = ⟨ kc_app , scons te4 (scons tmj ∅) ⟩ $ >
-  $ G ⇒ tT = ⟨ kc_app , scons tT0 (scons tmj ∅) ⟩ $ >
+  $ G ⇒ tl = ⟨ kc_app , te4 +: tmj +: ∅ ⟩ $ >
+  $ G ⇒ tT = ⟨ kc_app , tT0 +: tmj +: ∅ ⟩ $ >
   $ G ⇒ dt u (mcv H) z1 w (m ++ p ++ s) = dt u (mcv H) tl w (m ++ p ++ s) ∧ dt u (mcv H) z2 w (m ++ p ++ s) = dt u (mcv H) tT w (m ++ p ++ s) $;
 
 --| A restored right-hand side of a recursor rule (`rec_rhs`, then `rst`) has the value of the unrestored one.
@@ -870,7 +870,7 @@ theorem proj_lhs_rst_val (G: hyps) (H J: class) (u w r0 tg td tb tp tt tnp tn tm
   $ G ⇒ ra_ntys tt tn tm ∈ lrel $ >
   $ G ⇒ ra_sinst td ⟨ kc_nz , ∅ ⟩ tn tnp tK0 tK2 ∈ lrel $ >
   $ G ⇒ ra_clen tX tnf ∈ lrel $ >
-  $ G ⇒ ra_pargs ⟨ kc_ind_ctor , scons td (scons ti (scons tc ∅)) ⟩ tnf tnp tc1 ∈ lrel $ >
+  $ G ⇒ ra_pargs ⟨ kc_ind_ctor , td +: ti +: tc +: ∅ ⟩ tnf tnp tc1 ∈ lrel $ >
   $ G ⇒ ra_pargs tc1 ⟨ kc_nz , ∅ ⟩ tnf tmj ∈ lrel $ >
   $ G ⇒ tl ∊ ofsort lsig lopen ks_expr $ >
   $ G ⇒ ra_rst td tN tl z1 ∈ lrel $ >
@@ -878,7 +878,7 @@ theorem proj_lhs_rst_val (G: hyps) (H J: class) (u w r0 tg td tb tp tt tnp tn tm
   $ G ⇒ s ∊ fseq u $ >
   $ G ⇒ m ∊ fseq u $ >
   $ G ⇒ cdm m = nvf' tnf $ >
-  $ G ⇒ tl = ⟨ kc_proj , scons tb2 (scons tfi (scons tmj ∅)) ⟩ $ >
+  $ G ⇒ tl = ⟨ kc_proj , tb2 +: tfi +: tmj +: ∅ ⟩ $ >
   $ G ⇒ tb2 ∊ trees ω $ >
   $ G ⇒ tfi ∊ trees ω $ >
   $ G ⇒ dt u (mcv H) z1 w (m ++ p ++ s) = dt u (mcv H) tl w (m ++ p ++ s) $;
@@ -898,7 +898,7 @@ theorem proj_res_spine {x9: set} (G: hyps) (J: class) (tg td tb tp tt tnp tn tm 
   $ G ⇒ ra_pis tX tB tK2 ∈ lrel $ >
   $ G ⇒ ra_clen tX tnf ∈ lrel $ >
   $ G ⇒ ra_npis tK tnf ∈ lrel $ >
-  $ G ⇒ ∃ x9 (ra_spine ⟨ kc_ind_ty , scons td (scons ti ∅) ⟩ tB x9 ∈ lrel) $;
+  $ G ⇒ ∃ x9 (ra_spine ⟨ kc_ind_ty , td +: ti +: ∅ ⟩ tB x9 ∈ lrel) $;
 
 -- --------------------------------------------------------------------------
 -- The transitive closure: its elements, and induction on membership through it

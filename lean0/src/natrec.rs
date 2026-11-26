@@ -166,14 +166,14 @@ fn fact(el: &mut El<'_, '_, '_, '_>, lean: &str) -> R<P> {
     mm(el.g.env.thm(th, &[gv], &[]))
 }
 
-/// `⟨ G ⊢ c : T ⟩` for the constant `lean`, from its typing lemma.
+/// `⟦ₜ G ⊢ c : T ⟧` for the constant `lean`, from its typing lemma.
 fn typing(el: &mut El<'_, '_, '_, '_>, lean: &str) -> R<P> {
     let th = el.g.consts[lean].ty_thm;
     let gv = el.g.env.var(0);
     mm(el.g.env.thm(th, &[gv], &[]))
 }
 
-/// `⟨ G ⊢ e : Nat → Nat → Nat ⟩` for a closed term.
+/// `⟦ₜ G ⊢ e : Nat → Nat → Nat ⟧` for a closed term.
 fn binop<'t>(el: &mut El<'_, '_, 't, '_>, v: &Voc<'t>, e: Ex<'t>) -> R<P> {
     let (t, p) = el.infer(e)?;
     let ty = v.pi2(el, v.nat);
@@ -224,7 +224,7 @@ fn mul_eqs<'t>(el: &mut El<'_, '_, 't, '_>, v: &Voc<'t>) -> R<P> {
     mm(el.g.env.thm_n("mul_eqs_i", &targs, &hyps))
 }
 
-/// The carried proof `name` as a term `h` with `⟨ G ⊢ h : ty ⟩`: a premise asking that a
+/// The carried proof `name` as a term `h` with `⟦ₜ G ⊢ h : ty ⟧`: a premise asking that a
 /// proof of `ty` exists.
 fn proof<'t>(el: &mut El<'_, '_, 't, '_>, b: &mut Baked<'t>, name: &str, ty: Ex<'t>) -> R<(E, P)> {
     let h = b.term(el, name)?;

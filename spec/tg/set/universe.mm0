@@ -37,10 +37,10 @@ theorem universe_cpw (G: hyps) (U: class) (a: set):
 theorem universe_cpw_c (G: hyps) (U A: class):
   $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ 𝒫 A ∈ U $;
 theorem universe_cuni_fn (G: hyps) (U: class) (a f: set):
-  $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ fn_into f a U $ > $ G ⇒ ⋃ (img f a) ∈ U $;
+  $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ ⌈ f : a → U ⌉ $ > $ G ⇒ ⋃ (img f a) ∈ U $;
 --| `universe_cuni_fn` for a functional class.
 theorem universe_cuni_fn_c (G: hyps) (U F: class) (a: set):
-  $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ fn_into F a U $ > $ G ⇒ ⋃ (img F a) ∈ U $;
+  $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ ⌈ F : a → U ⌉ $ > $ G ⇒ ⋃ (img F a) ∈ U $;
 --| A subclass of an element is an element.
 theorem universe_subset (G: hyps) (U A: class) (a: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ A ⊆ a $ > $ G ⇒ A ∈ U $;
@@ -99,10 +99,10 @@ theorem universe_cres (G: hyps) (U A: class) (a: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ a ↾ A ∈ U $;
 --| The image of an element under a function into the universe.
 theorem universe_img_fn (G: hyps) (U: class) (a f: set):
-  $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ fn_into f a U $ > $ G ⇒ img f a ∈ U $;
+  $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ ⌈ f : a → U ⌉ $ > $ G ⇒ img f a ∈ U $;
 --| `universe_img_fn` for a functional class.
 theorem universe_img_fn_c (G: hyps) (U F: class) (a: set):
-  $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ fn_into F a U $ > $ G ⇒ img F a ∈ U $;
+  $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ ⌈ F : a → U ⌉ $ > $ G ⇒ img F a ∈ U $;
 --| The same for a class operation `x ↦ B` with values in the universe: the
 --| family's image and its union are elements.
 theorem universe_img_op {x: set} (G: hyps x) (U: class) (B: class x) (a: set):
@@ -115,10 +115,10 @@ theorem universe_cuni_op {x: set} (G: hyps x) (U: class) (B: class x) (a: set):
 --| `csn x × B`, and `cpi x A B ⊆ 𝒫 (clam x A (⋃ B))`.
 theorem universe_clam {x: set} (G: hyps x) (U A: class) (B: class x):
   $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ ∀ x (x ∊ A → B ∈ U) $ >
-  $ G ⇒ clam x A B ∈ U $;
+  $ G ⇒ (λₛ x ∈ A, B) ∈ U $;
 theorem universe_cpi {x: set} (G: hyps x) (U A: class) (B: class x):
   $ G ⇒ universe U $ > $ G ⇒ A ∈ U $ > $ G ⇒ ∀ x (x ∊ A → B ∈ U) $ >
-  $ G ⇒ cpi x A B ∈ U $;
+  $ G ⇒ (Πₛ x ∈ A, B) ∈ U $;
 theorem universe_two (G: hyps) (U: class) (a: set):
   $ G ⇒ universe U $ > $ G ⇒ a ∊ U $ > $ G ⇒ two ∈ U $;
 --| The natural numbers are in every universe (but `ω` itself need not be).
@@ -152,7 +152,7 @@ theorem cint_congr (A B: class): $ A ≐ B $ > $ cint A ≐ cint B $;
 theorem cint_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ cint A = cint B $;
 --| @rewrite
 theorem sb_c_cint {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (cint A)) ≐ cint (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (cint A)) ≐ cint ([[ x / t ]] A) $;
 
 theorem univs_intro (G: hyps) (A: class) (u: set):
   $ G ⇒ universe u $ > $ G ⇒ A ∈ u $ > $ G ⇒ u ∊ univs A $;
@@ -164,7 +164,7 @@ theorem univs_nonempty (G: hyps) {u: set} (a: set): $ G ⇒ ∃ u (u ∊ univs a
 theorem univs_congr (A B: class): $ A ≐ B $ > $ univs A ≐ univs B $;
 --| @rewrite
 theorem sb_c_univs {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (univs A)) ≐ univs (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (univs A)) ≐ univs ([[ x / t ]] A) $;
 --| The intersection of a nonempty class of universes is a universe.
 --| @freshen G y
 theorem universe_cint (G: hyps) {y: set} (A: class) (b: set):
@@ -184,7 +184,7 @@ theorem nextu_congr (A B: class): $ A ≐ B $ > $ nextu A ≐ nextu B $;
 theorem nextu_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ nextu A = nextu B $;
 --| @rewrite
 theorem sb_c_nextu {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (nextu A)) ≐ nextu (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (nextu A)) ≐ nextu ([[ x / t ]] A) $;
 --| Class form of `nextu_universe`.
 theorem nextu_universe_c (G: hyps) (A: class): $ G ⇒ isset A $ > $ G ⇒ universe (nextu A) $;
 --| Class form of `nextu_elem`.

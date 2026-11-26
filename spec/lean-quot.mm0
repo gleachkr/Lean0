@@ -82,23 +82,23 @@ def choice (u: lvl): expr = $ cst choice_atom (lcons u lnil) $;
 -- `Quot.lift` reduces on `Quot.mk`. `Quot.ind` on `Quot.mk` needs no rule:
 -- both sides prove one proposition (`proofIrrel`).
 
---| `Quot : Π (α : Sort u). (α → α → Prop) → Sort u`
+--| `Quot : Π (α : Sort u), (α → α → Prop) → Sort u`
 axiom quot_ty (G: ctx) (u: lvl):
-  $ ⟨ G ⊢ quot u : Π (Sort u). Π (Π #0. Π #1. Prop). Sort u ⟩ $;
---| `Quot.mk : Π (α : Sort u) (r : α → α → Prop). α → Quot r`
+  $ ⟦ₜ G ⊢ quot u : Π (Sort u), Π (Π #0, Π #1, Prop), Sort u ⟧ $;
+--| `Quot.mk : Π (α : Sort u) (r : α → α → Prop), α → Quot r`
 axiom quot_mk_ty (G: ctx) (u: lvl):
-  $ ⟨ G ⊢ quot_mk u : Π (Sort u). Π (Π #0. Π #1. Prop). Π #1. quot u @ #2 @ #1 ⟩ $;
+  $ ⟦ₜ G ⊢ quot_mk u : Π (Sort u), Π (Π #0, Π #1, Prop), Π #1, quot u @ #2 @ #1 ⟧ $;
 --| `Quot.lift : Π (α : Sort u) (r : α → α → Prop) (β : Sort v) (f : α → β).
 --|   (Π a b. r a b → Eq (f a) (f b)) → Quot r → β`
 axiom quot_lift_ty (G: ctx) (u v: lvl):
-  $ ⟨ G ⊢ quot_lift u v : Π (Sort u). Π (Π #0. Π #1. Prop). Π (Sort v). Π (Π #2. #1).
-      Π (Π #3. Π #4. Π (#4 @ #1 @ #0). ind_ty (eq_D v) 0 @ #4 @ (#3 @ #2) @ (#3 @ #1)).
-      Π (quot u @ #4 @ #3). #3 ⟩ $;
+  $ ⟦ₜ G ⊢ quot_lift u v : Π (Sort u), Π (Π #0, Π #1, Prop), Π (Sort v), Π (Π #2, #1),
+      Π (Π #3, Π #4, Π (#4 @ #1 @ #0), ind_ty (eq_D v) 0 @ #4 @ (#3 @ #2) @ (#3 @ #1)),
+      Π (quot u @ #4 @ #3), #3 ⟧ $;
 --| `Quot.ind : Π (α : Sort u) (r : α → α → Prop) (β : Quot r → Prop).
 --|   (Π a. β (Quot.mk r a)) → Π q. β q`
 axiom quot_ind_ty (G: ctx) (u: lvl):
-  $ ⟨ G ⊢ quot_ind u : Π (Sort u). Π (Π #0. Π #1. Prop). Π (Π (quot u @ #1 @ #0). Prop).
-      Π (Π #2. #1 @ (quot_mk u @ #3 @ #2 @ #0)). Π (quot u @ #3 @ #2). #2 @ #0 ⟩ $;
+  $ ⟦ₜ G ⊢ quot_ind u : Π (Sort u), Π (Π #0, Π #1, Prop), Π (Π (quot u @ #1 @ #0), Prop),
+      Π (Π #2, #1 @ (quot_mk u @ #3 @ #2 @ #0)), Π (quot u @ #3 @ #2), #2 @ #0 ⟧ $;
 
 --| `Quot.lift f h (Quot.mk r a) ≡ f a` as a closed equation: stated once, in
 --| the context of the primitive's own variables (`α`, `r`, `β`, `f`, `h`,
@@ -106,22 +106,22 @@ axiom quot_ind_ty (G: ctx) (u: lvl):
 --| premise: every argument is a variable of the context. Instances follow
 --| by `weakBaseDF` and `instDF`.
 axiom quot_lift_mk (u v: lvl):
-  $ ⟦ [] ▷ Sort u ▷ (Π #0. Π #1. Prop) ▷ Sort v ▷ (Π #2. #1) ▷
-      (Π #3. Π #4. Π (#4 @ #1 @ #0). ind_ty (eq_D v) 0 @ #4 @ (#3 @ #2) @ (#3 @ #1)) ▷ #4
+  $ ⟦ [] ▷ Sort u ▷ (Π #0, Π #1, Prop) ▷ Sort v ▷ (Π #2, #1) ▷
+      (Π #3, Π #4, Π (#4 @ #1 @ #0), ind_ty (eq_D v) 0 @ #4 @ (#3 @ #2) @ (#3 @ #1)) ▷ #4
     ⊢ quot_lift u v @ #5 @ #4 @ #3 @ #2 @ #1 @ (quot_mk u @ #5 @ #4 @ #0) ≡ #2 @ #0 : #3 ⟧ $;
 
 -- Lean's axioms `propext`, `Quot.sound` and `Classical.choice` (audit §4) ----
 -- The three axioms of Lean's library that hold in the model outright, with the
 -- types Lean gives them: a certificate that uses them assumes nothing.
 
---| `propext : Π (a b : Prop). (a ↔ b) → a = b`
+--| `propext : Π (a b : Prop), (a ↔ b) → a = b`
 axiom propext_ty (G: ctx):
-  $ ⟨ G ⊢ propext : Π Prop. Π Prop. Π (ind_ty iff_D 0 @ #1 @ #0). ind_ty (eq_D (ls lz)) 0 @ Prop @ #2 @ #1 ⟩ $;
+  $ ⟦ₜ G ⊢ propext : Π Prop, Π Prop, Π (ind_ty iff_D 0 @ #1 @ #0), ind_ty (eq_D (ls lz)) 0 @ Prop @ #2 @ #1 ⟧ $;
 --| `Quot.sound : Π (α : Sort u) (r : α → α → Prop) (a b : α).
 --|   r a b → Quot.mk r a = Quot.mk r b`
 axiom quot_sound_ty (G: ctx) (u: lvl):
-  $ ⟨ G ⊢ quot_sound u : Π (Sort u). Π (Π #0. Π #1. Prop). Π #1. Π #2. Π (#2 @ #1 @ #0).
-      ind_ty (eq_D u) 0 @ (quot u @ #4 @ #3) @ (quot_mk u @ #4 @ #3 @ #2) @ (quot_mk u @ #4 @ #3 @ #1) ⟩ $;
---| `Classical.choice : Π (α : Sort u). Nonempty α → α`
+  $ ⟦ₜ G ⊢ quot_sound u : Π (Sort u), Π (Π #0, Π #1, Prop), Π #1, Π #2, Π (#2 @ #1 @ #0),
+      ind_ty (eq_D u) 0 @ (quot u @ #4 @ #3) @ (quot_mk u @ #4 @ #3 @ #2) @ (quot_mk u @ #4 @ #3 @ #1) ⟧ $;
+--| `Classical.choice : Π (α : Sort u), Nonempty α → α`
 axiom choice_ty (G: ctx) (u: lvl):
-  $ ⟨ G ⊢ choice u : Π (Sort u). Π (ind_ty (nonempty_D u) 0 @ #0). #1 ⟩ $;
+  $ ⟦ₜ G ⊢ choice u : Π (Sort u), Π (ind_ty (nonempty_D u) 0 @ #0), #1 ⟧ $;

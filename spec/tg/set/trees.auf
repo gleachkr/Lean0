@@ -2,55 +2,55 @@
 
 --| Three substitutions, reversed.
 lemma t1_sb3_rev {k s v: set} (a b c: set) (B: class k s v):
-  $ (⟦ v / c ⟧ (⟦ s / b ⟧ (⟦ k / a ⟧ B))) ≐ (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $
+  $ ([[ v / c ]] ([[ s / b ]] ([[ k / a ]] B))) ≐ ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $
 ----
-r1: $ (⟦ s / b ⟧ (⟦ k / a ⟧ B)) ≐ (⟦ k / a ⟧ (⟦ s / b ⟧ B)) $ by sb_c_swap
+r1: $ ([[ s / b ]] ([[ k / a ]] B)) ≐ ([[ k / a ]] ([[ s / b ]] B)) $ by sb_c_swap
 r2: $ seqt c c $ by seqt_refl
-r3: $ (⟦ v / c ⟧ (⟦ s / b ⟧ (⟦ k / a ⟧ B))) ≐ (⟦ v / c ⟧ (⟦ k / a ⟧ (⟦ s / b ⟧ B))) $ by sb_c_congr [r2, r1]
-r4: $ (⟦ v / c ⟧ (⟦ k / a ⟧ (⟦ s / b ⟧ B))) ≐ (⟦ k / a ⟧ (⟦ v / c ⟧ (⟦ s / b ⟧ B))) $ by sb_c_swap
-r5: $ (⟦ v / c ⟧ (⟦ s / b ⟧ B)) ≐ (⟦ s / b ⟧ (⟦ v / c ⟧ B)) $ by sb_c_swap
+r3: $ ([[ v / c ]] ([[ s / b ]] ([[ k / a ]] B))) ≐ ([[ v / c ]] ([[ k / a ]] ([[ s / b ]] B))) $ by sb_c_congr [r2, r1]
+r4: $ ([[ v / c ]] ([[ k / a ]] ([[ s / b ]] B))) ≐ ([[ k / a ]] ([[ v / c ]] ([[ s / b ]] B))) $ by sb_c_swap
+r5: $ ([[ v / c ]] ([[ s / b ]] B)) ≐ ([[ s / b ]] ([[ v / c ]] B)) $ by sb_c_swap
 r6: $ seqt a a $ by seqt_refl
-r7: $ (⟦ k / a ⟧ (⟦ v / c ⟧ (⟦ s / b ⟧ B))) ≐ (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ by sb_c_congr [r6, r5]
-r8: $ (⟦ v / c ⟧ (⟦ s / b ⟧ (⟦ k / a ⟧ B))) ≐ (⟦ k / a ⟧ (⟦ v / c ⟧ (⟦ s / b ⟧ B))) $ by ceqt_trans [r3, r4]
-r9: $ (⟦ v / c ⟧ (⟦ s / b ⟧ (⟦ k / a ⟧ B))) ≐ (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ by ceqt_trans [r8, r7]
+r7: $ ([[ k / a ]] ([[ v / c ]] ([[ s / b ]] B))) ≐ ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $ by sb_c_congr [r6, r5]
+r8: $ ([[ v / c ]] ([[ s / b ]] ([[ k / a ]] B))) ≐ ([[ k / a ]] ([[ v / c ]] ([[ s / b ]] B))) $ by ceqt_trans [r3, r4]
+r9: $ ([[ v / c ]] ([[ s / b ]] ([[ k / a ]] B))) ≐ ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $ by ceqt_trans [r8, r7]
 
 --| Moving three substitutions along equalities of set variables.
 lemma t1_sb3_eq {k s v: set} (G: hyps k s v) (B: class k s v) (a b c i j u: set):
   $ G ⇒ a = i $ > $ G ⇒ b = j $ > $ G ⇒ c = u $ >
-  $ G ⇒ (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) $
+  $ G ⇒ ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) $
 ----
-p1: $ … ⇒ (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) = (⟦ k / i ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ by sb_c_eq [#1]
-p2: $ (⟦ k / i ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ≐ (⟦ s / b ⟧ (⟦ k / i ⟧ (⟦ v / c ⟧ B))) $ by sb_c_swap
-p3: $ G ⇒ (⟦ k / i ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) = (⟦ s / b ⟧ (⟦ k / i ⟧ (⟦ v / c ⟧ B))) $ by weaken [p2]
-p4: $ … ⇒ (⟦ s / b ⟧ (⟦ k / i ⟧ (⟦ v / c ⟧ B))) = (⟦ s / j ⟧ (⟦ k / i ⟧ (⟦ v / c ⟧ B))) $ by sb_c_eq [#2]
-p5: $ (⟦ s / j ⟧ (⟦ k / i ⟧ (⟦ v / c ⟧ B))) ≐ (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / c ⟧ B))) $ by sb_c_swap
-p6: $ G ⇒ (⟦ s / j ⟧ (⟦ k / i ⟧ (⟦ v / c ⟧ B))) = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / c ⟧ B))) $ by weaken [p5]
-p7: $ (⟦ s / j ⟧ (⟦ v / c ⟧ B)) ≐ (⟦ v / c ⟧ (⟦ s / j ⟧ B)) $ by sb_c_swap
+p1: $ … ⇒ ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) = ([[ k / i ]] ([[ s / b ]] ([[ v / c ]] B))) $ by sb_c_eq [#1]
+p2: $ ([[ k / i ]] ([[ s / b ]] ([[ v / c ]] B))) ≐ ([[ s / b ]] ([[ k / i ]] ([[ v / c ]] B))) $ by sb_c_swap
+p3: $ G ⇒ ([[ k / i ]] ([[ s / b ]] ([[ v / c ]] B))) = ([[ s / b ]] ([[ k / i ]] ([[ v / c ]] B))) $ by weaken [p2]
+p4: $ … ⇒ ([[ s / b ]] ([[ k / i ]] ([[ v / c ]] B))) = ([[ s / j ]] ([[ k / i ]] ([[ v / c ]] B))) $ by sb_c_eq [#2]
+p5: $ ([[ s / j ]] ([[ k / i ]] ([[ v / c ]] B))) ≐ ([[ k / i ]] ([[ s / j ]] ([[ v / c ]] B))) $ by sb_c_swap
+p6: $ G ⇒ ([[ s / j ]] ([[ k / i ]] ([[ v / c ]] B))) = ([[ k / i ]] ([[ s / j ]] ([[ v / c ]] B))) $ by weaken [p5]
+p7: $ ([[ s / j ]] ([[ v / c ]] B)) ≐ ([[ v / c ]] ([[ s / j ]] B)) $ by sb_c_swap
 p8: $ seqt i i $ by seqt_refl
-p9: $ (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / c ⟧ B))) ≐ (⟦ k / i ⟧ (⟦ v / c ⟧ (⟦ s / j ⟧ B))) $ by sb_c_congr [p8, p7]
-p10: $ (⟦ k / i ⟧ (⟦ v / c ⟧ (⟦ s / j ⟧ B))) ≐ (⟦ v / c ⟧ (⟦ k / i ⟧ (⟦ s / j ⟧ B))) $ by sb_c_swap
-q1: $ (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / c ⟧ B))) ≐ (⟦ v / c ⟧ (⟦ k / i ⟧ (⟦ s / j ⟧ B))) $ by ceqt_trans [p9, p10]
-q2: $ G ⇒ (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / c ⟧ B))) = (⟦ v / c ⟧ (⟦ k / i ⟧ (⟦ s / j ⟧ B))) $ by weaken [q1]
-p11: $ … ⇒ (⟦ v / c ⟧ (⟦ k / i ⟧ (⟦ s / j ⟧ B))) = (⟦ v / u ⟧ (⟦ k / i ⟧ (⟦ s / j ⟧ B))) $ by sb_c_eq [#3]
-p12: $ (⟦ v / u ⟧ (⟦ k / i ⟧ (⟦ s / j ⟧ B))) ≐ (⟦ k / i ⟧ (⟦ v / u ⟧ (⟦ s / j ⟧ B))) $ by sb_c_swap
-p13: $ (⟦ v / u ⟧ (⟦ s / j ⟧ B)) ≐ (⟦ s / j ⟧ (⟦ v / u ⟧ B)) $ by sb_c_swap
-p14: $ (⟦ k / i ⟧ (⟦ v / u ⟧ (⟦ s / j ⟧ B))) ≐ (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) $ by sb_c_congr [p8, p13]
-q3: $ (⟦ v / u ⟧ (⟦ k / i ⟧ (⟦ s / j ⟧ B))) ≐ (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) $ by ceqt_trans [p12, p14]
-q4: $ G ⇒ (⟦ v / u ⟧ (⟦ k / i ⟧ (⟦ s / j ⟧ B))) = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) $ by weaken [q3]
-t1: $ … ⇒ (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) = (⟦ s / b ⟧ (⟦ k / i ⟧ (⟦ v / c ⟧ B))) $ by eq_trans [p1, p3]
-t2: $ … ⇒ (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) = (⟦ s / j ⟧ (⟦ k / i ⟧ (⟦ v / c ⟧ B))) $ by eq_trans [t1, p4]
-t3: $ … ⇒ (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / c ⟧ B))) $ by eq_trans [t2, p6]
-t4: $ … ⇒ (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) = (⟦ v / c ⟧ (⟦ k / i ⟧ (⟦ s / j ⟧ B))) $ by eq_trans [t3, q2]
-t5: $ … ⇒ (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) = (⟦ v / u ⟧ (⟦ k / i ⟧ (⟦ s / j ⟧ B))) $ by eq_trans [t4, p11]
-t6: $ … ⇒ (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) $ by eq_trans [t5, q4]
+p9: $ ([[ k / i ]] ([[ s / j ]] ([[ v / c ]] B))) ≐ ([[ k / i ]] ([[ v / c ]] ([[ s / j ]] B))) $ by sb_c_congr [p8, p7]
+p10: $ ([[ k / i ]] ([[ v / c ]] ([[ s / j ]] B))) ≐ ([[ v / c ]] ([[ k / i ]] ([[ s / j ]] B))) $ by sb_c_swap
+q1: $ ([[ k / i ]] ([[ s / j ]] ([[ v / c ]] B))) ≐ ([[ v / c ]] ([[ k / i ]] ([[ s / j ]] B))) $ by ceqt_trans [p9, p10]
+q2: $ G ⇒ ([[ k / i ]] ([[ s / j ]] ([[ v / c ]] B))) = ([[ v / c ]] ([[ k / i ]] ([[ s / j ]] B))) $ by weaken [q1]
+p11: $ … ⇒ ([[ v / c ]] ([[ k / i ]] ([[ s / j ]] B))) = ([[ v / u ]] ([[ k / i ]] ([[ s / j ]] B))) $ by sb_c_eq [#3]
+p12: $ ([[ v / u ]] ([[ k / i ]] ([[ s / j ]] B))) ≐ ([[ k / i ]] ([[ v / u ]] ([[ s / j ]] B))) $ by sb_c_swap
+p13: $ ([[ v / u ]] ([[ s / j ]] B)) ≐ ([[ s / j ]] ([[ v / u ]] B)) $ by sb_c_swap
+p14: $ ([[ k / i ]] ([[ v / u ]] ([[ s / j ]] B))) ≐ ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) $ by sb_c_congr [p8, p13]
+q3: $ ([[ v / u ]] ([[ k / i ]] ([[ s / j ]] B))) ≐ ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) $ by ceqt_trans [p12, p14]
+q4: $ G ⇒ ([[ v / u ]] ([[ k / i ]] ([[ s / j ]] B))) = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) $ by weaken [q3]
+t1: $ … ⇒ ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) = ([[ s / b ]] ([[ k / i ]] ([[ v / c ]] B))) $ by eq_trans [p1, p3]
+t2: $ … ⇒ ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) = ([[ s / j ]] ([[ k / i ]] ([[ v / c ]] B))) $ by eq_trans [t1, p4]
+t3: $ … ⇒ ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) = ([[ k / i ]] ([[ s / j ]] ([[ v / c ]] B))) $ by eq_trans [t2, p6]
+t4: $ … ⇒ ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) = ([[ v / c ]] ([[ k / i ]] ([[ s / j ]] B))) $ by eq_trans [t3, q2]
+t5: $ … ⇒ ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) = ([[ v / u ]] ([[ k / i ]] ([[ s / j ]] B))) $ by eq_trans [t4, p11]
+t6: $ … ⇒ ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) $ by eq_trans [t5, q4]
 
 --| Introduction for `cgr3`.
 cgr3_intro
 ----------
-i1: $ (⟦ v / c ⟧ (⟦ s / b ⟧ (⟦ k / a ⟧ B))) ≐ (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ by t1_sb3_rev
-i2: $ G ⇒ (⟦ v / c ⟧ (⟦ s / b ⟧ (⟦ k / a ⟧ B))) = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ by weaken [i1]
-i3: $ … ⇒ (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) = (⟦ v / c ⟧ (⟦ s / b ⟧ (⟦ k / a ⟧ B))) $ by eq_sym [i2]
-i4: $ … ⇒ f = (⟦ v / c ⟧ (⟦ s / b ⟧ (⟦ k / a ⟧ B))) $ by eq_trans [#1, i3]
+i1: $ ([[ v / c ]] ([[ s / b ]] ([[ k / a ]] B))) ≐ ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $ by t1_sb3_rev
+i2: $ G ⇒ ([[ v / c ]] ([[ s / b ]] ([[ k / a ]] B))) = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $ by weaken [i1]
+i3: $ … ⇒ ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) = ([[ v / c ]] ([[ s / b ]] ([[ k / a ]] B))) $ by eq_sym [i2]
+i4: $ … ⇒ f = ([[ v / c ]] ([[ s / b ]] ([[ k / a ]] B))) $ by eq_trans [#1, i3]
 i5: $ G ⇒ isset a $ by isset_var
 i6: $ G ⇒ isset b $ by isset_var
 i7: $ G ⇒ isset c $ by isset_var
@@ -59,11 +59,11 @@ i9: $ … ⇒ isset ⟨ b , c ⟩ $ by opair_set [i6, i7]
 i10: $ … ⇒ isset ⟨ a , ⟨ b , c ⟩ ⟩ $ by opair_set [i5, i9]
 i11: $ … ⇒ isset ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ $ by opair_set [i10, i8]
 j1: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ ⇒ z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ $ by ax
-j2: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ ⇒ f = (⟦ v / c ⟧ (⟦ s / b ⟧ (⟦ k / a ⟧ B))) $ by weaken [i4]
-j3: $ … ⇒ z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ ∧ f = (⟦ v / c ⟧ (⟦ s / b ⟧ (⟦ k / a ⟧ B))) $ by and_intro [j1, j2]
-j4: $ … ⇒ ∃ y (z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , y ⟩ ∧ y = (⟦ v / c ⟧ (⟦ s / b ⟧ (⟦ k / a ⟧ B)))) $ by ex_intro [j3]
-j5: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ ⇒ ∃ v ∃ y (z = ⟨ ⟨ a , ⟨ b , v ⟩ ⟩ , y ⟩ ∧ y = (⟦ s / b ⟧ (⟦ k / a ⟧ B))) $ by ex_intro [j4]
-j6: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ ⇒ ∃ s ∃ v ∃ y (z = ⟨ ⟨ a , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = (⟦ k / a ⟧ B)) $ by ex_intro [j5]
+j2: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ ⇒ f = ([[ v / c ]] ([[ s / b ]] ([[ k / a ]] B))) $ by weaken [i4]
+j3: $ … ⇒ z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ ∧ f = ([[ v / c ]] ([[ s / b ]] ([[ k / a ]] B))) $ by and_intro [j1, j2]
+j4: $ … ⇒ ∃ y (z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , y ⟩ ∧ y = ([[ v / c ]] ([[ s / b ]] ([[ k / a ]] B)))) $ by ex_intro [j3]
+j5: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ ⇒ ∃ v ∃ y (z = ⟨ ⟨ a , ⟨ b , v ⟩ ⟩ , y ⟩ ∧ y = ([[ s / b ]] ([[ k / a ]] B))) $ by ex_intro [j4]
+j6: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ ⇒ ∃ s ∃ v ∃ y (z = ⟨ ⟨ a , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = ([[ k / a ]] B)) $ by ex_intro [j5]
 j7: $ … ⇒ ∃ k ∃ s ∃ v ∃ y (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B) $ by ex_intro [j6]
 j8: $ … ⇒ z ∊ {w | ∃ k ∃ s ∃ v ∃ y (w = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B)} $ by cab_intro [j7]
 j9: $ … ⇒ ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ ∈ cgr3 k s v B $ by wcel_intro [j1, j8]
@@ -77,45 +77,45 @@ a1: $ (∃ y (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B)) ⟺ ∃ g (z
 a2: $ (∃ v ∃ y (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B)) ⟺ ∃ v ∃ g (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , g ⟩ ∧ g = B) $ by ex_congr [a1]
 a3: $ (∃ s ∃ v ∃ y (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B)) ⟺ ∃ s ∃ v ∃ g (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , g ⟩ ∧ g = B) $ by ex_congr [a2]
 a4: $ (∃ k ∃ s ∃ v ∃ y (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B)) ⟺ ∃ k ∃ s ∃ v ∃ g (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , g ⟩ ∧ g = B) $ by ex_congr [a3]
-b1: $ (∃ v ∃ g (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , g ⟩ ∧ g = B)) ⟺ ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ s , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ v / u ⟧ B)) $ by ex_alpha
-b2: $ (∃ s ∃ v ∃ g (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , g ⟩ ∧ g = B)) ⟺ ∃ s ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ s , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ v / u ⟧ B)) $ by ex_congr [b1]
-b3: $ (∃ k ∃ s ∃ v ∃ g (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , g ⟩ ∧ g = B)) ⟺ ∃ k ∃ s ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ s , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ v / u ⟧ B)) $ by ex_congr [b2]
-c1: $ (∃ s ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ s , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ v / u ⟧ B))) ⟺ ∃ j ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ s / j ⟧ (⟦ v / u ⟧ B))) $ by ex_alpha
-c2: $ (∃ k ∃ s ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ s , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ v / u ⟧ B))) ⟺ ∃ k ∃ j ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ s / j ⟧ (⟦ v / u ⟧ B))) $ by ex_congr [c1]
-d1: $ (∃ k ∃ j ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ s / j ⟧ (⟦ v / u ⟧ B)))) ⟺ ∃ i ∃ j ∃ u ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B)))) $ by ex_alpha
-e1: $ (∃ k ∃ s ∃ v ∃ y (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B)) ⟺ ∃ k ∃ s ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ s , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ v / u ⟧ B)) $ by iff_trans [a4, b3]
-e2: $ (∃ k ∃ s ∃ v ∃ y (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B)) ⟺ ∃ k ∃ j ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ s / j ⟧ (⟦ v / u ⟧ B))) $ by iff_trans [e1, c2]
-e3: $ (∃ k ∃ s ∃ v ∃ y (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B)) ⟺ ∃ i ∃ j ∃ u ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B)))) $ by iff_trans [e2, d1]
-e4: $ G ⇒ (∃ k ∃ s ∃ v ∃ y (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B)) ↔ ∃ i ∃ j ∃ u ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B)))) $ by weaken [e3]
-f0: $ … ⇒ ∃ i ∃ j ∃ u ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B)))) $ by bi_elim_l [e4, m1]
-h1: $ H , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) $ by ax
+b1: $ (∃ v ∃ g (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , g ⟩ ∧ g = B)) ⟺ ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ s , u ⟩ ⟩ , g ⟩ ∧ g = ([[ v / u ]] B)) $ by ex_alpha
+b2: $ (∃ s ∃ v ∃ g (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , g ⟩ ∧ g = B)) ⟺ ∃ s ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ s , u ⟩ ⟩ , g ⟩ ∧ g = ([[ v / u ]] B)) $ by ex_congr [b1]
+b3: $ (∃ k ∃ s ∃ v ∃ g (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , g ⟩ ∧ g = B)) ⟺ ∃ k ∃ s ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ s , u ⟩ ⟩ , g ⟩ ∧ g = ([[ v / u ]] B)) $ by ex_congr [b2]
+c1: $ (∃ s ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ s , u ⟩ ⟩ , g ⟩ ∧ g = ([[ v / u ]] B))) ⟺ ∃ j ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = ([[ s / j ]] ([[ v / u ]] B))) $ by ex_alpha
+c2: $ (∃ k ∃ s ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ s , u ⟩ ⟩ , g ⟩ ∧ g = ([[ v / u ]] B))) ⟺ ∃ k ∃ j ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = ([[ s / j ]] ([[ v / u ]] B))) $ by ex_congr [c1]
+d1: $ (∃ k ∃ j ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = ([[ s / j ]] ([[ v / u ]] B)))) ⟺ ∃ i ∃ j ∃ u ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B)))) $ by ex_alpha
+e1: $ (∃ k ∃ s ∃ v ∃ y (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B)) ⟺ ∃ k ∃ s ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ s , u ⟩ ⟩ , g ⟩ ∧ g = ([[ v / u ]] B)) $ by iff_trans [a4, b3]
+e2: $ (∃ k ∃ s ∃ v ∃ y (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B)) ⟺ ∃ k ∃ j ∃ u ∃ g (z = ⟨ ⟨ k , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = ([[ s / j ]] ([[ v / u ]] B))) $ by iff_trans [e1, c2]
+e3: $ (∃ k ∃ s ∃ v ∃ y (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B)) ⟺ ∃ i ∃ j ∃ u ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B)))) $ by iff_trans [e2, d1]
+e4: $ G ⇒ (∃ k ∃ s ∃ v ∃ y (z = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B)) ↔ ∃ i ∃ j ∃ u ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B)))) $ by weaken [e3]
+f0: $ … ⇒ ∃ i ∃ j ∃ u ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B)))) $ by bi_elim_l [e4, m1]
+h1: $ H , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) $ by ax
 h2: $ … ⇒ z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ $ by and_elim_l [h1]
-h3: $ … ⇒ g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) $ by and_elim_r [h1]
+h3: $ … ⇒ g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) $ by and_elim_r [h1]
 h4: $ … ⇒ p $ by cut [h2, #2]
 h5: $ … ⇒ p $ by cut [h3, h4]
-h6: $ H , ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B)))) ⇒ ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B)))) $ by ax
+h6: $ H , ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B)))) ⇒ ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B)))) $ by ax
 h7: $ … ⇒ p $ by ex_elim [h6, h5]
-h8: $ H , ∃ u ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B)))) ⇒ ∃ u ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B)))) $ by ax
+h8: $ H , ∃ u ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B)))) ⇒ ∃ u ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B)))) $ by ax
 h9: $ … ⇒ p $ by ex_elim [h8, h7]
-h10: $ H , ∃ j ∃ u ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B)))) ⇒ ∃ j ∃ u ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B)))) $ by ax
+h10: $ H , ∃ j ∃ u ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B)))) ⇒ ∃ j ∃ u ∃ g (z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ ∧ g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B)))) $ by ax
 h11: $ … ⇒ p $ by ex_elim [h10, h9]
 h12: $ … ⇒ p $ by ex_elim [f0, h11]
 
 --| Elimination for a pair whose argument is a triple.
 cgr3_elim
 ---------
-k1: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ $ by ax
-k2: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ $ by ax
+k1: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ $ by ax
+k2: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ $ by ax
 k3: $ … ⇒ ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ = z $ by eq_sym [k1]
 k4: $ … ⇒ ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ $ by eq_trans [k3, k2]
-n1: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ isset a $ by isset_var
-n2: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ isset b $ by isset_var
-n3: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ isset c $ by isset_var
-n4: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ isset f $ by isset_var
-n5: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ isset i $ by isset_var
-n6: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ isset j $ by isset_var
-n7: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ isset u $ by isset_var
-n8: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ isset g $ by isset_var
+n1: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ isset a $ by isset_var
+n2: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ isset b $ by isset_var
+n3: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ isset c $ by isset_var
+n4: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ isset f $ by isset_var
+n5: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ isset i $ by isset_var
+n6: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ isset j $ by isset_var
+n7: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ isset u $ by isset_var
+n8: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ isset g $ by isset_var
 n9: $ … ⇒ isset ⟨ b , c ⟩ $ by opair_set [n2, n3]
 n10: $ … ⇒ isset ⟨ a , ⟨ b , c ⟩ ⟩ $ by opair_set [n1, n9]
 n11: $ … ⇒ isset ⟨ j , u ⟩ $ by opair_set [n6, n7]
@@ -128,40 +128,40 @@ k9: $ … ⇒ a = i $ by and_elim_l [k8]
 k10: $ … ⇒ ⟨ b , c ⟩ = ⟨ j , u ⟩ $ by and_elim_r [k8]
 k11: $ … ⇒ b = j $ by opair_inj_l [k10]
 k12: $ … ⇒ c = u $ by opair_inj_r [k10]
-k13: $ … ⇒ (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) $ by t1_sb3_eq [k9, k11, k12]
-k14: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) $ by ax
-k15: $ … ⇒ (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ by eq_sym [k13]
-k16: $ … ⇒ g = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ by eq_trans [k14, k15]
-k17: $ … ⇒ f = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ by eq_trans [k7, k16]
+k13: $ … ⇒ ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) $ by t1_sb3_eq [k9, k11, k12]
+k14: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) $ by ax
+k15: $ … ⇒ ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $ by eq_sym [k13]
+k16: $ … ⇒ g = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $ by eq_trans [k14, k15]
+k17: $ … ⇒ f = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $ by eq_trans [k7, k16]
 k18: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ , z ∊ cgr3 k s v B ⇒ z ∊ cgr3 k s v B $ by ax
-k19: $ … ⇒ f = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ by cgr3_elim_mem [k18, k17]
-k20: $ … ⇒ f = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ by wcel_elim [#1, k19]
+k19: $ … ⇒ f = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $ by cgr3_elim_mem [k18, k17]
+k20: $ … ⇒ f = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $ by wcel_elim [#1, k19]
 
 cgr3_functional
 ---------------
-l1: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ z = ⟨ a , b ⟩ $ by ax
-l2: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ $ by ax
+l1: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ z = ⟨ a , b ⟩ $ by ax
+l2: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ $ by ax
 l3: $ … ⇒ ⟨ a , b ⟩ = z $ by eq_sym [l1]
 l4: $ … ⇒ ⟨ a , b ⟩ = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ $ by eq_trans [l3, l2]
-n1: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ isset a $ by isset_var
-n2: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ isset b $ by isset_var
-n5: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ isset i $ by isset_var
-n6: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ isset j $ by isset_var
-n7: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ isset u $ by isset_var
-n8: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ isset g $ by isset_var
+n1: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ isset a $ by isset_var
+n2: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ isset b $ by isset_var
+n5: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ isset i $ by isset_var
+n6: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ isset j $ by isset_var
+n7: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ isset u $ by isset_var
+n8: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ isset g $ by isset_var
 n11: $ … ⇒ isset ⟨ j , u ⟩ $ by opair_set [n6, n7]
 n12: $ … ⇒ isset ⟨ i , ⟨ j , u ⟩ ⟩ $ by opair_set [n5, n11]
 l5: $ … ⇒ a = ⟨ i , ⟨ j , u ⟩ ⟩ ∧ b = g $ by opair_inj_c [l4, n1, n2, n12, n8]
 l6: $ … ⇒ a = ⟨ i , ⟨ j , u ⟩ ⟩ $ by and_elim_l [l5]
 l7: $ … ⇒ b = g $ by and_elim_r [l5]
-l8: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ c = c $ by eq_refl
+l8: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ c = c $ by eq_refl
 l9: $ … ⇒ ⟨ a , c ⟩ = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , c ⟩ $ by opair_eq [l6, l8]
-l10: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ ⟨ a , c ⟩ ∈ cgr3 k s v B $ by ax
+l10: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ ⟨ a , c ⟩ ∈ cgr3 k s v B $ by ax
 l11: $ … ⇒ ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , c ⟩ ∈ cgr3 k s v B $ by wcel_eq_l [l9, l10]
-l12: $ … ⇒ c = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) $ by cgr3_elim [l11]
-l13: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) $ by ax
-l14: $ … ⇒ b = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) $ by eq_trans [l7, l13]
-l15: $ … ⇒ (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) = c $ by eq_sym [l12]
+l12: $ … ⇒ c = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) $ by cgr3_elim [l11]
+l13: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) $ by ax
+l14: $ … ⇒ b = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) $ by eq_trans [l7, l13]
+l15: $ … ⇒ ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) = c $ by eq_sym [l12]
 l16: $ … ⇒ b = c $ by eq_trans [l14, l15]
 l17: $ G , ⟨ a , b ⟩ ∈ cgr3 k s v B , ⟨ a , c ⟩ ∈ cgr3 k s v B , z = ⟨ a , b ⟩ , z ∊ cgr3 k s v B ⇒ z ∊ cgr3 k s v B $ by ax
 l18: $ … ⇒ b = c $ by cgr3_elim_mem [l17, l16]
@@ -171,26 +171,26 @@ l21: $ … ⇒ functional (cgr3 k s v B) $ by functional_intro [l20]
 
 fv_cgr3
 -------
-l1: $ G , y = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) , w = ⟨ a , ⟨ b , c ⟩ ⟩ ⇒ y = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ by ax
+l1: $ G , y = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) , w = ⟨ a , ⟨ b , c ⟩ ⟩ ⇒ y = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $ by ax
 l2: $ … ⇒ ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , y ⟩ ∈ cgr3 k s v B $ by cgr3_intro [l1]
-l3: $ G , y = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) , w = ⟨ a , ⟨ b , c ⟩ ⟩ ⇒ w = ⟨ a , ⟨ b , c ⟩ ⟩ $ by ax
+l3: $ G , y = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) , w = ⟨ a , ⟨ b , c ⟩ ⟩ ⇒ w = ⟨ a , ⟨ b , c ⟩ ⟩ $ by ax
 l4: $ … ⇒ ⟨ a , ⟨ b , c ⟩ ⟩ = w $ by eq_sym [l3]
-l5: $ G , y = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) , w = ⟨ a , ⟨ b , c ⟩ ⟩ ⇒ y = y $ by eq_refl
+l5: $ G , y = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) , w = ⟨ a , ⟨ b , c ⟩ ⟩ ⇒ y = y $ by eq_refl
 l6: $ … ⇒ ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , y ⟩ = ⟨ w , y ⟩ $ by opair_eq [l4, l5]
 l7: $ … ⇒ ⟨ w , y ⟩ ∈ cgr3 k s v B $ by wcel_eq_l [l6, l2]
-l8: $ G , y = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) , w = ⟨ a , ⟨ b , c ⟩ ⟩ ⇒ functional (cgr3 k s v B) $ by cgr3_functional
+l8: $ G , y = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) , w = ⟨ a , ⟨ b , c ⟩ ⟩ ⇒ functional (cgr3 k s v B) $ by cgr3_functional
 l9: $ … ⇒ (cgr3 k s v B)' w = y $ by fv_val [l8, l7]
-l10: $ G , y = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) , w = ⟨ a , ⟨ b , c ⟩ ⟩ ⇒ cgr3 k s v B = cgr3 k s v B $ by eq_refl
+l10: $ G , y = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) , w = ⟨ a , ⟨ b , c ⟩ ⟩ ⇒ cgr3 k s v B = cgr3 k s v B $ by eq_refl
 l11: $ … ⇒ (cgr3 k s v B)' ⟨ a , ⟨ b , c ⟩ ⟩ = (cgr3 k s v B)' w $ by fv_eq [l10, l4]
 l12: $ … ⇒ (cgr3 k s v B)' ⟨ a , ⟨ b , c ⟩ ⟩ = y $ by eq_trans [l11, l9]
-l13: $ … ⇒ (cgr3 k s v B)' ⟨ a , ⟨ b , c ⟩ ⟩ = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ by eq_trans [l12, l1]
-m1: $ G , y = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ⇒ isset a $ by isset_var
-m2: $ G , y = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ⇒ isset b $ by isset_var
-m3: $ G , y = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ⇒ isset c $ by isset_var
+l13: $ … ⇒ (cgr3 k s v B)' ⟨ a , ⟨ b , c ⟩ ⟩ = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $ by eq_trans [l12, l1]
+m1: $ G , y = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) ⇒ isset a $ by isset_var
+m2: $ G , y = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) ⇒ isset b $ by isset_var
+m3: $ G , y = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) ⇒ isset c $ by isset_var
 m4: $ … ⇒ isset ⟨ b , c ⟩ $ by opair_set [m2, m3]
 m5: $ … ⇒ isset ⟨ a , ⟨ b , c ⟩ ⟩ $ by opair_set [m1, m4]
-m6: $ … ⇒ (cgr3 k s v B)' ⟨ a , ⟨ b , c ⟩ ⟩ = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ by isset_elim [m5, l13]
-m7: $ … ⇒ (cgr3 k s v B)' ⟨ a , ⟨ b , c ⟩ ⟩ = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ by isset_elim [#1, m6]
+m6: $ … ⇒ (cgr3 k s v B)' ⟨ a , ⟨ b , c ⟩ ⟩ = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $ by isset_elim [m5, l13]
+m7: $ … ⇒ (cgr3 k s v B)' ⟨ a , ⟨ b , c ⟩ ⟩ = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $ by isset_elim [#1, m6]
 
 cgr3_congr
 ----------
@@ -208,14 +208,14 @@ lemma q0_cgr3_sub {k s v: set} (G: hyps) (B D: class k s v):
   $ G ⇒ ∀ v ∀ s ∀ k (B = D) $ > $ G ⇒ cgr3 k s v B ⊆ cgr3 k s v D $
 ----
 c1: $ G , z ∊ cgr3 k s v B ⇒ z ∊ cgr3 k s v B $ by ax
-d1: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ , d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ⇒ ∀ v ∀ s ∀ k (B = D) $ by weaken [#1]
-d2: $ … ⇒ ∀ s ∀ k ((⟦ v / c ⟧ B) = (⟦ v / c ⟧ D)) $ by all_elim [d1]
-d3: $ … ⇒ ∀ k ((⟦ s / b ⟧ (⟦ v / c ⟧ B)) = (⟦ s / b ⟧ (⟦ v / c ⟧ D))) $ by all_elim [d2]
-d4: $ … ⇒ (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ D))) $ by all_elim [d3]
-d5: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ , d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ⇒ d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ by ax
-d6: $ … ⇒ d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ D))) $ by eq_trans [d5, d4]
+d1: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ , d = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) ⇒ ∀ v ∀ s ∀ k (B = D) $ by weaken [#1]
+d2: $ … ⇒ ∀ s ∀ k (([[ v / c ]] B) = ([[ v / c ]] D)) $ by all_elim [d1]
+d3: $ … ⇒ ∀ k (([[ s / b ]] ([[ v / c ]] B)) = ([[ s / b ]] ([[ v / c ]] D))) $ by all_elim [d2]
+d4: $ … ⇒ ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] D))) $ by all_elim [d3]
+d5: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ , d = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) ⇒ d = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $ by ax
+d6: $ … ⇒ d = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] D))) $ by eq_trans [d5, d4]
 d7: $ … ⇒ ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ ∈ cgr3 k s v D $ by cgr3_intro [d6]
-d8: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ , d = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) ⇒ z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ $ by ax
+d8: $ G , z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ , d = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) ⇒ z = ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ $ by ax
 d9: $ … ⇒ ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , d ⟩ = z $ by eq_sym [d8]
 d10: $ … ⇒ z ∈ cgr3 k s v D $ by wcel_eq_l [d9, d7]
 d11: $ … ⇒ z ∊ cgr3 k s v D $ by wcel_welc [d10]
@@ -237,7 +237,7 @@ l10: $ … ⇒ cgr3 k s v B = cgr3 k s v D $ by subset_antisym [l8, l9]
 
 sb_c_cgr3
 ---------
-l1: $ (⟦ y / t ⟧ {w | ∃ k ∃ s ∃ v ∃ x (w = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , x ⟩ ∧ x = B)}) ≐ {w | ∃ k ∃ s ∃ v ∃ x (w = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , x ⟩ ∧ x = (⟦ y / t ⟧ B))} $ by ceqt_refl
+l1: $ ([[ y / t ]] {w | ∃ k ∃ s ∃ v ∃ x (w = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , x ⟩ ∧ x = B)}) ≐ {w | ∃ k ∃ s ∃ v ∃ x (w = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , x ⟩ ∧ x = ([[ y / t ]] B))} $ by ceqt_refl
 
 trees_congr
 -----------
@@ -299,7 +299,7 @@ l4: $ … ⇒ trees A = trees B $ by eq_intro [l1, l3]
 
 sb_c_trees
 ----------
-l1: $ (⟦ x / t ⟧ (lfp y (A × fseq y))) ≐ lfp y ((⟦ x / t ⟧ A) × fseq y) $ by ceqt_refl
+l1: $ ([[ x / t ]] (lfp y (A × fseq y))) ≐ lfp y (([[ x / t ]] A) × fseq y) $ by ceqt_refl
 
 trees_op_mono
 -------------
@@ -443,23 +443,23 @@ l22: $ … ⇒ K ∈ L ∧ S ∈ fseq (trees L) $ by isset_elim [#3, l21]
 l23: $ … ⇒ K ∈ L ∧ S ∈ fseq (trees L) $ by isset_elim [#1, l22]
 
 --| The head of a sequence whose range lies in X is in X.
-lemma z1_crn_hd (G: hyps) (X S: class) (x: set): $ G ⇒ crn (scons x S) ⊆ X $ > $ G ⇒ x ∊ X $
+lemma z1_crn_hd (G: hyps) (X S: class) (x: set): $ G ⇒ crn (x +: S) ⊆ X $ > $ G ⇒ x ∊ X $
 ----
 l1: $ G ⇒ isset ⟨ ∅ , x ⟩ $ by opair_isset
 l2: $ G , w = ⟨ ∅ , x ⟩ ⇒ w = ⟨ ∅ , x ⟩ $ by ax
 l3: $ … ⇒ w ∊ csn ⟨ ∅ , x ⟩ $ by csn_intro [l2]
-l4: $ … ⇒ w ∊ scons x S $ by cun_intro_l [l3]
-l5: $ … ⇒ ⟨ ∅ , x ⟩ ∈ scons x S $ by wcel_intro [l2, l4]
-l6: $ … ⇒ ⟨ ∅ , x ⟩ ∈ scons x S $ by isset_elim [l1, l5]
+l4: $ … ⇒ w ∊ x +: S $ by cun_intro_l [l3]
+l5: $ … ⇒ ⟨ ∅ , x ⟩ ∈ x +: S $ by wcel_intro [l2, l4]
+l6: $ … ⇒ ⟨ ∅ , x ⟩ ∈ x +: S $ by isset_elim [l1, l5]
 l7: $ G ⇒ isset ∅ $ by ax_empty
 m1: $ G , b = ∅ ⇒ b = ∅ $ by ax
 m2: $ … ⇒ ∅ = b $ by eq_sym [m1]
 m3: $ G , b = ∅ ⇒ x = x $ by eq_refl
 m4: $ … ⇒ ⟨ ∅ , x ⟩ = ⟨ b , x ⟩ $ by opair_eq [m2, m3]
-m5: $ G , b = ∅ ⇒ ⟨ ∅ , x ⟩ ∈ scons x S $ by weaken [l6]
-m6: $ … ⇒ ⟨ b , x ⟩ ∈ scons x S $ by wcel_eq_l [m4, m5]
-m7: $ … ⇒ x ∊ crn (scons x S) $ by crn_intro [m6]
-m8: $ G , b = ∅ ⇒ crn (scons x S) ⊆ X $ by weaken [#1]
+m5: $ G , b = ∅ ⇒ ⟨ ∅ , x ⟩ ∈ x +: S $ by weaken [l6]
+m6: $ … ⇒ ⟨ b , x ⟩ ∈ x +: S $ by wcel_eq_l [m4, m5]
+m7: $ … ⇒ x ∊ crn (x +: S) $ by crn_intro [m6]
+m8: $ G , b = ∅ ⇒ crn (x +: S) ⊆ X $ by weaken [#1]
 m9: $ … ⇒ x ∊ X $ by subset_elim [m8, m7]
 m10: $ … ⇒ x ∊ X $ by isset_elim [l7, m9]
 
@@ -467,37 +467,37 @@ m10: $ … ⇒ x ∊ X $ by isset_elim [l7, m9]
 trees_kids1
 -----------
 l1: $ G ⇒ isset ∅ $ by ax_empty
-l2: $ … ⇒ isset (scons a ∅) $ by scons_set [l1]
-l3: $ … ⇒ K ∈ L ∧ scons a ∅ ∈ fseq (trees L) $ by trees_node_c [#1, #2, #3, l2]
-l4: $ … ⇒ scons a ∅ ∈ fseq (trees L) $ by and_elim_r [l3]
+l2: $ … ⇒ isset (a +: ∅) $ by scons_set [l1]
+l3: $ … ⇒ K ∈ L ∧ a +: ∅ ∈ fseq (trees L) $ by trees_node_c [#1, #2, #3, l2]
+l4: $ … ⇒ a +: ∅ ∈ fseq (trees L) $ by and_elim_r [l3]
 l5: $ … ⇒ a ∊ trees L $ by scons_fseq_hd [l4]
 
 trees_kids2
 -----------
 l1: $ G ⇒ isset ∅ $ by ax_empty
-l2: $ … ⇒ isset (scons b ∅) $ by scons_set [l1]
-l2a: $ … ⇒ isset (scons a (scons b ∅)) $ by scons_set [l2]
-l3: $ … ⇒ K ∈ L ∧ scons a (scons b ∅) ∈ fseq (trees L) $ by trees_node_c [#1, #2, #3, l2a]
-l4: $ … ⇒ scons a (scons b ∅) ∈ fseq (trees L) $ by and_elim_r [l3]
+l2: $ … ⇒ isset (b +: ∅) $ by scons_set [l1]
+l2a: $ … ⇒ isset (a +: b +: ∅) $ by scons_set [l2]
+l3: $ … ⇒ K ∈ L ∧ a +: b +: ∅ ∈ fseq (trees L) $ by trees_node_c [#1, #2, #3, l2a]
+l4: $ … ⇒ a +: b +: ∅ ∈ fseq (trees L) $ by and_elim_r [l3]
 l5: $ … ⇒ a ∊ trees L $ by scons_fseq_hd [l4]
-l6: $ … ⇒ crn (scons a (scons b ∅)) ⊆ trees L $ by fseq_crn_c [l4]
-l7: $ … ⇒ crn (scons b ∅) ⊆ trees L $ by crn_scons_tail [l6]
+l6: $ … ⇒ crn (a +: b +: ∅) ⊆ trees L $ by fseq_crn_c [l4]
+l7: $ … ⇒ crn (b +: ∅) ⊆ trees L $ by crn_scons_tail [l6]
 l8: $ … ⇒ b ∊ trees L $ by z1_crn_hd [l7]
 l9: $ … ⇒ a ∊ trees L ∧ b ∊ trees L $ by and_intro [l5, l8]
 
 trees_kids3
 -----------
 l1: $ G ⇒ isset ∅ $ by ax_empty
-l2: $ … ⇒ isset (scons c ∅) $ by scons_set [l1]
-l2a: $ … ⇒ isset (scons b (scons c ∅)) $ by scons_set [l2]
-l2b: $ … ⇒ isset (scons a (scons b (scons c ∅))) $ by scons_set [l2a]
-l3: $ … ⇒ K ∈ L ∧ scons a (scons b (scons c ∅)) ∈ fseq (trees L) $ by trees_node_c [#1, #2, #3, l2b]
-l4: $ … ⇒ scons a (scons b (scons c ∅)) ∈ fseq (trees L) $ by and_elim_r [l3]
+l2: $ … ⇒ isset (c +: ∅) $ by scons_set [l1]
+l2a: $ … ⇒ isset (b +: c +: ∅) $ by scons_set [l2]
+l2b: $ … ⇒ isset (a +: b +: c +: ∅) $ by scons_set [l2a]
+l3: $ … ⇒ K ∈ L ∧ a +: b +: c +: ∅ ∈ fseq (trees L) $ by trees_node_c [#1, #2, #3, l2b]
+l4: $ … ⇒ a +: b +: c +: ∅ ∈ fseq (trees L) $ by and_elim_r [l3]
 l5: $ … ⇒ a ∊ trees L $ by scons_fseq_hd [l4]
-l6: $ … ⇒ crn (scons a (scons b (scons c ∅))) ⊆ trees L $ by fseq_crn_c [l4]
-l7: $ … ⇒ crn (scons b (scons c ∅)) ⊆ trees L $ by crn_scons_tail [l6]
+l6: $ … ⇒ crn (a +: b +: c +: ∅) ⊆ trees L $ by fseq_crn_c [l4]
+l7: $ … ⇒ crn (b +: c +: ∅) ⊆ trees L $ by crn_scons_tail [l6]
 l8: $ … ⇒ b ∊ trees L $ by z1_crn_hd [l7]
-l9: $ … ⇒ crn (scons c ∅) ⊆ trees L $ by crn_scons_tail [l7]
+l9: $ … ⇒ crn (c +: ∅) ⊆ trees L $ by crn_scons_tail [l7]
 l10: $ … ⇒ c ∊ trees L $ by z1_crn_hd [l9]
 l11: $ … ⇒ b ∊ trees L ∧ c ∊ trees L $ by and_intro [l8, l10]
 l12: $ … ⇒ a ∊ trees L ∧ b ∊ trees L ∧ c ∊ trees L $ by and_intro [l5, l11]
@@ -526,13 +526,13 @@ crn_scons_head_trees
 --------------------
 l1: $ G ⇒ isset A ∨ ¬ isset A $ by excluded_middle
 l2: $ G , isset A ⇒ isset A $ by ax
-l3: $ G , isset A ⇒ crn (scons A S) ⊆ trees L $ by weaken [#2]
+l3: $ G , isset A ⇒ crn (A +: S) ⊆ trees L $ by weaken [#2]
 l4: $ … ⇒ A ∈ trees L $ by crn_scons_head [l2, l3]
 l5: $ G , ¬ isset A ⇒ ¬ isset A $ by ax
-l6: $ … ⇒ scons A S = scons ∅ S $ by scons_proper [l5]
-l7: $ … ⇒ crn (scons A S) = crn (scons ∅ S) $ by crn_eq [l6]
-l8: $ G , ¬ isset A ⇒ crn (scons A S) ⊆ trees L $ by weaken [#2]
-l9: $ … ⇒ crn (scons ∅ S) ⊆ trees L $ by subset_eq_l [l7, l8]
+l6: $ … ⇒ A +: S = ∅ +: S $ by scons_proper [l5]
+l7: $ … ⇒ crn (A +: S) = crn (∅ +: S) $ by crn_eq [l6]
+l8: $ G , ¬ isset A ⇒ crn (A +: S) ⊆ trees L $ by weaken [#2]
+l9: $ … ⇒ crn (∅ +: S) ⊆ trees L $ by subset_eq_l [l7, l8]
 l10: $ G , ¬ isset A ⇒ isset ∅ $ by ax_empty
 l11: $ … ⇒ ∅ ∈ trees L $ by crn_scons_head [l10, l9]
 l11a: $ G , ¬ isset A ⇒ isset L $ by weaken [#1]
@@ -543,64 +543,64 @@ l14: $ … ⇒ A ∈ trees L $ by or_elim [l1, l4, l13]
 node1_inj
 ---------
 l1: $ G ⇒ isset ∅ $ by ax_empty
-l2: $ … ⇒ isset (scons f ∅) $ by scons_set [l1]
-l3: $ … ⇒ isset (scons o ∅) $ by scons_set [l1]
-l4: $ … ⇒ K = K ∧ scons f ∅ = scons o ∅ $ by opair_inj_c [#2, #1, l2, #1, l3]
-l5: $ … ⇒ scons f ∅ = scons o ∅ $ by and_elim_r [l4]
+l2: $ … ⇒ isset (f +: ∅) $ by scons_set [l1]
+l3: $ … ⇒ isset (o +: ∅) $ by scons_set [l1]
+l4: $ … ⇒ K = K ∧ f +: ∅ = o +: ∅ $ by opair_inj_c [#2, #1, l2, #1, l3]
+l5: $ … ⇒ f +: ∅ = o +: ∅ $ by and_elim_r [l4]
 l6: $ G ⇒ isset f $ by isset_var
 l7: $ G ⇒ isset o $ by isset_var
 l8: $ G ⇒ ∅ = ∅ $ by eq_refl
-l9: $ … ⇒ (scons f ∅)' ∅ = (scons o ∅)' ∅ $ by fv_eq [l5, l8]
-l10: $ … ⇒ (scons f ∅)' ∅ = f $ by scons_fv_zero_c [l6, l1]
-l11: $ … ⇒ (scons o ∅)' ∅ = o $ by scons_fv_zero_c [l7, l1]
-l12: $ … ⇒ f = (scons f ∅)' ∅ $ by eq_sym [l10]
-l13: $ … ⇒ f = (scons o ∅)' ∅ $ by eq_trans [l12, l9]
+l9: $ … ⇒ (f +: ∅)' ∅ = (o +: ∅)' ∅ $ by fv_eq [l5, l8]
+l10: $ … ⇒ (f +: ∅)' ∅ = f $ by scons_fv_zero_c [l6, l1]
+l11: $ … ⇒ (o +: ∅)' ∅ = o $ by scons_fv_zero_c [l7, l1]
+l12: $ … ⇒ f = (f +: ∅)' ∅ $ by eq_sym [l10]
+l13: $ … ⇒ f = (o +: ∅)' ∅ $ by eq_trans [l12, l9]
 l14: $ … ⇒ f = o $ by eq_trans [l13, l11]
 
 node2_inj
 ---------
 l1: $ G ⇒ isset ∅ $ by ax_empty
-l2: $ … ⇒ isset (scons g ∅) $ by scons_set [l1]
-l3: $ … ⇒ isset (scons f (scons g ∅)) $ by scons_set [l2]
-l4: $ … ⇒ isset (scons p ∅) $ by scons_set [l1]
-l5: $ … ⇒ isset (scons o (scons p ∅)) $ by scons_set [l4]
-l6: $ … ⇒ K = K ∧ scons f (scons g ∅) = scons o (scons p ∅) $ by opair_inj_c [#2, #1, l3, #1, l5]
-l7: $ … ⇒ scons f (scons g ∅) = scons o (scons p ∅) $ by and_elim_r [l6]
+l2: $ … ⇒ isset (g +: ∅) $ by scons_set [l1]
+l3: $ … ⇒ isset (f +: g +: ∅) $ by scons_set [l2]
+l4: $ … ⇒ isset (p +: ∅) $ by scons_set [l1]
+l5: $ … ⇒ isset (o +: p +: ∅) $ by scons_set [l4]
+l6: $ … ⇒ K = K ∧ f +: g +: ∅ = o +: p +: ∅ $ by opair_inj_c [#2, #1, l3, #1, l5]
+l7: $ … ⇒ f +: g +: ∅ = o +: p +: ∅ $ by and_elim_r [l6]
 l8: $ G ⇒ isset f $ by isset_var
 l9: $ G ⇒ isset g $ by isset_var
 l10: $ G ⇒ isset o $ by isset_var
 l11: $ G ⇒ isset p $ by isset_var
 l12: $ G ⇒ ∅ = ∅ $ by eq_refl
-l13: $ … ⇒ (scons f (scons g ∅))' ∅ = (scons o (scons p ∅))' ∅ $ by fv_eq [l7, l12]
-l14: $ … ⇒ (scons f (scons g ∅))' ∅ = f $ by scons_fv_zero_c [l8, l2]
-l15: $ … ⇒ (scons o (scons p ∅))' ∅ = o $ by scons_fv_zero_c [l10, l4]
-l16: $ … ⇒ f = (scons f (scons g ∅))' ∅ $ by eq_sym [l14]
-l17: $ … ⇒ f = (scons o (scons p ∅))' ∅ $ by eq_trans [l16, l13]
+l13: $ … ⇒ (f +: g +: ∅)' ∅ = (o +: p +: ∅)' ∅ $ by fv_eq [l7, l12]
+l14: $ … ⇒ (f +: g +: ∅)' ∅ = f $ by scons_fv_zero_c [l8, l2]
+l15: $ … ⇒ (o +: p +: ∅)' ∅ = o $ by scons_fv_zero_c [l10, l4]
+l16: $ … ⇒ f = (f +: g +: ∅)' ∅ $ by eq_sym [l14]
+l17: $ … ⇒ f = (o +: p +: ∅)' ∅ $ by eq_trans [l16, l13]
 l18: $ … ⇒ f = o $ by eq_trans [l17, l15]
 l19: $ G ⇒ suc ∅ = suc ∅ $ by eq_refl
-l20: $ … ⇒ (scons f (scons g ∅))' (suc ∅) = (scons o (scons p ∅))' (suc ∅) $ by fv_eq [l7, l19]
-l21: $ … ⇒ (scons f (scons g ∅))' (suc ∅) = (scons g ∅)' ∅ $ by scons_fv_suc_c [l8, l2, l1]
-l22: $ … ⇒ (scons g ∅)' ∅ = g $ by scons_fv_zero_c [l9, l1]
-l23: $ … ⇒ (scons o (scons p ∅))' (suc ∅) = (scons p ∅)' ∅ $ by scons_fv_suc_c [l10, l4, l1]
-l24: $ … ⇒ (scons p ∅)' ∅ = p $ by scons_fv_zero_c [l11, l1]
-l25: $ … ⇒ (scons f (scons g ∅))' (suc ∅) = g $ by eq_trans [l21, l22]
-l26: $ … ⇒ (scons o (scons p ∅))' (suc ∅) = p $ by eq_trans [l23, l24]
-l27: $ … ⇒ g = (scons f (scons g ∅))' (suc ∅) $ by eq_sym [l25]
-l28: $ … ⇒ g = (scons o (scons p ∅))' (suc ∅) $ by eq_trans [l27, l20]
+l20: $ … ⇒ (f +: g +: ∅)' (suc ∅) = (o +: p +: ∅)' (suc ∅) $ by fv_eq [l7, l19]
+l21: $ … ⇒ (f +: g +: ∅)' (suc ∅) = (g +: ∅)' ∅ $ by scons_fv_suc_c [l8, l2, l1]
+l22: $ … ⇒ (g +: ∅)' ∅ = g $ by scons_fv_zero_c [l9, l1]
+l23: $ … ⇒ (o +: p +: ∅)' (suc ∅) = (p +: ∅)' ∅ $ by scons_fv_suc_c [l10, l4, l1]
+l24: $ … ⇒ (p +: ∅)' ∅ = p $ by scons_fv_zero_c [l11, l1]
+l25: $ … ⇒ (f +: g +: ∅)' (suc ∅) = g $ by eq_trans [l21, l22]
+l26: $ … ⇒ (o +: p +: ∅)' (suc ∅) = p $ by eq_trans [l23, l24]
+l27: $ … ⇒ g = (f +: g +: ∅)' (suc ∅) $ by eq_sym [l25]
+l28: $ … ⇒ g = (o +: p +: ∅)' (suc ∅) $ by eq_trans [l27, l20]
 l29: $ … ⇒ g = p $ by eq_trans [l28, l26]
 l30: $ … ⇒ f = o ∧ g = p $ by and_intro [l18, l29]
 
 node3_inj
 ---------
 l1: $ G ⇒ isset ∅ $ by ax_empty
-l2: $ … ⇒ isset (scons h ∅) $ by scons_set [l1]
-l3: $ … ⇒ isset (scons g (scons h ∅)) $ by scons_set [l2]
-l4: $ … ⇒ isset (scons f (scons g (scons h ∅))) $ by scons_set [l3]
-l5: $ … ⇒ isset (scons q ∅) $ by scons_set [l1]
-l6: $ … ⇒ isset (scons p (scons q ∅)) $ by scons_set [l5]
-l7: $ … ⇒ isset (scons o (scons p (scons q ∅))) $ by scons_set [l6]
-l8: $ … ⇒ K = K ∧ scons f (scons g (scons h ∅)) = scons o (scons p (scons q ∅)) $ by opair_inj_c [#2, #1, l4, #1, l7]
-l9: $ … ⇒ scons f (scons g (scons h ∅)) = scons o (scons p (scons q ∅)) $ by and_elim_r [l8]
+l2: $ … ⇒ isset (h +: ∅) $ by scons_set [l1]
+l3: $ … ⇒ isset (g +: h +: ∅) $ by scons_set [l2]
+l4: $ … ⇒ isset (f +: g +: h +: ∅) $ by scons_set [l3]
+l5: $ … ⇒ isset (q +: ∅) $ by scons_set [l1]
+l6: $ … ⇒ isset (p +: q +: ∅) $ by scons_set [l5]
+l7: $ … ⇒ isset (o +: p +: q +: ∅) $ by scons_set [l6]
+l8: $ … ⇒ K = K ∧ f +: g +: h +: ∅ = o +: p +: q +: ∅ $ by opair_inj_c [#2, #1, l4, #1, l7]
+l9: $ … ⇒ f +: g +: h +: ∅ = o +: p +: q +: ∅ $ by and_elim_r [l8]
 l10: $ G ⇒ isset f $ by isset_var
 l11: $ G ⇒ isset g $ by isset_var
 l12: $ G ⇒ isset h $ by isset_var
@@ -613,35 +613,35 @@ l18: $ … ⇒ suc ∅ ∈ ω $ by omega_suc_c [l17]
 l19: $ … ⇒ isset (suc ∅) $ by wcel_isset [l18]
 l20: $ G ⇒ suc ∅ = suc ∅ $ by eq_refl
 l21: $ G ⇒ suc (suc ∅) = suc (suc ∅) $ by eq_refl
-l22: $ … ⇒ (scons f (scons g (scons h ∅)))' ∅ = (scons o (scons p (scons q ∅)))' ∅ $ by fv_eq [l9, l16]
-l23: $ … ⇒ (scons f (scons g (scons h ∅)))' ∅ = f $ by scons_fv_zero_c [l10, l3]
-l24: $ … ⇒ (scons o (scons p (scons q ∅)))' ∅ = o $ by scons_fv_zero_c [l13, l6]
-l25: $ … ⇒ f = (scons f (scons g (scons h ∅)))' ∅ $ by eq_sym [l23]
-l26: $ … ⇒ f = (scons o (scons p (scons q ∅)))' ∅ $ by eq_trans [l25, l22]
+l22: $ … ⇒ (f +: g +: h +: ∅)' ∅ = (o +: p +: q +: ∅)' ∅ $ by fv_eq [l9, l16]
+l23: $ … ⇒ (f +: g +: h +: ∅)' ∅ = f $ by scons_fv_zero_c [l10, l3]
+l24: $ … ⇒ (o +: p +: q +: ∅)' ∅ = o $ by scons_fv_zero_c [l13, l6]
+l25: $ … ⇒ f = (f +: g +: h +: ∅)' ∅ $ by eq_sym [l23]
+l26: $ … ⇒ f = (o +: p +: q +: ∅)' ∅ $ by eq_trans [l25, l22]
 l27: $ … ⇒ f = o $ by eq_trans [l26, l24]
-l28: $ … ⇒ (scons f (scons g (scons h ∅)))' (suc ∅) = (scons o (scons p (scons q ∅)))' (suc ∅) $ by fv_eq [l9, l20]
-l29: $ … ⇒ (scons f (scons g (scons h ∅)))' (suc ∅) = (scons g (scons h ∅))' ∅ $ by scons_fv_suc_c [l10, l3, l1]
-l30: $ … ⇒ (scons g (scons h ∅))' ∅ = g $ by scons_fv_zero_c [l11, l2]
-l31: $ … ⇒ (scons o (scons p (scons q ∅)))' (suc ∅) = (scons p (scons q ∅))' ∅ $ by scons_fv_suc_c [l13, l6, l1]
-l32: $ … ⇒ (scons p (scons q ∅))' ∅ = p $ by scons_fv_zero_c [l14, l5]
-l33: $ … ⇒ (scons f (scons g (scons h ∅)))' (suc ∅) = g $ by eq_trans [l29, l30]
-l34: $ … ⇒ (scons o (scons p (scons q ∅)))' (suc ∅) = p $ by eq_trans [l31, l32]
-l35: $ … ⇒ g = (scons f (scons g (scons h ∅)))' (suc ∅) $ by eq_sym [l33]
-l36: $ … ⇒ g = (scons o (scons p (scons q ∅)))' (suc ∅) $ by eq_trans [l35, l28]
+l28: $ … ⇒ (f +: g +: h +: ∅)' (suc ∅) = (o +: p +: q +: ∅)' (suc ∅) $ by fv_eq [l9, l20]
+l29: $ … ⇒ (f +: g +: h +: ∅)' (suc ∅) = (g +: h +: ∅)' ∅ $ by scons_fv_suc_c [l10, l3, l1]
+l30: $ … ⇒ (g +: h +: ∅)' ∅ = g $ by scons_fv_zero_c [l11, l2]
+l31: $ … ⇒ (o +: p +: q +: ∅)' (suc ∅) = (p +: q +: ∅)' ∅ $ by scons_fv_suc_c [l13, l6, l1]
+l32: $ … ⇒ (p +: q +: ∅)' ∅ = p $ by scons_fv_zero_c [l14, l5]
+l33: $ … ⇒ (f +: g +: h +: ∅)' (suc ∅) = g $ by eq_trans [l29, l30]
+l34: $ … ⇒ (o +: p +: q +: ∅)' (suc ∅) = p $ by eq_trans [l31, l32]
+l35: $ … ⇒ g = (f +: g +: h +: ∅)' (suc ∅) $ by eq_sym [l33]
+l36: $ … ⇒ g = (o +: p +: q +: ∅)' (suc ∅) $ by eq_trans [l35, l28]
 l37: $ … ⇒ g = p $ by eq_trans [l36, l34]
-l38: $ … ⇒ (scons f (scons g (scons h ∅)))' (suc (suc ∅)) = (scons o (scons p (scons q ∅)))' (suc (suc ∅)) $ by fv_eq [l9, l21]
-l39: $ … ⇒ (scons f (scons g (scons h ∅)))' (suc (suc ∅)) = (scons g (scons h ∅))' (suc ∅) $ by scons_fv_suc_c [l10, l3, l19]
-l40: $ … ⇒ (scons g (scons h ∅))' (suc ∅) = (scons h ∅)' ∅ $ by scons_fv_suc_c [l11, l2, l1]
-l41: $ … ⇒ (scons h ∅)' ∅ = h $ by scons_fv_zero_c [l12, l1]
-l42: $ … ⇒ (scons o (scons p (scons q ∅)))' (suc (suc ∅)) = (scons p (scons q ∅))' (suc ∅) $ by scons_fv_suc_c [l13, l6, l19]
-l43: $ … ⇒ (scons p (scons q ∅))' (suc ∅) = (scons q ∅)' ∅ $ by scons_fv_suc_c [l14, l5, l1]
-l44: $ … ⇒ (scons q ∅)' ∅ = q $ by scons_fv_zero_c [l15, l1]
-l45: $ … ⇒ (scons f (scons g (scons h ∅)))' (suc (suc ∅)) = (scons h ∅)' ∅ $ by eq_trans [l39, l40]
-l46: $ … ⇒ (scons f (scons g (scons h ∅)))' (suc (suc ∅)) = h $ by eq_trans [l45, l41]
-l47: $ … ⇒ (scons o (scons p (scons q ∅)))' (suc (suc ∅)) = (scons q ∅)' ∅ $ by eq_trans [l42, l43]
-l48: $ … ⇒ (scons o (scons p (scons q ∅)))' (suc (suc ∅)) = q $ by eq_trans [l47, l44]
-l49: $ … ⇒ h = (scons f (scons g (scons h ∅)))' (suc (suc ∅)) $ by eq_sym [l46]
-l50: $ … ⇒ h = (scons o (scons p (scons q ∅)))' (suc (suc ∅)) $ by eq_trans [l49, l38]
+l38: $ … ⇒ (f +: g +: h +: ∅)' (suc (suc ∅)) = (o +: p +: q +: ∅)' (suc (suc ∅)) $ by fv_eq [l9, l21]
+l39: $ … ⇒ (f +: g +: h +: ∅)' (suc (suc ∅)) = (g +: h +: ∅)' (suc ∅) $ by scons_fv_suc_c [l10, l3, l19]
+l40: $ … ⇒ (g +: h +: ∅)' (suc ∅) = (h +: ∅)' ∅ $ by scons_fv_suc_c [l11, l2, l1]
+l41: $ … ⇒ (h +: ∅)' ∅ = h $ by scons_fv_zero_c [l12, l1]
+l42: $ … ⇒ (o +: p +: q +: ∅)' (suc (suc ∅)) = (p +: q +: ∅)' (suc ∅) $ by scons_fv_suc_c [l13, l6, l19]
+l43: $ … ⇒ (p +: q +: ∅)' (suc ∅) = (q +: ∅)' ∅ $ by scons_fv_suc_c [l14, l5, l1]
+l44: $ … ⇒ (q +: ∅)' ∅ = q $ by scons_fv_zero_c [l15, l1]
+l45: $ … ⇒ (f +: g +: h +: ∅)' (suc (suc ∅)) = (h +: ∅)' ∅ $ by eq_trans [l39, l40]
+l46: $ … ⇒ (f +: g +: h +: ∅)' (suc (suc ∅)) = h $ by eq_trans [l45, l41]
+l47: $ … ⇒ (o +: p +: q +: ∅)' (suc (suc ∅)) = (q +: ∅)' ∅ $ by eq_trans [l42, l43]
+l48: $ … ⇒ (o +: p +: q +: ∅)' (suc (suc ∅)) = q $ by eq_trans [l47, l44]
+l49: $ … ⇒ h = (f +: g +: h +: ∅)' (suc (suc ∅)) $ by eq_sym [l46]
+l50: $ … ⇒ h = (o +: p +: q +: ∅)' (suc (suc ∅)) $ by eq_trans [l49, l38]
 l51: $ … ⇒ h = q $ by eq_trans [l50, l48]
 l52: $ … ⇒ g = p ∧ h = q $ by and_intro [l37, l51]
 l53: $ … ⇒ f = o ∧ g = p ∧ h = q $ by and_intro [l27, l52]
@@ -650,11 +650,11 @@ node1_inj_c
 -----------
 l1: $ G , a = A ⇒ a = A $ by ax
 l2: $ G , a = A ⇒ ∅ = ∅ $ by eq_refl
-l3: $ … ⇒ scons a ∅ = scons A ∅ $ by scons_eq [l1, l2]
+l3: $ … ⇒ a +: ∅ = A +: ∅ $ by scons_eq [l1, l2]
 l4: $ G , a = A ⇒ K = K $ by eq_refl
-l5: $ … ⇒ ⟨ K , scons a ∅ ⟩ = ⟨ K , scons A ∅ ⟩ $ by opair_eq [l4, l3]
-l6: $ G , a = A ⇒ ⟨ K , scons A ∅ ⟩ = ⟨ K , scons o ∅ ⟩ $ by weaken [#3]
-l7: $ … ⇒ ⟨ K , scons a ∅ ⟩ = ⟨ K , scons o ∅ ⟩ $ by eq_trans [l5, l6]
+l5: $ … ⇒ ⟨ K , a +: ∅ ⟩ = ⟨ K , A +: ∅ ⟩ $ by opair_eq [l4, l3]
+l6: $ G , a = A ⇒ ⟨ K , A +: ∅ ⟩ = ⟨ K , o +: ∅ ⟩ $ by weaken [#3]
+l7: $ … ⇒ ⟨ K , a +: ∅ ⟩ = ⟨ K , o +: ∅ ⟩ $ by eq_trans [l5, l6]
 l8: $ G , a = A ⇒ isset K $ by weaken [#1]
 l9: $ … ⇒ a = o $ by node1_inj [l8, l7]
 l10: $ … ⇒ A = a $ by eq_sym [l1]
@@ -666,12 +666,12 @@ node2_inj_c
 l1: $ G , a = A , b = B ⇒ a = A $ by ax
 l2: $ G , a = A , b = B ⇒ b = B $ by ax
 l3: $ G , a = A , b = B ⇒ ∅ = ∅ $ by eq_refl
-l4: $ … ⇒ scons b ∅ = scons B ∅ $ by scons_eq [l2, l3]
-l5: $ … ⇒ scons a (scons b ∅) = scons A (scons B ∅) $ by scons_eq [l1, l4]
+l4: $ … ⇒ b +: ∅ = B +: ∅ $ by scons_eq [l2, l3]
+l5: $ … ⇒ a +: b +: ∅ = A +: B +: ∅ $ by scons_eq [l1, l4]
 l6: $ G , a = A , b = B ⇒ K = K $ by eq_refl
-l7: $ … ⇒ ⟨ K , scons a (scons b ∅) ⟩ = ⟨ K , scons A (scons B ∅) ⟩ $ by opair_eq [l6, l5]
-l8: $ G , a = A , b = B ⇒ ⟨ K , scons A (scons B ∅) ⟩ = ⟨ K , scons o (scons p ∅) ⟩ $ by weaken [#4]
-l9: $ … ⇒ ⟨ K , scons a (scons b ∅) ⟩ = ⟨ K , scons o (scons p ∅) ⟩ $ by eq_trans [l7, l8]
+l7: $ … ⇒ ⟨ K , a +: b +: ∅ ⟩ = ⟨ K , A +: B +: ∅ ⟩ $ by opair_eq [l6, l5]
+l8: $ G , a = A , b = B ⇒ ⟨ K , A +: B +: ∅ ⟩ = ⟨ K , o +: p +: ∅ ⟩ $ by weaken [#4]
+l9: $ … ⇒ ⟨ K , a +: b +: ∅ ⟩ = ⟨ K , o +: p +: ∅ ⟩ $ by eq_trans [l7, l8]
 l10: $ G , a = A , b = B ⇒ isset K $ by weaken [#1]
 l11: $ … ⇒ a = o ∧ b = p $ by node2_inj [l10, l9]
 l12: $ … ⇒ a = o $ by and_elim_l [l11]
@@ -690,13 +690,13 @@ l1: $ G , a = A , b = B , c = C ⇒ a = A $ by ax
 l2: $ G , a = A , b = B , c = C ⇒ b = B $ by ax
 l3: $ G , a = A , b = B , c = C ⇒ c = C $ by ax
 l4: $ G , a = A , b = B , c = C ⇒ ∅ = ∅ $ by eq_refl
-l5: $ … ⇒ scons c ∅ = scons C ∅ $ by scons_eq [l3, l4]
-l6: $ … ⇒ scons b (scons c ∅) = scons B (scons C ∅) $ by scons_eq [l2, l5]
-l7: $ … ⇒ scons a (scons b (scons c ∅)) = scons A (scons B (scons C ∅)) $ by scons_eq [l1, l6]
+l5: $ … ⇒ c +: ∅ = C +: ∅ $ by scons_eq [l3, l4]
+l6: $ … ⇒ b +: c +: ∅ = B +: C +: ∅ $ by scons_eq [l2, l5]
+l7: $ … ⇒ a +: b +: c +: ∅ = A +: B +: C +: ∅ $ by scons_eq [l1, l6]
 l8: $ G , a = A , b = B , c = C ⇒ K = K $ by eq_refl
-l9: $ … ⇒ ⟨ K , scons a (scons b (scons c ∅)) ⟩ = ⟨ K , scons A (scons B (scons C ∅)) ⟩ $ by opair_eq [l8, l7]
-l10: $ G , a = A , b = B , c = C ⇒ ⟨ K , scons A (scons B (scons C ∅)) ⟩ = ⟨ K , scons o (scons p (scons q ∅)) ⟩ $ by weaken [#5]
-l11: $ … ⇒ ⟨ K , scons a (scons b (scons c ∅)) ⟩ = ⟨ K , scons o (scons p (scons q ∅)) ⟩ $ by eq_trans [l9, l10]
+l9: $ … ⇒ ⟨ K , a +: b +: c +: ∅ ⟩ = ⟨ K , A +: B +: C +: ∅ ⟩ $ by opair_eq [l8, l7]
+l10: $ G , a = A , b = B , c = C ⇒ ⟨ K , A +: B +: C +: ∅ ⟩ = ⟨ K , o +: p +: q +: ∅ ⟩ $ by weaken [#5]
+l11: $ … ⇒ ⟨ K , a +: b +: c +: ∅ ⟩ = ⟨ K , o +: p +: q +: ∅ ⟩ $ by eq_trans [l9, l10]
 l12: $ G , a = A , b = B , c = C ⇒ isset K $ by weaken [#1]
 l13: $ … ⇒ a = o ∧ b = p ∧ c = q $ by node3_inj [l12, l11]
 l14: $ … ⇒ a = o $ by and_elim_l [l13]
@@ -960,7 +960,7 @@ l20: $ {z | ∃ k ∃ j (z = ⟨ ⟨ k , j ⟩ , C' ⟨ k , ⟨ j , ccom E j ⟩
 
 sb_c_tstep
 ----------
-l1: $ (⟦ x / t ⟧ {z | ∃ k ∃ j (z = ⟨ ⟨ k , j ⟩ , B' ⟨ k , ⟨ j , ccom C j ⟩ ⟩ ⟩ ∧ k ∊ A ∧ j ∊ fseq (cdm C))}) ≐ {z | ∃ k ∃ j (z = ⟨ ⟨ k , j ⟩ , (⟦ x / t ⟧ B)' ⟨ k , ⟨ j , ccom (⟦ x / t ⟧ C) j ⟩ ⟩ ⟩ ∧ k ∊ (⟦ x / t ⟧ A) ∧ j ∊ fseq (cdm (⟦ x / t ⟧ C)))} $ by ceqt_refl
+l1: $ ([[ x / t ]] {z | ∃ k ∃ j (z = ⟨ ⟨ k , j ⟩ , B' ⟨ k , ⟨ j , ccom C j ⟩ ⟩ ⟩ ∧ k ∊ A ∧ j ∊ fseq (cdm C))}) ≐ {z | ∃ k ∃ j (z = ⟨ ⟨ k , j ⟩ , ([[ x / t ]] B)' ⟨ k , ⟨ j , ccom ([[ x / t ]] C) j ⟩ ⟩ ⟩ ∧ k ∊ ([[ x / t ]] A) ∧ j ∊ fseq (cdm ([[ x / t ]] C)))} $ by ceqt_refl
 
 tstep_mem
 ---------
@@ -1249,7 +1249,7 @@ l4: $ trec (cgr g (tstep A C (⋃ (crn g)))) ≐ trec (cgr g (tstep B D (⋃ (cr
 
 sb_c_tstg
 ---------
-l1: $ (⟦ x / t ⟧ (trec (cgr g (tstep A B (⋃ (crn g)))))) ≐ trec (cgr g (tstep (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⋃ (crn g)))) $ by ceqt_refl
+l1: $ ([[ x / t ]] (trec (cgr g (tstep A B (⋃ (crn g)))))) ≐ trec (cgr g (tstep ([[ x / t ]] A) ([[ x / t ]] B) (⋃ (crn g)))) $ by ceqt_refl
 
 tstgb_congr
 -----------
@@ -1260,7 +1260,7 @@ l4: $ ⋃ (crn (tstg A C ↾ E)) ≐ ⋃ (crn (tstg B D ↾ F)) $ by cuni_congr 
 
 sb_c_tstgb
 ----------
-l1: $ (⟦ x / t ⟧ (⋃ (crn (tstg A B ↾ C)))) ≐ ⋃ (crn (tstg (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) ↾ (⟦ x / t ⟧ C))) $ by ceqt_refl
+l1: $ ([[ x / t ]] (⋃ (crn (tstg A B ↾ C)))) ≐ ⋃ (crn (tstg ([[ x / t ]] A) ([[ x / t ]] B) ↾ ([[ x / t ]] C))) $ by ceqt_refl
 
 tstg_functional
 ---------------
@@ -1351,9 +1351,9 @@ q2: $ … ⇒ K = H $ by eq_sym [#1]
 q3: $ … ⇒ tstep L F K ⊆ tstep L F H $ by t2_tstep_sub [q2]
 q4: $ … ⇒ tstep L F H = tstep L F K $ by subset_antisym [q1, q3]
 
-lemma t2_fv_cgr_tstep {g: set} (G: hyps) (L F: class) (i: set): $ G ⇒ isset (⟦ g / i ⟧ (tstep L F (⋃ (crn g)))) $ > $ G ⇒ (cgr g (tstep L F (⋃ (crn g))))' i = (⟦ g / i ⟧ (tstep L F (⋃ (crn g)))) $
+lemma t2_fv_cgr_tstep {g: set} (G: hyps) (L F: class) (i: set): $ G ⇒ isset ([[ g / i ]] (tstep L F (⋃ (crn g)))) $ > $ G ⇒ (cgr g (tstep L F (⋃ (crn g))))' i = ([[ g / i ]] (tstep L F (⋃ (crn g)))) $
 ----
-c1: $ … ⇒ (cgr g (tstep L F (⋃ (crn g))))' i = (⟦ g / i ⟧ (tstep L F (⋃ (crn g)))) $ by fv_cgr [#1]
+c1: $ … ⇒ (cgr g (tstep L F (⋃ (crn g))))' i = ([[ g / i ]] (tstep L F (⋃ (crn g)))) $ by fv_cgr [#1]
 
 tstg_eq
 -------
@@ -1371,11 +1371,11 @@ q11: $ … ⇒ isset (⋃ (crn i)) $ by cuni_set [q10]
 q12: $ G , i = (tstg l F ↾ a) ⇒ functional F $ by weaken [#1]
 q12b: $ G , i = (tstg l F ↾ a) ⇒ isset l $ by isset_var
 q13: $ … ⇒ isset (tstep l F (⋃ (crn i))) $ by tstep_set [q12, q12b, q11]
-x1: $ (⟦ g / i ⟧ (tstep l F (⋃ (crn g)))) ≐ tstep l F (⋃ (crn i)) $ by ceqt_refl
-x2: $ G , i = (tstg l F ↾ a) ⇒ (⟦ g / i ⟧ (tstep l F (⋃ (crn g)))) = tstep l F (⋃ (crn i)) $ by weaken [x1]
-x3: $ … ⇒ tstep l F (⋃ (crn i)) = (⟦ g / i ⟧ (tstep l F (⋃ (crn g)))) $ by eq_sym [x2]
-x4: $ … ⇒ isset (⟦ g / i ⟧ (tstep l F (⋃ (crn g)))) $ by isset_eq [x3, q13]
-q14a: $ … ⇒ (cgr g (tstep l F (⋃ (crn g))))' i = (⟦ g / i ⟧ (tstep l F (⋃ (crn g)))) $ by t2_fv_cgr_tstep [x4]
+x1: $ ([[ g / i ]] (tstep l F (⋃ (crn g)))) ≐ tstep l F (⋃ (crn i)) $ by ceqt_refl
+x2: $ G , i = (tstg l F ↾ a) ⇒ ([[ g / i ]] (tstep l F (⋃ (crn g)))) = tstep l F (⋃ (crn i)) $ by weaken [x1]
+x3: $ … ⇒ tstep l F (⋃ (crn i)) = ([[ g / i ]] (tstep l F (⋃ (crn g)))) $ by eq_sym [x2]
+x4: $ … ⇒ isset ([[ g / i ]] (tstep l F (⋃ (crn g)))) $ by isset_eq [x3, q13]
+q14a: $ … ⇒ (cgr g (tstep l F (⋃ (crn g))))' i = ([[ g / i ]] (tstep l F (⋃ (crn g)))) $ by t2_fv_cgr_tstep [x4]
 q14: $ … ⇒ (cgr g (tstep l F (⋃ (crn g))))' i = tstep l F (⋃ (crn i)) $ by eq_trans [q14a, x2]
 q15: $ … ⇒ crn i = crn (tstg l F ↾ a) $ by crn_eq [q5]
 q16: $ … ⇒ ⋃ (crn i) = ⋃ (crn (tstg l F ↾ a)) $ by cuni_eq [q15]
@@ -1582,8 +1582,8 @@ s8: $ … ⇒ l × fseq (cdm (tstgb l F u)) = l × fseq (stgb x (l × fseq x) u)
 s9a: $ G , ord u , ∀ y (y ∊ u → cdm ((tstg l F)' y) = (stg x (l × fseq x))' y) ⇒ setop x (l × fseq x) $ by trees_op_setop
 s9: $ … ⇒ (stg x (l × fseq x))' u = cap x (l × fseq x) (stgb x (l × fseq x) u) $ by stg_eq [s9a, s1b]
 s10: $ … ⇒ isset (stgb x (l × fseq x) u) $ by stgb_set [s1b]
-s11a: $ (⟦ x / w ⟧ (stgb x (l × fseq x) u)) ≐ (stgb x (l × fseq x) u) $ by sb_c_stgb_vac
-s11b: $ (⟦ x / c ⟧ (stgb x (l × fseq x) u)) ≐ (stgb x (l × fseq x) u) $ by sb_c_stgb_vac
+s11a: $ ([[ x / w ]] (stgb x (l × fseq x) u)) ≐ (stgb x (l × fseq x) u) $ by sb_c_stgb_vac
+s11b: $ ([[ x / c ]] (stgb x (l × fseq x) u)) ≐ (stgb x (l × fseq x) u) $ by sb_c_stgb_vac
 s11c: $ G , ord u , ∀ y (y ∊ u → cdm ((tstg l F)' y) = (stg x (l × fseq x))' y) , c = (stgb x (l × fseq x) u) ⇒ c = (stgb x (l × fseq x) u) $ by ax
 s11: $ … ⇒ cap x (l × fseq x) (stgb x (l × fseq x) u) = l × fseq c $ by cap_set_vac [s11a, s11b, s11c]
 s12: $ … ⇒ fseq c = fseq (stgb x (l × fseq x) u) $ by fseq_eq [s11c]
@@ -1694,27 +1694,27 @@ f9: $ … ⇒ trc A C = trc B D $ by eq_intro [f4, f8]
 
 sb_c_trc
 --------
-l1: $ (⟦ x / t ⟧ {z | ∃ a (ord a ∧ z ∊ (tstg A B)' a)}) ≐ {z | [x/t] (∃ a (ord a ∧ z ∊ (tstg A B)' a))} $ by sb_c_cab
-l2: $ [x/t] (∃ a (ord a ∧ z ∊ (tstg A B)' a)) ⟺ ∃ a ([x/t] (ord a ∧ z ∊ (tstg A B)' a)) $ by sb_f_ex
-l3: $ [x/t] (ord a ∧ z ∊ (tstg A B)' a) ⟺ ([x/t] (ord a) ∧ [x/t] (z ∊ (tstg A B)' a)) $ by sb_f_and
-l4: $ [x/t] (ord a) ⟺ ord (⟦ x / t ⟧ a) $ by sb_f_ord
-l5: $ (⟦ x / t ⟧ a) ≐ a $ by sb_c_other
-l6: $ ord (⟦ x / t ⟧ a) ⟺ ord a $ by ord_congr [l5]
-l7: $ [x/t] (z ∊ (tstg A B)' a) ⟺ z ∊ (⟦ x / t ⟧ ((tstg A B)' a)) $ by sb_f_welc_other
-l8: $ (⟦ x / t ⟧ ((tstg A B)' a)) ≐ (⟦ x / t ⟧ (tstg A B))' (⟦ x / t ⟧ a) $ by sb_c_fv
-l9: $ (⟦ x / t ⟧ (tstg A B)) ≐ tstg (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $ by sb_c_tstg
-l10: $ (⟦ x / t ⟧ (tstg A B))' (⟦ x / t ⟧ a) ≐ (tstg (⟦ x / t ⟧ A) (⟦ x / t ⟧ B))' a $ by fv_congr [l9, l5]
-l11: $ (⟦ x / t ⟧ ((tstg A B)' a)) ≐ (tstg (⟦ x / t ⟧ A) (⟦ x / t ⟧ B))' a $ by ceqt_trans [l8, l10]
+l1: $ ([[ x / t ]] {z | ∃ a (ord a ∧ z ∊ (tstg A B)' a)}) ≐ {z | [ x / t ] (∃ a (ord a ∧ z ∊ (tstg A B)' a))} $ by sb_c_cab
+l2: $ [ x / t ] (∃ a (ord a ∧ z ∊ (tstg A B)' a)) ⟺ ∃ a ([ x / t ] (ord a ∧ z ∊ (tstg A B)' a)) $ by sb_f_ex
+l3: $ [ x / t ] (ord a ∧ z ∊ (tstg A B)' a) ⟺ ([ x / t ] (ord a) ∧ [ x / t ] (z ∊ (tstg A B)' a)) $ by sb_f_and
+l4: $ [ x / t ] (ord a) ⟺ ord ([[ x / t ]] a) $ by sb_f_ord
+l5: $ ([[ x / t ]] a) ≐ a $ by sb_c_other
+l6: $ ord ([[ x / t ]] a) ⟺ ord a $ by ord_congr [l5]
+l7: $ [ x / t ] (z ∊ (tstg A B)' a) ⟺ z ∊ ([[ x / t ]] ((tstg A B)' a)) $ by sb_f_welc_other
+l8: $ ([[ x / t ]] ((tstg A B)' a)) ≐ ([[ x / t ]] (tstg A B))' ([[ x / t ]] a) $ by sb_c_fv
+l9: $ ([[ x / t ]] (tstg A B)) ≐ tstg ([[ x / t ]] A) ([[ x / t ]] B) $ by sb_c_tstg
+l10: $ ([[ x / t ]] (tstg A B))' ([[ x / t ]] a) ≐ (tstg ([[ x / t ]] A) ([[ x / t ]] B))' a $ by fv_congr [l9, l5]
+l11: $ ([[ x / t ]] ((tstg A B)' a)) ≐ (tstg ([[ x / t ]] A) ([[ x / t ]] B))' a $ by ceqt_trans [l8, l10]
 l12: $ seqt z z $ by seqt_refl
-l13: $ (z ∊ (⟦ x / t ⟧ ((tstg A B)' a))) ⟺ (z ∊ (tstg (⟦ x / t ⟧ A) (⟦ x / t ⟧ B))' a) $ by welc_congr [l12, l11]
-l14: $ [x/t] (z ∊ (tstg A B)' a) ⟺ z ∊ (tstg (⟦ x / t ⟧ A) (⟦ x / t ⟧ B))' a $ by iff_trans [l7, l13]
-l15: $ [x/t] (ord a) ⟺ ord a $ by iff_trans [l4, l6]
-l16: $ ([x/t] (ord a) ∧ [x/t] (z ∊ (tstg A B)' a)) ⟺ (ord a ∧ z ∊ (tstg (⟦ x / t ⟧ A) (⟦ x / t ⟧ B))' a) $ by and_congr [l15, l14]
-l17: $ [x/t] (ord a ∧ z ∊ (tstg A B)' a) ⟺ (ord a ∧ z ∊ (tstg (⟦ x / t ⟧ A) (⟦ x / t ⟧ B))' a) $ by iff_trans [l3, l16]
-l18: $ (∃ a ([x/t] (ord a ∧ z ∊ (tstg A B)' a))) ⟺ ∃ a (ord a ∧ z ∊ (tstg (⟦ x / t ⟧ A) (⟦ x / t ⟧ B))' a) $ by ex_congr [l17]
-l19: $ [x/t] (∃ a (ord a ∧ z ∊ (tstg A B)' a)) ⟺ ∃ a (ord a ∧ z ∊ (tstg (⟦ x / t ⟧ A) (⟦ x / t ⟧ B))' a) $ by iff_trans [l2, l18]
-l20: $ {z | [x/t] (∃ a (ord a ∧ z ∊ (tstg A B)' a))} ≐ {z | ∃ a (ord a ∧ z ∊ (tstg (⟦ x / t ⟧ A) (⟦ x / t ⟧ B))' a)} $ by cab_congr [l19]
-l21: $ (⟦ x / t ⟧ {z | ∃ a (ord a ∧ z ∊ (tstg A B)' a)}) ≐ {z | ∃ a (ord a ∧ z ∊ (tstg (⟦ x / t ⟧ A) (⟦ x / t ⟧ B))' a)} $ by ceqt_trans [l1, l20]
+l13: $ (z ∊ ([[ x / t ]] ((tstg A B)' a))) ⟺ (z ∊ (tstg ([[ x / t ]] A) ([[ x / t ]] B))' a) $ by welc_congr [l12, l11]
+l14: $ [ x / t ] (z ∊ (tstg A B)' a) ⟺ z ∊ (tstg ([[ x / t ]] A) ([[ x / t ]] B))' a $ by iff_trans [l7, l13]
+l15: $ [ x / t ] (ord a) ⟺ ord a $ by iff_trans [l4, l6]
+l16: $ ([ x / t ] (ord a) ∧ [ x / t ] (z ∊ (tstg A B)' a)) ⟺ (ord a ∧ z ∊ (tstg ([[ x / t ]] A) ([[ x / t ]] B))' a) $ by and_congr [l15, l14]
+l17: $ [ x / t ] (ord a ∧ z ∊ (tstg A B)' a) ⟺ (ord a ∧ z ∊ (tstg ([[ x / t ]] A) ([[ x / t ]] B))' a) $ by iff_trans [l3, l16]
+l18: $ (∃ a ([ x / t ] (ord a ∧ z ∊ (tstg A B)' a))) ⟺ ∃ a (ord a ∧ z ∊ (tstg ([[ x / t ]] A) ([[ x / t ]] B))' a) $ by ex_congr [l17]
+l19: $ [ x / t ] (∃ a (ord a ∧ z ∊ (tstg A B)' a)) ⟺ ∃ a (ord a ∧ z ∊ (tstg ([[ x / t ]] A) ([[ x / t ]] B))' a) $ by iff_trans [l2, l18]
+l20: $ {z | [ x / t ] (∃ a (ord a ∧ z ∊ (tstg A B)' a))} ≐ {z | ∃ a (ord a ∧ z ∊ (tstg ([[ x / t ]] A) ([[ x / t ]] B))' a)} $ by cab_congr [l19]
+l21: $ ([[ x / t ]] {z | ∃ a (ord a ∧ z ∊ (tstg A B)' a)}) ≐ {z | ∃ a (ord a ∧ z ∊ (tstg ([[ x / t ]] A) ([[ x / t ]] B))' a)} $ by ceqt_trans [l1, l20]
 
 trc_intro
 ---------

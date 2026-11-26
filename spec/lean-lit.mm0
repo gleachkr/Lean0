@@ -23,16 +23,16 @@ term bd1: bin > bin;
 
 --| `bsucc a b`: a + 1 = b.
 term bsucc: bin > bin > wff;
-notation bsucc (a b: bin): wff = (${s|$:0) a ($+$:0) ($1$:max) ($=$:0) b ($|}$:0);
-notation bsucc (a b: bin): wff = ($⟪ₛ$:0) a ($+$:0) ($1$:max) ($=$:0) b ($⟫$:0);
+notation bsucc (a b: bin): wff = ($<<s$:0) a ($+$:64) ($1$:max) ($=$:50) b ($>>$:0);
+notation bsucc (a b: bin): wff = ($⟪ₛ$:0) a ($+$:64) ($1$:max) ($=$:50) b ($⟫$:0);
 axiom bsucc_0: $ ⟪ₛ b0 + 1 = bd1 b0 ⟫ $;
 axiom bsucc_d0 (a: bin): $ ⟪ₛ bd0 a + 1 = bd1 a ⟫ $;
 axiom bsucc_d1 (a b: bin): $ ⟪ₛ a + 1 = b ⟫ $ > $ ⟪ₛ bd1 a + 1 = bd0 b ⟫ $;
 
 --| `bdbl a b`: 2a = b (`bd0`, except that 2·0 is `b0`).
 term bdbl: bin > bin > wff;
-notation bdbl (a b: bin): wff = (${2|$:0) ($2$:max) ($*$:0) a ($=$:0) b ($|}$:0);
-notation bdbl (a b: bin): wff = ($⟪₂$:0) ($2$:max) ($*$:0) a ($=$:0) b ($⟫$:0);
+notation bdbl (a b: bin): wff = ($<<2$:0) ($2$:max) ($*$:70) a ($=$:50) b ($>>$:0);
+notation bdbl (a b: bin): wff = ($⟪₂$:0) ($2$:max) ($*$:70) a ($=$:50) b ($⟫$:0);
 axiom bdbl_0: $ ⟪₂ 2 * b0 = b0 ⟫ $;
 axiom bdbl_d0 (a: bin): $ ⟪₂ 2 * bd0 a = bd0 (bd0 a) ⟫ $;
 axiom bdbl_d1 (a: bin): $ ⟪₂ 2 * bd1 a = bd0 (bd1 a) ⟫ $;
@@ -40,10 +40,10 @@ axiom bdbl_d1 (a: bin): $ ⟪₂ 2 * bd1 a = bd0 (bd1 a) ⟫ $;
 --| `badd a b c`: a + b = c. `baddc a b c`: a + b + 1 = c (with carry).
 term badd: bin > bin > bin > wff;
 term baddc: bin > bin > bin > wff;
-notation badd (a b c: bin): wff = (${+|$:0) a ($+$:0) b ($=$:0) c ($|}$:0);
-notation badd (a b c: bin): wff = ($⟪$:0) a ($+$:0) b ($=$:0) c ($⟫$:0);
-notation baddc (a b c: bin): wff = (${+1|$:0) a ($+$:0) b ($+$:0) ($1$:max) ($=$:0) c ($|}$:0);
-notation baddc (a b c: bin): wff = ($⟪₁$:0) a ($+$:0) b ($+$:0) ($1$:max) ($=$:0) c ($⟫$:0);
+notation badd (a b c: bin): wff = ($<<$:0) a ($+$:64) b ($=$:50) c ($>>$:0);
+notation badd (a b c: bin): wff = ($⟪$:0) a ($+$:64) b ($=$:50) c ($⟫$:0);
+notation baddc (a b c: bin): wff = ($<<1$:0) a ($+$:64) b ($+$:64) ($1$:max) ($=$:50) c ($>>$:0);
+notation baddc (a b c: bin): wff = ($⟪₁$:0) a ($+$:64) b ($+$:64) ($1$:max) ($=$:50) c ($⟫$:0);
 axiom badd_0l (b: bin): $ ⟪ b0 + b = b ⟫ $;
 axiom badd_0r (a: bin): $ ⟪ a + b0 = a ⟫ $;
 axiom badd_00 (a b c: bin): $ ⟪ a + b = c ⟫ $ > $ ⟪ bd0 a + bd0 b = bd0 c ⟫ $;
@@ -59,8 +59,8 @@ axiom baddc_11 (a b c: bin): $ ⟪₁ a + b + 1 = c ⟫ $ > $ ⟪₁ bd1 a + bd1
 
 --| `bmul a b c`: a · b = c (by the bits of `b`).
 term bmul: bin > bin > bin > wff;
-notation bmul (a b c: bin): wff = (${*|$:0) a ($*$:0) b ($=$:0) c ($|}$:0);
-notation bmul (a b c: bin): wff = ($⟪ₘ$:0) a ($*$:0) b ($=$:0) c ($⟫$:0);
+notation bmul (a b c: bin): wff = ($<<m$:0) a ($*$:70) b ($=$:50) c ($>>$:0);
+notation bmul (a b c: bin): wff = ($⟪ₘ$:0) a ($*$:70) b ($=$:50) c ($⟫$:0);
 axiom bmul_0 (a: bin): $ ⟪ₘ a * b0 = b0 ⟫ $;
 axiom bmul_d0 (a b c d: bin): $ ⟪ₘ a * b = c ⟫ $ > $ ⟪₂ 2 * c = d ⟫ $ > $ ⟪ₘ a * bd0 b = d ⟫ $;
 axiom bmul_d1 (a b c d e: bin):
@@ -68,8 +68,8 @@ axiom bmul_d1 (a b c d e: bin):
 
 --| `bpow a b c`: a ^ b = c (by the bits of `b`; 0 ^ 0 = 1).
 term bpow: bin > bin > bin > wff;
-notation bpow (a b c: bin): wff = (${^|$:0) a ($^$:0) b ($=$:0) c ($|}$:0);
-notation bpow (a b c: bin): wff = ($⟪ₚ$:0) a ($^$:0) b ($=$:0) c ($⟫$:0);
+notation bpow (a b c: bin): wff = ($<<p$:0) a ($^$:75) b ($=$:50) c ($>>$:0);
+notation bpow (a b c: bin): wff = ($⟪ₚ$:0) a ($^$:75) b ($=$:50) c ($⟫$:0);
 axiom bpow_0 (a: bin): $ ⟪ₚ a ^ b0 = bd1 b0 ⟫ $;
 axiom bpow_d0 (a b c d: bin): $ ⟪ₚ a ^ b = c ⟫ $ > $ ⟪ₘ c * c = d ⟫ $ > $ ⟪ₚ a ^ bd0 b = d ⟫ $;
 axiom bpow_d1 (a b c d e: bin):
@@ -77,8 +77,8 @@ axiom bpow_d1 (a b c d e: bin):
 
 --| `band a b c`, `bor a b c`, `bxor a b c`: bitwise and, or and exclusive or.
 term band: bin > bin > bin > wff;
-notation band (a b c: bin): wff = (${and|$:0) a ($&&&$:0) b ($=$:0) c ($|}$:0);
-notation band (a b c: bin): wff = ($⟪ₐ$:0) a ($&&&$:0) b ($=$:0) c ($⟫$:0);
+notation band (a b c: bin): wff = ($<<a$:0) a ($&&&$:0) b ($=$:50) c ($>>$:0);
+notation band (a b c: bin): wff = ($⟪ₐ$:0) a ($&&&$:0) b ($=$:50) c ($⟫$:0);
 axiom band_0l (b: bin): $ ⟪ₐ b0 &&& b = b0 ⟫ $;
 axiom band_0r (a: bin): $ ⟪ₐ a &&& b0 = b0 ⟫ $;
 axiom band_00 (a b c d: bin): $ ⟪ₐ a &&& b = c ⟫ $ > $ ⟪₂ 2 * c = d ⟫ $ > $ ⟪ₐ bd0 a &&& bd0 b = d ⟫ $;
@@ -86,8 +86,8 @@ axiom band_01 (a b c d: bin): $ ⟪ₐ a &&& b = c ⟫ $ > $ ⟪₂ 2 * c = d �
 axiom band_10 (a b c d: bin): $ ⟪ₐ a &&& b = c ⟫ $ > $ ⟪₂ 2 * c = d ⟫ $ > $ ⟪ₐ bd1 a &&& bd0 b = d ⟫ $;
 axiom band_11 (a b c: bin): $ ⟪ₐ a &&& b = c ⟫ $ > $ ⟪ₐ bd1 a &&& bd1 b = bd1 c ⟫ $;
 term bor: bin > bin > bin > wff;
-notation bor (a b c: bin): wff = (${or|$:0) a ($|||$:0) b ($=$:0) c ($|}$:0);
-notation bor (a b c: bin): wff = ($⟪ₒ$:0) a ($|||$:0) b ($=$:0) c ($⟫$:0);
+notation bor (a b c: bin): wff = ($<<o$:0) a ($|||$:0) b ($=$:50) c ($>>$:0);
+notation bor (a b c: bin): wff = ($⟪ₒ$:0) a ($|||$:0) b ($=$:50) c ($⟫$:0);
 axiom bor_0l (b: bin): $ ⟪ₒ b0 ||| b = b ⟫ $;
 axiom bor_0r (a: bin): $ ⟪ₒ a ||| b0 = a ⟫ $;
 axiom bor_00 (a b c: bin): $ ⟪ₒ a ||| b = c ⟫ $ > $ ⟪ₒ bd0 a ||| bd0 b = bd0 c ⟫ $;
@@ -95,8 +95,8 @@ axiom bor_01 (a b c: bin): $ ⟪ₒ a ||| b = c ⟫ $ > $ ⟪ₒ bd0 a ||| bd1 b
 axiom bor_10 (a b c: bin): $ ⟪ₒ a ||| b = c ⟫ $ > $ ⟪ₒ bd1 a ||| bd0 b = bd1 c ⟫ $;
 axiom bor_11 (a b c: bin): $ ⟪ₒ a ||| b = c ⟫ $ > $ ⟪ₒ bd1 a ||| bd1 b = bd1 c ⟫ $;
 term bxor: bin > bin > bin > wff;
-notation bxor (a b c: bin): wff = (${xor|$:0) a ($^^^$:0) b ($=$:0) c ($|}$:0);
-notation bxor (a b c: bin): wff = ($⟪ₓ$:0) a ($^^^$:0) b ($=$:0) c ($⟫$:0);
+notation bxor (a b c: bin): wff = ($<<x$:0) a ($^^^$:0) b ($=$:50) c ($>>$:0);
+notation bxor (a b c: bin): wff = ($⟪ₓ$:0) a ($^^^$:0) b ($=$:50) c ($⟫$:0);
 axiom bxor_0l (b: bin): $ ⟪ₓ b0 ^^^ b = b ⟫ $;
 axiom bxor_0r (a: bin): $ ⟪ₓ a ^^^ b0 = a ⟫ $;
 axiom bxor_00 (a b c d: bin): $ ⟪ₓ a ^^^ b = c ⟫ $ > $ ⟪₂ 2 * c = d ⟫ $ > $ ⟪ₓ bd0 a ^^^ bd0 b = d ⟫ $;
@@ -132,6 +132,7 @@ def nat_D: ind = $ ind_mk nat_blk nil (tcons (srt (ls lz)) (ccons (bvar nz) (cco
 
 --| Lean's `Nat`, `Nat.zero` and `Nat.succ`.
 def nat_ty: expr = $ ind_ty nat_D 0 $;
+prefix nat_ty: $\N$ prec max;
 prefix nat_ty: $ℕ$ prec max;
 def nat_zero: expr = $ ind_ctor nat_D 0 0 $;
 def nat_succ: expr = $ ind_ctor nat_D 0 1 $;
@@ -179,14 +180,14 @@ axiom eeqv_lit (n: bin): $ eeqv (lit n) (lit n) $;
 --| `f x (succ y) ≡ succ (f x y)`: Lean's `Nat.add`.
 term add_eqs: ctx > expr > wff;
 axiom add_eqs_i (G: ctx) (f: expr):
-  $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
+  $ closed 0 f $ > $ ⟦ₜ G ⊢ f : Π ℕ, Π ℕ, ℕ ⟧ $ >
   $ ⟦ G ▷ ℕ ⊢ f @ #0 @ nat_zero ≡ #0 : ℕ ⟧ $ >
   $ ⟦ G ▷ ℕ ▷ ℕ ⊢ f @ #1 @ (nat_succ @ #0) ≡ nat_succ @ (f @ #1 @ #0) : ℕ ⟧ $ >
   $ add_eqs G f $;
 --| `pred_eqs G p`: `p 0 ≡ 0` and `p (succ x) ≡ x`: Lean's `Nat.pred`.
 term pred_eqs: ctx > expr > wff;
 axiom pred_eqs_i (G: ctx) (p: expr):
-  $ closed 0 p $ > $ ⟨ G ⊢ p : Π ℕ. ℕ ⟩ $ >
+  $ closed 0 p $ > $ ⟦ₜ G ⊢ p : Π ℕ, ℕ ⟧ $ >
   $ ⟦ G ⊢ p @ nat_zero ≡ nat_zero : ℕ ⟧ $ >
   $ ⟦ G ▷ ℕ ⊢ p @ (nat_succ @ #0) ≡ #0 : ℕ ⟧ $ >
   $ pred_eqs G p $;
@@ -194,7 +195,7 @@ axiom pred_eqs_i (G: ctx) (p: expr):
 --| Lean's `Nat.sub`.
 term sub_eqs: ctx > expr > expr > wff;
 axiom sub_eqs_i (G: ctx) (f p: expr):
-  $ pred_eqs G p $ > $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
+  $ pred_eqs G p $ > $ closed 0 f $ > $ ⟦ₜ G ⊢ f : Π ℕ, Π ℕ, ℕ ⟧ $ >
   $ ⟦ G ▷ ℕ ⊢ f @ #0 @ nat_zero ≡ #0 : ℕ ⟧ $ >
   $ ⟦ G ▷ ℕ ▷ ℕ ⊢ f @ #1 @ (nat_succ @ #0) ≡ p @ (f @ #1 @ #0) : ℕ ⟧ $ >
   $ sub_eqs G f p $;
@@ -202,7 +203,7 @@ axiom sub_eqs_i (G: ctx) (f p: expr):
 --| Lean's `Nat.mul`.
 term mul_eqs: ctx > expr > expr > wff;
 axiom mul_eqs_i (G: ctx) (f fa: expr):
-  $ add_eqs G fa $ > $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
+  $ add_eqs G fa $ > $ closed 0 f $ > $ ⟦ₜ G ⊢ f : Π ℕ, Π ℕ, ℕ ⟧ $ >
   $ ⟦ G ▷ ℕ ⊢ f @ #0 @ nat_zero ≡ nat_zero : ℕ ⟧ $ >
   $ ⟦ G ▷ ℕ ▷ ℕ ⊢ f @ #1 @ (nat_succ @ #0) ≡ fa @ (f @ #1 @ #0) @ #1 : ℕ ⟧ $ >
   $ mul_eqs G f fa $;
@@ -210,7 +211,7 @@ axiom mul_eqs_i (G: ctx) (f fa: expr):
 --| `f x (succ y) ≡ fm (f x y) x`: Lean's `Nat.pow`.
 term pow_eqs: ctx > expr > expr > expr > wff;
 axiom pow_eqs_i (G: ctx) (f fm fa: expr):
-  $ mul_eqs G fm fa $ > $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
+  $ mul_eqs G fm fa $ > $ closed 0 f $ > $ ⟦ₜ G ⊢ f : Π ℕ, Π ℕ, ℕ ⟧ $ >
   $ ⟦ G ▷ ℕ ⊢ f @ #0 @ nat_zero ≡ nat_succ @ nat_zero : ℕ ⟧ $ >
   $ ⟦ G ▷ ℕ ▷ ℕ ⊢ f @ #1 @ (nat_succ @ #0) ≡ fm @ (f @ #1 @ #0) @ #1 : ℕ ⟧ $ >
   $ pow_eqs G f fm fa $;
@@ -220,7 +221,7 @@ axiom pow_eqs_i (G: ctx) (f fm fa: expr):
 term beq_eqs: ctx > expr > expr > expr > expr > wff;
 axiom beq_eqs_i (G: ctx) (f B t u: expr):
   $ closed 0 f $ > $ closed 0 B $ > $ closed 0 t $ > $ closed 0 u $ >
-  $ ⟨ G ⊢ f : Π ℕ. Π ℕ. B ⟩ $ >
+  $ ⟦ₜ G ⊢ f : Π ℕ, Π ℕ, B ⟧ $ >
   $ ⟦ G ⊢ f @ nat_zero @ nat_zero ≡ t : B ⟧ $ >
   $ ⟦ G ▷ ℕ ⊢ f @ nat_zero @ (nat_succ @ #0) ≡ u : B ⟧ $ >
   $ ⟦ G ▷ ℕ ⊢ f @ (nat_succ @ #0) @ nat_zero ≡ u : B ⟧ $ >
@@ -231,7 +232,7 @@ axiom beq_eqs_i (G: ctx) (f B t u: expr):
 term ble_eqs: ctx > expr > expr > expr > expr > wff;
 axiom ble_eqs_i (G: ctx) (f B t u: expr):
   $ closed 0 f $ > $ closed 0 B $ > $ closed 0 t $ > $ closed 0 u $ >
-  $ ⟨ G ⊢ f : Π ℕ. Π ℕ. B ⟩ $ >
+  $ ⟦ₜ G ⊢ f : Π ℕ, Π ℕ, B ⟧ $ >
   $ ⟦ G ▷ ℕ ⊢ f @ nat_zero @ #0 ≡ t : B ⟧ $ >
   $ ⟦ G ▷ ℕ ⊢ f @ (nat_succ @ #0) @ nat_zero ≡ u : B ⟧ $ >
   $ ⟦ G ▷ ℕ ▷ ℕ ⊢ f @ (nat_succ @ #1) @ (nat_succ @ #0) ≡ f @ #1 @ #0 : B ⟧ $ >
@@ -240,7 +241,7 @@ axiom ble_eqs_i (G: ctx) (f B t u: expr):
 --| `f x (succ y) ≡ f (fm 2 x) y`: Lean's `Nat.shiftLeft`.
 term shl_eqs: ctx > expr > expr > expr > wff;
 axiom shl_eqs_i (G: ctx) (f fm fa: expr):
-  $ mul_eqs G fm fa $ > $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
+  $ mul_eqs G fm fa $ > $ closed 0 f $ > $ ⟦ₜ G ⊢ f : Π ℕ, Π ℕ, ℕ ⟧ $ >
   $ ⟦ G ▷ ℕ ⊢ f @ #0 @ nat_zero ≡ #0 : ℕ ⟧ $ >
   $ ⟦ G ▷ ℕ ▷ ℕ ⊢ f @ #1 @ (nat_succ @ #0) ≡ f @ (fm @ lit (bd0 (bd1 b0)) @ #1) @ #0 : ℕ ⟧ $ >
   $ shl_eqs G f fm fa $;
@@ -248,7 +249,7 @@ axiom shl_eqs_i (G: ctx) (f fm fa: expr):
 --| Lean's `Nat.shiftRight`, with `Nat.div`.
 term shr_eqs: ctx > expr > expr > wff;
 axiom shr_eqs_i (G: ctx) (f fd: expr):
-  $ closed 0 f $ > $ closed 0 fd $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
+  $ closed 0 f $ > $ closed 0 fd $ > $ ⟦ₜ G ⊢ f : Π ℕ, Π ℕ, ℕ ⟧ $ >
   $ ⟦ G ▷ ℕ ⊢ f @ #0 @ nat_zero ≡ #0 : ℕ ⟧ $ >
   $ ⟦ G ▷ ℕ ▷ ℕ ⊢ f @ #1 @ (nat_succ @ #0) ≡ fd @ (f @ #1 @ #0) @ lit (bd0 (bd1 b0)) : ℕ ⟧ $ >
   $ shr_eqs G f fd $;
@@ -268,45 +269,45 @@ axiom shr_eqs_i (G: ctx) (f fd: expr):
 term divmod_eqs: ctx > expr > expr > expr > expr > wff;
 axiom divmod_eqs_i (G: ctx) (fd fm fmul fadd h1 h2 h3: expr):
   $ mul_eqs G fmul fadd $ > $ closed 0 fd $ > $ closed 0 fm $ >
-  $ ⟨ G ⊢ fd : Π ℕ. Π ℕ. ℕ ⟩ $ > $ ⟨ G ⊢ fm : Π ℕ. Π ℕ. ℕ ⟩ $ >
-  $ ⟨ G ⊢ h1 : Π ℕ. Π ℕ. nat_eq (fadd @ (fmul @ #0 @ (fd @ #1 @ #0)) @ (fm @ #1 @ #0)) #1 ⟩ $ >
-  $ ⟨ G ⊢ h2 : Π ℕ. Π ℕ. Π (nat_lt lit0 #0). nat_lt (fm @ #2 @ #1) #1 ⟩ $ >
-  $ ⟨ G ⊢ h3 : Π ℕ. nat_eq (fd @ #0 @ lit0) lit0 ⟩ $ >
+  $ ⟦ₜ G ⊢ fd : Π ℕ, Π ℕ, ℕ ⟧ $ > $ ⟦ₜ G ⊢ fm : Π ℕ, Π ℕ, ℕ ⟧ $ >
+  $ ⟦ₜ G ⊢ h1 : Π ℕ, Π ℕ, nat_eq (fadd @ (fmul @ #0 @ (fd @ #1 @ #0)) @ (fm @ #1 @ #0)) #1 ⟧ $ >
+  $ ⟦ₜ G ⊢ h2 : Π ℕ, Π ℕ, Π (nat_lt lit0 #0), nat_lt (fm @ #2 @ #1) #1 ⟧ $ >
+  $ ⟦ₜ G ⊢ h3 : Π ℕ, nat_eq (fd @ #0 @ lit0) lit0 ⟧ $ >
   $ divmod_eqs G fd fm fmul fadd $;
 --| `gcd_eqs G f fd fm fmul fadd`: proofs exist of `gcd 0 y = y` and
 --| `gcd (x + 1) y = gcd (y % (x + 1)) (x + 1)`: Lean's `Nat.gcd`.
 term gcd_eqs: ctx > expr > expr > expr > expr > expr > wff;
 axiom gcd_eqs_i (G: ctx) (f fd fm fmul fadd h1 h2: expr):
-  $ divmod_eqs G fd fm fmul fadd $ > $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
-  $ ⟨ G ⊢ h1 : Π ℕ. nat_eq (f @ lit0 @ #0) #0 ⟩ $ >
-  $ ⟨ G ⊢ h2 : Π ℕ. Π ℕ. nat_eq (f @ (nat_succ @ #1) @ #0) (f @ (fm @ #0 @ (nat_succ @ #1)) @ (nat_succ @ #1)) ⟩ $ >
+  $ divmod_eqs G fd fm fmul fadd $ > $ closed 0 f $ > $ ⟦ₜ G ⊢ f : Π ℕ, Π ℕ, ℕ ⟧ $ >
+  $ ⟦ₜ G ⊢ h1 : Π ℕ, nat_eq (f @ lit0 @ #0) #0 ⟧ $ >
+  $ ⟦ₜ G ⊢ h2 : Π ℕ, Π ℕ, nat_eq (f @ (nat_succ @ #1) @ #0) (f @ (fm @ #0 @ (nat_succ @ #1)) @ (nat_succ @ #1)) ⟧ $ >
   $ gcd_eqs G f fd fm fmul fadd $;
 --| `land_eqs G f fd fm fmul fadd`: a proof exists of
 --| `x &&& y = (x/2 &&& y/2) + (x/2 &&& y/2) + (x%2 + y%2) / 2`: Lean's `Nat.land`.
 term land_eqs: ctx > expr > expr > expr > expr > expr > wff;
 axiom land_eqs_i (G: ctx) (f fd fm fmul fadd h: expr):
-  $ divmod_eqs G fd fm fmul fadd $ > $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
-  $ ⟨ G ⊢ h : Π ℕ. Π ℕ. nat_eq (f @ #1 @ #0)
+  $ divmod_eqs G fd fm fmul fadd $ > $ closed 0 f $ > $ ⟦ₜ G ⊢ f : Π ℕ, Π ℕ, ℕ ⟧ $ >
+  $ ⟦ₜ G ⊢ h : Π ℕ, Π ℕ, nat_eq (f @ #1 @ #0)
       (fadd @ (fadd @ (f @ (fd @ #1 @ lit2) @ (fd @ #0 @ lit2)) @ (f @ (fd @ #1 @ lit2) @ (fd @ #0 @ lit2)))
-            @ (fd @ (fadd @ (fm @ #1 @ lit2) @ (fm @ #0 @ lit2)) @ lit2)) ⟩ $ >
+            @ (fd @ (fadd @ (fm @ #1 @ lit2) @ (fm @ #0 @ lit2)) @ lit2)) ⟧ $ >
   $ land_eqs G f fd fm fmul fadd $;
 --| `lor_eqs G f fd fm fmul fadd`: a proof exists of
 --| `x ||| y = (x/2 ||| y/2) + (x/2 ||| y/2) + (x%2 + y%2 + 1) / 2`: Lean's `Nat.lor`.
 term lor_eqs: ctx > expr > expr > expr > expr > expr > wff;
 axiom lor_eqs_i (G: ctx) (f fd fm fmul fadd h: expr):
-  $ divmod_eqs G fd fm fmul fadd $ > $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
-  $ ⟨ G ⊢ h : Π ℕ. Π ℕ. nat_eq (f @ #1 @ #0)
+  $ divmod_eqs G fd fm fmul fadd $ > $ closed 0 f $ > $ ⟦ₜ G ⊢ f : Π ℕ, Π ℕ, ℕ ⟧ $ >
+  $ ⟦ₜ G ⊢ h : Π ℕ, Π ℕ, nat_eq (f @ #1 @ #0)
       (fadd @ (fadd @ (f @ (fd @ #1 @ lit2) @ (fd @ #0 @ lit2)) @ (f @ (fd @ #1 @ lit2) @ (fd @ #0 @ lit2)))
-            @ (fd @ (fadd @ (fadd @ (fm @ #1 @ lit2) @ (fm @ #0 @ lit2)) @ lit1) @ lit2)) ⟩ $ >
+            @ (fd @ (fadd @ (fadd @ (fm @ #1 @ lit2) @ (fm @ #0 @ lit2)) @ lit1) @ lit2)) ⟧ $ >
   $ lor_eqs G f fd fm fmul fadd $;
 --| `xor_eqs G f fd fm fmul fadd`: a proof exists of
 --| `x ^^^ y = (x/2 ^^^ y/2) + (x/2 ^^^ y/2) + (x%2 + y%2) % 2`: Lean's `Nat.xor`.
 term xor_eqs: ctx > expr > expr > expr > expr > expr > wff;
 axiom xor_eqs_i (G: ctx) (f fd fm fmul fadd h: expr):
-  $ divmod_eqs G fd fm fmul fadd $ > $ closed 0 f $ > $ ⟨ G ⊢ f : Π ℕ. Π ℕ. ℕ ⟩ $ >
-  $ ⟨ G ⊢ h : Π ℕ. Π ℕ. nat_eq (f @ #1 @ #0)
+  $ divmod_eqs G fd fm fmul fadd $ > $ closed 0 f $ > $ ⟦ₜ G ⊢ f : Π ℕ, Π ℕ, ℕ ⟧ $ >
+  $ ⟦ₜ G ⊢ h : Π ℕ, Π ℕ, nat_eq (f @ #1 @ #0)
       (fadd @ (fadd @ (f @ (fd @ #1 @ lit2) @ (fd @ #0 @ lit2)) @ (f @ (fd @ #1 @ lit2) @ (fd @ #0 @ lit2)))
-            @ (fm @ (fadd @ (fm @ #1 @ lit2) @ (fm @ #0 @ lit2)) @ lit2)) ⟩ $ >
+            @ (fm @ (fadd @ (fm @ #1 @ lit2) @ (fm @ #0 @ lit2)) @ lit2)) ⟧ $ >
   $ xor_eqs G f fd fm fmul fadd $;
 
 ---------------------------------------------------------------------------

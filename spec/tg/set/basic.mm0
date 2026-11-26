@@ -57,10 +57,10 @@ theorem welc_eq_set (G: hyps) (a b: set) (A: class):
 --| @abstract p q r z a b
 --| @fresh z
 theorem eq_subst (G: hyps) {z: set} (a b: set) (p: fml z):
-  $ G ⇒ a = b $ > $ G ⇒ [z/a] p $ > $ G ⇒ [z/b] p $;
+  $ G ⇒ a = b $ > $ G ⇒ [ z / a ] p $ > $ G ⇒ [ z / b ] p $;
 --| Moving a substitution instance along an equality of set variables.
-theorem sb_f_eq {x: set} (G: hyps x) (p: fml x) (u a: set): $ G ⇒ u = a $ > $ G ⇒ [x/u] p $ > $ G ⇒ [x/a] p $;
-theorem sb_c_eq {x: set} (G: hyps x) (B: class x) (u a: set): $ G ⇒ u = a $ > $ G ⇒ (⟦ x / u ⟧ B) = (⟦ x / a ⟧ B) $;
+theorem sb_f_eq {x: set} (G: hyps x) (p: fml x) (u a: set): $ G ⇒ u = a $ > $ G ⇒ [ x / u ] p $ > $ G ⇒ [ x / a ] p $;
+theorem sb_c_eq {x: set} (G: hyps x) (B: class x) (u a: set): $ G ⇒ u = a $ > $ G ⇒ ([[ x / u ]] B) = ([[ x / a ]] B) $;
 
 -- --------------------------------------------------------------------------
 -- Sethood and membership of classes
@@ -90,7 +90,7 @@ theorem wcel_eq_r (G: hyps) (A B C: class):
 --| @freshen G z
 --| @freshen p z
 theorem wcel_cab_intro {x z: set} (G: hyps x) (A: class) (p: fml x):
-  $ G ⇒ isset A $ > $ G , z = A ⇒ [x/z] p $ > $ G ⇒ A ∈ {x | p} $;
+  $ G ⇒ isset A $ > $ G , z = A ⇒ [ x / z ] p $ > $ G ⇒ A ∈ {x | p} $;
 
 -- --------------------------------------------------------------------------
 -- Subsets and the empty set
@@ -158,7 +158,7 @@ theorem img_congr (A B C D: class):
   $ A ≐ B $ > $ C ≐ D $ > $ img A C ≐ img B D $;
 --| @congr
 theorem fn_into_congr (A B C D E F: class):
-  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ fn_into A C E ⟺ fn_into B D F $;
+  $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ ⌈ A : C → E ⌉ ⟺ ⌈ B : D → F ⌉ $;
 --| @congr
 theorem inductive_congr (A B: class):
   $ A ≐ B $ > $ inductive A ⟺ inductive B $;
@@ -179,43 +179,43 @@ theorem universe_congr (A B: class):
 
 --| @rewrite
 theorem sb_c_csn {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (csn A)) ≐ csn (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (csn A)) ≐ csn ([[ x / t ]] A) $;
 --| @rewrite
 theorem sb_c_opair {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ ⟨ A , B ⟩) ≐ ⟨ ⟦ x / t ⟧ A , ⟦ x / t ⟧ B ⟩ $;
+  $ ([[ x / t ]] ⟨ A , B ⟩) ≐ ⟨ [[ x / t ]] A , [[ x / t ]] B ⟩ $;
 --| @rewrite
 theorem sb_c_cuni {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (⋃ A)) ≐ ⋃ (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (⋃ A)) ≐ ⋃ ([[ x / t ]] A) $;
 --| @rewrite
 theorem sb_c_cpw {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (𝒫 A)) ≐ 𝒫 (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (𝒫 A)) ≐ 𝒫 ([[ x / t ]] A) $;
 --| @rewrite
 theorem sb_c_cun {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (A ∪ B)) ≐ (⟦ x / t ⟧ A) ∪ (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (A ∪ B)) ≐ ([[ x / t ]] A) ∪ ([[ x / t ]] B) $;
 --| @rewrite
 theorem sb_c_suc {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (suc A)) ≐ suc (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (suc A)) ≐ suc ([[ x / t ]] A) $;
 --| @rewrite
 theorem sb_c_img {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (img A B)) ≐ img (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (img A B)) ≐ img ([[ x / t ]] A) ([[ x / t ]] B) $;
 --| @rewrite
 theorem sb_f_functional {x: set} (t: set x) (A: class x):
-  $ [x/t] (functional A) ⟺ functional (⟦ x / t ⟧ A) $;
+  $ [ x / t ] (functional A) ⟺ functional ([[ x / t ]] A) $;
 --| @rewrite
 theorem sb_f_fn_into {x: set} (t: set x) (A B C: class x):
-  $ [x/t] (fn_into A B C) ⟺ fn_into (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+  $ [ x / t ] ⌈ A : B → C ⌉ ⟺ ⌈ [[ x / t ]] A : [[ x / t ]] B → [[ x / t ]] C ⌉ $;
 --| @rewrite
 theorem sb_f_inductive {x: set} (t: set x) (A: class x):
-  $ [x/t] (inductive A) ⟺ inductive (⟦ x / t ⟧ A) $;
+  $ [ x / t ] (inductive A) ⟺ inductive ([[ x / t ]] A) $;
 --| @rewrite
 theorem sb_f_transitive {x: set} (t: set x) (A: class x):
-  $ [x/t] (transitive A) ⟺ transitive (⟦ x / t ⟧ A) $;
+  $ [ x / t ] (transitive A) ⟺ transitive ([[ x / t ]] A) $;
 --| @rewrite
 theorem sb_f_chooses {x: set} (t: set x) (A B: class x):
-  $ [x/t] (chooses A B) ⟺ chooses (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ [ x / t ] (chooses A B) ⟺ chooses ([[ x / t ]] A) ([[ x / t ]] B) $;
 --| @rewrite
 theorem sb_f_universe {x: set} (t: set x) (A: class x):
-  $ [x/t] (universe A) ⟺ universe (⟦ x / t ⟧ A) $;
+  $ [ x / t ] (universe A) ⟺ universe ([[ x / t ]] A) $;
 
 -- --------------------------------------------------------------------------
 -- Equality lemmas in a context: equal arguments, equal results (`X_eq`), and
@@ -248,7 +248,7 @@ theorem functional_eq (G: hyps) (A B: class):
   $ G ⇒ A = B $ > $ G ⇒ functional A $ > $ G ⇒ functional B $;
 theorem fn_into_eq (G: hyps) (A B C D E F: class):
   $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ E = F $ >
-  $ G ⇒ fn_into A C E $ > $ G ⇒ fn_into B D F $;
+  $ G ⇒ ⌈ A : C → E ⌉ $ > $ G ⇒ ⌈ B : D → F ⌉ $;
 theorem inductive_eq (G: hyps) (A B: class):
   $ G ⇒ A = B $ > $ G ⇒ inductive A $ > $ G ⇒ inductive B $;
 theorem transitive_eq (G: hyps) (A B: class):
@@ -267,7 +267,7 @@ theorem universe_eq (G: hyps) (A B: class):
 
 --| @rewrite
 theorem sb_f_welc_set {x: set} (t: set x) (a: set) (A: class x):
-  $ [x/t] (a ∊ A) ⟺ a ∊ (⟦ x / t ⟧ A) $;
+  $ [ x / t ] (a ∊ A) ⟺ a ∊ ([[ x / t ]] A) $;
 
 --| Two abstractions with equivalent bodies, under hypotheses, are equal.
 theorem cab_eq {x: set} (G: hyps x) (p q: fml x): $ G ⇒ ∀ x (p ↔ q) $ > $ G ⇒ {x | p} = {x | q} $;

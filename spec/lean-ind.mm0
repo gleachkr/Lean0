@@ -22,7 +22,7 @@ import "lean-core.mm0";
 -- so that structurally equal declarations stay distinct), the parameters as
 -- a telescope `P` (a `ctx`: innermost parameter first, each type under the
 -- earlier ones) and the types `T`: for each type its type `F` (under `P`:
--- `Π indices. srt l`) and the types of its constructors; `N` lists its nested
+-- `Π indices, srt l`) and the types of its constructors; `N` lists its nested
 -- occurrences (below; `[]` for a block without any). A constructor's
 -- type `K` is written under `P` and, outside `P`, under the block's `n`
 -- types themselves: at depth `d` inside `K`, parameter `q` (0 outermost) is
@@ -79,9 +79,9 @@ axiom closed_ind_rec (k: nat) (D: ind) (i: nat) (v: lvl): $ closed k (ind_rec D 
 axiom closed_proj (k: nat) (b: blk) (i: nat) (e: expr):
   $ closed k e $ > $ closed k (proj b i e) $;
 axiom lift_proj (n k: nat) (b: blk) (i: nat) (e e2: expr):
-  $ ⟮ₗ e [ #k ↑ n ] = e2 ⟯ $ > $ ⟮ₗ proj b i e [ #k ↑ n ] = proj b i e2 ⟯ $;
+  $ ⟮ₗ [ #k ↑ n ] e = e2 ⟯ $ > $ ⟮ₗ [ #k ↑ n ] proj b i e = proj b i e2 ⟯ $;
 axiom inst_proj (k: nat) (b: blk) (i: nat) (e a e2: expr):
-  $ ⟮ e [ #k ↦ a ] = e2 ⟯ $ > $ ⟮ proj b i e [ #k ↦ a ] = proj b i e2 ⟯ $;
+  $ ⟮ [ #k ↦ a ] e = e2 ⟯ $ > $ ⟮ [ #k ↦ a ] proj b i e = proj b i e2 ⟯ $;
 
 -- Reading the declaration --------------------------------------------------
 
@@ -121,20 +121,20 @@ axiom minor_idx_s (F: expr) (C: ctors) (T: tys) (i c k nc k2: nat):
 term npis: expr > nat > wff;
 axiom npis_bvar (i: nat): $ npis #i 0 $;
 axiom npis_app (f a: expr): $ npis (f @ a) 0 $;
-axiom npis_pi (A B: expr) (n: nat): $ npis B n $ > $ npis (Π A. B) (s n) $;
+axiom npis_pi (A B: expr) (n: nat): $ npis B n $ > $ npis (Π A, B) (s n) $;
 --| `nth_pi e i A`: the `i`th binder type of `e`.
 term nth_pi: expr > nat > expr > wff;
-axiom nth_pi_z (A B: expr): $ nth_pi (Π A. B) 0 A $;
-axiom nth_pi_s (A A2 B: expr) (i: nat): $ nth_pi B i A $ > $ nth_pi (Π A2. B) (s i) A $;
+axiom nth_pi_z (A B: expr): $ nth_pi (Π A, B) 0 A $;
+axiom nth_pi_s (A A2 B: expr) (i: nat): $ nth_pi B i A $ > $ nth_pi (Π A2, B) (s i) A $;
 --| `isort F k l`: `F` is `k` binders over `srt l`.
 term isort: expr > nat > lvl > wff;
 axiom isort_srt (l: lvl): $ isort (Sort l) 0 l $;
-axiom isort_pi (A B: expr) (k: nat) (l: lvl): $ isort B k l $ > $ isort (Π A. B) (s k) l $;
+axiom isort_pi (A B: expr) (k: nat) (l: lvl): $ isort B k l $ > $ isort (Π A, B) (s k) l $;
 --| Derived counts of a block: `ind_arity D np n m`, `nidx D i k` (indices of
 --| type `i`) and `nfields D i c nf`.
 term ind_arity: ind > nat > nat > nat > wff;
 axiom ind_arity_i (D: ind) (b: blk) (P: ctx) (T: tys) (np n m: nat):
-  $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ ind_arity D np n m $;
+  $ ind_data D b P T $ > $ ⌊| P | = np ⌋ $ > $ ntys T n m $ > $ ind_arity D np n m $;
 term nidx: ind > nat > nat > wff;
 axiom nidx_i (D: ind) (b: blk) (P: ctx) (T: tys) (i k: nat) (F: expr) (C: ctors) (l: lvl):
   $ ind_data D b P T $ > $ nth_ty T i F C $ > $ isort F k l $ > $ nidx D i k $;
@@ -152,20 +152,25 @@ axiom aux_of_i (D: ind) (N: ctx) (j np n m n0 k: nat) (X: expr):
 
 -- Telescopes and applications ----------------------------------------------
 
---| `pis P b T`: `T = Π P. b`; `lams P b T`: `T = λ P. b`.
+--| `⌊Π P, b = T ⌋` (`pis P b T`): `T` is `b` under the binders `Π` of the
+--| telescope `P`, outermost first; `⌊λ P, b = T ⌋` (`lams P b T`) likewise with `λ`.
 term pis: ctx > expr > expr > wff;
-axiom pis_nil (b: expr): $ pis [] b b $;
-axiom pis_cons (A b T: expr) (P: ctx): $ pis P (Π A. b) T $ > $ pis (P ▷ A) b T $;
+notation pis (P: ctx) (b T: expr): wff = ($<_\Pi$:0) P ($,$:5) b ($=$:50) T ($_>$:0);
+notation pis (P: ctx) (b T: expr): wff = ($⌊Π$:0) P ($,$:5) b ($=$:50) T ($⌋$:0);
+axiom pis_nil (b: expr): $ ⌊Π [], b = b ⌋ $;
+axiom pis_cons (A b T: expr) (P: ctx): $ ⌊Π P, (Π A, b) = T ⌋ $ > $ ⌊Π P ▷ A, b = T ⌋ $;
 term lams: ctx > expr > expr > wff;
-axiom lams_nil (b: expr): $ lams [] b b $;
-axiom lams_cons (A b T: expr) (P: ctx): $ lams P (λ A. b) T $ > $ lams (P ▷ A) b T $;
+notation lams (P: ctx) (b T: expr): wff = ($<_\$:0) P ($,$:5) b ($=$:50) T ($_>$:0);
+notation lams (P: ctx) (b T: expr): wff = ($⌊λ$:0) P ($,$:5) b ($=$:50) T ($⌋$:0);
+axiom lams_nil (b: expr): $ ⌊λ [], b = b ⌋ $;
+axiom lams_cons (A b T: expr) (P: ctx): $ ⌊λ P, (λ A, b) = T ⌋ $ > $ ⌊λ P ▷ A, b = T ⌋ $;
 --| `tys_closed P T`: each type's type over the parameters is closed with them,
---| `Π P. F` closed (a block is a closed constant: it mentions no variable of
+--| `Π P, F` closed (a block is a closed constant: it mentions no variable of
 --| the context it is used in).
 term tys_closed: ctx > tys > wff;
 axiom tys_closed_nil (P: ctx): $ tys_closed P tnil $;
 axiom tys_closed_cons (P: ctx) (F R: expr) (C: ctors) (T: tys):
-  $ pis P F R $ > $ closed 0 R $ > $ tys_closed P T $ > $ tys_closed P (tcons F C T) $;
+  $ ⌊Π P, F = R ⌋ $ > $ closed 0 R $ > $ tys_closed P T $ > $ tys_closed P (tcons F C T) $;
 
 --| `pargs X d n e`: `e = X @ #(d+n-1) @ ... @ #d` (the `n` variables above
 --| depth `d`). `spine h e k`: `e` is `h` applied to `k` arguments; read with
@@ -188,7 +193,7 @@ term has_arg: expr > expr > wff;
 axiom has_arg_z (e a: expr): $ has_arg (e @ a) a $;
 axiom has_arg_s (e a b: expr): $ has_arg e a $ > $ has_arg (e @ b) a $;
 term leaf_has: nat > expr > wff;
-axiom leaf_has_pi (j: nat) (A B: expr): $ leaf_has (s j) B $ > $ leaf_has j (Π A. B) $;
+axiom leaf_has_pi (j: nat) (A B: expr): $ leaf_has (s j) B $ > $ leaf_has j (Π A, B) $;
 axiom leaf_has_app (j: nat) (e: expr): $ has_arg e #j $ > $ leaf_has j e $;
 --| `pinst i S A R`: `S` is a block's type or constructor applied to `p0 ..
 --| p(np-1)`; `R` is `A` (under `i` binders over the block's parameters) with
@@ -198,7 +203,7 @@ axiom leaf_has_app (j: nat) (e: expr): $ has_arg e #j $ > $ leaf_has j e $;
 term pinst: nat > expr > expr > expr > wff;
 axiom pinst_head (i: nat) (D: ind) (j: nat) (A: expr): $ pinst i (ind_ty D j) A A $;
 axiom pinst_head_c (i: nat) (D: ind) (j c: nat) (A: expr): $ pinst i (ind_ctor D j c) A A $;
-axiom pinst_app (i: nat) (S a A A1 R: expr): $ pinst (s i) S A A1 $ > $ ⟮ A1 [ #i ↦ a ] = R ⟯ $ > $ pinst i (S @ a) A R $;
+axiom pinst_app (i: nat) (S a A A1 R: expr): $ pinst (s i) S A A1 $ > $ ⟮ [ #i ↦ a ] A1 = R ⟯ $ > $ pinst i (S @ a) A R $;
 
 -- Occurrences of the block (`isValidIndApp`, `checkPositivity`, `isRecArg`) ---
 
@@ -208,7 +213,7 @@ axiom pinst_app (i: nat) (S a A A1 R: expr): $ pinst (s i) S A A1 $ > $ ⟮ A1 [
 term sinst: ind > nat > nat > nat > expr > expr > wff;
 axiom sinst_done (D: ind) (n k: nat) (e: expr): $ sinst D n n k e e $;
 axiom sinst_step (D: ind) (j n k: nat) (e e1 e2: expr):
-  $ j < n $ > $ ⟮ e [ #k ↦ ind_ty D j ] = e1 ⟯ $ > $ sinst D (s j) n k e1 e2 $ > $ sinst D j n k e e2 $;
+  $ j < n $ > $ ⟮ [ #k ↦ ind_ty D j ] e = e1 ⟯ $ > $ sinst D (s j) n k e1 e2 $ > $ sinst D j n k e e2 $;
 --| `iargs k m X A`: `A` is `X` applied to `m` arguments, each `closed k`.
 term iargs: nat > nat > expr > expr > wff;
 axiom iargs_z (k: nat) (X: expr): $ iargs k 0 X X $;
@@ -223,15 +228,15 @@ axiom indapp_i (D: ind) (n np d j k t m na: nat) (X A: expr):
 --| `ipos D n np d A`: `A` is a positive field type at depth `d`: no occurrence
 --| of the block, or `Π` over a domain without one, or a valid occurrence
 --| (`checkPositivity`). `recfield D n np d A j`: `A` is a recursive field
---| (`Π ys. ` a valid occurrence of type `j`; `isRecArg`).
+--| (`Π ys, ` a valid occurrence of type `j`; `isRecArg`).
 term ipos: ind > nat > nat > nat > expr > wff;
 axiom ipos_closed (D: ind) (n np d k: nat) (A: expr): $ ⦃ d + np = k ⦄ $ > $ closed k A $ > $ ipos D n np d A $;
 axiom ipos_pi (D: ind) (n np d k: nat) (A B: expr):
-  $ ⦃ d + np = k ⦄ $ > $ closed k A $ > $ ipos D n np (s d) B $ > $ ipos D n np d (Π A. B) $;
+  $ ⦃ d + np = k ⦄ $ > $ closed k A $ > $ ipos D n np (s d) B $ > $ ipos D n np d (Π A, B) $;
 axiom ipos_app (D: ind) (n np d j: nat) (A: expr): $ indapp D n np d A j $ > $ ipos D n np d A $;
 term recfield: ind > nat > nat > nat > expr > nat > wff;
 axiom recfield_pi (D: ind) (n np d j: nat) (A B: expr):
-  $ recfield D n np (s d) B j $ > $ recfield D n np d (Π A. B) j $;
+  $ recfield D n np (s d) B j $ > $ recfield D n np d (Π A, B) j $;
 axiom recfield_app (D: ind) (n np d j: nat) (A: expr): $ indapp D n np d A j $ > $ recfield D n np d A j $;
 
 -- Nested occurrences (`ElimNestedInductive`): restoring and specializing ---
@@ -250,8 +255,8 @@ axiom rst_ctor (D I: ind) (N: ctx) (j c i np n m na k npi: nat) (e S X X1 X2 Y e
   $ ⦃ np + k = na ⦄ $ > $ spine S e k $ > $ pinst 0 S X1 X2 $ > $ spine (ind_ty I i) X2 npi $ >
   $ rehead (ind_ty I i) (ind_ctor I i c) npi X2 Y $ > $ rehead S Y k e e2 $ > $ rst D N e e2 $;
 axiom rst_app (D: ind) (N: ctx) (f a f2 a2: expr): $ rst D N f f2 $ > $ rst D N a a2 $ > $ rst D N (f @ a) (f2 @ a2) $;
-axiom rst_lam (D: ind) (N: ctx) (A b A2 b2: expr): $ rst D N A A2 $ > $ rst D N b b2 $ > $ rst D N (λ A. b) (λ A2. b2) $;
-axiom rst_pi (D: ind) (N: ctx) (A b A2 b2: expr): $ rst D N A A2 $ > $ rst D N b b2 $ > $ rst D N (Π A. b) (Π A2. b2) $;
+axiom rst_lam (D: ind) (N: ctx) (A b A2 b2: expr): $ rst D N A A2 $ > $ rst D N b b2 $ > $ rst D N (λ A, b) (λ A2, b2) $;
+axiom rst_pi (D: ind) (N: ctx) (A b A2 b2: expr): $ rst D N A A2 $ > $ rst D N b b2 $ > $ rst D N (Π A, b) (Π A2, b2) $;
 axiom rst_proj (D: ind) (N: ctx) (b: blk) (i: nat) (e e2: expr): $ rst D N e e2 $ > $ rst D N (proj b i e) (proj b i e2) $;
 axiom rst_refl (D: ind) (N: ctx) (e: expr): $ rst D N e e $;
 --| `crst D N G G2`: the context `G2` is `G` with each entry restored.
@@ -277,8 +282,8 @@ axiom spz_refl (D: ind) (N: ctx) (d: nat) (e: expr): $ spz D N d e e $;
 axiom spz_hit (D: ind) (N: ctx) (d np n m n0: nat) (e e2: expr):
   $ ind_arity D np n m $ > $ ndecl N n n0 $ > $ nst_hit N n0 d np e e2 $ > $ spz D N d e e2 $;
 axiom spz_app (D: ind) (N: ctx) (d: nat) (f a f2 a2: expr): $ spz D N d f f2 $ > $ spz D N d a a2 $ > $ spz D N d (f @ a) (f2 @ a2) $;
-axiom spz_lam (D: ind) (N: ctx) (d: nat) (A b A2 b2: expr): $ spz D N d A A2 $ > $ spz D N (s d) b b2 $ > $ spz D N d (λ A. b) (λ A2. b2) $;
-axiom spz_pi (D: ind) (N: ctx) (d: nat) (A b A2 b2: expr): $ spz D N d A A2 $ > $ spz D N (s d) b b2 $ > $ spz D N d (Π A. b) (Π A2. b2) $;
+axiom spz_lam (D: ind) (N: ctx) (d: nat) (A b A2 b2: expr): $ spz D N d A A2 $ > $ spz D N (s d) b b2 $ > $ spz D N d (λ A, b) (λ A2, b2) $;
+axiom spz_pi (D: ind) (N: ctx) (d: nat) (A b A2 b2: expr): $ spz D N d A A2 $ > $ spz D N (s d) b b2 $ > $ spz D N d (Π A, b) (Π A2, b2) $;
 axiom spz_proj (D: ind) (N: ctx) (d: nat) (b: blk) (i: nat) (e e2: expr): $ spz D N d e e2 $ > $ spz D N d (proj b i e) (proj b i e2) $;
 --| `afree e`: `e` mentions no auxiliary type and no constructor of one: at
 --| `ind_ty D j` and `ind_ctor D j c` the number `j` is one of `D`'s declared
@@ -289,8 +294,8 @@ term afree: expr > wff;
 axiom afree_bvar (i: nat): $ afree #i $;
 axiom afree_srt (l: lvl): $ afree (Sort l) $;
 axiom afree_app (f a: expr): $ afree f $ > $ afree a $ > $ afree (f @ a) $;
-axiom afree_lam (A b: expr): $ afree A $ > $ afree b $ > $ afree (λ A. b) $;
-axiom afree_pi (A b: expr): $ afree A $ > $ afree b $ > $ afree (Π A. b) $;
+axiom afree_lam (A b: expr): $ afree A $ > $ afree b $ > $ afree (λ A, b) $;
+axiom afree_pi (A b: expr): $ afree A $ > $ afree b $ > $ afree (Π A, b) $;
 axiom afree_cst (a: atom) (S: lvls): $ afree (cst a S) $;
 axiom afree_ind_ty (D: ind) (N: ctx) (j np n m n0: nat):
   $ ind_nested D N $ > $ ind_arity D np n m $ > $ ndecl N n n0 $ > $ j < n0 $ > $ afree (ind_ty D j) $;
@@ -319,26 +324,26 @@ axiom aux_data_i (D I: ind) (b bi: blk) (P Pi N: ctx) (T Ti: tys) (j i npi ni mi
 
 --| `mty D np j d v F M`: `M` is the type of motive `j`, read off `F` (the
 --| type's type lifted over the `j` earlier motives) at depth `d`:
---| `Π indices. Π (ind_ty D j params indices). srt v`.
+--| `Π indices, Π (ind_ty D j params indices), srt v`.
 term mty: ind > nat > nat > nat > lvl > expr > expr > wff;
 axiom mty_pi (D: ind) (np j d: nat) (v: lvl) (A B M: expr):
-  $ mty D np j (s d) v B M $ > $ mty D np j d v (Π A. B) (Π A. M) $;
+  $ mty D np j (s d) v B M $ > $ mty D np j d v (Π A, B) (Π A, M) $;
 axiom mty_srt (D: ind) (np j d k: nat) (v l: lvl) (X I: expr):
-  $ ⦃ d + j = k ⦄ $ > $ pargs (ind_ty D j) k np X $ > $ pargs X 0 d I $ > $ mty D np j d v (Sort l) (Π I. Sort v) $;
+  $ ⦃ d + j = k ⦄ $ > $ pargs (ind_ty D j) k np X $ > $ pargs X 0 d I $ > $ mty D np j d v (Sort l) (Π I, Sort v) $;
 --| `motives D np v j T M`: the motives of the types `j`.. of `T`, as a context
 --| (motive `j` outermost).
 term motives: ind > nat > lvl > nat > tys > ctx > wff;
 axiom motives_nil (D: ind) (np j: nat) (v: lvl): $ motives D np v j tnil [] $;
 axiom motives_cons (D: ind) (np j: nat) (v: lvl) (F F2 Mj: expr) (C: ctors) (T: tys) (Mr M: ctx):
-  $ ⟮₀ F ↑ j = F2 ⟯ $ > $ mty D np j 0 v F2 Mj $ > $ motives D np v (s j) T Mr $ > $ capp Mr ([] ▷ Mj) M $ >
+  $ ⟮₀ F ↑ j = F2 ⟯ $ > $ mty D np j 0 v F2 Mj $ > $ motives D np v (s j) T Mr $ > $ ⌊ [] ▷ Mj ++ Mr = M ⌋ $ >
   $ motives D np v j (tcons F C T) M $;
 --| `ihty D np n mo fld y j A IH`: the type of the inductive hypothesis for a
---| recursive field on type `j` (`recfield`'s), of type `A = Π ys. ind_ty D j params indices` (`A` already
+--| recursive field on type `j` (`recfield`'s), of type `A = Π ys, ind_ty D j params indices` (`A` already
 --| over the fields and the minors before it): `Π ys. motive_j indices (field
 --| ys)`, with the motives `mo` binders above depth 0 and the field at `#fld`.
 term ihty: ind > nat > nat > nat > nat > nat > nat > expr > expr > wff;
 axiom ihty_pi (D: ind) (np n mo fld y j: nat) (A B IH: expr):
-  $ ihty D np n mo fld (s y) j B IH $ > $ ihty D np n mo fld y j (Π A. B) (Π A. IH) $;
+  $ ihty D np n mo fld (s y) j B IH $ > $ ihty D np n mo fld y j (Π A, B) (Π A, IH) $;
 axiom ihty_app (D: ind) (np n mo fld y j ni k a b mj f: nat) (Y X U A: expr):
   $ spine (ind_ty D j) A k $ > $ nidx D j ni $ > $ ⦃ np + ni = k ⦄ $ > $ rehead Y #mj ni A X $ > $ spine (ind_ty D j) Y np $ >
   $ ⦃ y + mo = a ⦄ $ > $ ⦃ a + n = b ⦄ $ > $ ⦃ mj + s j = b ⦄ $ > $ ⦃ y + fld = f ⦄ $ > $ pargs #f 0 y U $ >
@@ -351,18 +356,18 @@ axiom ihty_app (D: ind) (np n mo fld y j ni k a b mj f: nat) (Y X U A: expr):
 --| motives (`lift`, with the block's types put in).
 term mwalk: ind > nat > nat > nat > nat > nat > nat > nat > nat > ctx > expr > expr > wff;
 axiom mwalk_pi_nr (D: ind) (np n k i c nf d r dp kn: nat) (Ihs: ctx) (A A3 B Min: expr):
-  $ ⦃ d + np = dp ⦄ $ > $ closed dp A $ > $ ⦃ k + n = kn ⦄ $ > $ ⟮ₗ A [ #d ↑ kn ] = A3 ⟯ $ >
-  $ mwalk D np n k i c nf (s d) r Ihs B Min $ > $ mwalk D np n k i c nf d r Ihs (Π A. B) (Π A3. Min) $;
+  $ ⦃ d + np = dp ⦄ $ > $ closed dp A $ > $ ⦃ k + n = kn ⦄ $ > $ ⟮ₗ [ #d ↑ kn ] A = A3 ⟯ $ >
+  $ mwalk D np n k i c nf (s d) r Ihs B Min $ > $ mwalk D np n k i c nf d r Ihs (Π A, B) (Π A3, Min) $;
 axiom mwalk_pi_rec (D: ind) (np n k i c nf d r dp kn j a sh fld mo: nat) (Ihs: ctx) (A A2 A3 A4 B IH Min: expr):
-  $ ⦃ d + np = dp ⦄ $ > $ recfield D n np d A j $ > $ sinst D 0 n dp A A2 $ > $ ⦃ k + n = kn ⦄ $ > $ ⟮ₗ A2 [ #d ↑ kn ] = A3 ⟯ $ >
+  $ ⦃ d + np = dp ⦄ $ > $ recfield D n np d A j $ > $ sinst D 0 n dp A A2 $ > $ ⦃ k + n = kn ⦄ $ > $ ⟮ₗ [ #d ↑ kn ] A2 = A3 ⟯ $ >
   $ ⦃ r + nf = a ⦄ $ > $ ⦃ sh + d = a ⦄ $ > $ ⦃ fld + 1 = sh ⦄ $ > $ ⦃ a + k = mo ⦄ $ > $ ⟮₀ A3 ↑ sh = A4 ⟯ $ >
   $ ihty D np n mo fld 0 j A4 IH $ >
-  $ mwalk D np n k i c nf (s d) (s r) (Ihs ▷ IH) B Min $ > $ mwalk D np n k i c nf d r Ihs (Π A. B) (Π A3. Min) $;
+  $ mwalk D np n k i c nf (s d) (s r) (Ihs ▷ IH) B Min $ > $ mwalk D np n k i c nf d r Ihs (Π A, B) (Π A3, Min) $;
 axiom mwalk_res (D: ind) (np n k i c d r dp kn h0 h1 h ni mi a b: nat) (Ihs: ctx) (K K2 K3 Y X Y1 Y2 Min: expr):
   $ ⦃ d + np = dp ⦄ $ > $ ⦃ k + n = kn ⦄ $ > $ ⦃ dp + i = h0 ⦄ $ > $ ⦃ h0 + kn = h1 ⦄ $ > $ ⦃ h1 + r = h ⦄ $ >
-  $ ⟮ₗ K [ #d ↑ kn ] = K2 ⟯ $ > $ ⟮₀ K2 ↑ r = K3 ⟯ $ > $ nidx D i ni $ > $ rehead Y #mi ni K3 X $ > $ spine #h Y np $ >
+  $ ⟮ₗ [ #d ↑ kn ] K = K2 ⟯ $ > $ ⟮₀ K2 ↑ r = K3 ⟯ $ > $ nidx D i ni $ > $ rehead Y #mi ni K3 X $ > $ spine #h Y np $ >
   $ ⦃ r + d = a ⦄ $ > $ ⦃ a + kn = b ⦄ $ > $ ⦃ mi + s i = b ⦄ $ > $ pargs (ind_ctor D i c) b np Y1 $ > $ pargs Y1 r d Y2 $ >
-  $ pis Ihs (X @ Y2) Min $ > $ mwalk D np n k i c d d r Ihs K Min $;
+  $ ⌊Π Ihs, X @ Y2 = Min ⌋ $ > $ mwalk D np n k i c d d r Ihs K Min $;
 --| `cminors D np n k i c C M`: the minors of constructors `c`.. (`C`) of type
 --| `i`, from minor `k`; `minors D np n k i T M`: of types `i`.. (`T`). Both
 --| as contexts.
@@ -370,60 +375,60 @@ term cminors: ind > nat > nat > nat > nat > nat > ctors > ctx > wff;
 axiom cminors_nil (D: ind) (np n k i c: nat): $ cminors D np n k i c cnil [] $;
 axiom cminors_cons (D: ind) (np n k i c nf: nat) (K Min: expr) (C: ctors) (M1 M: ctx):
   $ npis K nf $ > $ mwalk D np n k i c nf 0 0 [] K Min $ > $ cminors D np n (s k) i (s c) C M1 $ >
-  $ capp M1 ([] ▷ Min) M $ > $ cminors D np n k i c (ccons K C) M $;
+  $ ⌊ [] ▷ Min ++ M1 = M ⌋ $ > $ cminors D np n k i c (ccons K C) M $;
 term minors: ind > nat > nat > nat > nat > tys > ctx > wff;
 axiom minors_nil (D: ind) (np n k i: nat): $ minors D np n k i tnil [] $;
 axiom minors_cons (D: ind) (np n k i nc k2: nat) (F: expr) (C: ctors) (T: tys) (M1 M2 M: ctx):
   $ cminors D np n k i 0 C M1 $ > $ clen_c C nc $ > $ ⦃ k + nc = k2 ⦄ $ > $ minors D np n k2 (s i) T M2 $ >
-  $ capp M2 M1 M $ > $ minors D np n k i (tcons F C T) M $;
+  $ ⌊ M1 ++ M2 = M ⌋ $ > $ minors D np n k i (tcons F C T) M $;
 --| `rtail D np n m i d F B`: `B = Π indices. Π (ind_ty D i params indices).
 --| motive_i indices major`, read off `F` (lifted over the motives and
 --| minors) at depth `d`.
 term rtail: ind > nat > nat > nat > nat > nat > expr > expr > wff;
 axiom rtail_pi (D: ind) (np n m i d: nat) (A B B2: expr):
-  $ rtail D np n m i (s d) B B2 $ > $ rtail D np n m i d (Π A. B) (Π A. B2) $;
+  $ rtail D np n m i (s d) B B2 $ > $ rtail D np n m i d (Π A, B) (Π A, B2) $;
 axiom rtail_srt (D: ind) (np n m i d mn dmn mi: nat) (l: lvl) (X I X2: expr):
   $ ⦃ m + n = mn ⦄ $ > $ ⦃ d + mn = dmn ⦄ $ > $ pargs (ind_ty D i) dmn np X $ > $ pargs X 0 d I $ >
-  $ ⦃ mi + i = dmn ⦄ $ > $ pargs #mi 1 d X2 $ > $ rtail D np n m i d (Sort l) (Π I. X2 @ #0) $;
+  $ ⦃ mi + i = dmn ⦄ $ > $ pargs #mi 1 d X2 $ > $ rtail D np n m i d (Sort l) (Π I, X2 @ #0) $;
 --| `rec_ty D v i R`: the type of the recursor of type `i` with motives in
 --| `srt v`: `Π params. Π motives. Π minors. Π indices. Π major. motive_i
 --| indices major`.
 term rec_ty: ind > lvl > nat > expr > wff;
 axiom rec_ty_i (D: ind) (b: blk) (P: ctx) (T: tys) (v: lvl) (i np n m mn: nat) (M N: ctx) (F F2 B R1 R2 R: expr) (C: ctors):
-  $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ motives D np v 0 T M $ > $ minors D np n 0 0 T N $ >
+  $ ind_data D b P T $ > $ ⌊| P | = np ⌋ $ > $ ntys T n m $ > $ motives D np v 0 T M $ > $ minors D np n 0 0 T N $ >
   $ nth_ty T i F C $ > $ ⦃ m + n = mn ⦄ $ > $ ⟮₀ F ↑ mn = F2 ⟯ $ > $ rtail D np n m i 0 F2 B $ >
-  $ pis N B R1 $ > $ pis M R1 R2 $ > $ pis P R2 R $ > $ rec_ty D v i R $;
---| `ctor_ty D i c R`: the type of constructor `c` of type `i`: `Π params.` its
+  $ ⌊Π N, B = R1 ⌋ $ > $ ⌊Π M, R1 = R2 ⌋ $ > $ ⌊Π P, R2 = R ⌋ $ > $ rec_ty D v i R $;
+--| `ctor_ty D i c R`: the type of constructor `c` of type `i`: `Π params,` its
 --| data type with the block's types applied to the parameters for the type
 --| variables (`sinst`), restored (`rst`).
 term ctor_ty: ind > nat > nat > expr > wff;
 axiom ctor_ty_i (D: ind) (b: blk) (P N: ctx) (T: tys) (i c np n m: nat) (F K K2 K3 R: expr) (C: ctors):
-  $ ind_data D b P T $ > $ nth_ty T i F C $ > $ nth_ctor C c K $ > $ clen P np $ > $ ntys T n m $ >
-  $ sinst D 0 n np K K2 $ > $ ind_nested D N $ > $ rst D N K2 K3 $ > $ pis P K3 R $ > $ ctor_ty D i c R $;
+  $ ind_data D b P T $ > $ nth_ty T i F C $ > $ nth_ctor C c K $ > $ ⌊| P | = np ⌋ $ > $ ntys T n m $ >
+  $ sinst D 0 n np K K2 $ > $ ind_nested D N $ > $ rst D N K2 K3 $ > $ ⌊Π P, K3 = R ⌋ $ > $ ctor_ty D i c R $;
 
 -- The recursor's rules (`mkRecRules`) --------------------------------------
 
 --| `ihval D np n m v nf fld y j A IH`: the inductive hypothesis of a recursive
---| field on type `j` (`recfield`'s): `λ ys. ind_rec D j v params motives minors indices (field ys)`, read
+--| field on type `j` (`recfield`'s): `λ ys, ind_rec D j v params motives minors indices (field ys)`, read
 --| off the field's type `A` (over all `nf` fields, the field at `#fld`).
 term ihval: ind > nat > nat > nat > lvl > nat > nat > nat > nat > expr > expr > wff;
 axiom ihval_lam (D: ind) (np n m: nat) (v: lvl) (nf fld y j: nat) (A B IH: expr):
-  $ ihval D np n m v nf fld (s y) j B IH $ > $ ihval D np n m v nf fld y j (Π A. B) (λ A. IH) $;
+  $ ihval D np n m v nf fld (s y) j B IH $ > $ ihval D np n m v nf fld y j (Π A, B) (λ A, IH) $;
 axiom ihval_app (D: ind) (np n m: nat) (v: lvl) (nf fld y j ni k a mn b f: nat) (Y X1 X2 X3 U A: expr):
   $ spine (ind_ty D j) A k $ > $ nidx D j ni $ > $ ⦃ np + ni = k ⦄ $ > $ rehead Y X2 ni A X3 $ > $ spine (ind_ty D j) Y np $ >
   $ ⦃ y + nf = a ⦄ $ > $ ⦃ m + n = mn ⦄ $ > $ ⦃ a + mn = b ⦄ $ > $ pargs (ind_rec D j v) b np X1 $ > $ pargs X1 a mn X2 $ >
   $ ⦃ y + fld = f ⦄ $ > $ pargs #f 0 y U $ > $ ihval D np n m v nf fld y j A (X3 @ U) $;
---| `rwalk D np n m v nf d Acc K Val`: `Val = λ fields. Acc ihs`, read off the
+--| `rwalk D np n m v nf d Acc K Val`: `Val = λ fields, Acc ihs`, read off the
 --| constructor type `K` at depth `d`, where `Acc` is the minor applied to
 --| the fields and `ihs` the inductive hypotheses of the recursive fields.
 term rwalk: ind > nat > nat > nat > lvl > nat > nat > expr > expr > expr > wff;
 axiom rwalk_pi_nr (D: ind) (np n m: nat) (v: lvl) (nf d dp mn: nat) (Acc A A3 B Val: expr):
-  $ ⦃ d + np = dp ⦄ $ > $ closed dp A $ > $ ⦃ m + n = mn ⦄ $ > $ ⟮ₗ A [ #d ↑ mn ] = A3 ⟯ $ >
-  $ rwalk D np n m v nf (s d) Acc B Val $ > $ rwalk D np n m v nf d Acc (Π A. B) (λ A3. Val) $;
+  $ ⦃ d + np = dp ⦄ $ > $ closed dp A $ > $ ⦃ m + n = mn ⦄ $ > $ ⟮ₗ [ #d ↑ mn ] A = A3 ⟯ $ >
+  $ rwalk D np n m v nf (s d) Acc B Val $ > $ rwalk D np n m v nf d Acc (Π A, B) (λ A3, Val) $;
 axiom rwalk_pi_rec (D: ind) (np n m: nat) (v: lvl) (nf d dp mn j sh fld: nat) (Acc A A2 A3 A4 B IH Val: expr):
-  $ ⦃ d + np = dp ⦄ $ > $ recfield D n np d A j $ > $ sinst D 0 n dp A A2 $ > $ ⦃ m + n = mn ⦄ $ > $ ⟮ₗ A2 [ #d ↑ mn ] = A3 ⟯ $ >
+  $ ⦃ d + np = dp ⦄ $ > $ recfield D n np d A j $ > $ sinst D 0 n dp A A2 $ > $ ⦃ m + n = mn ⦄ $ > $ ⟮ₗ [ #d ↑ mn ] A2 = A3 ⟯ $ >
   $ ⦃ sh + d = nf ⦄ $ > $ ⦃ fld + 1 = sh ⦄ $ > $ ⟮₀ A3 ↑ sh = A4 ⟯ $ > $ ihval D np n m v nf fld 0 j A4 IH $ >
-  $ rwalk D np n m v nf (s d) (Acc @ IH) B Val $ > $ rwalk D np n m v nf d Acc (Π A. B) (λ A3. Val) $;
+  $ rwalk D np n m v nf (s d) (Acc @ IH) B Val $ > $ rwalk D np n m v nf d Acc (Π A, B) (λ A3, Val) $;
 axiom rwalk_res (D: ind) (np n m: nat) (v: lvl) (d: nat) (Acc K: expr):
   $ npis K 0 $ > $ rwalk D np n m v d d Acc K Acc $;
 --| `rec_rhs D v i c R`: the right-hand side of the recursor's rule for
@@ -431,10 +436,10 @@ axiom rwalk_res (D: ind) (np n m: nat) (v: lvl) (d: nat) (Acc K: expr):
 --| minor_k fields ihs`.
 term rec_rhs: ind > lvl > nat > nat > expr > wff;
 axiom rec_rhs_i (D: ind) (b: blk) (P: ctx) (T: tys) (v: lvl) (i c np n m k nf a mk: nat) (M N: ctx) (F K Acc Val R1 R2 R: expr) (C: ctors):
-  $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ motives D np v 0 T M $ > $ minors D np n 0 0 T N $ >
+  $ ind_data D b P T $ > $ ⌊| P | = np ⌋ $ > $ ntys T n m $ > $ motives D np v 0 T M $ > $ minors D np n 0 0 T N $ >
   $ nth_ty T i F C $ > $ nth_ctor C c K $ > $ minor_idx T i c k $ > $ npis K nf $ >
   $ ⦃ nf + m = a ⦄ $ > $ ⦃ mk + s k = a ⦄ $ > $ pargs #mk 0 nf Acc $ > $ rwalk D np n m v nf 0 Acc K Val $ >
-  $ lams N Val R1 $ > $ lams M R1 R2 $ > $ lams P R2 R $ > $ rec_rhs D v i c R $;
+  $ ⌊λ N, Val = R1 ⌋ $ > $ ⌊λ M, R1 = R2 ⌋ $ > $ ⌊λ P, R2 = R ⌋ $ > $ rec_rhs D v i c R $;
 
 -- The recursor's rules as closed equations (draft) -------------------------
 
@@ -443,24 +448,24 @@ axiom rec_rhs_i (D: ind) (b: blk) (P: ctx) (T: tys) (v: lvl) (i c np n m k nf a 
 term clift: nat > ctx > ctx > wff;
 axiom clift_nil (k: nat): $ clift k [] [] $;
 axiom clift_cons (k d: nat) (A A2: expr) (X Y: ctx):
-  $ clift k X Y $ > $ clen X d $ > $ ⟮ₗ A [ #d ↑ k ] = A2 ⟯ $ > $ clift k (X ▷ A) (Y ▷ A2) $;
+  $ clift k X Y $ > $ ⌊| X | = d ⌋ $ > $ ⟮ₗ [ #d ↑ k ] A = A2 ⟯ $ > $ clift k (X ▷ A) (Y ▷ A2) $;
 --| `psplit n K A X res`: `K` is `Π` over `n` binders of `res`, and `X` is
 --| those binders' context on top of `A` (the inverse of `pis` at a given
 --| number of binders).
 term psplit: nat > expr > ctx > ctx > expr > wff;
 axiom psplit_z (K: expr) (A: ctx): $ psplit 0 K A A K $;
 axiom psplit_s (n: nat) (B C res: expr) (A X: ctx):
-  $ psplit n C (A ▷ B) X res $ > $ psplit (s n) (Π B. C) A X res $;
+  $ psplit n C (A ▷ B) X res $ > $ psplit (s n) (Π B, C) A X res $;
 --| `iota_tel D v i c X res nf Dl`: the context `Dl` of the rule of constructor
 --| `c` of type `i` as a closed equation: the parameters, the motives, the
 --| minors, then the constructor's `nf` fields `X` (its type with the block's
---| types put in is `Π X. res`), moved under the motives and the minors.
+--| types put in is `Π X, res`), moved under the motives and the minors.
 term iota_tel: ind > lvl > nat > nat > ctx > expr > nat > ctx > wff;
 axiom iota_tel_i (D: ind) (b: blk) (P: ctx) (T: tys) (v: lvl) (i c np n m mn nf: nat) (M N X Xl Q1 Q2 Dl: ctx)
     (F K K2 res: expr) (C: ctors):
-  $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ motives D np v 0 T M $ > $ minors D np n 0 0 T N $ >
+  $ ind_data D b P T $ > $ ⌊| P | = np ⌋ $ > $ ntys T n m $ > $ motives D np v 0 T M $ > $ minors D np n 0 0 T N $ >
   $ nth_ty T i F C $ > $ nth_ctor C c K $ > $ npis K nf $ > $ sinst D 0 n np K K2 $ > $ psplit nf K2 [] X res $ >
-  $ ⦃ m + n = mn ⦄ $ > $ clift mn X Xl $ > $ capp M P Q1 $ > $ capp N Q1 Q2 $ > $ capp Xl Q2 Dl $ >
+  $ ⦃ m + n = mn ⦄ $ > $ clift mn X Xl $ > $ ⌊ P ++ M = Q1 ⌋ $ > $ ⌊ Q1 ++ N = Q2 ⌋ $ > $ ⌊ Q2 ++ Xl = Dl ⌋ $ >
   $ iota_tel D v i c X res nf Dl $;
 --| `iota_lhs D v i c nf res e3 c1 maj e4 T`: in that context, `e3` is the
 --| recursor at the parameters, the motives and the minors, `c1` the
@@ -472,7 +477,7 @@ axiom iota_lhs_i (D: ind) (v: lvl) (i c np n m mn nf ni a d1 io mo: nat) (res e1
   $ ind_arity D np n m $ > $ nidx D i ni $ >
   $ ⦃ m + n = mn ⦄ $ > $ ⦃ nf + m = a ⦄ $ > $ ⦃ a + n = d1 ⦄ $ >
   $ pargs (ind_rec D i v) d1 np e1 $ > $ pargs e1 a n e2 $ > $ pargs e2 nf m e3 $ >
-  $ pargs (ind_ty D i) d1 np Y $ > $ ⟮ₗ res [ #nf ↑ mn ] = T2 ⟯ $ > $ rehead Y e3 ni T2 e4 $ >
+  $ pargs (ind_ty D i) d1 np Y $ > $ ⟮ₗ [ #nf ↑ mn ] res = T2 ⟯ $ > $ rehead Y e3 ni T2 e4 $ >
   $ pargs (ind_ctor D i c) d1 np c1 $ > $ pargs c1 0 nf maj $ >
   $ ⦃ io + s i = n ⦄ $ > $ ⦃ a + io = mo ⦄ $ > $ rehead Y #mo ni T2 T0 $ >
   $ iota_lhs D v i c nf res e3 c1 maj e4 (T0 @ maj) $;
@@ -504,22 +509,22 @@ axiom struct_like_i (D: ind) (b: blk) (P: ctx) (T: tys) (j: nat) (F K: expr) (l:
 --| under the parameters and the earlier fields, with the block's types put in.
 term field_ty: ind > nat > nat > expr > wff;
 axiom field_ty_i (D: ind) (b: blk) (P: ctx) (T: tys) (j i np n m: nat) (F K K2 A: expr) (C: ctors):
-  $ ind_data D b P T $ > $ nth_ty T j F C $ > $ nth_ctor C 0 K $ > $ clen P np $ > $ ntys T n m $ >
+  $ ind_data D b P T $ > $ nth_ty T j F C $ > $ nth_ctor C 0 K $ > $ ⌊| P | = np ⌋ $ > $ ntys T n m $ >
   $ sinst D 0 n np K K2 $ > $ nth_pi K2 i A $ > $ field_ty D j i A $;
 --| `qinst b e k j A R`: `R` is `A` with the `k` remaining fields `j`,
 --| `j+1`, ... (field `j` at `#(k-1)`) replaced by the projections of `e`.
 term qinst: blk > expr > nat > nat > expr > expr > wff;
 axiom qinst_z (b: blk) (e A: expr) (j: nat): $ qinst b e 0 j A A $;
 axiom qinst_s (b: blk) (e A A1 R: expr) (k j: nat):
-  $ ⟮ A [ #k ↦ proj b j e ] = A1 ⟯ $ > $ qinst b e k (s j) A1 R $ > $ qinst b e (s k) j A R $;
+  $ ⟮ [ #k ↦ proj b j e ] A = A1 ⟯ $ > $ qinst b e k (s j) A1 R $ > $ qinst b e (s k) j A R $;
 --| Structure eta is for a structure whose fields do not mention the block
 --| (`nonrec`, `eta_ok`); `projs b e k Y M`: `M = Y @ proj b 0 e @ .. @ proj b (k-1) e`.
 term nonrec: nat > nat > expr > wff;
-axiom nonrec_pi (np d k: nat) (A B: expr): $ ⦃ d + np = k ⦄ $ > $ closed k A $ > $ nonrec np (s d) B $ > $ nonrec np d (Π A. B) $;
+axiom nonrec_pi (np d k: nat) (A B: expr): $ ⦃ d + np = k ⦄ $ > $ closed k A $ > $ nonrec np (s d) B $ > $ nonrec np d (Π A, B) $;
 axiom nonrec_res (np d: nat) (K: expr): $ npis K 0 $ > $ nonrec np d K $;
 term eta_ok: ind > nat > wff;
 axiom eta_ok_i (D: ind) (b: blk) (P: ctx) (T: tys) (j np: nat) (F K: expr):
-  $ struct_like D j $ > $ ind_data D b P T $ > $ nth_ty T j F (ccons K cnil) $ > $ clen P np $ > $ nonrec np 0 K $ >
+  $ struct_like D j $ > $ ind_data D b P T $ > $ nth_ty T j F (ccons K cnil) $ > $ ⌊| P | = np ⌋ $ > $ nonrec np 0 K $ >
   $ eta_ok D j $;
 term projs: blk > expr > nat > expr > expr > wff;
 axiom projs_z (b: blk) (e Y: expr): $ projs b e 0 Y Y $;
@@ -534,8 +539,8 @@ axiom projs_s (b: blk) (e Y M: expr) (k: nat): $ projs b e k Y M $ > $ projs b e
 --| `snd`), `lhs` is `proj b 0 (mk @ #3 @ #2 @ #1 @ #0)` and `k` is `1`.
 term proj_eq: ind > nat > nat > ctx > expr > nat > wff;
 axiom proj_eq_i (D: ind) (b: blk) (P X Dl: ctx) (T: tys) (j i np n m nf k: nat) (F K K2 res c1 maj: expr) (C: ctors):
-  $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ nth_ty T j F C $ > $ nth_ctor C 0 K $ > $ npis K nf $ >
-  $ sinst D 0 n np K K2 $ > $ psplit nf K2 [] X res $ > $ capp X P Dl $ >
+  $ ind_data D b P T $ > $ ⌊| P | = np ⌋ $ > $ ntys T n m $ > $ nth_ty T j F C $ > $ nth_ctor C 0 K $ > $ npis K nf $ >
+  $ sinst D 0 n np K K2 $ > $ psplit nf K2 [] X res $ > $ ⌊ P ++ X = Dl ⌋ $ >
   $ pargs (ind_ctor D j 0) nf np c1 $ > $ pargs c1 0 nf maj $ > $ ⦃ k + s i = nf ⦄ $ >
   $ proj_eq D j i Dl (proj b i maj) k $;
 --| `eta_eq D j Dl M S`: structure eta for type `j` as a closed equation:
@@ -547,7 +552,7 @@ axiom proj_eq_i (D: ind) (b: blk) (P X Dl: ctx) (T: tys) (j i np n m nf k: nat) 
 --| `mk @ #2 @ #1 @ proj b 0 #0 @ proj b 1 #0`.
 term eta_eq: ind > nat > ctx > expr > expr > wff;
 axiom eta_eq_i (D: ind) (b: blk) (P: ctx) (T: tys) (j np nf: nat) (S0 S Y M: expr):
-  $ ind_data D b P T $ > $ clen P np $ > $ pargs (ind_ty D j) 0 np S0 $ > $ ⟮₀ S0 ↑ 1 = S ⟯ $ >
+  $ ind_data D b P T $ > $ ⌊| P | = np ⌋ $ > $ pargs (ind_ty D j) 0 np S0 $ > $ ⟮₀ S0 ↑ 1 = S ⟯ $ >
   $ rehead (ind_ty D j) (ind_ctor D j 0) np S Y $ > $ nfields D j 0 nf $ > $ projs b #0 nf Y M $ >
   $ eta_eq D j (P ▷ S0) M S $;
 ---------------------------------------------------------------------------
@@ -595,28 +600,28 @@ axiom cseqv_cons (K K2: expr) (C C2: ctors): $ eeqv K K2 $ > $ cseqv C C2 $ > $ 
 --| the lift of something: the `inst` premise only computes that).
 term cwf: ind > nat > nat > lvl > nat > ctx > nat > expr > wff;
 axiom cwf_pi (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (A B A2: expr) (u: lvl):
-  $ ⦃ d + np = k ⦄ $ > $ closed k A $ > $ sinst D 0 n k A A2 $ > $ ⟨ Ctx ⊢ A2 : Sort u ⟩ $ > $ ulevel l u $ >
-  $ cwf D n np l i (Ctx ▷ A2) (s d) B $ > $ cwf D n np l i Ctx d (Π A. B) $;
+  $ ⦃ d + np = k ⦄ $ > $ closed k A $ > $ sinst D 0 n k A A2 $ > $ ⟦ₜ Ctx ⊢ A2 : Sort u ⟧ $ > $ ulevel l u $ >
+  $ cwf D n np l i (Ctx ▷ A2) (s d) B $ > $ cwf D n np l i Ctx d (Π A, B) $;
 axiom cwf_pi_rec (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (A B A2 B2: expr) (u: lvl):
-  $ ⦃ d + np = k ⦄ $ > $ sinst D 0 n k A A2 $ > $ ⟨ Ctx ⊢ A2 : Sort u ⟩ $ > $ ulevel l u $ > $ ipos D n np d A $ >
-  $ ⟮ B [ #0 ↦ Sort lz ] = B2 ⟯ $ > $ ⟮₀ B2 ↑ 1 = B ⟯ $ >
-  $ cwf D n np l i (Ctx ▷ A2) (s d) B $ > $ cwf D n np l i Ctx d (Π A. B) $;
+  $ ⦃ d + np = k ⦄ $ > $ sinst D 0 n k A A2 $ > $ ⟦ₜ Ctx ⊢ A2 : Sort u ⟧ $ > $ ulevel l u $ > $ ipos D n np d A $ >
+  $ ⟮ [ #0 ↦ Sort lz ] B = B2 ⟯ $ > $ ⟮₀ B2 ↑ 1 = B ⟯ $ >
+  $ cwf D n np l i (Ctx ▷ A2) (s d) B $ > $ cwf D n np l i Ctx d (Π A, B) $;
 axiom cwf_res (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (d k: nat) (K K2: expr) (b: blk) (P: ctx)
     (T: tys) (F: expr) (C: ctors) (R R2 S: expr):
   $ indapp D n np d K i $ > $ ⦃ d + np = k ⦄ $ > $ sinst D 0 n k K K2 $ > $ ind_data D b P T $ > $ nth_ty T i F C $ >
-  $ pis P F R $ > $ ⟮₀ R ↑ k = R2 ⟯ $ > $ sty Ctx (ind_ty D i) R2 K2 S $ > $ cwf D n np l i Ctx d K $;
+  $ ⌊Π P, F = R ⌋ $ > $ ⟮₀ R ↑ k = R2 ⟯ $ > $ sty Ctx (ind_ty D i) R2 K2 S $ > $ cwf D n np l i Ctx d K $;
 --| `ctors_wf D n np l i Ctx C`: the constructors `C` of type `i` are well
---| formed, and each is closed over the parameters and the types (`Π P. K`
+--| formed, and each is closed over the parameters and the types (`Π P, K`
 --| mentions only the `n` types: a constructor is a closed constant, as
 --| `tys_closed` for the types' types).
 term ctors_wf: ind > nat > nat > lvl > nat > ctx > ctors > wff;
 axiom ctors_wf_nil (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx): $ ctors_wf D n np l i Ctx cnil $;
 axiom ctors_wf_cons (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx) (K: expr) (C: ctors) (b: blk) (P: ctx)
     (T: tys) (R: expr):
-  $ ind_data D b P T $ > $ pis P K R $ > $ closed n R $ >
+  $ ind_data D b P T $ > $ ⌊Π P, K = R ⌋ $ > $ closed n R $ >
   $ cwf D n np l i Ctx 0 K $ > $ ctors_wf D n np l i Ctx C $ > $ ctors_wf D n np l i Ctx (ccons K C) $;
 --| `tys_wf D n np l i Ctx T`: the types `i`.. of `T`, in `Ctx = P ++ G`: each
---| type's type is `Π indices. srt l` (all in the same universe `l`,
+--| type's type is `Π indices, srt l` (all in the same universe `l`,
 --| `checkInductiveTypes`) and its constructors are well formed.
 term tys_wf: ind > nat > nat > lvl > nat > ctx > tys > wff;
 axiom tys_wf_nil (D: ind) (n np: nat) (l: lvl) (i: nat) (Ctx: ctx): $ tys_wf D n np l i Ctx tnil $;
@@ -627,13 +632,13 @@ axiom tys_wf_cons (D: ind) (n np: nat) (l l2: lvl) (i k: nat) (Ctx: ctx) (F: exp
 term ctx_wf: ctx > ctx > wff;
 axiom ctx_wf_nil (G: ctx): $ ctx_wf G [] $;
 axiom ctx_wf_cons (G P G2: ctx) (A: expr) (u: lvl):
-  $ ctx_wf G P $ > $ capp P G G2 $ > $ ⟨ G2 ⊢ A : Sort u ⟩ $ > $ ctx_wf G (P ▷ A) $;
+  $ ctx_wf G P $ > $ ⌊ G ++ P = G2 ⌋ $ > $ ⟦ₜ G2 ⊢ A : Sort u ⟧ $ > $ ctx_wf G (P ▷ A) $;
 --| `tys_ty Ctx T`: each type's type is binders over a sort (`isort`) and a type
 --| in `Ctx = P ++ G`.
 term tys_ty: ctx > tys > wff;
 axiom tys_ty_nil (Ctx: ctx): $ tys_ty Ctx tnil $;
 axiom tys_ty_cons (Ctx: ctx) (F: expr) (C: ctors) (T: tys) (u l: lvl) (k: nat):
-  $ isort F k l $ > $ ⟨ Ctx ⊢ F : Sort u ⟩ $ > $ tys_ty Ctx T $ > $ tys_ty Ctx (tcons F C T) $;
+  $ isort F k l $ > $ ⟦ₜ Ctx ⊢ F : Sort u ⟧ $ > $ tys_ty Ctx T $ > $ tys_ty Ctx (tcons F C T) $;
 --| `tys_ok G D`: the parameters and the types' types are closed, the
 --| parameters are types over the earlier ones and the types' types are types:
 --| what typing `ind_ty D i` needs (the kernel adds the types before it checks
@@ -641,7 +646,7 @@ axiom tys_ty_cons (Ctx: ctx) (F: expr) (C: ctors) (T: tys) (u l: lvl) (k: nat):
 --| of empty types).
 term tys_ok: ctx > ind > wff;
 axiom tys_ok_i (G G2: ctx) (D: ind) (b: blk) (P: ctx) (T: tys):
-  $ ind_data D b P T $ > $ tys_closed P T $ > $ ctx_wf G P $ > $ capp P G G2 $ > $ tys_ty G2 T $ > $ tys_ok G D $;
+  $ ind_data D b P T $ > $ tys_closed P T $ > $ ctx_wf G P $ > $ ⌊ G ++ P = G2 ⌋ $ > $ tys_ty G2 T $ > $ tys_ok G D $;
 --| A well-formed block, in context `G` (`ind_wf_i`, after `nst_ok` below).
 term ind_wf: ctx > ind > wff;
 --| `nst_ok G D j N2`: the occurrences `N2` (from auxiliary type `j` on) come
@@ -659,8 +664,8 @@ term nst_group: ctx > ind > ind > expr > nat > nat > nat > ctx > ctx > wff;
 --| the block's constants are closed.
 term nst_ty: ctx > ind > ind > expr > wff;
 axiom nst_ty_i (G G2: ctx) (D I: ind) (b bi: blk) (P Pi: ctx) (T Ti: tys) (np n m: nat) (X X1 Fi RI S: expr) (Ci: ctors):
-  $ ind_data D b P T $ > $ capp P G G2 $ > $ ind_arity D np n m $ > $ sinst D 0 n np X X1 $ > $ closed np X1 $ >
-  $ ind_data I bi Pi Ti $ > $ nth_ty Ti 0 Fi Ci $ > $ pis Pi Fi RI $ > $ sty G2 (ind_ty I 0) RI X1 S $ > $ nst_ty G D I X $;
+  $ ind_data D b P T $ > $ ⌊ G ++ P = G2 ⌋ $ > $ ind_arity D np n m $ > $ sinst D 0 n np X X1 $ > $ closed np X1 $ >
+  $ ind_data I bi Pi Ti $ > $ nth_ty Ti 0 Fi Ci $ > $ ⌊Π Pi, Fi = RI ⌋ $ > $ sty G2 (ind_ty I 0) RI X1 S $ > $ nst_ty G D I X $;
 axiom nst_ok_nil (G: ctx) (D: ind) (j: nat): $ nst_ok G D j [] $;
 axiom nst_ok_cons (G: ctx) (D I: ind) (j j2 npi ni mi ni0: nat) (X: expr) (N2 N3 NI: ctx):
   $ spine (ind_ty I 0) X npi $ > $ ind_wf G I $ > $ ind_arity I npi ni mi $ > $ ind_nested I NI $ > $ ndecl NI ni ni0 $ >
@@ -673,7 +678,7 @@ axiom nst_group_cons (G: ctx) (D I: ind) (X0 X: expr) (j i ni npi: nat) (N N2: c
 --| A well-formed block, in context `G` (`l`, the block's universe, is the first
 --| type's).
 axiom ind_wf_i (G G2: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (np n m k n0: nat) (l: lvl) (F: expr) (C: ctors):
-  $ tys_ok G D $ > $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ capp P G G2 $ >
+  $ tys_ok G D $ > $ ind_data D b P T $ > $ ⌊| P | = np ⌋ $ > $ ntys T n m $ > $ ⌊ G ++ P = G2 ⌋ $ >
   $ nth_ty T 0 F C $ > $ isort F k l $ > $ tys_wf D n np l 0 G2 T $ >
   $ ind_nested D N $ > $ ndecl N n n0 $ > $ nst_ok G D n0 N $ > $ ind_wf G D $;
 
@@ -695,7 +700,7 @@ axiom large_nz (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (F: expr) (C: ctors)
 axiom large_empty (G: ctx) (D: ind) (b: blk) (P: ctx) (F: expr):
   $ ind_data D b P (tcons F cnil tnil) $ > $ large G D $;
 axiom large_single (G G2: ctx) (D: ind) (b: blk) (P: ctx) (F K: expr) (np: nat):
-  $ ind_data D b P (tcons F (ccons K cnil) tnil) $ > $ clen P np $ > $ capp P G G2 $ > $ fir D np G2 0 K $ >
+  $ ind_data D b P (tcons F (ccons K cnil) tnil) $ > $ ⌊| P | = np ⌋ $ > $ ⌊ G ++ P = G2 ⌋ $ > $ fir D np G2 0 K $ >
   $ large G D $;
 --| `fir D np Ctx d K`: each remaining field is a proposition or an argument
 --| of the result; `leaf_has j e`: `#j` (at the binder's depth) is an argument
@@ -704,10 +709,10 @@ axiom fir_res (D: ind) (np: nat) (Ctx: ctx) (d: nat) (K: expr):
   $ indapp D 1 np d K 0 $ > $ fir D np Ctx d K $;
 axiom fir_arg (D: ind) (np: nat) (Ctx: ctx) (d k: nat) (A A2 B: expr):
   $ leaf_has 0 B $ > $ ⦃ d + np = k ⦄ $ > $ sinst D 0 1 k A A2 $ > $ fir D np (Ctx ▷ A2) (s d) B $ >
-  $ fir D np Ctx d (Π A. B) $;
+  $ fir D np Ctx d (Π A, B) $;
 axiom fir_prop (D: ind) (np: nat) (Ctx: ctx) (d k: nat) (A A2 B: expr):
-  $ ⦃ d + np = k ⦄ $ > $ sinst D 0 1 k A A2 $ > $ ⟨ Ctx ⊢ A2 : Prop ⟩ $ > $ fir D np (Ctx ▷ A2) (s d) B $ >
-  $ fir D np Ctx d (Π A. B) $;
+  $ ⦃ d + np = k ⦄ $ > $ sinst D 0 1 k A A2 $ > $ ⟦ₜ Ctx ⊢ A2 : Prop ⟧ $ > $ fir D np (Ctx ▷ A2) (s d) B $ >
+  $ fir D np Ctx d (Π A, B) $;
 
 -- Projections from a structure that may be a proposition (`infer_proj`) ----
 
@@ -719,13 +724,13 @@ term proj_ok: ctx > ind > nat > nat > wff;
 axiom proj_ok_sort (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (j i: nat) (F: expr) (C: ctors) (l: lvl):
   $ ind_data D b P T $ > $ nth_ty T j F C $ > $ isort F 0 l $ > $ ls lz ⊔ l ≈ l $ > $ proj_ok G D j i $;
 axiom proj_ok_prop (G G2: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (j i np n m: nat) (F K: expr) (C: ctors):
-  $ ind_data D b P T $ > $ clen P np $ > $ ntys T n m $ > $ capp P G G2 $ > $ nth_ty T j F C $ > $ nth_ctor C 0 K $ >
+  $ ind_data D b P T $ > $ ⌊| P | = np ⌋ $ > $ ntys T n m $ > $ ⌊ G ++ P = G2 ⌋ $ > $ nth_ty T j F C $ > $ nth_ctor C 0 K $ >
   $ fprops D n np G2 0 (s i) K $ > $ proj_ok G D j i $;
 --| `fprops D n np Ctx d cnt K`: the next `cnt` fields of `K` are propositions.
 axiom fprops_z (D: ind) (n np: nat) (Ctx: ctx) (d: nat) (K: expr): $ fprops D n np Ctx d 0 K $;
 axiom fprops_s (D: ind) (n np: nat) (Ctx: ctx) (d cnt k: nat) (A A2 B: expr):
-  $ ⦃ d + np = k ⦄ $ > $ sinst D 0 n k A A2 $ > $ ⟨ Ctx ⊢ A2 : Prop ⟩ $ > $ fprops D n np (Ctx ▷ A2) (s d) cnt B $ >
-  $ fprops D n np Ctx d (s cnt) (Π A. B) $;
+  $ ⦃ d + np = k ⦄ $ > $ sinst D 0 n k A A2 $ > $ ⟦ₜ Ctx ⊢ A2 : Prop ⟧ $ > $ fprops D n np (Ctx ▷ A2) (s d) cnt B $ >
+  $ fprops D n np Ctx d (s cnt) (Π A, B) $;
 
 ---------------------------------------------------------------------------
 -- PART III: THE RULES
@@ -737,26 +742,26 @@ axiom fprops_s (D: ind) (n np: nat) (Ctx: ctx) (d cnt k: nat) (A A2 B: expr):
 --| block `D` with parameters `P` and declared type `F` (`pis P F R`: `R` is
 --| `F` under the parameters' binders).
 axiom ind_ty_ty (G: ctx) (D: ind) (b: blk) (P: ctx) (T: tys) (i: nat) (F R: expr) (C: ctors):
-  $ tys_ok G D $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ pis P F R $ > $ ⟨ G ⊢ ind_ty D i : R ⟩ $;
+  $ tys_ok G D $ > $ ind_data D b P T $ > $ nth_ty T i F C $ > $ ⌊Π P, F = R ⌋ $ > $ ⟦ₜ G ⊢ ind_ty D i : R ⟧ $;
 --| The constructor: `ind_ctor D i c : R`, with `R` the constructor's declared
 --| type under the parameters, the block's types put in for its variables
 --| (`ctor_ty`).
 axiom ind_ctor_ty (G: ctx) (D: ind) (i c: nat) (R: expr):
-  $ ind_wf G D $ > $ ctor_ty D i c R $ > $ ⟨ G ⊢ ind_ctor D i c : R ⟩ $;
+  $ ind_wf G D $ > $ ctor_ty D i c R $ > $ ⟦ₜ G ⊢ ind_ctor D i c : R ⟧ $;
 --| The recursor: `ind_rec D i v : (ps) → (motives) → (minors) → (indices) →
 --| (t : I ps indices) → motive indices t`, as `rec_ty` builds it, for `I`
 --| the block's `i`-th type; `v` is the motives' universe, allowed by
 --| `elim_ok`; `rst` puts back the nested occurrences (the identity at a
 --| block without them).
 axiom ind_rec_ty (G: ctx) (D: ind) (N: ctx) (i: nat) (v: lvl) (R0 R: expr):
-  $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_ty D v i R0 $ > $ ind_nested D N $ > $ rst D N R0 R $ > $ ⟨ G ⊢ ind_rec D i v : R ⟩ $;
+  $ ind_wf G D $ > $ elim_ok G D v $ > $ rec_ty D v i R0 $ > $ ind_nested D N $ > $ rst D N R0 R $ > $ ⟦ₜ G ⊢ ind_rec D i v : R ⟧ $;
 --| Weakening below a closed context: a judgment in a context `G` whose
 --| entries and terms mention no variable outside `G` holds over any base
 --| context `G0` (`IsDefEq.weakN` for `Ctx.LiftN n k` at `k` the length of
 --| `G`, where lifting is the identity; see notes/audit-lean-mm0.md §6).
 axiom weakBaseDF (k: nat) (G G0 G2: ctx) (e e2 A K: expr):
-  $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ pis G (Sort lz) K $ > $ closed 0 K $ > $ clen G k $ >
-  $ closed k e $ > $ closed k e2 $ > $ closed k A $ > $ capp G G0 G2 $ >
+  $ ⟦ G ⊢ e ≡ e2 : A ⟧ $ > $ ⌊Π G, Sort lz = K ⌋ $ > $ closed 0 K $ > $ ⌊| G | = k ⌋ $ >
+  $ closed k e $ > $ closed k e2 $ > $ closed k A $ > $ ⌊ G0 ++ G = G2 ⌋ $ >
   $ ⟦ G2 ⊢ e ≡ e2 : A ⟧ $;
 --| Iota as a closed equation (`iota_eq`): in the context `Dl` of the
 --| recursor's own variables, `ind_rec D i v ps ms ns is (ind_ctor D i c ps fs)
@@ -774,7 +779,7 @@ axiom ind_iota_eq (D: ind) (N: ctx) (i c: nat) (v: lvl) (Dl0 Dl: ctx) (lhs0 rhs0
 --| and may be projected (`proj_ok`).
 axiom proj_ty (G: ctx) (D: ind) (b: blk) (P N: ctx) (T: tys) (j i np: nat) (e e2 S A A1 A2 R: expr):
   $ ⟦ G ⊢ e ≡ e2 : S ⟧ $ > $ spine (ind_ty D j) S np $ > $ ind_wf G D $ > $ ind_data D b P T $ > $ struct_like D j $ >
-  $ proj_ok G D j i $ > $ clen P np $ > $ field_ty D j i A $ > $ ind_nested D N $ > $ rst D N A A2 $ > $ pinst i S A2 A1 $ >
+  $ proj_ok G D j i $ > $ ⌊| P | = np ⌋ $ > $ field_ty D j i A $ > $ ind_nested D N $ > $ rst D N A A2 $ > $ pinst i S A2 A1 $ >
   $ qinst b e i 0 A1 R $ >
   $ ⟦ G ⊢ proj b i e ≡ proj b i e2 : R ⟧ $;
 --| `proj b i (ind_ctor D j 0 @ ps @ fs) ≡ fs[i]` when the field may be

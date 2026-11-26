@@ -14,45 +14,45 @@ prefix fbot: $⊥ₒ$ prec max;
 
 --| The implication `P →ₒ Q` of two formulas.
 def fimp (P Q: class): class =
-  $ ⟨ suc ∅ , scons P (scons Q ∅) ⟩ $;
+  $ ⟨ suc ∅ , P +: Q +: ∅ ⟩ $;
 --| @congr
 theorem fimp_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ fimp A C ≐ fimp B D $;
 --| @rewrite
 theorem sb_c_fimp {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (fimp A B)) ≐ fimp (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (fimp A B)) ≐ fimp ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 infixr fimp: $→ₒ$ prec 25;
 
 --| The universal quantifier `∀ₒ P`: in `P` the index `0` is the bound variable and an outer index `i` is `suc i`.
 def fall (P: class): class =
-  $ ⟨ suc (suc ∅) , scons P ∅ ⟩ $;
+  $ ⟨ suc (suc ∅) , P +: ∅ ⟩ $;
 --| @congr
 theorem fall_congr (A B: class): $ A ≐ B $ > $ fall A ≐ fall B $;
 --| @rewrite
 theorem sb_c_fall {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (fall A)) ≐ fall (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (fall A)) ≐ fall ([[ x / t ]] A) $;
 
 prefix fall: $∀ₒ$ prec 41;
 
 --| The atomic formula `I =ₒ J`: the variables with indices `I` and `J` are equal.
 def feq (I J: class): class =
-  $ ⟨ suc (suc (suc ∅)) , scons ⟨ I , ∅ ⟩ (scons ⟨ J , ∅ ⟩ ∅) ⟩ $;
+  $ ⟨ suc (suc (suc ∅)) , ⟨ I , ∅ ⟩ +: ⟨ J , ∅ ⟩ +: ∅ ⟩ $;
 --| @congr
 theorem feq_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ feq A C ≐ feq B D $;
 --| @rewrite
 theorem sb_c_feq {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (feq A B)) ≐ feq (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (feq A B)) ≐ feq ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 infixl feq: $=ₒ$ prec 50;
 
 --| The atomic formula `I ∈ₒ J`: the variable with index `I` is an element of the one with index `J`.
 def fin (I J: class): class =
-  $ ⟨ suc (suc (suc (suc ∅))) , scons ⟨ I , ∅ ⟩ (scons ⟨ J , ∅ ⟩ ∅) ⟩ $;
+  $ ⟨ suc (suc (suc (suc ∅))) , ⟨ I , ∅ ⟩ +: ⟨ J , ∅ ⟩ +: ∅ ⟩ $;
 --| @congr
 theorem fin_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ fin A C ≐ fin B D $;
 --| @rewrite
 theorem sb_c_fin {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (fin A B)) ≐ fin (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (fin A B)) ≐ fin ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 infixl fin: $∈ₒ$ prec 50;
 
@@ -66,7 +66,7 @@ def fmop (X: class) (.n .p .q .i .j .z: set): class =
 theorem fmop_congr (A B: class): $ A ≐ B $ > $ fmop A ≐ fmop B $;
 --| @rewrite
 theorem sb_c_fmop {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (fmop A)) ≐ fmop (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (fmop A)) ≐ fmop ([[ x / t ]] A) $;
 
 --| The pairs of a number `n` and a formula whose free variables are below `n`.
 def fmla (.x: set): class = $ lfp x (fmop x) $;
@@ -78,7 +78,7 @@ def fm (N: class) (.z: set): class =
 theorem fm_congr (A B: class): $ A ≐ B $ > $ fm A ≐ fm B $;
 --| @rewrite
 theorem sb_c_fm {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (fm A)) ≐ fm (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (fm A)) ≐ fm ([[ x / t ]] A) $;
 
 
 -- --------------------------------------------------------------------------
@@ -90,14 +90,14 @@ theorem sb_c_fm {x: set} (t: set x) (A: class x):
 def fsb (A K S V: class) (.y .i .j .z: set): class =
   $ {z | z ∊ fseq A ∧ (
       (K = suc ∅ ∧ (z ∊ V' ∅ → z ∊ V' (suc ∅))) ∨
-      (K = suc (suc ∅) ∧ ∀ y (y ∊ A → scons y z ∈ V' ∅)) ∨
+      (K = suc (suc ∅) ∧ ∀ y (y ∊ A → y +: z ∈ V' ∅)) ∨
       (K = suc (suc (suc ∅)) ∧ ∃ i ∃ j (S' ∅ = ⟨ i , ∅ ⟩ ∧ S' (suc ∅) = ⟨ j , ∅ ⟩ ∧ z' i = z' j)) ∨
       (K = suc (suc (suc (suc ∅))) ∧ ∃ i ∃ j (S' ∅ = ⟨ i , ∅ ⟩ ∧ S' (suc ∅) = ⟨ j , ∅ ⟩ ∧ z' i ∈ z' j)))} $;
 --| @congr
 theorem fsb_congr (A B C D E F H I: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ fsb A C E H ≐ fsb B D F I $;
 --| @rewrite
 theorem sb_c_fsb {x: set} (t: set x) (A B C D: class x):
-  $ (⟦ x / t ⟧ (fsb A B C D)) ≐ fsb (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) $;
+  $ ([[ x / t ]] (fsb A B C D)) ≐ fsb ([[ x / t ]] A) ([[ x / t ]] B) ([[ x / t ]] C) ([[ x / t ]] D) $;
 
 --| The satisfying assignments of every formula.
 def fsf (A: class) (.k .j .v: set): class = $ trc ω (cgr3 k j v (fsb A k j v)) $;
@@ -105,9 +105,9 @@ def fsf (A: class) (.k .j .v: set): class = $ trc ω (cgr3 k j v (fsb A k j v)) 
 theorem fsf_congr (A B: class): $ A ≐ B $ > $ fsf A ≐ fsf B $;
 --| @rewrite
 theorem sb_c_fsf {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (fsf A)) ≐ fsf (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (fsf A)) ≐ fsf ([[ x / t ]] A) $;
 
---| Satisfaction `⟪ A , S ⊨ C ⟫`: the assignment `S` (a finite sequence over `A`, the value of the index `0` first)
+--| Satisfaction `⟅ A , S ⊨ C ⟆`: the assignment `S` (a finite sequence over `A`, the value of the index `0` first)
 --| satisfies the formula `C` in the structure `(A, ∈)`. The equations are `fsat_bot` to `fsat_in`.
 def fsat (A S C: class): fml =
   $ S ∈ (fsf A)' C $;
@@ -115,11 +115,11 @@ def fsat (A S C: class): fml =
 theorem fsat_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ fsat A C E ⟺ fsat B D F $;
 --| @rewrite
 theorem sb_f_fsat {x: set} (t: set x) (A B C: class x):
-  $ [x/t] (fsat A B C) ⟺ fsat (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+  $ [ x / t ] (fsat A B C) ⟺ fsat ([[ x / t ]] A) ([[ x / t ]] B) ([[ x / t ]] C) $;
 
-notation fsat (A S C: class): fml = ($⟪$:max) A ($,$:5) S ($⊨$:50) C ($⟫$:0);
+notation fsat (A S C: class): fml = ($⟅$:max) A ($,$:5) S ($⊨$:50) C ($⟆$:0);
 --| Truth `A ⊨ C`: the sentence `C` is satisfied in `(A, ∈)` by the empty assignment.
-def ftrue (A C: class): fml = $ ⟪ A , ∅ ⊨ C ⟫ $;
+def ftrue (A C: class): fml = $ ⟅ A , ∅ ⊨ C ⟆ $;
 infixl ftrue: $⊨$ prec 50;
 
 -- --------------------------------------------------------------------------
@@ -129,55 +129,55 @@ infixl ftrue: $⊨$ prec 50;
 
 --| The tree of the Lean term `Π A. B`, from the trees of `A` and `B`.
 def tpi (A B: class): class =
-  $ ⟨ kc_pi , scons A (scons B ∅) ⟩ $;
+  $ ⟨ kc_pi , A +: B +: ∅ ⟩ $;
 --| @congr
 theorem tpi_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ tpi A C ≐ tpi B D $;
 --| @rewrite
 theorem sb_c_tpi {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (tpi A B)) ≐ tpi (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (tpi A B)) ≐ tpi ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 --| The tree of the Lean term `f @ a`, from the trees of `f` and `a`.
 def tapp (A B: class): class =
-  $ ⟨ kc_app , scons A (scons B ∅) ⟩ $;
+  $ ⟨ kc_app , A +: B +: ∅ ⟩ $;
 --| @congr
 theorem tapp_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ tapp A C ≐ tapp B D $;
 --| @rewrite
 theorem sb_c_tapp {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (tapp A B)) ≐ tapp (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (tapp A B)) ≐ tapp ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 --| The tree of the Lean variable `#n`, from the tree of the numeral `n`.
 def tbv (N: class): class =
-  $ ⟨ kc_bvar , scons N ∅ ⟩ $;
+  $ ⟨ kc_bvar , N +: ∅ ⟩ $;
 --| @congr
 theorem tbv_congr (A B: class): $ A ≐ B $ > $ tbv A ≐ tbv B $;
 --| @rewrite
 theorem sb_c_tbv {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (tbv A)) ≐ tbv (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (tbv A)) ≐ tbv ([[ x / t ]] A) $;
 
 --| The list `R` of de Bruijn indices (trees of numerals) with every index raised by one: the list under one more Lean
 --| binder.
 def lup (R: class) (.i .y .z: set): class =
-  $ {z | ∃ i ∃ y (z = ⟨ i , ⟨ kc_s , scons y ∅ ⟩ ⟩ ∧ ⟨ i , y ⟩ ∈ R)} $;
+  $ {z | ∃ i ∃ y (z = ⟨ i , ⟨ kc_s , y +: ∅ ⟩ ⟩ ∧ ⟨ i , y ⟩ ∈ R)} $;
 --| @congr
 theorem lup_congr (A B: class): $ A ≐ B $ > $ lup A ≐ lup B $;
 --| @rewrite
 theorem sb_c_lup {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (lup A)) ≐ lup (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (lup A)) ≐ lup ([[ x / t ]] A) $;
 
 --| One step of the Lean form: a trace over the lists of indices.
 def ltb (P E M K S V: class) (.r .i .j .z: set): class =
-  $ {z | (K = ∅ ∧ z ∊ clam r (fseq (trees ω)) (enc_expr lfalse)) ∨
-      (K = suc ∅ ∧ z ∊ clam r (fseq (trees ω)) (tpi (ap (V' ∅) r) (ap (V' (suc ∅)) (lup r)))) ∨
-      (K = suc (suc ∅) ∧ z ∊ clam r (fseq (trees ω)) (tpi P (ap (V' ∅) (scons ⟨ kc_nz , ∅ ⟩ (lup r))))) ∨
+  $ {z | (K = ∅ ∧ z ∊ (λₛ r ∈ fseq (trees ω), enc_expr lfalse)) ∨
+      (K = suc ∅ ∧ z ∊ (λₛ r ∈ fseq (trees ω), tpi (ap (V' ∅) r) (ap (V' (suc ∅)) (lup r)))) ∨
+      (K = suc (suc ∅) ∧ z ∊ (λₛ r ∈ fseq (trees ω), tpi P (ap (V' ∅) (⟨ kc_nz , ∅ ⟩ +: lup r)))) ∨
       (K = suc (suc (suc ∅)) ∧ ∃ i ∃ j (S' ∅ = ⟨ i , ∅ ⟩ ∧ S' (suc ∅) = ⟨ j , ∅ ⟩ ∧
-         z ∊ clam r (fseq (trees ω)) (tapp (tapp E (tbv (r' i))) (tbv (r' j))))) ∨
+         z ∊ (λₛ r ∈ fseq (trees ω), tapp (tapp E (tbv (r' i))) (tbv (r' j))))) ∨
       (K = suc (suc (suc (suc ∅))) ∧ ∃ i ∃ j (S' ∅ = ⟨ i , ∅ ⟩ ∧ S' (suc ∅) = ⟨ j , ∅ ⟩ ∧
-         z ∊ clam r (fseq (trees ω)) (tapp (tapp M (tbv (r' i))) (tbv (r' j)))))} $;
+         z ∊ (λₛ r ∈ fseq (trees ω), tapp (tapp M (tbv (r' i))) (tbv (r' j)))))} $;
 --| @congr
 theorem ltb_congr (A B C D E F H I J K L N: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ L ≐ N $ > $ ltb A C E H J L ≐ ltb B D F I K N $;
 --| @rewrite
 theorem sb_c_ltb {x: set} (t: set x) (A B C D E F: class x):
-  $ (⟦ x / t ⟧ (ltb A B C D E F)) ≐ ltb (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) (⟦ x / t ⟧ F) $;
+  $ ([[ x / t ]] (ltb A B C D E F)) ≐ ltb ([[ x / t ]] A) ([[ x / t ]] B) ([[ x / t ]] C) ([[ x / t ]] D) ([[ x / t ]] E) ([[ x / t ]] F) $;
 
 --| The Lean form of every formula, as a trace over the lists of indices.
 def ltf (P E M: class) (.k .j .v: set): class = $ trc ω (cgr3 k j v (ltb P E M k j v)) $;
@@ -185,7 +185,7 @@ def ltf (P E M: class) (.k .j .v: set): class = $ trc ω (cgr3 k j v (ltb P E M 
 theorem ltf_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ ltf A C E ≐ ltf B D F $;
 --| @rewrite
 theorem sb_c_ltf {x: set} (t: set x) (A B C: class x):
-  $ (⟦ x / t ⟧ (ltf A B C)) ≐ ltf (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+  $ ([[ x / t ]] (ltf A B C)) ≐ ltf ([[ x / t ]] A) ([[ x / t ]] B) ([[ x / t ]] C) $;
 
 --| The tree of the Lean term of the formula `C`. `R` lists the Lean de Bruijn indices of the formula's variables, `P`
 --| is the tree of the type of sets and `E`, `M` are the trees of the relations that stand for `=` and `∈`. The
@@ -196,7 +196,7 @@ def ltr (P E M C R: class): class =
 theorem ltr_congr (A B C D E F H I J K: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ J ≐ K $ > $ ltr A C E H J ≐ ltr B D F I K $;
 --| @rewrite
 theorem sb_c_ltr {x: set} (t: set x) (A B C D E: class x):
-  $ (⟦ x / t ⟧ (ltr A B C D E)) ≐ ltr (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) (⟦ x / t ⟧ E) $;
+  $ ([[ x / t ]] (ltr A B C D E)) ≐ ltr ([[ x / t ]] A) ([[ x / t ]] B) ([[ x / t ]] C) ([[ x / t ]] D) ([[ x / t ]] E) $;
 
 --| The Lean form of the sentence `C` of set theory, as the tree of a closed Lean proposition: quantifiers range over
 --| `pset b`, and `=`, `∈` are the relations `E`, `M`.
@@ -209,24 +209,24 @@ def lsent (b: blk) (E M: expr) (C: class): class = $ ltr (enc_expr (pset b)) (en
 
 --| No assignment satisfies `⊥ₒ`.
 theorem fsat_bot (G: hyps) (A: class) (a: set): $ G ⇒ isset A $ > $ G ⇒ a ∊ fseq A $ > 
-  $ G ⇒ ¬ ⟪ A , a ⊨ ⊥ₒ ⟫ $;
+  $ G ⇒ ¬ ⟅ A , a ⊨ ⊥ₒ ⟆ $;
 
 --| Satisfaction at an implication.
 theorem fsat_imp (G: hyps) (A: class) (a p q: set): $ G ⇒ isset A $ > $ G ⇒ a ∊ fseq A $ > $ G ⇒ p ∊ trees ω $ > $ G ⇒ q ∊ trees ω $ > 
-  $ G ⇒ (⟪ A , a ⊨ p →ₒ q ⟫ ↔ (⟪ A , a ⊨ p ⟫ → ⟪ A , a ⊨ q ⟫)) $;
+  $ G ⇒ (⟅ A , a ⊨ p →ₒ q ⟆ ↔ (⟅ A , a ⊨ p ⟆ → ⟅ A , a ⊨ q ⟆)) $;
 
 --| Satisfaction at a universal quantifier: the body is satisfied with every element of `A` put in front of the
 --| assignment.
 theorem fsat_all {x: set} (G: hyps) (A: class) (a p: set): $ G ⇒ isset A $ > $ G ⇒ a ∊ fseq A $ > $ G ⇒ p ∊ trees ω $ > 
-  $ G ⇒ (⟪ A , a ⊨ ∀ₒ p ⟫ ↔ ∀ x (x ∊ A → ⟪ A , scons x a ⊨ p ⟫)) $;
+  $ G ⇒ (⟅ A , a ⊨ ∀ₒ p ⟆ ↔ ∀ x (x ∊ A → ⟅ A , x +: a ⊨ p ⟆)) $;
 
 --| Satisfaction at an equation: the assignment's values at the two indices are equal.
 theorem fsat_eq (G: hyps) (A: class) (a i j: set): $ G ⇒ isset A $ > $ G ⇒ a ∊ fseq A $ > $ G ⇒ i ∊ ω $ > $ G ⇒ j ∊ ω $ > 
-  $ G ⇒ (⟪ A , a ⊨ i =ₒ j ⟫ ↔ a' i = a' j) $;
+  $ G ⇒ (⟅ A , a ⊨ i =ₒ j ⟆ ↔ a' i = a' j) $;
 
 --| Satisfaction at a membership: the assignment's value at the first index is an element of its value at the second.
 theorem fsat_in (G: hyps) (A: class) (a i j: set): $ G ⇒ isset A $ > $ G ⇒ a ∊ fseq A $ > $ G ⇒ i ∊ ω $ > $ G ⇒ j ∊ ω $ > 
-  $ G ⇒ (⟪ A , a ⊨ i ∈ₒ j ⟫ ↔ a' i ∈ a' j) $;
+  $ G ⇒ (⟅ A , a ⊨ i ∈ₒ j ⟆ ↔ a' i ∈ a' j) $;
 
 --| The Lean form of `⊥ₒ` is `lfalse`.
 theorem ltr_bot (G: hyps) (P E M: class) (r: set): $ G ⇒ r ∊ fseq (trees ω) $ > 
@@ -239,7 +239,7 @@ theorem ltr_imp (G: hyps) (P E M: class) (p q r: set): $ G ⇒ r ∊ fseq (trees
 --| The Lean form of a universal quantifier is a `Π` over the type of sets; the bound variable is `#0` in the body and
 --| the other indices are raised.
 theorem ltr_all (G: hyps) (P E M: class) (p r: set): $ G ⇒ r ∊ fseq (trees ω) $ > $ G ⇒ p ∊ trees ω $ > 
-  $ G ⇒ ltr P E M (∀ₒ p) r = tpi P (ltr P E M p (scons ⟨ kc_nz , ∅ ⟩ (lup r))) $;
+  $ G ⇒ ltr P E M (∀ₒ p) r = tpi P (ltr P E M p (⟨ kc_nz , ∅ ⟩ +: lup r)) $;
 
 --| The Lean form of an equation is `E` applied to the two variables.
 theorem ltr_eq (G: hyps) (P E M: class) (i j r: set): $ G ⇒ r ∊ fseq (trees ω) $ > $ G ⇒ i ∊ ω $ > $ G ⇒ j ∊ ω $ > 
@@ -258,7 +258,6 @@ theorem ltr_in (G: hyps) (P E M: class) (i j r: set): $ G ⇒ r ∊ fseq (trees 
 -- Readback
 -- --------------------------------------------------------------------------
 
-notation ty (G: ctx) (e A: expr): wff = ($⟮$:0) G ($⊢$:0) e ($:$:0) A ($⟯$:0);
 
 --| `E` and `M` are closed relations on `pset b` with the characterizations of `PSet.Equiv` and `PSet.Mem`. The
 --| statement packs the nine premises of `pset_rels_i` into one, in the terms of the model; it is meant to be obtained
@@ -277,7 +276,7 @@ def pset_rels (b: blk) (E M: expr) (.u .w .r .x: set): wff =
 --| The premises on the relations, in the spec's terms: `E` and `M` are closed, have the type `pset b → pset b → Prop`,
 --| and the five characterizations (`pset_e1` to `pset_m2`) are provable.
 theorem pset_rels_i (b: blk) (E M: expr):
-  $ closed nz E $ > $ closed nz M $ > $ ⟮ nil ⊢ E : pi (pset b) (pi (pset b) Prop) ⟯ $ > $ ⟮ nil ⊢ M : pi (pset b) (pi (pset b) Prop) ⟯ $ >
+  $ closed nz E $ > $ closed nz M $ > $ ⟦ₜ nil ⊢ E : pi (pset b) (pi (pset b) Prop) ⟧ $ > $ ⟦ₜ nil ⊢ M : pi (pset b) (pi (pset b) Prop) ⟧ $ >
   $ inh nil (pset_e1 b E) $ > $ inh nil (pset_e2 b E) $ > $ inh nil (pset_e3 b E) $ > $ inh nil (pset_m1 b E M) $ > $ inh nil (pset_m2 b E M) $ >
   $ pset_rels b E M $;
 
@@ -298,23 +297,23 @@ theorem pset_readback (b: blk) (E M T: expr) (c: set):
 -- --------------------------------------------------------------------------
 
 --| `fsat_bot` at classes.
-theorem fsat_bot_c (G: hyps) (A S: class): $ G ⇒ isset A $ > $ G ⇒ S ∈ fseq A $ > $ G ⇒ ¬ ⟪ A , S ⊨ ⊥ₒ ⟫ $;
+theorem fsat_bot_c (G: hyps) (A S: class): $ G ⇒ isset A $ > $ G ⇒ S ∈ fseq A $ > $ G ⇒ ¬ ⟅ A , S ⊨ ⊥ₒ ⟆ $;
 
 --| `fsat_imp` at classes.
 theorem fsat_imp_c (G: hyps) (A S P Q: class): $ G ⇒ isset A $ > $ G ⇒ S ∈ fseq A $ > $ G ⇒ P ∈ trees ω $ > $ G ⇒ Q ∈ trees ω $ >
-  $ G ⇒ (⟪ A , S ⊨ P →ₒ Q ⟫ ↔ (⟪ A , S ⊨ P ⟫ → ⟪ A , S ⊨ Q ⟫)) $;
+  $ G ⇒ (⟅ A , S ⊨ P →ₒ Q ⟆ ↔ (⟅ A , S ⊨ P ⟆ → ⟅ A , S ⊨ Q ⟆)) $;
 
 --| `fsat_all` at classes.
 theorem fsat_all_c {x: set} (G: hyps) (A S P: class): $ G ⇒ isset A $ > $ G ⇒ S ∈ fseq A $ > $ G ⇒ P ∈ trees ω $ >
-  $ G ⇒ (⟪ A , S ⊨ ∀ₒ P ⟫ ↔ ∀ x (x ∊ A → ⟪ A , scons x S ⊨ P ⟫)) $;
+  $ G ⇒ (⟅ A , S ⊨ ∀ₒ P ⟆ ↔ ∀ x (x ∊ A → ⟅ A , x +: S ⊨ P ⟆)) $;
 
 --| `fsat_eq` at classes.
 theorem fsat_eq_c (G: hyps) (A S I J: class): $ G ⇒ isset A $ > $ G ⇒ S ∈ fseq A $ > $ G ⇒ I ∈ ω $ > $ G ⇒ J ∈ ω $ >
-  $ G ⇒ (⟪ A , S ⊨ I =ₒ J ⟫ ↔ S' I = S' J) $;
+  $ G ⇒ (⟅ A , S ⊨ I =ₒ J ⟆ ↔ S' I = S' J) $;
 
 --| `fsat_in` at classes.
 theorem fsat_in_c (G: hyps) (A S I J: class): $ G ⇒ isset A $ > $ G ⇒ S ∈ fseq A $ > $ G ⇒ I ∈ ω $ > $ G ⇒ J ∈ ω $ >
-  $ G ⇒ (⟪ A , S ⊨ I ∈ₒ J ⟫ ↔ S' I ∈ S' J) $;
+  $ G ⇒ (⟅ A , S ⊨ I ∈ₒ J ⟆ ↔ S' I ∈ S' J) $;
 
 --| A formula is a tree, and its bound on the free variables a number.
 theorem fm_tree (G: hyps) (N C: class): $ G ⇒ C ∈ fm N $ > $ G ⇒ isset N $ > $ G ⇒ N ∈ ω ∧ C ∈ trees ω $;
@@ -351,7 +350,7 @@ def fnot (P: class): class =
 theorem fnot_congr (A B: class): $ A ≐ B $ > $ fnot A ≐ fnot B $;
 --| @rewrite
 theorem sb_c_fnot {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (fnot A)) ≐ fnot (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (fnot A)) ≐ fnot ([[ x / t ]] A) $;
 
 prefix fnot: $¬ₒ$ prec 41;
 
@@ -362,7 +361,7 @@ def fand (P Q: class): class =
 theorem fand_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ fand A C ≐ fand B D $;
 --| @rewrite
 theorem sb_c_fand {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (fand A B)) ≐ fand (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (fand A B)) ≐ fand ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 infixr fand: $∧ₒ$ prec 30;
 
@@ -373,7 +372,7 @@ def for (P Q: class): class =
 theorem for_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ for A C ≐ for B D $;
 --| @rewrite
 theorem sb_c_for {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (for A B)) ≐ for (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (for A B)) ≐ for ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 infixr for: $∨ₒ$ prec 28;
 
@@ -384,7 +383,7 @@ def fiff (P Q: class): class =
 theorem fiff_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ fiff A C ≐ fiff B D $;
 --| @rewrite
 theorem sb_c_fiff {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (fiff A B)) ≐ fiff (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (fiff A B)) ≐ fiff ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 infixr fiff: $↔ₒ$ prec 20;
 
@@ -395,30 +394,30 @@ def fex (P: class): class =
 theorem fex_congr (A B: class): $ A ≐ B $ > $ fex A ≐ fex B $;
 --| @rewrite
 theorem sb_c_fex {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (fex A)) ≐ fex (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (fex A)) ≐ fex ([[ x / t ]] A) $;
 
 prefix fex: $∃ₒ$ prec 41;
 
 --| Satisfaction at a negation.
 theorem fsat_not_c (G: hyps) (A S P: class): $ G ⇒ isset A $ > $ G ⇒ S ∈ fseq A $ > $ G ⇒ P ∈ trees ω $ >
-  $ G ⇒ (⟪ A , S ⊨ ¬ₒ P ⟫ ↔ ¬ ⟪ A , S ⊨ P ⟫) $;
+  $ G ⇒ (⟅ A , S ⊨ ¬ₒ P ⟆ ↔ ¬ ⟅ A , S ⊨ P ⟆) $;
 
 --| Satisfaction at a conjunction.
 theorem fsat_and_c (G: hyps) (A S P Q: class): $ G ⇒ isset A $ > $ G ⇒ S ∈ fseq A $ > $ G ⇒ P ∈ trees ω $ > $ G ⇒ Q ∈ trees ω $ >
-  $ G ⇒ (⟪ A , S ⊨ P ∧ₒ Q ⟫ ↔ ⟪ A , S ⊨ P ⟫ ∧ ⟪ A , S ⊨ Q ⟫) $;
+  $ G ⇒ (⟅ A , S ⊨ P ∧ₒ Q ⟆ ↔ ⟅ A , S ⊨ P ⟆ ∧ ⟅ A , S ⊨ Q ⟆) $;
 
 --| Satisfaction at a disjunction.
 theorem fsat_or_c (G: hyps) (A S P Q: class): $ G ⇒ isset A $ > $ G ⇒ S ∈ fseq A $ > $ G ⇒ P ∈ trees ω $ > $ G ⇒ Q ∈ trees ω $ >
-  $ G ⇒ (⟪ A , S ⊨ P ∨ₒ Q ⟫ ↔ ⟪ A , S ⊨ P ⟫ ∨ ⟪ A , S ⊨ Q ⟫) $;
+  $ G ⇒ (⟅ A , S ⊨ P ∨ₒ Q ⟆ ↔ ⟅ A , S ⊨ P ⟆ ∨ ⟅ A , S ⊨ Q ⟆) $;
 
 --| Satisfaction at an equivalence.
 theorem fsat_iff_c (G: hyps) (A S P Q: class): $ G ⇒ isset A $ > $ G ⇒ S ∈ fseq A $ > $ G ⇒ P ∈ trees ω $ > $ G ⇒ Q ∈ trees ω $ >
-  $ G ⇒ (⟪ A , S ⊨ P ↔ₒ Q ⟫ ↔ (⟪ A , S ⊨ P ⟫ ↔ ⟪ A , S ⊨ Q ⟫)) $;
+  $ G ⇒ (⟅ A , S ⊨ P ↔ₒ Q ⟆ ↔ (⟅ A , S ⊨ P ⟆ ↔ ⟅ A , S ⊨ Q ⟆)) $;
 
 --| Satisfaction at an existential quantifier: the body is satisfied with some element of `A` put in front of the
 --| assignment.
 theorem fsat_ex_c {x: set} (G: hyps) (A S P: class): $ G ⇒ isset A $ > $ G ⇒ S ∈ fseq A $ > $ G ⇒ P ∈ trees ω $ >
-  $ G ⇒ (⟪ A , S ⊨ ∃ₒ P ⟫ ↔ ∃ x (x ∊ A ∧ ⟪ A , scons x S ⊨ P ⟫)) $;
+  $ G ⇒ (⟅ A , S ⊨ ∃ₒ P ⟆ ↔ ∃ x (x ∊ A ∧ ⟅ A , x +: S ⊨ P ⟆)) $;
 
 --| Formation: a negation.
 theorem fm_not (G: hyps) (N P: class): $ G ⇒ N ∈ ω $ > $ G ⇒ P ∈ fm N $ > $ G ⇒ (¬ₒ P) ∈ fm N $;
@@ -459,7 +458,7 @@ def c_sub (I J: class): class =
 theorem c_sub_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ c_sub A C ≐ c_sub B D $;
 --| @rewrite
 theorem sb_c_c_sub {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (c_sub A B)) ≐ c_sub (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (c_sub A B)) ≐ c_sub ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 --| `X ⊆ Y` with its quantifier bounded by `U`: every element of `U` that is in `X` is in `Y`.
 def r_sub (U X Y: class) (.z: set): fml =
@@ -468,14 +467,14 @@ def r_sub (U X Y: class) (.z: set): fml =
 theorem r_sub_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ r_sub A C E ⟺ r_sub B D F $;
 --| @rewrite
 theorem sb_f_r_sub {x: set} (t: set x) (A B C: class x):
-  $ [x/t] (r_sub A B C) ⟺ r_sub (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+  $ [ x / t ] (r_sub A B C) ⟺ r_sub ([[ x / t ]] A) ([[ x / t ]] B) ([[ x / t ]] C) $;
 
 --| Formation: `c_sub` is a formula when its indices are below `N`.
 theorem fm_sub (G: hyps) (N I J: class): $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ (c_sub I J) ∈ fm N $;
 
 --| `c_sub` is satisfied in `(U, ∈)` exactly when `r_sub` holds of the values of its variables.
 theorem sat_sub (G: hyps) (U S N I J: class) (x1 x2: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ S' I = x1 $ > $ G ⇒ S' J = x2 $ >
-  $ G ⇒ (⟪ U , S ⊨ c_sub I J ⟫ ↔ r_sub U x1 x2) $;
+  $ G ⇒ (⟅ U , S ⊨ c_sub I J ⟆ ↔ r_sub U x1 x2) $;
 
 --| The formula "`x` has no elements", for the variable with index `I`.
 def c_empty (I: class): class =
@@ -484,7 +483,7 @@ def c_empty (I: class): class =
 theorem c_empty_congr (A B: class): $ A ≐ B $ > $ c_empty A ≐ c_empty B $;
 --| @rewrite
 theorem sb_c_c_empty {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (c_empty A)) ≐ c_empty (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (c_empty A)) ≐ c_empty ([[ x / t ]] A) $;
 
 --| "`X` has no elements" with its quantifier bounded by `U`.
 def r_empty (U X: class) (.z: set): fml =
@@ -493,14 +492,14 @@ def r_empty (U X: class) (.z: set): fml =
 theorem r_empty_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ r_empty A C ⟺ r_empty B D $;
 --| @rewrite
 theorem sb_f_r_empty {x: set} (t: set x) (A B: class x):
-  $ [x/t] (r_empty A B) ⟺ r_empty (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ [ x / t ] (r_empty A B) ⟺ r_empty ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 --| Formation: `c_empty` is a formula when its indices are below `N`.
 theorem fm_empty (G: hyps) (N I: class): $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ (c_empty I) ∈ fm N $;
 
 --| `c_empty` is satisfied in `(U, ∈)` exactly when `r_empty` holds of the values of its variables.
 theorem sat_empty (G: hyps) (U S N I: class) (x1: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ S' I = x1 $ >
-  $ G ⇒ (⟪ U , S ⊨ c_empty I ⟫ ↔ r_empty U x1) $;
+  $ G ⇒ (⟅ U , S ⊨ c_empty I ⟆ ↔ r_empty U x1) $;
 
 --| The formula `y = x ∪ {x}`, for the variables `y`, `x` with indices `J`, `I`.
 def c_succ (J I: class): class =
@@ -509,7 +508,7 @@ def c_succ (J I: class): class =
 theorem c_succ_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ c_succ A C ≐ c_succ B D $;
 --| @rewrite
 theorem sb_c_c_succ {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (c_succ A B)) ≐ c_succ (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (c_succ A B)) ≐ c_succ ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 --| `Y = X ∪ {X}` with its quantifier bounded by `U`.
 def r_succ (U Y X: class) (.z: set): fml =
@@ -518,14 +517,14 @@ def r_succ (U Y X: class) (.z: set): fml =
 theorem r_succ_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ r_succ A C E ⟺ r_succ B D F $;
 --| @rewrite
 theorem sb_f_r_succ {x: set} (t: set x) (A B C: class x):
-  $ [x/t] (r_succ A B C) ⟺ r_succ (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+  $ [ x / t ] (r_succ A B C) ⟺ r_succ ([[ x / t ]] A) ([[ x / t ]] B) ([[ x / t ]] C) $;
 
 --| Formation: `c_succ` is a formula when its indices are below `N`.
 theorem fm_succ (G: hyps) (N J I: class): $ G ⇒ N ∈ ω $ > $ G ⇒ J ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ (c_succ J I) ∈ fm N $;
 
 --| `c_succ` is satisfied in `(U, ∈)` exactly when `r_succ` holds of the values of its variables.
 theorem sat_succ (G: hyps) (U S N J I: class) (x1 x2: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ J ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ S' J = x1 $ > $ G ⇒ S' I = x2 $ >
-  $ G ⇒ (⟪ U , S ⊨ c_succ J I ⟫ ↔ r_succ U x1 x2) $;
+  $ G ⇒ (⟅ U , S ⊨ c_succ J I ⟆ ↔ r_succ U x1 x2) $;
 
 --| The formula "`w` is inductive", for the variable with index `I`: it has an empty element and a successor of each of
 --| its elements.
@@ -535,7 +534,7 @@ def c_ind (I: class): class =
 theorem c_ind_congr (A B: class): $ A ≐ B $ > $ c_ind A ≐ c_ind B $;
 --| @rewrite
 theorem sb_c_c_ind {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (c_ind A)) ≐ c_ind (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (c_ind A)) ≐ c_ind ([[ x / t ]] A) $;
 
 --| "`W` is inductive" with its quantifiers bounded by `U`.
 def r_ind (U W: class) (.e .n .y: set): fml =
@@ -544,14 +543,14 @@ def r_ind (U W: class) (.e .n .y: set): fml =
 theorem r_ind_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ r_ind A C ⟺ r_ind B D $;
 --| @rewrite
 theorem sb_f_r_ind {x: set} (t: set x) (A B: class x):
-  $ [x/t] (r_ind A B) ⟺ r_ind (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ [ x / t ] (r_ind A B) ⟺ r_ind ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 --| Formation: `c_ind` is a formula when its indices are below `N`.
 theorem fm_ind (G: hyps) (N I: class): $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ (c_ind I) ∈ fm N $;
 
 --| `c_ind` is satisfied in `(U, ∈)` exactly when `r_ind` holds of the values of its variables.
 theorem sat_ind (G: hyps) (U S N I: class) (x1: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ S' I = x1 $ >
-  $ G ⇒ (⟪ U , S ⊨ c_ind I ⟫ ↔ r_ind U x1) $;
+  $ G ⇒ (⟅ U , S ⊨ c_ind I ⟆ ↔ r_ind U x1) $;
 
 --| The formula "`w` is the least inductive set", for the variable with index `I`.
 def c_omega (I: class): class =
@@ -560,7 +559,7 @@ def c_omega (I: class): class =
 theorem c_omega_congr (A B: class): $ A ≐ B $ > $ c_omega A ≐ c_omega B $;
 --| @rewrite
 theorem sb_c_c_omega {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (c_omega A)) ≐ c_omega (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (c_omega A)) ≐ c_omega ([[ x / t ]] A) $;
 
 --| "`W` is the least inductive set" with its quantifiers bounded by `U`.
 def r_omega (U W: class) (.v: set): fml =
@@ -569,14 +568,14 @@ def r_omega (U W: class) (.v: set): fml =
 theorem r_omega_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ r_omega A C ⟺ r_omega B D $;
 --| @rewrite
 theorem sb_f_r_omega {x: set} (t: set x) (A B: class x):
-  $ [x/t] (r_omega A B) ⟺ r_omega (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ [ x / t ] (r_omega A B) ⟺ r_omega ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 --| Formation: `c_omega` is a formula when its indices are below `N`.
 theorem fm_omega (G: hyps) (N I: class): $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ (c_omega I) ∈ fm N $;
 
 --| `c_omega` is satisfied in `(U, ∈)` exactly when `r_omega` holds of the values of its variables.
 theorem sat_omega (G: hyps) (U S N I: class) (x1: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ S' I = x1 $ >
-  $ G ⇒ (⟪ U , S ⊨ c_omega I ⟫ ↔ r_omega U x1) $;
+  $ G ⇒ (⟅ U , S ⊨ c_omega I ⟆ ↔ r_omega U x1) $;
 
 --| The formula "`p` is the power set of `w`", for the variables `p`, `w` with indices `I`, `J`.
 def c_pow (I J: class): class =
@@ -585,7 +584,7 @@ def c_pow (I J: class): class =
 theorem c_pow_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ c_pow A C ≐ c_pow B D $;
 --| @rewrite
 theorem sb_c_c_pow {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (c_pow A B)) ≐ c_pow (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (c_pow A B)) ≐ c_pow ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 --| "`P` is the power set of `W`" with its quantifiers bounded by `U`.
 def r_pow (U P W: class) (.z: set): fml =
@@ -594,14 +593,14 @@ def r_pow (U P W: class) (.z: set): fml =
 theorem r_pow_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ r_pow A C E ⟺ r_pow B D F $;
 --| @rewrite
 theorem sb_f_r_pow {x: set} (t: set x) (A B C: class x):
-  $ [x/t] (r_pow A B C) ⟺ r_pow (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+  $ [ x / t ] (r_pow A B C) ⟺ r_pow ([[ x / t ]] A) ([[ x / t ]] B) ([[ x / t ]] C) $;
 
 --| Formation: `c_pow` is a formula when its indices are below `N`.
 theorem fm_pow (G: hyps) (N I J: class): $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ (c_pow I J) ∈ fm N $;
 
 --| `c_pow` is satisfied in `(U, ∈)` exactly when `r_pow` holds of the values of its variables.
 theorem sat_pow (G: hyps) (U S N I J: class) (x1 x2: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ S' I = x1 $ > $ G ⇒ S' J = x2 $ >
-  $ G ⇒ (⟪ U , S ⊨ c_pow I J ⟫ ↔ r_pow U x1 x2) $;
+  $ G ⇒ (⟅ U , S ⊨ c_pow I J ⟆ ↔ r_pow U x1 x2) $;
 
 --| The formula `c = {a, b}`, for the variables `c`, `a`, `b` with indices `K`, `I`, `J`.
 def c_pair (K I J: class): class =
@@ -610,7 +609,7 @@ def c_pair (K I J: class): class =
 theorem c_pair_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ c_pair A C E ≐ c_pair B D F $;
 --| @rewrite
 theorem sb_c_c_pair {x: set} (t: set x) (A B C: class x):
-  $ (⟦ x / t ⟧ (c_pair A B C)) ≐ c_pair (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+  $ ([[ x / t ]] (c_pair A B C)) ≐ c_pair ([[ x / t ]] A) ([[ x / t ]] B) ([[ x / t ]] C) $;
 
 --| `C = {A, B}` with its quantifier bounded by `U`.
 def r_pair (U C A B: class) (.z: set): fml =
@@ -619,14 +618,14 @@ def r_pair (U C A B: class) (.z: set): fml =
 theorem r_pair_congr (A B C D E F H I: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ r_pair A C E H ⟺ r_pair B D F I $;
 --| @rewrite
 theorem sb_f_r_pair {x: set} (t: set x) (A B C D: class x):
-  $ [x/t] (r_pair A B C D) ⟺ r_pair (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) $;
+  $ [ x / t ] (r_pair A B C D) ⟺ r_pair ([[ x / t ]] A) ([[ x / t ]] B) ([[ x / t ]] C) ([[ x / t ]] D) $;
 
 --| Formation: `c_pair` is a formula when its indices are below `N`.
 theorem fm_pair (G: hyps) (N K I J: class): $ G ⇒ N ∈ ω $ > $ G ⇒ K ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ (c_pair K I J) ∈ fm N $;
 
 --| `c_pair` is satisfied in `(U, ∈)` exactly when `r_pair` holds of the values of its variables.
 theorem sat_pair (G: hyps) (U S N K I J: class) (x1 x2 x3: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ K ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ S' K = x1 $ > $ G ⇒ S' I = x2 $ > $ G ⇒ S' J = x3 $ >
-  $ G ⇒ (⟪ U , S ⊨ c_pair K I J ⟫ ↔ r_pair U x1 x2 x3) $;
+  $ G ⇒ (⟅ U , S ⊨ c_pair K I J ⟆ ↔ r_pair U x1 x2 x3) $;
 
 --| The formula `o = ⟨a, b⟩` (Kuratowski's pair), for the variables `o`, `a`, `b` with indices `K`, `I`, `J`.
 def c_opair (K I J: class): class =
@@ -635,7 +634,7 @@ def c_opair (K I J: class): class =
 theorem c_opair_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ c_opair A C E ≐ c_opair B D F $;
 --| @rewrite
 theorem sb_c_c_opair {x: set} (t: set x) (A B C: class x):
-  $ (⟦ x / t ⟧ (c_opair A B C)) ≐ c_opair (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+  $ ([[ x / t ]] (c_opair A B C)) ≐ c_opair ([[ x / t ]] A) ([[ x / t ]] B) ([[ x / t ]] C) $;
 
 --| `O = ⟨A, B⟩` with its quantifiers bounded by `U`.
 def r_opair (U O A B: class) (.c .d: set): fml =
@@ -644,14 +643,14 @@ def r_opair (U O A B: class) (.c .d: set): fml =
 theorem r_opair_congr (A B C D E F H I: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ r_opair A C E H ⟺ r_opair B D F I $;
 --| @rewrite
 theorem sb_f_r_opair {x: set} (t: set x) (A B C D: class x):
-  $ [x/t] (r_opair A B C D) ⟺ r_opair (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) $;
+  $ [ x / t ] (r_opair A B C D) ⟺ r_opair ([[ x / t ]] A) ([[ x / t ]] B) ([[ x / t ]] C) ([[ x / t ]] D) $;
 
 --| Formation: `c_opair` is a formula when its indices are below `N`.
 theorem fm_opair (G: hyps) (N K I J: class): $ G ⇒ N ∈ ω $ > $ G ⇒ K ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ (c_opair K I J) ∈ fm N $;
 
 --| `c_opair` is satisfied in `(U, ∈)` exactly when `r_opair` holds of the values of its variables.
 theorem sat_opair (G: hyps) (U S N K I J: class) (x1 x2 x3: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ K ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ S' K = x1 $ > $ G ⇒ S' I = x2 $ > $ G ⇒ S' J = x3 $ >
-  $ G ⇒ (⟪ U , S ⊨ c_opair K I J ⟫ ↔ r_opair U x1 x2 x3) $;
+  $ G ⇒ (⟅ U , S ⊨ c_opair K I J ⟆ ↔ r_opair U x1 x2 x3) $;
 
 --| The formula "`f` has a one-to-one map from `a` into `b` among its elements", for the variables `f`, `a`, `b` with
 --| indices `K`, `I`, `J`: every element of `a` has a pair in `f` with an element of `b`, and two pairs in `f` have
@@ -662,7 +661,7 @@ def c_inj (K I J: class): class =
 theorem c_inj_congr (A B C D E F: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ c_inj A C E ≐ c_inj B D F $;
 --| @rewrite
 theorem sb_c_c_inj {x: set} (t: set x) (A B C: class x):
-  $ (⟦ x / t ⟧ (c_inj A B C)) ≐ c_inj (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+  $ ([[ x / t ]] (c_inj A B C)) ≐ c_inj ([[ x / t ]] A) ([[ x / t ]] B) ([[ x / t ]] C) $;
 
 --| "`F` has a one-to-one map from `A` into `B` among its elements" with its quantifiers bounded by `U`.
 def r_inj (U F A B: class) (.a .b .c .d .o .p: set): fml =
@@ -671,14 +670,14 @@ def r_inj (U F A B: class) (.a .b .c .d .o .p: set): fml =
 theorem r_inj_congr (A B C D E F H I: class): $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ H ≐ I $ > $ r_inj A C E H ⟺ r_inj B D F I $;
 --| @rewrite
 theorem sb_f_r_inj {x: set} (t: set x) (A B C D: class x):
-  $ [x/t] (r_inj A B C D) ⟺ r_inj (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) (⟦ x / t ⟧ D) $;
+  $ [ x / t ] (r_inj A B C D) ⟺ r_inj ([[ x / t ]] A) ([[ x / t ]] B) ([[ x / t ]] C) ([[ x / t ]] D) $;
 
 --| Formation: `c_inj` is a formula when its indices are below `N`.
 theorem fm_inj (G: hyps) (N K I J: class): $ G ⇒ N ∈ ω $ > $ G ⇒ K ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ (c_inj K I J) ∈ fm N $;
 
 --| `c_inj` is satisfied in `(U, ∈)` exactly when `r_inj` holds of the values of its variables.
 theorem sat_inj (G: hyps) (U S N K I J: class) (x1 x2 x3: set): $ G ⇒ isset U $ > $ G ⇒ S ∈ fseq U $ > $ G ⇒ N ∈ ω $ > $ G ⇒ K ∈ N $ > $ G ⇒ I ∈ N $ > $ G ⇒ J ∈ N $ > $ G ⇒ S' K = x1 $ > $ G ⇒ S' I = x2 $ > $ G ⇒ S' J = x3 $ >
-  $ G ⇒ (⟪ U , S ⊨ c_inj K I J ⟫ ↔ r_inj U x1 x2 x3) $;
+  $ G ⇒ (⟅ U , S ⊨ c_inj K I J ⟆ ↔ r_inj U x1 x2 x3) $;
 
 --| The continuum hypothesis, as a sentence of set theory: for `ω` and its power set `p`, every subset `a` of `p` maps
 --| one-to-one into `ω`, or `p` maps one-to-one into `a`.
@@ -692,7 +691,7 @@ def r_ch (U: class) (.w .p .a .f: set): fml =
 theorem r_ch_congr (A B: class): $ A ≐ B $ > $ r_ch A ⟺ r_ch B $;
 --| @rewrite
 theorem sb_f_r_ch {x: set} (t: set x) (A: class x):
-  $ [x/t] (r_ch A) ⟺ r_ch (⟦ x / t ⟧ A) $;
+  $ [ x / t ] (r_ch A) ⟺ r_ch ([[ x / t ]] A) $;
 
 
 --| `ch_code` is a sentence.

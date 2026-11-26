@@ -15,7 +15,7 @@
 -- form a context `G` joined by `,` and treated as a set (ACUI). Classes are as
 -- in set.mm: a set variable is coerced to the class of its members, `a ∊ A` is
 -- membership of a set variable in a class, and the general `A ∈ B`, equality
--- `A = B` and `isset A` are definitions. Substitution `[x/t] p` and `⟦ x / t ⟧ A`
+-- `A = B` and `isset A` are definitions. Substitution `[ x / t ] p` and `[[ x / t ]] A`
 -- of a set variable `t` for `x` is a term with defining equations, one per
 -- primitive constructor, plus the laws the equations do not give on a
 -- schematic formula (composition, vacuity under a rebinding of the same
@@ -24,10 +24,13 @@
 --
 -- The deduction layer follows Aufbau's zermelo.mm0 and its manual: the
 -- propositional rules share their context and weakening is a rule; the
--- quantifier and equality rules join the contexts of their premises. Names and
--- tokens avoid those of spec/lean.mm0, with which this file is joined.
+-- quantifier and equality rules join the contexts of their premises. Names avoid
+-- those of spec/lean.mm0, with which this file is joined, and the two files'
+-- notations form one scheme: a token has one precedence in both, a family of
+-- notations has one pair of brackets, and each notation has an ASCII form
+-- (declared first) and a Unicode form.
 
-delimiter $ ( ) { } [ / ] , | $;
+delimiter $ ( ) { } , $;
 
 --| Formulas of set theory. Not a provable sort: a formula is asserted only as
 --| the conclusion of a sequent `G ⇒ p`.
@@ -95,7 +98,7 @@ term ex {x: set} (p: fml x): fml;
 prefix ex: $E.$ prec 41;
 prefix ex: $∃$ prec 41;
 
---| Substitution `[x/t] p`: the formula `p` with the set `t` in place of the
+--| Substitution `[ x / t ] p`: the formula `p` with the set `t` in place of the
 --| variable `x`.
 --|
 --| A term of the language, not an operation of the metatheory: the equations
@@ -122,11 +125,11 @@ term welc (a: set) (A: class): fml;
 infixl welc: $ec.$ prec 50;
 infixl welc: $∊$ prec 50;
 
---| Substitution `⟦ x / t ⟧ A`: the class `A` with the set `t` in place of the
+--| Substitution `[[ x / t ]] A`: the class `A` with the set `t` in place of the
 --| variable `x`. Computed by the equations `sb_c_*`, as `sb_f` is by its own.
 term sb_c {x: set} (t: set x) (A: class x): class;
 notation sb_c {x: set} (t: set x) (A: class x): class =
-  ($⟦$:41) x ($/$:0) t ($⟧$:0) A;
+  ($[[$:41) x ($/$:0) t ($]]$:0) A;
 
 -- --------------------------------------------------------------------------
 -- Judgments
@@ -272,13 +275,13 @@ axiom all_intro (G: hyps) {x: set} (p: fml x):
 --| @recover t q p x
 --| @auto forward
 axiom all_elim {x: set} (G: hyps x) (t: set x) (p: fml x):
-  $ G ⇒ ∀ x p $ > $ G ⇒ [x/t] p $;
+  $ G ⇒ ∀ x p $ > $ G ⇒ [ x / t ] p $;
 
 --| Existential introduction: `∃ x p` from the instance of `p` at a witness `t`.
 --| @view {x:set}(G:hyps x)(t:set x)(p:fml x)(q:fml x): $ G ⇒ q $ > $ G ⇒ ∃ x p $
 --| @recover t q p x
 axiom ex_intro {x: set} (G: hyps x) (t: set x) (p: fml x):
-  $ G ⇒ [x/t] p $ > $ G ⇒ ∃ x p $;
+  $ G ⇒ [ x / t ] p $ > $ G ⇒ ∃ x p $;
 
 --| Existential elimination: `c` follows from `∃ x p` when it follows from `p`
 --| under hypotheses `H`, where `x` is free in neither `H` nor `c`.
@@ -345,69 +348,69 @@ theorem iff_congr (p q r s: fml):
 
 --| Substitution for a variable the formula does not depend on changes nothing.
 --| @rewrite
-axiom sb_f_vac {x: set} (t: set x) (p: fml): $ [x/t] p ⟺ p $;
+axiom sb_f_vac {x: set} (t: set x) (p: fml): $ [ x / t ] p ⟺ p $;
 --| Substitution of a variable for itself changes nothing.
 --| @rewrite
-axiom sb_f_id {x: set} (p: fml x): $ [x/x] p ⟺ p $;
+axiom sb_f_id {x: set} (p: fml x): $ [ x / x ] p ⟺ p $;
 --| Substitution distributes over `→`.
 --| @rewrite
 axiom sb_f_im {x: set} (t: set x) (p q: fml x):
-  $ [x/t] (p → q) ⟺ ([x/t] p → [x/t] q) $;
+  $ [ x / t ] (p → q) ⟺ ([ x / t ] p → [ x / t ] q) $;
 --| Substitution distributes over `¬`.
 --| @rewrite
 axiom sb_f_not {x: set} (t: set x) (p: fml x):
-  $ [x/t] (¬ p) ⟺ ¬ [x/t] p $;
+  $ [ x / t ] (¬ p) ⟺ ¬ [ x / t ] p $;
 --| Substitution distributes over `∧`.
 --| @rewrite
 axiom sb_f_and {x: set} (t: set x) (p q: fml x):
-  $ [x/t] (p ∧ q) ⟺ ([x/t] p ∧ [x/t] q) $;
+  $ [ x / t ] (p ∧ q) ⟺ ([ x / t ] p ∧ [ x / t ] q) $;
 --| Substitution distributes over `∨`.
 --| @rewrite
 axiom sb_f_or {x: set} (t: set x) (p q: fml x):
-  $ [x/t] (p ∨ q) ⟺ ([x/t] p ∨ [x/t] q) $;
+  $ [ x / t ] (p ∨ q) ⟺ ([ x / t ] p ∨ [ x / t ] q) $;
 --| Substitution distributes over `↔`.
 --| @rewrite
 axiom sb_f_bi {x: set} (t: set x) (p q: fml x):
-  $ [x/t] (p ↔ q) ⟺ ([x/t] p ↔ [x/t] q) $;
+  $ [ x / t ] (p ↔ q) ⟺ ([ x / t ] p ↔ [ x / t ] q) $;
 --| Substitution goes under `∀` on another variable. Nothing is captured: `t` is
 --| not declared to depend on `y`.
 --| @rewrite
 axiom sb_f_all {x y: set} (t: set x) (p: fml x y):
-  $ [x/t] (∀ y p) ⟺ ∀ y [x/t] p $;
+  $ [ x / t ] (∀ y p) ⟺ ∀ y [ x / t ] p $;
 --| Substitution goes under `∃` on another variable. Nothing is captured: `t` is
 --| not declared to depend on `y`.
 --| @rewrite
 axiom sb_f_ex {x y: set} (t: set x) (p: fml x y):
-  $ [x/t] (∃ y p) ⟺ ∃ y [x/t] p $;
+  $ [ x / t ] (∃ y p) ⟺ ∃ y [ x / t ] p $;
 --| Substitution at the atom `x ∊ A`, for a class `A` that does not depend on
 --| `x`.
 --| @rewrite
 axiom sb_f_welc_var_vac {x: set} (t: set x) (A: class):
-  $ [x/t] (x ∊ A) ⟺ t ∊ A $;
+  $ [ x / t ] (x ∊ A) ⟺ t ∊ A $;
 --| Substitution at the atom `y ∊ A`, for another variable `y` and a class `A`
 --| that does not depend on `x`.
 --| @rewrite
 axiom sb_f_welc_other_vac {x y: set} (t: set x) (A: class):
-  $ [x/t] (y ∊ A) ⟺ y ∊ A $;
+  $ [ x / t ] (y ∊ A) ⟺ y ∊ A $;
 --| Substitution at the atom `x ∊ A`.
 --| @rewrite
 axiom sb_f_welc_var {x: set} (t: set x) (A: class x):
-  $ [x/t] (x ∊ A) ⟺ t ∊ (⟦ x / t ⟧ A) $;
+  $ [ x / t ] (x ∊ A) ⟺ t ∊ ([[ x / t ]] A) $;
 --| Substitution at the atom `y ∊ A`, for another variable `y`.
 --| @rewrite
 axiom sb_f_welc_other {x y: set} (t: set x) (A: class x):
-  $ [x/t] (y ∊ A) ⟺ y ∊ (⟦ x / t ⟧ A) $;
+  $ [ x / t ] (y ∊ A) ⟺ y ∊ ([[ x / t ]] A) $;
 
 --| Renaming the bound variable of `∀` to a variable `y` that `p` does not
 --| depend on.
 --| @alpha x y
 axiom all_alpha {x y: set} (p: fml x):
-  $ ∀ x p ⟺ ∀ y ([x/y] p) $;
+  $ ∀ x p ⟺ ∀ y ([ x / y ] p) $;
 --| Renaming the bound variable of `∃` to a variable `y` that `p` does not
 --| depend on.
 --| @alpha x y
 axiom ex_alpha {x y: set} (p: fml x):
-  $ ∃ x p ⟺ ∃ y ([x/y] p) $;
+  $ ∃ x p ⟺ ∃ y ([ x / y ] p) $;
 
 -- Substitution laws that the equations above do not give (they are schemas
 -- over a formula `p`, and nothing here does induction on formulas):
@@ -419,20 +422,20 @@ axiom ex_alpha {x y: set} (p: fml x):
 --| then substituting `t` for `y`, is substituting `t` for `x`.
 --| @rewrite
 axiom sb_f_comp {x y: set} (t: set x y) (p: fml x):
-  $ [y/t] ([x/y] p) ⟺ [x/t] p $;
+  $ [ y / t ] ([ x / y ] p) ⟺ [ x / t ] p $;
 --| After a substitution for `x` of a set that does not depend on `x`, a second
 --| substitution for `x` changes nothing.
 --| @rewrite
 axiom sb_f_sb_same {x: set} (t: set x) (u: set) (p: fml x):
-  $ [x/t] ([x/u] p) ⟺ [x/u] p $;
+  $ [ x / t ] ([ x / u ] p) ⟺ [ x / u ] p $;
 --| Substitution for the variable that `∀` binds changes nothing.
 --| @rewrite
 axiom sb_f_all_same {x: set} (t: set x) (p: fml x):
-  $ [x/t] (∀ x p) ⟺ ∀ x p $;
+  $ [ x / t ] (∀ x p) ⟺ ∀ x p $;
 --| Substitution for the variable that `∃` binds changes nothing.
 --| @rewrite
 axiom sb_f_ex_same {x: set} (t: set x) (p: fml x):
-  $ [x/t] (∃ x p) ⟺ ∃ x p $;
+  $ [ x / t ] (∃ x p) ⟺ ∃ x p $;
 
 -- --------------------------------------------------------------------------
 -- Equality, membership and sethood, as definitions
@@ -472,16 +475,16 @@ def seqt (a b: set): wff = $ a ≐ b $;
 --| @abstract p q r z a b
 --| @fresh z
 axiom eq_replace (G H: hyps) {z: set} (a b: set) (p: fml z):
-  $ G ⇒ a = b $ > $ H ⇒ [z/a] p $ > $ G , H ⇒ [z/b] p $;
+  $ G ⇒ a = b $ > $ H ⇒ [ z / a ] p $ > $ G , H ⇒ [ z / b ] p $;
 
 --| Class abstraction, introduction: a set that satisfies `p` is a member of `{x
 --| | p}`.
 --| @view {x: set} (G: hyps x) (t: set x) (p: fml x) (q: fml): $ G ⇒ q $ > $ G ⇒ t ∊ {x | p} $
 axiom cab_intro {x: set} (G: hyps x) (t: set x) (p: fml x):
-  $ G ⇒ [x/t] p $ > $ G ⇒ t ∊ {x | p} $;
+  $ G ⇒ [ x / t ] p $ > $ G ⇒ t ∊ {x | p} $;
 --| Class abstraction, elimination: a member of `{x | p}` satisfies `p`.
 axiom cab_elim {x: set} (G: hyps x) (t: set x) (p: fml x):
-  $ G ⇒ t ∊ {x | p} $ > $ G ⇒ [x/t] p $;
+  $ G ⇒ t ∊ {x | p} $ > $ G ⇒ [ x / t ] p $;
 
 --| Provable equality of classes is reflexive.
 --| @relation class ceqt ceqt_refl ceqt_trans ceqt_sym _
@@ -506,50 +509,50 @@ theorem seqt_sym (a b: set): $ seqt a b $ > $ seqt b a $;
 
 --| Substitution at the variable itself gives the substituted set.
 --| @rewrite
-axiom sb_c_var {x: set} (t: set x): $ (⟦ x / t ⟧ x) ≐ t $;
+axiom sb_c_var {x: set} (t: set x): $ ([[ x / t ]] x) ≐ t $;
 --| Substitution at another variable changes nothing.
 --| @rewrite
-axiom sb_c_other {x y: set} (t: set x): $ (⟦ x / t ⟧ y) ≐ y $;
+axiom sb_c_other {x y: set} (t: set x): $ ([[ x / t ]] y) ≐ y $;
 --| Substitution for a variable the class does not depend on changes nothing.
 --| @rewrite
-axiom sb_c_irrel {x: set} (t: set x) (A: class): $ (⟦ x / t ⟧ A) ≐ A $;
+axiom sb_c_irrel {x: set} (t: set x) (A: class): $ ([[ x / t ]] A) ≐ A $;
 --| Substitution goes under a class abstraction on another variable. Nothing is
 --| captured: `t` is not declared to depend on `y`.
 --| @rewrite
 axiom sb_c_cab {x y: set} (t: set x) (p: fml x y):
-  $ (⟦ x / t ⟧ {y | p}) ≐ {y | [x/t] p} $;
+  $ ([[ x / t ]] {y | p}) ≐ {y | [ x / t ] p} $;
 --| Substitution into a formula respects provable equality of the substituted
 --| sets and equivalence of the formulas.
 --| @congr
 axiom sb_f_congr {x: set} (t u: set x) (p q: fml x):
-  $ seqt t u $ > $ p ⟺ q $ > $ [x/t] p ⟺ [x/u] q $;
+  $ seqt t u $ > $ p ⟺ q $ > $ [ x / t ] p ⟺ [ x / u ] q $;
 --| Substitution into a class respects provable equality of the substituted sets
 --| and of the classes.
 --| @congr
 axiom sb_c_congr {x: set} (t u: set x) (A B: class x):
-  $ seqt t u $ > $ A ≐ B $ > $ (⟦ x / t ⟧ A) ≐ (⟦ x / u ⟧ B) $;
+  $ seqt t u $ > $ A ≐ B $ > $ ([[ x / t ]] A) ≐ ([[ x / u ]] B) $;
 
 -- The substitution laws for classes, and alpha-renaming of an abstraction.
 --| Composition for classes: renaming `x` to a variable `y` that `A` does not
 --| depend on, then substituting `t` for `y`, is substituting `t` for `x`.
 --| @rewrite
 axiom sb_c_comp {x y: set} (t: set x y) (A: class x):
-  $ (⟦ y / t ⟧ (⟦ x / y ⟧ A)) ≐ (⟦ x / t ⟧ A) $;
+  $ ([[ y / t ]] ([[ x / y ]] A)) ≐ ([[ x / t ]] A) $;
 --| After a substitution for `x` of a set that does not depend on `x`, a second
 --| substitution for `x` changes nothing.
 --| @rewrite
 axiom sb_c_sb_same {x: set} (t: set x) (u: set) (A: class x):
-  $ (⟦ x / t ⟧ (⟦ x / u ⟧ A)) ≐ (⟦ x / u ⟧ A) $;
+  $ ([[ x / t ]] ([[ x / u ]] A)) ≐ ([[ x / u ]] A) $;
 --| Substitution for the variable that a class abstraction binds changes
 --| nothing.
 --| @rewrite
 axiom sb_c_cab_same {x: set} (t: set x) (p: fml x):
-  $ (⟦ x / t ⟧ {x | p}) ≐ {x | p} $;
+  $ ([[ x / t ]] {x | p}) ≐ {x | p} $;
 --| Renaming the bound variable of a class abstraction to a variable `y` that
 --| `p` does not depend on.
 --| @alpha x y
 axiom cab_alpha {x y: set} (p: fml x):
-  $ {x | p} ≐ {y | [x/y] p} $;
+  $ {x | p} ≐ {y | [ x / y ] p} $;
 
 -- --------------------------------------------------------------------------
 -- Congruences of the quantifiers, the class constructors, and substitution
@@ -595,19 +598,19 @@ theorem ceqt_congr (A B C D: class):
 --| Substitution distributes over `=`.
 --| @rewrite
 theorem sb_f_ceq {x: set} (t: set x) (A B: class x):
-  $ [x/t] (A = B) ⟺ (⟦ x / t ⟧ A) = (⟦ x / t ⟧ B) $;
+  $ [ x / t ] (A = B) ⟺ ([[ x / t ]] A) = ([[ x / t ]] B) $;
 --| Substitution distributes over `∈`.
 --| @rewrite
 theorem sb_f_wcel {x: set} (t: set x) (A B: class x):
-  $ [x/t] (A ∈ B) ⟺ (⟦ x / t ⟧ A) ∈ (⟦ x / t ⟧ B) $;
+  $ [ x / t ] (A ∈ B) ⟺ ([[ x / t ]] A) ∈ ([[ x / t ]] B) $;
 --| Substitution goes through `isset`.
 --| @rewrite
 theorem sb_f_isset {x: set} (t: set x) (A: class x):
-  $ [x/t] (isset A) ⟺ isset (⟦ x / t ⟧ A) $;
+  $ [ x / t ] (isset A) ⟺ isset ([[ x / t ]] A) $;
 --| Substitution distributes over `⊆`.
 --| @rewrite
 theorem sb_f_subset {x: set} (t: set x) (A B: class x):
-  $ [x/t] (A ⊆ B) ⟺ (⟦ x / t ⟧ A) ⊆ (⟦ x / t ⟧ B) $;
+  $ [ x / t ] (A ⊆ B) ⟺ ([[ x / t ]] A) ⊆ ([[ x / t ]] B) $;
 
 -- --------------------------------------------------------------------------
 -- Set-forming operations, as definitions
@@ -625,6 +628,7 @@ def csn (A: class): class = $ cpr A A $;
 --| Kuratowski's ordered pair `⟨ A , B ⟩`: the pair of the singleton of `A` and
 --| the pair of `A` and `B`.
 def opair (A B: class): class = $ cpr (csn A) (cpr A B) $;
+notation opair (A B: class): class = ($<.$:max) A ($,$:5) B ($>.$:0);
 notation opair (A B: class): class = ($⟨$:max) A ($,$:5) B ($⟩$:0);
 
 --| The union `⋃ A`: the members of the members of `A`.
@@ -656,6 +660,8 @@ def img (F A: class) (.x .y: set): class =
 --| `F` is defined on every element of `A` with a value in `B`.
 def fn_into (F A B: class) (.x .y: set): fml =
   $ functional F ∧ ∀ x (x ∊ A → ∃ y (y ∊ B ∧ ⟨ x , y ⟩ ∈ F)) $;
+notation fn_into (F A B: class): fml = ($<@$:max) F ($:$:0) A ($->$:25) B ($@>$:0);
+notation fn_into (F A B: class): fml = ($⌈$:max) F ($:$:0) A ($→$:25) B ($⌉$:0);
 
 --| `A` has `∅` as a member and the successor of each of its members.
 def inductive (A: class) (.y: set): fml =
@@ -676,14 +682,14 @@ def universe (U: class) (.x .y .f: set): fml =
   $ transitive U ∧
     ∀ x ∀ y (x ∊ U ∧ y ∊ U → cpr x y ∈ U) ∧
     ∀ x (x ∊ U → 𝒫 x ∈ U) ∧
-    ∀ x ∀ f (x ∊ U ∧ fn_into f x U → ⋃ (img f x) ∈ U) $;
+    ∀ x ∀ f (x ∊ U ∧ ⌈ f : x → U ⌉ → ⋃ (img f x) ∈ U) $;
 
 -- Substitution through a defined class operation.
 
 --| Substitution distributes over the unordered pair.
 --| @rewrite
 theorem sb_c_cpr {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (cpr A B)) ≐ cpr (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (cpr A B)) ≐ cpr ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 -- --------------------------------------------------------------------------
 -- The set axioms
@@ -706,14 +712,14 @@ axiom ax_infinity {x: set} (G: hyps): $ G ⇒ ∃ x inductive x $;
 --| holds of a set whenever it holds of all its members.
 --| @freshen G x
 axiom ax_induction {x y: set} (G: hyps) (p: fml x):
-  $ G , ∀ y (y ∊ x → [x/y] p) ⇒ p $ > $ G ⇒ ∀ x p $;
+  $ G , ∀ y (y ∊ x → [ x / y ] p) ⇒ p $ > $ G ⇒ ∀ x p $;
 --| The choice operator: `ch a` is a member of `a` when `a` has a member
 --| (`ax_choice`). An operator in place of the usual statement of choice, which
 --| is the theorem `choice_ex`.
 term ch (a: set): class;
 --| Substitution at the choice operator.
 --| @rewrite
-axiom sb_c_ch {x: set} (t: set x): $ (⟦ x / t ⟧ ch x) ≐ ch t $;
+axiom sb_c_ch {x: set} (t: set x): $ ([[ x / t ]] ch x) ≐ ch t $;
 --| Choice: `ch a` is a member of `a` when `a` has a member.
 axiom ax_choice {x: set} (G: hyps) (a: set): $ G ⇒ ∃ x (x ∊ a) → ch a ∈ a $;
 --| Tarski's axiom, in Grothendieck's form: every set is a member of a universe.

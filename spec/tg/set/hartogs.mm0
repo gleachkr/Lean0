@@ -22,11 +22,13 @@ import "universe.mm0";
 def injective (F: class) (.x .y .z: set): fml =
   $ ∀ x ∀ y ∀ z (⟨ x , z ⟩ ∈ F ∧ ⟨ y , z ⟩ ∈ F → x = y) $;
 --| An injection from `A` into `B`: a function on `A` into `B`, injective on `A`.
-def injects (F A B: class): fml = $ fn_into F A B ∧ injective (F ↾ A) $;
+def injects (F A B: class): fml = $ ⌈ F : A → B ⌉ ∧ injective (F ↾ A) $;
+notation injects (F A B: class): fml = ($<@1$:max) F ($:$:0) A ($->$:25) B ($@>$:0);
+notation injects (F A B: class): fml = ($⌈₁$:max) F ($:$:0) A ($→$:25) B ($⌉$:0);
 --| `A` injects into `B`.
-def inj_into (A B: class) (.f: set): fml = $ ∃ f (injects f A B) $;
+def inj_into (A B: class) (.f: set): fml = $ ∃ f ⌈₁ f : A → B ⌉ $;
 --| The injections of `A` into `B`, as a set when `A` and `B` are.
-def injs (A B: class) (.f: set): class = $ {f | injects f A B ∧ f ⊆ A × B} $;
+def injs (A B: class) (.f: set): class = $ {f | ⌈₁ f : A → B ⌉ ∧ f ⊆ A × B} $;
 
 --| @freshen G x
 --| @freshen G y
@@ -48,62 +50,62 @@ theorem injective_eq (G: hyps) (F H: class):
   $ G ⇒ F = H $ > $ G ⇒ injective F $ > $ G ⇒ injective H $;
 --| @rewrite
 theorem sb_f_injective {x: set} (t: set x) (F: class x):
-  $ [x/t] (injective F) ⟺ injective (⟦ x / t ⟧ F) $;
+  $ [ x / t ] (injective F) ⟺ injective ([[ x / t ]] F) $;
 
 theorem injects_intro (G: hyps) (F A B: class):
-  $ G ⇒ fn_into F A B $ > $ G ⇒ injective (F ↾ A) $ > $ G ⇒ injects F A B $;
+  $ G ⇒ ⌈ F : A → B ⌉ $ > $ G ⇒ injective (F ↾ A) $ > $ G ⇒ ⌈₁ F : A → B ⌉ $;
 theorem injects_fn_into (G: hyps) (F A B: class):
-  $ G ⇒ injects F A B $ > $ G ⇒ fn_into F A B $;
+  $ G ⇒ ⌈₁ F : A → B ⌉ $ > $ G ⇒ ⌈ F : A → B ⌉ $;
 theorem injects_functional (G: hyps) (F A B: class):
-  $ G ⇒ injects F A B $ > $ G ⇒ functional F $;
+  $ G ⇒ ⌈₁ F : A → B ⌉ $ > $ G ⇒ functional F $;
 --| Values of an injection: in `B`, and determining the argument.
 theorem injects_fv (G: hyps) (F A B: class) (a: set):
-  $ G ⇒ injects F A B $ > $ G ⇒ a ∊ A $ > $ G ⇒ F' a ∈ B $;
+  $ G ⇒ ⌈₁ F : A → B ⌉ $ > $ G ⇒ a ∊ A $ > $ G ⇒ F' a ∈ B $;
 theorem injects_fv_in (G: hyps) (F A B: class) (a: set):
-  $ G ⇒ injects F A B $ > $ G ⇒ a ∊ A $ > $ G ⇒ ⟨ a , F' a ⟩ ∈ F $;
+  $ G ⇒ ⌈₁ F : A → B ⌉ $ > $ G ⇒ a ∊ A $ > $ G ⇒ ⟨ a , F' a ⟩ ∈ F $;
 theorem injects_elim_inj (G: hyps) (F A B: class) (a b: set):
-  $ G ⇒ injects F A B $ > $ G ⇒ a ∊ A $ > $ G ⇒ b ∊ A $ > $ G ⇒ F' a = F' b $ >
+  $ G ⇒ ⌈₁ F : A → B ⌉ $ > $ G ⇒ a ∊ A $ > $ G ⇒ b ∊ A $ > $ G ⇒ F' a = F' b $ >
   $ G ⇒ a = b $;
 theorem injects_subset_dom (G: hyps) (F A B C: class):
-  $ G ⇒ injects F A B $ > $ G ⇒ C ⊆ A $ > $ G ⇒ injects F C B $;
+  $ G ⇒ ⌈₁ F : A → B ⌉ $ > $ G ⇒ C ⊆ A $ > $ G ⇒ ⌈₁ F : C → B ⌉ $;
 theorem injects_subset_cod (G: hyps) (F A B C: class):
-  $ G ⇒ injects F A B $ > $ G ⇒ B ⊆ C $ > $ G ⇒ injects F A C $;
+  $ G ⇒ ⌈₁ F : A → B ⌉ $ > $ G ⇒ B ⊆ C $ > $ G ⇒ ⌈₁ F : A → C ⌉ $;
 theorem injects_cres (G: hyps) (F A B: class):
-  $ G ⇒ injects F A B $ > $ G ⇒ injects (F ↾ A) A B $;
+  $ G ⇒ ⌈₁ F : A → B ⌉ $ > $ G ⇒ ⌈₁ F ↾ A : A → B ⌉ $;
 theorem injects_img (G: hyps) (F A B: class):
-  $ G ⇒ injects F A B $ > $ G ⇒ img F A ⊆ B $;
+  $ G ⇒ ⌈₁ F : A → B ⌉ $ > $ G ⇒ img F A ⊆ B $;
 --| The converse of an injection restricted to its domain inverts it.
 theorem injects_ccnv_functional (G: hyps) (F A B: class):
-  $ G ⇒ injects F A B $ > $ G ⇒ functional (ccnv (F ↾ A)) $;
+  $ G ⇒ ⌈₁ F : A → B ⌉ $ > $ G ⇒ functional (ccnv (F ↾ A)) $;
 theorem injects_ccnv_fv (G: hyps) (F A B: class) (a: set):
-  $ G ⇒ injects F A B $ > $ G ⇒ a ∊ A $ > $ G ⇒ (ccnv (F ↾ A))' F' a = a $;
+  $ G ⇒ ⌈₁ F : A → B ⌉ $ > $ G ⇒ a ∊ A $ > $ G ⇒ (ccnv (F ↾ A))' F' a = a $;
 --| The inverse at a value given by a pair of the injection.
 theorem injects_ccnv_fv_pair (G: hyps) (F A B: class) (k z: set):
-  $ G ⇒ injects F A B $ > $ G ⇒ z ∊ A $ > $ G ⇒ ⟨ z , k ⟩ ∈ F $ > $ G ⇒ (ccnv (F ↾ A))' k = z $;
+  $ G ⇒ ⌈₁ F : A → B ⌉ $ > $ G ⇒ z ∊ A $ > $ G ⇒ ⟨ z , k ⟩ ∈ F $ > $ G ⇒ (ccnv (F ↾ A))' k = z $;
 --| The identity on `A` and the composite of two injections.
 theorem injects_id {x: set} (G: hyps x) (A B: class):
-  $ G ⇒ A ⊆ B $ > $ G ⇒ injects (cgr x x ↾ A) A B $;
+  $ G ⇒ A ⊆ B $ > $ G ⇒ ⌈₁ cgr x x ↾ A : A → B ⌉ $;
 theorem injects_ccom (G: hyps) (F H A B C: class):
-  $ G ⇒ injects F A B $ > $ G ⇒ injects H B C $ > $ G ⇒ injects (ccom H F) A C $;
+  $ G ⇒ ⌈₁ F : A → B ⌉ $ > $ G ⇒ ⌈₁ H : B → C ⌉ $ > $ G ⇒ ⌈₁ ccom H F : A → C ⌉ $;
 --| @congr
 theorem injects_congr (F H A B C D: class):
-  $ F ≐ H $ > $ A ≐ B $ > $ C ≐ D $ > $ injects F A C ⟺ injects H B D $;
+  $ F ≐ H $ > $ A ≐ B $ > $ C ≐ D $ > $ ⌈₁ F : A → C ⌉ ⟺ ⌈₁ H : B → D ⌉ $;
 theorem injects_eq (G: hyps) (F H A B C D: class):
-  $ G ⇒ F = H $ > $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ injects F A C $ >
-  $ G ⇒ injects H B D $;
+  $ G ⇒ F = H $ > $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ ⌈₁ F : A → C ⌉ $ >
+  $ G ⇒ ⌈₁ H : B → D ⌉ $;
 --| @rewrite
 theorem sb_f_injects {x: set} (t: set x) (F A B: class x):
-  $ [x/t] (injects F A B) ⟺ injects (⟦ x / t ⟧ F) (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ [ x / t ] ⌈₁ F : A → B ⌉ ⟺ ⌈₁ [[ x / t ]] F : [[ x / t ]] A → [[ x / t ]] B ⌉ $;
 
 theorem inj_into_intro (G: hyps) (A B: class) (f: set):
-  $ G ⇒ injects f A B $ > $ G ⇒ inj_into A B $;
+  $ G ⇒ ⌈₁ f : A → B ⌉ $ > $ G ⇒ inj_into A B $;
 --| Class form of `inj_into_intro`: an injection that is a set.
 theorem inj_into_intro_c (G: hyps) (F A B: class):
-  $ G ⇒ isset F $ > $ G ⇒ injects F A B $ > $ G ⇒ inj_into A B $;
+  $ G ⇒ isset F $ > $ G ⇒ ⌈₁ F : A → B ⌉ $ > $ G ⇒ inj_into A B $;
 --| @freshen H f
 --| @freshen c f
 theorem inj_into_elim {f: set} (G: hyps f) (H: hyps) (A B: class) (c: fml):
-  $ G ⇒ inj_into A B $ > $ H , injects f A B ⇒ c $ > $ G , H ⇒ c $;
+  $ G ⇒ inj_into A B $ > $ H , ⌈₁ f : A → B ⌉ ⇒ c $ > $ G , H ⇒ c $;
 --| A class that injects into any class is a set (the injection is a set).
 theorem inj_into_set (G: hyps) (A B: class):
   $ G ⇒ inj_into A B $ > $ G ⇒ isset A $;
@@ -123,12 +125,12 @@ theorem inj_into_eq (G: hyps) (A B C D: class):
   $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ inj_into A C $ > $ G ⇒ inj_into B D $;
 --| @rewrite
 theorem sb_f_inj_into {x: set} (t: set x) (A B: class x):
-  $ [x/t] (inj_into A B) ⟺ inj_into (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ [ x / t ] (inj_into A B) ⟺ inj_into ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 theorem injs_intro (G: hyps) (A B: class) (f: set):
-  $ G ⇒ injects f A B $ > $ G ⇒ f ⊆ A × B $ > $ G ⇒ f ∊ injs A B $;
+  $ G ⇒ ⌈₁ f : A → B ⌉ $ > $ G ⇒ f ⊆ A × B $ > $ G ⇒ f ∊ injs A B $;
 theorem injs_elim (G: hyps) (A B: class) (f: set):
-  $ G ⇒ f ∊ injs A B $ > $ G ⇒ injects f A B $;
+  $ G ⇒ f ∊ injs A B $ > $ G ⇒ ⌈₁ f : A → B ⌉ $;
 --| A member of `injs A B` lies in `A × B`.
 theorem injs_elim_sub (G: hyps) (A B: class) (f: set): $ G ⇒ f ∊ injs A B $ > $ G ⇒ f ⊆ A × B $;
 theorem injs_set (G: hyps) (A B: class):
@@ -142,7 +144,7 @@ theorem injs_eq (G: hyps) (A B C D: class):
   $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ injs A C = injs B D $;
 --| @rewrite
 theorem sb_c_injs {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (injs A B)) ≐ injs (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (injs A B)) ≐ injs ([[ x / t ]] A) ([[ x / t ]] B) $;
 
 -- --------------------------------------------------------------------------
 -- Hartogs numbers
@@ -166,7 +168,7 @@ theorem hartogs_congr (A B: class): $ A ≐ B $ > $ hartogs A ≐ hartogs B $;
 theorem hartogs_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ hartogs A = hartogs B $;
 --| @rewrite
 theorem sb_c_hartogs {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (hartogs A)) ≐ hartogs (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (hartogs A)) ≐ hartogs ([[ x / t ]] A) $;
 
 --| An ordinal that injects into an element of a universe is in the universe
 --| (transfinite induction: `a` is the union of the family `suc x`, `x ∊ a`,
@@ -201,24 +203,24 @@ theorem erel_elim {x y: set} (G: hyps x y) (H: hyps) (F A: class) (c: set) (d: f
   $ G ⇒ c ∊ erel F A $ >
   $ H , x ∊ A , y ∊ A , x ∊ y , c = ⟨ F' x , F' y ⟩ ⇒ d $ > $ G , H ⇒ d $;
 theorem erel_subset (G: hyps) (F A B: class):
-  $ G ⇒ injects F A B $ > $ G ⇒ erel F A ⊆ B × B $;
+  $ G ⇒ ⌈₁ F : A → B ⌉ $ > $ G ⇒ erel F A ⊆ B × B $;
 --| @congr
 theorem erel_congr (F H A B: class): $ F ≐ H $ > $ A ≐ B $ > $ erel F A ≐ erel H B $;
 --| @rewrite
 theorem sb_c_erel {x: set} (t: set x) (F A: class x):
-  $ (⟦ x / t ⟧ (erel F A)) ≐ erel (⟦ x / t ⟧ F) (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (erel F A)) ≐ erel ([[ x / t ]] F) ([[ x / t ]] A) $;
 --| Rigidity, the core: two injections of ordinals with the same induced
 --| relation agree in the sense that equal values have equal arguments
 --| (membership induction on the argument).
 --| @freshen G x
 --| @freshen G y
 theorem ord_rigid_core (G: hyps) {x y: set} (a b s g h: set):
-  $ G ⇒ ord a $ > $ G ⇒ ord b $ > $ G ⇒ injects g a s $ > $ G ⇒ injects h b s $ >
+  $ G ⇒ ord a $ > $ G ⇒ ord b $ > $ G ⇒ ⌈₁ g : a → s ⌉ $ > $ G ⇒ ⌈₁ h : b → s ⌉ $ >
   $ G ⇒ erel g a = erel h b $ >
   $ G ⇒ ∀ x (x ∊ a → ∀ y (y ∊ b → g' x = h' y → x = y)) $;
 --| Rigidity: the same image and the same induced relation give the same ordinal.
 theorem ord_rigid (G: hyps) (a b s g h: set):
-  $ G ⇒ ord a $ > $ G ⇒ ord b $ > $ G ⇒ injects g a s $ > $ G ⇒ injects h b s $ >
+  $ G ⇒ ord a $ > $ G ⇒ ord b $ > $ G ⇒ ⌈₁ g : a → s ⌉ $ > $ G ⇒ ⌈₁ h : b → s ⌉ $ >
   $ G ⇒ img g a = img h b $ > $ G ⇒ erel g a = erel h b $ > $ G ⇒ a = b $;
 
 theorem reps_intro (G: hyps) (A S: class) (f: set):
@@ -238,10 +240,10 @@ theorem reps_disjoint (G: hyps) (a b s w: set):
 theorem reps_congr (A B S T: class): $ A ≐ B $ > $ S ≐ T $ > $ reps A S ≐ reps B T $;
 --| @rewrite
 theorem sb_c_reps {x: set} (t: set x) (A S: class x):
-  $ (⟦ x / t ⟧ (reps A S)) ≐ reps (⟦ x / t ⟧ A) (⟦ x / t ⟧ S) $;
+  $ ([[ x / t ]] (reps A S)) ≐ reps ([[ x / t ]] A) ([[ x / t ]] S) $;
 --| `a ↦ reps a s` injects the Hartogs number of `s` into `𝒫 (𝒫 s × 𝒫 (s × s))`.
 theorem hartogs_inj_into {x: set} (G: hyps x) (s: set):
-  $ G ⇒ injects (cgr x (reps x s) ↾ hartogs s) (hartogs s) (𝒫 (𝒫 s × 𝒫 (s × s))) $;
+  $ G ⇒ ⌈₁ cgr x (reps x s) ↾ hartogs s : hartogs s → 𝒫 (𝒫 s × 𝒫 (s × s)) ⌉ $;
 theorem hartogs_universe (G: hyps) (U: class) (s: set):
   $ G ⇒ universe U $ > $ G ⇒ s ∊ U $ > $ G ⇒ hartogs s ∈ U $;
 
@@ -302,14 +304,14 @@ theorem shiftp_congr (X Y: class): $ X ≐ Y $ > $ shiftp X ≐ shiftp Y $;
 theorem shiftp_eq (G: hyps) (X Y: class): $ G ⇒ X = Y $ > $ G ⇒ shiftp X = shiftp Y $;
 --| @rewrite
 theorem sb_c_shiftp {x: set} (t: set x) (X: class x):
-  $ (⟦ x / t ⟧ (shiftp X)) ≐ shiftp (⟦ x / t ⟧ X) $;
+  $ ([[ x / t ]] (shiftp X)) ≐ shiftp ([[ x / t ]] X) $;
 --| The two parts of a shifted value are recovered from it.
 theorem shift_val_fst (G: hyps) (a b u v: set):
   $ G ⇒ csn ⟨ a , ∅ ⟩ ∪ shiftp u = csn ⟨ b , ∅ ⟩ ∪ shiftp v $ > $ G ⇒ a = b $;
 theorem shift_val_snd (G: hyps) (a b u v: set):
   $ G ⇒ csn ⟨ a , ∅ ⟩ ∪ shiftp u = csn ⟨ b , ∅ ⟩ ∪ shiftp v $ > $ G ⇒ shiftp u = shiftp v $;
 theorem shift_injects (G: hyps) (a: set):
-  $ G ⇒ injects (shift a) (a × 𝒫 (a × ω)) (𝒫 (a × ω)) $;
+  $ G ⇒ ⌈₁ shift a : a × 𝒫 (a × ω) → 𝒫 (a × ω) ⌉ $;
 theorem inj_into_cxp_cpw (G: hyps) (a: set):
   $ G ⇒ inj_into (a × 𝒫 (a × ω)) (𝒫 (a × ω)) $;
 --| @congr
@@ -317,7 +319,7 @@ theorem shift_congr (A B: class): $ A ≐ B $ > $ shift A ≐ shift B $;
 theorem shift_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ shift A = shift B $;
 --| @rewrite
 theorem sb_c_shift {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (shift A)) ≐ shift (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (shift A)) ≐ shift ([[ x / t ]] A) $;
 
 --| The bounding lemma: an `a`-indexed family of ordinals below
 --| `hartogs (𝒫 (a × ω))` is bounded below it.

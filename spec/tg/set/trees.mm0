@@ -30,7 +30,7 @@ def cgr3 {k s v: set} (B: class k s v) (.w .y: set): class =
   $ {w | ∃ k ∃ s ∃ v ∃ y (w = ⟨ ⟨ k , ⟨ s , v ⟩ ⟩ , y ⟩ ∧ y = B)} $;
 
 --| Introduction for `cgr3`.
-theorem cgr3_intro {k s v: set} (G: hyps k s v) (B: class k s v) (a b c f: set): $ G ⇒ f = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ > $ G ⇒ ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ ∈ cgr3 k s v B $;
+theorem cgr3_intro {k s v: set} (G: hyps k s v) (B: class k s v) (a b c f: set): $ G ⇒ f = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $ > $ G ⇒ ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ ∈ cgr3 k s v B $;
 --| Elimination for `cgr3`, with the components named in the statement's order.
 --| @freshen G i
 --| @freshen G j
@@ -44,14 +44,14 @@ theorem cgr3_intro {k s v: set} (G: hyps k s v) (B: class k s v) (a b c f: set):
 --| @freshen p j
 --| @freshen p u
 --| @freshen p g
-theorem cgr3_elim_mem {k s v i j u g: set} (G: hyps k s v) (H: hyps k s v) (B: class k s v) (z: set) (p: fml k s v): $ G ⇒ z ∊ cgr3 k s v B $ > $ H , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = (⟦ k / i ⟧ (⟦ s / j ⟧ (⟦ v / u ⟧ B))) ⇒ p $ > $ G , H ⇒ p $;
+theorem cgr3_elim_mem {k s v i j u g: set} (G: hyps k s v) (H: hyps k s v) (B: class k s v) (z: set) (p: fml k s v): $ G ⇒ z ∊ cgr3 k s v B $ > $ H , z = ⟨ ⟨ i , ⟨ j , u ⟩ ⟩ , g ⟩ , g = ([[ k / i ]] ([[ s / j ]] ([[ v / u ]] B))) ⇒ p $ > $ G , H ⇒ p $;
 --| Elimination for a pair whose argument is a triple.
-theorem cgr3_elim {k s v: set} (G: hyps k s v) (B: class k s v) (a b c f: set): $ G ⇒ ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ ∈ cgr3 k s v B $ > $ G ⇒ f = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $;
+theorem cgr3_elim {k s v: set} (G: hyps k s v) (B: class k s v) (a b c f: set): $ G ⇒ ⟨ ⟨ a , ⟨ b , c ⟩ ⟩ , f ⟩ ∈ cgr3 k s v B $ > $ G ⇒ f = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $;
 theorem cgr3_functional {k s v: set} (G: hyps k s v) (B: class k s v):
   $ G ⇒ functional (cgr3 k s v B) $;
 theorem fv_cgr3 {k s v: set} (G: hyps k s v) (B: class k s v) (a b c: set):
-  $ G ⇒ isset (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $ >
-  $ G ⇒ (cgr3 k s v B)' ⟨ a , ⟨ b , c ⟩ ⟩ = (⟦ k / a ⟧ (⟦ s / b ⟧ (⟦ v / c ⟧ B))) $;
+  $ G ⇒ isset ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $ >
+  $ G ⇒ (cgr3 k s v B)' ⟨ a , ⟨ b , c ⟩ ⟩ = ([[ k / a ]] ([[ s / b ]] ([[ v / c ]] B))) $;
 --| @congr
 theorem cgr3_congr {k s v: set} (B D: class k s v): $ B ≐ D $ > $ cgr3 k s v B ≐ cgr3 k s v D $;
 --| Equal bodies under hypotheses give equal graphs (the quantifiers in the order
@@ -63,7 +63,7 @@ theorem cgr3_eq {k s v: set} (G: hyps) (B D: class k s v):
   $ G ⇒ ∀ v ∀ s ∀ k (B = D) $ > $ G ⇒ cgr3 k s v B = cgr3 k s v D $;
 --| @rewrite
 theorem sb_c_cgr3 {k s v y: set} (t: set y) (B: class k s v y):
-  $ (⟦ y / t ⟧ (cgr3 k s v B)) ≐ cgr3 k s v (⟦ y / t ⟧ B) $;
+  $ ([[ y / t ]] (cgr3 k s v B)) ≐ cgr3 k s v ([[ y / t ]] B) $;
 
 -- --------------------------------------------------------------------------
 -- Trees
@@ -77,7 +77,7 @@ theorem trees_congr (A B: class): $ A ≐ B $ > $ trees A ≐ trees B $;
 theorem trees_eq (G: hyps) (A B: class): $ G ⇒ A = B $ > $ G ⇒ trees A = trees B $;
 --| @rewrite
 theorem sb_c_trees {x: set} (t: set x) (A: class x):
-  $ (⟦ x / t ⟧ (trees A)) ≐ trees (⟦ x / t ⟧ A) $;
+  $ ([[ x / t ]] (trees A)) ≐ trees ([[ x / t ]] A) $;
 
 theorem trees_op_mono {x: set} (G: hyps x) (l: set): $ G ⇒ mono x (l × fseq x) $;
 theorem trees_op_setop {x: set} (G: hyps x) (l: set): $ G ⇒ setop x (l × fseq x) $;
@@ -98,12 +98,12 @@ theorem trees_node_c (G: hyps) (L K S: class):
   $ G ⇒ K ∈ L ∧ S ∈ fseq (trees L) $;
 --| The children of a node with one, two or three children are trees.
 theorem trees_kids1 (G: hyps) (L K: class) (a: set):
-  $ G ⇒ isset L $ > $ G ⇒ ⟨ K , scons a ∅ ⟩ ∈ trees L $ > $ G ⇒ isset K $ > $ G ⇒ a ∊ trees L $;
+  $ G ⇒ isset L $ > $ G ⇒ ⟨ K , a +: ∅ ⟩ ∈ trees L $ > $ G ⇒ isset K $ > $ G ⇒ a ∊ trees L $;
 theorem trees_kids2 (G: hyps) (L K: class) (a b: set):
-  $ G ⇒ isset L $ > $ G ⇒ ⟨ K , scons a (scons b ∅) ⟩ ∈ trees L $ > $ G ⇒ isset K $ >
+  $ G ⇒ isset L $ > $ G ⇒ ⟨ K , a +: b +: ∅ ⟩ ∈ trees L $ > $ G ⇒ isset K $ >
   $ G ⇒ a ∊ trees L ∧ b ∊ trees L $;
 theorem trees_kids3 (G: hyps) (L K: class) (a b c: set):
-  $ G ⇒ isset L $ > $ G ⇒ ⟨ K , scons a (scons b (scons c ∅)) ⟩ ∈ trees L $ > $ G ⇒ isset K $ >
+  $ G ⇒ isset L $ > $ G ⇒ ⟨ K , a +: b +: c +: ∅ ⟩ ∈ trees L $ > $ G ⇒ isset K $ >
   $ G ⇒ a ∊ trees L ∧ b ∊ trees L ∧ c ∊ trees L $;
 --| Class form of `trees_intro`.
 theorem trees_intro_c (G: hyps) (L K S: class):
@@ -112,19 +112,19 @@ theorem trees_intro_c (G: hyps) (L K S: class):
 theorem empty_notin_trees_c (G: hyps) (L: class): $ G ⇒ isset L $ > $ G ⇒ ∅ ∈ trees L $ > $ G ⇒ ⊥ $;
 --| The head of a sequence of trees is a tree, whether or not it is a set.
 theorem crn_scons_head_trees (G: hyps) (L A S: class):
-  $ G ⇒ isset L $ > $ G ⇒ crn (scons A S) ⊆ trees L $ > $ G ⇒ A ∈ trees L $;
+  $ G ⇒ isset L $ > $ G ⇒ crn (A +: S) ⊆ trees L $ > $ G ⇒ A ∈ trees L $;
 --| Nodes with one, two or three children are equal only for equal children.
 theorem node1_inj (G: hyps) (K: class) (f o: set):
-  $ G ⇒ isset K $ > $ G ⇒ ⟨ K , scons f ∅ ⟩ = ⟨ K , scons o ∅ ⟩ $ > $ G ⇒ f = o $;
+  $ G ⇒ isset K $ > $ G ⇒ ⟨ K , f +: ∅ ⟩ = ⟨ K , o +: ∅ ⟩ $ > $ G ⇒ f = o $;
 theorem node2_inj (G: hyps) (K: class) (f g o p: set):
-  $ G ⇒ isset K $ > $ G ⇒ ⟨ K , scons f (scons g ∅) ⟩ = ⟨ K , scons o (scons p ∅) ⟩ $ > $ G ⇒ f = o ∧ g = p $;
+  $ G ⇒ isset K $ > $ G ⇒ ⟨ K , f +: g +: ∅ ⟩ = ⟨ K , o +: p +: ∅ ⟩ $ > $ G ⇒ f = o ∧ g = p $;
 theorem node3_inj (G: hyps) (K: class) (f g h o p q: set):
-  $ G ⇒ isset K $ > $ G ⇒ ⟨ K , scons f (scons g (scons h ∅)) ⟩ = ⟨ K , scons o (scons p (scons q ∅)) ⟩ $ >
+  $ G ⇒ isset K $ > $ G ⇒ ⟨ K , f +: g +: h +: ∅ ⟩ = ⟨ K , o +: p +: q +: ∅ ⟩ $ >
   $ G ⇒ f = o ∧ g = p ∧ h = q $;
 --| Class forms of `node1_inj`..`node3_inj` (the left side's children as classes).
-theorem node1_inj_c (G: hyps) (K A: class) (o: set): $ G ⇒ isset K $ > $ G ⇒ isset A $ > $ G ⇒ ⟨ K , scons A ∅ ⟩ = ⟨ K , scons o ∅ ⟩ $ > $ G ⇒ A = o $;
-theorem node2_inj_c (G: hyps) (K A B: class) (o p: set): $ G ⇒ isset K $ > $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ ⟨ K , scons A (scons B ∅) ⟩ = ⟨ K , scons o (scons p ∅) ⟩ $ > $ G ⇒ A = o ∧ B = p $;
-theorem node3_inj_c (G: hyps) (K A B C: class) (o p q: set): $ G ⇒ isset K $ > $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ isset C $ > $ G ⇒ ⟨ K , scons A (scons B (scons C ∅)) ⟩ = ⟨ K , scons o (scons p (scons q ∅)) ⟩ $ > $ G ⇒ A = o ∧ B = p ∧ C = q $;
+theorem node1_inj_c (G: hyps) (K A: class) (o: set): $ G ⇒ isset K $ > $ G ⇒ isset A $ > $ G ⇒ ⟨ K , A +: ∅ ⟩ = ⟨ K , o +: ∅ ⟩ $ > $ G ⇒ A = o $;
+theorem node2_inj_c (G: hyps) (K A B: class) (o p: set): $ G ⇒ isset K $ > $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ ⟨ K , A +: B +: ∅ ⟩ = ⟨ K , o +: p +: ∅ ⟩ $ > $ G ⇒ A = o ∧ B = p $;
+theorem node3_inj_c (G: hyps) (K A B C: class) (o p q: set): $ G ⇒ isset K $ > $ G ⇒ isset A $ > $ G ⇒ isset B $ > $ G ⇒ isset C $ > $ G ⇒ ⟨ K , A +: B +: C +: ∅ ⟩ = ⟨ K , o +: p +: q +: ∅ ⟩ $ > $ G ⇒ A = o ∧ B = p ∧ C = q $;
 --| Induction over the children.
 theorem trees_ind {k s: set} (G: hyps k s) (l: set) (P: class):
   $ G ⇒ ∀ k ∀ s (k ∊ l → s ∊ fseq (trees l) → crn s ⊆ P → ⟨ k , s ⟩ ∈ P) $ >
@@ -177,7 +177,7 @@ theorem tstep_congr (A B C D E F: class):
   $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ tstep A C E ≐ tstep B D F $;
 --| @rewrite
 theorem sb_c_tstep {x: set} (t: set x) (A B C: class x):
-  $ (⟦ x / t ⟧ (tstep A B C)) ≐ tstep (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+  $ ([[ x / t ]] (tstep A B C)) ≐ tstep ([[ x / t ]] A) ([[ x / t ]] B) ([[ x / t ]] C) $;
 theorem tstep_mem (G: hyps) (L F H: class) (k s: set):
   $ G ⇒ k ∊ L $ > $ G ⇒ s ∊ fseq (cdm H) $ >
   $ G ⇒ ⟨ ⟨ k , s ⟩ , F' ⟨ k , ⟨ s , ccom H s ⟩ ⟩ ⟩ ∈ tstep L F H $;
@@ -210,13 +210,13 @@ def tstgb (L F A: class): class = $ ⋃ (crn (tstg L F ↾ A)) $;
 theorem tstg_congr (A B C D: class): $ A ≐ B $ > $ C ≐ D $ > $ tstg A C ≐ tstg B D $;
 --| @rewrite
 theorem sb_c_tstg {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (tstg A B)) ≐ tstg (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (tstg A B)) ≐ tstg ([[ x / t ]] A) ([[ x / t ]] B) $;
 --| @congr
 theorem tstgb_congr (A B C D E F: class):
   $ A ≐ B $ > $ C ≐ D $ > $ E ≐ F $ > $ tstgb A C E ≐ tstgb B D F $;
 --| @rewrite
 theorem sb_c_tstgb {x: set} (t: set x) (A B C: class x):
-  $ (⟦ x / t ⟧ (tstgb A B C)) ≐ tstgb (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) (⟦ x / t ⟧ C) $;
+  $ ([[ x / t ]] (tstgb A B C)) ≐ tstgb ([[ x / t ]] A) ([[ x / t ]] B) ([[ x / t ]] C) $;
 theorem tstg_functional (G: hyps) (L F: class): $ G ⇒ functional (tstg L F) $;
 theorem tstg_set (G: hyps) (L F: class) (a: set): $ G ⇒ isset ((tstg L F)' a) $;
 theorem tstgb_intro (G: hyps) (L F: class) (a b c: set):
@@ -253,7 +253,7 @@ theorem trc_eq (G: hyps) (A B C D: class):
   $ G ⇒ A = B $ > $ G ⇒ C = D $ > $ G ⇒ trc A C = trc B D $;
 --| @rewrite
 theorem sb_c_trc {x: set} (t: set x) (A B: class x):
-  $ (⟦ x / t ⟧ (trc A B)) ≐ trc (⟦ x / t ⟧ A) (⟦ x / t ⟧ B) $;
+  $ ([[ x / t ]] (trc A B)) ≐ trc ([[ x / t ]] A) ([[ x / t ]] B) $;
 theorem trc_intro (G: hyps) (L F: class) (a c: set):
   $ G ⇒ ord a $ > $ G ⇒ c ∊ (tstg L F)' a $ > $ G ⇒ c ∊ trc L F $;
 theorem trc_elim {a: set} (G: hyps a) (L F: class) (c: set):
